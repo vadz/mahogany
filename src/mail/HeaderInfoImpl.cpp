@@ -1235,12 +1235,12 @@ extern "C"
    {
       THREADNODE* th1 = *(THREADNODE**)p1;
       MsgnoType msgno1 = FindMsgno(th1);
-      if (msgno1 == 0) return 0;
+      CHECK(msgno1 != 0, 0, "No message number found in CompareThreadNodes");
       size_t pos1 = globalInvSortTable[msgno1-1];
 
       THREADNODE* th2 = *(THREADNODE**)p2;
       MsgnoType msgno2 = FindMsgno(th2);
-      if (msgno2 == 0) return 0;
+      CHECK(msgno2 != 0, 0, "No message number found in CompareThreadNodes");
       size_t pos2 = globalInvSortTable[msgno2-1];
 
       return pos1 - pos2;
