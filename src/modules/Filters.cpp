@@ -2355,78 +2355,212 @@ static bool WhiteListListId(RefCounter<AdbBook> book,const String &id)
    return true;
 }
 
+// This is not RFC-compliant address parser and it won't be because
+// it would then generate many false matches. It isn't problem because
+// it is used for parsing non-standard headers anyway.
+static bool IsSaneAddressCharacter(wxChar byte)
+{
+   return byte >= _T('a') && byte <= _T('z')
+      || byte >= _T('A') && byte <= _T('Z')
+      || byte >= _T('0') && byte <= _T('9')
+      || byte == _T('@')
+      || byte == _T('.')
+      || byte == _T('-')
+      || byte == _T('+')
+      || byte == _T('=')
+      || byte == _T('_')
+      || byte == _T('~');
+}
+
+// Extract address(es) from messy string into parseable format
+static String AddressFromFreeStyleHeader(const String &in)
+{
+   String out;
+   
+   for( size_t at = in.find(_T('@')); at != String::npos;
+      at = in.find(_T('@'),at+1) )
+   {
+      size_t begin;
+      for( begin = at; begin > 0; --begin )
+      {
+         if( !IsSaneAddressCharacter(in[begin])
+            || begin < at && in[begin] == _T('@') )
+         {
+            ++begin;
+            break;
+         }
+      }
+
+      size_t end;
+      for( end = at; end < in.size(); ++end )
+      {
+         if( !IsSaneAddressCharacter(in[end])
+            || end > at && in[end] == _T('@') )
+         {
+            --end;
+            break;
+         }
+      }
+      
+      if( begin < at && at < end )
+      {
+         size_t dot = in.find(_T('.'),at+1);
+         if( dot != String::npos && dot < end )
+         {
+            if( !out.empty() )
+               out += _T(',');
+            out += in.substr(begin,end-begin+1);
+         }
+      }
+   }
+   
+   return out;
+}
+
+static const wxChar *gs_whitelistHeaders[] =
+{
+   // Source
+   _T("From"),
+   _T("Sender"),
+   _T("Reply-To"),
+   // Destination
+   _T("To"),
+   _T("Cc"),
+   _T("Bcc"),
+   // List
+   //_T("List-Id"), // List-Id may contain all sorts of garbage (see below)
+   _T("List-Help"),
+   _T("List-Subscribe"),
+   _T("List-Unsubscribe"),
+   _T("List-Post"),
+   _T("List-Owner"),
+   _T("List-Archive"),
+   // Obscure
+   _T("Resent-To"),
+   _T("Resent-Cc"),
+   _T("Resent-Bcc"),
+   _T("Resent-From"),
+   _T("Resent-Sender"),
+   // Non-standard - some entries can be probably removed without danger
+   _T("Envelope-To"), // Exim
+   _T("X-Envelope-To"), // Sendmail
+   _T("Apparently-To"), // Procmail ^TO
+   _T("X-Envelope-From"), // Procmail ^FROM_DAEMON
+   _T("Mailing-List"), // Ezmlm and Yahoo
+   _T("X-Mailing-List"), // SmartList
+   _T("X-BeenThere"), // Mailman
+   _T("Delivered-To"), // qmail
+   _T("X-Delivered-To"), // fastmail.fm
+   _T("X-Original-To"), // postfix 2.0
+   _T("X-Rcpt-To"), // best.com
+   _T("X-Real-To"), // CommuniGate Pro
+   _T("X-MDMailing-List"), // Nancy Mc'Gough's Procmail Faq
+   _T("Return-Path"), // Nancy Mc'Gough's Procmail Faq
+   NULL
+};
+
+static enum
+{
+   AddressMessStandard, // Standard address fields can be parsed directly
+   AddressMessUrl, // List headers contain URLs and only few are e-mails
+   AddressMessGarbage, // Free style text that may contain addresses
+   AddressMessUnknown // Treated the same as AddressMessGarbage
+}
+gs_whitelistHeaderMess[] =
+{
+   AddressMessStandard, // From
+   AddressMessStandard, // Sender
+   AddressMessStandard, // Reply-To
+   AddressMessStandard, // To
+   AddressMessStandard, // Cc
+   AddressMessStandard, // Bcc
+   AddressMessUrl, // List-Help
+   AddressMessUrl, // List-Subscribe
+   AddressMessUrl, // List-Unsubscribe
+   AddressMessUrl, // List-Post
+   AddressMessUrl, // List-Owner
+   AddressMessUrl, // List-Archive
+   AddressMessStandard, // Resent-To
+   AddressMessStandard, // Resent-Cc
+   AddressMessStandard, // Resent-Bcc
+   AddressMessStandard, // Resent-From
+   AddressMessStandard, // Resent-Sender
+   AddressMessUnknown, // Envelope-To
+   AddressMessUnknown, // X-Envelope-To
+   AddressMessUnknown, // Apparently-To
+   AddressMessUnknown, // X-Envelope-From
+   AddressMessGarbage, // Mailing-List
+   AddressMessGarbage, // X-Mailing-List
+   AddressMessUnknown, // X-BeenThere
+   AddressMessGarbage, // Delivered-To
+   AddressMessGarbage, // X-Delivered-To
+   AddressMessUnknown, // X-Original-To
+   AddressMessUnknown, // X-Rcpt-To
+   AddressMessUnknown, // X-Real-To
+   AddressMessUnknown, // X-MDMailing-List
+   AddressMessUnknown, // Return-Path
+   AddressMessUnknown // NULL
+};
+
+static String SanitizeWhitelistedAddress(const String &in,size_t header)
+{
+   String out;
+   
+   switch(gs_whitelistHeaderMess[header])
+   {
+   case AddressMessStandard:
+      out = in;
+
+   case AddressMessUrl:
+      out = FilterAddressList(in);
+
+   case AddressMessGarbage:
+   case AddressMessUnknown:
+      out = AddressFromFreeStyleHeader(in);
+   }
+   
+   return out;
+}
+
+static RefCounter<AdbBook> GetWhitelistBook()
+{
+   AdbManager *manager = AdbManager::Get();
+   
+   manager->LoadAll(); // HACK: So that AdbEditor's provider list is utilized
+   
+   RefCounter<AdbBook> book(
+      manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
+   
+   manager->Unget();
+   
+   return book;
+}
+
 // check whether any address field (sender or recipient) matches whitelist
 static bool CheckWhiteList(const Message *msg)
 {
-   static const wxChar *headers[] =
-   {
-      // Source
-      _T("From"),
-      _T("Sender"),
-      _T("Reply-To"),
-      // Destination
-      _T("To"),
-      _T("Cc"),
-      _T("Bcc"),
-      // List
-      //_T("List-Id"), // List-Id may contain all sorts of garbage (see below)
-      _T("List-Help"),
-      _T("List-Subscribe"),
-      _T("List-Unsubscribe"),
-      _T("List-Post"),
-      _T("List-Owner"),
-      _T("List-Archive"),
-      // Obscure
-      _T("Resent-To"),
-      _T("Resent-Cc"),
-      _T("Resent-Bcc"),
-      _T("Resent-From"),
-      _T("Resent-Sender"),
-      // Non-standard - some entries can be probably removed without danger
-      _T("Envelope-To"),            // Exim
-      _T("X-Envelope-To"),          // Sendmail
-      _T("Apparently-To"),          // Procmail ^TO
-      _T("X-Envelope-From"),        // Procmail ^FROM_DAEMON
-      _T("Mailing-List"),           // Ezmlm and Yahoo
-      _T("X-Mailing-List"),         // SmartList
-      _T("X-BeenThere"),            // Mailman
-      _T("Delivered-To"),           // qmail
-      _T("X-Delivered-To"),         // fastmail.fm
-      _T("X-Original-To"),          // postfix 2.0
-      _T("X-Rcpt-To"),              // best.com
-      _T("X-Real-To"),              // CommuniGate Pro
-      _T("X-MDMailing-List"),       // Nancy Mc'Gough's Procmail Faq
-      _T("Return-Path"),            // Nancy Mc'Gough's Procmail Faq
-      NULL
-   };
-
-   AdbManager *manager = AdbManager::Get();
-   manager->LoadAll(); // HACK: So that AdbEditor's provider list is utilized
-   RefCounter<AdbBook> book(
-      manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
-   manager->Unget();
-
-#ifdef DEBUG
    // Go painfully through all headers to debug their format
    bool result = true;
+
+#ifdef DEBUG
+#define RETURN(value) result = value
+#else
+#define RETURN(value) return value
 #endif
-   wxArrayString values = msg->GetHeaderLines(headers);
+
+   RefCounter<AdbBook> book(GetWhitelistBook());
+
+   wxArrayString values = msg->GetHeaderLines(gs_whitelistHeaders);
    for( size_t list = 0; list < values.GetCount(); ++list )
    {
-      RefCounter<AddressList> parser(
-         AddressList::Create(FilterAddressList(values[list])));
+      RefCounter<AddressList> parser(AddressList::Create(
+         SanitizeWhitelistedAddress(values[list],list)));
 
       for( Address *candidate = parser->GetFirst(); candidate;
          candidate = parser->GetNext(candidate) )
       {
          if( !WhiteListDomain(book,candidate->GetDomain()) )
-         {
-#ifdef DEBUG
-            result = false;
-#else
-            return false;
-#endif
-         }
+            RETURN(false);
       }
    }
 
@@ -2434,14 +2568,11 @@ static bool CheckWhiteList(const Message *msg)
    if( msg->GetHeaderLine(_T("List-Id"),id) )
    {
       if( !WhiteListListId(book,id) )
-         return false;
+         RETURN(false);
    }
    
-#ifdef DEBUG
    return result;
-#else
-   return true;
-#endif
+#undef RETURN
 }
 
 // check if we have a message with "suspicious" MIME structure
