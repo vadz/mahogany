@@ -978,6 +978,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_menuFolders = NULL;
 
    m_colSort = WXFLC_NONE;
+   // FIXME: replace by a more efficient call
+   for (size_t i = 0; i < WXFLC_NUMENTRIES; ++i) {
+      m_columns[i] = 0;
+   }
 
    m_isInPopupMenu = false;
 
@@ -2549,6 +2553,7 @@ wxFolderView::Create(wxWindow *parent)
 
 wxFolderView::wxFolderView(wxWindow *parent)
 {
+   m_FocusFollowMode = false;
    m_Profile = NULL;
    m_Parent = parent;
 

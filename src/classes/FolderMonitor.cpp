@@ -111,6 +111,7 @@ public:
 
       m_failcount = 0;
       m_state = Folder_Ok;
+      m_timeNext = time(NULL);
    }
 
    ~FolderMonitorFolderEntry()
