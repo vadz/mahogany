@@ -177,13 +177,14 @@ private:
    // did we have some headers already?
    bool m_firstheader;
 
-   // do we have a non default font?
-   bool m_hasGlobalFont;
-
 #if wxUSE_PRINTING_ARCHITECTURE
    // the object which does all printing for us
    wxHtmlEasyPrinting *m_printHtml;
 #endif // wxUSE_PRINTING_ARCHITECTURE
+
+   // do we have text (false) or HTML (true) contents?
+   bool m_hasHtmlContents;
+
 
    DECLARE_MESSAGE_VIEWER()
 };
@@ -592,6 +593,8 @@ HtmlViewer::HtmlViewer()
 #if wxUSE_PRINTING_ARCHITECTURE
    m_printHtml = NULL;
 #endif // wxUSE_PRINTING_ARCHITECTURE
+
+   m_hasHtmlContents = false;
 
    m_htmlText.reserve(4096);
 }
@@ -1121,11 +1124,8 @@ void HtmlViewer::InsertRawContents(const String& data)
       m_htmlText += pHtml;
    }
 
-#ifdef USE_STRIP_TAGS
-   // we also have to extract all the text we have so that it could be included
-   // in the reply
-   m_msgView->OnBodyText(StripHtmlTags(data));
-#endif
+   // set the flag for EndBody
+   m_hasHtmlContents = true;
 }
 
 void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
@@ -1167,12 +1167,21 @@ void HtmlViewer::EndBody()
    m_window->SetPage(m_htmlText);
 
 #if wxCHECK_VERSION(2, 5, 2)
-   String text(m_window->ToText());
-   size_t posEndHeaders = text.find("\n\n");
-   if ( posEndHeaders != String::npos )
-      text.erase(0, posEndHeaders + 2);
-   m_msgView->OnBodyText(text);
-#endif
+   // if we display HTML text, we need to let the msg view know about the text
+   // we have so that it could be quoted later -- normally this is done by
+   // TransparentFilter which intercepts all InsertText() calls, but it can't
+   // do this for InsertRawContents()
+   if ( m_hasHtmlContents )
+   {
+      String text(m_window->ToText());
+      size_t posEndHeaders = text.find("\n\n");
+      if ( posEndHeaders != String::npos )
+         text.erase(0, posEndHeaders + 2);
+      m_msgView->OnBodyText(text);
+
+      m_hasHtmlContents = false;
+   }
+#endif // wx >= 2.5.2
 }
 
 // ----------------------------------------------------------------------------
