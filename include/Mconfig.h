@@ -11,8 +11,8 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef MCONFIG_H
-#define MCONFIG_H
+#ifndef _MCONFIG_H_
+#define _MCONFIG_H_
 
 #include  "config.h"
 
@@ -113,12 +113,6 @@
 /// name of the vendor
 #define   M_VENDORNAME   _T("Mahogany-Team")
 
-/// name of global config file
-#define   M_GLOBAL_CONFIG_NAME   _T("Mahogany.conf")
-
-/// path for etc directories
-#define   M_ETC_PATH   _T("/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc:/opt/share/etc:/usr/local/stow/etc")
-
 /// basic M installation directory
 #ifdef OS_UNIX
 #   define   M_BASEDIR M_PREFIX _T("/share/Mahogany")
@@ -129,8 +123,6 @@
 #ifdef   HAVE_COMPFACE_H
 #   define   HAVE_XFACES
 #endif
-
-#define   M_STRBUFLEN      1024
 
 #ifdef USE_STD_STRING
 #   include   <string>
@@ -162,8 +154,6 @@
 # define  STL_LIST  list
 #endif
 
-#define Bool    int
-
 #ifdef USE_THREADS
 #   if !  wxUSE_THREADS
 #      error "Mahogany's thread support requires a wxWindows with threads compiled in!"
@@ -184,4 +174,5 @@
     DECLARE_DYNAMIC_CLASS(name)
 #endif
 
-#endif // MCONFIG_H
+#endif // _MCONFIG_H_
+
