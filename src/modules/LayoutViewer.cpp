@@ -143,7 +143,7 @@ private:
 class LayoutUserData : public wxLayoutObject::UserData
 {
 public:
-   // we tkae ownership of ClickableInfo object
+   // we take ownership of ClickableInfo object
    LayoutUserData(ClickableInfo *ci)
    {
       m_ci = ci;
@@ -151,6 +151,8 @@ public:
       SetLabel(m_ci->GetType() == ClickableInfo::CI_URL ? m_ci->GetUrl()
                                                         : m_ci->GetLabel());
    }
+
+   virtual ~LayoutUserData() { delete m_ci; }
 
    // get the real data back
    ClickableInfo *GetClickableInfo() const { return m_ci; }

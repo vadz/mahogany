@@ -485,6 +485,7 @@ public:
 
       wxLogStatus(m_folderView->GetParentFrame(), m_msgInitial);
       wxBeginBusyCursor();
+      wxLog::Suspend();
    }
 
    // monitor the given ticket, give error message if the corresponding
@@ -532,6 +533,8 @@ public:
    // give the appropariate message
    ~FolderViewAsyncStatus()
    {
+      wxLog::Resume();
+
       if ( m_ticket == ILLEGAL_TICKET )
       {
          // also put it into the status bar to overwrite the previous message

@@ -156,7 +156,7 @@ void TextViewerWindow::OnMouseEvent(wxCommandEvent& event)
 
 IMPLEMENT_MESSAGE_VIEWER(TextViewer,
                          _("Text only message viewer"),
-                         "(c) 2001 Vadim Zeitlin <vadimn@wxwindows.org>");
+                         "(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>");
 
 TextViewer::TextViewer()
 {

@@ -460,7 +460,9 @@ private:
 
       AllProfileValues();
 
-      bool operator==(const AllProfileValues& other);
+      bool operator==(const AllProfileValues& other) const;
+      bool operator!=(const AllProfileValues& other) const
+         { return !(*this == other); }
    } m_ProfileValues;
 
    /// read all our options from the current profile (returned by GetProfile())

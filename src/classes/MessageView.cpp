@@ -75,6 +75,9 @@
    #include <sys/stat.h>
 #endif
 
+// FIXME: there shouldn't be no GUI code here
+#include <wx/splitter.h>
+
 // ----------------------------------------------------------------------------
 // helper functions
 // ----------------------------------------------------------------------------
@@ -330,9 +333,6 @@ MessageView::AllProfileValues::AllProfileValues()
    // init everything to some default values, even if they're not normally
    // used before ReadAllSettings() is called it is still better not to leave
    // junk in the struct fields
-
-   msgViewer = "LayoutViewer";
-
    fontFamily = wxDEFAULT;
    fontSize = 12;
 
@@ -358,7 +358,8 @@ MessageView::AllProfileValues::AllProfileValues()
    autocollect = false;
 }
 
-bool MessageView::AllProfileValues::operator==(const AllProfileValues& other)
+bool
+MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
 {
    #define CMP(x) (x == other.x)
 
@@ -414,8 +415,14 @@ MessageView::Init()
 void
 MessageView::CreateViewer(wxWindow *parent)
 {
+   // FIXME: there shouldn't be no GUI code here
+   wxWindow *winOld = NULL;
+   wxSplitterWindow *splitter = NULL;
    if ( m_viewer )
    {
+      winOld = m_viewer->GetWindow();
+      splitter = wxDynamicCast(winOld->GetParent(), wxSplitterWindow);
+
       m_viewer->DecRef();
       m_viewer = NULL;
    }
@@ -430,27 +437,9 @@ MessageView::CreateViewer(wxWindow *parent)
    }
    else // have at least one viewer, load it
    {
-//      Profile *profile = GetProfile();
-//m_profile = profile ? profile : mApplication->GetProfile();
-//m_profile->IncRef();
-
-      String nameFirst = (*listing)[0].GetName();
-
-      String name;
-//      if ( profile )
-      if ( 1 )
-      {
-//         name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
-//         name = READ_CONFIG(m_profile, MP_MSGVIEW_VIEWER);
-name=m_ProfileValues.msgViewer;
-      }
-      else
-      {
-         // not fatal but unexpected
-         FAIL_MSG( "no profile in MessageView::CreateViewer" );
-
-         name = nameFirst;
-      }
+      String name = m_ProfileValues.msgViewer;
+      if ( name.empty() )
+         name = MP_MSGVIEW_VIEWER_D;
 
       MModule *viewer = MModule::LoadModule(name);
       if ( viewer )
@@ -459,6 +448,9 @@ name=m_ProfileValues.msgViewer;
       }
       else // failed to load the configured viewer
       {
+         // try any other
+         String nameFirst = (*listing)[0].GetName();
+
          if ( name != nameFirst )
          {
             wxLogError(_("Failed to load the configured message viewer '%s'.\n"
@@ -467,6 +459,12 @@ name=m_ProfileValues.msgViewer;
                        name.c_str());
 
             viewer = MModule::LoadModule(nameFirst);
+
+            if ( viewer )
+            {
+               // oops, our real viewer is not "name" at all
+               m_ProfileValues.msgViewer = nameFirst;
+            }
          }
 
          if ( !viewer )
@@ -490,6 +488,15 @@ name=m_ProfileValues.msgViewer;
    }
 
    m_viewer->Create(this, parent);
+
+   // FIXME: there shouldn't be no GUI code here
+   if ( winOld )
+   {
+      if ( splitter )
+         splitter->ReplaceWindow(winOld, m_viewer->GetWindow());
+
+      delete winOld;
+   }
 }
 
 MessageView::~MessageView()
@@ -586,21 +593,12 @@ void MessageView::OnOptionsChange(MEventOptionsChangeData& event)
       return;
    }
 
-   AllProfileValues settings;
-   ReadAllSettings(&settings);
-   if ( settings == m_ProfileValues )
-   {
-      // nothing changed
-      return;
-   }
-
    switch ( event.GetChangeKind() )
    {
       case MEventOptionsChangeData::Apply:
       case MEventOptionsChangeData::Ok:
       case MEventOptionsChangeData::Cancel:
-         // update everything
-         m_ProfileValues = settings;
+         UpdateProfileValues();
          break;
 
       default:
@@ -648,7 +646,22 @@ MessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
 void
 MessageView::UpdateProfileValues()
 {
-   ReadAllSettings(&m_ProfileValues);
+   AllProfileValues settings;
+   ReadAllSettings(&settings);
+   if ( settings != m_ProfileValues )
+   {
+      bool recreateViewer = settings.msgViewer != m_ProfileValues.msgViewer;
+
+      // update options first so that CreateViewer() creates the correct
+      // viewer
+      m_ProfileValues = settings;
+
+      if ( recreateViewer )
+      {
+         CreateViewer(GetWindow()->GetParent());
+      }
+   }
+   //else: nothing changed
 }
 
 void
@@ -739,6 +752,8 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
 wxFontEncoding
 MessageView::ShowHeaders()
 {
+   m_viewer->StartHeaders();
+
    // if wanted, display all header lines
    if ( m_ProfileValues.showHeaders )
    {
@@ -1029,6 +1044,8 @@ MessageView::ShowHeaders()
 
       m_viewer->ShowHeader(headerNames[n], headerValues[n], encHeader);
    }
+
+   m_viewer->EndHeaders();
 
    return encInHeaders;
 }
