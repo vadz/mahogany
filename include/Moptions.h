@@ -263,6 +263,7 @@ extern const MOption MP_FVIEW_PREVIEW_DELAY;
 extern const MOption MP_FOLDER_BGCOLOUR;
 extern const MOption MP_FTREE_FORMAT;
 extern const MOption MP_FTREE_PROPAGATE;
+extern const MOption MP_FTREE_NEVER_UNREAD;
 
 // composer
 extern const MOption MP_CVIEW_FONT;
@@ -870,6 +871,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_FTREE_FORMAT_NAME "FTreeFormat"
 /// reflect the folder status in its parent
 #define MP_FTREE_PROPAGATE_NAME "FTreePropagate"
+/// skip this folder when looking for next unread one in the tree
+#define MP_FTREE_NEVER_UNREAD_NAME "FTreeNeverUnread"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -1712,6 +1715,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_FTREE_FORMAT_DEFVAL " (%t, %u)"
 /// reflect the folder status in its parent?
 #define MP_FTREE_PROPAGATE_DEFVAL 1L
+/// skip this folder when looking for next unread one in the tree
+#define MP_FTREE_NEVER_UNREAD_DEFVAL 0L
 //@}
 /**@name Font settings for compose view */
 //@{

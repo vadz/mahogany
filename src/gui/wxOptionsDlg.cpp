@@ -342,7 +342,9 @@ enum ConfigFields
    ConfigField_FolderTreeFormat,
    ConfigField_FolderTreePropagateHelp,
    ConfigField_FolderTreePropagate,
-   ConfigField_FolderTreeLast = ConfigField_FolderTreePropagate,
+   ConfigField_FolderTreeNeverUnreadHelp,
+   ConfigField_FolderTreeNeverUnread,
+   ConfigField_FolderTreeLast = ConfigField_FolderTreeNeverUnread,
 
    // autocollecting and address books options
    ConfigField_AdbFirst = ConfigField_FolderTreeLast,
@@ -1057,6 +1059,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "it below if you don't like it (this makes sense mostly\n"
                   "for folders such as \"Trash\" or \"Sent Mail\")."), Field_Message, -1 },
    { gettext_noop("&Parent shows status:"), Field_Bool, -1 },
+   { gettext_noop("You may check the option below to skip this folder when\n"
+                  "navigating in the folder tree using Ctrl-Up/Down arrows\n"
+                  "which normally selects the next folder with unread messages.\n"
+                  "But if you select it, this one will be skipped even it has\n"
+                  "unread mail (again, this is mainly useful for \"Trash\"\n"
+                  "folder, for example)."), Field_Message, -1 },
+   { gettext_noop("&Skip this folder:"), Field_Bool, -1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
@@ -1407,6 +1416,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FTREE_FORMAT),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_PROPAGATE),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FTREE_NEVER_UNREAD),
 
    // autocollect
    CONFIG_NONE(),

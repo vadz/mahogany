@@ -20,3 +20,4 @@ To define filters for incoming messages, you need to first define filter rules v
 You can import messages and settings from a few other E-Mail programs such as Eudora, Pine or XFMail.
 You can configure an external editor (such as vim or emacs) to be used for message composition.
 You can also configure Mahogany to always launch the external editor automatically.
+Use Ctrl-Up or Down arrow in the folder tree to quickly go to the next or previous folder with unread messages.

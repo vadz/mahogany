@@ -18,7 +18,8 @@
 // headers we have to include
 // -----------------------------------------------------------------------------
 
-#include <wx/persctrl.h>
+#include <wx/persctrl.h>   // needed for wxPNotebook
+
 #include "MDialogs.h"
 
 // -----------------------------------------------------------------------------

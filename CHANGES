@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+24.09.01 VZ: quickly select next unread folder in the tree with Ctrl-Up/Down
 12.09.01 VZ: added "open folder in read only mode" command
 05.09.01 VZ: added support for server side threading
 05.09.01 VZ: added threading item to folder view popup menu
@@ -16,7 +17,6 @@ Release 0.64 'Sparc' ???, 2001
 25.08.01 VZ: auto select the next unread msg/folder with one key press
 21.08.01 VZ: added address book interface to /etc/passwd (Unix only)
 21.08.01 VZ: better colour selector control in the options dialog
-20.08.01 VZ: added navigation between unread folders in the tree using PgUp/Dn
 13.08.01 NB: added the option to configure Forward prefix
 12.08.01 VZ: added the option to include the selected text only in reply
 11.08.01 MR: added "quote original text in reply" option (yes/no/ask)

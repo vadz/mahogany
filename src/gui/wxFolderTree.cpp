@@ -91,6 +91,7 @@ extern const MOption MP_FOCUS_FOLLOWSMOUSE;
 extern const MOption MP_FOLDER_BGCOLOUR;
 extern const MOption MP_FOLDER_TREEINDEX;
 extern const MOption MP_FTREE_FORMAT;
+extern const MOption MP_FTREE_NEVER_UNREAD;
 extern const MOption MP_FTREE_PROPAGATE;
 extern const MOption MP_FVIEW_FGCOLOUR;
 extern const MOption MP_FVIEW_FLAGGEDCOLOUR;
@@ -1939,11 +1940,19 @@ wxFolderTreeImpl::FindNextUnreadFolder(wxTreeItemId id, bool next) const
    // check first this item, then the next one(s)
    do
    {
-      MailFolderStatus status;
       wxString name = GetFolderTreeNode(id)->GetFolder()->GetFullName();
-      if ( mfStatus->GetStatus(name, &status) && status.unread )
+      Profile_obj profile(name);
+
+      // this folder may be explicitly excluded from this search (it makes
+      // sense for folders such as Trash...), check for it
+      if ( !READ_CONFIG(profile, MP_FTREE_NEVER_UNREAD) )
       {
-         return id;
+         // does it have any unread messages?
+         MailFolderStatus status;
+         if ( mfStatus->GetStatus(name, &status) && status.unread )
+         {
+            return id;
+         }
       }
 
       id = GetNextItem(id, next);
@@ -2373,17 +2382,23 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
 
 void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
 {
-   // we want to make PageUp/Down to go to the next folder with unread
+   // we want to make Ctrl-Up/Down to go to the next folder with unread
    // messages in it
-   int keycode = event.GetCode();
-   if ( keycode != WXK_PRIOR && keycode != WXK_NEXT )
+   const wxKeyEvent& evtKey = event.GetKeyEvent();
+   if ( evtKey.ControlDown() )
    {
-      event.Skip();
-      return;
+      int keycode = evtKey.GetKeyCode();
+      if ( keycode == WXK_DOWN || keycode == WXK_UP )
+      {
+         // do go to next or previous folder
+         (void)GoToNextUnreadFolder(GetSelection(), keycode == WXK_DOWN);
+
+         // skip Skip() below
+         return;
+      }
    }
 
-   // go to next or previous folder
-   (void)GoToNextUnreadFolder(GetSelection(), keycode == WXK_NEXT);
+   event.Skip();
 }
 
 void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
