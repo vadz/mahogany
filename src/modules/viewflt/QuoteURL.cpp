@@ -314,11 +314,13 @@ CountQuoteLevel(const char *string,
 
       // last chance: it is possible that the next line is a wrapped part of
       // this one, so check the line after it too
-      //
-      // as this has a lot of potential for false positives, only do it for the
-      // most common quoting character
-      if ( sameAsNext == Line_Different && nextStart && *c == '>' )
+      if ( sameAsNext == Line_Different )
       {
+         // as this has a lot of potential for false positives, only do it for
+         // the most common quoting character
+         if ( !nextStart || *c != '>' )
+            break;
+
          const char *nextnext = strchr(nextStart + 1 /* skip '\n' */, '\n');
          if ( !nextnext ||
                (!IsBlankLine(nextnext + 1) &&
