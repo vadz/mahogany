@@ -68,6 +68,7 @@
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxIconManager.h"
+#include "gui/wxSelectionDlg.h"
 
 #include "HeadersDialogs.h"
 

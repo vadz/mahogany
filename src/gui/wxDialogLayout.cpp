@@ -1002,7 +1002,7 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
       // do allow making the dialog smaller because the height might be too
       // big for the screen - but still set some minimal height to prevent it
       // from being shrunk to nothing at all
-      SetSizeHints(width, wxMin(height, 10*hBtn));
+      SetSizeHints(width, wxMin(height, 40*hBtn));
 
       m_sizeMin = wxSize(width, height);
    }

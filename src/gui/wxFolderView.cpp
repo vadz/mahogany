@@ -23,9 +23,9 @@
 #endif
 
 #include "Mpch.h"
-#include "Mcommon.h"
 
 #ifndef USE_PCH
+#  include "Mcommon.h"
 #  include "strutil.h"
 #  include "MFrame.h"
 #  include "MLogFrame.h"
@@ -161,6 +161,7 @@ enum
    WXMENU_FVIEW_RESET_SORT,
    WXMENU_FVIEW_TOGGLE_THREAD,
    WXMENU_FVIEW_CONFIG_THREAD,
+   WXMENU_FVIEW_CONFIG_COLUMNS,
 
    // must be in the same order as MessageSizeShow enum members
    WXMENU_FVIEW_SIZE_AUTO,
@@ -1759,6 +1760,10 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
          // nothing special to do
          break;
    }
+
+   // this is valid for all columns
+   menu.AppendSeparator();
+   menu.Append(WXMENU_FVIEW_CONFIG_COLUMNS, _("&Columns..."));
 
    // set the initial state of the menu items
 
@@ -4137,6 +4142,14 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
          }
          break;
 
+      case WXMENU_FVIEW_CONFIG_COLUMNS:
+         if ( !ConfigureFolderViewHeaders(profile, GetWindow()) )
+         {
+            // nothing changed, skip MEventManager::Send() below
+            return;
+         }
+         break;
+
       case WXMENU_FVIEW_RESET_SORT:
          // we try to keep our profiles tidy and clean, so first just delete
          // the current sorting order
@@ -4772,19 +4785,22 @@ bool OpenFolderViewFrame(MFolder *folder,
                                     openmode) != NULL;
 }
 
-// TODO: this code probably should be updated to avoid writing columns width
-//       to the profile if the widths didn't change
+extern
+bool ShowFolderViewColumnDialog(wxArrayString* names,
+                                wxArrayInt* status,
+                                wxArrayInt* widths,
+                                wxWindow *parent);
 
 bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 {
-   // prepare the data for the dialog: we need the array of columns in order
-   // and we also need to remember the widths of the columns to shuffle them
-   // as well if the columns order is changed
+   // prepare the data for the dialog: we need the array of columns and their
+   // widths in order
 
    // this array contains the column positions: columns[WXFLC_XXX] is the
    // index (from 0 to WXFLC_NUMENTRIES) of the column WXFLC_XXX if it is
    // shown and -1 otherwise (we also have a copy of it used below)
-   int columns[WXFLC_NUMENTRIES], columnsOld[WXFLC_NUMENTRIES];
+   int columns[WXFLC_NUMENTRIES],
+       columnsOld[WXFLC_NUMENTRIES];
    ReadColumnsInfo(profile, columnsOld);
    memcpy(columns, columnsOld, sizeof(columns));
 
@@ -4796,6 +4812,8 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 
    wxArrayString choices;
    wxArrayInt status;
+   wxArrayInt widths;
+
    size_t n;
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
    {
@@ -4805,11 +4823,9 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
       {
          break;
       }
-      else
-      {
-         choices.Add(GetColumnName(col));
-         status.Add(true);
-      }
+
+      choices.Add(GetColumnName(col));
+      status.Add(true);
    }
 
    // all columns which are shown are already in choices array, add all the
@@ -4822,15 +4838,20 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
          choices.Add(colName);
          status.Add(false);
       }
+
+      unsigned long w;
+      if ( !strWidths[n].ToULong(&w) )
+      {
+         wxLogDebug("Invalid width for the column %d", n);
+
+         w = 0;
+      }
+
+      widths.Add((int)w);
    }
 
    // do show the dialog
-   if ( !MDialog_GetSelectionsInOrder(_("All &columns:"),
-                                      _("Choose the columns to be shown"),
-                                      &choices,
-                                      &status,
-                                      "FolderViewCol",
-                                      parent) )
+   if ( !ShowFolderViewColumnDialog(&choices, &status, &widths, parent) )
    {
       // nothing changed
       return false;

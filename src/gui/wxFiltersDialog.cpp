@@ -57,6 +57,7 @@
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFiltersDialog.h"
+#include "gui/wxSelectionDlg.h"
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here

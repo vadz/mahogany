@@ -83,6 +83,7 @@
 
 #include "gui/wxFolderTree.h"
 #include "gui/wxDialogLayout.h"
+#include "gui/wxSelectionDlg.h"
 #include "gui/wxIdentityCombo.h"
 
 #include "sysutil.h"    // for sysutil_compare_filenames
@@ -3028,16 +3029,17 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
 
    // layout the controls
    // -------------------
+
    wxLayoutConstraints *c;
 
    // Ok and Cancel buttons and a static box around everything else
-   wxStaticBox *box = CreateStdButtonsAndBox(message);
+   m_box = CreateStdButtonsAndBox(message);
 
    // buttons to move items up/down
    wxButton *btnDown = new wxButton(this, Button_Down, _("&Down"));
    c = new wxLayoutConstraints();
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(m_box, wxCentreY, LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
    btnDown->SetConstraints(c);
@@ -3046,8 +3048,8 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    //        course, be false after translation
    wxButton *btnUp = new wxButton(this, Button_Up, _("&Up"));
    c = new wxLayoutConstraints();
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(m_box, wxCentreY, LAYOUT_Y_MARGIN);
    c->width.SameAs(btnDown, wxWidth);
    c->height.AsIs();
    btnUp->SetConstraints(c);
@@ -3055,10 +3057,10 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    // a checklistbox with headers on the space which is left
    m_checklstBox = new wxCheckListBox(this, -1);
    c = new wxLayoutConstraints();
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.LeftOf(btnDown, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_checklstBox->SetConstraints(c);
 
    // set the minimal window size
@@ -3114,31 +3116,6 @@ void wxSelectionsOrderDialog::OnButtonMove(bool up)
 // MDialog_GetSelectionsInOrder()
 // ----------------------------------------------------------------------------
 
-// a simple class deriving from wxSelectionsOrderDialog which just passes the
-// strings around
-class wxSelectionsOrderDialogSimple : public wxSelectionsOrderDialog
-{
-public:
-   wxSelectionsOrderDialogSimple(const wxString& message,
-                                 const wxString& caption,
-                                 wxArrayString* choices,
-                                 wxArrayInt* status,
-                                 const wxString& profileKey,
-                                 wxWindow *parent)
-      : wxSelectionsOrderDialog(parent, message, caption, profileKey)
-   {
-      m_choices = choices;
-      m_status = status;
-   }
-
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
-
-private:
-   wxArrayString *m_choices;
-   wxArrayInt    *m_status;
-};
-
 bool wxSelectionsOrderDialogSimple::TransferDataToWindow()
 {
    size_t count = m_choices->GetCount();
@@ -3155,8 +3132,8 @@ bool wxSelectionsOrderDialogSimple::TransferDataToWindow()
 bool wxSelectionsOrderDialogSimple::TransferDataFromWindow()
 {
    // we're a bit dumb here as we assume that if the user changed something, it
-   // should matter (this is not always the case: clicking on thecheck list box
-   // twice doesn't cange anything...) -- we could instead compare the old
+   // should matter (this is not always the case: clicking on the check list
+   // box twice doesn't cange anything...) -- we could instead compare the old
    // state with the new one
    if ( m_hasChanges )
    {

@@ -601,51 +601,6 @@ public:
    virtual ~wxNotebookWithImages();
 };
 
-// ----------------------------------------------------------------------------
-// wxSelectionsOrderDialog
-// ----------------------------------------------------------------------------
-
-// helper class used by MDialog_GetSelectionsInOrder and
-// wxMsgViewHeadersDialog elsewhere
-class wxSelectionsOrderDialog : public wxManuallyLaidOutDialog
-{
-public:
-   wxSelectionsOrderDialog(wxWindow *parent,
-                           const wxString& message,
-                           const wxString& caption,
-                           const wxString& profileKey);
-
-   // did anything really changed?
-   bool HasChanges() const { return m_hasChanges; }
-
-   // transfer data to/from window - must be overridden to populate the check
-   // list box and retrieve the results from it
-   virtual bool TransferDataToWindow() = 0;
-   virtual bool TransferDataFromWindow() = 0;
-
-   // implementation only from now on
-
-   // check list box event handler
-   void OnCheckLstBoxToggle(wxCommandEvent& event) { m_hasChanges = TRUE; }
-
-   // update UI: disable the text boxes which shouldn't be edited
-   void OnUpdateUI(wxUpdateUIEvent& event);
-
-   // up/down buttons notifications
-   void OnButtonUp(wxCommandEvent& event) { OnButtonMove(TRUE); }
-   void OnButtonDown(wxCommandEvent& event) { OnButtonMove(FALSE); }
-
-protected:
-   // real button events handler
-   void OnButtonMove(bool up);
-
-   wxCheckListBox *m_checklstBox;
-
-   bool m_hasChanges;
-
-   DECLARE_EVENT_TABLE()
-};
-
 // =============================================================================
 // helper functions
 // =============================================================================

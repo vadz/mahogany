@@ -424,6 +424,10 @@ SOURCE=.\src\gui\wxBrowseButton.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\wxColumnsDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\wxComposeView.cpp
 # End Source File
 # Begin Source File
