@@ -299,6 +299,10 @@ public:
 
    /** @name Folder names and specifications */
    //@{
+   /** Return the full folder spec
+    */
+   String GetSpec() const { return m_MailboxPath; }
+
    /** Extracts the folder name from the folder specification string used by
        cclient (i.e. {nntp/xxx}news.answers => news.answers and also #mh/Foo
        => Foo)

@@ -1032,6 +1032,16 @@ public:
 MWizard_CreateFolder_FinalPage::MWizard_CreateFolder_FinalPage(MWizard *wizard)
    : MWizardPage(wizard, MWizard_CreateFolder_Final)
 {
+   CreateFolderWizard::FolderParams *params =
+      ((CreateFolderWizard*)GetWizard())->GetParams();
+   FolderType ftype;
+   if ( CanHaveSubfolders((FolderType)params->m_FolderType,
+                          params->m_FolderFlags, &ftype)
+        && ftype != MF_ILLEGAL )
+   {
+      // TODO propose to add all subfolders to the created entry
+   }
+
    (void)new wxStaticText(this, -1, _(
       "You have now specified the basic\n"
       "parameters for the new mailbox entry.\n"
@@ -1124,8 +1134,7 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
       }
       else // wizard completed successfully, create folder
       {
-         CreateFolderWizard::FolderParams *params =
-            wizard->GetParams();
+         CreateFolderWizard::FolderParams *params = wizard->GetParams();
          newfolder = CreateFolderTreeEntry(
             parent, params->m_Name,
             (FolderType) params->m_FolderType,

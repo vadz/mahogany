@@ -1,5 +1,6 @@
 (next release) on (date of next release)
 26.07.00 VZ: encode 8bit characters in the header of outgoing messages too
+             allow adding all subfolders of an IMAP/MH/NNTP folder automatically
 25.07.00 VZ: support for setting charset for the outgoing messages
 21.07.00 VZ: completely rewrote subfoldrs dialog which is now *much* faster
 19.07.00 VZ: it is possible to specify several address which should be replaced

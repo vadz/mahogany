@@ -40,6 +40,7 @@
 #include <wx/tokenzr.h>
 
 #include "MFolder.h"
+#include "Mpers.h"
 
 #include "ASMailFolder.h"
 #include "MailFolder.h"
@@ -141,6 +142,9 @@ private:
    // the folder name separator
    char m_chDelimiter;
 
+   // the full spec of the folder whose children we're currently listing
+   wxString m_reference;
+
    // the item which we're currently populating in the tree
    wxTreeItemId m_idParent;
 
@@ -232,6 +236,46 @@ private:
    wxSubscriptionDialog *m_dialog;
 
    DECLARE_EVENT_TABLE()
+};
+
+// event receiver for the list events
+class ListFolderEventReceiver : public MEventReceiver
+{
+public:
+   ListFolderEventReceiver()
+   {
+      m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
+   }
+
+   virtual ~ListFolderEventReceiver()
+   {
+      MEventManager::Deregister(m_regCookie);
+   }
+
+   // do retrieve all folders and create them
+   size_t AddAllFolders(MFolder *folder, ASMailFolder *mailFolder);
+
+   // event processing function
+   virtual bool OnMEvent(MEventData& event);
+
+private:
+   // MEventReceiver cookie for the event manager
+   void *m_regCookie;
+
+   // the progress meter
+   MProgressInfo *m_progressInfo;
+
+   // number of folders retrieved since the last call to ListFolders()
+   size_t m_nFoldersRetrieved;
+
+   // done?
+   bool m_finished;
+
+   // the folder whose children we enum
+   MFolder *m_folder;
+
+   // the full spec of the folder whose children we're currently listing
+   wxString m_reference;
 };
 
 // ----------------------------------------------------------------------------
@@ -353,28 +397,32 @@ wxString wxSubfoldersTree::GetRelativePath(wxTreeItemId id) const
 void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
 {
    m_idParent = event.GetItem();
-   if ( !HasChildren(m_idParent) )
+   if ( !GetChildrenCount(m_idParent) )
    {
       // reset the counter, we will show the progress info if there are many
       // folders
       m_nFoldersRetrieved = 0;
 
       // start from the folder being expanded
-      wxString relPath = GetRelativePath(m_idParent);
+      wxString reference = GetRelativePath(m_idParent);
 
       // disable the tree (it will be reenabled in OnNoMoreFolders) to prevent
       // other events (possible as we will call wxYield())
       Disable();
-      
+
+      // this is the cclient spec of the folder whose children we enum
+      m_reference = ((MailFolderCC *)m_mailFolder->GetMailFolder())->GetSpec();
+      m_reference += reference;
+
       wxBusyCursor bc;
 
       // now OnNewFolder() and OnNoMoreFolders() will be called
       (void)m_mailFolder->ListFolders
                           (
-                             "%",      // everything at this tree level
-                             FALSE,    // subscribed only?
-                             relPath,  // reference (path relative to the folder)
-                             this      // data to pass to the callback
+                             "%",         // everything at this tree level
+                             FALSE,       // subscribed only?
+                             reference,   // path relative to the folder
+                             this         // data to pass to the callback
                           );
 
       // wait until the expansion ends
@@ -441,20 +489,20 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
    else // normal folder event
    {
       // we're passed a folder specification - extract the folder name from it
-      // (it's better to show this to the user rather than cryptic cclient
-      // string)
       wxString name;
-      if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
+      if ( spec.StartsWith(m_reference, &name) )
       {
-         // leave only the last componenet if we have a delimiter (the
-         // delimiter may be NUL for IMAP INBOX)
-         if ( !!name && chDelimiter )
+         if ( m_chDelimiter )
          {
-            name = name.AfterLast(chDelimiter);
+            if ( !!name && name[0] == m_chDelimiter )
+            {
+               name = name.c_str() + 1;
+            }
          }
 
-         // ListFolders() will also return the folder itself, ignore it
-         if ( !!name )
+         // ignore the folder itself and any grand children - we only want the
+         // direct children here
+         if ( !!name && (!m_chDelimiter || !strchr(name, m_chDelimiter)) )
          {
             wxTreeItemId id = OnNewFolder(name);
             if ( id.IsOk() )
@@ -626,17 +674,15 @@ void wxFolderNameTextCtrl::OnChar(wxKeyEvent& event)
 wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
                                           MFolder *folder,
                                           ASMailFolder *mailFolder)
-                    : wxManuallyLaidOutDialog(parent, "", "SubscribeDialog")
+                    : wxManuallyLaidOutDialog(parent,
+                                              _("Select subfolders to add to the tree"),
+                                              "SubscribeDialog")
 {
    // init members
    m_folder = folder;
    m_folder->IncRef();
    m_folderType = folder->GetType();
    m_settingFromProgram = false;
-
-   wxString title;
-   title.Printf(_("Subfolders of folder '%s'"), folder->GetFullName().c_str());
-   SetTitle(title);
 
    // create controls
    wxLayoutConstraints *c;
@@ -663,7 +709,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 #ifdef USE_SELECT_BUTTONS
    m_btnSelectAll = new wxButton(this, , _("&Select all"));
 #endif // USE_SELECT_BUTTONS
-                                 
+
    m_treectrl = new wxSubfoldersTree(this, folder, mailFolder);
    c = new wxLayoutConstraints;
    c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
@@ -1037,11 +1083,175 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
 }
 
 // ----------------------------------------------------------------------------
+// ListFolderEventReceiver
+// ----------------------------------------------------------------------------
+
+size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
+                                              ASMailFolder *mailFolder)
+{
+   m_folder = folder;
+   m_folder->IncRef();
+
+   m_reference = ((MailFolderCC *)mailFolder->GetMailFolder())->GetSpec();
+   m_nFoldersRetrieved = 0u;
+   m_finished = false;
+
+   (void)mailFolder->ListFolders
+                     (
+                        "*",         // everything
+                        FALSE,       // subscribed only?
+                        "",          // path relative to the folder
+                        this         // data to pass to the callback
+                     );
+
+   // wait until the expansion ends
+   do
+   {
+      wxYield();
+   }
+   while ( !m_finished );
+
+   m_folder->DecRef();
+
+   return m_nFoldersRetrieved;
+}
+
+bool ListFolderEventReceiver::OnMEvent(MEventData& event)
+{
+   // we're only subscribed to the ASFolder events
+   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
+          "unexpected event type" );
+
+   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
+
+   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
+
+   // is this message really for us?
+   if ( result->GetUserData() != this )
+   {
+      // no: continue with other event handlers
+      return TRUE;
+   }
+
+   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
+   {
+      FAIL_MSG( "unexpected operation notification" );
+
+      // eat the event - it was for us but we didn't process it...
+      return FALSE;
+   }
+
+   char chDelimiter = result->GetDelimiter();
+
+   // is it the special event which signals that there will be no more of
+   // folders?
+   wxString spec = result->GetName();
+   if ( !spec )
+   {
+      // no more folders
+      m_finished = true;
+
+      if ( m_nFoldersRetrieved )
+      {
+         // generate an event notifying everybody that a new folder has been
+         // created
+         MEventManager::Send(
+            new MEventFolderTreeChangeData(m_folder->GetFullName(),
+                                           MEventFolderTreeChangeData::CreateUnder)
+            );
+         MEventManager::DispatchPending();
+      }
+   }
+   else // normal folder event
+   {
+      // count the number of folders retrieved and show progress
+      m_nFoldersRetrieved++;
+
+      // create the progress indicator if there are many folders and it hadn't
+      // been yet created
+      if ( m_nFoldersRetrieved > 20 && !m_progressInfo )
+      {
+         m_progressInfo = new MProgressInfo(NULL,
+                                            _("Retrieving the folder list: "));
+      }
+
+      // update the progress indicator from time to time
+      if ( !(m_nFoldersRetrieved % 100) )
+      {
+         m_progressInfo->SetValue(m_nFoldersRetrieved);
+      }
+
+      // we're passed a folder specification - extract the folder name from it
+      wxString name;
+      if ( spec.StartsWith(m_reference, &name) && !!name )
+      {
+         if ( name[0u] == chDelimiter )
+         {
+            name = name.c_str() + 1;
+         }
+
+         MFolder *folderNew = m_folder->GetSubfolder(name);
+         if ( !folderNew )
+         {
+            folderNew = m_folder->CreateSubfolder(name, m_folder->GetType());
+
+            long flags = folderNew->GetFlags();
+            long attr = result->GetAttributes();
+            if ( attr & LATT_NOINFERIORS )
+            {
+               flags &= ~MF_FLAGS_GROUP;
+            }
+            else
+            {
+               flags |= MF_FLAGS_GROUP;
+            }
+
+            if ( attr & LATT_NOSELECT )
+            {
+               flags |= MF_FLAGS_NOSELECT;
+            }
+            else
+            {
+               flags &= ~MF_FLAGS_NOSELECT;
+            }
+
+            folderNew->SetFlags(flags);
+
+            Profile_obj profile(folderNew->GetFullName());
+            String path;
+            path << m_folder->GetPath() << chDelimiter << name;
+            profile->writeEntry(MP_FOLDER_PATH, path);
+         }
+
+         folderNew->DecRef();
+      }
+      else
+      {
+         wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
+      }
+   }
+
+   // we don't want anyone else to receive this message - it was for us only
+   return FALSE;
+}
+
+// ----------------------------------------------------------------------------
 // public interface
 // ----------------------------------------------------------------------------
 
+// show the dialog allowing the user to choose the subfoldersto add to the
+// tree
 bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 {
+   if ( !(folder->GetFlags() & MF_FLAGS_GROUP) )
+   {
+      // how did we get here at all?
+      wxLogMessage(_("The folder '%s' has no subfolders."),
+                   folder->GetPath().c_str());
+
+      return FALSE;
+   }
+
    // The folder must be half opened because we don't really want to read any
    // messages in it, just enum subfolders
    ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder, NULL);
@@ -1060,23 +1270,38 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       return FALSE;
    }
 
-   if ( !(folder->GetFlags() & MF_FLAGS_GROUP) )
+   if ( MDialog_YesNoDialog
+        (
+         _("Would you like to add all subfolders of this folder\n"
+           "to the folder tree (or select the individual folders\n"
+           "manually)?"),
+         parent,
+         wxString::Format(_("Subfolders of '%s'"), folder->GetPath().c_str()),
+         true, // [Yes] default
+         GetPersMsgBoxName(M_MSGBOX_ADD_ALL_SUBFOLDERS)
+        )
+      )
    {
-      // how did we get here at all?
-      wxLogMessage(_("The folder '%s' has no subfolders."),
-                   folder->GetPath().c_str());
+      AddAllSubfoldersToTree(folder, asmf);
+
+      asmf->DecRef();
+   }
+   else // select the folders manually
+   {
+      wxSubscriptionDialog dlg(GetFrame(parent), folder, asmf);
 
       asmf->DecRef();
 
-      return FALSE;
+      dlg.ShowModal();
    }
-
-   wxSubscriptionDialog dlg(GetFrame(parent), folder, asmf);
-
-   asmf->DecRef();
-
-   dlg.ShowModal();
 
    return TRUE;
 }
 
+// add all subfolders to the tree
+extern size_t AddAllSubfoldersToTree(MFolder *folder, ASMailFolder *mailFolder)
+{
+   ListFolderEventReceiver receiver;
+
+   return receiver.AddAllFolders(folder, mailFolder);
+}

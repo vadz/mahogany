@@ -277,4 +277,11 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                                       long folderFlags,
                                       const String& path,
                                       bool notify = TRUE);
+
+/**
+   Add all subfolders of the given folder to the tree.
+ */
+extern size_t AddAllSubfoldersToTree(MFolder *parent,
+                                     class ASMailFolder *mailFolder);
+
 #endif // _MFOLDER_H

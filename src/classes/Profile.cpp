@@ -324,8 +324,10 @@ public:
    virtual void SetPath(const String &path)
       {
          PCHECK();
-         ASSERT(path.Length() == 0 ||  // only relative paths allowed
-                (path[0u] != '.' && path[0u] != '/'));
+
+         ASSERT_MSG( path.Length() == 0 || path[0u] != '/',
+                     "only relative paths allowed" );
+
          m_ProfilePath = path;
       }
    virtual void ResetPath(void)

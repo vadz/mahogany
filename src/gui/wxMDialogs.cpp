@@ -2225,6 +2225,7 @@ static const struct
    { "RulesMismatchWarn2",       gettext_noop("Warning that filter rules have been edited") },
 #endif // 0
    { "FilterReplace",            gettext_noop("ask whether to replace filter when adding a new filter") },
+   { "AddAllSubfolders",         gettext_noop("create all subfolders automatically instead of browsing them") },
    //{ "", gettext_noop("") },
 };
 
