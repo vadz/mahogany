@@ -84,6 +84,86 @@ static const char *wxIconManagerFileExtensions[] =
 };
 
 // ----------------------------------------------------------------------------
+// helper functions to load images
+// ----------------------------------------------------------------------------
+
+#define   WXICONMANAGER_DEFAULTSIZE 100
+
+char **
+wxIconManager::LoadImage(String filename)
+{
+   String tempfile;
+   
+   // lets convert to xpm using image magick:
+   if(! wxMatchWild("*.xpm",filename,FALSE))
+   {
+#ifdef OS_UNIX
+      int i;
+      tempfile.assign(filename,0,filename.length()-4); // -".xpm"
+      tempfile = tempfile + ".xpm";
+      // strip leading path
+      i = tempfile.length();
+      while(i && tempfile[i] != '/')
+         i--;
+      tempfile.assign(tempfile,i,tempfile.length()-1);
+      tempfile << (getenv("TMP") ? getenv("TMP") : "/tmp")
+               << '/' << tempfile;
+      String command;
+      command << "convert " << filename << tempfile;
+      system(command); // don't check for returncode, will fail later
+      // if it didn't work
+      filename = tempfile;
+#else
+      return NULL; // fail
+#endif
+
+   // this is the actual XPM loading:
+   size_t maxlines = WXICONMANAGER_DEFAULTSIZE;
+   size_t line = 0;
+   
+   char **cpptr = malloc(maxlines * sizeof(char *));
+   ASSERT(cpptr);
+
+   ifstream in(filename);
+   if(in)
+   {  
+      String str;
+      
+      do
+      {
+         if(line == maxlines)
+         {
+            maxlines = maxlines + maxlines/2;
+            cpptr = realloc(cpptr,maxlines * sizeof(char *));
+            ASSERT(cpptr);
+         }
+         strutil_getstrline(in,str);
+         cpptr[line++] = strutil_strdup(str);
+      }while(! in.fail());
+      cpptr[line++] = NULL;
+      cpptr = realloc(cpptr,line*sizeoff(char *));
+      ASSERT(cpptr);
+   }
+   else
+   {
+      free(cpptr);
+      cpptr = NULL;
+   }
+   if(tempfile.length()) // using a temporary file
+      wxRemoveFile(tempfile);
+   return cpptr;
+}
+
+void
+wxIconManager::FreeImage(char **cpptr)
+{
+   char **cpptr2 = cpptr;
+   while(*cpptr2)
+      delete[] *(cpptr++);
+   free(cpptr);
+}
+
+// ----------------------------------------------------------------------------
 // wxIconManager implementation
 // ----------------------------------------------------------------------------
 wxIconManager::wxIconManager()
@@ -209,8 +289,17 @@ wxIconManager::GetIcon(String const &_iconName)
 
       if( found )
       {
+#ifdef   OS_UNIX
+         char **ptr = LoadImage(name);
+         if(ptr)
+         {
+            icn = wxIcon(ptr);
+            // we never free ptr or wxIcon will get broken? FIXME
+#else
+         // Windows:
          if(icn.LoadFile(Str(name),0))
          {
+#endif   
             id = new IconData;
             id->iconRef = icn;
             id->iconName = key;
