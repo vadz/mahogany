@@ -712,10 +712,7 @@ protected:
    /// delay between selecting a message and previewing it
    unsigned long m_PreviewDelay;
 
-   /// the item which will be previewed once m_PreviewDelay expires
-   long m_itemDelayed;
-
-   /// uid of m_itemDelayed
+   /// the message which will be previewed once m_PreviewDelay expires
    UIdType m_uidDelayed;
 
    /// timer used for delayed previewing
@@ -2065,14 +2062,14 @@ void wxFolderListCtrl::OnPreviewTimer(wxTimerEvent& event)
 {
    // preview timer expirer, do we still have the message we wanted to preview
    // selected?
-   if ( GetUniqueSelection() == m_itemDelayed )
+   long sel = GetUniqueSelection();
+   if ( sel != -1 )
    {
       // do we still have this message? it might have been deleted
-      if ( GetUIdFromIndex(m_itemDelayed) == m_uidDelayed )
-         PreviewItem(m_itemDelayed, m_uidDelayed);
+      if ( GetUIdFromIndex(sel) == m_uidDelayed )
+         PreviewItem(sel, m_uidDelayed);
    }
 
-   m_itemDelayed = -1;
    m_uidDelayed = UID_ILLEGAL;
 }
 
@@ -2082,7 +2079,6 @@ void wxFolderListCtrl::PreviewItemDelayed(long idx, UIdType uid)
    if ( m_PreviewDelay )
    {
       // remember the item we wanted to preview
-      m_itemDelayed = idx;
       m_uidDelayed = uid;
 
       // start (or restart) the timer
