@@ -740,6 +740,7 @@ MAppBase::OnMEvent(MEventData& event)
 
                unsigned long number = mailevent.GetNumber();
                unsigned i;
+               unsigned found = 0;
                if ( number <= (unsigned long) READ_CONFIG(GetProfile(),
                                                           MP_SHOW_NEWMAILINFO))
                {
@@ -754,6 +755,7 @@ MAppBase::OnMEvent(MEventData& event)
                                 << '\n'
                                 << _("in folder '") << folder->GetName() << "'\n\n";
                         msg->DecRef();
+                        found++;
                      }
                      else
                         FAIL_MSG("new mail received but no new message?");
@@ -765,8 +767,12 @@ MAppBase::OnMEvent(MEventData& event)
                   // of several messages
                   message.Printf(_("You have received %lu new messages\nin folder '%s'."),
                                  number, folder->GetName().c_str());
+                  found = number;
                }
-               MDialog_Message(message, m_topLevelFrame, _("New Mail"));
+               // This test is there as the messages might have gone
+               // in the meantime, as happens when filtering.
+               if(found > 0) 
+                  MDialog_Message(message, m_topLevelFrame, _("New Mail"));
             }
          }
    }

@@ -1423,7 +1423,8 @@ MailFolderCC::GetMessage(unsigned long uid)
          uidValid = true;
    }
    hil->DecRef();
-   ASSERT_MSG(uidValid, "Attempting to get a non-existing message.");
+   ASSERT_MSG(uidValid, "DEBUG: Attempting to get a non-existing message.\n"
+              "(OK when filtering as message might have disappeared)");
    if(! uidValid) return NULL;
 
    MessageCC *m = MessageCC::CreateMessageCC(this,uid);
