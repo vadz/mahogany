@@ -54,6 +54,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "mconfig"=.\mconfig\mconfig.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "mtest"="..\imap-4.2\mtest\mtest.dsp" - Package Owner=<4>
 
 Package=<5>

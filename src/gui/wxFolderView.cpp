@@ -1870,7 +1870,7 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    if ( focusedIndex != -1 )
    {
-      ASSERT_MSG( focusedIndex < n, "invalid focused index" );
+      ASSERT_MSG( (size_t)focusedIndex < n, "invalid focused index" );
 
       m_FolderCtrl->Focus(focusedIndex);
 

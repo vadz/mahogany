@@ -14,10 +14,12 @@
 #ifndef _MSWIG_H_
 #define _MSWIG_H_
 
+#include <wx/defs.h>
+
 #include "Mconfig.h"
 
 // disable some warnings which VC++ gives for swig-generated code
-#ifdef _MSC_VER
+#ifdef __VISUALC__
    // 'int' : forcing value to bool 'true' or 'false' (performance warning)
    #pragma warning(disable:4800)
 #endif // VC++
