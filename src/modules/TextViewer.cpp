@@ -197,6 +197,8 @@ TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
                              wxBORDER_NONE)
 {
    m_viewer = viewer;
+
+   SetEditable(false);
 }
 
 TextViewerWindow::~TextViewerWindow()
@@ -475,7 +477,6 @@ void TextViewer::EndPart()
 void TextViewer::EndBody()
 {
    m_window->SetInsertionPoint(0);
-   m_window->SetEditable(false);
 
    m_window->Thaw();
 }
@@ -486,30 +487,22 @@ void TextViewer::EndBody()
 
 bool TextViewer::LineDown()
 {
-   m_window->LineDown();
-
-   return false;
+   return m_window->LineDown();
 }
 
 bool TextViewer::LineUp()
 {
-   m_window->LineUp();
-
-   return false;
+   return m_window->LineUp();
 }
 
 bool TextViewer::PageDown()
 {
-   m_window->PageDown();
-
-   return false;
+   return m_window->PageDown();
 }
 
 bool TextViewer::PageUp()
 {
-   m_window->PageUp();
-
-   return false;
+   return m_window->PageUp();
 }
 
 // ----------------------------------------------------------------------------

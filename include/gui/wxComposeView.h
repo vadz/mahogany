@@ -374,8 +374,8 @@ private:
    /// New article, reply/follow-up or forward?
    MessageKind m_kind;
 
-   /// Has message been sent already?
-   bool m_sent;
+   /// Are we sending the message?
+   bool m_sending;
 
    /// If replying, this is the original message
    Message *m_OriginalMessage;

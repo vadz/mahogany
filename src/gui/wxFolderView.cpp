@@ -963,7 +963,11 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          // scroll down the preview window
          if ( IsPreviewed(focused) )
          {
-            m_FolderView->m_MessagePreview->PageDown();
+            if ( !m_FolderView->m_MessagePreview->PageDown() )
+            {
+               // go to the next message if we were already at the end
+               m_FolderView->SelectNextUnread();
+            }
          }
          else
          {
@@ -1227,8 +1231,10 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 
    if ( IsPreviewed(event.m_itemIndex) )
    {
-      // scroll down one line
-      m_FolderView->m_MessagePreview->LineDown();
+      // scroll down one line, go to the next unread if already at the end of
+      // this one
+      if ( !m_FolderView->m_MessagePreview->LineDown() )
+         m_FolderView->SelectNextUnread();
    }
    else // do preview
    {
@@ -1376,6 +1382,11 @@ void wxFolderListCtrl::OnPreview()
 
    // as folder view calls us itself, no need to notify it
    wxFolderListCtrlBlockOnSelect noselect(this);
+
+   long selOld = GetUniqueSelection();
+   if ( selOld != -1 )
+      Select(selOld, false);
+
    Select(m_itemPreviewed, true);
 }
 
@@ -1570,18 +1581,11 @@ void wxFolderListCtrl::UpdateFocus()
    // this one (as selecting this one now won't preview it because it is not
    // the first selected message, see OnSelected()!)
 
-   // we have to use tmp var as Select() will reset m_selIsUnique
-   bool selIsUnique = m_selIsUnique;
-   if ( selIsUnique && (m_itemFocus != -1) && (m_itemFocus < GetItemCount()) )
-   {
-      Select(m_itemFocus, false);
-   }
-
    m_itemFocus = itemFocus;
 
    m_FolderView->OnFocusChange();
 
-   if ( selIsUnique && m_itemFocus != -1 )
+   if ( m_selIsUnique && m_itemFocus != -1 )
    {
       // will set m_selIsUnique to true back again
       Select(m_itemFocus, true);
@@ -2013,6 +2017,32 @@ wxFolderView::~wxFolderView()
 inline size_t wxFolderView::GetHeadersCount() const
 {
    return m_FolderCtrl->GetHeadersCount();
+}
+
+void wxFolderView::SelectNextUnread()
+{
+   HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
+
+   int idxFocused = m_FolderCtrl->GetFocusedItem();
+   if ( idxFocused == -1 )
+      return;
+
+   size_t idx = hil->FindHeaderByFlag(MailFolder::MSG_STAT_SEEN, false,
+                                      idxFocused);
+
+   // no unread?
+   if ( idx == UID_ILLEGAL )
+   {
+      if ( idxFocused == m_FolderCtrl->GetItemCount() - 1 )
+         return;
+
+      // take just the next one
+      idx = idxFocused + 1;
+   }
+
+   m_FolderCtrl->Focus(idx);
+
+   PreviewMessage(m_FolderCtrl->GetUIdFromIndex(idx));
 }
 
 void

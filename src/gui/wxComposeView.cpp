@@ -981,7 +981,7 @@ wxComposeView::wxComposeView(const String &name,
    m_name = name;
    m_pidEditor = 0;
    m_procExtEdit = NULL;
-   m_sent = false;
+   m_sending = false;
    m_OriginalMessage = NULL;
 
    m_indexLast = -1;
@@ -2178,6 +2178,11 @@ wxComposeView::OnMenuCommand(int id)
 
 bool wxComposeView::OnFirstTimeFocus()
 {
+   // it may happen that the message is sent before the composer gets focus,
+   // avoid starting the external editor by this time!
+   if ( m_sending )
+      return true;
+
    // now we can launch the ext editor if configured to do it
    if ( READ_CONFIG(m_Profile, MP_ALWAYS_USE_EXTERNALEDITOR) )
    {
@@ -2704,6 +2709,10 @@ wxComposeView::IsReadyToSend() const
 bool
 wxComposeView::Send(bool schedule)
 {
+   CHECK( !m_sending, false, "wxComposeView::Send() reentered" );
+
+   m_sending = true;
+
    Protocol proto;
    switch(m_mode)
    {
@@ -2962,6 +2971,8 @@ wxComposeView::Send(bool schedule)
 
    // reenable the window disabled previously
    Enable();
+
+   m_sending = false;
 
    return success;
 }

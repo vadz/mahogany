@@ -2438,6 +2438,15 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 
 void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
 {
+   Profile_obj profile(folder->GetName());
+
+   if ( READ_CONFIG(profile, MP_FTREE_FORMAT).empty() )
+   {
+      // don't bother counting the messages - it may be time consuming, so
+      // don't do it just to throw away the result later anyhow
+      return;
+   }
+
    wxTreeItemId item = GetTreeItemFromName(folder->GetName());
 
    // it's not an error: MTempFolder objects are not in the tree, yet they

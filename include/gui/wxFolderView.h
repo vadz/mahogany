@@ -270,6 +270,9 @@ protected:
    /// select the first interesting message in the folder
    void SelectInitialMessage(const HeaderInfoList_obj& hil);
 
+   /// select the next unread message
+   void SelectNextUnread();
+
    /// get the number of the messages we show
    inline size_t GetHeadersCount() const;
 
