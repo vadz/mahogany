@@ -41,7 +41,7 @@
 
 #include <wx/msgdlg.h>   // for wxMessageBox
 #include <wx/cmndata.h>  // for wxPageSetupData
-#include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
+#include "wx/persctrl.h" // for wxPMessageBoxEnable(d)
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>

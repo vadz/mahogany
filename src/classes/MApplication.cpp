@@ -56,7 +56,7 @@
 #include <wx/confbase.h>      // wxExpandEnvVars
 #include <wx/mimetype.h>      // wxMimeTypesManager
 
-#include <wx/persctrl.h>      // for wxPControls::SetSettingsPath
+#include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
 
 #ifdef OS_UNIX
 #  include <unistd.h>

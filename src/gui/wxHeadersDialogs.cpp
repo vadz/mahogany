@@ -41,7 +41,7 @@
 #include <wx/checklst.h>
 #include <wx/utils.h>  // wxMax()
 #include <wx/listctrl.h>
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 
 #include "Mdefaults.h"
 

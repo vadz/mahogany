@@ -47,7 +47,7 @@
 
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 
 #include <wx/menuitem.h>
 #include <wx/checklst.h>

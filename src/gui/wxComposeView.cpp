@@ -45,7 +45,7 @@
 #include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 
 #include "Mdefaults.h"
 

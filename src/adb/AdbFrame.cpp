@@ -56,7 +56,7 @@
 #include <wx/file.h>
 #include <wx/imaglist.h>
 
-#include <wx/persctrl.h>
+#include wx/persctrl.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"

@@ -36,7 +36,7 @@
 #include <pi-address.h>
 #include "MModule.h"
 #include "kbList.h"
-#include <adb/ProvPalm.h>   // class declarations
+#include "adb/ProvPalm.h"   // class declarations
 
 // ----------------------------------------------------------------------------
 // constants

@@ -29,7 +29,7 @@
 #   include   "strutil.h"
 #endif
 
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 #include <wx/menuitem.h>
 
 #include "MFolder.h"

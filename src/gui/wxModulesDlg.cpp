@@ -30,7 +30,7 @@
 #include <wx/defs.h>
 #include <wx/event.h>
 #include <wx/log.h>
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 #include <wx/control.h>
 #include <wx/layout.h>
 #include <wx/stattext.h>

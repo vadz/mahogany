@@ -46,7 +46,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <stdlib.h>
-#include <wx/pprocess.h>
+#include "wx/pprocess.h"
 
 #include <wx/listimpl.cpp>
 WX_DEFINE_LIST(wxEnvVarList);

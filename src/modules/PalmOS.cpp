@@ -91,7 +91,7 @@
 #include <pi-mail.h>        // for the mailbox
 #include <pi-dlp.h>
 
-#include <adb/AdbManager.h>
+#include "adb/AdbManager.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -54,7 +54,7 @@
 #include <wx/window.h>
 #include <wx/radiobox.h>
 #include <wx/confbase.h>
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 #include <wx/gauge.h>
 #include <wx/stattext.h>
 #include <wx/statbmp.h>

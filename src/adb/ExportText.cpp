@@ -38,7 +38,7 @@
 
 #include <wx/textfile.h>
 #include <wx/ffile.h>
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 
 #include "gui/wxDialogLayout.h"
 

@@ -37,7 +37,7 @@
 
 #include <wx/window.h>
 #include <wx/confbase.h>
-#include <wx/persctrl.h>
+#include "wx/persctrl.h"
 #include <wx/stattext.h>
 #include <wx/layout.h>
 #include <wx/checklst.h>
