@@ -75,14 +75,20 @@ public:
      */
    virtual void OnShutDown();
 
-   /** called if something goes seriously wrong with the application.
-       Because it can be called from a signal handler, all usual
-       restrictions about signal handlers apply to this function.
-       Because it can be called because of out-of-memory error,
-       it shouldn't allocate memory. The only thing it can do is
-       to save everything that may be saved and return a.s.a.p.
+   /**
+       Called if something goes seriously wrong with the application.
+
+       Because it can be called from a signal handler, all usual restrictions
+       about signal handlers apply to this function. Because it can be called
+       because of out-of-memory error, it shouldn't allocate [a lot of] memory.
+       The only thing it can do is to save everything that may be saved and
+       return a.s.a.p. and the program will exit after it.
+
+       @param msg a non NULL string pointer if called manually because the
+                  application detected that some unrecoverable error occured
+                  or NULL if caused because we have crashed
    */
-   virtual void OnAbnormalTermination();
+   virtual void OnAbnormalTermination(const char *msg = NULL);
 
    /**
      @name Exiting the application

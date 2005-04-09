@@ -459,6 +459,66 @@ BEGIN_EVENT_TABLE(wxMApp, wxApp)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
+// MDebugReport
+// ----------------------------------------------------------------------------
+
+#if wxUSE_DEBUGREPORT
+
+#include "wx/debugrpt.h"
+#include "wx/file.h"
+
+#include "SendMessage.h"
+
+class MDebugReport : public wxDebugReportCompress
+{
+public:
+   MDebugReport(const char *msg)
+   {
+      AddAll(msg == NULL ? Context_Exception : Context_Current);
+
+      // TODO: include msg in report if not NUL
+   }
+
+protected:
+   virtual bool DoProcess()
+   {
+      if ( !wxDebugReportCompress::DoProcess() )
+         return false;
+
+      Profile *profile = mApplication ? mApplication->GetProfile() : NULL;
+
+      if ( profile )
+      {
+         // create a mail message and send it
+         SendMessage_obj sm(SendMessage::Create(profile, Prot_SMTP));
+         sm->SetSubject(_T("Mahogany crash report"));
+         sm->SetAddresses(_T("mahogany@users.sourceforge.net"));
+
+         wxFile file(GetCompressedFileName());
+         if ( !file.IsOpened() )
+            return false;
+
+         const wxFileOffset len = file.Length();
+         wxCharBuffer buf(len);
+         if ( !file.Read(buf.data(), len) )
+            return false;
+
+         sm->AddPart(MimeType::APPLICATION, buf, len,
+                     _T("OCTET-STREAM"), _T("ATTACHMENT"));
+         if ( sm->SendOrQueue(SendMessage::NeverQueue | SendMessage::Silent) )
+         {
+            // sent successfully
+            return true;
+         }
+      }
+
+      return false;
+   }
+};
+
+#endif // wxUSE_DEBUGREPORT
+
+// ----------------------------------------------------------------------------
 // wxMApp ctor/dtor
 // ----------------------------------------------------------------------------
 
@@ -574,24 +634,30 @@ wxMApp::Yield(bool onlyIfNeeded)
 }
 
 static void
-SafeMsgBox(const String& msg)
+FatalMsgBox(const String& msg)
 {
    static const wxChar *title = gettext_noop("Fatal application error");
 
    // using a plain message box is safer in this situation, but under Unix we
    // have no such choice
 #ifdef __WXMSW__
-   ::MessageBox(NULL, wxGetTranslation(msg), wxGetTranslation(title), MB_ICONSTOP);
+   ::MessageBox(NULL, msg, wxGetTranslation(title), MB_ICONSTOP);
 #else // !MSW
-   wxMessageBox(wxGetTranslation(msg), wxGetTranslation(title), wxICON_STOP | wxOK);
+   wxMessageBox(msg, wxGetTranslation(title), wxICON_STOP | wxOK);
 #endif // MSW/!MSW
 }
 
 void
-wxMApp::OnAbnormalTermination()
+wxMApp::OnAbnormalTermination(const char *msgOrig)
 {
-   // no more background processing
-   gs_mutexBlockBg.Lock();
+   static bool s_crashed = false;
+
+   if ( s_crashed )
+      return;
+   s_crashed = true;
+
+   // no background processing in this function
+   MLocker lock(gs_mutexBlockBg);
 
 
    MAppBase::OnAbnormalTermination();
@@ -599,11 +665,14 @@ wxMApp::OnAbnormalTermination()
    // try to save the unsaved messages and options
    int nSaved = SaveAll();
 
-   wxString msg;
+   String msg(_("The application is terminating abnormally,\n"
+                "sorry for the inconvenience.\n\n"));
+
+   String msgComposer;
    switch ( nSaved )
    {
       case -1:
-         msg = _("Not all composer windows could be saved.");
+         msgComposer = _("Not all composer windows could be saved.");
          break;
 
       case 0:
@@ -611,78 +680,61 @@ wxMApp::OnAbnormalTermination()
          break;
 
       default:
-         msg.Printf(_("%d unsaved messages were saved,\n"
-                      "they will be restored on the next program startup."),
-                    nSaved);
+         msgComposer.Printf
+                     (
+                        _("%d unsaved messages were saved,\n"
+                          "they will be restored on the next program startup."),
+                        nSaved
+                     );
    }
 
-   static const wxChar *msgCrash =
-      gettext_noop("The application is terminating abnormally.\n"
-                   "\n"
-                   "Please report the bug via our bugtracker at\n"
-                   "\n"
-                   "     http://mahogany.sourceforge.net/bugz\n"
-                   "\n"
-                   "Be sure to mention your OS and Mahogany version\n"
-                   "and what exactly you were doing before this message\n"
-                   "box appeared as well as any other useful details!.\n"
-                   "\n"
-                   "Thank you!");
-
-   if ( !msg.empty() )
+   if ( !msgComposer.empty() )
    {
-      msg += _T("\n\n");
+      msg << msgComposer << _T('\n');
    }
 
-   msg += msgCrash;
-
-#ifdef wxHAS_CRASH_REPORT
-   msg += "\n\n";
-   msg += String::Format
-          (
-            _("P.S. Mahogany will also try to generate bug report in the file\n"
-              "\n"
-              "              %s\n"
-              "\n"
-              "after you close this message box. Please look at this\n"
-              "file if the program terminates without giving any other\n"
-              "messages, it might contain some additional information."),
-            wxCrashReport::GetFileName()
-          );
-#endif // wxCrashReport available
-
-   SafeMsgBox(msg);
-
-#ifdef wxHAS_CRASH_REPORT
-   if ( wxCrashReport::Generate() )
+#if wxUSE_DEBUGREPORT
+   MDebugReport report(msgOrig);
+   if ( wxDebugReportPreviewStd().Show(report) )
    {
-      msg.Printf
-          (
-            _("Detailed crash report has been generated in the file\n"
-              "\n"
-              "           %s\n"
-              "\n"
-              "please join it to your bug report.\n"
-              "\n"
-              "Thank you in advance!"),
-            wxCrashReport::GetFileName()
-          );
-   }
-   else // failed to generate crash dump
-   {
-      msg.Printf
-          (
-            _("Crash report generation failed, please look in the file\n"
-              "\n"
-              "           %s\n"
-              "\n"
-              "for the explanation of why it failed."),
-            wxCrashReport::GetFileName()
-          );
-   }
+      if ( report.Process() )
+      {
+         msg += _("Debug report was successfully sent to Mahogany dev-team.\n"
+                  "\n"
+                  "Thank you for your help!");
+      }
+      else // failed to send debug report
+      {
+         msg += _("Debug report couldn't be sent.");
 
-   SafeMsgBox(msg);
-#endif // wxCrashReport available
+         const wxString& fname = report.GetCompressedFileName();
+         if ( wxFile::Exists(fname) )
+            msg << _("Debug report couldn't be sent but was generated in "
+                     "the file\n")
+                << _T("          ") << fname << _T("\n\n")
+                << _("Please attach this file to the the bug if you open\n"
+                     "one in Mahogany bug tracker, thank you in advance.");
+         else
+            msg += _("Debug report couldn't be generated.");
+      }
+   }
+   else // user cancelled the report
+   {
+      msg += _("Debug report generation has been cancelled.");
+   }
+#else // !wxUSE_DEBUGREPORT
+   msg += _("Please report the bug via our bugtracker at\n"
+            "\n"
+            "     http://mahogany.sourceforge.net/bugz\n"
+            "\n"
+            "Be sure to mention your OS and Mahogany version\n"
+            "and what exactly you were doing before this message\n"
+            "box appeared as well as any other useful details!.\n"
+            "\n"
+            "Thank you!");
+#endif // wxUSE_DEBUGREPORT/!wxUSE_DEBUGREPORT
+
+   FatalMsgBox(msg);
 }
 
 // can we close now?
@@ -815,11 +867,8 @@ wxMApp::OnClose()
 bool
 wxMApp::OnInit()
 {
-   // in release build we handle any exceptions we generate (i.e. crashes)
-   // ourselves
-#ifndef DEBUG
+   // we want our OnAbnormalTermination() be called if we crash
    wxHandleFatalExceptions();
-#endif
 
    // create a semaphore indicating that we're running - or check if another
    // copy already is
@@ -2017,9 +2066,11 @@ wxMApp::UpdateOnlineDisplay(void)
 // ----------------------------------------------------------------------------
 
 void
-wxMApp::FatalError(const wxChar * /* message */)
+wxMApp::FatalError(const wxChar *message)
 {
-   OnAbnormalTermination();
+   OnAbnormalTermination(message);
+
+   abort();
 }
 
 void
