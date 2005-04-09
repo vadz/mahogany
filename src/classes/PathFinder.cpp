@@ -183,7 +183,7 @@ PathFinder::FindDirFile(const String & filename, bool *found,
 bool
 PathFinder::IsDir(const String & pathname)
 {
-   return wxPathExists(pathname);
+   return wxDirExists(pathname);
 }
 
 //static

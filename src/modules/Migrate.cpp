@@ -1492,7 +1492,7 @@ MigrateWizardProgressPage::GetDstFolder(const String& name, int flags)
       if ( !(flags & ASMailFolder::ATT_NOINFERIORS) )
       {
          // create a subdirectory for the subfolders if it doesn't exist yet
-         if ( !wxPathExists(path) && !wxMkdir(path) )
+         if ( !wxDirExists(path) && !wxMkdir(path) )
          {
             wxLogWarning(_("Failed to create directory \"%s\" for folder \"%s\""),
                          path.c_str(), name.c_str());
@@ -1592,7 +1592,7 @@ bool MigrateWizardProgressPage::CreateDstDirectory(const String& name)
    {
       // create a directory if it doesn't exist yet
       const String dir = GetDstNameForSource(name);
-      return wxPathExists(dir) || wxMkdir(dir);
+      return wxDirExists(dir) || wxMkdir(dir);
    }
 }
 
@@ -1637,7 +1637,7 @@ bool MigrateWizardProgressPage::ProcessAllFolders()
    if ( !Data().toIMAP )
    {
       const String& dir = Data().dstLocal.root;
-      if ( !dir.empty() && !wxPathExists(dir) )
+      if ( !dir.empty() && !wxDirExists(dir) )
       {
          if ( !wxMkdir(dir) )
          {
