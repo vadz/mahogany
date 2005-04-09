@@ -1869,7 +1869,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
 
    wxSizer *sizerSubj = new wxBoxSizer(wxHORIZONTAL);
    m_txtSubject = new wxSubjectTextCtrl(m_panel);
-   sizerSubj->Add(m_txtSubject, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
+   sizerSubj->Add(m_txtSubject, 1, wxALIGN_CENTRE_VERTICAL);
    SetTextAppearance(m_txtSubject);
 
    sizerSubj->Add(new wxIsReplyButton(this, m_panel),
