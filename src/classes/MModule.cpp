@@ -629,7 +629,7 @@ MModule::ListAvailableModules(const String& interfaceName)
    for( size_t i = 0; i < nDirs ; i++ )
    {
       pathname = dirs[i];
-      if ( wxPathExists(pathname) )
+      if ( wxDirExists(pathname) )
       {
          pathname = dirs[i];
          pathname << "*" << extDll;
