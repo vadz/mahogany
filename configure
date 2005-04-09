@@ -3758,82 +3758,27 @@ PYTHON_VER=
 
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-	 m_safe=`echo "Python.h_2.3" | sed 'y%./+-%__p_%'`
-    echo $ac_n "checking for Python.h (2.3)""... $ac_c" 1>&6
-echo "configure:3764: checking for Python.h (2.3)" >&5
+	for ver in 2.4 2.3 2.2 2.1 2.0 1.5; do
+	     m_safe=`echo "Python.h_$ver" | sed 'y%./+-%__p_%'`
+    echo $ac_n "checking for Python.h ($ver)""... $ac_c" 1>&6
+echo "configure:3765: checking for Python.h ($ver)" >&5
     if eval "test \"`echo '$''{'m_cv_header_$m_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
    m_save_CPPFLAGS="$CPPFLAGS"
         for j in "."  \
-		$prefix/include/python2.3 \
-		/usr/include/python2.3 \
-		/usr/local/include/python2.3 \
-	 ; do
-           CPPFLAGS="-I$j $CPPFLAGS"
-           cat > conftest.$ac_ext <<EOF
-#line 3776 "configure"
-#include "confdefs.h"
-             #include <Python.h>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3781: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  
-               if test "$j" = "."; then
-                  j="/usr/include"
-               fi
-               eval "m_cv_header_$m_safe=$j"
-               CPPFLAGS="$m_save_CPPFLAGS"
-               break
-             
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-   eval "m_cv_header_$m_safe=no" 
-           
-fi
-rm -f conftest*
-           CPPFLAGS="$m_save_CPPFLAGS"
-        done
-      
-    
-fi
-
-    if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
-              dir=`eval echo $\`eval echo m_cv_header_$m_safe\``
-       echo "$ac_t""yes (in $dir)" 1>&6
-       eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
-       
-		PYTHON_VER=2.3
-	
-    else
-       echo "$ac_t""no" 1>&6
-       
-		 m_safe=`echo "Python.h_2.2" | sed 'y%./+-%__p_%'`
-    echo $ac_n "checking for Python.h (2.2)""... $ac_c" 1>&6
-echo "configure:3820: checking for Python.h (2.2)" >&5
-    if eval "test \"`echo '$''{'m_cv_header_$m_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-   m_save_CPPFLAGS="$CPPFLAGS"
-        for j in "."  \
-			$prefix/include/python2.2 \
-			/usr/include/python2.2 \
-			/usr/local/include/python2.2 \
+		    $prefix/include/python$ver \
+		    /usr/include/python$ver \
+		    /usr/local/include/python$ver \
 		 ; do
            CPPFLAGS="-I$j $CPPFLAGS"
            cat > conftest.$ac_ext <<EOF
-#line 3832 "configure"
+#line 3777 "configure"
 #include "confdefs.h"
              #include <Python.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3837: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:3782: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -3865,195 +3810,19 @@ fi
        echo "$ac_t""yes (in $dir)" 1>&6
        eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
        
-			PYTHON_VER=2.2
+		    PYTHON_VER=$ver
+		    break
 		
+	    
     else
        echo "$ac_t""no" 1>&6
-       
-			 m_safe=`echo "Python.h_2.1" | sed 'y%./+-%__p_%'`
-    echo $ac_n "checking for Python.h (2.1)""... $ac_c" 1>&6
-echo "configure:3876: checking for Python.h (2.1)" >&5
-    if eval "test \"`echo '$''{'m_cv_header_$m_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-   m_save_CPPFLAGS="$CPPFLAGS"
-        for j in "."  \
-				$prefix/include/python2.1 \
-				/usr/include/python2.1 \
-				/usr/local/include/python2.1 \
-			 ; do
-           CPPFLAGS="-I$j $CPPFLAGS"
-           cat > conftest.$ac_ext <<EOF
-#line 3888 "configure"
-#include "confdefs.h"
-             #include <Python.h>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3893: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  
-               if test "$j" = "."; then
-                  j="/usr/include"
-               fi
-               eval "m_cv_header_$m_safe=$j"
-               CPPFLAGS="$m_save_CPPFLAGS"
-               break
-             
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-   eval "m_cv_header_$m_safe=no" 
-           
-fi
-rm -f conftest*
-           CPPFLAGS="$m_save_CPPFLAGS"
-        done
-      
-    
-fi
-
-    if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
-              dir=`eval echo $\`eval echo m_cv_header_$m_safe\``
-       echo "$ac_t""yes (in $dir)" 1>&6
-       eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
-       
-				PYTHON_VER=2.1
-			
-    else
-       echo "$ac_t""no" 1>&6
-       
-				 m_safe=`echo "Python.h_2.0" | sed 'y%./+-%__p_%'`
-    echo $ac_n "checking for Python.h (2.0)""... $ac_c" 1>&6
-echo "configure:3932: checking for Python.h (2.0)" >&5
-    if eval "test \"`echo '$''{'m_cv_header_$m_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-   m_save_CPPFLAGS="$CPPFLAGS"
-        for j in "."  \
-					$prefix/include/python2.0 \
-					/usr/include/python2.0 \
-					/usr/local/include/python2.0 \
-				 ; do
-           CPPFLAGS="-I$j $CPPFLAGS"
-           cat > conftest.$ac_ext <<EOF
-#line 3944 "configure"
-#include "confdefs.h"
-             #include <Python.h>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3949: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  
-               if test "$j" = "."; then
-                  j="/usr/include"
-               fi
-               eval "m_cv_header_$m_safe=$j"
-               CPPFLAGS="$m_save_CPPFLAGS"
-               break
-             
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-   eval "m_cv_header_$m_safe=no" 
-           
-fi
-rm -f conftest*
-           CPPFLAGS="$m_save_CPPFLAGS"
-        done
-      
-    
-fi
-
-    if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
-              dir=`eval echo $\`eval echo m_cv_header_$m_safe\``
-       echo "$ac_t""yes (in $dir)" 1>&6
-       eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
-       
-					PYTHON_VER=2.0
-				
-    else
-       echo "$ac_t""no" 1>&6
-       
-					 m_safe=`echo "Python.h_1.5" | sed 'y%./+-%__p_%'`
-    echo $ac_n "checking for Python.h (1.5)""... $ac_c" 1>&6
-echo "configure:3988: checking for Python.h (1.5)" >&5
-    if eval "test \"`echo '$''{'m_cv_header_$m_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-   m_save_CPPFLAGS="$CPPFLAGS"
-        for j in "."  \
-						$prefix/include/python1.5 \
-						/usr/include/python1.5 \
-						/usr/local/include/python1.5 \
-					 ; do
-           CPPFLAGS="-I$j $CPPFLAGS"
-           cat > conftest.$ac_ext <<EOF
-#line 4000 "configure"
-#include "confdefs.h"
-             #include <Python.h>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4005: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  
-               if test "$j" = "."; then
-                  j="/usr/include"
-               fi
-               eval "m_cv_header_$m_safe=$j"
-               CPPFLAGS="$m_save_CPPFLAGS"
-               break
-             
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-   eval "m_cv_header_$m_safe=no" 
-           
-fi
-rm -f conftest*
-           CPPFLAGS="$m_save_CPPFLAGS"
-        done
-      
-    
-fi
-
-    if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
-              dir=`eval echo $\`eval echo m_cv_header_$m_safe\``
-       echo "$ac_t""yes (in $dir)" 1>&6
-       eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
-       
-						PYTHON_VER=1.5
-					
-    else
-       echo "$ac_t""no" 1>&6
-       
-						USE_PYTHON=0
-					    fi
+           fi
   
 
-				    fi
-  
-
-			    fi
-  
-
-		    fi
-  
-
-	    fi
-  
-
+	done
+	if test "x$PYTHON_VER" = "x"; then
+	    USE_PYTHON=0
+	fi
 	;;
 
 none|0)
@@ -4081,7 +3850,7 @@ static|Static|STATIC|1)
 	if test "$USE_MAC" = 1; then
 	    PYTHON_LIBS="-framework Python"
 	    echo $ac_n "checking if we can link with Python framework""... $ac_c" 1>&6
-echo "configure:4085: checking if we can link with Python framework" >&5
+echo "configure:3854: checking if we can link with Python framework" >&5
 if eval "test \"`echo '$''{'m_cv_framework_python'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4089,14 +3858,14 @@ else
 			    LIBS_OLD=$LIBS
 			    LIBS="$LIBS $PYTHON_LIBS"
 			    cat > conftest.$ac_ext <<EOF
-#line 4093 "configure"
+#line 3862 "configure"
 #include "confdefs.h"
 #include "python.h"
 int main() {
 Py_Initialize();
 ; return 0; }
 EOF
-if { (eval echo configure:4100: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3869: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   m_cv_framework_python=yes
 else
@@ -4118,7 +3887,7 @@ echo "$ac_t""$m_cv_framework_python" 1>&6
 
 	if test "x$PYTHON_LIBS" = "x"; then
 	    echo $ac_n "checking for main in -lpython$PYTHON_VER""... $ac_c" 1>&6
-echo "configure:4122: checking for main in -lpython$PYTHON_VER" >&5
+echo "configure:3891: checking for main in -lpython$PYTHON_VER" >&5
 m_lib_var=`echo python$PYTHON_VER'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'m_cv_lib_$m_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4137,14 +3906,14 @@ for j in "."  \
 	     ; do
 LIBS="-L$j -lpython$PYTHON_VER  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4141 "configure"
+#line 3910 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4148: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3917: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "m_cv_lib_$m_lib_var=\"libpath_$m_lib_var=-L$j\"" 
              eval eval "`echo '$m_cv_lib_'$m_lib_var`"
@@ -4186,12 +3955,12 @@ else
 
 						if test "$PYTHON_VER" != "1.5"; then
 		    echo $ac_n "checking for openpty""... $ac_c" 1>&6
-echo "configure:4190: checking for openpty" >&5
+echo "configure:3959: checking for openpty" >&5
 if eval "test \"`echo '$''{'ac_cv_func_openpty'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4195 "configure"
+#line 3964 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char openpty(); below.  */
@@ -4214,7 +3983,7 @@ openpty();
 
 ; return 0; }
 EOF
-if { (eval echo configure:4218: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:3987: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_openpty=yes"
 else
@@ -4232,7 +4001,7 @@ if eval "test \"`echo '$ac_cv_func_'openpty`\" = yes"; then
 else
   echo "$ac_t""no" 1>&6
 echo $ac_n "checking for openpty in -lutil""... $ac_c" 1>&6
-echo "configure:4236: checking for openpty in -lutil" >&5
+echo "configure:4005: checking for openpty in -lutil" >&5
 ac_lib_var=`echo util'_'openpty | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4240,7 +4009,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lutil  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4244 "configure"
+#line 4013 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4251,7 +4020,7 @@ int main() {
 openpty()
 ; return 0; }
 EOF
-if { (eval echo configure:4255: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4024: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4302,7 +4071,7 @@ EOF
 	    # Extract the first word of "swig", so it can be a program name with args.
 set dummy swig; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4306: checking for $ac_word" >&5
+echo "configure:4075: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_SWIG'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4350,7 +4119,7 @@ MAKE_XLATE='TRANSLATIONS := yes'
 # Extract the first word of "xgettext", so it can be a program name with args.
 set dummy xgettext; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4354: checking for $ac_word" >&5
+echo "configure:4123: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_XGETTEXT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4385,7 +4154,7 @@ fi
 # Extract the first word of "msgmerge", so it can be a program name with args.
 set dummy msgmerge; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4389: checking for $ac_word" >&5
+echo "configure:4158: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MSGMERGE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4428,7 +4197,7 @@ esac
 # Extract the first word of "msgfmt", so it can be a program name with args.
 set dummy msgfmt; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4432: checking for $ac_word" >&5
+echo "configure:4201: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MSGFMT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4490,14 +4259,14 @@ esac
 
     if test -x "$WX_CONFIG_NAME" ; then
      echo $ac_n "checking for wx-config""... $ac_c" 1>&6
-echo "configure:4494: checking for wx-config" >&5
+echo "configure:4263: checking for wx-config" >&5
      WX_CONFIG_PATH="$WX_CONFIG_NAME"
      echo "$ac_t""$WX_CONFIG_PATH" 1>&6
   else
      # Extract the first word of "$WX_CONFIG_NAME", so it can be a program name with args.
 set dummy $WX_CONFIG_NAME; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4501: checking for $ac_word" >&5
+echo "configure:4270: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_WX_CONFIG_PATH'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4538,10 +4307,10 @@ fi
     min_wx_version=2.5.2
     if test -z "" ; then
       echo $ac_n "checking for wxWindows version >= $min_wx_version""... $ac_c" 1>&6
-echo "configure:4542: checking for wxWindows version >= $min_wx_version" >&5
+echo "configure:4311: checking for wxWindows version >= $min_wx_version" >&5
     else
       echo $ac_n "checking for wxWindows version >= $min_wx_version ()""... $ac_c" 1>&6
-echo "configure:4545: checking for wxWindows version >= $min_wx_version ()" >&5
+echo "configure:4314: checking for wxWindows version >= $min_wx_version ()" >&5
     fi
 
     WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args  "
@@ -4586,7 +4355,7 @@ echo "configure:4545: checking for wxWindows version >= $min_wx_version ()" >&5
       WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs`
 
                               echo $ac_n "checking for wxWindows static library""... $ac_c" 1>&6
-echo "configure:4590: checking for wxWindows static library" >&5
+echo "configure:4359: checking for wxWindows static library" >&5
       WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs 2>/dev/null`
       if test "x$WX_LIBS_STATIC" = "x"; then
         echo "$ac_t""no" 1>&6
@@ -4692,7 +4461,7 @@ if test "$USE_MAC" = 1; then
     # Extract the first word of "SetFile", so it can be a program name with args.
 set dummy SetFile; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4696: checking for $ac_word" >&5
+echo "configure:4465: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_SETFILE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4738,7 +4507,7 @@ fi
 
 case "$USE_THREADS" in 1)
 	echo $ac_n "checking if wxWindows was compiled with threads""... $ac_c" 1>&6
-echo "configure:4742: checking if wxWindows was compiled with threads" >&5
+echo "configure:4511: checking if wxWindows was compiled with threads" >&5
 if eval "test \"`echo '$''{'m_cv_wx_threads'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4746,7 +4515,7 @@ else
   m_cv_wx_threads=x
 else
   cat > conftest.$ac_ext <<EOF
-#line 4750 "configure"
+#line 4519 "configure"
 #include "confdefs.h"
 #include "wx/setup.h"
 			int main(){
@@ -4757,7 +4526,7 @@ else
 			#endif
 			}
 EOF
-if { (eval echo configure:4761: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:4530: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   m_cv_wx_threads=yes
 else
@@ -4793,7 +4562,7 @@ esac
 case "$OSTYPE" in
    linux* | Linux*)
       echo $ac_n "checking for pam_end in -lpam""... $ac_c" 1>&6
-echo "configure:4797: checking for pam_end in -lpam" >&5
+echo "configure:4566: checking for pam_end in -lpam" >&5
 ac_lib_var=`echo pam'_'pam_end | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4801,7 +4570,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpam  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4805 "configure"
+#line 4574 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4812,7 +4581,7 @@ int main() {
 pam_end()
 ; return 0; }
 EOF
-if { (eval echo configure:4816: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4585: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4840,7 +4609,7 @@ case "$USE_MINGW" in
 0)
 case "$USE_CCOSTYPE" in
 ''|0|1)	echo $ac_n "checking for c-client library OS type""... $ac_c" 1>&6
-echo "configure:4844: checking for c-client library OS type" >&5
+echo "configure:4613: checking for c-client library OS type" >&5
 	case "$OSTYPE" in
 	linux* | Linux*)
 		;; 	Solaris* | solaris* | SunOS*)
@@ -4899,17 +4668,17 @@ case "$USE_PISOCK" in
 1)
     ac_safe=`echo "pi-source.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for pi-source.h""... $ac_c" 1>&6
-echo "configure:4903: checking for pi-source.h" >&5
+echo "configure:4672: checking for pi-source.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4908 "configure"
+#line 4677 "configure"
 #include "confdefs.h"
 #include <pi-source.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4913: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4682: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4926,7 +4695,7 @@ fi
 if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
   echo $ac_n "checking for main in -lpisock""... $ac_c" 1>&6
-echo "configure:4930: checking for main in -lpisock" >&5
+echo "configure:4699: checking for main in -lpisock" >&5
 ac_lib_var=`echo pisock'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4934,14 +4703,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4938 "configure"
+#line 4707 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4945: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4714: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4962,7 +4731,7 @@ EOF
 
 	MAKE_PISOCKLIB="PISOCK_LIB:=-lpisock"
 	echo $ac_n "checking for pi_setmaxspeed in -lpisock""... $ac_c" 1>&6
-echo "configure:4966: checking for pi_setmaxspeed in -lpisock" >&5
+echo "configure:4735: checking for pi_setmaxspeed in -lpisock" >&5
 ac_lib_var=`echo pisock'_'pi_setmaxspeed | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4970,7 +4739,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4974 "configure"
+#line 4743 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4981,7 +4750,7 @@ int main() {
 pi_setmaxspeed()
 ; return 0; }
 EOF
-if { (eval echo configure:4985: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4754: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5006,7 +4775,7 @@ echo "configure: warning: Your pisock library is old - some functionality will b
 fi
 
 	echo $ac_n "checking for pi_accept_to in -lpisock""... $ac_c" 1>&6
-echo "configure:5010: checking for pi_accept_to in -lpisock" >&5
+echo "configure:4779: checking for pi_accept_to in -lpisock" >&5
 ac_lib_var=`echo pisock'_'pi_accept_to | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5014,7 +4783,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5018 "configure"
+#line 4787 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -5025,7 +4794,7 @@ int main() {
 pi_accept_to()
 ; return 0; }
 EOF
-if { (eval echo configure:5029: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4798: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5071,7 +4840,7 @@ case "$MAKE_PISOCKLIB" in
 '') ;;
 *)
 	echo $ac_n "checking for libmal in lib""... $ac_c" 1>&6
-echo "configure:5075: checking for libmal in lib" >&5
+echo "configure:4844: checking for libmal in lib" >&5
 	if test ! -d $srcdir/lib/libmal 
 	then	echo "$ac_t""not found - no MAL synch for PalmOS" 1>&6
 	elif test -f $srcdir/lib/libmal/Makefile.in \
@@ -5090,17 +4859,17 @@ case "$USE_DSPAM" in
     1)
 				ac_safe=`echo "sqlite.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for sqlite.h""... $ac_c" 1>&6
-echo "configure:5094: checking for sqlite.h" >&5
+echo "configure:4863: checking for sqlite.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5099 "configure"
+#line 4868 "configure"
 #include "confdefs.h"
 #include <sqlite.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:5104: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4873: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -5117,7 +4886,7 @@ fi
 if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
   echo $ac_n "checking for main in -lsqlite""... $ac_c" 1>&6
-echo "configure:5121: checking for main in -lsqlite" >&5
+echo "configure:4890: checking for main in -lsqlite" >&5
 ac_lib_var=`echo sqlite'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5125,14 +4894,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsqlite  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5129 "configure"
+#line 4898 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:5136: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4905: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5200,7 +4969,7 @@ EOF
 	;;
 auto|Auto|AUTO|1)
 	echo $ac_n "checking how to link modules""... $ac_c" 1>&6
-echo "configure:5204: checking how to link modules" >&5
+echo "configure:4973: checking how to link modules" >&5
 		if test "$USE_MAC" = 0; then
 	    LDD="ldd"
 	else
@@ -5252,7 +5021,7 @@ MAKE_HAVE_DOCTOOLS='HAVE_DOCTOOLS=yes'
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5256: checking for $ac_word" >&5
+echo "configure:5025: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5287,7 +5056,7 @@ case "$PERL" in '') MAKE_HAVE_DOCTOOLS='' PERL='false "No perl available"';; esa
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5291: checking for $ac_word" >&5
+echo "configure:5060: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5322,7 +5091,7 @@ case "$LATEX" in '') MAKE_HAVE_DOCTOOLS='' LATEX='false "No latex available"';; 
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5326: checking for $ac_word" >&5
+echo "configure:5095: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5357,7 +5126,7 @@ case "$MAKEINDEX" in '') MAKE_HAVE_DOCTOOLS='' MAKEINDEX='false "No makeindex av
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5361: checking for $ac_word" >&5
+echo "configure:5130: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5392,7 +5161,7 @@ case "$DVIPS" in '') MAKE_HAVE_DOCTOOLS='' DVIPS='false "No dvips available"';; 
 # Extract the first word of "ps2pdf", so it can be a program name with args.
 set dummy ps2pdf; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5396: checking for $ac_word" >&5
+echo "configure:5165: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PSTOPDF'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5427,7 +5196,7 @@ case "$PSTOPDF" in '') MAKE_HAVE_DOCTOOLS='' PSTOPDF='false "No ps2pdf available
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5431: checking for $ac_word" >&5
+echo "configure:5200: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5522,7 +5291,7 @@ fi
 if test "x$DEPFLAGS" != "x"; then
             if test "x$GXX" != "xyes"; then
 	echo $ac_n "checking whether ${CXX} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5526: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
+echo "configure:5295: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_cxx_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5545,7 +5314,7 @@ echo "$ac_t""$m_cv_cxx_depflags" 1>&6
     if test "x$DEPFLAGS" != "x"; then
 	if test "x$GCC" != "xyes"; then
 	    echo $ac_n "checking whether ${CC} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5549: checking whether ${CC} accepts ${DEPFLAGS}" >&5
+echo "configure:5318: checking whether ${CC} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_c_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

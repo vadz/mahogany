@@ -757,77 +757,24 @@ dnl Check for Python headers first: we need this for both dynamic and static
 dnl linking
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-	M_CHECK_MYHEADER_VER(Python.h, 2.3,
-	[ \
-		$prefix/include/python2.3 \
-		/usr/include/python2.3 \
-		/usr/local/include/python2.3 \
-	],
-	[
-		PYTHON_VER=2.3
-	],
-	[
-		M_CHECK_MYHEADER_VER(Python.h, 2.2,
+	for ver in 2.4 2.3 2.2 2.1 2.0 1.5; do
+	    M_CHECK_MYHEADER_VER(
+		Python.h,
+		$ver,
 		[ \
-			$prefix/include/python2.2 \
-			/usr/include/python2.2 \
-			/usr/local/include/python2.2 \
+		    $prefix/include/python$ver \
+		    /usr/include/python$ver \
+		    /usr/local/include/python$ver \
 		],
 		[
-			PYTHON_VER=2.2
-		],
-		[
-			M_CHECK_MYHEADER_VER(Python.h, 2.1,
-			[ \
-				$prefix/include/python2.1 \
-				/usr/include/python2.1 \
-				/usr/local/include/python2.1 \
-			],
-			[
-				PYTHON_VER=2.1
-			],
-			[
-				M_CHECK_MYHEADER_VER(Python.h, 2.0,
-				[ \
-					$prefix/include/python2.0 \
-					/usr/include/python2.0 \
-					/usr/local/include/python2.0 \
-				],
-				[
-					PYTHON_VER=2.0
-				],
-				[
-					M_CHECK_MYHEADER_VER(Python.h, 1.5,
-					[ \
-						$prefix/include/python1.5 \
-						/usr/include/python1.5 \
-						/usr/local/include/python1.5 \
-					],
-					[
-						PYTHON_VER=1.5
-					],
-					[
-						USE_PYTHON=0
-					],
-					[ (for Python 1.5)],
-					15,
-					)
-				],
-				[ (for Python 2.0)],
-				20,
-				)
-			],
-			[ (for Python 2.1)],
-			21,
- 			)
-		],
-		[ (for Python 2.2)],
-		22,
- 		)
-	],
-	[ (for Python 2.3)],
-	23,
-	)
+		    PYTHON_VER=$ver
+		    break
+		]
+	    )
+	done
+	if test "x$PYTHON_VER" = "x"; then
+	    USE_PYTHON=0
+	fi
 	;;
 
 none|0)
