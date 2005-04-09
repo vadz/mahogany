@@ -476,7 +476,14 @@ public:
    {
       AddAll(msg == NULL ? Context_Exception : Context_Current);
 
-      // TODO: include msg in report if not NUL
+      if ( msg )
+      {
+         // include message which resulted in program termination
+         AddText(_T("error.txt"), msg, _("Last error message"));
+      }
+
+      // TODO: include config? this is tricky as it contains sensitive
+      //       information such as passwords so we'd have to filter it out
    }
 
 protected:
@@ -489,16 +496,30 @@ protected:
 
       if ( profile )
       {
-         // create a mail message and send it
-         SendMessage_obj sm(SendMessage::Create(profile, Prot_SMTP));
-         sm->SetSubject(_T("Mahogany crash report"));
-         sm->SetAddresses(_T("mahogany@users.sourceforge.net"));
-
          wxFile file(GetCompressedFileName());
          if ( !file.IsOpened() )
             return false;
 
          const wxFileOffset len = file.Length();
+         if ( !MDialog_YesNoDialog
+               (
+                  wxString::Format
+                  (
+                     _("Would you like to send the crash report to "
+                       "Mahogany dev team? The report size is %lukB.\n"
+                       "\n"
+                       "If you answer \"No\" here you will still be able "
+                       "to send the report manually later."),
+                     len / 1024
+                  )
+               ) )
+            return false;
+
+         // create a mail message and send it
+         SendMessage_obj sm(SendMessage::Create(profile, Prot_SMTP));
+         sm->SetSubject(_T("Mahogany crash report"));
+         sm->SetAddresses(_T("mahogany@users.sourceforge.net"));
+
          wxCharBuffer buf(len);
          if ( !file.Read(buf.data(), len) )
             return false;
@@ -705,15 +726,15 @@ wxMApp::OnAbnormalTermination(const char *msgOrig)
       }
       else // failed to send debug report
       {
-         msg += _("Debug report couldn't be sent.");
-
          const wxString& fname = report.GetCompressedFileName();
          if ( wxFile::Exists(fname) )
-            msg << _("Debug report couldn't be sent but was generated in "
+            msg << _("Debug report wasn't sent but was generated in "
                      "the file\n")
-                << _T("          ") << fname << _T("\n\n")
+                << fname << _T("\n\n")
                 << _("Please attach this file to the the bug if you open\n"
-                     "one in Mahogany bug tracker, thank you in advance.");
+                     "one in Mahogany bug tracker.\n"
+                     "\n"
+                     "Thank you in advance!");
          else
             msg += _("Debug report couldn't be generated.");
       }
