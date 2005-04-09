@@ -465,8 +465,8 @@ wxIconManager::SetSubDirectory(wxString subDir)
       {
          m_SubDir = DIR_SEPARATOR + subDir;
 
-         if ( !wxPathExists(m_GlobalDir + m_SubDir) &&
-               !wxPathExists(m_LocalDir + m_SubDir) )
+         if ( !wxDirExists(m_GlobalDir + m_SubDir) &&
+               !wxDirExists(m_LocalDir + m_SubDir) )
          {
             // save ourselves some time when searching - we don't risk to find
             // anything in non-existent directories anyhow
