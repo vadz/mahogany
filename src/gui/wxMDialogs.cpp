@@ -793,6 +793,9 @@ MDialog_YesNoDialog(const wxChar *message,
          // _not_ closing the splash unless the message box is really shown
          return storedValue == wxYES;
       }
+
+      if ( pathLocal.empty() )
+         pathLocal = pathGlobal;
    }
 
    NoBusyCursor noBC;
