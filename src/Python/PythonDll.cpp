@@ -78,6 +78,7 @@ extern "C"
    void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *) = NULL;
    //void(*M_PyErr_SetNone)(PyObject *) = NULL;
    void(*M_PyErr_SetString)(PyObject *, const char *) = NULL;
+   PyObject *(*M_PyErr_Format)(PyObject *, const char *, ...) = NULL;
 
    // objects
    //PyObject*(*M__PyObject_New)(PyTypeObject *, PyObject *) = NULL;
@@ -91,13 +92,16 @@ extern "C"
    int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *) = NULL;
    int (*M_PyObject_Size)(PyObject *) = NULL;
 
-   // ints
+   // ints and longs
    long(*M_PyInt_AsLong)(PyObject *) = NULL;
    PyObject*(*M_PyInt_FromLong)(long) = NULL;
+   long (*M_PyLong_AsLong)(PyObject *) = NULL;
+   unsigned long (*M_PyLong_AsUnsignedLong)(PyObject *) = NULL;
+   PyObject*(*M_PyLong_FromUnsignedLong)(unsigned long) = NULL;
    PyTypeObject *M_PyInt_Type = NULL;
-
-   // longs
    PyTypeObject *M_PyLong_Type = NULL;
+   PyIntObject *M__Py_TrueStruct = NULL;
+   PyIntObject *M__Py_ZeroStruct = NULL;
 
    // strings
    char*(*M_PyString_AsString)(PyObject *) = NULL;
@@ -186,6 +190,7 @@ static struct PythonFunc
    PYTHON_FUNC(PyErr_Occurred)
    PYTHON_FUNC(PyErr_Restore)
    PYTHON_FUNC(PyErr_SetString)
+   PYTHON_FUNC(PyErr_Format)
 
    // objects
    PYTHON_FUNC(PyObject_CallFunction)
@@ -197,13 +202,16 @@ static struct PythonFunc
    PYTHON_FUNC(PyObject_SetAttrString)
    PYTHON_FUNC(PyObject_Size)
 
-   // ints
+   // ints and longs
    PYTHON_FUNC(PyInt_AsLong)
    PYTHON_FUNC(PyInt_FromLong)
+   PYTHON_FUNC(PyLong_FromUnsignedLong)
+   PYTHON_FUNC(PyLong_AsLong)
+   PYTHON_FUNC(PyLong_AsUnsignedLong)
    PYTHON_FUNC(PyInt_Type)
-
-   // longs
    PYTHON_FUNC(PyLong_Type)
+   PYTHON_FUNC(_Py_TrueStruct)
+   PYTHON_FUNC(_Py_ZeroStruct)
 
    // strings
    PYTHON_FUNC(PyString_AsString)

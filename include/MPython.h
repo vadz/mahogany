@@ -73,6 +73,7 @@ extern "C"
    extern void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *);
    //extern void (*M_PyErr_SetNone)(PyObject *);
    extern void (*M_PyErr_SetString)(PyObject *, const char *);
+   extern PyObject *(*M_PyErr_Format)(PyObject *, const char *, ...);
 
    // objects
    //extern PyObject *(*M__PyObject_New)(PyTypeObject *, PyObject *);
@@ -86,13 +87,16 @@ extern "C"
    extern int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *);
    extern int (*M_PyObject_Size)(PyObject *);
 
-   // ints
+   // ints and longs
    extern long(*M_PyInt_AsLong)(PyObject *);
    extern PyObject*(*M_PyInt_FromLong)(long);
+   extern PyObject *(*M_PyLong_FromUnsignedLong)(unsigned long);
+   extern long (*M_PyLong_AsLong)(PyObject *);
+   extern unsigned long (*M_PyLong_AsUnsignedLong)(PyObject *);
    extern PyTypeObject *M_PyInt_Type;
-
-   // longs
    extern PyTypeObject *M_PyLong_Type;
+   extern PyIntObject *M__Py_TrueStruct;
+   extern PyIntObject *M__Py_ZeroStruct;
 
    // strings
    extern char *(*M_PyString_AsString)(PyObject *);
@@ -160,6 +164,7 @@ extern "C"
 #define PyErr_Occurred M_PyErr_Occurred
 #define PyErr_Restore M_PyErr_Restore
 #define PyErr_SetString M_PyErr_SetString
+#define PyErr_Format M_PyErr_Format
 
 // objects
 #define PyObject_CallFunction M_PyObject_CallFunction
@@ -176,13 +181,16 @@ extern "C"
 #define PyObject_SetAttrString M_PyObject_SetAttrString
 #define PyObject_Size M_PyObject_Size
 
-// ints
+// ints and longs
 #define PyInt_AsLong M_PyInt_AsLong
 #define PyInt_FromLong M_PyInt_FromLong
+#define PyLong_FromUnsignedLong M_PyLong_FromUnsignedLong
+#define PyLong_AsLong M_PyLong_AsLong
+#define PyLong_AsUnsignedLong M_PyLong_AsUnsignedLong
 #define PyInt_Type (*M_PyInt_Type)
-
-// longs
 #define PyLong_Type (*M_PyLong_Type)
+#define _Py_TrueStruct (*M__Py_TrueStruct)
+#define _Py_ZeroStruct (*M__Py_ZeroStruct)
 
 // strings
 #define PyString_AsString M_PyString_AsString
