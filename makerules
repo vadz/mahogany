@@ -100,11 +100,12 @@ vpath %.y .src
 	@rm -f $*.c
 else
 vpath %.c-yacc .src
-%.o: %.c-yacc
-	@mv $< $*.c
+%.c: %.c-yacc
+	@cp $< $@
+
+%.o: %.c
 	$(CC) -o $@ $(M_COMPILE_CC) $*.c
 	@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.c,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
-	@rm -f $*.c
 endif
 
 # this syntax is for exuberant ctags
