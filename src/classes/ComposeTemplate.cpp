@@ -546,7 +546,7 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
          // take the first letter of each word (include single quote in
          // delimiters so that names like "Foo O'Bar" and "Baz d'ABC" are
          // handled correctly)
-         wxStringTokenizer tk(name, " '-");
+         wxStringTokenizer tk(name, _T(" '-"));
          while ( tk.HasMoreTokens() )
          {
             unsigned char chInitial = tk.GetNextToken()[0u];
