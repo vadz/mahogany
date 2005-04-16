@@ -161,7 +161,7 @@ InitPython(void)
 
    if ( !startScript.empty() )
    {
-      PyObject *moduleInit = PyImport_ImportModule(startScript);
+      PyObject *moduleInit = PyImport_ImportModule((char *)startScript.mb_str());
 
       if ( !CheckPyError() || !moduleInit )
       {
