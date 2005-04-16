@@ -24,7 +24,7 @@
 #  include <wx/dynarray.h>        // for WX_DEFINE_ARRAY_INT
 #endif // USE_PCH
 
-WX_DEFINE_ARRAY_INT(UIdType, UIdArray);
+WX_DEFINE_ARRAY_LONG(UIdType, UIdArray);
 
 #ifndef MsgnoArray
    #define MsgnoArray UIdArray
