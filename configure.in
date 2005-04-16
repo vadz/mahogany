@@ -765,6 +765,7 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
 		    $prefix/include/python$ver \
 		    /usr/include/python$ver \
 		    /usr/local/include/python$ver \
+		    /System/Library/Frameworks/Python.framework/Versions/$ver/include/python$ver \
 		],
 		[
 		    PYTHON_VER=$ver
