@@ -4856,6 +4856,12 @@ MailFolderCC::CClientInit(void)
    mail_parameters(NULL, SET_READPROGRESS, (void *)mahogany_read_progress);
 #endif // USE_READ_PROGRESS
 
+   // disable time zone text in the "Date" field, it's unnecessary and some
+   // (arguably broken, as this text is RFC 2822 conformant) mail servers
+   // reject messages with it erroneously considering that they are used to
+   // attack Exchange server (!)
+   mail_parameters(NULL, SET_DISABLE822TZTEXT, (void *)1);
+
 #if defined(OS_UNIX) && !defined(__CYGWIN__)
    // install our own sigpipe handler to ignore (and not die) if a SIGPIPE
    // happens
