@@ -148,9 +148,9 @@ following:
     make install_doc     # this should install the documentation and
                          # online help
 
-Mac OS X users only: you may do "make M_bundle" in build_dir/src
-directory to create a Mac OS application Mahogany.app. You may also
-do "make dmg" to create a disk image containing Mahogany.app.
+Mac OS X users only: after a successful make, you may do "make M_bundle"
+in build_dir/src directory to create a Mac OS application Mahogany.app.
+You may also do "make dmg" to create a disk image containing Mahogany.app.
 
 
 
