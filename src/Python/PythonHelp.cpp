@@ -6,7 +6,7 @@
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (c) 1997-2004 Mahogany Team
+// Copyright:   (c) 1997-2005 Mahogany Team
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
