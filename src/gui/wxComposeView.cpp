@@ -1958,7 +1958,10 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // set def values for all headers
    SetDefaultFrom();
 
-   AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
+   // don't add default "To:" header if this is a reply, this usually just
+   // results in address duplication
+   if ( m_kind != Message_Reply )
+      AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
    AddCc(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
    AddBcc(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
 
