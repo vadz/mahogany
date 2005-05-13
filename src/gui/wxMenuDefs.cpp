@@ -230,7 +230,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // available accels: BFGHJKLOQVWZ
    { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &new message\tCtrl-N"),  gettext_noop("Start a new message")      , wxITEM_NORMAL },
    { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
-                           gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , wxITEM_NORMAL },
+                           gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message after choosing a template for it")      , wxITEM_NORMAL },
    { WXMENU_FILE_POST,     gettext_noop("Post news &article"),   gettext_noop("Write a news article and post it")      , wxITEM_NORMAL },
    { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tShift-Ctrl-C"), gettext_noop("Check all incoming folders for new mail and download it now") , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
