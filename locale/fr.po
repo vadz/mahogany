@@ -6214,7 +6214,7 @@ msgid "Failed to create the search results folder"
 msgstr "Répertoire '%s' sélectionné."
 
 #: gui/wxMainFrame.cpp:572
-msgid "Copyright (C) 1997-2004 The Mahogany Developers Team"
+msgid "Copyright (C) 1997-2005 The Mahogany Developers Team"
 msgstr ""
 
 #: gui/wxMainFrame.cpp:575

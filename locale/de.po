@@ -4796,8 +4796,8 @@ msgid "Failed to create the search results folder"
 msgstr "Ordner für die Suchergebnisse konnte nicht angelegt werden."
 
 #: gui/wxMainFrame.cpp:572
-msgid "Copyright (C) 1997-2004 The Mahogany Developers Team"
-msgstr "Copyright (C) 1997-2004 Das Mahogany Entwickler Team"
+msgid "Copyright (C) 1997-2005 The Mahogany Developers Team"
+msgstr "Copyright (C) 1997-2005 Das Mahogany Entwickler Team"
 
 #: gui/wxMainFrame.cpp:575
 msgid " (Debug build)"
