@@ -35,7 +35,7 @@
 \vfill{}
 
 
-\author{Copyright 1997-2004 by The Mahogany Development Team\\
+\author{Copyright 1997-2005 by The Mahogany Development Team\\
 \vspace{1cm}
 \mailtolink{mahogany-developers@lists.sourceforge.net} \\
 \vspace{1cm}
@@ -3043,7 +3043,7 @@ Python, can be found in the \htmladdnormallinkfoot{doc/classes directory}{../cla
 
 Starting with release 0.5, \emph{Mahogany} allows the use of plugins
 (modules). This allows for an easy and comfortable way to enlarge
-\emph{Mahogany}´s functionality. These modules can be loaded at runtime
+\emph{Mahogany}'s functionality. These modules can be loaded at runtime
 and do not need to be part of the main executable.
 
 
@@ -3169,11 +3169,11 @@ When 3Com released its first PalmPilots several years ago, many people
 did not believe in a success. But they were proven wrong, the Palm
 Pilot (or short: Palm) is today the most used handheld organizer.
 
-For all the people possessing one of those´s little helpers, the PalmOS
-Module allows (or will allow) for an easy integration of the Palm´s
+For all the people possessing one of those little helpers, the PalmOS
+Module allows (or will allow) for an easy integration of the Palm's
 data in Mahogany. In future releases there will be full support for
 addressbook synching, schedules etc. Currently you can only view the
-Palm´s addressbook (see above) and use \emph{Mahogany} as your Palm
+Palm's addressbook (see above) and use \emph{Mahogany} as your Palm
 desktop software.
 
 
@@ -3185,7 +3185,7 @@ the desktop into \emph{Mahogany}. Therefore \emph{Mahogany} does allow
 to
 
 \begin{itemize}
-\item create backups of the Palm´s databases using the {}``Backup{}''
+\item create backups of the Palm's databases using the {}``Backup{}''
 function
 \item restore the previously backup-ed databases using the {}``Restore{}''
 function
@@ -3206,14 +3206,14 @@ dialog to get see how you can customize your PalmOS-Module.
 \subsubsection{The configuration dialog\_10011\_}
 
 You can configure the PalmOS module via the Plugin menu in a lot of
-ways. Let´s go through every single item in the configuration dialog
+ways. Let's go through every single item in the configuration dialog
 which you can access using the Plugin-Menu:
 
 \begin{description}
 \item [Synchronise~Mail]When you have this enabled, you can specify a mailbox
 which will be used as place of exchange for mails. Mails in this folder
 will be transfered to the Palm at the next hotsync and the outbox
-of the Palm´s mail program will be send. This mailbox is also used
+of the Palm's mail program will be send. This mailbox is also used
 as a configuration setting for messages sent. \emph{Mahogany} will
 use the properties of this mailbox when sending the messages retrieved
 from the Palm's Outbox. If you have enabled the {}``advanced user{}''
@@ -3236,7 +3236,7 @@ retrieved from the PalmPilot and sent. You have three options:
 \item [Always~do~Backup]Setting this checkbox to true will make a backup
 take place every time you {}``Synchronize{}''.
 \item [Directory~for~backup~files]This field does contain a valid directory
-path where the PalmOS-Module will store the backup of your Palm´s
+path where the PalmOS-Module will store the backup of your Palm's
 databases.
 \item [Delete~no~longer~existing~backups]This checkbox determines whether
 you want files to be deleted on the PC that are residing in the backup
@@ -3252,9 +3252,9 @@ from the Palm.
 \item [Backup~all~databases]Enabling this checkbox will make the PalmOS-Module
 ignore the backup flags of the databases. By default the PalmOS-Module
 does only backup files with a set backup flag. Use this option if
-you want all files to be backup´ed.
+you want all files to be backup'ed.
 \item [Exclude~these~databases]Here you can specify a comma separated
-list of databases (without spaces!) that should not be backup´ed.
+list of databases (without spaces!) that should not be backup'ed.
 \item [Do~auto-install]Using this feature enables the auto-install feature
 and everytime you {}``Synchronize{}'' the module will check the
 auto-install directory for Palm databases. If databases are found
@@ -3283,7 +3283,7 @@ on what you have enabled in the configuration dialog (see above),
 different actions will be taken (backup, mail exchange, ...).
 
 If you only want to update your backup or to install a file or to
-restore your Palm´s contents, you can access these functions individually
+restore your Palm's contents, you can access these functions individually
 by using the corresponding menu points in the plugin menu.
 
 

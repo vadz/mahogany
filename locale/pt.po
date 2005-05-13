@@ -6398,7 +6398,7 @@ msgstr "Compor com modelo...\tShift-Ctrl-N"
 
 #: gui/wxMenuDefs.cpp:233
 #, fuzzy
-msgid "Compose a new message using after choosing a temple for it"
+msgid "Compose a new message after choosing a template for it"
 msgstr "Compor uma mensagem nova utilizando ?????????"
 
 #: gui/wxMenuDefs.cpp:234

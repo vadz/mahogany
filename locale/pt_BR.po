@@ -6488,7 +6488,7 @@ msgid "Compose with &template...\tShift-Ctrl-N"
 msgstr "Configurar &modelos..."
 
 #: gui/wxMenuDefs.cpp:233
-msgid "Compose a new message using after choosing a temple for it"
+msgid "Compose a new message after choosing a template for it"
 msgstr ""
 
 #: gui/wxMenuDefs.cpp:234

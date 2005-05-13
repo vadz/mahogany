@@ -5866,8 +5866,8 @@ msgid "Compose with &template...\tShift-Ctrl-N"
 msgstr "Mit &Vorlage schreiben...\tShift-Ctrl-N"
 
 #: gui/wxMenuDefs.cpp:233
-msgid "Compose a new message using after choosing a temple for it"
-msgstr "Nachricht unter Verwendung einer Vorlage schreiben."
+msgid "Compose a new message after choosing a template for it"
+msgstr "Nachricht unter Verwendung einer Vorlage schreiben"
 
 #: gui/wxMenuDefs.cpp:234
 msgid "Post news &article"

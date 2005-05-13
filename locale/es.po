@@ -7132,7 +7132,7 @@ msgid "Compose with &template...\tShift-Ctrl-N"
 msgstr "Componer con Plan&tilla...\tShift-Ctrl-N"
 
 #: gui/wxMenuDefs.cpp:233
-msgid "Compose a new message using after choosing a temple for it"
+msgid "Compose a new message after choosing a template for it"
 msgstr "Crea un mensaje nuevo usando una plantilla"
 
 # wxMenuDefs.cpp:207

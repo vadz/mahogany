@@ -7365,7 +7365,7 @@ msgstr "Scrivi come da &modello...\tShift-Ctrl-N"
 
 # wxMenuDefs.cpp:211
 #: gui/wxMenuDefs.cpp:233
-msgid "Compose a new message using after choosing a temple for it"
+msgid "Compose a new message after choosing a template for it"
 msgstr "Scrivi un nuovo messaggio usando un modello dopo averlo scelto"
 
 # wxMenuDefs.cpp:212
