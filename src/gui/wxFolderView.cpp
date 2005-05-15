@@ -2763,10 +2763,13 @@ void wxFolderListCtrl::UpdateThreadIndicator()
 {
    Profile_obj profile(m_FolderView->GetFolderProfile());
 
-   SetColumnImage(m_columns[WXFLC_STATUS],
-                  READ_CONFIG(profile, MP_MSGS_USE_THREADING)
-                     ? ListCtrlImage_Thread
-                     : ListCtrlImage_None);
+   if ( m_columns[WXFLC_STATUS] != -1 )
+   {
+      SetColumnImage(m_columns[WXFLC_STATUS],
+                     READ_CONFIG(profile, MP_MSGS_USE_THREADING)
+                        ? ListCtrlImage_Thread
+                        : ListCtrlImage_None);
+   }
 }
 
 // ----------------------------------------------------------------------------
