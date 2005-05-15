@@ -517,15 +517,27 @@ protected:
 
          // create a mail message and send it
          SendMessage_obj sm(SendMessage::Create(profile, Prot_SMTP));
-         sm->SetSubject(_T("Mahogany crash report"));
+         sm->SetSubject(wxString::Format(_T("Mahogany %s crash report"),
+                        M_VERSION));
          sm->SetAddresses(_T("mahogany@users.sourceforge.net"));
 
          wxCharBuffer buf(len);
          if ( !file.Read(buf.data(), len) )
             return false;
 
+         MimeParameterList paramsDisp;
+         paramsDisp.push_back(new MimeParameter
+                                  (
+                                    _T("FILENAME"),
+                                    wxString::Format
+                                    (
+                                       _T("M-%s-debugrpt.zip"),
+                                       M_VERSION
+                                    )
+                                  ));
          sm->AddPart(MimeType::APPLICATION, buf, len,
-                     _T("OCTET-STREAM"), _T("ATTACHMENT"));
+                     _T("OCTET-STREAM"), _T("ATTACHMENT"),
+                     &paramsDisp);
          if ( sm->SendOrQueue(SendMessage::NeverQueue | SendMessage::Silent) )
          {
             // sent successfully
