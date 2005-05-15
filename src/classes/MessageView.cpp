@@ -471,7 +471,7 @@ MessageView::AllProfileValues::AllProfileValues()
    inlineGFX = -1;
    showExtImages = false;
 
-   autocollect = false;
+   autocollect = M_ACTION_NEVER;
 }
 
 bool
@@ -636,68 +636,92 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
    m_viewer = viewer;
 }
 
-void
-MessageView::CreateViewer(wxWindow *parent)
+/**
+   Load the viewer by name.
+
+   If the viewer with this name can't be loaded and another viewer is
+   available, return its name in nameAlt parameter if it's not NULL: this
+   allows to use a fallback viewer to show at least something if the configured
+   viewer is not available.
+
+   @param name of the viewer to load
+   @param nameAlt output parameter for the available viewer name if the given
+                  one couldn't be loaded
+   @return the viewer (to be DecRef()'d by caller) or NULL
+ */
+static MessageViewer *LoadViewer(const String& name, String *nameAlt = NULL)
 {
    MessageViewer *viewer = NULL;
 
-   MModuleListing *listing =
-      MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
+   MModuleListing *
+      listing = MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
 
-   if ( !listing || !listing->Count() )
+   const size_t countViewers = listing ? listing->Count() : 0;
+   if ( !countViewers )
    {
       wxLogError(_("No message viewer plugins found. It will be "
                    "impossible to view any messages.\n"
                    "\n"
                    "Please check that Mahogany plugins are available."));
-
-      if ( listing )
-          listing->DecRef();
    }
-   else // have at least one viewer, load it
+   else // got listing of viewer factories
    {
-      String name = m_ProfileValues.msgViewer;
-      if ( name.empty() )
-         name = GetStringDefault(MP_MSGVIEW_VIEWER);
-
       MModule *viewerFactory = MModule::LoadModule(name);
-      if ( !viewerFactory ) // failed to load the configured viewer
+
+      // failed to load the configured viewer
+      if ( !viewerFactory )
       {
-         // try any other
-         String nameFirst = (*listing)[0].GetName();
-
-         if ( name != nameFirst )
+         // try to find alternative
+         if ( nameAlt )
          {
-            wxLogWarning(_("Failed to load the configured message viewer '%s'.\n"
-                           "\n"
-                           "Reverting to the default message viewer."),
-                         name.c_str());
-
-            viewerFactory = MModule::LoadModule(nameFirst);
-
-            if ( viewerFactory )
+            for ( size_t n = 0; n < countViewers; n++ )
             {
-               // remember this one as our real viewer or the code reacting to
-               // the options change would break down
-               m_ProfileValues.msgViewer = nameFirst;
+               String nameViewer = (*listing)[n].GetName();
+               if ( nameViewer != name )
+               {
+                  *nameAlt = nameViewer;
+                  break;
+               }
             }
          }
-
-         if ( !viewerFactory )
-         {
-            wxLogError(_("Failed to load the default message viewer '%s'.\n"
-                         "\n"
-                         "Message preview will not work!"), nameFirst.c_str());
-         }
       }
-
-      if ( viewerFactory )
+      else // loaded ok
       {
          viewer = ((MessageViewerFactory *)viewerFactory)->Create();
          viewerFactory->DecRef();
       }
+   }
 
+   if ( listing )
       listing->DecRef();
+
+   return viewer;
+}
+
+void
+MessageView::CreateViewer(wxWindow *parent)
+{
+   String name = m_ProfileValues.msgViewer;
+   if ( name.empty() )
+      name = GetStringDefault(MP_MSGVIEW_VIEWER);
+
+   String nameAlt;
+   MessageViewer *viewer = LoadViewer(name, &nameAlt);
+   if ( !viewer )
+   {
+      wxLogWarning(_("Failed to load the configured message viewer '%s'.\n"
+                     "\n"
+                     "Reverting to the available message viewer '%s'."),
+                   name.c_str(), nameAlt.c_str());
+
+      viewer = LoadViewer(nameAlt);
+   }
+
+   if ( !viewer )
+   {
+      wxLogError(_("Failed to load any message viewer.\n"
+                   "\n"
+                   "Message preview will not work!"));
    }
 
    SetViewer(viewer, parent);
@@ -1130,7 +1154,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
       settings->showExtImages = READ_CONFIG_BOOL(profile, MP_INLINE_GFX_EXTERNAL);
    }
 
-   settings->autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
+   settings->autocollect = (MAction)(long)READ_CONFIG(profile, MP_AUTOCOLLECT);
    settings->autocollectSenderOnly =  READ_CONFIG(profile, MP_AUTOCOLLECT_SENDER);
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG_TEXT(profile, MP_AUTOCOLLECT_ADB);
@@ -2295,6 +2319,92 @@ MessageView::AddVirtualMimePart(MimePart *mimepart)
    m_virtualMimeParts->push_back(mimepart);
 }
 
+// ----------------------------------------------------------------------------
+// finding the best viewer for the current message
+// ----------------------------------------------------------------------------
+
+#if 0
+String
+MessageView::FindViewerForNestedPart(const MimePart *mimepart)
+{
+   const MimePart *partChild = mimepart->GetNested();
+   while ( partChild )
+   {
+      ProcessPart(partChild);
+
+      partChild = partChild->GetNext();
+   }
+}
+
+String
+MessageView::FindViewerForMultiPart(const MimePart *mimepart,
+                                    const String& subtype)
+{
+   String name;
+
+   if ( subtype == _T("ALTERNATIVE") )
+   {
+      ProcessAlternativeMultiPart(mimepart);
+   }
+   else // process all unknown as MIXED (according to the RFC 2047)
+   {
+      ProcessAllNestedParts(mimepart);
+   }
+
+   return name;
+}
+
+String
+MessageView::FindViewerForPart(const MimePart *mimepart)
+{
+   CHECK_RET( mimepart, _T("NULL mimepart") );
+
+   String name;
+
+   const MimeType type = mimepart->GetType();
+   switch ( type.GetPrimary() )
+   {
+      case MimeType::MULTIPART:
+         name = FindViewerForMultiPart(mimepart, type.GetSubType());
+         break;
+
+      case MimeType::MESSAGE:
+         if ( m_ProfileValues.inlineRFC822 )
+         {
+            name = FindViewerForNestedPart(mimepart);
+            break;
+         }
+         //else: fall through and show it as attachment
+
+      case MimeType::TEXT:
+      case MimeType::APPLICATION:
+      case MimeType::AUDIO:
+      case MimeType::IMAGE:
+      case MimeType::VIDEO:
+      case MimeType::MODEL:
+      case MimeType::OTHER:
+      case MimeType::CUSTOM1:
+      case MimeType::CUSTOM2:
+      case MimeType::CUSTOM3:
+      case MimeType::CUSTOM4:
+      case MimeType::CUSTOM5:
+      case MimeType::CUSTOM6:
+         // a simple part, check 
+         ShowPart(mimepart);
+         break;
+
+      default:
+         FAIL_MSG( _T("unknown MIME type") );
+   }
+
+   return name;
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// showing a new message
+// ----------------------------------------------------------------------------
+
 void
 MessageView::Update()
 {
@@ -3202,7 +3312,7 @@ MessageView::DoShowMessage(Message *mailMessage)
       //else: read only folder
 
       // autocollect the addresses from it if configured
-      if ( m_ProfileValues.autocollect )
+      if ( m_ProfileValues.autocollect != M_ACTION_NEVER )
       {
          AutoCollectAddresses(m_mailMessage,
                               m_ProfileValues.autocollect,

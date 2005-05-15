@@ -29,7 +29,7 @@ class Profile;
         the profile and so this would create a compatibility problem
  */
 //@{
-enum
+enum MAction
 {
    /// never do this action
    M_ACTION_NEVER,

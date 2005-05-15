@@ -386,7 +386,7 @@ protected:
       //@{
 
       /// Autocollect email addresses?
-      int autocollect;
+      MAction autocollect;
 
       /// Autocollect only email sender's address?
       int autocollectSenderOnly;

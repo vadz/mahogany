@@ -11,12 +11,14 @@
 // Licence:     M licence
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "Mdefaults.h"     // for MAction enum
+
 class Message;
 
 /** Automatically collect all interesting addresses from this message
 
     @param message the message to collect addresses from
-    @param autocollectFlag the 0,1,2 value whether to do auto collection or not
+    @param autocollectFlag M_ACTION_NEVER, M_ACTION_ALWAYS or M_ACTION_PROMPT
     @param senderOnly if true, only collect sender's address
     @param collectNamed if true, only collect addresses with a name
     @param bookName the address book name for auto collection
@@ -24,7 +26,7 @@ class Message;
     @param frame optional pointer to a frame for displaying status messages
 */
 extern void AutoCollectAddresses(const Message *message,
-                                 int autocollectFlag,
+                                 MAction autocollectFlag,
                                  bool senderOnly,
                                  bool collectNamed,
                                  const String& bookName,
@@ -35,7 +37,7 @@ extern void AutoCollectAddresses(const Message *message,
     of the given addressbook.
     @param email email address string
     @param name  User name or empty
-    @param autocollectFlag the 0,1,2 value whether to do auto collection or not
+    @param autocollectFlag M_ACTION_NEVER, M_ACTION_ALWAYS or M_ACTION_PROMPT
     @param collectNamed if true, only collect addresses with a name
     @param bookName the address book name for auto collection
     @param groupName the subgroup name in bookName where to put new entries
@@ -43,7 +45,7 @@ extern void AutoCollectAddresses(const Message *message,
 */
 extern void AutoCollectAddress(const String& email,
                                const String& name,
-                               int autocollectFlag,
+                               MAction autocollectFlag,
                                bool collectNamed,
                                const String& bookName,
                                const String& groupName,

@@ -55,7 +55,7 @@ DECLARE_AUTOPTR(AdbBook);
 // ============================================================================
 
 void AutoCollectAddresses(const Message *message,
-                          int autocollectFlag,
+                          MAction autocollectFlag,
                           bool senderOnly,
                           bool collectNamed,
                           const String& bookName,
@@ -109,7 +109,7 @@ void AutoCollectAddresses(const Message *message,
 
 void AutoCollectAddress(const String& email,
                         const String& nameOrig,
-                        int autocollectFlag,
+                        MAction autocollectFlag,
                         bool collectNamed,
                         const String& bookName,
                         const String& groupName,
