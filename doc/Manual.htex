@@ -2469,6 +2469,9 @@ For example, the default for this option is {}``autocollect.adb{}''
 and so the default autocollect book will be created in \noun{}\\
 \noun{\$HOME/.M/autocollect.adb} \noun{}\\
 under Unix.
+\item \textbf{Collect addresses in outgoing mail}\\
+If autocollection is activated above and this option is checked, the addresses
+in the outgoing mail will be automatically collected as well.
 \item \textbf{Ignore addresses without names}\\
 You may with to autocollect only addresses which have a full name
 - in this case you should check this option. If it is off and the

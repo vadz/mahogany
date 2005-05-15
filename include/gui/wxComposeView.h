@@ -155,7 +155,17 @@ public:
    /// get addresses of this type formatted into string
    virtual String GetRecipients(RecipientType type) const;
 
-   void CollectWhitelist();
+   /**
+      Save all the current recipients to the given address book/group
+
+      @param collect the autocollect flag, if it is M_ACTION_NEVER, nothing
+                     is done
+      @param book the name of the address book to save addresses to
+      @param group the name of the group in this book
+    */
+   void SaveRecipientsAddresses(MAction collect,
+                                const String& book,
+                                const String& group);
 
    /// get the currently entered subject
    virtual String GetSubject() const;

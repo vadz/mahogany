@@ -105,6 +105,10 @@
 
 extern const MOption MP_ADB_SUBSTRINGEXPANSION;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
+extern const MOption MP_AUTOCOLLECT;
+extern const MOption MP_AUTOCOLLECT_ADB;
+extern const MOption MP_AUTOCOLLECT_NAMED;
+extern const MOption MP_AUTOCOLLECT_OUTGOING;
 extern const MOption MP_COMPOSE_BCC;
 extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_SHOW_FROM;
@@ -2482,35 +2486,40 @@ bool wxComposeView::IsRecipientEnabled(size_t index) const
    return m_rcptExtra[index]->IsEnabled();
 }
 
-void wxComposeView::CollectWhitelist()
+void
+wxComposeView::SaveRecipientsAddresses(MAction collect,
+                                       const String& book,
+                                       const String& group)
 {
-   static RecipientType all[]
-      = { Recipient_To, Recipient_Cc, Recipient_Bcc };
-   
-   for( size_t type = 0; type < sizeof(all) / sizeof(all[0]); ++type )
+   if ( collect == M_ACTION_NEVER )
+      return;
+
+   static RecipientType types[] = { Recipient_To, Recipient_Cc, Recipient_Bcc };
+
+   const bool namedOnly = READ_CONFIG_BOOL(m_Profile, MP_AUTOCOLLECT_NAMED);
+
+   for ( size_t n = 0; n < WXSIZEOF(types); ++n )
    {
       wxArrayString list;
-      GetRecipients(all[type], list);
-      
-      for( size_t address = 0; address < list.GetCount(); ++address )
+      GetRecipients(types[n], list);
+
+      for ( size_t address = 0; address < list.GetCount(); ++address )
       {
          RefCounter<AddressList> parser(AddressList::Create(list[address]));
 
-         for( Address *field = parser->GetFirst();
-            field;
-            field = parser->GetNext(field) )
+         for ( Address *field = parser->GetFirst();
+               field;
+               field = parser->GetNext(field) )
          {
-#if 0 // AutoCollectAddress is severely broken
-            AutoCollectAddress(
+            AutoCollectAddress
+            (
                field->GetEMail(),
                field->GetName(),
-               2, // Don't ask user, just autocollect it
-               false, // Collect addresses without name too
-               READ_APPCONFIG_TEXT(MP_WHITE_LIST),
-               _T(""), // Root group
-               this // Status bar messages to soon to be destroyed frame
+               collect,
+               namedOnly,
+               book,
+               group
             );
-#endif
          }
       }
    }
@@ -2533,8 +2542,7 @@ GetRecipientFromControl(wxComposeView::RecipientType type,
    }
 }
 
-void wxComposeView::GetRecipients(RecipientType type,
-   wxArrayString& list) const
+void wxComposeView::GetRecipients(RecipientType type, wxArrayString& list) const
 {
    list.Empty();
 
@@ -2551,7 +2559,7 @@ String wxComposeView::GetRecipients(RecipientType type) const
 {
    wxArrayString list;
    GetRecipients(type, list);
-   
+
    String address;
 
    size_t count = list.GetCount();
@@ -3643,7 +3651,7 @@ void
 wxComposeView::InsertData(void *data,
                           size_t length,
                           const wxChar *mimetype,
-                          const wxChar *name, 
+                          const wxChar *name,
                           const wxChar *filename)
 {
    String mt = mimetype;
@@ -3960,7 +3968,7 @@ wxComposeView::IsReadyToSend() const
 
    if(!m_editor->FinishWork())
       return false;
-   
+
    // everything is ok
    return true;
 }
@@ -4307,6 +4315,17 @@ wxComposeView::Send(SendMode mode)
 
    if ( success )
    {
+      if ( READ_CONFIG(m_Profile, MP_AUTOCOLLECT_OUTGOING) )
+      {
+         // remember the addresses we sent mail to
+         SaveRecipientsAddresses
+         (
+            (MAction)(long)READ_CONFIG(m_Profile, MP_AUTOCOLLECT),
+            READ_CONFIG_TEXT(m_Profile, MP_AUTOCOLLECT_ADB),
+            _("Previous Recipients")
+         );
+      }
+
       if ( m_OriginalMessage != NULL )
       {
          // we mark the original message as "answered"
@@ -4755,7 +4774,7 @@ bool wxComposeView::SaveAsDraft() const
 {
    if(!m_editor->FinishWork())
       return false;
-   
+
    SendMessage_obj msg(BuildDraftMessage());
    if ( !msg )
    {

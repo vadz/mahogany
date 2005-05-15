@@ -6,9 +6,10 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.67 'Constance' ??? ??, 2004
-------------------------------------
+Release 0.67 'Constance' ??? ??, 2005
+-------------------------------------
 
+2005-05-15 VZ: added autocollecting of addersses in outgoing mail
 2005-02-27 VZ: added "Compose|Set if is a reply..." command
 2004-09-27 VZ: allow to select "open as mail message" in "Open with" dialog
 2004-09-23 VZ: improved UTF-[78] support: try to guess correct encoding

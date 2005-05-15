@@ -470,6 +470,7 @@ enum ConfigFields
    ConfigField_AutoCollect,
    ConfigField_AutoCollectAdb,
    ConfigField_AutoCollectSenderOnly,
+   ConfigField_AutoCollectOutgoing,
    ConfigField_AutoCollectNameless,
    ConfigField_WhiteList,
 #ifdef USE_BBDB
@@ -1569,7 +1570,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Home folder"), Field_Folder | Field_AppWide, -1 },
    { gettext_noop("Is &home folder"), Field_Bool | Field_NotApp, -1 },
 
-   // adb: autocollect and bbdb options
+   // autocollecting and address books options
    { gettext_noop("The addresses listed below are the ones which are\n"
                   "recognized as being your own when showing the message\n"
                   "headers and also answering to the messages (they are\n"
@@ -1589,6 +1590,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Autocollect addresses"),       Field_Radio,  -1,                    },
    { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
    { gettext_noop("Autocollect only &senders' addresses"), Field_Bool, ConfigField_AutoCollect},
+   { gettext_noop("Collect addresses in &outgoing mail"), Field_Bool, ConfigField_AutoCollect},
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
    { gettext_noop("&Whitelist"),                   Field_Text | Field_AppWide, -1 },
 #ifdef USE_BBDB
@@ -2084,7 +2086,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FTREE_HOME),
    CONFIG_NONE(), // is home checkbox
 
-   // addresses
+   // autocollecting and address books options
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FROM_REPLACE_ADDRESSES),
    CONFIG_NONE(),
@@ -2093,6 +2095,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOCOLLECT),
    CONFIG_ENTRY(MP_AUTOCOLLECT_ADB),
    CONFIG_ENTRY(MP_AUTOCOLLECT_SENDER),
+   CONFIG_ENTRY(MP_AUTOCOLLECT_OUTGOING),
    CONFIG_ENTRY(MP_AUTOCOLLECT_NAMED),
    CONFIG_ENTRY(MP_WHITE_LIST),
 #ifdef USE_BBDB
