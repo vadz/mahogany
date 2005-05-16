@@ -20,6 +20,7 @@
 
 #ifndef USE_PCH
    #include <wx/dynarray.h>     // for WX_DEFINE_ARRAY
+   #include "Mdefaults.h"       // for MAction enum
 #endif // USE_PCH
 
 #include <wx/font.h>         // for wxFont
