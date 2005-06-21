@@ -72,7 +72,7 @@ enum MimeXferEncoding
    MIME_ENC_OTHER = 5,
 
    /// maximum encoding code
-   MIME_ENC_INVALID = 10,
+   MIME_ENC_INVALID = 10
 };
 
 // ----------------------------------------------------------------------------

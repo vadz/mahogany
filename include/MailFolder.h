@@ -171,7 +171,7 @@ public:
          don't move the messages to trash, even if the folder is configured to
          use it, always delete them
        */
-      DELETE_NO_TRASH = 1,
+      DELETE_NO_TRASH = 1
    };
 
    /// flags for DeleteMessages
