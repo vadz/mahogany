@@ -167,6 +167,12 @@ public:
    /// get the list of all disposition parameters (from Content-Disposition)
    virtual const MimeParameterList& GetDispositionParameters() const = 0;
 
+   /// return true if this part must be shown as attachment
+   bool IsAttachment() const
+   {
+      return GetDisposition().CmpNoCase(_T("attachment")) == 0;
+   }
+
    //@}
 
    /** @name Data access
