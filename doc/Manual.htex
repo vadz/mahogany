@@ -82,6 +82,10 @@ any problems with building it.
 \begin{itemize}
    \item New integrated statistical spam filter (DSPAM)
    \item Folders can now be dragged in the folder tree to reorder them
+   \item Mahogany can now select the viewer best suited for the contents of the
+         current message, e.g. you can use text viewer by default but the
+         program can be configured to switch to a graphical one for the
+         messages with embedded images.
    \item New \texttt{--import} command line option to simplify sharing
          of Mahogany options between different installations
    \item Options with non default values are now highlighted in the

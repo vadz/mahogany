@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2005
 -------------------------------------
 
+2005-06-24 VZ: automatically select the viewer best fit for the shown message
 2005-05-15 VZ: added autocollecting of addresses in outgoing mail
 2005-02-27 VZ: added "Compose|Set if is a reply..." command
 2004-09-27 VZ: allow to select "open as mail message" in "Open with" dialog

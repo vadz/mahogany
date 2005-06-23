@@ -253,6 +253,10 @@ extern const MOption MP_INLINE_GFX_EXTERNAL;
 extern const MOption MP_INLINE_GFX_SIZE;
 extern const MOption MP_MSGVIEW_SHOWBAR;
 extern const MOption MP_MSGVIEW_VIEWER;
+extern const MOption MP_MSGVIEW_AUTO_VIEWER;
+extern const MOption MP_MSGVIEW_PREFER_HTML;
+extern const MOption MP_MSGVIEW_ALLOW_HTML;
+extern const MOption MP_MSGVIEW_ALLOW_IMAGES;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_MSGVIEW_ALL_HEADERS;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
@@ -910,6 +914,14 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGVIEW_SHOWBAR_NAME _T("ShowViewerBar")
 /// which viewer to use in the message view?
 #define MP_MSGVIEW_VIEWER_NAME _T("MsgViewer")
+/// select the "best" viewer automatically?
+#define MP_MSGVIEW_AUTO_VIEWER_NAME _T("AutoViewer")
+/// use HTML viewer whenever there is HTML content?
+#define MP_MSGVIEW_PREFER_HTML_NAME _T("PreferHTML")
+/// allow HTML viewer when there is only HTML content?
+#define MP_MSGVIEW_ALLOW_HTML_NAME _T("AllowHTML")
+/// allow image-capable viewer when there are inline images?
+#define MP_MSGVIEW_ALLOW_IMAGES_NAME _T("AllowImages")
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_NAME     _T("MsgViewHeaders")
 /// all headers we know about
@@ -1761,6 +1773,14 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGVIEW_SHOWBAR_DEFVAL 1
 /// which viewer to use in the message view?
 #define MP_MSGVIEW_VIEWER_DEFVAL _T("LayoutViewer")
+/// select the "best" viewer automatically?
+#define MP_MSGVIEW_AUTO_VIEWER_DEFVAL 1l
+/// use HTML viewer whenever there is HTML content?
+#define MP_MSGVIEW_PREFER_HTML_DEFVAL 0l
+/// allow HTML viewer when there is only HTML content?
+#define MP_MSGVIEW_ALLOW_HTML_DEFVAL 1l
+/// allow image-capable viewer when there are inline images?
+#define MP_MSGVIEW_ALLOW_IMAGES_DEFVAL 1l
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_DEFVAL     \
           _T("Date:" \

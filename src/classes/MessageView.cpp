@@ -104,8 +104,12 @@ extern const MOption MP_INLINE_GFX;
 extern const MOption MP_INLINE_GFX_EXTERNAL;
 extern const MOption MP_INLINE_GFX_SIZE;
 extern const MOption MP_MAX_MESSAGE_SIZE;
+extern const MOption MP_MSGVIEW_ALLOW_HTML;
+extern const MOption MP_MSGVIEW_ALLOW_IMAGES;
+extern const MOption MP_MSGVIEW_AUTO_VIEWER;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_MSGVIEW_HEADERS;
+extern const MOption MP_MSGVIEW_PREFER_HTML;
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_MVIEW_TITLE_FMT;
 extern const MOption MP_MVIEW_FONT;
@@ -451,7 +455,11 @@ MessageView::AllProfileValues::AllProfileValues()
    inlineRFC822 =
    inlinePlainText =
    showFaces =
-   highlightURLs = false;
+   highlightURLs =
+   autoViewer =
+   preferHTML =
+   allowHTML =
+   allowImages = false;
 
    inlineGFX = -1;
    showExtImages = false;
@@ -477,7 +485,9 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(autocollect) && CMP(autocollectSenderOnly) &&
           CMP (autocollectNamed) CMP(autocollectBookName) &&
 #endif // 0
-          CMP(showFaces);
+          CMP(showFaces) &&
+          CMP(autoViewer) &&
+          (!autoViewer || CMP(preferHTML) && CMP(allowHTML) && CMP(allowImages));
 
    #undef CMP
 }
@@ -538,7 +548,7 @@ MessageView::Init(wxWindow *parent, Profile *profile)
    if ( m_profile )
       m_profile->IncRef();
 
-   SetViewer(NULL, parent);
+   ResetViewer(parent);
 
    m_usingDefViewer = true;
 }
@@ -549,7 +559,8 @@ MessageView::Init()
    m_profile = NULL;
    m_asyncFolder = NULL;
    m_mailMessage = NULL;
-   m_viewer = NULL;
+   m_viewer =
+   m_viewerOld = NULL;
    m_filters = NULL;
    m_virtualMimeParts = NULL;
 
@@ -577,6 +588,7 @@ MessageView::~MessageView()
 
    delete m_filters;
    delete m_viewer;
+   delete m_viewerOld;
 }
 
 // ----------------------------------------------------------------------------
@@ -591,7 +603,9 @@ size_t MessageView::GetAllAvailableViewers(wxArrayString *names,
 }
 
 void
-MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
+MessageView::SetViewer(MessageViewer *viewer,
+                       const String& viewerName,
+                       wxWindow *parent)
 {
    if ( !viewer )
    {
@@ -612,13 +626,13 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
       m_usingDefViewer = false;
    }
 
-   viewer->Create(this, parent);
+   viewer->Create(this, parent ? parent : GetWindow()->GetParent());
 
-   OnViewerChange(m_viewer, viewer);
-   if ( m_viewer )
-      delete m_viewer;
+   OnViewerChange(m_viewer, viewer, viewerName);
+   delete m_viewer;
 
    m_viewer = viewer;
+   m_viewerName = viewerName;
 }
 
 /**
@@ -632,7 +646,7 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
    @param name of the viewer to load
    @param nameAlt output parameter for the available viewer name if the given
                   one couldn't be loaded
-   @return the viewer (to be DecRef()'d by caller) or NULL
+   @return the viewer (to be deleted by caller) or NULL
  */
 static MessageViewer *LoadViewer(const String& name, String *nameAlt = NULL)
 {
@@ -684,7 +698,7 @@ static MessageViewer *LoadViewer(const String& name, String *nameAlt = NULL)
 }
 
 void
-MessageView::CreateViewer(wxWindow *parent)
+MessageView::CreateViewer()
 {
    String name = m_ProfileValues.msgViewer;
    if ( name.empty() )
@@ -699,7 +713,7 @@ MessageView::CreateViewer(wxWindow *parent)
                      "Reverting to the available message viewer '%s'."),
                    name.c_str(), nameAlt.c_str());
 
-      viewer = LoadViewer(nameAlt);
+      viewer = LoadViewer(name = nameAlt);
    }
 
    if ( !viewer )
@@ -709,7 +723,7 @@ MessageView::CreateViewer(wxWindow *parent)
                    "Message preview will not work!"));
    }
 
-   SetViewer(viewer, parent);
+   SetViewer(viewer, name);
 }
 
 // ----------------------------------------------------------------------------
@@ -1068,7 +1082,7 @@ MessageView::UpdateProfileValues()
 
       if ( recreateViewer )
       {
-         CreateViewer(GetWindow()->GetParent());
+         CreateViewer();
       }
       else // use the same viewer
       {
@@ -1144,6 +1158,11 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG_TEXT(profile, MP_AUTOCOLLECT_ADB);
    settings->showFaces = READ_CONFIG_BOOL(profile, MP_SHOW_XFACES);
+
+   settings->autoViewer = READ_CONFIG_BOOL(profile, MP_MSGVIEW_AUTO_VIEWER);
+   settings->preferHTML = READ_CONFIG_BOOL(profile, MP_MSGVIEW_PREFER_HTML);
+   settings->allowHTML = READ_CONFIG_BOOL(profile, MP_MSGVIEW_ALLOW_HTML);
+   settings->allowImages = READ_CONFIG_BOOL(profile, MP_MSGVIEW_ALLOW_IMAGES);
 
    settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
 
@@ -1927,12 +1946,11 @@ MessageView::ShowPart(const MimePart *mimepart)
    m_viewer->StartPart();
 
    // if the disposition is set to attachment we force the part to be shown
-   // as an attachment
-   bool isAttachment = mimepart->GetDisposition().IsSameAs(_T("attachment"), false);
+   // as an attachment by disabling all the other heuristics
+   const bool isAttachment = mimepart->IsAttachment();
 
    // first check for viewer specific formats, next for text, then for
    // images and finally show all the rest as generic attachment
-
    if ( !isAttachment && m_viewer->CanProcess(mimeType) )
    {
       // as we're going to need its contents, we'll have to download it: check
@@ -2390,16 +2408,164 @@ MessageView::FindViewerForPart(const MimePart *mimepart)
 // showing a new message
 // ----------------------------------------------------------------------------
 
+// bit flags returned by GetPartContent()
+enum
+{
+   PartContent_Text = 0x01,
+   PartContent_Image = 0x02,
+   PartContent_HTML = 0x04
+};
+
+int
+MessageView::DeterminePartContent(const MimePart *mimepart)
+{
+   int contents = 0;
+
+   // if the part is explicitely an attachment we show it as attachment anyhow
+   // so its real contents don't matter
+   if ( !mimepart->IsAttachment() )
+   {
+      const MimeType type = mimepart->GetType();
+      const String subtype = type.GetSubType();
+      switch ( type.GetPrimary() )
+      {
+         case MimeType::MESSAGE:
+            if ( !m_ProfileValues.inlineRFC822 )
+               break;
+            //else: fall through and handle it as embedded multipart
+
+         case MimeType::MULTIPART:
+            {
+               for ( const MimePart *partChild = mimepart->GetNested();
+                     partChild;
+                     partChild = partChild->GetNext() )
+               {
+                  contents |= DeterminePartContent(partChild);
+               }
+            }
+            break;
+
+         case MimeType::TEXT:
+            if ( subtype == _T("TEXT") )
+               contents |= PartContent_Text;
+            else if ( subtype == _T("HTML") )
+               contents |= PartContent_HTML;
+            break;
+
+         case MimeType::IMAGE:
+            contents |= PartContent_Image;
+            break;
+
+         default:
+            wxFAIL_MSG( _T("Unknown MIME part type") );
+            // fall through
+
+         case MimeType::APPLICATION:
+         case MimeType::AUDIO:
+         case MimeType::VIDEO:
+         case MimeType::MODEL:
+         case MimeType::OTHER:
+         case MimeType::CUSTOM1:
+         case MimeType::CUSTOM2:
+         case MimeType::CUSTOM3:
+         case MimeType::CUSTOM4:
+         case MimeType::CUSTOM5:
+         case MimeType::CUSTOM6:
+            // these parts don't influence the viewer choice
+            break;
+      }
+   }
+
+   return contents;
+}
+
+void
+MessageView::AutoAdjustViewer(const MimePart *mimepart)
+{
+   // find out which viewer we want to use for this message
+   String viewerName;
+   const int contents = DeterminePartContent(mimepart);
+   if ( contents & PartContent_HTML )
+   {
+      // use HTML viewer when the user prefers HTML to plain text or when there
+      // is nothing but HTML
+      if ( m_ProfileValues.preferHTML ||
+            (!(contents & PartContent_Text) && m_ProfileValues.allowHTML) )
+      {
+         viewerName = _T("HtmlViewer");
+      }
+   }
+
+   if ( viewerName.empty() )
+   {
+      if ( contents & PartContent_Image )
+      {
+         if ( m_ProfileValues.allowImages )
+         {
+            // this is the best viewer for showing images currently
+            viewerName = _T("LayoutViewer");
+         }
+      }
+   }
+   //else: viewerName is already HTML and can show images anyhow
+
+
+   if ( viewerName == m_viewerName )
+   {
+      // nothing to do, we already use the correct viewer
+      return;
+   }
+
+   if ( viewerName.empty() || viewerName == m_viewerNameOld )
+   {
+      // either we don't have any specific viewer to set, in which case we need
+      // to just restore the user-chosen one if any, or we need the viewer
+      // which had been previously replaced
+      if ( m_viewerOld )
+      {
+         SetViewer(m_viewerOld, m_viewerNameOld);
+         m_viewerOld = NULL;
+         m_viewerNameOld.clear();
+      }
+   }
+   else // we need to switch to another viewer
+   {
+      MessageViewer *viewer = LoadViewer(viewerName);
+      if ( viewer )
+      {
+         if ( m_viewerOld )
+         {
+            // replace the last automatically set viewer
+            SetViewer(viewer, viewerName);
+         }
+         else // we're using the original user-chosen viewer, keep it as "old"
+         {
+            // we can't use SetViewer() because it deletes the current viewer
+            // and we want to keep it as m_viewerOld and restore it later
+            viewer->Create(this, GetWindow()->GetParent());
+
+            OnViewerChange(m_viewer, viewer, viewerName);
+
+            m_viewerNameOld = m_viewerName;
+            m_viewerName = viewerName;
+
+            m_viewerOld = m_viewer;
+            m_viewer = viewer;
+         }
+      }
+   }
+}
+
 void
 MessageView::Update()
 {
-   m_viewer->Clear();
    if ( m_virtualMimeParts )
       m_virtualMimeParts->clear();
 
    if( !m_mailMessage )
    {
       // no message to display, but still call Update() after Clear()
+      m_viewer->Clear();
       m_viewer->Update();
 
       return;
@@ -2417,6 +2583,12 @@ MessageView::Update()
 
    m_encodingAuto = mimepart->GetTextEncoding();
 
+   // adjust the viewer to the current message contents
+   if ( m_ProfileValues.autoViewer )
+      AutoAdjustViewer(mimepart);
+
+
+   m_viewer->Clear();
 
    //#define PROFILE_VIEWER
 #ifdef PROFILE_VIEWER
@@ -3176,7 +3348,7 @@ MessageView::SetFolder(ASMailFolder *asmf)
    {
       // on the contrary, revert to the default ones if we don't have any
       // folder any more
-      SetViewer(NULL, GetWindow()->GetParent());
+      ResetViewer();
 
       // make sure the viewer will be recreated the next time we are called
       // with a valid folder - if we didn't do it, the UpdateProfileValues()

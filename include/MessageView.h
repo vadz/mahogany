@@ -370,6 +370,18 @@ protected:
       /// Show XFaces?
       bool showFaces:1;
 
+      /// choose the viewer automatically?
+      bool autoViewer:1;
+
+      /// prefer HTML to plain text?
+      bool preferHTML:1;
+
+      /// allow HTML as last resort?
+      bool allowHTML:1;
+
+      /// switch viewer to be able to show images inline?
+      bool allowImages:1;
+
       //@}
 
       /// @name URL viewing
@@ -433,7 +445,8 @@ protected:
 
    /// update GUI to show the new viewer window
    virtual void OnViewerChange(const MessageViewer *viewerOld,
-                               const MessageViewer *viewerNew) = 0;
+                               const MessageViewer *viewerNew,
+                               const String& nameViewer) = 0;
 
    /// update GUI to indicate the new "show headers" options state
    virtual void OnShowHeadersChange() = 0;
@@ -671,10 +684,32 @@ private:
    //@{
 
    /// create the viewer we'll use
-   void CreateViewer(wxWindow *parent);
+   void CreateViewer();
 
-   /// set the viewer (may be NULL, then CreateDefaultViewer() is used)
-   void SetViewer(MessageViewer *viewer, wxWindow *parent);
+   /**
+      Set the viewer.
+
+      @param viewer the viewer to use, may be NULL, then CreateDefaultViewer()
+                    is used; this viewer will be deleted automatically when
+                    this function is called the next time
+      @param viewerName the name of the viewer
+      @param parent the parent window for the viewer, we may find it ourselves
+                    once we're fully created so it can be left NULL except for
+                    the initial call
+    */
+   void SetViewer(MessageViewer *viewer,
+                  const String& viewerName,
+                  wxWindow *parent = NULL);
+
+   /**
+      Reset the viewer to the default one.
+
+      @param parent the parent window, may be NULL
+    */
+   void ResetViewer(wxWindow *parent = NULL)
+   {
+      SetViewer(NULL, String(), parent);
+   }
 
    /**
       Default viewer creation: we must always have at least this viewer
@@ -686,8 +721,30 @@ private:
    /// returns true if we have a non default viewer
    bool HasRealViewer() const { return m_viewer && !m_usingDefViewer; }
 
+   /// this is a private function used to study what kind of contents we have
+   int DeterminePartContent(const MimePart *mimepart);
+
+   /**
+      Adjusts the viewer to correspond to the given MIME structure.
+
+      We may want to choose a specific viewer for this message, e.g. we
+      currently use HTML viewer for the HTML messages without any plain text
+      part (of course, this is subject to user-defined options). When this
+      function changes the viewer, it saves the old one as m_viewerOld and when
+      it's called the next time, it restores it.
+    */
+   void AutoAdjustViewer(const MimePart *mimepart);
+
+
    /// the viewer we use
    MessageViewer *m_viewer;
+
+   /// the last viewer we used, before temporarily switching to the above one
+   MessageViewer *m_viewerOld;
+
+   /// the names of the current and old viewer (may be empty)
+   String m_viewerName,
+          m_viewerNameOld;
 
    /// is it the default one?
    bool m_usingDefViewer;
