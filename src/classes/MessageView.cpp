@@ -156,35 +156,24 @@ static String NormalizeString(const String& s)
 // Data about a process (external viewer typically) we launched: these objects
 // are created by LaunchProcess() and deleted when the viewer process
 // terminates. If it terminates with non 0 exit code, errormsg is given to the
-// user. The tempfile is the name of a temp file containing the data passedto
-// the viewer (or NULL if none) and will be removed after viewer terminates.
+// user.
 class ProcessInfo
 {
 public:
    ProcessInfo(wxProcess *process,
-
                int pid,
-               const String& errormsg,
-               const String& tempfilename)
+               const String& errormsg)
       : m_errormsg(errormsg)
    {
       ASSERT_MSG( process && pid, _T("invalid process in ProcessInfo") );
 
       m_process = process;
       m_pid = pid;
-
-      if ( !tempfilename.empty() )
-         m_tempfile = new MTempFileName(tempfilename);
-      else
-         m_tempfile = NULL;
    }
 
    ~ProcessInfo()
    {
-      if ( m_process )
-         delete m_process;
-      if ( m_tempfile )
-         delete m_tempfile;
+      delete m_process;
    }
 
    // get the pid of our process
@@ -197,14 +186,10 @@ public:
    // object if the external process is still running)
    void Detach() { m_process->Detach(); m_process = NULL; }
 
-   // return the pointer to temp file object (may be NULL)
-   MTempFileName *GetTempFile() const { return m_tempfile; }
-
 private:
    String         m_errormsg; // error message to give if launch failed
    wxProcess     *m_process;  // wxWindows process info
    int            m_pid;      // pid of the process
-   MTempFileName *m_tempfile; // the temp file (or NULL if none)
 };
 
 // a simple event forwarder
@@ -3398,8 +3383,8 @@ MessageView::GetEventHandlerForProcess()
 
 bool
 MessageView::LaunchProcess(const String& command,
-                             const String& errormsg,
-                             const String& filename)
+                           const String& errormsg,
+                           const String& filename)
 {
    wxLogStatus(GetParentFrame(),
                _("Calling external viewer '%s'"),
@@ -3419,9 +3404,10 @@ MessageView::LaunchProcess(const String& command,
 
    if ( pid != -1 )
    {
-      ProcessInfo *procInfo = new ProcessInfo(process, pid, errormsg, filename);
+      ProcessInfo *procInfo = new ProcessInfo(process, pid, errormsg);
 
       m_processes.Add(procInfo);
+      m_tempFiles.Add(filename);
    }
 
    return true;
@@ -3454,22 +3440,41 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
 
 void MessageView::DetachAllProcesses()
 {
-   size_t procCount = m_processes.GetCount();
-   for ( size_t n = 0; n < procCount; n++ )
+   size_t n;
+
+   // delete all process info objects, we don't need notifications about
+   // process termination any more
+   const size_t procCount = m_processes.GetCount();
+   for ( n = 0; n < procCount; n++ )
    {
       ProcessInfo *info = m_processes[n];
       info->Detach();
 
-      MTempFileName *tempfile = info->GetTempFile();
-      if ( tempfile )
-      {
-         String tempFileName = tempfile->GetName();
-         wxLogWarning(_("Temporary file '%s' left because it is still in "
-                        "use by an external process"), tempFileName.c_str());
-      }
-
       delete info;
    }
+
+   m_processes.Empty();
+
+
+   // also delete the temporary files used by them
+   bool closedAll = true;
+   const size_t tmpCount = m_tempFiles.GetCount();
+   for ( n = 0; n < tmpCount; n++ )
+   {
+      const wxString& fn = m_tempFiles[n];
+      if ( wxRemove(fn) != 0 )
+      {
+         wxLogSysError(_("Failed to delete file \"%s\""), fn.c_str());
+         closedAll = false;
+      }
+   }
+
+   if ( !closedAll )
+   {
+      wxLogWarning(_("Some of the temporary files couldn't have been removed."));
+   }
+
+   m_tempFiles.Empty();
 }
 
 // ----------------------------------------------------------------------------

@@ -465,6 +465,9 @@ protected:
    /// array of process info for all external viewers we have launched
    ArrayProcessInfo m_processes;
 
+   /// temporary files we have created for the view processes
+   wxArrayString m_tempFiles;
+
    /// the event handler which forwards process events to us
    ProcessEvtHandler *m_evtHandlerProc;
 
