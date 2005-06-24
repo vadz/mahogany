@@ -2446,7 +2446,7 @@ MessageView::DeterminePartContent(const MimePart *mimepart)
             break;
 
          case MimeType::TEXT:
-            if ( subtype == _T("TEXT") )
+            if ( subtype == _T("PLAIN") )
                contents |= PartContent_Text;
             else if ( subtype == _T("HTML") )
                contents |= PartContent_HTML;
