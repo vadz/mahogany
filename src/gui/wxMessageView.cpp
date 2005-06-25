@@ -242,7 +242,8 @@ wxMessageView::DoShowMessage(Message *mailMessage)
 
 void
 wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
-                              const MessageViewer *viewerNew)
+                              const MessageViewer *viewerNew,
+                              const String& nameViewer)
 {
    if ( m_FolderView )
    {
@@ -257,7 +258,6 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
 
    // we also need to update the viewers menu to indicate the currently
    // selected one (if we do have a viewer, i.e. are not using the dummy one)
-   const String& nameViewer = GetProfileValues().msgViewer;
    if ( viewerNew && !nameViewer.empty() )
    {
       int n = m_namesViewers.Index(nameViewer);

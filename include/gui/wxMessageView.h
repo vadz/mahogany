@@ -58,7 +58,8 @@ public:
 
    /// update the GUI to show the new viewer window
    virtual void OnViewerChange(const MessageViewer *viewerOld,
-                               const MessageViewer *viewerNew);
+                               const MessageViewer *viewerNew,
+                               const String& nameViewer);
 
    /// create the "View" menu for our parent frame
    virtual void CreateViewMenu();

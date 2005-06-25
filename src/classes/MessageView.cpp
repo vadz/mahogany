@@ -2783,9 +2783,9 @@ void MessageView::MimeDoOpen(const String& command, const String& filename)
       return;
    }
 
+   // see HandleProcessTermination() for the explanation of "possibly"
    wxString errmsg;
-   errmsg.Printf(_("Error opening attachment: command '%s' failed"),
-                 command.c_str());
+   errmsg.Printf(_("External viewer \"%s\" possibly failed"), command.c_str());
    (void)LaunchProcess(command, errmsg, filename);
 }
 
@@ -3602,8 +3602,16 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
    ProcessInfo *info = m_processes[n];
    if ( exitcode != 0 )
    {
-      wxLogError(_("%s (external viewer exited with non null exit code)"),
-                 info->GetErrorMsg().c_str());
+      // don't make this a wxLogError because too many Windows apps (most
+      // annoyingly, Acrobat Reader which is used very often to view PDFs) do
+      // exit with non zero exit code if they simply forward the file via DDE
+      // to another (already running) instance instead of showing it themselves
+      //
+      // so just warn the user about it...
+      wxLogStatus(GetParentFrame(),
+                  _("%s (non null exit code %d)"),
+                  info->GetErrorMsg().c_str(),
+                  exitcode);
    }
 
    m_processes.RemoveAt(n);

@@ -347,6 +347,11 @@ enum ConfigFields
 #ifdef USE_VIEWER_BAR
    ConfigField_MsgViewerBar,
 #endif // USE_VIEWER_BAR
+   ConfigField_MessageViewAutoViewer,
+   ConfigField_MessageViewPreferHTML,
+   ConfigField_MessageViewAllowHTML,
+   ConfigField_MessageViewAllowImages,
+   ConfigField_MessageViewSpacer,
 #ifdef USE_FONT_DESC
    ConfigField_MessageViewFont,
 #else // !USE_FONT_DESC
@@ -1374,10 +1379,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_PYTHON
 
    // message view
-   // FIXME: this text is stupid but we should have _some_ explanation, right?
    { gettext_noop("Mahogany has several standard message viewers and more\n"
-                  "can be plugged in. The default one is the safest choice\n"
-                  "but you may try the others for an alternative look."),
+                  "can be plugged in. The viewer here will be used by default\n"
+                  "but may be automatically adjusted for message contents."),
                                                    Field_Message |
                                                    Field_Advanced,    -1 },
    { gettext_noop("&Message viewer"),              Field_Combo |
@@ -1385,6 +1389,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #ifdef USE_VIEWER_BAR
    { gettext_noop("Show viewer &bar"),             Field_Bool,    -1 },
 #endif // USE_VIEWER_BAR
+   { gettext_noop("A&utomatically adjust to contents"), Field_Bool, -1 },
+   { gettext_noop("Prefer &HTML to plain text"),   Field_Bool, ConfigField_MessageViewAutoViewer },
+   { gettext_noop("Sho&w HTML if no text"),        Field_Bool, ConfigField_MessageViewAutoViewer },
+   { gettext_noop("Ensure &images are shown"),     Field_Bool, ConfigField_MessageViewAutoViewer },
+   { _T(""),                                       Field_Message, -1},
 
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font,    -1 },
@@ -1979,6 +1988,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #ifdef USE_VIEWER_BAR
    CONFIG_ENTRY(MP_MSGVIEW_SHOWBAR),
 #endif // USE_VIEWER_BAR
+   CONFIG_ENTRY(MP_MSGVIEW_AUTO_VIEWER),
+   CONFIG_ENTRY(MP_MSGVIEW_PREFER_HTML),
+   CONFIG_ENTRY(MP_MSGVIEW_ALLOW_HTML),
+   CONFIG_ENTRY(MP_MSGVIEW_ALLOW_IMAGES),
+   CONFIG_NONE(),
 #ifdef USE_FONT_DESC
    CONFIG_ENTRY(MP_MVIEW_FONT_DESC),
 #else // !USE_FONT_DESC
