@@ -22,7 +22,7 @@
    The value of an extra header X-Foo is stored under CustomHeaders:X-Foo:Mail,
    CustomHeaders:X-Foo:News or CustomHeaders:X-Foo:Both.
 
-   Note that the names of the custom headers must be valie profile names and
+   Note that the names of the custom headers must be valid profile names and
    can't contain ':'. This is not a restriction as a valid RFC 822 (or 1036)
    header satisfies both of these requirments anyhow.
  */
