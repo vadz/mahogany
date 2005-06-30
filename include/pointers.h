@@ -197,6 +197,15 @@ private:
    T *m_pointer;
 };
 
+/**
+   Convenience function to create a ref counter from raw pointer.
+ */
+template <class T>
+inline RefCounter<T> MakeRefCounter(T *p)
+{
+   return RefCounter<T>(p);
+}
+
 
 /**
    Weak pointer complementary to RefCounter.
