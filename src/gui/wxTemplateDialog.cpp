@@ -764,6 +764,8 @@ wxChooseTemplateDialog::wxChooseTemplateDialog(MessageTemplateKind kind,
    c->left.RightOf(m_listbox, LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_textctrl->SetConstraints(c);
+
+   FindWindow(wxID_OK)->SetFocus();
 }
 
 void wxChooseTemplateDialog::OnUpdateUIOk(wxUpdateUIEvent& event)
