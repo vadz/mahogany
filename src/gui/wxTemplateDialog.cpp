@@ -186,7 +186,7 @@ protected:
    wxString m_name;
 
    // controls
-   wxListBox  *m_listbox;
+   wxPListBox *m_listbox;
    wxButton   *m_btnAdd,
               *m_btnDelete;
    wxTextCtrl *m_textctrl;
@@ -205,8 +205,14 @@ public:
 
 protected:
    // event handlers
-   void OnUpdateUIOk(wxUpdateUIEvent& event);
+   void OnListboxSelection(wxCommandEvent& event);
    void OnListboxDoubleClick(wxCommandEvent& event);
+
+   void DoUpdateUI()
+   {
+      // only enable the ok button if there is a valid selection
+      FindWindow(wxID_OK)->Enable(m_listbox->GetSelection() != -1);
+   }
 
    virtual wxString GetTemplateTitle(MessageTemplateKind kind) const;
 
@@ -272,9 +278,8 @@ BEGIN_EVENT_TABLE(wxTemplatesDialogBase, wxManuallyLaidOutDialog)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxChooseTemplateDialog, wxTemplatesDialogBase)
+   EVT_LISTBOX(-1, wxChooseTemplateDialog::OnListboxSelection)
    EVT_LISTBOX_DCLICK(-1, wxChooseTemplateDialog::OnListboxDoubleClick)
-
-   EVT_UPDATE_UI(wxID_OK, wxChooseTemplateDialog::OnUpdateUIOk)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAllTemplatesDialog, wxTemplatesDialogBase)
@@ -643,7 +648,7 @@ void wxTemplatesDialogBase::FillListBox()
 wxString wxTemplatesDialogBase::GetTemplateValue() const
 {
    wxString value;
-   if ( !!m_name )
+   if ( !m_name.empty() )
    {
       value = GetMessageTemplate(m_kind, m_name);
    }
@@ -653,7 +658,7 @@ wxString wxTemplatesDialogBase::GetTemplateValue() const
 
 void wxTemplatesDialogBase::SaveChanges()
 {
-   wxASSERT_MSG( !!m_name, _T("shouldn't try to save") );
+   wxASSERT_MSG( !m_name.empty(), _T("shouldn't try to save") );
 
    SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, NULL);
 }
@@ -765,12 +770,19 @@ wxChooseTemplateDialog::wxChooseTemplateDialog(MessageTemplateKind kind,
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_textctrl->SetConstraints(c);
 
-   FindWindow(wxID_OK)->SetFocus();
+   // we need to restore selection right now, without waiting for the listbox
+   // to do it itself later, as otherwise we'd disable the "Ok" button in
+   // DoUpdateUI() initially and this means that the focus wouldn't be given to
+   // it (focus never goes to disabled controls)
+   m_listbox->RestoreSelection();
+   DoUpdateUI();
 }
 
-void wxChooseTemplateDialog::OnUpdateUIOk(wxUpdateUIEvent& event)
+void wxChooseTemplateDialog::OnListboxSelection(wxCommandEvent& event)
 {
-   event.Enable( m_listbox->GetSelection() != -1 );
+   DoUpdateUI();
+
+   event.Skip();
 }
 
 void wxChooseTemplateDialog::OnListboxDoubleClick(wxCommandEvent& /* event */)
