@@ -44,6 +44,7 @@
 #   include <sys/stat.h>               // needed by wxStructStat
 #endif // USE_PCH
 
+#include "pointers.h"
 #include "UIdArray.h"
 
 #include "MSearch.h"
@@ -1839,7 +1840,7 @@ MailFolderCC::Create(MFolderType /* type */, int /* flags */)
 
    Init();
 
-   m_ASMailFolder = NULL;
+   m_listData = NULL;
 
    m_SearchMessagesFound = NULL;
 }
@@ -2330,7 +2331,10 @@ MailFolderCC::Open(OpenMode openmode)
             break;
 
          case HalfOpen:
-            ccOptions |= OP_HALFOPEN;
+            // only IMAP supports half opening, for all the other folder types
+            // c-client is not even going to try to do anything
+            if ( folderType == MF_IMAP )
+               ccOptions |= OP_HALFOPEN;
             break;
 
          default:
@@ -3162,7 +3166,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       // check if host, protocol, user all identical:
       String specDst = MailFolder::GetImapSpec(folder);
       String serverSrc = GetFirstPartFromImapSpec(specDst);
-      String serverDst = GetFirstPartFromImapSpec(GetImapSpec());
+      String serverDst = GetFirstPartFromImapSpec(m_ImapSpec);
 
       if ( serverSrc == serverDst )
       {
@@ -5055,46 +5059,47 @@ MailFolderCC::mm_searched(MAILSTREAM * stream,
 void
 MailFolderCC::mm_list(MAILSTREAM * stream,
                       char delim,
-                      String  name,
-                      long  attrib)
+                      const String& name,
+                      long attrib)
 {
-   if(gs_mmListRedirect)
+   if ( gs_mmListRedirect )
    {
       gs_mmListRedirect(stream, delim, name, attrib);
       return;
    }
 
    MailFolderCC *mf = LookupObject(stream);
-   CHECK_RET(mf,_T("NULL mailfolder"));
+   CHECK_RET(mf, _T("NULL mailfolder"));
 
-   // create the event corresponding to the folder
-   ASMailFolder::ResultFolderExists *result =
-      ASMailFolder::ResultFolderExists::Create
-      (
-         mf->m_ASMailFolder,
-         mf->m_Ticket,
-         name,
-         delim,
-         attrib,
-         mf->m_UserData
-      );
+   CHECK_RET(mf->m_listData, _T("mm_list() without preceding mail_list()?"));
 
-   // and send it
-   MEventManager::Send(new MEventASFolderResultData (result) );
+   // translate IMAP spec to folder path
+   String path;
+   if ( !name.StartsWith(mf->m_ImapSpec, &path) )
+   {
+      FAIL_MSG( _T("returned mailbox doesn't start with reference?") );
+      path = name;
+   }
 
-   // don't forget to free the result - MEventASFolderResultData makes a copy
-   // (i.e. calls IncRef) of it
-   result->DecRef();
-
-   // wxYield() is needed to send the events resulting from (previous) calls
-   // to MEventManager::Send(), but don't forget to prevent any other calls to
-   // c-client from happening - this will result in a fatal error as it is not
-   // reentrant
-#if wxCHECK_VERSION(2, 2, 6)
-   wxYieldIfNeeded();
-#else // wxWin <= 2.2.5
-   wxYield();
-#endif // wxWin 2.2.5/2.2.6
+   // create the event corresponding to the folder and process it immediately
+   MEventManager::Dispatch
+   (
+      new MEventASFolderResultData
+          (
+            MakeRefCounter
+            (
+               ASMailFolder::ResultFolderExists::Create
+               (
+                mf->m_listData->m_ASMailFolder,
+                mf->m_listData->m_Ticket,
+                path,
+                delim,
+                attrib,
+                mf->m_listData->m_UserData
+               )
+            ).get()
+          )
+   );
 }
 
 
@@ -5107,7 +5112,7 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
 void
 MailFolderCC::mm_lsub(MAILSTREAM * stream,
                       char /* delim */,
-                      String  /* name */,
+                      const String&  /* name */,
                       long /* attrib */)
 {
    MailFolderCC *mf = LookupObject(stream);
@@ -5123,7 +5128,7 @@ MailFolderCC::mm_lsub(MAILSTREAM * stream,
 */
 void
 MailFolderCC::mm_status(MAILSTREAM *stream,
-                        String mailbox,
+                        const String& mailbox,
                         MAILSTATUS *status)
 {
    MailFolderCC *mf = LookupObject(stream);
@@ -5141,7 +5146,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
        @param errflg error level
  */
 void
-MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
+MailFolderCC::mm_notify(MAILSTREAM * stream, const String& str, long errflg)
 {
    MailFolderCC *mf = MailFolderCC::LookupObject(stream);
 
@@ -5363,6 +5368,23 @@ MailFolder::Subscribe(const String &host,
                      : mail_unsubscribe (NIL, (char *)spec.c_str())) != NIL;
 }
 
+inline
+MailFolderCC::ListFoldersData::ListFoldersData(ASMailFolder *asmf,
+                                               Ticket ticket,
+                                               UserData ud)
+{
+   m_UserData = ud;
+   m_Ticket = ticket;
+   m_ASMailFolder = asmf;
+   m_ASMailFolder->IncRef();
+}
+
+inline
+MailFolderCC::ListFoldersData::~ListFoldersData()
+{
+   m_ASMailFolder->DecRef();
+}
+
 void
 MailFolderCC::ListFolders(ASMailFolder *asmf,
                           const String &pattern,
@@ -5375,6 +5397,8 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 
    CHECK_RET( asmf, _T("no ASMailFolder in ListFolders") );
 
+   CHECK_RET( !m_listData, _T("reentrancy in MailFolderCC::ListFolders") );
+
    String spec = m_ImapSpec;
 
    // hack: if the folder ends with this special suffix, the driver doesn't
@@ -5385,11 +5409,12 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       spec.RemoveLast(MAILBOX_MSGS_SUFFIX_LEN);
    }
 
-   // make sure that there is a folder name delimiter before pattern -- this is
-   // convenient for the calling code however it makes it impossible to
-   // enumerate all folders under the given one including itself, so we use a
-   // dirty hack: empty pattern is just like "*" except that we don't add the
-   // delimiter before it
+   // make sure that there is a folder name delimiter before pattern
+   //
+   // doing this automatically is convenient for the calling code however it
+   // makes it impossible to enumerate all folders under the given one
+   // including itself, so we use a dirty hack: empty pattern is just like "*"
+   // except that we don't add the delimiter before it
    if ( !spec.empty() && !pattern.empty() )
    {
       char ch = spec.Last();
@@ -5405,39 +5430,32 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 
    spec << reference << (pattern.empty() ? String(_T("*")) : pattern);
 
-   // set user data (retrieved by mm_list)
-   m_UserData = ud;
-   m_Ticket = ticket;
-   m_ASMailFolder = asmf;
-   m_ASMailFolder->IncRef();
+#ifdef OS_WIN
+   // c-client code only accepts slashes for file path separators
+   spec.Replace("\\", "/");
+#endif // OS_WIN
 
-   if ( subscribedOnly )
-   {
-      mail_lsub (m_MailStream, NULL, (char *) spec.c_str());
-   }
-   else
-   {
-      mail_list (m_MailStream, NULL, (char *) spec.c_str());
-   }
 
-   // Send event telling about end of listing:
-   ASMailFolder::ResultFolderExists *result =
-      ASMailFolder::ResultFolderExists::Create
-      (
-         m_ASMailFolder,
-         m_Ticket,
-         _T(""),  // empty name == no more entries
-         0,   // no delim
-         0,   // no flags
-         m_UserData
-      );
+   // remember list data, this will be used from mm_list() called by mail_list
+   m_listData = new ListFoldersData(asmf, ticket, ud);
 
-   // and send it
-   MEventManager::Send(new MEventASFolderResultData (result) );
+   (subscribedOnly ? mail_lsub : mail_list)
+      (m_MailStream, NULL, const_cast<char *>(spec.c_str()));
 
-   result->DecRef();
-   m_ASMailFolder->DecRef();
-   m_ASMailFolder = NULL;
+   // send event telling about end of listing:
+   MEventManager::Send(
+      new MEventASFolderResultData
+          (
+            MakeRefCounter
+            (
+               ASMailFolder::ResultFolderExists::
+               CreateNoMore(asmf, m_listData->m_Ticket, m_listData->m_UserData)
+            ).get()
+          )
+   );
+
+   delete m_listData;
+   m_listData = NULL;
 }
 
 // ----------------------------------------------------------------------------

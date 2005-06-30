@@ -399,7 +399,10 @@ public:
 
    /** Get a listing of all mailboxes.
 
-       DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!
+       DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!
+
+       This function is not reentrant and not MT-safe, it needs to be fixed to
+       be both.
 
        @param asmf the ASMailFolder initiating the request
        @param pattern a wildcard matching the folders to list
@@ -451,12 +454,6 @@ public:
      @return the full symbolic name of the mailbox
     */
    virtual String GetName(void) const = 0;
-
-   /**
-     Return the full specification of the folder, i.e. what makes it unique
-     among all folders of this class.
-    */
-   virtual String GetImapSpec(void) const = 0;
 
    /// Return the folder's type.
    virtual MFolderType GetType(void) const = 0;

@@ -317,7 +317,7 @@ public:
    /** Get a listing of all mailboxes.
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
-       @param reference implementation dependend reference
+       @param reference the path to start from
     */
    Ticket ListFolders(const String &pattern = _T("*"),
                       bool subscribed_only = false,
@@ -339,11 +339,6 @@ public:
       @return character dependind on the folder type and server
     */
    char GetFolderDelimiter() const;
-
-   /**
-      Returns the full spec (in cclient sense) for this folder
-    */
-   String GetImapSpec(void) const;
 
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
@@ -513,37 +508,68 @@ private:
    Message *m_Message;
    UIdType  m_uid;
 };
-/** Holds a single folder name found in a ListFolders() call.
+
+/**
+  Holds either a single folder name returned by ListFolders() call or indicates
+  that no more folders are available.
 */
 class ASMailFolderResultFolderExists : public ASMailFolderResultImpl
 {
 public:
-   static ASMailFolder::ResultFolderExists *Create(ASMailFolder *mf,
-                                      Ticket t,
-                                      const String &name,
-                                      char delimiter,
-                                      long attrib,
-                                      UserData ud)
-      { return new ASMailFolder::ResultFolderExists(mf, t, name, delimiter, attrib, ud); }
+   static ASMailFolder::ResultFolderExists *
+   Create(ASMailFolder *mf,
+          Ticket t,
+          const String &name,
+          char delimiter,
+          long attrib,
+          UserData ud)
+   {
+      return new
+         ASMailFolderResultFolderExists(mf, t, name, delimiter, attrib, ud);
+   }
 
-   String GetName(void) const { return m_Name; }
-   char GetDelimiter(void) const { return m_Delim; }
-   long GetAttributes(void) const { return m_Attrib; }
+   static ASMailFolder::ResultFolderExists *
+   CreateNoMore(ASMailFolder *mf, Ticket t, UserData ud)
+   {
+      return new ASMailFolderResultFolderExists(mf, t, ud);
+   }
+
+   String GetName() const { return m_Name; }
+   char GetDelimiter() const { return m_Delim; }
+   long GetAttributes() const { return m_Attrib; }
+
+   bool NoMore() const { return m_NoMore; }
 
 protected:
-   ASMailFolderResultFolderExists(ASMailFolder *mf, Ticket t,
-                       const String &name, char delimiter, long attrib,
-                       UserData ud)
+   // ctor for "no more folders" result
+   ASMailFolderResultFolderExists(ASMailFolder *mf,
+                                  Ticket t,
+                                  UserData ud)
       : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_ListFolders, NULL, ud)
-      {
-         m_Name = name;
-         m_Delim = delimiter;
-         m_Attrib = attrib;
-      }
+   {
+      m_NoMore = true;
+   }
+
+   // ctor for "folder available" result
+   ASMailFolderResultFolderExists(ASMailFolder *mf,
+                                  Ticket t,
+                                  const String& name,
+                                  char delimiter,
+                                  long attrib,
+                                  UserData ud)
+      : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_ListFolders, NULL, ud)
+   {
+      m_Name = name;
+      m_Delim = delimiter;
+      m_Attrib = attrib;
+      m_NoMore = false;
+   }
+
 private:
    String m_Name;
    long m_Attrib;
    char m_Delim;
+   bool m_NoMore;
 };
 
 /** A useful helper class to keep tickets for us. */

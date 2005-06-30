@@ -99,9 +99,6 @@ public:
    /// return the folder flags
    virtual int GetFlags(void) const;
 
-   /// Return IMAP spec
-   virtual String GetImapSpec(void) const { return m_ImapSpec; }
-
    /// return full IMAP spec including the login name
    static String GetFullImapSpec(const MFolder *folder, const String& login);
 
@@ -506,12 +503,18 @@ private:
 
    /**
       Data used by ListFolders().
-    */
 
-   // TODO: put all this into a single struct
-   UserData m_UserData;
-   Ticket   m_Ticket;
-   ASMailFolder *m_ASMailFolder;
+      This pointer is not NULL only inside ListFolders() call.
+    */
+   struct ListFoldersData
+   {
+      ListFoldersData(ASMailFolder *asmf, Ticket ticket, UserData ud);
+      ~ListFoldersData();
+
+      UserData m_UserData;
+      Ticket   m_Ticket;
+      ASMailFolder *m_ASMailFolder;
+   } *m_listData;
 
    //@}
 
@@ -593,8 +596,9 @@ public:
        @param str message str
        @param errflg error level
        */
-   static void mm_notify(MAILSTREAM *stream, String str, long
-                         errflg);
+   static void mm_notify(MAILSTREAM *stream,
+                         const String& str,
+                         long errflg);
 
    /** this mailbox name matches a listing request
        @param stream mailstream
@@ -602,7 +606,9 @@ public:
        @param name    mailbox name
        @param attrib   mailbox attributes
        */
-   static void mm_list(MAILSTREAM *stream, char delim, String name,
+   static void mm_list(MAILSTREAM *stream,
+                       char delim,
+                       const String& name,
                        long attrib);
 
    /** matches a subscribed mailbox listing request
@@ -611,14 +617,19 @@ public:
        @param name   mailbox name
        @param attrib   mailbox attributes
        */
-   static void mm_lsub(MAILSTREAM *stream, char delim, String name,
+   static void mm_lsub(MAILSTREAM *stream,
+                       char delim,
+                       const String& name,
                        long attrib);
+
    /** status of mailbox has changed
        @param stream   mailstream
        @param mailbox    mailbox name for this status
        @param status   structure with new mailbox status
        */
-   static void mm_status(MAILSTREAM *stream, String mailbox, MAILSTATUS *status);
+   static void mm_status(MAILSTREAM *stream,
+                         const String& mailbox,
+                         MAILSTATUS *status);
 
    /** log a message
        @param str   message string

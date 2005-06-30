@@ -38,8 +38,6 @@ public:
 
    virtual String GetName() const;
 
-   virtual String GetImapSpec() const;
-
    virtual MFolderType GetType() const;
 
    virtual int GetFlags() const;

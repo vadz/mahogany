@@ -216,11 +216,6 @@ String MailFolderVirt::GetName() const
    return m_folder->GetFullName();
 }
 
-String MailFolderVirt::GetImapSpec() const
-{
-   return GetName();
-}
-
 MFolderType MailFolderVirt::GetType() const
 {
    return m_folder->GetType();

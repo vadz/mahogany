@@ -86,7 +86,7 @@ static const size_t PROGRESS_THRESHOLD = 10;
 
 static void RemoveTrailingDelimiters(wxString *s, wxChar chDel = '/')
 {
-   // now remove trailing backslashes if any
+   // now remove trailing slashes if any
    size_t len = s->length();
    while ( len > 0 && (*s)[len - 1] == chDel )
    {
@@ -165,7 +165,7 @@ private:
    // the folder name separator
    wxChar m_chDelimiter;
 
-   // the full spec of the folder whose children we're currently listing
+   // the path of the folder whose children we're currently listing
    wxString m_reference;
 
    // the item which we're currently populating in the tree
@@ -256,7 +256,7 @@ public:
    }
 
    // callbacks
-   void OnChar(wxKeyEvent& event);
+   void OnKeyDown(wxKeyEvent& event);
 
 private:
    wxSubscriptionDialog *m_dialog;
@@ -307,7 +307,7 @@ private:
    // the (cached) flags of this folder
    int m_flagsParent;
 
-   // the full spec of the folder whose children we're currently listing
+   // the path of the folder whose children we're currently listing
    wxString m_reference;
 };
 
@@ -320,7 +320,7 @@ BEGIN_EVENT_TABLE(wxSubfoldersTree, wxTreeCtrl)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderNameTextCtrl, wxTextCtrl)
-   EVT_CHAR(wxFolderNameTextCtrl::OnChar)
+   EVT_KEY_DOWN(wxFolderNameTextCtrl::OnKeyDown)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxSubscriptionDialog, wxManuallyLaidOutDialog)
@@ -359,8 +359,6 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    m_mailFolder = mailFolder;
    m_mailFolder->IncRef();
 
-   m_reference = m_mailFolder->GetImapSpec();
-
    m_progressInfo = (MProgressInfo *)NULL;
    m_chDelimiter = m_mailFolder->GetFolderDelimiter();
    m_idParent = wxTreeItemId();
@@ -381,7 +379,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
 
          RemoveTrailingDelimiters(&m_folderPath);
 
-         // andnow only leave the last component
+         // and now only leave the last component
          m_folderPath = m_folderPath.AfterLast('/');
       }
    }
@@ -454,8 +452,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // we may need a separator
       if ( !m_reference.empty() )
       {
-         wxChar chLast = m_reference.Last();
-         if ( chLast != '}' && chLast != m_chDelimiter )
+         if ( m_reference.Last() != m_chDelimiter )
          {
             ASSERT_MSG( m_chDelimiter, _T("should have folder name separator") );
 
@@ -468,17 +465,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       MBusyCursor bc;
 
       // now OnNewFolder() and OnNoMoreFolders() will be called
-      //
-      // NB: the cast below is needed as ListEventReceiver compares the user
-      //     data in the results it gets with "this" and its this pointer is
-      //     different from our "this" as we use multiple inheritance
-      m_mailFolder->ListFolders
-                    (
-                       _T("%"),         // everything at this tree level
-                       FALSE,       // subscribed only?
-                       reference,   // path relative to the folder
-                       (ListEventReceiver *)this  // data for the callback
-                    );
+      List(m_mailFolder, _T("%"), reference);
 
       // process the events from ListFolders
       do
@@ -518,15 +505,15 @@ wxSubfoldersTree::OnListFolder(const String& spec,
       Hide();
    }
 
-   // we're passed a folder specification - extract the folder name from it
+   // we're passed a folder path -- extract the folder name from it
    wxString name;
    if ( spec.StartsWith(m_reference, &name) )
    {
       if ( m_chDelimiter )
       {
-         if ( !!name && name[0u] == m_chDelimiter )
+         if ( *name.c_str() == m_chDelimiter )
          {
-            name = name.c_str() + 1;
+            name.erase(0, 1);
          }
       }
 
@@ -673,35 +660,38 @@ wxSubfoldersTree::~wxSubfoldersTree()
 // wxFolderNameTextCtrl
 // ----------------------------------------------------------------------------
 
-void wxFolderNameTextCtrl::OnChar(wxKeyEvent& event)
+void wxFolderNameTextCtrl::OnKeyDown(wxKeyEvent& event)
 {
    ASSERT( event.GetEventObject() == this ); // how can we get anything else?
 
-   // we're only interested in TABs and only it's not a second TAB in a row
-   if ( event.GetKeyCode() == WXK_TAB )
+   // we're only interested in TABs and only if it's not a second TAB in a row
+   if ( event.GetKeyCode() != WXK_TAB )
    {
-      if ( IsModified() &&
-           !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
-      {
-         // mark control as being "not modified" - if the user presses TAB
-         // the second time go to the next window immediately after having
-         // expanded the entry
-         DiscardEdits();
-
-         if ( m_dialog->OnComplete(this) )
-         {
-            // text changed
-            return;
-         }
-         //else: process normally
-      }
-      //else: nothing because we're not interested in Ctrl-TAB, Shift-TAB &c -
-      //      and also in the TABs if the last one was already a TAB
+      event.Skip();
+      return;
    }
 
-   // let the text control process it normally: if it's a TAB this will make
-   // the focus go to the next window
-   event.Skip();
+   if ( IsModified() &&
+        !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
+   {
+      // mark control as being "not modified" - if the user presses TAB
+      // the second time go to the next window immediately after having
+      // expanded the entry
+      DiscardEdits();
+
+      if ( m_dialog->OnComplete(this) )
+      {
+         // text changed
+         return;
+      }
+      //else: process normally
+   }
+   //else: nothing because we're not interested in Ctrl-TAB, Shift-TAB &c -
+   //      and also in the TABs if the last one was already a TAB
+
+   // handle TAB as usually: navigate to the next control (or previous one
+   // with Shift)
+   Navigate(!event.ShiftDown());
 }
 
 // ----------------------------------------------------------------------------
@@ -986,21 +976,17 @@ void wxSubscriptionDialog::OnText(wxCommandEvent& event)
 
 bool wxSubscriptionDialog::OnComplete(wxTextCtrl *textctrl)
 {
-   if ( !!m_completion )
-   {
-      m_settingFromProgram = true;
-
-      textctrl->SetValue(m_completion);
-      m_completion.clear();
-
-      m_settingFromProgram = false;
-
-      return true;
-   }
-   else
-   {
+   if ( !m_completion.empty() )
       return false;
-   }
+
+   m_settingFromProgram = true;
+
+   textctrl->SetValue(m_completion);
+   m_completion.clear();
+
+   m_settingFromProgram = false;
+
+   return true;
 }
 
 bool wxSubscriptionDialog::TransferDataFromWindow()
@@ -1020,7 +1006,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       // this will be used to set MF_FLAGS_GROUP flag later
       bool isGroup = m_treectrl->ItemHasChildren(id);
 
-      // construct the full folder name by going upwars the tree and
+      // construct the full folder name by going upwards the tree and
       // concatenating everything
       wxArrayString components;
       wxArrayTreeItemIds ids;
@@ -1140,7 +1126,6 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    m_folder->IncRef();
    m_flagsParent = m_folder->GetFlags();
 
-   m_reference = mailFolder->GetImapSpec();
    m_nFoldersRetrieved = 0u;
    m_finished = false;
 
@@ -1210,9 +1195,9 @@ ListFolderEventReceiver::OnListFolder(const String& spec,
    if ( spec.StartsWith(m_reference, &name) )
    {
       // remove the leading delimiter to get a relative name
-      if ( name[0u] == chDelimiter && chDelimiter != '\0')
+      if ( chDelimiter != '\0' && *name.c_str() == chDelimiter )
       {
-         name = name.c_str() + 1;
+         name.erase(0, 1);
       }
    }
 

@@ -30,21 +30,24 @@ public:
    virtual ~ListEventReceiver();
 
    /**
-     Call OnListFolder() for all folders under the given one. Note that if this
-     method is used, then the path in OnListFolder() will be just the folder
-     path and not the full IMAP spec as when asmf->ListFolders() is called
-     directly (the possibility to do the latter is kept just for the backwards
-     compatibility with the code in wxSubfoldersDialog.cpp).
+     Call OnListFolder() for all folders under the given one.
 
      @param asmf the folder to list the subfolders of
+     @param pattern wildcard matching the folders to be listed
+     @param root the path to start listing from, "" means start from root
      @return true if ok, false if ListFolders() failed
     */
-   bool ListAll(ASMailFolder *asmf);
+   bool List(ASMailFolder *asmf, const String& pattern, const String& root);
+
+   /**
+     Shortcut to List(asmf, "*", ""): returns all folders starting from root.
+    */
+   bool ListAll(ASMailFolder *asmf) { return List(asmf, _T("*"), String()); }
 
    /**
      Override this method to process an mm_list() notification for one folder.
 
-     @param path the full path to the folder (may include IMAP spec or not)
+     @param path the full path to the folder
      @param delim the folder hierarchy delimiter
      @param flags the attributes (combination of ASMailFolder::ATT_XXX values)
     */
@@ -62,9 +65,6 @@ public:
 private:
    // MEventReceiver cookie for the event manager
    void *m_regCookie;
-
-   // the IMAP spec of the folder we're listing the subfolders of or empty
-   String m_specRoot;
 };
 
 #endif // _LISTRECEIVER_H_

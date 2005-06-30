@@ -1143,8 +1143,11 @@ char MailFolder::GetFolderDelimiter(const MFolder *folder)
       case MF_MH:
       case MF_MDIR:
       case MF_MFILE:
-         // the filenames use slash as separator
-         return wxFILE_SEP_PATH;
+         // the filenames use slash as separator: note that we use slash both
+         // under Unix and Windows because all the file functions under Windows
+         // still understand slashes and using backslashes just adds a lot of
+         // confusion
+         return '/';
 
       case MF_NNTP:
       case MF_NEWS:

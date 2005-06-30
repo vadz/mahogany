@@ -1008,8 +1008,8 @@ public:
 
    /** Get a listing of all mailboxes.
        @param pattern a wildcard matching the folders to list
-       @param subscribed_only if true, only the subscribed ones
-       @param reference implementation dependend reference
+       @param subscribed_only return only the folders we're subscribed to if true
+       @param reference the path to start from
     */
    Ticket ListFolders(const String &pattern,
                       bool subscribed_only,
@@ -1207,20 +1207,6 @@ char ASMailFolder::GetFolderDelimiter() const
    mf->DecRef();
 
    return chDelim;
-}
-
-String ASMailFolder::GetImapSpec(void) const
-{
-   String spec;
-   MailFolder *mf = GetMailFolder();
-   if ( mf )
-   {
-      spec = ((MailFolderCC *)mf)->GetImapSpec();
-
-      mf->DecRef();
-   }
-
-   return spec;
 }
 
 // ----------------------------------------------------------------------------

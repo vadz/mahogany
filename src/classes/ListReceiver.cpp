@@ -51,17 +51,14 @@ ListEventReceiver::~ListEventReceiver()
    MEventManager::Deregister(m_regCookie);
 }
 
-bool ListEventReceiver::ListAll(ASMailFolder *asmf)
+bool
+ListEventReceiver::List(ASMailFolder *asmf,
+                        const String& pattern,
+                        const String& root)
 {
    CHECK( asmf, false, _T("NULL ASMailFolder in ListEventReceiver::ListAll") );
 
-   m_specRoot = asmf->GetImapSpec();
-
-   Ticket t = asmf->ListFolders(_T(""), false, _T(""), this);
-   if ( t == ILLEGAL_TICKET )
-      return false;
-
-   return true;
+   return asmf->ListFolders(pattern, false, root, this) != ILLEGAL_TICKET;
 }
 
 bool ListEventReceiver::OnMEvent(MEventData& event)
@@ -91,29 +88,18 @@ bool ListEventReceiver::OnMEvent(MEventData& event)
 
    // is it the special event which signals that there will be no more of
    // folders?
-   wxString path = result->GetName();
-   if ( path.empty() )
+   if ( result->NoMore() )
    {
       // end of enumeration
       OnNoMoreFolders();
-
-      m_specRoot.clear();
    }
-   else
+   else // notification about a folder
    {
-      // if our ListAll() was called, make path really just a path from the
-      // full c-client IMAP spec (otherwise m_specRoot is empty and calling
-      // StartsWith() is a NOOP: it just copies path to name)
-      String name;
-      if ( !path.StartsWith(m_specRoot, &name) )
-      {
-         FAIL_MSG( _T("unexpected folder in mm_list()") );
-      }
-
       const wxChar delim = result->GetDelimiter();
+      String name = result->GetName();
 
       // we don't want the leading slash, if any
-      if ( !name.empty() && name[0u] == delim )
+      if ( *name.c_str() == delim )
          name.erase(0, 1);
 
       OnListFolder(name, delim, result->GetAttributes());
