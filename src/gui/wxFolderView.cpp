@@ -2905,8 +2905,12 @@ wxFolderListCtrl::GetSelectionsOrFocus() const
    switch ( seq.GetCount() )
    {
       case 0:
-         // if no selection, use the focused item
-         uids.Add(GetFocusedUId());
+         // if no selection, use the focused item (if any)
+         {
+            const UIdType uidFocus = GetFocusedUId();
+            if ( uidFocus != UID_ILLEGAL )
+               uids.Add(uidFocus);
+         }
          break;
 
       case 1:
