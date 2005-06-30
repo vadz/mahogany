@@ -467,7 +467,7 @@ private:
 
    void CreateProgressDialog();
    bool GetMessage();
-   void GetSenderSubject(String &from,String &subject);
+   void GetSenderSubject(String& from, String& subject);
    bool TreatAsJunk();
    String CreditsCommon();
    String CreditsForDialog();
@@ -2885,10 +2885,23 @@ FilterRuleApply::Evaluate()
    return m_retval.IsNumber();
 }
 
-void FilterRuleApply::GetSenderSubject(String &from,String &subject)
+void FilterRuleApply::GetSenderSubject(String& from, String& subject)
 {
    subject = MailFolder::DecodeHeader(m_parent->m_MailMessage->Subject());
-   from = MailFolder::DecodeHeader(m_parent->m_MailMessage->From());
+
+   AddressList_obj addrList(m_parent->m_MailMessage->GetAddressList(MAT_FROM));
+   Address *addr = addrList ? addrList->GetFirst() : NULL;
+   if ( addr )
+   {
+      // show just the personal name if any, otherwise show the address
+      from = addr->GetName();
+      if ( from.empty() )
+         from << _T('<') << addr->GetEMail() << _T('>');
+   }
+   else // no valid sender address
+   {
+      from = _("unknown sender");
+   }
 }
 
 bool FilterRuleApply::TreatAsJunk()
@@ -2903,9 +2916,13 @@ bool FilterRuleApply::TreatAsJunk()
 
 String FilterRuleApply::CreditsCommon()
 {
-   String common;
-   common.Printf(_("Filtering message %u/%u"),
-      m_idx + 1, m_msgs.GetCount());
+   String common(_("Filtering message"));
+
+   // don't append "1/1" as it carries no useful information
+   const unsigned count = m_msgs.GetCount();
+   if ( count != 1 )
+      common += String::Format(_T(" %u/%u"), m_idx + 1, count);
+
    return common;
 }
 
@@ -2926,10 +2943,10 @@ String FilterRuleApply::CreditsForDialog()
       {
          String from;
          String subject;
-         GetSenderSubject(from,subject);
+         GetSenderSubject(from, subject);
 
          textPD << _T('\n') << _("From: ") << from
-            << _T('\n') << _("Subject: ") << subject;
+                << _T('\n') << _("Subject: ") << subject;
       }
    }
    
@@ -2944,7 +2961,7 @@ String FilterRuleApply::CreditsForStatusBar()
    {
       String from;
       String subject;
-      GetSenderSubject(from,subject);
+      GetSenderSubject(from, subject);
    
       textLog << _T(" (");
 
@@ -2955,6 +2972,14 @@ String FilterRuleApply::CreditsForStatusBar()
    
       if ( !subject.empty() )
       {
+         // the length of status bar text is limited under Windows and, anyhow,
+         // status bar is not that wide so truncate subjects to something
+         // reasonable
+         if ( subject.length() > 40 )
+         {
+            subject = subject.Left(18) + _T("...") + subject.Right(18);
+         }
+
          textLog << _("about '") << subject << '\'';
       }
       else
