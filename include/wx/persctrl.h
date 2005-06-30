@@ -536,18 +536,19 @@ public:
         // set the path to use (either absolute or relative)
     void SetConfigPath(const wxString& path);
 
-    // callbacks
-        // when we're resized the first time we restore our page
-    void OnSize(wxSizeEvent& event);
+
+    // restore the selection: this may be called manually if it needs to be
+    // done before first wxEVT_SIZE, otherwise it's done automatically then
+    void RestoreSelection();
 
 protected:
     bool       m_bFirstTime;  // FIXME hack used in OnSize()
     wxPHelper *m_persist;
 
-    // do remember/restore the selection
-       // retrieve the column widths from config
-    void RestoreSelection();
-       // save the column widths to config
+    // call RestoreSelection() once we're fully initialized
+    void OnSize(wxSizeEvent& event);
+
+    // save the current selection
     void SaveSelection();
 
 private:

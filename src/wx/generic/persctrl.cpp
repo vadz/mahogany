@@ -1032,11 +1032,8 @@ void wxPListBox::SetConfigPath(const wxString& path)
 // (surely they may be added after ctor call)
 void wxPListBox::OnSize(wxSizeEvent& event)
 {
-    if ( m_bFirstTime ) {
+    if ( m_bFirstTime )
         RestoreSelection();
-
-        m_bFirstTime = FALSE;
-    }
 
     // important things may be done in the base class version!
     event.Skip();
@@ -1045,6 +1042,8 @@ void wxPListBox::OnSize(wxSizeEvent& event)
 // retrieve the selection from config
 void wxPListBox::RestoreSelection()
 {
+    m_bFirstTime = false;
+
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
