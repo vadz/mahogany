@@ -184,6 +184,13 @@ extern const MPersMsgBox *M_MSGBOX_NO_NET_PING_ANYWAY;
 /// invalid value for MailFolderCC::m_chDelimiter
 #define ILLEGAL_DELIMITER ((char)-1)
 
+// special suffix which we use to implement mailboxes containing both messages
+// and other mailboxes with drivers which don't support this: if it's
+// impossible to put both messages and mailboxes in a mailbox "foo", we create
+// a mailbox "foo.messages" for the messages and use "foo" only for children
+static const char *MAILBOX_MSGS_SUFFIX = ".messages";
+static const size_t MAILBOX_MSGS_SUFFIX_LEN = strlen(MAILBOX_MSGS_SUFFIX);
+
 // ----------------------------------------------------------------------------
 // trace masks used (you have to wxLog::AddTraceMask() to enable the
 // correpsonding kind of messages)
@@ -5369,6 +5376,14 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    CHECK_RET( asmf, _T("no ASMailFolder in ListFolders") );
 
    String spec = m_ImapSpec;
+
+   // hack: if the folder ends with this special suffix, the driver doesn't
+   // support "dual use" mailboxes and so any child mailboxes are put under
+   // "foo" and not "foo.messages" (see comment near MAILBOX_MSGS_SUFFIX)
+   if ( spec.Right(MAILBOX_MSGS_SUFFIX_LEN) == MAILBOX_MSGS_SUFFIX )
+   {
+      spec.RemoveLast(MAILBOX_MSGS_SUFFIX_LEN);
+   }
 
    // make sure that there is a folder name delimiter before pattern -- this is
    // convenient for the calling code however it makes it impossible to
