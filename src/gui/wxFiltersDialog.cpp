@@ -542,9 +542,10 @@ private:
    wxChoice   *m_Logical;  // corresponds to ORC_Logical
    wxChoice   *m_Type;     // corresponds to ORC_Types
 
-   // the controls which are shown for most of ORC_T_XXX values
-   wxTextCtrl *m_Argument; // string, number of days or bytes
-   wxChoice   *m_Where;    // corresponds to ORC_Where
+   // the controls which are shown for many of ORC_T_XXX values
+   wxTextCtrl *m_Argument;    // string, number of days or bytes
+   wxChoice   *m_Where;       // corresponds to ORC_Where
+   wxStaticText *m_helpText;  // the explanation text for some items
 
    // special controls
    wxChoice   *m_choiceFlags; // used for ORC_T_HasFlag
@@ -624,6 +625,8 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
                           wxDefaultSize, ORC_WhereCountS, whereTrans);
 
+   m_helpText = new wxStaticText(parent, -1, wxEmptyString);
+
    // set up the initial values or the code in UpdateProgram() would complain
    // about invalid values
    m_Type->SetSelection(MFDialogTest_toSelect(ORC_T_Contains));
@@ -699,6 +702,13 @@ OneCritControl::LayoutControls(wxWindow **last)
    c->height.AsIs();
    m_choiceFlags->SetConstraints(c);
 
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Argument, LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->centreY.SameAs(m_Not, wxCentreY);
+   c->height.AsIs();
+   m_helpText->SetConstraints(c);
+
    *last = m_Where;
 }
 
@@ -719,33 +729,61 @@ OneCritControl::CreateSpamButton()
    m_Parent->Layout();
 }
 
+static void EnableAndShow(wxWindow *win, bool enable)
+{
+   win->Show(enable);
+   if ( enable )
+      win->Enable(enable);
+}
+
 void
 OneCritControl::UpdateUI(wxTextCtrl *textProgram)
 {
-   // decide what to show and enable
-   MFDialogTest test   = GetTest();
-   bool enable_isspam  = test == ORC_T_IsSpam;
-   bool enable_msgflag = test == ORC_T_HasFlag;
-   bool enable_arg     = ! enable_isspam && ! enable_msgflag &&
-                         FilterTestNeedsArgument(test);
-   bool enable_target  = FilterTestNeedsTarget(test);
+   // decide which controls to enable for this test
+   bool enableMsgFlag = false,
+        enableArg = false,
+        enableTarget = false,
+        enableSpam = false,
+        enableHelpText = false;
 
-   // disable everything if test not implemented
-   if ( ! FilterTestImplemented(test) )
+   const MFDialogTest test = GetTest();
+
+   if ( FilterTestImplemented(test) )
    {
-      enable_msgflag = false;
-      enable_arg     = false;
-      enable_target  = false;
-      enable_isspam  = false;
-   }
+      switch ( test )
+      {
+         case ORC_T_IsSpam:
+            enableSpam = true;
+            break;
 
-   m_choiceFlags->Show(enable_msgflag);
-   m_choiceFlags->Enable(enable_msgflag);
-   m_Argument->Show(enable_arg);
-   m_Argument->Enable(enable_arg);
-   m_Where->Show(enable_target);
-   m_Where->Enable(enable_target);
-   if ( enable_isspam && !m_btnSpam )
+         case ORC_T_HasFlag:
+            enableMsgFlag = true;
+            break;
+
+         case ORC_T_LargerThan:
+         case ORC_T_SmallerThan:
+            m_helpText->SetLabel(_(" kB"));
+            enableHelpText = true;
+            break;
+
+         case ORC_T_OlderThan:
+         case ORC_T_NewerThan:
+            m_helpText->SetLabel(_(" days"));
+            enableHelpText = true;
+            break;
+      }
+
+      enableArg = !enableSpam && !enableMsgFlag && FilterTestNeedsArgument(test);
+      enableTarget = FilterTestNeedsTarget(test);
+   }
+   //else: disable everything if test not implemented
+
+   EnableAndShow(m_choiceFlags, enableMsgFlag);
+   EnableAndShow(m_Argument, enableArg);
+   EnableAndShow(m_Where, enableTarget);
+   EnableAndShow(m_helpText, enableHelpText);
+
+   if ( enableSpam && !m_btnSpam )
    {
       CreateSpamButton();
       m_spamOptions = m_Argument->GetValue();
@@ -753,8 +791,8 @@ OneCritControl::UpdateUI(wxTextCtrl *textProgram)
 
    if ( m_btnSpam )
    {
-      m_btnSpam->Show(enable_isspam);
-      m_btnSpam->Enable(enable_isspam);
+      m_btnSpam->Show(enableSpam);
+      m_btnSpam->Enable(enableSpam);
    }
 }
 
@@ -766,6 +804,7 @@ OneCritControl::Disable()
    m_choiceFlags->Disable();
    m_Argument->Disable();
    m_Where->Disable();
+   m_helpText->Disable();
    if ( m_Logical )
       m_Logical->Disable();
 }
@@ -927,32 +966,32 @@ void
 OneActionControl::UpdateUI()
 {
    MFDialogAction type = GetAction();
-   bool enable_msgflag = FilterActionMsgFlag(type);
-   bool enable_arg     = ! enable_msgflag && FilterActionNeedsArg(type);
-   bool enable_colour  = FilterActionUsesColour(type);
-   bool enable_folder  = FilterActionUsesFolder(type);
+   bool enableMsgFlag = FilterActionMsgFlag(type);
+   bool enableArg     = ! enableMsgFlag && FilterActionNeedsArg(type);
+   bool enableColour  = FilterActionUsesColour(type);
+   bool enableFolder  = FilterActionUsesFolder(type);
 
    // disable everything if action not implemented
    if ( ! FilterActionImplemented(type) )
    {
-      enable_msgflag = false;
-      enable_arg     = false;
-      enable_colour  = false;
-      enable_folder  = false;
+      enableMsgFlag = false;
+      enableArg     = false;
+      enableColour  = false;
+      enableFolder  = false;
    }
 
-   m_choiceFlags->Show(enable_msgflag);
-   m_choiceFlags->Enable(enable_msgflag);
-   m_btnColour->Show(enable_colour);
-   m_btnColour->Enable(enable_colour);
-   m_btnFolder->Show(enable_folder);
-   m_btnFolder->Enable(enable_folder);
+   m_choiceFlags->Show(enableMsgFlag);
+   m_choiceFlags->Enable(enableMsgFlag);
+   m_btnColour->Show(enableColour);
+   m_btnColour->Enable(enableColour);
+   m_btnFolder->Show(enableFolder);
+   m_btnFolder->Enable(enableFolder);
 
    // update the argument *after* updating the browse buttons because their
    // Enable() disables the text control as well if they're disabled and so the
    // text could end up disabled even when it should be enabled
-   m_Argument->Show(enable_arg);
-   m_Argument->Enable(enable_arg);
+   m_Argument->Show(enableArg);
+   m_Argument->Enable(enableArg);
 }
 
 OneActionControl::OneActionControl(wxWindow *parent)
@@ -1087,7 +1126,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->top.SameAs(box, wxTop, 5*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    msg->SetConstraints(c);
 
