@@ -211,9 +211,6 @@ public:
 
    //@}
 
-   /** @name Static functions, implemented in MailFolder.cpp */
-   //@{
-
    /** @name Opening folders */
    //@{
    /**
@@ -381,7 +378,7 @@ public:
    //@}
 
    /**
-     @name Subscription management
+     @name Mailbox management
     */
    //@{
    /** Subscribe to a given mailbox (related to the
@@ -415,8 +412,9 @@ public:
                             const String &reference = _T(""),
                             UserData ud = 0,
                             Ticket ticket = ILLEGAL_TICKET) = 0;
+
    //@}
-   //@}
+
 
    /** @name Accessors */
    //@{
@@ -496,6 +494,29 @@ public:
      @return the delimiter character or NUL
     */
    static char GetFolderDelimiter(const MFolder *folder);
+
+   /**
+      Get the logical mailbox name (as opposed to the physical one).
+
+      Usually these 2 names are the same and they're only ever different for
+      dual use mailboxes when the underlying driver doesn't support them. Dual
+      use mailboxes are those which contain both messages and other mailboxes
+      and are very convenient but not always directly supported (notorious
+      example is MB(O)X format which represents each mailbox as a file and as a
+      file can't be both a regular file and a subdirectory, it can contain
+      either only messages or only other mailboxes but not both).
+
+      If the dual use mailboxes are not supported directly, we emulate them
+      using the following simple schema: for a dual use mailbox "foo" we use 2
+      physical mailboxes: "foo" containing the subfolders and "foo.messages"
+      containing the messages. This functions returns the logical name "foo"
+      given either "foo" (i.e. normal situation) or "foo.messages".
+
+      @param name the physical name of the mailbox
+      @return the logical name of the mailbox with the given name (*not* of
+              this one!)
+    */
+   virtual String GetLogicalMailboxName(const String& name) { return name; }
 
    //@}
 

@@ -5393,6 +5393,15 @@ MailFolderCC::ListFoldersData::~ListFoldersData()
    m_ASMailFolder->DecRef();
 }
 
+static String RemoveMsgsSuffix(const String& namePhysical)
+{
+   String name(namePhysical);
+   if ( name.Right(MAILBOX_MSGS_SUFFIX_LEN) == MAILBOX_MSGS_SUFFIX )
+      name.RemoveLast(MAILBOX_MSGS_SUFFIX_LEN);
+
+   return name;
+}
+
 void
 MailFolderCC::ListFolders(ASMailFolder *asmf,
                           const String &pattern,
@@ -5407,15 +5416,12 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 
    CHECK_RET( !m_listData, _T("reentrancy in MailFolderCC::ListFolders") );
 
-   String spec = m_ImapSpec;
 
    // hack: if the folder ends with this special suffix, the driver doesn't
    // support "dual use" mailboxes and so any child mailboxes are put under
    // "foo" and not "foo.messages" (see comment near MAILBOX_MSGS_SUFFIX)
-   if ( spec.Right(MAILBOX_MSGS_SUFFIX_LEN) == MAILBOX_MSGS_SUFFIX )
-   {
-      spec.RemoveLast(MAILBOX_MSGS_SUFFIX_LEN);
-   }
+   String spec = RemoveMsgsSuffix(m_ImapSpec);
+
 
    // make sure that there is a folder name delimiter before pattern
    //
@@ -5538,6 +5544,11 @@ char MailFolderCC::GetFolderDelimiter() const
    ASSERT_MSG( m_chDelimiter != ILLEGAL_DELIMITER, _T("should have delimiter") );
 
    return m_chDelimiter;
+}
+
+String MailFolderCC::GetLogicalMailboxName(const String& name)
+{
+   return RemoveMsgsSuffix(name);
 }
 
 // ----------------------------------------------------------------------------
