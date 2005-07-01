@@ -41,12 +41,6 @@
 
 #include "gui/wxDialogLayout.h"
 
-// this gets rid of the assert warning, but not of the real problem: we should
-// be able to redraw the window without calling wxYield() at all
-#if wxCHECK_VERSION(2, 2, 6)
-   #define wxYield wxYieldIfNeeded
-#endif // wxWin 2.2.6+
-
 // TODO: this code doesn't work yet, finish it
 //#define USE_SELECT_BUTTONS
 
@@ -97,6 +91,57 @@ static void RemoveTrailingDelimiters(wxString *s, wxChar chDel = '/')
    s->Truncate(len);
 }
 
+/// Values for StringStartsWith() last argument
+enum CaseSensitivity
+{
+   Case_Exact,
+   Case_Ignore
+};
+
+/**
+   Compare two characaters either case sensitively or not.
+ */
+static inline bool IsSame(wxChar ch1, wxChar ch2, CaseSensitivity cs)
+{
+   return cs == Case_Ignore ? wxToupper(ch1) == wxToupper(ch2) : ch1 == ch2;
+}
+
+/**
+   Checks whether the given string starts with the prefix and returns the
+   remainder of the string in this case.
+
+   @param str the string to examine
+   @param prefix the prefix to detect and possibly remove
+   @param cs case sensitivity: if Case_Ignore, prefix is matched ignoring case
+   @param rest if non-NULL is filled with the remaining part of the string
+               (after prefix) if the return value is true and becomes empty
+               otherwise
+   @return true if str starts with prefix
+ */
+static bool
+StringStartsWith(const String& str,
+                 const wxChar *prefix,
+                 CaseSensitivity cs = Case_Exact,
+                 String *rest = NULL)
+{
+   const wxChar *p = str.c_str();
+   while ( *prefix )
+   {
+      if ( !IsSame(*prefix++, *p++, cs) )
+      {
+         // no match
+         if ( rest )
+            rest->clear();
+         return false;
+      }
+   }
+
+   if ( rest )
+      *rest = p;
+
+   return true;
+}
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -141,6 +186,7 @@ private:
    // get the path of the item in the tree excluding the root part
    wxString GetRelativePath(wxTreeItemId id) const;
 
+
    // the progress meter
    MProgressInfo *m_progressInfo;
 
@@ -173,6 +219,21 @@ private:
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxSubfoldersTree)
+};
+
+struct SubfoldersTreeItemData : public wxTreeItemData
+{
+   SubfoldersTreeItemData(long attr_, const String& name_)
+      : name(name_),
+        attr(attr_)
+   {
+   }
+
+   const String name;
+   const long attr;
+
+
+   DECLARE_NO_COPY_CLASS(SubfoldersTreeItemData)
 };
 
 class wxSubscriptionDialog : public wxManuallyLaidOutDialog
@@ -368,20 +429,31 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    // a hack around old entries in config which were using '/inbox' instead of
    // just 'inbox' for #mh/inbox
    m_folderPath = m_folder->GetPath();
-   if ( m_folderType == MF_MH )
+   switch ( m_folderType )
    {
-      if ( !!m_folderPath )
-      {
-         if ( m_folderPath[0u] == '/' )
+      case MF_MH:
+         if ( !m_folderPath.empty() )
          {
-            m_folderPath.erase(0, 1);
+            if ( m_folderPath[0u] == '/' )
+            {
+               m_folderPath.erase(0, 1);
+            }
+
+            RemoveTrailingDelimiters(&m_folderPath);
+
+            // and now only leave the last component
+            m_folderPath = m_folderPath.AfterLast('/');
          }
+         break;
 
-         RemoveTrailingDelimiters(&m_folderPath);
-
-         // and now only leave the last component
-         m_folderPath = m_folderPath.AfterLast('/');
-      }
+      case MF_FILE:
+      case MF_IMAP:
+         {
+            MailFolder_obj mf(m_mailFolder->GetMailFolder());
+            if ( mf )
+               m_folderPath = mf->GetLogicalMailboxName(m_folderPath);
+         }
+         break;
    }
 
    // show something...
@@ -483,7 +555,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
 }
 
 void
-wxSubfoldersTree::OnListFolder(const String& spec, wxChar delim, long attr)
+wxSubfoldersTree::OnListFolder(const String& path, wxChar delim, long attr)
 {
    if ( m_chDelimiter == '\0' )
       m_chDelimiter = delim;
@@ -502,51 +574,57 @@ wxSubfoldersTree::OnListFolder(const String& spec, wxChar delim, long attr)
 
    // we're passed a folder path -- extract the folder name from it
    wxString name;
-   if ( spec.StartsWith(m_reference, &name) )
+   if ( !StringStartsWith(path, m_reference, Case_Ignore, &name) )
    {
-      if ( m_chDelimiter )
-      {
-         if ( *name.c_str() == m_chDelimiter )
-         {
-            name.erase(0, 1);
-         }
-      }
+      wxLogDebug(_T("Folder specification '%s' unexpected."), path.c_str());
+      return;
+   }
 
+   if ( m_chDelimiter )
+   {
+      if ( *name.c_str() == m_chDelimiter )
+         name.erase(0, 1);
+   }
+
+   if ( name.empty() || (m_chDelimiter && wxStrchr(name, m_chDelimiter)) )
+   {
       // ignore the folder itself and any grand children - we only want the
       // direct children here
-      if ( !!name && (!m_chDelimiter || !wxStrchr(name, m_chDelimiter)) )
-      {
-         wxTreeItemId id = OnNewFolder(name);
-         if ( id.IsOk() )
-         {
-            if ( !(attr & ASMailFolder::ATT_NOINFERIORS) )
-            {
-               // this node can have children too
-               SetItemHasChildren(id);
-            }
-
-            if ( attr & ASMailFolder::ATT_NOSELECT )
-            {
-               SetItemData(id, new wxTreeItemData());
-            }
-
-            // show the folders not already present in the tree in bold
-            // so that new folders are immediately visible
-            //
-            // note that if the parent folder is not in the tree, its children
-            // don't risk to be there neither
-            MFolder_obj folder(m_folderCur ? m_folderCur->GetSubfolder(name)
-                                           : NULL);
-            if ( !folder )
-            {
-               SetItemBold(id);
-            }
-         }
-      }
+      return;
    }
-   else
+
+   // ignore "messages" part of the dual use mailboxes if we had already had
+   // the "subfolders" one
+   MailFolder_obj mf(m_mailFolder->GetMailFolder());
+   if ( !mf )
+      return;
+
+   String namePhysical = name;
+   name = mf->GetLogicalMailboxName(name);
+
+
+   // do add new folder to the tree
+   wxTreeItemId id = OnNewFolder(name);
+   if ( !id.IsOk() )
+      return;
+
+   if ( !(attr & ASMailFolder::ATT_NOINFERIORS) )
    {
-      wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
+      // this node can have children too
+      SetItemHasChildren(id);
+   }
+
+   SetItemData(id, new SubfoldersTreeItemData(attr, namePhysical));
+
+   // show the folders not already present in the tree in bold
+   // so that new folders are immediately visible
+   //
+   // note that if the parent folder is not in the tree, its children
+   // don't risk to be there neither
+   MFolder_obj folder(m_folderCur ? m_folderCur->GetSubfolder(name) : NULL);
+   if ( !folder )
+   {
+      SetItemBold(id);
    }
 }
 
@@ -570,7 +648,7 @@ wxTreeItemId wxSubfoldersTree::OnNewFolder(String& name)
       m_progressInfo->SetValue(m_nFoldersRetrieved);
    }
 
-   if ( m_chDelimiter )
+   if ( m_chDelimiter != '\0' )
       RemoveTrailingDelimiters(&name, m_chDelimiter);
 
    // and add the new folder into the tree
@@ -588,24 +666,23 @@ void wxSubfoldersTree::OnNoMoreFolders()
    Show();
    Enable();
 
+   // we lose focus during expansion because we're disabled, restore it now
+   SetFocus();
+
    if ( !m_nFoldersRetrieved && m_idParent.IsOk() )
    {
       // this item doesn't have any subfolders
       SetItemHasChildren(m_idParent, FALSE);
    }
 
-   m_idParent = wxTreeItemId(); // invalid
+   m_idParent.Unset();
 }
 
 wxTreeItemId wxSubfoldersTree::InsertInOrder(wxTreeItemId parent,
                                              const wxString& name)
 {
    // insert in alphabetic order under the parent
-#if wxCHECK_VERSION(2, 5, 0)
    wxTreeItemIdValue cookie;
-#else
-   long cookie;
-#endif
    wxTreeItemId childPrev,
                 child = GetFirstChild(parent, cookie);
    while ( child.IsOk() )
@@ -734,7 +811,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 
    m_treectrl = new wxSubfoldersTree(this, folder, mailFolder);
    c = new wxLayoutConstraints;
-   c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->top.SameAs(m_box, wxTop, 5*LAYOUT_Y_MARGIN);
    c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
    c->bottom.SameAs(m_textFind, wxTop, 2*LAYOUT_Y_MARGIN);
@@ -822,11 +899,7 @@ void wxSubscriptionDialog::SelectRecursively(const wxString& path)
          wxTreeItemId itemNew;
          wxString subStr = component.Left(n + 1);
 
-#if wxCHECK_VERSION(2, 5, 0)
          wxTreeItemIdValue cookie;
-#else
-         long cookie;
-#endif
          wxTreeItemId child = m_treectrl->GetFirstChild(item, cookie);
          while ( child.IsOk() )
          {
@@ -1024,22 +1097,20 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
 
       int flagsParent = parent->GetFlags();
 
-      wxString fullpath = m_folder->GetPath();
+      wxString fullpath = m_folderPath;
       for ( int level = levelMax - 1; level >= 0; level-- )
       {
-         wxString name = components[level];
+         const String name = components[level];
 
          // the idea for this test is to avoid creating MH folders named
          // /inbox (fullpath is empty for the root MH folder)
-         if ( !!fullpath )
+         if ( !fullpath.empty() )
          {
             fullpath += GetFolderNameSeparator();
          }
-         fullpath += name;
 
-         // to create a a/b/c, we must first create a, then b and then c, so
-         // we create a folder during each loop iteration - unless it already
-         // exists
+         // to create a/b/c, we must first create a, then b and then c, so we
+         // create a folder during each loop iteration if it doesn't exist yet
          MFolder *folderNew = parent->GetSubfolder(name);
          if ( !folderNew )
          {
@@ -1048,15 +1119,25 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             folderNew = parent->CreateSubfolder(name, m_folderType, false);
             if ( !folderNew )
             {
-               wxLogError(_("Failed to create folder '%s'."), fullpath.c_str());
+               wxLogError(_("Failed to create folder '%s'."),
+                          (fullpath + name).c_str());
 
                // can't create children if parent creation failed...
                break;
             }
 
+            SubfoldersTreeItemData *
+               data = static_cast<SubfoldersTreeItemData *>(
+                                          m_treectrl->GetItemData(ids[level]));
+
             // set up the just created folder
             Profile_obj profile(folderNew->GetProfile());
-            profile->writeEntry(MP_FOLDER_PATH, fullpath);
+
+            // notice the use of data->name: this is important as for emulated
+            // dual use mailboxes it may be different than name and here we
+            // need the real path pointing to the mailbox containing the
+            // messages, not the path in the folders hierarchy
+            profile->writeEntry(MP_FOLDER_PATH, fullpath + data->name);
 
             // copy folder flags from its parent handling MF_FLAGS_GROUP
             // specially: for all the intermediate folders, it must be set (as
@@ -1069,9 +1150,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
                flags &= ~MF_FLAGS_GROUP;
             }
 
-            // the item data is only set by the tree for non selectable
-            // folders, so a folder with item data has NOSELECT flag
-            if ( m_treectrl->GetItemData(ids[level]) )
+            if ( data && (data->attr & ASMailFolder::ATT_NOSELECT) )
             {
                flags |= MF_FLAGS_NOSELECT;
             }
@@ -1085,6 +1164,8 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             // we created a new folder, set the flag to refresh the tree
             createdSomething = TRUE;
          }
+
+         fullpath += name;
 
          parent->DecRef();
          parent = folderNew;
@@ -1126,7 +1207,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
 
    m_progressInfo = new MProgressInfo(NULL,
                                       _("Retrieving the folder list: "));
-   wxYield(); // to show the frame
+   wxYieldIfNeeded(); // to show the frame
 
    (void)mailFolder->ListFolders
                      (
@@ -1170,7 +1251,7 @@ ListFolderEventReceiver::OnNoMoreFolders()
 }
 
 void
-ListFolderEventReceiver::OnListFolder(const String& spec,
+ListFolderEventReceiver::OnListFolder(const String& path,
                                       wxChar chDelimiter,
                                       long attr)
 {
@@ -1187,7 +1268,7 @@ ListFolderEventReceiver::OnListFolder(const String& spec,
 
    // we're passed a folder specification - extract the folder name from it
    wxString name;
-   if ( spec.StartsWith(m_reference, &name) )
+   if ( StringStartsWith(path, m_reference, Case_Ignore, &name) )
    {
       // remove the leading delimiter to get a relative name
       if ( chDelimiter != '\0' && *name.c_str() == chDelimiter )
@@ -1196,78 +1277,77 @@ ListFolderEventReceiver::OnListFolder(const String& spec,
       }
    }
 
-   if ( !name.empty() )
+   if ( name.empty() )
    {
-      wxString relpath = name;
-      if ( chDelimiter != '\0' )
-         name.Replace(wxString(chDelimiter), _T("/"));
+      wxLogDebug(_T("Folder specification '%s' unexpected."), path.c_str());
+      return;
+   }
 
-      MFolder *folderNew = m_folder->GetSubfolder(name);
-      if ( !folderNew )
+   wxString relpath = name;
+   if ( chDelimiter != '\0' )
+      name.Replace(wxString(chDelimiter), _T("/"));
+
+   MFolder *folderNew = m_folder->GetSubfolder(name);
+   if ( !folderNew )
+   {
+      // last parameter tell CreateSubfolder() to not try to create
+      // this folder - we know that it already exists
+      folderNew = m_folder->CreateSubfolder(name,
+                                            m_folder->GetType(), false);
+   }
+
+   // note that we must set the folder flags/whatever even if it already
+   // exists as we can get first the notification for folder.subfolder
+   // and when we create it, we create the config group for folder as
+   // well but it is empty and so we have to set the params for it later
+   // when we get the notification for the folder itself
+   if ( folderNew )
+   {
+      Profile_obj profile(folderNew->GetProfile());
+
+      // check if the folder really already exists, if not - create it
+      if ( !profile->HasEntry(MP_FOLDER_PATH) )
       {
-         // last parameter tell CreateSubfolder() to not try to create
-         // this folder - we know that it already exists
-         folderNew = m_folder->CreateSubfolder(name,
-                                               m_folder->GetType(), false);
-      }
-
-      // note that we must set the folder flags/whatever even if it already
-      // exists as we can get first the notification for folder.subfolder
-      // and when we create it, we create the config group for folder as
-      // well but it is empty and so we have to set the params for it later
-      // when we get the notification for the folder itself
-      if ( folderNew )
-      {
-         Profile_obj profile(folderNew->GetProfile());
-
-         // check if the folder really already exists, if not - create it
-         if ( !profile->HasEntry(MP_FOLDER_PATH) )
+         int flags = m_flagsParent;
+         if ( attr & ASMailFolder::ATT_NOINFERIORS )
          {
-            int flags = m_flagsParent;
-            if ( attr & ASMailFolder::ATT_NOINFERIORS )
-            {
-               flags &= ~MF_FLAGS_GROUP;
-            }
-            else
-            {
-               flags |= MF_FLAGS_GROUP;
-            }
-
-            if ( attr & ASMailFolder::ATT_NOSELECT )
-            {
-               flags |= MF_FLAGS_NOSELECT;
-            }
-            else
-            {
-               flags &= ~MF_FLAGS_NOSELECT;
-            }
-
-            folderNew->SetFlags(flags);
-
-            String fullpath = m_folder->GetPath();
-            if ( !fullpath.empty() )
-            {
-               // we don't want the paths to start with '/', but we want to
-               // have it if there is something before
-               fullpath += chDelimiter;
-            }
-
-            fullpath += relpath;
-
-            profile->writeEntry(MP_FOLDER_PATH, fullpath);
+            flags &= ~MF_FLAGS_GROUP;
          }
-         //else: folder already exists with the correct parameters
+         else
+         {
+            flags |= MF_FLAGS_GROUP;
+         }
 
-         folderNew->DecRef();
+         if ( attr & ASMailFolder::ATT_NOSELECT )
+         {
+            flags |= MF_FLAGS_NOSELECT;
+         }
+         else
+         {
+            flags &= ~MF_FLAGS_NOSELECT;
+         }
+
+         folderNew->SetFlags(flags);
+
+         String fullpath = m_folder->GetPath();
+         if ( !fullpath.empty() )
+         {
+            // we don't want the paths to start with '/', but we want to
+            // have it if there is something before
+            fullpath += chDelimiter;
+         }
+
+         fullpath += relpath;
+
+         profile->writeEntry(MP_FOLDER_PATH, fullpath);
       }
-      else
-      {
-         wxLogError(_("Failed to create the folder '%s'"), name.c_str());
-      }
+      //else: folder already exists with the correct parameters
+
+      folderNew->DecRef();
    }
    else
    {
-      wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
+      wxLogError(_("Failed to create the folder '%s'"), name.c_str());
    }
 }
 
