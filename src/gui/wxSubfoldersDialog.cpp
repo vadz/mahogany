@@ -360,7 +360,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    m_mailFolder->IncRef();
 
    m_progressInfo = (MProgressInfo *)NULL;
-   m_chDelimiter = m_mailFolder->GetFolderDelimiter();
+   m_chDelimiter = '\0';
    m_idParent = wxTreeItemId();
 
    m_folderType = m_folder->GetType();
@@ -482,17 +482,12 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
    event.Skip();
 }
 
-#ifdef DEBUG
-   #define UNUSED_UNLESS_DEBUG(x) x
-#else
-   #define UNUSED_UNLESS_DEBUG(x)
-#endif
-
 void
-wxSubfoldersTree::OnListFolder(const String& spec,
-                               wxChar UNUSED_UNLESS_DEBUG(delim),
-                               long attr)
+wxSubfoldersTree::OnListFolder(const String& spec, wxChar delim, long attr)
 {
+   if ( m_chDelimiter == '\0' )
+      m_chDelimiter = delim;
+
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
    // for everything else), but IMAP INBOX is special and can have a NUL one
    ASSERT_MSG( delim == m_chDelimiter || !delim,
