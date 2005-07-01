@@ -467,7 +467,7 @@ private:
 
    void CreateProgressDialog();
    bool GetMessage();
-   void GetSenderSubject(String& from, String& subject);
+   void GetSenderSubject(String& from, String& subject, bool full);
    bool TreatAsJunk();
    String CreditsCommon();
    String CreditsForDialog();
@@ -2885,7 +2885,7 @@ FilterRuleApply::Evaluate()
    return m_retval.IsNumber();
 }
 
-void FilterRuleApply::GetSenderSubject(String& from, String& subject)
+void FilterRuleApply::GetSenderSubject(String& from, String& subject, bool full)
 {
    subject = MailFolder::DecodeHeader(m_parent->m_MailMessage->Subject());
 
@@ -2893,10 +2893,17 @@ void FilterRuleApply::GetSenderSubject(String& from, String& subject)
    Address *addr = addrList ? addrList->GetFirst() : NULL;
    if ( addr )
    {
-      // show just the personal name if any, otherwise show the address
-      from = addr->GetName();
-      if ( from.empty() )
-         from << _T('<') << addr->GetEMail() << _T('>');
+      if ( full )
+      {
+         from = addr->GetAddress();
+      }
+      else // short form
+      {
+         // show just the personal name if any, otherwise show the address
+         from = addr->GetName();
+         if ( from.empty() )
+            from << _T('<') << addr->GetEMail() << _T('>');
+      }
    }
    else // no valid sender address
    {
@@ -2943,7 +2950,7 @@ String FilterRuleApply::CreditsForDialog()
       {
          String from;
          String subject;
-         GetSenderSubject(from, subject);
+         GetSenderSubject(from, subject, true /* full */);
 
          textPD << _T('\n') << _("From: ") << from
                 << _T('\n') << _("Subject: ") << subject;
@@ -2961,7 +2968,7 @@ String FilterRuleApply::CreditsForStatusBar()
    {
       String from;
       String subject;
-      GetSenderSubject(from, subject);
+      GetSenderSubject(from, subject, false /* short */);
    
       textLog << _T(" (");
 
