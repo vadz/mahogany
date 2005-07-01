@@ -506,14 +506,25 @@ private:
 
       This pointer is not NULL only inside ListFolders() call.
     */
-   struct ListFoldersData
+   class ListFoldersData
    {
-      ListFoldersData(ASMailFolder *asmf, Ticket ticket, UserData ud);
+   public:
+      ListFoldersData(ASMailFolder *asmf,
+                      const String& rootSpec,
+                      Ticket ticket,
+                      UserData ud);
       ~ListFoldersData();
 
-      UserData m_UserData;
-      Ticket   m_Ticket;
+      ASMailFolder *GetFolder() const { return m_ASMailFolder; }
+      const String& GetRootSpec() const { return m_RootSpec; }
+      Ticket GetTicket() const { return m_Ticket; }
+      UserData GetData() const { return m_UserData; }
+
+   private:
       ASMailFolder *m_ASMailFolder;
+      String m_RootSpec;
+      Ticket   m_Ticket;
+      UserData m_UserData;
    } *m_listData;
 
    //@}

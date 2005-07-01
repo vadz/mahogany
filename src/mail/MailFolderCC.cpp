@@ -5075,10 +5075,16 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
 
    // translate IMAP spec to folder path
    String path;
-   if ( !name.StartsWith(mf->m_ImapSpec, &path) )
+   const String& root = mf->m_listData->GetRootSpec();
+   const size_t lenRoot = root.length();
+   if ( wxStrnicmp(name, root, lenRoot) != 0 )
    {
       FAIL_MSG( _T("returned mailbox doesn't start with reference?") );
       path = name;
+   }
+   else
+   {
+      path.assign(name, lenRoot, String::npos);
    }
 
    // create the event corresponding to the folder and process it immediately
@@ -5090,12 +5096,12 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
             (
                ASMailFolder::ResultFolderExists::Create
                (
-                mf->m_listData->m_ASMailFolder,
-                mf->m_listData->m_Ticket,
+                mf->m_listData->GetFolder(),
+                mf->m_listData->GetTicket(),
                 path,
                 delim,
                 attrib,
-                mf->m_listData->m_UserData
+                mf->m_listData->GetData()
                )
             ).get()
           )
@@ -5370,8 +5376,10 @@ MailFolder::Subscribe(const String &host,
 
 inline
 MailFolderCC::ListFoldersData::ListFoldersData(ASMailFolder *asmf,
+                                               const String& rootSpec,
                                                Ticket ticket,
                                                UserData ud)
+                             : m_RootSpec(rootSpec)
 {
    m_UserData = ud;
    m_Ticket = ticket;
@@ -5428,19 +5436,26 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       }
    }
 
-   spec << reference << (pattern.empty() ? String(_T("*")) : pattern);
-
 #ifdef OS_WIN
-   // c-client code only accepts slashes for file path separators
-   spec.Replace("\\", "/");
+   // c-client code only accepts backslashes for file path separators in
+   // MBX routines, so canonicalize the spec
+   if ( GetType() == MF_FILE )
+      spec.Replace("/", "\\");
 #endif // OS_WIN
 
 
    // remember list data, this will be used from mm_list() called by mail_list
-   m_listData = new ListFoldersData(asmf, ticket, ud);
+   m_listData = new ListFoldersData(asmf, spec, ticket, ud);
 
    (subscribedOnly ? mail_lsub : mail_list)
-      (m_MailStream, NULL, const_cast<char *>(spec.c_str()));
+   (
+      m_MailStream,
+      NULL,
+      const_cast<char *>(
+         (spec + reference + (pattern.empty() ? String(_T("*")) : pattern))
+            .c_str()
+      )
+   );
 
    // send event telling about end of listing:
    MEventManager::Send(
@@ -5449,7 +5464,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
             MakeRefCounter
             (
                ASMailFolder::ResultFolderExists::
-               CreateNoMore(asmf, m_listData->m_Ticket, m_listData->m_UserData)
+               CreateNoMore(asmf, m_listData->GetTicket(), m_listData->GetData())
             ).get()
           )
    );
