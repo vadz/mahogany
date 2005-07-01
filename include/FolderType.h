@@ -203,55 +203,28 @@ inline static int GetFolderFlags(int typeAndFlags)
    return typeAndFlags & MF_FLAGSMASK;
 }
 
-#ifdef USE_SSL
-/// is this a folder type for which username/password make sense?
-inline bool FolderTypeSupportsSSL(MFolderType type)
+/// is this a folder type for which we [may] need authentication?
+inline bool FolderTypeHasAuth(MFolderType type)
 {
    ASSERT(GetFolderType(type) == type);
-   switch(type)
-   {
-   case MF_POP:
-   case MF_IMAP:
-   case MF_NNTP:
-      return true;
-   default:
-      return false;
-   }
+
+   return type == MF_POP || type == MF_IMAP || type == MF_NNTP;
 }
+
+#ifdef USE_SSL
+
+/// can we use SSL for folders of this type?
+inline bool FolderTypeSupportsSSL(MFolderType type)
+{
+   return FolderTypeHasAuth(type);
+}
+
 #endif // USE_SSL
 
 /// is this a folder type for which username/password make sense?
 inline bool FolderTypeHasUserName(MFolderType type)
 {
-   ASSERT(GetFolderType(type) == type);
-
-   switch ( type )
-   {
-   case MF_POP:
-   case MF_IMAP:
-   case MF_NNTP:
-   case MF_GROUP:
-      return true;
-
-      // don't use "default:" - like this, the compiler will warn us if we add
-      // a new type to the MFolderType enum and forget to add it here
-   case MF_ROOT:
-   case MF_ILLEGAL:
-   case MF_PROFILE:
-      FAIL_MSG(_T("this is not supposed to be called for this type"));
-      // fall through nevertheless
-
-   case MF_INBOX:
-   case MF_FILE:
-   case MF_MH:
-   case MF_NEWS:
-   case MF_MFILE:
-   case MF_MDIR:
-   case MF_VIRTUAL:
-      ; // don't put return false here to avoid VC++ warnings
-   }
-
-   return false;
+   return FolderTypeHasAuth(type) || type == MF_GROUP;
 }
 
 /// is this a folder type for which server field makes sense?
@@ -278,65 +251,32 @@ inline bool IsLocalQuickFolder(MFolderType type)
    return type == MF_FILE || type == MF_MH || type == MF_NEWS;
 }
 
-/// can this folder contain other subfolders? if so, of which type?
-inline bool CanHaveSubfolders(MFolderType folderType,
+/**
+   Can this folder contain other subfolders and, if so, of which type?
+
+   @param folderType the type of this folder
+   @param flagsof this folder
+   @param subtype if non NULL and function returns true, filled with the type
+                  of our subfolders
+   @param true if folders of this type can have subfolders, false otherwise
+ */
+extern bool CanHaveSubfolders(MFolderType folderType,
                               int flags,
-                              MFolderType *subtype = NULL)
-{
-   switch ( folderType )
-   {
-      case MF_MH:
-         if ( subtype )
-         {
-            // MH folder can only have MH subfolders
-            *subtype = MF_MH;
-         }
-         return TRUE;
-
-      case MF_NEWS:
-      case MF_NNTP:
-      case MF_IMAP:
-         if ( flags & MF_FLAGS_GROUP )
-         {
-            if ( subtype )
-            {
-               *subtype = folderType;
-            }
-
-            return TRUE;
-         }
-         else
-         {
-            return FALSE;
-         }
-
-      case MF_GROUP:
-      case MF_ROOT:
-         if ( subtype )
-         {
-            // can contain any subfolders at all
-            *subtype = MF_ILLEGAL;
-         }
-         return TRUE;
-
-      default:
-         return FALSE;
-   }
-}
+                              MFolderType *subtype = NULL);
 
 /// can a folder of this type be (physically) deleted by the user?
 inline bool CanDeleteFolderOfType(MFolderType folderType)
 {
-   return folderType == MF_FILE ||
-          folderType == MF_MH ||
-          // folderType == MF_POP || -- can it?
-          folderType == MF_IMAP;
+   ASSERT(GetFolderType(folderType) == folderType);
+
+   return folderType == MF_FILE || folderType == MF_MH || folderType == MF_IMAP;
 }
 
 /// is it a file or directory local folder
 inline bool IsFileOrDirFolder(MFolderType folderType)
 {
    MFolderType ft = GetFolderType(folderType);
+
    return ft == MF_FILE || ft == MF_MH || ft == MF_MFILE || ft == MF_MDIR;
 }
 
@@ -347,88 +287,25 @@ inline bool CanDeleteMessagesInFolder(MFolderType folderType)
 }
 
 /// can we copy messages to this folder?
-inline bool CanCreateMessagesInFolder(MFolderType folderType)
-{
-   switch ( folderType )
-   {
-      case MF_NNTP:
-      case MF_NEWS:
-      case MF_GROUP:
-      case MF_ROOT:
-      case MF_VIRTUAL:     // so far we don't support this, maybe later
-         return false;
+extern bool CanCreateMessagesInFolder(MFolderType folderType);
 
-      case MF_ILLEGAL:
-      case MF_PROFILE:
-         FAIL_MSG(_T("this is not supposed to be called for this type"));
-         // fall through nevertheless
-
-         // don't use "default:" - like this, the compiler will warn us if we
-         // add a new type to the MFolderType enum and forget to add it here
-      case MF_INBOX:
-      case MF_FILE:
-      case MF_MH:
-      case MF_IMAP:
-      case MF_POP:
-      case MF_MFILE:
-      case MF_MDIR:
-         ; // don't put return false here to avoid VC++ warnings
-   }
-
-   return true;
-}
-
-inline bool CanOpenFolder(MFolderType folderType, int folderFlags)
-{
-   switch ( folderType )
-   {
-      case MF_NNTP:
-      case MF_NEWS:
-      case MF_IMAP:
-         if ( !(folderFlags & MF_FLAGS_NOSELECT) )
-         {
-            // can open
-            break;
-         }
-         //else: fall through
-
-      case MF_GROUP:
-      case MF_ROOT:
-         return false;
-
-      case MF_ILLEGAL:
-      case MF_PROFILE:
-         FAIL_MSG(_T("this is not supposed to be called for this type"));
-         // fall through nevertheless
-
-         // don't use "default:" - like this, the compiler will warn us if we
-         // add a new type to the MFolderType enum and forget to add it here
-      case MF_INBOX:
-      case MF_FILE:
-      case MF_MH:
-      case MF_POP:
-      case MF_MFILE:
-      case MF_MDIR:
-      case MF_VIRTUAL:
-         ; // don't put return here to avoid VC++ warnings
-   }
-
-   return true;
-}
+extern bool CanOpenFolder(MFolderType folderType, int folderFlags);
 
 /// does this folder require network to be up?
 inline bool FolderNeedsNetwork(MFolderType type, int flags)
 {
-   return (type == MF_NNTP || type == MF_IMAP || type == MF_POP) &&
-          !(flags & MF_FLAGS_ISLOCAL);
+   return FolderTypeHasAuth(type) && !(flags & MF_FLAGS_ISLOCAL);
 }
 
-// ----------------------------------------------------------------------------
-// Icon functions: the associated icon for the folder is shown in the folder
-// tree control, folder options dialog &c
-//
-// NB: these functions are implemented for now in wxFolderTree.cpp
-// ----------------------------------------------------------------------------
+/**
+   @name Icon functions.
+   
+   The associated icon for the folder is shown in the folder tree control,
+   folder options dialog &c.
+
+   NB: these functions are implemented for now in wxFolderTree.cpp
+ */
+//@{
 
 /// get the number of icons from which we may choose folder icon from
 extern size_t GetNumberOfFolderIcons();
@@ -441,5 +318,7 @@ int GetFolderIconForDisplay(const class MFolder* folder);
 
 /// get the default icon for folders of this type
 int GetDefaultFolderTypeIcon(MFolderType folderType);
+
+//@}
 
 #endif //  _FOLDERTYPE_H

@@ -455,6 +455,9 @@
 					RelativePath=".\src\mail\ASMailFolder.cpp">
 				</File>
 				<File
+					RelativePath=".\src\mail\FolderType.cpp">
+				</File>
+				<File
 					RelativePath=".\src\mail\HeaderInfoImpl.cpp">
 				</File>
 				<File
@@ -732,7 +735,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat &quot;$(InputDir)&quot; &quot;$(InputDir)&quot;
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
 "
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
@@ -760,12 +763,30 @@
 					Filter="">
 					<File
 						RelativePath=".\src\Python\InitPython.cpp">
+						<FileConfiguration
+							Name="Debug|Win32"
+							ExcludedFromBuild="TRUE">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\src\Python\PythonDll.cpp">
+						<FileConfiguration
+							Name="Debug|Win32"
+							ExcludedFromBuild="TRUE">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\src\Python\PythonHelp.cpp">
+						<FileConfiguration
+							Name="Debug|Win32"
+							ExcludedFromBuild="TRUE">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
 					</File>
 					<Filter
 						Name="SWIG output"
@@ -773,7 +794,8 @@
 						<File
 							RelativePath=".\src\Python\HeaderInfo_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -781,7 +803,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -789,7 +812,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -800,7 +824,8 @@
 						<File
 							RelativePath=".\src\Python\MailFolder_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -808,7 +833,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -816,7 +842,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -827,7 +854,8 @@
 						<File
 							RelativePath=".\src\Python\MDialogs_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -835,7 +863,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -843,7 +872,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -854,7 +884,8 @@
 						<File
 							RelativePath=".\src\Python\Message_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -862,7 +893,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -870,7 +902,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -881,7 +914,8 @@
 						<File
 							RelativePath=".\src\Python\MimePart_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -889,7 +923,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -897,7 +932,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -908,7 +944,8 @@
 						<File
 							RelativePath=".\src\Python\MimeType_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -916,7 +953,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -924,7 +962,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -935,7 +974,8 @@
 						<File
 							RelativePath=".\src\Python\SendMessage_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -943,7 +983,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -951,7 +992,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -962,7 +1004,8 @@
 						<File
 							RelativePath=".\src\Python\swiglib_swig.cpp">
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Debug|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
@@ -970,7 +1013,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Release|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
@@ -978,7 +1022,8 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Release With Debug Info|Win32"
+								ExcludedFromBuild="TRUE">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
