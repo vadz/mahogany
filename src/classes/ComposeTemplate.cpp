@@ -1396,7 +1396,12 @@ String VarExpander::GetSignature() const
       {
          String strSignFile = READ_CONFIG(m_profile, MP_COMPOSE_SIGNATURE);
          if ( !strSignFile.empty() )
-            hasSign = fileSig.Open(strSignFile);
+         {
+            wxFileName fn(strSignFile);
+            fn.MakeAbsolute(mApplication->GetLocalDir());
+
+            hasSign = fileSig.Open(fn.GetFullPath());
+         }
 
          if ( !hasSign )
          {
