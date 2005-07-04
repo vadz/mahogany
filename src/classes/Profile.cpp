@@ -102,6 +102,8 @@ class ProfileEnumDataImpl;
 class LookupData
 {
 public:
+   enum Type { LD_LONG, LD_STRING };
+
    LookupData(const String& key, const String& def)
       : m_Key(key), m_Str(def)
    {
@@ -118,7 +120,19 @@ public:
       m_Found = Profile::Read_Default;
    }
 
-   enum Type { LD_LONG, LD_STRING };
+   // default copy ctor, assignment operator and dtor are ok
+
+
+   // don't compare m_Found field here, just the data
+   bool operator==(const LookupData& other)
+   {
+      if ( other.m_Type != m_Type || other.m_Key != m_Key )
+         return false;
+
+      return m_Type == LD_LONG ? other.m_Long == m_Long
+                               : other.m_Str == m_Str;
+   }
+
 
    Type GetType(void) const { return m_Type; }
    const String & GetKey(void) const { return m_Key; }
@@ -198,7 +212,6 @@ public:
 
 #endif // OS_UNIX
 
-
 /**
    AllConfigSources is a list of all config source the profiles use.
 
@@ -219,11 +232,18 @@ public:
       creates them as well. They are inserted in the list in order specified
       by their priority values.
 
+      Side effect: this ctor also changes the global wxConfig object by
+      creating a new wxConfigMultiplexer instance and setting it as global
+      wxConfig using wxConfig::Set().
+
       @param filename the file used for the default config, may be empty
     */
    AllConfigSources(const String& filename);
 
-   // default dtor is ok
+   /**
+      Destructor destroys wxConfig we had set in ctor.
+    */
+   ~AllConfigSources();
 
 
    /**
@@ -288,10 +308,16 @@ public:
 
 
    /// Return true if the given group exists in any config source
-   bool HasGroup(const String& path) const;
+   bool HasGroup(const String& path) const
+   {
+      return FindGroup(path) != m_sources.end();
+   }
 
    /// Return true if the given entry exists in any config source
-   bool HasEntry(const String& path) const;
+   bool HasEntry(const String& path) const
+   {
+      return FindEntry(path) != m_sources.end();
+   }
 
    //@}
 
@@ -334,14 +360,30 @@ public:
 
 
    /**
-      Get wxConfig object associated with the local config source.
+      @name Helper methods for wxConfigMultiplexer only.
 
-      This method is deprecated and must not be used, it is there only to
-      avoid breaking some existing code.
+      Do not use these methods from elsewhere.
+    */
+   //@{
+
+   /// Get the list of all sources
+   List& GetSources() { return m_sources; }
+   const List& GetSources() const { return m_sources; }
+
+   /// Find the config source containing this entry
+   List::iterator FindEntry(const String& path) const;
+
+   /// Find the config source containing this group
+   List::iterator FindGroup(const String& path) const;
+
+   /**
+      Get wxConfig object associated with the local config source.
 
       @param config pointer (not to be deleted by caller) or NULL
     */
-   wxConfigBase *GetConfig() const;
+   wxConfigBase *GetLocalConfig() const;
+
+   //@}
 
 private:
    // public CopyGroup() helper
@@ -351,13 +393,220 @@ private:
 
    List m_sources;
 
-   // we can't be coppied
-   AllConfigSources(const AllConfigSources&);
-   AllConfigSources& operator=(const AllConfigSources&);
+
+   DECLARE_NO_COPY_CLASS(AllConfigSources)
 };
 
 // the global object containing all config sources used by Profile
 static AllConfigSources *gs_allConfigSources = NULL;
+
+
+/**
+   wxConfigMultiplexer is a wxConfig façade for AllConfigSources.
+
+   wxConfigMultiplexer presents wxConfig interface for AllConfigSources
+   functionality, i.e. it reads from all config sources and not just from the
+   local config.
+ */
+class wxConfigMultiplexer : public wxConfigBase
+{
+public:
+   wxConfigMultiplexer(AllConfigSources& configSources)
+      : m_configSources(configSources)
+   {
+   }
+
+   virtual void SetPath(const wxString& path)
+   {
+      m_path = path;
+      wxConfigBase * const config = m_configSources.GetLocalConfig();
+      if ( config )
+         config->SetPath(path);
+   }
+
+   virtual const wxString& GetPath() const { return m_path; }
+
+
+   virtual bool GetFirstGroup(wxString& str, long& lIndex) const
+   {
+      wxConfigBase * const config = m_configSources.GetLocalConfig();
+      return config && config->GetFirstGroup(str, lIndex);
+   }
+
+   virtual bool GetNextGroup(wxString& str, long& lIndex) const
+   {
+      wxConfigBase * const config = m_configSources.GetLocalConfig();
+      return config && config->GetNextGroup(str, lIndex);
+   }
+
+   virtual bool GetFirstEntry(wxString& str, long& lIndex) const
+   {
+      wxConfigBase * const config = m_configSources.GetLocalConfig();
+      return config && config->GetFirstEntry(str, lIndex);
+   }
+
+   virtual bool GetNextEntry(wxString& str, long& lIndex) const
+   {
+      wxConfigBase * const config = m_configSources.GetLocalConfig();
+      return config && config->GetNextEntry(str, lIndex);
+   }
+
+
+   virtual size_t GetNumberOfEntries(bool bRecursive = false) const
+   {
+      wxConfigBase * const config = m_configSources.GetLocalConfig();
+      return config ? config->GetNumberOfEntries(bRecursive) : 0;
+   }
+
+   virtual size_t GetNumberOfGroups(bool bRecursive = false) const
+   {
+      wxConfigBase * const config = m_configSources.GetLocalConfig();
+      return config ? config->GetNumberOfGroups(bRecursive) : 0;
+   }
+
+
+   virtual bool HasGroup(const wxString& name) const
+   {
+      return m_configSources.HasGroup(name);
+   }
+
+   virtual bool HasEntry(const wxString& name) const
+   {
+      return m_configSources.HasEntry(name);
+   }
+
+
+   virtual bool Flush(bool /* bCurrentOnly */ = false)
+   {
+      return m_configSources.FlushAll();
+   }
+
+   virtual bool
+   RenameEntry(const wxString& /* oldName */, const wxString& /* newName */)
+   {
+      FAIL_MSG( _T("not implemented") );
+
+      return false;
+   }
+
+   virtual bool
+   RenameGroup(const wxString& /* oldName */, const wxString& /* newName */)
+   {
+      FAIL_MSG( _T("not implemented") );
+
+      return false;
+   }
+
+   virtual bool DeleteEntry(const wxString& key, bool /* groupIfEmpty */ = true)
+   {
+      wxString path;
+      if ( *key.c_str() == _T('/') )
+         path = key;
+      else
+         path << m_path << _T('/') << key;
+
+      // we need to delete all these entries
+      bool foundAny = false;
+      for ( ;; )
+      {
+         AllConfigSources::List::iterator i = m_configSources.FindEntry(path);
+         if ( i == m_configSources.GetSources().end() )
+         {
+            CHECK( foundAny, false, _T("entry to delete doesn't exist") );
+            break;
+         }
+
+         foundAny = true;
+         if ( !i->DeleteEntry(path) )
+            return false;
+      }
+
+      return true;
+   }
+
+   virtual bool DeleteGroup(const wxString& key)
+   {
+      wxString path;
+      if ( *key.c_str() == _T('/') )
+         path = key;
+      else
+         path << m_path << _T('/') << key;
+
+      bool foundAny = false;
+      for ( ;; )
+      {
+         AllConfigSources::List::iterator i = m_configSources.FindGroup(path);
+         if ( i == m_configSources.GetSources().end() )
+         {
+            CHECK( foundAny, false, _T("group to delete doesn't exist") );
+            break;
+         }
+
+         foundAny = true;
+         if ( !i->DeleteGroup(path) )
+            return false;
+      }
+
+      return true;
+   }
+
+   virtual bool DeleteAll()
+   {
+      // this is too dangerous, we don't provide any way to wipe out all config
+      // information
+      return false;
+   }
+
+protected:
+   bool DoRead(LookupData& ld) const
+   {
+      return m_configSources.Read(m_path, ld);
+   }
+
+   bool DoWrite(LookupData& ld)
+   {
+      return m_configSources.Write(m_path, ld, NULL /* use local config */);
+   }
+
+
+   virtual bool DoReadString(const wxString& key, wxString *pStr) const
+   {
+      LookupData ld(key, _T(""));
+      if ( !DoRead(ld) )
+         return false;
+
+      *pStr = ld.GetString();
+      return true;
+   }
+
+   virtual bool DoReadLong(const wxString& key, long *pl) const
+   {
+      LookupData ld(key, 0l);
+      if ( !DoRead(ld) )
+         return false;
+
+      *pl = ld.GetLong();
+      return true;
+   }
+
+   virtual bool DoWriteString(const wxString& key, const wxString& value)
+   {
+      LookupData ld(key, value);
+      return DoWrite(ld);
+   }
+
+   virtual bool DoWriteLong(const wxString& key, long value)
+   {
+      LookupData ld(key, value);
+      return DoWrite(ld);
+   }
+
+private:
+   AllConfigSources& m_configSources;
+   wxString m_path;
+
+   DECLARE_NO_COPY_CLASS(wxConfigMultiplexer)
+};
 
 
 /**
@@ -481,8 +730,7 @@ public:
 
    virtual const String& GetName(void) const { return m_ProfileName; }
 
-   virtual wxConfigBase *GetConfig() const
-      { return gs_allConfigSources ? gs_allConfigSources->GetConfig() : NULL; }
+   virtual wxConfigBase *GetConfig() const { return wxConfig::Get(); }
 
    virtual void Suspend(void)
       {
@@ -737,6 +985,13 @@ AllConfigSources::AllConfigSources(const String& filename)
       return;
    }
 
+   // also register out special wxConfig for persistent controls use
+   delete wxConfig::Set(new wxConfigMultiplexer(*this));
+
+
+   // now build the list of all config source we use
+   // ----------------------------------------------
+
    // local config is always first
    m_sources.push_back(configLocal);
 
@@ -809,6 +1064,12 @@ AllConfigSources::AllConfigSources(const String& filename)
    }
 }
 
+AllConfigSources::~AllConfigSources()
+{
+   // we can't allow wxConfigMultiplexer to live any longer
+   delete wxConfig::Set(NULL);
+}
+
 // ----------------------------------------------------------------------------
 // AllConfigSources reading and writing
 // ----------------------------------------------------------------------------
@@ -846,6 +1107,16 @@ AllConfigSources::Write(const String& path,
                _T("can't write to profile if no config sources exist") );
 
       config = *m_sources.begin().operator->();
+
+      // avoid writing to local config source the same data that are already
+      // present in another one with lesser priority: this just results in huge
+      // duplication of data without any gain
+      LookupData dataOld(data);
+      if ( Read(path, dataOld) && dataOld == data )
+      {
+         // the same value already present, don't write it
+         return true;
+      }
    }
 
    String fullpath = path + _T('/') + data.GetKey();
@@ -934,28 +1205,30 @@ AllConfigSources::GetFirstEntry(const String& path,
    return data.GetNextEntry(entry);
 }
 
-bool AllConfigSources::HasGroup(const String& path) const
+AllConfigSources::List::iterator
+AllConfigSources::FindGroup(const String& path) const
 {
    const List::iterator end = m_sources.end();
    for ( List::iterator i = m_sources.begin(); i != end; ++i )
    {
       if ( i->HasGroup(path) )
-         return true;
+         return i;
    }
 
-   return false;
+   return end;
 }
 
-bool AllConfigSources::HasEntry(const String& path) const
+AllConfigSources::List::iterator
+AllConfigSources::FindEntry(const String& path) const
 {
    const List::iterator end = m_sources.end();
    for ( List::iterator i = m_sources.begin(); i != end; ++i )
    {
       if ( i->HasEntry(path) )
-         return true;
+         return i;
    }
 
-   return false;
+   return end;
 }
 
 // ----------------------------------------------------------------------------
@@ -1067,7 +1340,7 @@ bool AllConfigSources::DeleteGroup(const String& path)
 }
 
 
-wxConfigBase *AllConfigSources::GetConfig() const
+wxConfigBase *AllConfigSources::GetLocalConfig() const
 {
    if ( m_sources.empty() )
       return NULL;
