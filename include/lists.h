@@ -274,10 +274,20 @@ public: \
       { \
          new ListNode(element, header.prev, (ListNode*)&header); \
       } \
+   /** Insert an element either before the specified one or, if the iterator \
+       is at end of list, as last element of the list. \
+   */ \
    inline void insert(iterator &i, const_reference element) \
       { \
-         i.NodeCheck(); \
-         i = new ListNode(element, i.node->prev, i.node); \
+         ListNode *node; \
+         if ( i == end() ) \
+            node = (ListNode *)&header; \
+         else \
+         { \
+            i.NodeCheck(); \
+            node = i.node; \
+         } \
+         i = new ListNode(element, node->prev, node); \
       } \
    inline ~name(void) \
       { \
