@@ -463,16 +463,12 @@ MAppBase::OnStartup()
       }
    }
 
+   // set the path for persistent controls to save their state to
+   //
    // NB: although this shouldn't normally be here (it's GUI-dependent code),
    //     it's really impossible to put it into wxMApp because some dialogs
    //     can be already shown from here and this initialization must be done
    //     before.
-
-   // for the persistent controls to work (wx/persctrl.h) we must have
-   // a global wxConfig object
-   wxConfigBase::Set(m_profile->GetConfig());
-
-   // also set the path for persistent controls to save their state to
    wxPControls::SetSettingsPath(_T("/Settings/"));
 
 #ifdef OS_UNIX
