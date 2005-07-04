@@ -911,6 +911,12 @@ int MFolderFromProfile::GetFlags() const
 void MFolderFromProfile::SetFlags(int flags)
 {
    int typeAndFlags = READ_CONFIG(m_profile, MP_FOLDER_TYPE);
+   if ( (typeAndFlags & ~MF_TYPEMASK) == flags )
+   {
+      // flags unchanged
+      return;
+   }
+
    typeAndFlags = CombineFolderTypeAndFlags(GetFolderType(typeAndFlags),
                                             flags);
    m_profile->writeEntry(MP_FOLDER_TYPE, typeAndFlags);
