@@ -117,8 +117,11 @@ ConfigSource::CreateDefault(const String& filename)
 ConfigSource::Create(const ConfigSource& config, const String& name)
 {
    // get the type of config source to create
+   String path(name);
+   path << _T('/') << GetOptionName(MP_CONFIG_SOURCE_TYPE);
+
    String type;
-   if ( !config.Read(GetOptionName(MP_CONFIG_SOURCE_TYPE), &type) )
+   if ( !config.Read(path, &type) )
    {
       wxLogError(_("Invalid config source \"%s\" without type."), name.c_str());
 
@@ -753,7 +756,7 @@ ConfigSource *
 ConfigSourceLocalFactory::Create(const ConfigSource& config, const String& name)
 {
    String filename;
-   if ( !config.Read(_T(""), &filename) )
+   if ( !config.Read(name + _T("/FileName"), &filename) )
    {
       wxLogError(_("No filename for local config source \"%s\"."),
                  name.c_str());
