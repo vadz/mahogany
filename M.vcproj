@@ -201,6 +201,9 @@
 					RelativePath=".\src\classes\ConfigSource.cpp">
 				</File>
 				<File
+					RelativePath=".\src\classes\ConfigSourcesAll.cpp">
+				</File>
+				<File
 					RelativePath=".\src\classes\FolderMonitor.cpp">
 				</File>
 				<File
@@ -1630,7 +1633,13 @@
 				RelativePath=".\include\Composer.h">
 			</File>
 			<File
+				RelativePath=".\include\ConfigPrivate.h">
+			</File>
+			<File
 				RelativePath=".\include\ConfigSource.h">
+			</File>
+			<File
+				RelativePath=".\include\ConfigSourcesAll.h">
 			</File>
 			<File
 				RelativePath=".\include\FolderMonitor.h">
