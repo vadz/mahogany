@@ -45,7 +45,7 @@
 class WXDLLEXPORT wxConfigBase;
 
 /// The name of the config section containing the config sources info
-#define M_CONFIGSRC_CONFIG_SECTION _T("/M/Configs")
+#define M_CONFIGSRC_CONFIG_SECTION _T("/Configs")
 
 /**
    ConfigSource is a source of configuration information.
