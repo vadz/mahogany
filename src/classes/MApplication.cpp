@@ -966,7 +966,8 @@ MAppBase::InitDirectories()
    m_localDir = m_cmdLineOptions->userDir;
 
    // if not given, use the one from the config file
-   m_localDir = READ_APPCONFIG_TEXT(MP_USERDIR);
+   if ( m_localDir.empty() )
+      m_localDir = READ_APPCONFIG_TEXT(MP_USERDIR);
 
    // if still not given, try to find a good default one ourselves
    if ( m_localDir.empty() )
