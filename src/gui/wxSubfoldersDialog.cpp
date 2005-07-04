@@ -454,6 +454,10 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
                m_folderPath = mf->GetLogicalMailboxName(m_folderPath);
          }
          break;
+
+      default:
+         // needed just to suppress gcc warning
+         ;
    }
 
    // show something...

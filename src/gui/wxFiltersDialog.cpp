@@ -771,6 +771,25 @@ OneCritControl::UpdateUI(wxTextCtrl *textProgram)
             m_helpText->SetLabel(_(" days"));
             enableHelpText = true;
             break;
+
+         default:
+            FAIL_MSG( _T("unknown ORC_T_XXX") );
+            // fall through
+
+         case ORC_T_Illegal:
+         case ORC_T_Always:
+         case ORC_T_Match:
+         case ORC_T_Contains:
+         case ORC_T_MatchC:
+         case ORC_T_ContainsC:
+         case ORC_T_MatchRegExC:
+         case ORC_T_Python:
+         case ORC_T_MatchRegEx:
+         case ORC_T_ScoreAbove:
+         case ORC_T_ScoreBelow:
+         case ORC_T_IsFromMe:
+         case ORC_T_Max:
+            ;
       }
 
       enableArg = !enableSpam && !enableMsgFlag && FilterTestNeedsArgument(test);
