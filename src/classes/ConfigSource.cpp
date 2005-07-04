@@ -581,12 +581,8 @@ ConfigSourceLocal::CreateRegConfig()
 ConfigSourceLocal::~ConfigSourceLocal()
 {
    if ( this == gs_configSourceGlobal )
-   {
+       {
       gs_configSourceGlobal = NULL;
-
-      // we must have been set as global wxConfig object too, don't try to
-      // recreate it any more now
-      wxConfig::Set(NULL);
    }
 
    delete m_config;
