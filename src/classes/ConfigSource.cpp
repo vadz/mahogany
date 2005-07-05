@@ -51,15 +51,9 @@
 #include <errno.h>
 
 #include "ConfigSource.h"
+#include "ConfigSourceLocal.h"
 
 class MOption;
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// the type of the local config source
-#define CONFIG_SOURCE_TYPE_LOCAL _T("local")
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -68,8 +62,17 @@ class MOption;
 class ConfigSourceLocalFactory : public ConfigSourceFactory
 {
 public:
-   virtual const wxChar *GetType() const { return CONFIG_SOURCE_TYPE_LOCAL; }
+   // the type of the local config source
+   static const wxChar *Type() { return gettext_noop("file"); }
+
+   virtual const wxChar *GetType() const { return Type(); }
    virtual ConfigSource *Create(const ConfigSource& config, const String& name);
+   virtual bool
+       Save(ConfigSource& config, const String& name, const String& spec);
+
+private:
+   // the path used for storing the file name in config
+   static const wxChar *FileNamePath() { return _T("/FileName"); }
 };
 
 // ----------------------------------------------------------------------------
@@ -315,19 +318,15 @@ ConfigSourceFactory::Find(const String& type)
 // ConfigSourceLocal creation
 // ----------------------------------------------------------------------------
 
-ConfigSourceLocal::ConfigSourceLocal(wxConfigBase *config, const String& name)
-                 : ConfigSource(name)
+ConfigSourceLocal::ConfigSourceLocal(const String& name)
+                 : ConfigSource(name, ConfigSourceLocalFactory::Type())
 {
-   ASSERT_MSG( config, _T("NULL config in ConfigSourceLocal?") );
-
-   m_config = config;
+   m_config = NULL;
 }
 
-
-/* static */
-wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
+bool ConfigSourceLocal::InitDefault(const String& filename)
 {
-   wxConfigBase *config = NULL;
+   bool rc = false;
 
    String localFilePath = filename,
           globalFilePath;
@@ -495,39 +494,42 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
    // under Windows we just use the registry if the filename is not specified
    if ( localFilePath.empty() )
    {
-      config = CreateRegConfig();
+      rc = InitRegistry();
 
       // one extra complication: the user wants to always want to use config
       // file instead of the registry, this is indicated by the presence of
-      String key(M_PROFILE_CONFIG_SECTION);
-      key << _T('/') << GetOptionName(MP_USE_CONFIG_FILE);
-      if ( config->Read(key, &localFilePath) )
+      if ( rc )
       {
-         // we want to use wxFileConfig finally...
-         delete config;
-         config = NULL; // not needed now, but safer if code is changed later
+         String key(M_PROFILE_CONFIG_SECTION);
+         key << _T('/') << GetOptionName(MP_USE_CONFIG_FILE);
+         if ( m_config->Read(key, &localFilePath) )
+         {
+            // we want to use wxFileConfig finally...
+            delete m_config;
+            m_config = NULL; // not really needed now, but safer
+            rc = false;
+         }
+         //else: do use wxRegConfig created above
       }
-      //else: do use wxRegConfig created above
    }
 #else  // !Windows, !Unix
    #error "Don't know default config file location for this platform"
 #endif // OS
 
-   if ( !config )
+   if ( !rc )
    {
-      config = CreateFileConfig(localFilePath, globalFilePath);
+      rc = InitFile(localFilePath, globalFilePath);
    }
 
-   return config;
+   return rc;
 }
 
-/* static */
-wxConfigBase *
-ConfigSourceLocal::CreateFileConfig(const String& localFilePath,
-                                    const String& globalFilePath)
+bool
+ConfigSourceLocal::InitFile(const String& localFilePath,
+                            const String& globalFilePath)
 {
    ASSERT_MSG( !localFilePath.empty(),
-               _T("invalid file path in CreateFileConfig") );
+               _T("invalid local config file path") );
 
    wxFileConfig *fileconf = new wxFileConfig
                                 (
@@ -548,15 +550,15 @@ ConfigSourceLocal::CreateFileConfig(const String& localFilePath,
    // ourselves at Profile level and want to control it from there
    fileconf->SetExpandEnvVars(false);
 
-   return fileconf;
+   DoInit(fileconf, localFilePath);
+
+   return true;
 }
 
 
 #ifdef OS_WIN
 
-/* static */
-wxConfigBase *
-ConfigSourceLocal::CreateRegConfig()
+bool ConfigSourceLocal::InitRegistry()
 {
    // don't give explicit name, but rather use the default logic (it's
    // perfectly ok, for the registry case our keys are under vendor\appname)
@@ -573,7 +575,9 @@ ConfigSourceLocal::CreateRegConfig()
    // see comment in CreateFileConfig()
    regconf->SetExpandEnvVars(false);
 
-   return regconf;
+   DoInit(regconf);
+
+   return true;
 }
 
 #endif // OS_WIN
@@ -581,9 +585,7 @@ ConfigSourceLocal::CreateRegConfig()
 ConfigSourceLocal::~ConfigSourceLocal()
 {
    if ( this == gs_configSourceGlobal )
-       {
       gs_configSourceGlobal = NULL;
-   }
 
    delete m_config;
 }
@@ -591,6 +593,11 @@ ConfigSourceLocal::~ConfigSourceLocal()
 // ----------------------------------------------------------------------------
 // ConfigSourceLocal simple accessors
 // ----------------------------------------------------------------------------
+
+String ConfigSourceLocal::GetSpec() const
+{
+   return m_path;
+}
 
 bool ConfigSourceLocal::IsOk() const
 {
@@ -752,7 +759,7 @@ ConfigSource *
 ConfigSourceLocalFactory::Create(const ConfigSource& config, const String& name)
 {
    String filename;
-   if ( !config.Read(name + _T("/FileName"), &filename) )
+   if ( !config.Read(name + FileNamePath(), &filename) )
    {
       wxLogError(_("No filename for local config source \"%s\"."),
                  name.c_str());
@@ -767,5 +774,15 @@ ConfigSourceLocalFactory::Create(const ConfigSource& config, const String& name)
    }
 
    return configNew;
+}
+
+bool
+ConfigSourceLocalFactory::Save(ConfigSource& config,
+                               const String& name,
+                               const String& spec)
+{
+   // TODO: check file name validity?
+
+   return config.Write(name + FileNamePath(), spec);
 }
 

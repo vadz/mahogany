@@ -143,8 +143,22 @@ public:
     */
    //@{
 
-   /// Get the (untranslated and hence not user-readable) name of this object
+   /// Get the name of this object
    const String& GetName() const { return m_name; }
+
+   /// Get the type of this object (same as type of factory used to create it)
+   const String& GetType() const { return m_type; }
+
+   /**
+      Get the specification of this object.
+
+      The meaning of this string is type-dependent, e.g. it is a full path of
+      the file for "file" config sources and an IMAP spec in c-client format
+      for "imap" sources and maybe something else entirely for the other ones.
+      The only requirement is that this string be in the same format as used by
+      ConfigSourceFactory::Save().
+    */
+   virtual String GetSpec() const = 0;
 
    /**
       Return true if the object was created successfully.
@@ -313,7 +327,10 @@ public:
 
 protected:
    /// Constrructor is protected, you can only create derived classes
-   ConfigSource(const String& name) : m_name(name) { }
+   ConfigSource(const String& name, const String& type)
+      : m_name(name), m_type(type)
+   {
+   }
 
    /// Virtual destructor as for any base class
    virtual ~ConfigSource();
@@ -321,105 +338,12 @@ protected:
 private:
    /// the name of this object, it is set once on creation and can't be changed
    const String m_name;
+
+   /// the type of this object, can't be changed neither
+   const String m_type;
 };
 
 DECLARE_AUTOPTR(ConfigSource);
-
-/**
-   ConfigSourceLocal uses wxConfig to implement ConfigSource.
-
-   This class uses wxFileConfig or wxRegConfig if we're running under Windows
-   and the filename specified in the ctor is empty. In any case, it uses a
-   local file/whatever and this explains its name (and also the fact that
-   ConfigSourceConfig would have been really ugly).
- */
-class ConfigSourceLocal : public ConfigSource
-{
-public:
-   /**
-      Create the default local config.
-
-      @sa ConfigSource::CreateDefault
-
-      @param filename the name of config file or empty to use the default one
-    */
-   static ConfigSourceLocal *CreateDefault(const String& filename = _T(""))
-      { return new ConfigSourceLocal(CreateDefaultConfig(filename), _T("")); }
-
-   /**
-      Create the config source associated with the given file.
-
-      Unlike CreateDefault() above, this method never uses registry. Also, the
-      file name must not be empty here.
-    */
-   static ConfigSourceLocal *CreateFile(const String& filename,
-                                 const String& name = _T(""))
-      { return new ConfigSourceLocal(CreateFileConfig(filename), name); }
-
-#ifdef OS_WIN
-   /**
-      Create the registry config source.
-
-      This shouldn't be normally used explicitly, use CreateDefault() instead.
-    */
-   static ConfigSourceLocal *CreateRegistry()
-      { return new ConfigSourceLocal(CreateRegConfig(), _T("")); }
-#endif // OS_WIN
-
-
-   /**
-      Create a local config source.
-
-      @param config wxConfig object this config source is associated with
-      @param name the name for the ConfigSource object
-    */
-   ConfigSourceLocal(wxConfigBase *config, const String& name);
-   virtual ~ConfigSourceLocal();
-
-   // implement base class pure virtuals
-   virtual bool IsOk() const;
-   virtual bool IsLocal() const;
-   virtual bool Read(const String& name, String *value) const;
-   virtual bool Read(const String& name, long *value) const;
-   virtual bool Write(const String& name, const String& value);
-   virtual bool Write(const String& name, long value);
-   virtual bool Flush();
-   virtual bool GetFirstGroup(const String& key,
-                                 String& group, EnumData& cookie) const;
-   virtual bool GetNextGroup(String& group, EnumData& cookie) const;
-   virtual bool GetFirstEntry(const String& key,
-                                 String& entry, EnumData& cookie) const;
-   virtual bool GetNextEntry(String& entry, EnumData& cookie) const;
-   virtual bool HasGroup(const String& path) const;
-   virtual bool HasEntry(const String& path) const;
-   virtual bool DeleteEntry(const String& name);
-   virtual bool DeleteGroup(const String& name);
-   virtual bool CopyEntry(const String& nameSrc,
-                          const String& nameDst,
-                          ConfigSource *configDst);
-   virtual bool RenameGroup(const String& pathOld, const String& nameNew);
-
-   // for internal use by ProfileImpl only, don't use elsewhere
-   wxConfigBase *GetConfig() const { return m_config; }
-
-protected:
-#ifdef OS_WIN
-   // create wxRegConfig we use under Windows
-   static wxConfigBase *CreateRegConfig();
-#endif // OS_WIN
-
-   // create wxFileConfig
-   static wxConfigBase *CreateFileConfig(const String& fnameLocal,
-                                         const String& fnameGlobal = _T(""));
-
-   // create either wxRegConfig or wxFileConfig using the same logic as
-   // CreateDefault()
-   static wxConfigBase *CreateDefaultConfig(const String& filename);
-
-private:
-   // the config object we use
-   wxConfigBase *m_config;
-};
 
 
 /**
@@ -537,9 +461,24 @@ public:
     */
    virtual ConfigSource *Create(const ConfigSource& config,
                                 const String& name) = 0;
+
+   /**
+      Save the description of the config source object in a config.
+
+      @param config an existing config source where this source parameters to
+                    be saved
+      @param name the config section containing the parameters
+      @param spec the specification of the config source object (in the format
+                  returned by ConfigSource::GetSpec())
+      @return true if ok, false on error, e.g. if the spec is invalid.
+   */
+   virtual bool Save(ConfigSource& config,
+                     const String& name,
+                     const String& spec) = 0;
 };
 
 DECLARE_AUTOPTR(ConfigSourceFactory);
+
 
 /**
    ConfigSourceFactoryModule is used to load ConfigSourceFactory from shared

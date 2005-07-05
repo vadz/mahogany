@@ -43,7 +43,7 @@
 #include "PathFinder.h"       // for PathFinder
 #include "Composer.h"         // for RestoreAll()
 #include "SendMessage.h"
-#include "ConfigSource.h"
+#include "ConfigSourceLocal.h"
 #include "MAtExit.h"
 
 #include "InitPython.h"
