@@ -58,7 +58,7 @@ private:
 
 public:
    ConfigSourceLocalOld(const String& filename, const String& name = _T(""))
-      : ConfigSourceLocal(CreateDefaultConfig(filename), name) { }
+      : ConfigSourceLocal(CreateDefault(filename), name) { }
 
    virtual bool Read(const String& name, String *value) const
       { return ConfigSourceLocal::Read(Fix(name), value); }
