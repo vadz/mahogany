@@ -1639,6 +1639,9 @@
 				RelativePath=".\include\ConfigSource.h">
 			</File>
 			<File
+				RelativePath=".\include\ConfigSourceLocal.h">
+			</File>
+			<File
 				RelativePath=".\include\ConfigSourcesAll.h">
 			</File>
 			<File
