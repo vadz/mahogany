@@ -69,6 +69,8 @@ skip them unless you're updating from a very old version of Mahogany.
 
 \begin{itemize}
    \item New integrated statistical spam filter (DSPAM)
+   \item Better support for sharing preferences between multiple installations
+         (see \ref{multiconfigsources})
    \item Folders can now be dragged in the folder tree to reorder them
    \item Mahogany can now select the viewer best suited for the contents of the
          current message, e.g. you can use text viewer by default but the
@@ -1056,6 +1058,41 @@ If you encounter a mention of some {\tt Entry} in the group {\tt {[}Group{]}}
 of the config file, it maps to a value {\tt Entry} in the key
 {\tt Profiles$\backslash$Group} under the root key specified above under
 Windows.
+
+
+\subsection{Using multiple configuration sources}\label{multiconfigsources}
+
+The default behaviour described in the sections above is the simplest possible
+and works well as long as Mahogany is only used on a single machine. However it
+is not ideal if you want to use it from several different installations. It
+should be noted that in the simplest case, when all these installations use the
+same operating system and are similarly configured, you may simply trasnfer the
+Mahogany configuration file \footnote{use the option in the synchronisation
+page of the options dialog to force using a file instead of the registry under
+Windows} to the other machine, however this doesn't work if you want to use the
+program from both Unix and Windows as in such case some settings are bound to
+be different.
+
+The solution is to use multiple \emph{configuration sources} (they are called
+sources and not files because, in general, the settings can also be stored in
+other locations such as on a remote IMAP server). To set this up, choose the
+corresponding command from the \MenuCmd{Edit} menu: it will present you with
+the dialog allowing to create more configuration sources (currently only local
+files are supported) and to change their priority by moving them up or down in
+the list.
+
+Here is an example of a setup recommended for IMAP users:
+\begin{enumerate}
+   \item OS-specific settings are stored in \texttt{machine-os.conf}: this
+         file should be tiny as the only OS-specific options are those that
+         involve external paths, e.g. the user directory.
+   \item Machine-specific settings are stored in \texttt{machine.conf}: this
+         file is still quite small as the only machine-specific entries are
+         usually the IMAP and SMTP host names.
+   \item All the rest is stored in \texttt{global.conf} which may be shared
+         among all installations. This file is, correspondingly, usually large.
+\end{enumerate}
+
 
 
 \section{The User Interface}
