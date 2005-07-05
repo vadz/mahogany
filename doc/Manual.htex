@@ -1066,7 +1066,7 @@ The default behaviour described in the sections above is the simplest possible
 and works well as long as Mahogany is only used on a single machine. However it
 is not ideal if you want to use it from several different installations. It
 should be noted that in the simplest case, when all these installations use the
-same operating system and are similarly configured, you may simply trasnfer the
+same operating system and are similarly configured, you may simply transfer the
 Mahogany configuration file \footnote{use the option in the synchronisation
 page of the options dialog to force using a file instead of the registry under
 Windows} to the other machine, however this doesn't work if you want to use the
