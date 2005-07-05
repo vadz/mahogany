@@ -82,6 +82,7 @@
 
 extern const MPersMsgBox *M_MSGBOX_CONFIRM_EXIT;
 extern const MPersMsgBox *M_MSGBOX_OPT_STOREREMOTENOW;
+extern const MPersMsgBox *M_MSGBOX_WARN_RESTART_OPT;
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -852,8 +853,24 @@ private:
       Col_Max
    };
 
+   // event handlers
+   void OnButtonUp(wxCommandEvent& event);
+   void OnButtonDown(wxCommandEvent& event);
+   void OnButtonAdd(wxCommandEvent& event);
+   void OnButtonDelete(wxCommandEvent& event);
+
+   void OnUpdateButtonUp(wxUpdateUIEvent& event);
+   void OnUpdateButtonDown(wxUpdateUIEvent& event);
+   void OnUpdateButtonDelete(wxUpdateUIEvent& event);
+
+   // exchange the contents of the 2 given rows
+   void ExchangeRows(int row1, int row2);
+
+
    wxGrid *m_sources;
 
+
+   DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxConfigSourcesDialog)
 };
 
@@ -4758,6 +4775,17 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
 // wxConfigSourcesDialog implementation
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(wxConfigSourcesDialog, wxManuallyLaidOutDialog)
+   EVT_BUTTON(wxID_UP, wxConfigSourcesDialog::OnButtonUp)
+   EVT_BUTTON(wxID_DOWN, wxConfigSourcesDialog::OnButtonDown)
+   EVT_BUTTON(wxID_ADD, wxConfigSourcesDialog::OnButtonAdd)
+   EVT_BUTTON(wxID_DELETE, wxConfigSourcesDialog::OnButtonDelete)
+
+   EVT_UPDATE_UI(wxID_UP, wxConfigSourcesDialog::OnUpdateButtonUp)
+   EVT_UPDATE_UI(wxID_DOWN, wxConfigSourcesDialog::OnUpdateButtonDown)
+   EVT_UPDATE_UI(wxID_DELETE, wxConfigSourcesDialog::OnUpdateButtonDelete)
+END_EVENT_TABLE()
+
 wxConfigSourcesDialog::wxConfigSourcesDialog(wxFrame *parent)
                      : wxManuallyLaidOutDialog(parent,
                                                _("Configuration sources"),
@@ -4768,29 +4796,40 @@ wxConfigSourcesDialog::wxConfigSourcesDialog(wxFrame *parent)
    // create the Ok and Cancel buttons in the bottom right corner
    wxStaticBox *box = CreateStdButtonsAndBox(_("&Sources:"));
 
-   // create a short help message above
-   wxStaticText *msg = new wxStaticText
-                           (
-                              this, -1,
-                              _("Mahogany will always read its options from "
-                                "the main config file first, but other config\n"
-                                "sources may be added here and will be used "
-                                "for the options not found in the main one.")
-                           );
+   // create the buttons
+   wxButton *btnUp = new wxButton(this, wxID_UP, _("&Up"));
    c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
    c->height.AsIs();
-   msg->SetConstraints(c);
-
-   // create the listbox with the buttons in the area which is left
-   c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   btnUp->SetConstraints(c);
 
+   wxButton *btnDown = new wxButton(this, wxID_DOWN, _("Do&wn"));
+   c = new wxLayoutConstraints;
+   c->width.AsIs();
+   c->height.AsIs();
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   btnDown->SetConstraints(c);
+
+   wxButton *btnAdd = new wxButton(this, wxID_ADD, _("&Add"));
+   c = new wxLayoutConstraints;
+   c->width.AsIs();
+   c->height.AsIs();
+   c->right.SameAs(box, wxCentreX, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   btnAdd->SetConstraints(c);
+
+   wxButton *btnDelete = new wxButton(this, wxID_DELETE, _("&Delete"));
+   c = new wxLayoutConstraints;
+   c->width.AsIs();
+   c->height.AsIs();
+   c->left.RightOf(btnAdd, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(btnAdd, wxTop);
+   btnDelete->SetConstraints(c);
+
+   // create the grid in the area which is left
    m_sources = new wxGrid(this, -1);
    m_sources->CreateGrid(0, Col_Max, wxGrid::wxGridSelectRows);
 
@@ -4804,12 +4843,16 @@ wxConfigSourcesDialog::wxConfigSourcesDialog(wxFrame *parent)
    wxCOMPILE_TIME_ASSERT( WXSIZEOF(columnNames) == Col_Max,
                                     MismatchConfigSrcColumns );
 
-   wxListItem col;
    for ( int i = 0; i < Col_Max; i++ )
    {
       m_sources->SetColLabelValue(i, wxGetTranslation(columnNames[i]));
    }
 
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.LeftOf(btnDown, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 5*LAYOUT_Y_MARGIN);
+   c->bottom.Above(btnAdd, -2*LAYOUT_Y_MARGIN);
    m_sources->SetConstraints(c);
 
    // set the initial (but not minimal) size
@@ -4886,6 +4929,7 @@ bool wxConfigSourcesDialog::TransferDataToWindow()
       m_sources->SetColSize(col, m_sources->GetColSize(col) + 2*LAYOUT_X_MARGIN);
    }
 
+   m_sources->Fit();
    Layout();
 
    return true;
@@ -4930,10 +4974,72 @@ bool wxConfigSourcesDialog::TransferDataFromWindow()
          specs.push_back(m_sources->GetCellValue(row, Col_Spec));
       }
 
-      // TODO: AllConfigSources::Get().SetSources(names, types, specs);
+      if ( !AllConfigSources::Get().SetSources(names, types, specs) )
+         return false;
    }
 
+   MDialog_Message(_("Please notice that changes to configuration sources "
+                     "will only take effect during next program run."),
+                   NULL,
+                   _("Configuration Sources Updated"),
+                   GetPersMsgBoxName(M_MSGBOX_WARN_RESTART_OPT));
+
    return true;
+}
+
+void wxConfigSourcesDialog::ExchangeRows(int row1, int row2)
+{
+   wxString s;
+   for ( int col = 0; col < Col_Max; col++ )
+   {
+      s = m_sources->GetCellValue(row1, col);
+      m_sources->SetCellValue(row1, col, m_sources->GetCellValue(row2, col));
+      m_sources->SetCellValue(row2, col, s);
+   }
+
+   m_sources->SetGridCursor(row2, m_sources->GetGridCursorCol());
+}
+
+void wxConfigSourcesDialog::OnUpdateButtonUp(wxUpdateUIEvent& event)
+{
+   // first row must always remain on top, so row 1 can't be moved up
+   event.Enable( m_sources->GetCursorRow() > 1 );
+}
+
+void wxConfigSourcesDialog::OnUpdateButtonDown(wxUpdateUIEvent& event)
+{
+   // first row can't be moved down as it can't be moved at all and the last
+   // row can't be moved down any more neither
+   const int row = m_sources->GetCursorRow();
+   event.Enable( row > 0 && row < m_sources->GetNumberRows() - 1 );
+}
+
+void wxConfigSourcesDialog::OnUpdateButtonDelete(wxUpdateUIEvent& event)
+{
+   // first row can't be deleted, we always have local config
+   event.Enable( m_sources->GetCursorRow() > 0 );
+}
+
+void wxConfigSourcesDialog::OnButtonUp(wxCommandEvent& WXUNUSED(event))
+{
+   const int row = m_sources->GetCursorRow();
+   ExchangeRows(row, row - 1);
+}
+
+void wxConfigSourcesDialog::OnButtonDown(wxCommandEvent& WXUNUSED(event))
+{
+   const int row = m_sources->GetCursorRow();
+   ExchangeRows(row, row + 1);
+}
+
+void wxConfigSourcesDialog::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
+{
+   m_sources->AppendRows(1);
+}
+
+void wxConfigSourcesDialog::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
+{
+   m_sources->DeleteRows(m_sources->GetCursorRow());
 }
 
 // ----------------------------------------------------------------------------
