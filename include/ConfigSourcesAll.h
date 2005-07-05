@@ -185,6 +185,23 @@ public:
    List& GetSources() { return m_sources; }
    const List& GetSources() const { return m_sources; }
 
+   /**
+      Set the list of all configuration sources.
+
+      This function overwrites the previous defined config sources.
+
+      The unnamed local config source shouldn't be included in the arrays
+      passed to this function, it's always present.
+
+      @param names the names of all config sources
+      @param types the types of sources
+      @param specs the spec strings (passed to ConfigSourceFactory::Save())
+      @return true if ok, false on error
+    */
+   bool SetSources(const wxArrayString& names,
+                   const wxArrayString& types,
+                   const wxArrayString& specs);
+
    /// Delete the global AllConfigSources object returned by Get()
    static void Cleanup() { delete ms_theInstance; ms_theInstance = NULL; }
 

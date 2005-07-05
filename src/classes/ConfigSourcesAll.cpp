@@ -34,6 +34,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_CONFIG_SOURCE_PRIO;
+extern const MOption MP_CONFIG_SOURCE_TYPE;
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -350,14 +351,15 @@ AllConfigSources::AllConfigSources(const String& filename)
 
    ConfigSource::EnumData cookie;
    const String key(M_CONFIGSRC_CONFIG_SECTION),
-                valuePrio(_T('/') + GetOptionName(MP_CONFIG_SOURCE_PRIO));
+                slash(_T('/')),
+                valuePrio(slash + GetOptionName(MP_CONFIG_SOURCE_PRIO));
 
    String name;
    for ( bool cont = configLocal->GetFirstGroup(key, name, cookie);
          cont;
          cont = configLocal->GetNextGroup(name, cookie) )
    {
-      const String subkey = key + _T('/') + name;
+      const String subkey = key + slash + name;
 
       ConfigSource *config = ConfigSource::Create(*configLocal, subkey);
       if ( config )
@@ -697,4 +699,63 @@ wxConfigBase *AllConfigSources::GetLocalConfig() const
    return config->GetConfig();
 }
 
+// ----------------------------------------------------------------------------
+// changing configuration sources
+// ----------------------------------------------------------------------------
+
+bool
+AllConfigSources::SetSources(const wxArrayString& names,
+                             const wxArrayString& types,
+                             const wxArrayString& specs)
+{
+   const size_t count = names.size();
+   CHECK( types.size() == count && specs.size() == count, false,
+            _T("array size mismatch") );
+
+   ConfigSource& config = **m_sources.begin();
+
+   // we need just the name for RenameGroup()
+   String configsBackup(_T("Configs.Old"));
+   config.RenameGroup(M_CONFIGSRC_CONFIG_SECTION, configsBackup);
+
+   // but make full path now
+   const String slash(_T('/'));
+   configsBackup = String(M_CONFIGSRC_CONFIG_SECTION).BeforeLast(_T('/'))
+                         + slash + configsBackup;
+   const String pathType = slash + GetOptionName(MP_CONFIG_SOURCE_TYPE);
+   const String pathPrio = slash + GetOptionName(MP_CONFIG_SOURCE_PRIO);
+
+   // auto assign the priorities to ensure that the sources are in order but
+   // leave gaps between them to also allow for manual editing
+   int prio = 10;
+   for ( size_t n = 0; n < count; n++, prio += 10 )
+   {
+      String path;
+      path << M_CONFIGSRC_CONFIG_SECTION << slash << names[n];
+
+      const String type = types[n];
+      ConfigSourceFactory_obj factory(ConfigSourceFactory::Find(type));
+
+      if ( !factory ||
+               !factory->Save(config, path, specs[n]) ||
+                  !config.Write(path + pathType, type) ||
+                     !config.Write(path + pathPrio, prio) )
+      {
+         if ( !factory )
+         {
+            wxLogError(_("Unknown configuration source type \"%s\"."),
+                       type.c_str());
+         }
+
+         // restore old config sources
+         config.DeleteGroup(M_CONFIGSRC_CONFIG_SECTION);
+         config.RenameGroup(configsBackup,
+                            String(M_CONFIGSRC_CONFIG_SECTION).AfterLast(_T('/')));
+         return false;
+      }
+   }
+
+   config.DeleteGroup(configsBackup);
+   return true;
+}
 
