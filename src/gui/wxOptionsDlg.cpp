@@ -2253,7 +2253,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #ifdef OS_WIN
    CONFIG_NONE(), // separator
    CONFIG_NONE(), // help for config file setting
-   CONFIG_ENTRY(MP_USE_CONFIG_FILE),
+   CONFIG_NONE(), // config file itself
 #endif // OS_WIN
 };
 
@@ -4077,8 +4077,13 @@ bool wxOptionsPageSync::TransferDataToWindow()
       m_activateSync = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
 
 #ifdef OS_WIN
-      m_usingConfigFile =
-         !READ_CONFIG_TEXT(m_Profile, MP_USE_CONFIG_FILE).empty();
+      const String file = ConfigSourceLocal::GetFilePath();
+      m_usingConfigFile = !file.empty();
+      wxTextCtrl *text = wxDynamicCast(GetControl(ConfigField_SyncConfigFile),
+                                       wxTextCtrl);
+      wxCHECK_MSG( text, false, _T("where is the config file control?") );
+
+      text->SetValue(file);
 #endif // OS_WIN
    }
 
@@ -4110,7 +4115,12 @@ bool wxOptionsPageSync::TransferDataFromWindow()
       }
 
 #ifdef OS_WIN
-      String filenameConfig = READ_CONFIG_TEXT(m_Profile, MP_USE_CONFIG_FILE);
+      wxTextCtrl *text = wxDynamicCast(GetControl(ConfigField_SyncConfigFile),
+                                       wxTextCtrl);
+      String filenameConfig = text->GetValue();
+
+      ConfigSourceLocal::UseFile(filenameConfig);
+
       const int usingConfigFile = !filenameConfig.empty();
 
       if ( usingConfigFile != m_usingConfigFile )
@@ -4941,11 +4951,13 @@ bool wxConfigSourcesDialog::TransferDataFromWindow()
    CHECK( rowsCount >= 1, true, _T("first row can't be deleted, where is it?") );
 
 
-   // first row is handled specially (under Unix it can't be edited)
+   // first row is handled specially as it can only be changed to indicate
+   // whether we should use registry or file under Win32 (and under Unix it
+   // can't be edited at all)
 #ifdef OS_WIN
-   mApplication->GetProfile()->writeEntry(MP_USE_CONFIG_FILE,
-                                          m_sources->GetCellValue(0, Col_Spec));
+   ConfigSourceLocal::UseFile(m_sources->GetCellValue(0, Col_Spec));
 #endif // OS_WIN
+
 
    // now enum all the other ones
    if ( rowsCount > 1 )
