@@ -367,7 +367,7 @@ private:
 // module globals
 // ----------------------------------------------------------------------------
 
-// the global object containing all config sources used by Profile
+// the unique AllConfigSources object
 static AllConfigSources *gs_allConfigSources = NULL;
 
 
@@ -524,7 +524,7 @@ Profile::CreateGlobalConfig(const String& filename)
 {
    ASSERT_MSG( !gs_allConfigSources, _T("recreating the configs?") );
 
-   gs_allConfigSources = new AllConfigSources(filename);
+   gs_allConfigSources = AllConfigSources::Init(filename);
 
    Profile *p = ProfileImpl::CreateProfile(_T(""),NULL);
    EnforcePolicy(p);
@@ -536,7 +536,7 @@ Profile::DeleteGlobalConfig()
 {
    if ( gs_allConfigSources )
    {
-      delete gs_allConfigSources;
+      AllConfigSources::Cleanup();
       gs_allConfigSources = NULL;
    }
 }

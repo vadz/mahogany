@@ -26,6 +26,7 @@
 #endif // USE_PCH
 
 #include "ConfigSourcesAll.h"
+#include "ConfigSourceLocal.h"
 #include "ConfigPrivate.h"
 
 // ----------------------------------------------------------------------------
@@ -294,6 +295,8 @@ private:
 
 M_LIST(LongList, long);
 
+AllConfigSources *AllConfigSources::ms_theInstance = NULL;
+
 // ----------------------------------------------------------------------------
 // AllConfigSources creation
 // ----------------------------------------------------------------------------
@@ -364,7 +367,7 @@ AllConfigSources::AllConfigSources(const String& filename)
 
          // find the place to insert this config source at
          long prio;
-         if ( !configLocal->Read(valuePrio, &prio) )
+         if ( !configLocal->Read(subkey + valuePrio, &prio) )
          {
             // insert at the end by default
             prio = INT_MAX;
@@ -404,10 +407,20 @@ AllConfigSources::~AllConfigSources()
 bool AllConfigSources::Read(const String& path, LookupData& data) const
 {
    const String& key = data.GetKey();
-   ASSERT_MSG( !key.empty() && key[0u] != _T('/'),
-                  _T("invalid key in AllConfigSources::Read()") );
+   ASSERT_MSG( !key.empty(), _T("empty config key") );
 
-   String fullpath = path + _T('/') + key;
+   String fullpath;
+   if ( *key.c_str() != _T('/') )
+      fullpath << path << _T('/');
+   fullpath << key;
+
+   ASSERT_MSG( *fullpath.c_str() == _T('/'), _T("config paths must be absolute") );
+
+   ASSERT_MSG( fullpath.length() < 3 ||
+                  fullpath[1u] != 'M' ||
+                     fullpath[2u] != _T('/'),
+                        _T("config path must not start with /M") );
+
    const bool isNumeric = data.GetType() == LookupData::LD_LONG;
 
    const List::iterator end = m_sources.end();
@@ -446,10 +459,15 @@ AllConfigSources::Write(const String& path,
       }
    }
 
-   String fullpath = path + _T('/') + data.GetKey();
+   const String key = data.GetKey();
+   String fullpath;
+   if ( *key.c_str() != _T('/') )
+      fullpath << path << _T('/');
 
-   ASSERT_MSG( !fullpath.empty() && fullpath[0u] == _T('/'),
-                  _T("config path must always be absolute") );
+   fullpath << key;
+
+   ASSERT_MSG( *fullpath.c_str() == _T('/'), _T("config paths must be absolute") );
+
    ASSERT_MSG( fullpath.length() < 3 ||
                   fullpath[1u] != 'M' ||
                      fullpath[2u] != _T('/'),

@@ -31,7 +31,7 @@ public:
 
 
    /**
-      Constructor fully initializes the config sources list.
+      Static ctor: fully initializes the config sources list.
 
       In order to do this, it first creates the main local config source. It
       then uses it to find what other config sources are configured and
@@ -43,8 +43,13 @@ public:
       wxConfig using wxConfig::Set().
 
       @param filename the file used for the default config, may be empty
+      @return the pointer to global AllConfigSources object, same as returned
+              by Get() from now on
     */
-   AllConfigSources(const String& filename);
+   static AllConfigSources *Init(const String& filename)
+   {
+      return ms_theInstance = new AllConfigSources(filename);
+   }
 
    /**
       Destructor destroys wxConfig we had set in ctor.
@@ -166,15 +171,32 @@ public:
 
 
    /**
+      @name Accessors to config sources themselves.
+
+      These methods shouldn't be normally used directly but currently are for
+      configuring the sources list.
+   */
+   //@{
+
+   /// Get this object itself (created on demand)
+   static AllConfigSources& Get() { return *ms_theInstance; }
+
+   /// Get the list of all sources
+   List& GetSources() { return m_sources; }
+   const List& GetSources() const { return m_sources; }
+
+   /// Delete the global AllConfigSources object returned by Get()
+   static void Cleanup() { delete ms_theInstance; ms_theInstance = NULL; }
+
+   //@}
+
+
+   /**
       @name Helper methods for wxConfigMultiplexer only.
 
       Do not use these methods from elsewhere.
     */
    //@{
-
-   /// Get the list of all sources
-   List& GetSources() { return m_sources; }
-   const List& GetSources() const { return m_sources; }
 
    /// Find the config source containing this entry
    List::iterator FindEntry(const String& path) const;
@@ -192,12 +214,17 @@ public:
    //@}
 
 private:
+   // ctor is private, use public static Init() instead
+   AllConfigSources(const String& filename);
+
    // public CopyGroup() helper
    bool CopyGroup(ConfigSource *config,
                   const String& pathSrc,
                   const String& pathDst);
 
    List m_sources;
+
+   static AllConfigSources *ms_theInstance;
 
 
    DECLARE_NO_COPY_CLASS(AllConfigSources)
