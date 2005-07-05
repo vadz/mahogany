@@ -81,6 +81,27 @@ public:
 
       return config;
    }
+
+   /**
+      Configure CreateDefault() to use a file instead of the registry.
+
+      The value of config file name is always stored in the registry as this is
+      where we look first, hence if we're already using a config file and not
+      registry we can't use the usual ConfigSource or Profile methods to write
+      it but have to use this special function.
+
+      @sa GetFilePath()
+
+      @param filename if not empty, use the file with this name instead of the
+                      registry, otherwise use the registry
+    */
+   static void UseFile(const String& filename);
+
+   /**
+      Return the name of the config file used by CreateDefault() or an empty
+      string if we're using the registry.
+    */
+   static String GetFilePath();
 #endif // OS_WIN
 
 
@@ -132,8 +153,21 @@ protected:
    }
 
 #ifdef OS_WIN
+   // create registry config for us
+   static wxConfigBase *DoCreateRegConfig();
+
    // initialize m_config with wxRegConfig we use under Windows
    bool InitRegistry();
+
+   // get the location used for "config file" option in the registry (relative
+   // to wxRegConfig root)
+   static String GetConfigFileKey()
+   {
+      return M_PROFILE_CONFIG_SECTION _T("/UseConfigFile");
+   }
+
+   // get the config file location from the given wxRegConfig
+   static String GetFilePath(wxConfigBase *config);
 #endif // OS_WIN
 
    // initialize m_config with a wxFileConfig

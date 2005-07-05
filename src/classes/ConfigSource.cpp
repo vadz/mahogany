@@ -81,10 +81,6 @@ private:
 
 extern const MOption MP_CONFIG_SOURCE_TYPE;
 
-#ifdef OS_WIN
-extern const MOption MP_USE_CONFIG_FILE;
-#endif // OS_WIN
-
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -500,16 +496,19 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
       // file instead of the registry, this is indicated by the presence of
       if ( rc )
       {
-         String key(M_PROFILE_CONFIG_SECTION);
-         key << _T('/') << GetOptionName(MP_USE_CONFIG_FILE);
-         if ( m_config->Read(key, &localFilePath) )
+         localFilePath = GetFilePath(m_config);
+         if ( !localFilePath.empty() )
          {
             // we want to use wxFileConfig finally...
             delete m_config;
             m_config = NULL; // not really needed now, but safer
             rc = false;
          }
-         //else: do use wxRegConfig created above
+         else // do use wxRegConfig created above
+         {
+            // as for wxFileConfig, see comment in InitFile()
+            m_config->SetExpandEnvVars(false);
+         }
       }
    }
 #else  // !Windows, !Unix
@@ -558,26 +557,61 @@ ConfigSourceLocal::InitFile(const String& localFilePath,
 
 #ifdef OS_WIN
 
-bool ConfigSourceLocal::InitRegistry()
+/* static */
+wxConfigBase *ConfigSourceLocal::DoCreateRegConfig()
 {
    // don't give explicit name, but rather use the default logic (it's
    // perfectly ok, for the registry case our keys are under vendor\appname)
-   wxRegConfig *regconf = new wxRegConfig
-                              (
-                                 M_APPLICATIONNAME,
-                                 M_VENDORNAME,
-                                 _T(""),
-                                 _T(""),
-                                 wxCONFIG_USE_LOCAL_FILE |
-                                 wxCONFIG_USE_GLOBAL_FILE
-                              );
+   return new wxRegConfig
+              (
+                  M_APPLICATIONNAME,
+                  M_VENDORNAME,
+                  _T(""),
+                  _T(""),
+                  wxCONFIG_USE_LOCAL_FILE |
+                  wxCONFIG_USE_GLOBAL_FILE
+              );
+}
 
-   // see comment in CreateFileConfig()
-   regconf->SetExpandEnvVars(false);
+bool ConfigSourceLocal::InitRegistry()
+{
+   wxConfigBase *regconf = DoCreateRegConfig();
+
+   // don't call SetExpandEnvVars() here: this allows to use env vars in config
+   // file value
 
    DoInit(regconf);
 
    return true;
+}
+
+/* static */
+String ConfigSourceLocal::GetFilePath(wxConfigBase *config)
+{
+   String path;
+   config->Read(GetConfigFileKey(), &path);
+   return path;
+}
+
+/* static */
+void ConfigSourceLocal::UseFile(const String& filename)
+{
+   wxConfigBase *config = DoCreateRegConfig();
+   if ( filename.empty() )
+      config->DeleteEntry(GetConfigFileKey());
+   else
+      config->Write(GetConfigFileKey(), filename);
+   delete config;
+}
+
+/* static */
+String ConfigSourceLocal::GetFilePath()
+{
+   wxConfigBase *config = DoCreateRegConfig();
+   String path = GetFilePath(config);
+   delete config;
+
+   return path;
 }
 
 #endif // OS_WIN
