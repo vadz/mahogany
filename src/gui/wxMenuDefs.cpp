@@ -309,7 +309,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // normal edit
 
    // the available accelerators for this menu:
-   // BHJNVUWYZ
+   // BHJNVWYZ
    { WXMENU_EDIT_CUT,  gettext_noop("Cu&t\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , wxITEM_NORMAL },
@@ -320,12 +320,13 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_FINDAGAIN, gettext_noop("Find a&gain\tCtrl-F3"), gettext_noop("Find the same text again") , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_EDIT_ADB,      gettext_noop("Address boo&ks...\tCtrl-D"), gettext_noop("Edit the address book(s)") , wxITEM_NORMAL },
-   { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences...\tCtrl-Shift-E"),   gettext_noop("Change options")           , wxITEM_NORMAL },
    { WXMENU_EDIT_MODULES,  gettext_noop("M&odules..."), gettext_noop("Choose which extension modules to use")           , wxITEM_NORMAL },
    { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , wxITEM_NORMAL },
    { WXMENU_EDIT_TEMPLATES,gettext_noop("Te&mplates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
    { WXMENU_EDIT_SPAM_CONFIG, gettext_noop("Sp&am filters..."), gettext_noop("Set the options for spam detection"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
+   { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences...\tShift-Ctrl-E"),   gettext_noop("Change options")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_CONFIG_SOURCES, gettext_noop("Configuration so&urces..."), gettext_noop("Edit configuration sources list"), wxITEM_NORMAL },
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save preferences"), gettext_noop("Save options")             , wxITEM_NORMAL },
    { WXMENU_EDIT_EXPORT_PREF,gettext_noop("E&xport preferences..."), gettext_noop("Export options")             , wxITEM_NORMAL },
    { WXMENU_EDIT_IMPORT_PREF,gettext_noop("&Import preferences..."), gettext_noop("Import options")             , wxITEM_NORMAL },

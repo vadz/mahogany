@@ -43,7 +43,7 @@
 #  include <wx/ffile.h>
 #endif // Python
 
-#include "ConfigSource.h"
+#include "ConfigSourceLocal.h"
 #include "FolderMonitor.h"
 
 #include "TemplateDialog.h"
@@ -662,6 +662,10 @@ wxMFrame::OnMenuCommand(int id)
          {
             ERRORMESSAGE((_("Couldn't save preferences.")));
          }
+         break;
+
+      case WXMENU_EDIT_CONFIG_SOURCES:
+         ShowConfigSourcesDialog(this);
          break;
 
       case WXMENU_EDIT_EXPORT_PREF:

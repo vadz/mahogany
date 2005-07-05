@@ -43,6 +43,7 @@
 #endif // USE_PCH
 
 #include <wx/confbase.h>
+#include <wx/grid.h>
 
 #if defined(OS_WIN) && defined(USE_DIALUP)
 #  include <wx/dialup.h>          // for wxDialUpManager
@@ -50,7 +51,8 @@
 
 #include "Mpers.h"
 #include "Moptions.h"            // we need all MP_XXX for our arrays
-#include "ConfigSource.h"
+#include "ConfigSourceLocal.h"
+#include "ConfigSourcesAll.h"
 
 // we have to include these 3 headers just for wxOptionsPageNewMail... move it
 // to another file maybe?
@@ -829,6 +831,30 @@ private:
    wxCheckListBox *m_checklistBox;
 
    DECLARE_NO_COPY_CLASS(wxRestoreDefaultsDialog)
+};
+
+// dialog to edit the config sources (for now just files)
+class wxConfigSourcesDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxConfigSourcesDialog(wxFrame *parent);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+private:
+   // column indices
+   enum
+   {
+      Col_Name,
+      Col_Type,
+      Col_Spec,
+      Col_Max
+   };
+
+   wxGrid *m_sources;
+
+   DECLARE_NO_COPY_CLASS(wxConfigSourcesDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -4729,6 +4755,188 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
 }
 
 // ----------------------------------------------------------------------------
+// wxConfigSourcesDialog implementation
+// ----------------------------------------------------------------------------
+
+wxConfigSourcesDialog::wxConfigSourcesDialog(wxFrame *parent)
+                     : wxManuallyLaidOutDialog(parent,
+                                               _("Configuration sources"),
+                                               _T("ConfigSources"))
+{
+   wxLayoutConstraints *c;
+
+   // create the Ok and Cancel buttons in the bottom right corner
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&Sources:"));
+
+   // create a short help message above
+   wxStaticText *msg = new wxStaticText
+                           (
+                              this, -1,
+                              _("Mahogany will always read its options from "
+                                "the main config file first, but other config\n"
+                                "sources may be added here and will be used "
+                                "for the options not found in the main one.")
+                           );
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   msg->SetConstraints(c);
+
+   // create the listbox with the buttons in the area which is left
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+
+   m_sources = new wxGrid(this, -1);
+   m_sources->CreateGrid(0, Col_Max, wxGrid::wxGridSelectRows);
+
+   static const wxChar *columnNames[] =
+   {
+      gettext_noop("Name"),
+      gettext_noop("Type"),
+      gettext_noop("Description"),
+   };
+
+   wxCOMPILE_TIME_ASSERT( WXSIZEOF(columnNames) == Col_Max,
+                                    MismatchConfigSrcColumns );
+
+   wxListItem col;
+   for ( int i = 0; i < Col_Max; i++ )
+   {
+      m_sources->SetColLabelValue(i, wxGetTranslation(columnNames[i]));
+   }
+
+   m_sources->SetConstraints(c);
+
+   // set the initial (but not minimal) size
+   SetDefaultSize(8*wBtn, 8*hBtn, false);
+}
+
+bool wxConfigSourcesDialog::TransferDataToWindow()
+{
+   // fill the grid with configured sources
+   int n = 0;
+
+   const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
+   for ( AllConfigSources::List::iterator i = sources.begin(),
+                                        end = sources.end();
+         i != end;
+         ++i, ++n )
+   {
+      m_sources->AppendRows(1);
+
+      // first config is always the unnamed/local one
+      wxString name = n == 0 ? wxString(_("Local machine"))
+                             : i->GetName().AfterLast(_T('/')),
+               type = i->GetType(),
+               spec = i->GetSpec();
+
+#ifdef OS_WIN
+      if ( n == 0 && spec.empty() )
+         type = gettext_noop("registry");
+#endif // OS_WIN
+
+      m_sources->SetCellValue(n, Col_Name, name);
+      m_sources->SetCellValue(n, Col_Type, wxGetTranslation(type));
+      m_sources->SetCellValue(n, Col_Spec, spec);
+   }
+
+   // allow to choose only supported types for the type column
+   if ( n )
+   {
+      wxGridCellAttr *attrRO = new wxGridCellAttr;
+      attrRO->SetReadOnly();
+#ifdef OS_WIN
+      m_sources->SetAttr(0, Col_Name, attrRO);
+#else // !Win
+      m_sources->SetRowAttr(0, attrRO);
+#endif // Win/Unix
+
+      wxArrayString choices;
+      ConfigSourceFactory::EnumData cookie;
+      for ( ConfigSourceFactory *factory = ConfigSourceFactory::GetFirst(cookie);
+            factory;
+            factory = ConfigSourceFactory::GetNext(cookie) )
+      {
+         choices.push_back(factory->GetType());
+         factory->DecRef();
+      }
+
+      wxGridCellAttr *attrType = new wxGridCellAttr;
+      attrType->SetEditor(new wxGridCellChoiceEditor(choices));
+      m_sources->SetColAttr(Col_Type, attrType);
+
+      // under Windows the local config (and only it!) may use the registry
+#ifdef OS_WIN
+      choices.push_back(_("registry"));
+      attrType = new wxGridCellAttr;
+      attrType->SetEditor(new wxGridCellChoiceEditor(choices));
+      m_sources->SetAttr(0, Col_Type, attrType);
+#endif // OS_WIN
+   }
+
+   // resize the columns
+   for ( int col = 0; col < Col_Max; col++ )
+   {
+      m_sources->AutoSizeColumn(col);
+      m_sources->SetColSize(col, m_sources->GetColSize(col) + 2*LAYOUT_X_MARGIN);
+   }
+
+   Layout();
+
+   return true;
+}
+
+bool wxConfigSourcesDialog::TransferDataFromWindow()
+{
+   const int rowsCount = m_sources->GetNumberRows();
+   CHECK( rowsCount >= 1, true, _T("first row can't be deleted, where is it?") );
+
+
+   // first row is handled specially (under Unix it can't be edited)
+#ifdef OS_WIN
+   mApplication->GetProfile()->writeEntry(MP_USE_CONFIG_FILE,
+                                          m_sources->GetCellValue(0, Col_Spec));
+#endif // OS_WIN
+
+   // now enum all the other ones
+   if ( rowsCount > 1 )
+   {
+      wxArrayString names,
+                    types,
+                    specs;
+
+      for ( int row = 1; row < rowsCount; row++ )
+      {
+         wxString s = m_sources->GetCellValue(row, Col_Name);
+         if ( s.empty() )
+         {
+            wxLogError(_("Configuration sources must be named."));
+            return false;
+         }
+
+         if ( names.Index(s) != wxNOT_FOUND )
+         {
+            wxLogError(_("Name \"%s\" is not unique."), s.c_str());
+            return false;
+         }
+
+         names.push_back(s);
+         types.push_back(m_sources->GetCellValue(row, Col_Type));
+         specs.push_back(m_sources->GetCellValue(row, Col_Spec));
+      }
+
+      // TODO: AllConfigSources::Get().SetSources(names, types, specs);
+   }
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // our public interface
 // ----------------------------------------------------------------------------
 
@@ -4747,6 +4955,12 @@ bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent)
    (void)dlg.ShowModal();
 
    return dlg.HasChanges();
+}
+
+void ShowConfigSourcesDialog(wxFrame *parent)
+{
+   wxConfigSourcesDialog dlg(parent);
+   (void)dlg.ShowModal();
 }
 
 bool ShowCustomOptionsDialog(size_t nPages,

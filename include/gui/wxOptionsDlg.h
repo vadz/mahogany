@@ -64,6 +64,9 @@ extern void ShowIdentityDialog(const wxString& ident, wxFrame *parent = NULL);
 /// creates and shows the dialog allowing to restore default settings
 extern bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent = NULL);
 
+/// shows the dialog allowing to edit config sources
+extern void ShowConfigSourcesDialog(wxFrame *parent = NULL);
+
 /**
   creates and shows the options dialog with several custom options page
 
