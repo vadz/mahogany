@@ -12,7 +12,6 @@
 #ifndef _M_CONFIGPRIVATE_H_
 #define _M_CONFIGPRIVATE_H_
 
-#include "Profile.h"
 #include "ConfigSourcesAll.h"
 
 /**

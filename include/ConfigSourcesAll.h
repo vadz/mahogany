@@ -13,7 +13,7 @@
 #define _M_CONFIGSOURCESALL_H_
 
 #include "lists.h"
-
+#include "Profile.h"
 #include "ConfigSource.h"
 
 class LookupData;
