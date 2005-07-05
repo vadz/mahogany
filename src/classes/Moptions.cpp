@@ -122,10 +122,6 @@ const MOption MP_LICENSE_ACCEPTED;
 const MOption MP_GLOBALDIR;
 const MOption MP_RUNONEONLY;
 
-#ifdef OS_WIN
-const MOption MP_USE_CONFIG_FILE;
-#endif // OS_WIN
-
 const MOption MP_TBARIMAGES;
 
 #ifdef OS_UNIX
@@ -539,10 +535,6 @@ static const MOptionData MOptions[] =
 
     DEFINE_OPTION(MP_GLOBALDIR),
     DEFINE_OPTION(MP_RUNONEONLY),
-
-#ifdef OS_WIN
-    DEFINE_OPTION(MP_USE_CONFIG_FILE),
-#endif // OS_WIN
 
     DEFINE_OPTION(MP_TBARIMAGES),
 

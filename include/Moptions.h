@@ -59,10 +59,6 @@ extern const MOption MP_LICENSE_ACCEPTED;
 extern const MOption MP_GLOBALDIR;
 extern const MOption MP_RUNONEONLY;
 
-#ifdef OS_WIN
-extern const MOption MP_USE_CONFIG_FILE;
-#endif // OS_WIN
-
 extern const MOption MP_TBARIMAGES;
 
 #ifdef OS_UNIX
@@ -527,11 +523,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// run onl one copy of the program at once?
 #define MP_RUNONEONLY_NAME _T("RunOneOnly")
-
-#ifdef OS_WIN
-/// use config file even under Windows?
-#define MP_USE_CONFIG_FILE_NAME _T("UseConfigFile")
-#endif // OS_WIN
 
 /// show images in the toolbar
 #define MP_TBARIMAGES_NAME _T("ShowTbarImages")
@@ -1371,11 +1362,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// run onl one copy of the program at once?
 #define MP_RUNONEONLY_DEFVAL 1l
-
-#ifdef OS_WIN
-/// use config file even under Windows?
-#define MP_USE_CONFIG_FILE_DEFVAL wxEmptyString
-#endif // OS_WIN
 
 /// show images in the toolbar
 #define MP_TBARIMAGES_DEFVAL 0l // == TbarShow_Icons - 1
