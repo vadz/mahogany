@@ -48,20 +48,6 @@ Written by Vadim Zeitlin, Karsten Ballüder et.al.}
 
 \chapter{Using Mahogany }
 
-\bigskip{}
-{\centering \textbf{\large Please note that the manual may be partly
-out of date}\large \par}
-
-{\centering \textbf{\large and may contain information which is not
-correct any more.}\large \par}
-
-{\par}
-
-{\centering \textbf{\large Any help with keeping it up to date would
-be very appreciated!}\large \par}
-\bigskip{}
-
-
 \section{Release Notes\_1001\_}
 
 Welcome to the new Mahogany release! If you haven't installed the
@@ -76,6 +62,8 @@ any problems with building it.
 
 \subsection{Changes against the previous versions}
 
+All sections here except the first one present only historical interest, please
+skip them unless you're updating from a very old version of Mahogany.
 
 \subsubsection{0.67 against 0.66}
 
@@ -524,15 +512,8 @@ to improve.
 
 \begin{itemize}
 \item Multi-threaded folder access, to avoid blocking while retrieving slow
-remote folders/servers. This is moreless complete but not enabled
-in the release as we want to test and debug it further before making
-it the default behaviour.
-\item Message editor: rich text editing \& HTML (Almost complete, but not
-activated yet. Will be there very soon.)
-\item A faster mail folder format or support for storing messages in an
-ODBC database.
-\item Support for PGP and GNU Privacy Guard to encrypt mails.
-\item Wide character (Unicode) and UTF-8 support (waiting for GTK+ 2.0)
+remote folders/servers.
+\item Message editor: rich text editing \& HTML
 \end{itemize}
 
 \subsection{Help Needed}
@@ -759,11 +740,11 @@ use in the \htmladdnormallinkfoot{OpenSSL Toolkit}{http://www.openssl.org/}
 Hudson (tjh@cryptsoft.com)\char`\"{}
 \end{quote}
 
-\subsubsection{wxWindows:}
+\subsubsection{wxWidgets (formerly known as wxWindows):}
 
-We gratefully acknowledge the use of the \htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/}
-cross-platform class library and the excellent work and support of
-the wxWindows developer team.
+Mahogany is built using \htmladdnormallinkfoot{wxWidgets}{http://www.wxwidgets.org/}
+cross-platform class library -- without it, Mahogany wouldn't have been
+possible.
 
 
 \section{Introduction / Tutorial}
