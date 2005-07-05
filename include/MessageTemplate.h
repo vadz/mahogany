@@ -65,7 +65,7 @@
     with one branch per each MessageTemplateKind value and each template now
     has its own name, i.e.:
 
-    M/Templates/
+    Templates/
          NewMessage/
             Standard = "..."
             BugReply = "..."
@@ -76,15 +76,16 @@
             ...
          ...
 
-   The special template name "Standard" is used for the template used by
-   default. To determine the template to be used, the value in
-   <folder profile>/Templates/<kind> is read and is now interpreted as the
-   _name_ of the template in the tree shown above (and not as template value as
-   it used to be). The default values for all these keys are, of course, just
-   "Standard".
+   To determine the template to be used, the value in <folder profile>/
+   Template_<kind> is read and is now interpreted as the _name_ of the
+   template in the tree shown above (and not as template value as it used to
+   be). The default values for all these keys are empty and, in this case,
+   default templates hard coded in MessageTemplate.cpp are used (hard coding
+   them seems bad but they're still configurable at run-time and this allows to
+   translate them easily).
 
    When a template for a folder is edited, it is given a new unique name. By
-   default it will be something like <folder name> and there are also
+   default it will be subst(<folder name>,/,_)_<kind> and there are also
    old_foldername entries which are created by the upgrade procedure when
    upgrading from 0.50 or below.
 
