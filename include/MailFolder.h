@@ -513,10 +513,9 @@ public:
       given either "foo" (i.e. normal situation) or "foo.messages".
 
       @param name the physical name of the mailbox
-      @return the logical name of the mailbox with the given name (*not* of
-              this one!)
+      @return the logical name of the mailbox with the given name
     */
-   virtual String GetLogicalMailboxName(const String& name) { return name; }
+   static String GetLogicalMailboxName(const String& name);
 
    //@}
 

@@ -1121,7 +1121,7 @@ MailFolder::ForwardMessage(Message *msg,
 }
 
 // ----------------------------------------------------------------------------
-// folder delimiter stuff
+// folder names metainfo
 // ----------------------------------------------------------------------------
 
 /* static */
@@ -1165,6 +1165,24 @@ char MailFolder::GetFolderDelimiter(const MFolder *folder)
 
          return mfTmp->GetFolderDelimiter();
    }
+}
+
+/* static */
+String MailFolder::GetLogicalMailboxName(const String& namePhysical)
+{
+   // special suffix which we use to implement mailboxes containing both
+   // messages and other mailboxes with drivers which don't support this: if
+   // it's impossible to put both messages and mailboxes in a mailbox "foo", we
+   // create a mailbox "foo.messages" for the messages and use "foo" only for
+   // children
+   static const char *MAILBOX_MSGS_SUFFIX = ".messages";
+   static const size_t MAILBOX_MSGS_SUFFIX_LEN = strlen(MAILBOX_MSGS_SUFFIX);
+
+   String name(namePhysical);
+   if ( name.Right(MAILBOX_MSGS_SUFFIX_LEN) == MAILBOX_MSGS_SUFFIX )
+      name.RemoveLast(MAILBOX_MSGS_SUFFIX_LEN);
+
+   return name;
 }
 
 // ----------------------------------------------------------------------------

@@ -217,7 +217,6 @@ public:
    //@}
 
    virtual char GetFolderDelimiter() const;
-   virtual String GetLogicalMailboxName(const String& name);
 
    /// return TRUE if CClient lib had been initialized
    static bool IsInitialized() { return ms_CClientInitialisedFlag; }

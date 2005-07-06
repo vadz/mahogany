@@ -448,11 +448,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
 
       case MF_FILE:
       case MF_IMAP:
-         {
-            MailFolder_obj mf(m_mailFolder->GetMailFolder());
-            if ( mf )
-               m_folderPath = mf->GetLogicalMailboxName(m_folderPath);
-         }
+         m_folderPath = MailFolder::GetLogicalMailboxName(m_folderPath);
          break;
 
       default:
@@ -604,7 +600,7 @@ wxSubfoldersTree::OnListFolder(const String& path, wxChar delim, long attr)
       return;
 
    String namePhysical = name;
-   name = mf->GetLogicalMailboxName(name);
+   name = MailFolder::GetLogicalMailboxName(name);
 
 
    // do add new folder to the tree
