@@ -31,6 +31,7 @@
    #include "strutil.h"
    #include "MApplication.h"
    #include "Mdefaults.h"
+   #include <wx/fileconf.h>               // for wxFileConfig
 #endif // USE_PCH
 
 #include <wx/confbase.h>
