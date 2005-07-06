@@ -23,6 +23,8 @@
    #include "Mcommon.h"
    #include "Mdefaults.h"
    #include "MApplication.h"
+
+   #include <wx/config.h>
 #endif // USE_PCH
 
 #include <wx/persctrl.h>
@@ -41,48 +43,6 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
-
-#ifdef OS_UNIX
-
-/**
-   ConfigSourceLocalOld is the class which behaves in exactly the same way as
-   ConfigSourceLocal except that it prepends "/M" to all paths.
-
-   See AllConfigSources constructor for the explanation of why is this needed.
-
-   This class is read-only, all Write() methods silently fail.
- */
-class ConfigSourceLocalOld : public ConfigSourceLocal
-{
-private:
-   // "fix" the config path
-   static String Fix(const String& path) { return _T("/M") + path; }
-
-public:
-   ConfigSourceLocalOld(const String& filename, const String& name = _T(""))
-      : ConfigSourceLocal(CreateDefault(filename), name) { }
-
-   virtual bool Read(const String& name, String *value) const
-      { return ConfigSourceLocal::Read(Fix(name), value); }
-   virtual bool Read(const String& name, long *value) const
-      { return ConfigSourceLocal::Read(Fix(name), value); }
-   virtual bool Write(const String&, const String&) { return true; }
-   virtual bool Write(const String&, long) { return true; }
-   virtual bool GetFirstGroup(const String& key,
-                                 String& group, EnumData& cookie) const
-      { return ConfigSourceLocal::GetFirstGroup(Fix(key), group, cookie); }
-   virtual bool GetFirstEntry(const String& key,
-                                 String& entry, EnumData& cookie) const
-      { return ConfigSourceLocal::GetFirstEntry(Fix(key), entry, cookie); }
-   virtual bool DeleteEntry(const String&) { return true; }
-   virtual bool DeleteGroup(const String&) { return true; }
-   virtual bool CopyEntry(const String&, const String&, ConfigSource *)
-      { return true; }
-   virtual bool RenameGroup(const String&, const String&) { return true; }
-};
-
-#endif // OS_UNIX
-
 
 /**
    wxConfigMultiplexer is a wxConfig façade for AllConfigSources.
@@ -344,26 +304,6 @@ AllConfigSources::AllConfigSources(const String& filename)
    // local config is always first
    m_sources.push_back(configLocal);
 
-#ifdef OS_UNIX
-   // under Unix we used to store all config data under /M/Profiles which was
-   // inconsistent with Windows version which used just /Profile and a bit
-   // silly anyhow as what else if not M data can be stored in ~/.M/config
-   // file anyhow
-   //
-   // so starting with 0.66 we use just /Profiles everywhere but this creates
-   // a problem because the location of everything has changed
-   //
-   // to solve this, we create a fallback config source which justs look in
-   // /M/path when reading from /path and which we only use if we detect that
-   // config file is from an older version
-   String ver;
-   bool useOldConfig = configLocal->Read(_T("/M/Profiles/Version"), &ver);
-   if ( useOldConfig )
-   {
-      m_sources.push_back(new ConfigSourceLocalOld(filename));
-   }
-#endif // OS_UNIX
-
    // now get all the other configs
    LongList priorities;
 
@@ -395,10 +335,6 @@ AllConfigSources::AllConfigSources(const String& filename)
 
          List::iterator i = m_sources.begin();
          ++i;              // skip local config which is always first
-#ifdef OS_UNIX
-         if ( useOldConfig )
-            ++i;           // and compatibility config if we use it
-#endif // OS_UNIX
 
          LongList::iterator j;
          for ( j = priorities.begin(); j != priorities.end(); ++i, ++j )
