@@ -223,8 +223,8 @@ public:
    virtual wxControl *CreateControlsAbove(wxPanel * /* panel */) { return NULL; }
       // create the notebook itself (assign the pointer to m_notebook)
    virtual void CreateNotebook(wxPanel *panel) = 0;
-      // create the controls below the main notebook
-   virtual void CreateControlsBelow(wxPanel * /* panel */) { }
+      // create the controls below the main notebook, return the top-most
+   virtual wxControl *CreateControlsBelow(wxPanel *panel);
       // create the notebook and the standard Ok/Cancel/Apply buttons, calls
       // CreateControlsAbove/Below() and CreateNotebook() which may be
       // overriden in the derived classes
@@ -255,6 +255,12 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+   // get the config source to use for saving data: this must be passed to all
+   // Profile::writeEntry() calls
+   //
+   // the returned pointer may be NULL and, in any case, shouldn't be deleted
+   ConfigSource *GetConfigForSave() const { return m_configForSave; }
+
    // callbacks
    void OnHelp(wxCommandEvent &event);
    void OnOK(wxCommandEvent& event);
@@ -281,10 +287,12 @@ protected:
    // changes were accepted
    bool DoApply();
 
-   wxPNotebook *m_notebook;
-
    // get the profile for event sending
    virtual Profile *GetProfile() const = 0;
+
+
+   // the notebook occupying the main part of the dialog
+   wxPNotebook *m_notebook;
 
 private:
    // send a notification event about options change using m_lastBtn value
@@ -293,6 +301,12 @@ private:
    wxButton *m_btnHelp,
             *m_btnOk,
             *m_btnApply;
+
+   // choice containing all config sources, may be NULL
+   wxChoice *m_chcSources;
+
+   // config source to save changes to
+   ConfigSource *m_configForSave;
 
    // this profile is first retrieved using GetProfile(), but it's only done
    // once and then it is reused so that [Cancel] will call Discard() on the

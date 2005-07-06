@@ -34,16 +34,19 @@
 #  include "gui/wxIconManager.h"
 
 #  include <wx/layout.h>
-#  include <wx/stattext.h>      // for wxStaticText
+#  include <wx/stattext.h>
 #  include <wx/statbox.h>
 #  include <wx/statbmp.h>
 #endif // USE_PCH
 
-#include <wx/imaglist.h>        // for wxImageList
+#include <wx/imaglist.h>
+#include <wx/statline.h>
 
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
 #include "gui/wxMenuDefs.h"
+
+#include "ConfigSourcesAll.h"
 
 #include "Mupgrade.h"      // for VerifyEMailSendingWorks()
 
@@ -1229,14 +1232,62 @@ wxProfileSettingsEditDialog::~wxProfileSettingsEditDialog()
 wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
                                    const wxString& title,
                                    const wxString& profileKey)
-                : wxManuallyLaidOutDialog(parent, title, profileKey)
+                   : wxManuallyLaidOutDialog(parent, title, profileKey)
 {
    m_btnOk =
    m_btnApply = NULL;
 
    m_profileForButtons = NULL;
 
+   m_configForSave = NULL;
+
    m_lastBtn = MEventOptionsChangeData::Invalid;
+}
+
+wxControl *wxOptionsEditDialog::CreateControlsBelow(wxPanel *panel)
+{
+   const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
+   if ( sources.size() == 1 )
+   {
+      m_chcSources = NULL;
+      return NULL;
+   }
+
+   m_chcSources = new wxChoice(panel, -1);
+   for ( AllConfigSources::List::iterator i = sources.begin(),
+                                        end = sources.end();
+         i != end;
+         ++i )
+   {
+      m_chcSources->Append(i->GetName());
+   }
+
+   wxLayoutConstraints *c;
+
+   wxStaticLine *line = new wxStaticLine(panel, -1);
+   c = new wxLayoutConstraints;
+   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
+   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   c->bottom.SameAs(panel, wxBottom, 5*LAYOUT_Y_MARGIN + hBtn);
+   line->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   c->bottom.Above(line, -LAYOUT_Y_MARGIN);
+   m_chcSources->SetConstraints(c);
+
+   wxStaticText *label = new wxStaticText(panel, -1, _("&Save changes to:"));
+   c = new wxLayoutConstraints;
+   c->right.LeftOf(m_chcSources, LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   c->centreY.SameAs(m_chcSources, wxCentreY);
+   label->SetConstraints(c);
+
+   return m_chcSources;
 }
 
 void wxOptionsEditDialog::CreateAllControls()
@@ -1264,8 +1315,9 @@ void wxOptionsEditDialog::CreateAllControls()
    c->bottom.SameAs(this, wxBottom);
    panel->SetConstraints(c);
 
-   // optional controls above the notebook
-   wxControl *last = CreateControlsAbove(panel);
+   // optional controls above/below the notebook
+   wxControl *top = CreateControlsAbove(panel),
+             *bottom = CreateControlsBelow(panel);
 
    // the notebook itself is created by this function
    CreateNotebook(panel);
@@ -1273,11 +1325,14 @@ void wxOptionsEditDialog::CreateAllControls()
    c = new wxLayoutConstraints;
    c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
    c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
-   if ( last )
-      c->top.SameAs(last, wxBottom, 2*LAYOUT_Y_MARGIN);
+   if ( top )
+      c->top.SameAs(top, wxBottom, 2*LAYOUT_Y_MARGIN);
    else
       c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(panel, wxBottom, 4*LAYOUT_Y_MARGIN + hBtn);
+   if ( bottom )
+      c->bottom.SameAs(bottom, wxTop, 2*LAYOUT_Y_MARGIN);
+   else
+      c->bottom.SameAs(panel, wxBottom, 4*LAYOUT_Y_MARGIN + hBtn);
    m_notebook->SetConstraints(c);
 
    // create the buttons
@@ -1366,10 +1421,28 @@ bool wxOptionsEditDialog::TransferDataToWindow()
 
 bool wxOptionsEditDialog::TransferDataFromWindow()
 {
+   // first decide where to save the changes
+   m_configForSave = NULL;
+   if ( m_chcSources )
+   {
+      const int sel = m_chcSources->GetSelection();
+      if ( sel != -1 )
+      {
+         AllConfigSources::List::iterator
+            i = AllConfigSources::Get().GetSources().begin();
+         for ( int n = 0; n < sel; n++ )
+            ++i;
+
+         m_configForSave = i.operator->();
+      }
+   }
+
+   // now do save them
    const int count = m_notebook->GetPageCount();
    for ( int nPage = 0; nPage < count; nPage++ )
    {
-      if ( !m_notebook->GetPage(nPage)->TransferDataFromWindow() )
+      wxWindow * const page = m_notebook->GetPage(nPage);
+      if ( !page->TransferDataFromWindow() )
          return FALSE;
    }
 
