@@ -903,8 +903,8 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
          // propagate to us -- should it?
 
 
-         // try suspended parent profile first: wee must do this because
-         // otherwiise when the user edits the parent folders options and
+         // try suspended parent profile first: we must do this because
+         // otherwise when the user edits the parent folders options and
          // applies them, the child folders wouldn't see the changes
          if ( ms_suspendCount ) // (same optimization as above)
          {
