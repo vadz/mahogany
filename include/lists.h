@@ -144,7 +144,7 @@ public: \
    */ \
    inline iterator &operator--(void) \
       { \
-         NodeCheck(); \
+         node->NodeRefCheck(); \
          node = node->prev; \
          return *this; \
       } \
