@@ -363,6 +363,8 @@ public:
     void SetConfigObject(wxConfigBase *config);
         // set the path to use (either absolute or relative)
     void SetConfigPath(const wxString& path);
+        // get the default config path for sash positions in config
+    static wxString GetConfigPath() { return ms_path; }
 
 protected:
     // retrieve the position of the sash from config
