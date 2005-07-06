@@ -143,7 +143,7 @@ public:
     */
    //@{
 
-   /// Get the name of this object
+   /// Get the (user-readable) name of this object
    const String& GetName() const { return m_name; }
 
    /// Get the type of this object (same as type of factory used to create it)
@@ -328,7 +328,8 @@ public:
 protected:
    /// Constrructor is protected, you can only create derived classes
    ConfigSource(const String& name, const String& type)
-      : m_name(name), m_type(type)
+      : m_name(name.empty() ? _("Local") : name.AfterLast(_T('/'))),
+        m_type(type)
    {
    }
 
