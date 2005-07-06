@@ -86,7 +86,6 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
-extern const MOption MP_FOLDER_COMMENT;
 extern const MOption MP_FOLDER_FILE_DRIVER;
 extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
@@ -837,7 +836,7 @@ bool wxFolderCreateDialog::TransferDataToWindow()
 {
    // this is one of rare cases where persistent controls are more painful than
    // useful - when we create the folder, we always want to start with the
-   // "Access" page, but the persistent notebook restores thep age we used the
+   // "Access" page, but the persistent notebook restores the page we used the
    // last time. We still do use it, because it's nice that "Properties" dialog
    // will open on the page where we were last when it's opened the next time -
    // just override this behaviour here by setting selection explicitly.
@@ -1052,12 +1051,12 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Comment"),
 #ifdef USE_SSL
       gettext_noop("SS&L/TLS usage"),
-      gettext_noop("Accept &unsigned (self-signed) certificates"),
+      gettext_noop("Accept &unsigned certificates"),
 #endif // USE_SSL
-      gettext_noop("&Keep server connection when idle"),
+      gettext_noop("&Keep connection when idle"),
       gettext_noop("Anon&ymous access"),
 #ifdef USE_LOCAL_CHECKBOX
-      gettext_noop("Folder can be accessed &without network"),
+      gettext_noop("Can be accessed &without network"),
 #endif // USE_LOCAL_CHECKBOX
       gettext_noop("&Hide folder in tree"),
       gettext_noop("Can &be opened"),
@@ -1130,7 +1129,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                           "for communication with the server."));
    m_acceptUnsignedSSL->SetToolTip(_("Accept unsigned (self-signed) SSL certificates?"));
 #endif // USE_SSL
-#endif // wxUSE_PRINTING_ARCHITECTURE
+#endif // wxUSE_TOOLTIPS
 
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, _T("should have a parent dialog!") );
@@ -1328,7 +1327,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
                textToSet = m_mailboxname;
 
             if ( parent )
-               folderName = parent->GetPath();
+               folderName = MailFolder::GetLogicalMailboxName(parent->GetPath());
 
             if ( !folderName.empty() )
             {
@@ -2022,11 +2021,8 @@ wxFolderPropertiesPage::SetDefaultValues()
       m_originalValues[n].Empty();
    }
 
-   // we want to read settings from the default section under
-   // M_FOLDER_CONFIG_SECTION or from M_PROFILE_CONFIG_SECTION if the section
-   // is empty (i.e. we have no parent folder)
-
-   Profile_obj profile(m_folderPath);
+   MFolder_obj folder(m_folderPath);
+   CHECK_RET( folder, _T("can't create MFolder to read initial values") );
 
    RadioIndex selRadio = (RadioIndex)m_radio->GetSelection();
    MFolderType folderType = GetCurrentFolderType(selRadio);
@@ -2034,49 +2030,20 @@ wxFolderPropertiesPage::SetDefaultValues()
    String value;
    if ( FolderTypeHasUserName(folderType) )
    {
-      value = READ_CONFIG_TEXT(profile, MP_FOLDER_LOGIN);
-      if ( !value )
-         value = READ_APPCONFIG_TEXT(MP_USERNAME);
+      value = folder->GetLogin();
       m_login->SetValue(value);
       m_originalValues[Username] = value;
 
-      String pwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
-      m_password->SetValue(pwd);
-      m_originalValues[Password] = pwd;
+      value = folder->GetPassword();
+      m_password->SetValue(value);
+      m_originalValues[Password] = value;
    }
 
    if ( FolderTypeHasServer(folderType) )
    {
-      // take the global server setting for this protocol
-      switch ( folderType )
-      {
-         case MF_NNTP:
-            value = READ_CONFIG_TEXT(profile, MP_NNTPHOST);
-            break;
-         case MF_POP:
-            value = READ_CONFIG_TEXT(profile, MP_POPHOST);
-            break;
-         case MF_IMAP:
-            value = READ_CONFIG_TEXT(profile, MP_IMAPHOST);
-            break;
-
-         default:
-            FAIL_MSG(_T("new remote foldertype was added"));
-            // fall through
-
-         case MF_GROUP:
-            // we will read the correct value below from MP_HOSTNAME
-            value.clear();
-            break;
-      }
-
-      if ( !value )
-      {
-         // set to this host by default
-         value = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
-      }
-
+      value = folder->GetServer();
       m_server->SetValue(value);
+
       switch ( folderType )
       {
          case MF_NNTP:
@@ -2097,7 +2064,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    }
 
    wxTextCtrl *textToSet;
-   value = READ_CONFIG_TEXT(profile, MP_FOLDER_PATH);
+   value = MailFolder::GetLogicalMailboxName(folder->GetPath());
    switch ( selRadio )
    {
       case Radio_File:
@@ -2154,19 +2121,14 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_originalValues[Path] = value;
 
    if ( !IsCreating() )
-      m_comment->SetValue(READ_CONFIG(profile, MP_FOLDER_COMMENT));
+      m_comment->SetValue(folder->GetComment());
 
    // remember the original folder type
-   m_originalMboxFormat = (FileMailboxFormat)
-                          profile->readEntryFromHere
-                                   (
-                                    GetOptionName(MP_FOLDER_FILE_DRIVER),
-                                    FileMbox_Max
-                                   );
+   m_originalMboxFormat = folder->GetFileMboxFormat();
 
    // set the initial values for all checkboxes and remember them: we will only
    // write it back if it changes later
-   int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
+   const int flags = folder->GetFlags();
    m_originalIsHiddenValue = (flags & MF_FLAGS_HIDDEN) != 0;
 
    m_keepOpen->SetValue((flags & MF_FLAGS_KEEPOPEN) != 0);
@@ -2201,12 +2163,12 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_isAnonymous->SetValue(m_originalIsAnonymous);
 
 #ifdef USE_SSL
-   m_originalIntValues[SSL] = READ_CONFIG(profile, MP_USE_SSL);
+   SSLCert certAcceped;
+   m_originalIntValues[SSL] = folder->GetSSL(&certAcceped);
    m_useSSL->SetSelection(m_originalIntValues[SSL]);
 
-   m_originalIntValues[AcceptUnsigned] = READ_CONFIG(profile,
-                                                     MP_USE_SSL_UNSIGNED);
-   m_acceptUnsignedSSL->SetValue(m_originalIntValues[AcceptUnsigned] != 0);
+   m_originalIntValues[AcceptUnsigned] = certAcceped;
+   m_acceptUnsignedSSL->SetValue(certAcceped == SSLCert_AcceptUnsigned);
 #endif // USE_SSL
 
    // update the folder icon
@@ -2218,7 +2180,6 @@ wxFolderPropertiesPage::SetDefaultValues()
    else
    {
       // use the folders icon
-      MFolder_obj folder(m_folderPath);
       m_originalFolderIcon = GetFolderIconForDisplay(folder);
    }
 
