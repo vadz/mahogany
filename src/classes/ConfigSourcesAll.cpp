@@ -25,6 +25,8 @@
    #include "MApplication.h"
 #endif // USE_PCH
 
+#include <wx/persctrl.h>
+
 #include "ConfigSourcesAll.h"
 #include "ConfigSourceLocal.h"
 #include "ConfigPrivate.h"
@@ -246,7 +248,23 @@ protected:
 
    bool DoWrite(LookupData& ld)
    {
-      return m_configSources.Write(m_path, ld, NULL /* use local config */);
+      // most of the persistent controls settings can be shared between the
+      // installations and so can be written to the global config source, but
+      // some of them only make sense for this machine and should be written to
+      // the local config source
+      ConfigSource *config;
+      if ( m_path.StartsWith(M_FRAMES_CONFIG_SECTION) ||
+               m_path.StartsWith(_T("/") M_SETTINGS_CONFIG_SECTION +
+                                    wxPSplitterWindow::GetConfigPath()) )
+      {
+         config = *m_configSources.GetSources().begin().operator->();
+      }
+      else // can be shared
+      {
+         config = NULL;
+      }
+
+      return m_configSources.Write(m_path, ld, config);
    }
 
 
@@ -448,17 +466,8 @@ AllConfigSources::Write(const String& path,
       CHECK( !m_sources.empty(), false,
                _T("can't write to profile if no config sources exist") );
 
-      config = *m_sources.begin().operator->();
-
-      // avoid writing to local config source the same data that are already
-      // present in another one with lesser priority: this just results in huge
-      // duplication of data without any gain
-      LookupData dataOld(data);
-      if ( Read(path, dataOld) && dataOld == data )
-      {
-         // the same value already present, don't write it
-         return true;
-      }
+      List::iterator i = m_sources.end();
+      config = *((--i).operator->());
    }
 
    const String key = data.GetKey();

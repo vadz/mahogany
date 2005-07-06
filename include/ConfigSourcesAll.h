@@ -79,7 +79,7 @@ public:
       @param path the path to write entry to (without terminating slash)
       @param data contains the key and value to be written to it
       @param config contains the config to write to, if it is NULL the
-             default (local) config source is used
+             most global (last) config source is used
       @return true if the entry was successfully written, false otherwise
     */
    bool Write(const String& path, const LookupData& data, ConfigSource *config);
