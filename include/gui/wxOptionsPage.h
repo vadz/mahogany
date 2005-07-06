@@ -194,6 +194,23 @@ protected:
    /// get the name of the folder we're editing the options of
    String GetFolderName() const;
 
+   // get the parent dialog
+   wxOptionsEditDialog *GetOptionsDialog() const
+   {
+      wxOptionsEditDialog *
+         dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
+      ASSERT_MSG( dialog, _T("options page outside of options dialog?") );
+      return dialog;
+   }
+
+   // get the config source to use for saving
+   ConfigSource *GetConfigForSave() const
+   {
+      wxOptionsEditDialog *dialog = GetOptionsDialog();
+      return dialog ? dialog->GetConfigForSave() : NULL;
+   }
+
+
    // range of our controls in m_aFields
    size_t m_nFirst, m_nLast;
 

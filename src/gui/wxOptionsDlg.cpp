@@ -2363,7 +2363,8 @@ void wxOptionsPage::CreateControls()
 
    // some others are not shown when we're inside an identity or folder dialog
    // but only in the global one
-   wxGlobalOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxGlobalOptionsDialog);
+   wxGlobalOptionsDialog *
+      dialog = GET_PARENT_OF_CLASS(this, wxGlobalOptionsDialog);
    bool isIdentDialog = dialog && !dialog->IsGlobalOptionsDialog();
    bool isFolderDialog = !dialog;
 
@@ -2545,8 +2546,9 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    UpdateUI();
 
    // mark the dialog as being dirty
-   wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-   CHECK( dialog, FALSE, _T("option page without option dialog?") );
+   wxOptionsEditDialog *dialog = GetOptionsDialog();
+   if ( !dialog )
+      return false;
 
    if ( m_aVitalControls.Index(control) != -1 )
       dialog->SetDoTest();
@@ -2924,6 +2926,8 @@ bool wxOptionsPage::TransferDataToWindow()
 // write the data to config
 bool wxOptionsPage::TransferDataFromWindow()
 {
+   ConfigSource * const configForSave = GetConfigForSave();
+
    String strValue;
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
@@ -3027,12 +3031,12 @@ bool wxOptionsPage::TransferDataFromWindow()
 
       if ( m_aDefaults[n].IsNumeric() )
       {
-         m_Profile->writeEntry(m_aDefaults[n].name, (int)lValue);
+         m_Profile->writeEntry(m_aDefaults[n].name, (int)lValue, configForSave);
       }
       else
       {
          // it's a string
-         m_Profile->writeEntry(m_aDefaults[n].name, strValue);
+         m_Profile->writeEntry(m_aDefaults[n].name, strValue, configForSave);
       }
    }
 
@@ -3350,17 +3354,9 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
    if ( dirty )
    {
       // something changed - make us dirty
-      wxOptionsEditDialog *
-         dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-
+      wxOptionsEditDialog *dialog = GetOptionsDialog();
       if ( dialog )
-      {
          dialog->SetDirty();
-      }
-      else
-      {
-         FAIL_MSG( _T("options page without a parent dialog?") );
-      }
    }
 }
 
@@ -3399,9 +3395,9 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
    if ( dirty )
    {
       // something changed - make us dirty
-      wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-      wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
-      dialog->SetDirty();
+      wxOptionsEditDialog *dialog = GetOptionsDialog();
+      if ( dialog )
+         dialog->SetDirty();
    }
 }
 
@@ -3459,7 +3455,8 @@ bool wxOptionsPageMessageView::TransferDataFromWindow()
             if ( sel != -1 && sel != m_currentViewer )
             {
                m_Profile->writeEntry(MP_MSGVIEW_VIEWER,
-                                     m_nameViewers[(size_t)sel]);
+                                     m_nameViewers[(size_t)sel],
+                                     GetConfigForSave());
             }
          }
          else
@@ -3532,14 +3529,18 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
 
    CHECK( radio, false, _T("where is the initial selection radio box?") );
 
+   ConfigSource * const configForSave = GetConfigForSave();
+
+   bool showFirstUnread;
    int sel = radio->GetSelection();
    switch ( sel )
    {
       case FolderViewPage_Show_Last:
       case FolderViewPage_Show_First:
          m_Profile->writeEntry(MP_AUTOSHOW_FIRSTMESSAGE,
-                               sel == FolderViewPage_Show_First);
-         m_Profile->writeEntry(MP_AUTOSHOW_FIRSTUNREADMESSAGE, false);
+                               sel == FolderViewPage_Show_First,
+                               configForSave);
+         showFirstUnread = false;
          break;
 
       default:
@@ -3547,8 +3548,12 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
          // fall through
 
       case FolderViewPage_Show_Unread:
-         m_Profile->writeEntry(MP_AUTOSHOW_FIRSTUNREADMESSAGE, true);
+         showFirstUnread = true;
    }
+
+   m_Profile->writeEntry(MP_AUTOSHOW_FIRSTUNREADMESSAGE,
+                         showFirstUnread,
+                         configForSave);
 
    return true;
 }
@@ -3574,9 +3579,9 @@ void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
    if ( dirty )
    {
       // something changed - make us dirty
-      wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-      wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
-      dialog->SetDirty();
+      wxOptionsEditDialog *dialog = GetOptionsDialog();
+      if ( dialog )
+         dialog->SetDirty();
    }
 }
 
@@ -3643,7 +3648,9 @@ bool wxOptionsPageFolderTree::TransferDataFromWindow()
          }
          else // we're the new home folder
          {
-            profile->writeEntry(MP_FTREE_HOME, GetFolderName());
+            profile->writeEntry(MP_FTREE_HOME,
+                                GetFolderName(),
+                                GetConfigForSave());
          }
       }
    }
@@ -3770,7 +3777,9 @@ bool wxOptionsPageNetwork::TransferDataFromWindow()
          // auth names are case-insensitive
          authsDisabled.MakeUpper();
 
-         m_Profile->writeEntry(MP_SMTP_DISABLED_AUTHS, authsDisabled);
+         m_Profile->writeEntry(MP_SMTP_DISABLED_AUTHS,
+                               authsDisabled,
+                               GetConfigForSave());
       }
    }
 
@@ -4277,9 +4286,9 @@ void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
    {
       if ( ReenablePersistentMessageBoxes(this) )
       {
-         wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-         wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
-         dialog->SetDirty();
+         wxOptionsEditDialog *dialog = GetOptionsDialog();
+         if ( dialog )
+            dialog->SetDirty();
       }
    }
    else
@@ -4295,7 +4304,8 @@ bool wxOptionsPageOthers::TransferDataToWindow()
 
    // TODO this should be table based too probably...
    m_Profile->writeEntry(GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT),
-                           !wxPMessageBoxIsDisabled(MP_CONFIRMEXIT));
+                         !wxPMessageBoxIsDisabled(MP_CONFIRMEXIT),
+                         GetConfigForSave());
 
    bool rc = wxOptionsPage::TransferDataToWindow();
    if ( rc )
@@ -4882,18 +4892,17 @@ bool wxConfigSourcesDialog::TransferDataToWindow()
    {
       m_sources->AppendRows(1);
 
-      // first config is always the unnamed/local one
-      wxString name = n == 0 ? wxString(_("Local machine"))
-                             : i->GetName().AfterLast(_T('/')),
-               type = i->GetType(),
+      wxString type = i->GetType(),
                spec = i->GetSpec();
 
 #ifdef OS_WIN
+      // special case: the unnamed/local config may use registry and not a file
+      // under Windows
       if ( n == 0 && spec.empty() )
          type = gettext_noop("registry");
 #endif // OS_WIN
 
-      m_sources->SetCellValue(n, Col_Name, name);
+      m_sources->SetCellValue(n, Col_Name, i->GetName());
       m_sources->SetCellValue(n, Col_Type, wxGetTranslation(type));
       m_sources->SetCellValue(n, Col_Spec, spec);
    }
