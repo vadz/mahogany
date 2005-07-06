@@ -354,7 +354,7 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
          {
             wxLogError(_("Cannot create the directory for configuration "
                          "files '%s'."), localFilePath.c_str());
-            return NULL;
+            return false;
          }
 
          wxLogInfo(_("Created directory '%s' for configuration files."),
