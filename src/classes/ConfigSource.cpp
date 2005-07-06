@@ -39,6 +39,7 @@
 #endif
 
 #include <wx/dir.h>
+#include <wx/filename.h>
 #include <wx/fileconf.h>               // for wxFileConfig
 
 #ifdef OS_UNIX
@@ -530,11 +531,28 @@ ConfigSourceLocal::InitFile(const String& localFilePath,
    ASSERT_MSG( !localFilePath.empty(),
                _T("invalid local config file path") );
 
+   // make the file name absolute if it isn't already or, if it is, remember
+   // its path to use it as base for the other config files (we can't use
+   // MAppBase::GetLocalDir() here as it isn't set yet)
+   static String s_pathConfigFiles;
+
+   wxFileName fn(localFilePath);
+   if ( fn.IsAbsolute() )
+   {
+      if ( s_pathConfigFiles.empty() )
+         s_pathConfigFiles = fn.GetPath();
+   }
+   else // relative path
+   {
+      if ( !s_pathConfigFiles.empty() )
+         fn.MakeAbsolute(s_pathConfigFiles);
+   }
+
    wxFileConfig *fileconf = new wxFileConfig
                                 (
                                     M_APPLICATIONNAME,
                                     M_VENDORNAME,
-                                    localFilePath,
+                                    fn.GetFullPath(),
                                     globalFilePath,
                                     wxCONFIG_USE_LOCAL_FILE |
                                     (globalFilePath.empty()
