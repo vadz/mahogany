@@ -180,14 +180,10 @@ public:
    virtual int readEntryFromHere(const String& key, int defvalue) const = 0;
 
    /// Write back the character value.
-   virtual bool writeEntry(const String& key,
-                           const String& value,
-                           ConfigSource *config = NULL) = 0;
+   virtual bool writeEntry(const String& key, const String& value) = 0;
 
    /// Write back the int value.
-   virtual bool writeEntry(const String& key,
-                           long value,
-                           ConfigSource *config = NULL) = 0;
+   virtual bool writeEntry(const String& key, long value) = 0;
 
    /**
       Write the value in profile only if it is different from the current one.
@@ -198,13 +194,35 @@ public:
 
       @param key the key to modify
       @param value the new value
-      @param defvalue the default value for this key
+      @param def the default value for this key
       @return true if ok, false if an error occured
     */
-   virtual bool writeEntryIfNeeded(const String& key,
-                                   long value,
-                                   long defvalue,
-                                   ConfigSource *config = NULL) = 0;
+   virtual bool writeEntryIfNeeded(const String& key, long value, long def) =0;
+
+   /**
+      Change the config source used for saving the changes.
+
+      Normally all keys written by writeEntry() are saved to the default
+      (global) config. This method allows to change it and save them to some
+      other config instead.
+
+      This function is dangerous because it modifies not just this Profile but
+      also of all the other pointers to the same object because of ref-counted
+      sharing Profiles use. However it's the only way we have to save changes
+      to non default config source and we do need this for options dialogs.
+      Do use ProfileConfigSourceChange helper class to ensure that the old
+      config source is restored after finishing with writing changes to
+      user-specified source.
+
+      @param config source to use for saving changes from now on
+      @return config source used previously (may be NULL, must not be deleted)
+    */
+   ConfigSource *SetConfigSourceForWriting(ConfigSource *config)
+   {
+      ConfigSource *configOld = m_configForWriting;
+      m_configForWriting = config;
+      return configOld;
+   }
 
    //@}
 
@@ -328,7 +346,7 @@ public:
    /// is this profile a (grand) parent of the given one?
    virtual bool IsAncestor(Profile *profile) const = 0;
 
-   /// get the name of the folder his profile is for or an empty string
+   /// get the name of the folder this profile is for or an empty string
    virtual String GetFolderName() const = 0;
 
    /**
@@ -362,8 +380,8 @@ public:
    //@}
 
 protected:
-   // egcs wants this
-   Profile() { }
+   /// ctor is protected, we're only created with CreateXXX() static methods
+   Profile() { m_configForWriting = NULL; m_expandEnvVars = false; }
 
    /// provide access to ProfileEnumDataImpl for the derived classes
    ProfileEnumDataImpl& GetEnumData(EnumData& cookie) const
@@ -372,9 +390,15 @@ protected:
    /// expand env vars if necessary
    String ExpandEnvVarsIfNeeded(const String& val) const;
 
+   /// get config source for saving changes
+   ConfigSource *GetConfigSourceForWriting() const { return m_configForWriting; }
+
 private:
    /// helper for GetAllIdentities/GetAllFilters
    static wxArrayString GetAllGroupsUnder(const String& path);
+
+   /// the config source for saving changes
+   ConfigSource *m_configForWriting;
 
    /// should we expand the environment variables in string values?
    bool m_expandEnvVars;
@@ -442,6 +466,37 @@ public:
 private:
   Profile *m_profile;
   bool     m_wasExpanding;
+};
+
+// ----------------------------------------------------------------------------
+// ProfileConfigSourceChange: another helper which ensures that config source
+//                            is not only set but unset as well
+// ----------------------------------------------------------------------------
+
+class ProfileConfigSourceChange
+{
+public:
+   /**
+      Changes the config source to the specified one if it is not NULL.
+    */
+   ProfileConfigSourceChange(Profile *profile, ConfigSource *config)
+      : m_profile(profile)
+   {
+      m_changed = config != NULL;
+      if ( m_changed )
+         m_config = profile->SetConfigSourceForWriting(config);
+   }
+
+   ~ProfileConfigSourceChange()
+   {
+      if ( m_changed )
+         m_profile->SetConfigSourceForWriting(m_config);
+   }
+
+private:
+   Profile *m_profile;
+   ConfigSource *m_config;
+   bool m_changed;
 };
 
 // ----------------------------------------------------------------------------

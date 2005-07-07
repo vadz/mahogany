@@ -3,7 +3,7 @@
 // File name:   Profile.cpp
 // Purpose:     implementation of Profile &c
 // Author:      Karsten Ballüder
-// Modified by: Vadim Zeitlin at 26.08.03 to use ConfigSource
+// Modified by: Vadim Zeitlin at 26.08.03 to use AllConfigSources
 // Created:     1998
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998-2003 M-Team
@@ -124,16 +124,9 @@ public:
    virtual bool readEntry(LookupData &ld,
                           int flags = Lookup_All) const;
 
-   virtual bool writeEntry(const String& key,
-                           const String& value,
-                           ConfigSource *config = NULL);
-   virtual bool writeEntry(const String & key,
-                           long value,
-                           ConfigSource *config = NULL);
-   virtual bool writeEntryIfNeeded(const String& key,
-                                   long value,
-                                   long defvalue,
-                                   ConfigSource *config = NULL);
+   virtual bool writeEntry(const String& key, const String& value);
+   virtual bool writeEntry(const String & key, long value);
+   virtual bool writeEntryIfNeeded(const String& key, long value, long def);
 
    //@}
 
@@ -222,7 +215,7 @@ private:
    }
 
    /// common part of all writeEntry() overloads
-   bool DoWriteEntry(const LookupData& data, ConfigSource *config);
+   bool DoWriteEntry(const LookupData& data);
 
 
    /// suspend count: if positive, we're in suspend mode
@@ -932,7 +925,7 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
 }
 
 bool
-ProfileImpl::DoWriteEntry(const LookupData& data, ConfigSource *config)
+ProfileImpl::DoWriteEntry(const LookupData& data)
 {
    PCHECK();
 
@@ -948,32 +941,27 @@ ProfileImpl::DoWriteEntry(const LookupData& data, ConfigSource *config)
       path << _T('/') << SUSPEND_PATH;
    }
 
-   return gs_allConfigSources->Write(path, data, config);
+   return gs_allConfigSources->Write(path, data, GetConfigSourceForWriting());
 }
 
 bool
-ProfileImpl::writeEntry(const String& key,
-                        const String& value,
-                        ConfigSource *config)
+ProfileImpl::writeEntry(const String& key, const String& value)
 {
    LookupData ld(key, value);
 
-   return DoWriteEntry(ld, config);
+   return DoWriteEntry(ld);
 }
 
 bool
-ProfileImpl::writeEntry(const String& key, long value, ConfigSource *config)
+ProfileImpl::writeEntry(const String& key, long value)
 {
    LookupData ld(key, value);
 
-   return DoWriteEntry(ld, config);
+   return DoWriteEntry(ld);
 }
 
 bool
-ProfileImpl::writeEntryIfNeeded(const String& key,
-                                long value,
-                                long defvalue,
-                                ConfigSource *config)
+ProfileImpl::writeEntryIfNeeded(const String& key, long value, long defvalue)
 {
    if ( readEntry(key, defvalue) == value )
    {
@@ -981,7 +969,7 @@ ProfileImpl::writeEntryIfNeeded(const String& key,
       return true;
    }
 
-   return writeEntry(key, value, config);
+   return writeEntry(key, value);
 }
 
 // ----------------------------------------------------------------------------

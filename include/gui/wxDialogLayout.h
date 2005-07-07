@@ -255,17 +255,14 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
-   // get the config source to use for saving data: this must be passed to all
-   // Profile::writeEntry() calls
-   //
-   // the returned pointer may be NULL and, in any case, shouldn't be deleted
-   ConfigSource *GetConfigForSave() const { return m_configForSave; }
-
    // callbacks
    void OnHelp(wxCommandEvent &event);
    void OnOK(wxCommandEvent& event);
    void OnApply(wxCommandEvent& event);
    void OnCancel(wxCommandEvent& event);
+   void OnConfigSourceChange(wxCommandEvent& event);
+
+   virtual void EndModal(int rc);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
    wxOptionsEditDialog() { wxFAIL_MSG(_T("unaccessible")); }
@@ -302,11 +299,8 @@ private:
             *m_btnOk,
             *m_btnApply;
 
-   // choice containing all config sources, may be NULL
-   wxChoice *m_chcSources;
-
-   // config source to save changes to
-   ConfigSource *m_configForSave;
+   // Ok/Cancel/Apply depending on the last button pressed
+   MEventOptionsChangeData::ChangeKind m_lastBtn;
 
    // this profile is first retrieved using GetProfile(), but it's only done
    // once and then it is reused so that [Cancel] will call Discard() on the
@@ -314,14 +308,21 @@ private:
    // with the same path
    Profile *m_profileForButtons;
 
+   // choice containing all config sources, may be NULL
+   wxChoice *m_chcSources;
+
+   // original config source used by profile returned by GetProfile(): only
+   // valid if m_changedConfigSource == true
+   ConfigSource *m_configOld;
+
+   // true if we had called SetConfigSourceForWriting() on our profile
+   bool m_changedConfigSource;
+
    // flags
    bool m_bDirty,           // something changed
         m_bTest,            // test new settings?
         m_bRestartWarning;  // changes will take effect after restart
 
-
-   // Ok/Cancel/Apply depending on the last button pressed
-   MEventOptionsChangeData::ChangeKind m_lastBtn;
 
    DECLARE_DYNAMIC_CLASS_NO_COPY(wxOptionsEditDialog)
    DECLARE_EVENT_TABLE()

@@ -2926,8 +2926,6 @@ bool wxOptionsPage::TransferDataToWindow()
 // write the data to config
 bool wxOptionsPage::TransferDataFromWindow()
 {
-   ConfigSource * const configForSave = GetConfigForSave();
-
    String strValue;
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
@@ -3031,12 +3029,12 @@ bool wxOptionsPage::TransferDataFromWindow()
 
       if ( m_aDefaults[n].IsNumeric() )
       {
-         m_Profile->writeEntry(m_aDefaults[n].name, (int)lValue, configForSave);
+         m_Profile->writeEntry(m_aDefaults[n].name, (int)lValue);
       }
       else
       {
          // it's a string
-         m_Profile->writeEntry(m_aDefaults[n].name, strValue, configForSave);
+         m_Profile->writeEntry(m_aDefaults[n].name, strValue);
       }
    }
 
@@ -3455,8 +3453,7 @@ bool wxOptionsPageMessageView::TransferDataFromWindow()
             if ( sel != -1 && sel != m_currentViewer )
             {
                m_Profile->writeEntry(MP_MSGVIEW_VIEWER,
-                                     m_nameViewers[(size_t)sel],
-                                     GetConfigForSave());
+                                     m_nameViewers[(size_t)sel]);
             }
          }
          else
@@ -3529,8 +3526,6 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
 
    CHECK( radio, false, _T("where is the initial selection radio box?") );
 
-   ConfigSource * const configForSave = GetConfigForSave();
-
    bool showFirstUnread;
    int sel = radio->GetSelection();
    switch ( sel )
@@ -3538,8 +3533,7 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
       case FolderViewPage_Show_Last:
       case FolderViewPage_Show_First:
          m_Profile->writeEntry(MP_AUTOSHOW_FIRSTMESSAGE,
-                               sel == FolderViewPage_Show_First,
-                               configForSave);
+                               sel == FolderViewPage_Show_First);
          showFirstUnread = false;
          break;
 
@@ -3551,9 +3545,7 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
          showFirstUnread = true;
    }
 
-   m_Profile->writeEntry(MP_AUTOSHOW_FIRSTUNREADMESSAGE,
-                         showFirstUnread,
-                         configForSave);
+   m_Profile->writeEntry(MP_AUTOSHOW_FIRSTUNREADMESSAGE, showFirstUnread);
 
    return true;
 }
@@ -3648,9 +3640,7 @@ bool wxOptionsPageFolderTree::TransferDataFromWindow()
          }
          else // we're the new home folder
          {
-            profile->writeEntry(MP_FTREE_HOME,
-                                GetFolderName(),
-                                GetConfigForSave());
+            profile->writeEntry(MP_FTREE_HOME, GetFolderName());
          }
       }
    }
@@ -3777,9 +3767,7 @@ bool wxOptionsPageNetwork::TransferDataFromWindow()
          // auth names are case-insensitive
          authsDisabled.MakeUpper();
 
-         m_Profile->writeEntry(MP_SMTP_DISABLED_AUTHS,
-                               authsDisabled,
-                               GetConfigForSave());
+         m_Profile->writeEntry(MP_SMTP_DISABLED_AUTHS, authsDisabled);
       }
    }
 
@@ -4304,8 +4292,7 @@ bool wxOptionsPageOthers::TransferDataToWindow()
 
    // TODO this should be table based too probably...
    m_Profile->writeEntry(GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT),
-                         !wxPMessageBoxIsDisabled(MP_CONFIRMEXIT),
-                         GetConfigForSave());
+                         !wxPMessageBoxIsDisabled(MP_CONFIRMEXIT));
 
    bool rc = wxOptionsPage::TransferDataToWindow();
    if ( rc )

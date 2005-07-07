@@ -197,6 +197,7 @@ public:
    virtual int GetFlags() const { return m_flags; }
    virtual void SetFlags(int flags) { m_flags = flags; }
 
+   virtual void SetConfigSourceForWriting(ConfigSource * /* config */) { }
    virtual Profile *GetProfile() const
    {
       m_profile->IncRef();
@@ -317,6 +318,11 @@ public:
 
    virtual int GetFlags() const;
    virtual void SetFlags(int flags);
+
+   virtual void SetConfigSourceForWriting(ConfigSource *config)
+   {
+      m_profile->SetConfigSourceForWriting(config);
+   }
 
    virtual Profile *GetProfile() const
    {

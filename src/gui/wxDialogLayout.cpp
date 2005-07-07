@@ -115,6 +115,7 @@ BEGIN_EVENT_TABLE(wxOptionsEditDialog, wxDialog)
    EVT_BUTTON(wxID_OK,     wxOptionsEditDialog::OnOK)
    EVT_BUTTON(wxID_APPLY,  wxOptionsEditDialog::OnApply)
    EVT_BUTTON(wxID_CANCEL, wxOptionsEditDialog::OnCancel)
+   EVT_CHOICE(-1,          wxOptionsEditDialog::OnConfigSourceChange)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxEnhancedPanel, wxPanel)
@@ -1239,9 +1240,9 @@ wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
 
    m_profileForButtons = NULL;
 
-   m_configForSave = NULL;
-
    m_lastBtn = MEventOptionsChangeData::Invalid;
+
+   m_changedConfigSource = false;
 }
 
 wxControl *wxOptionsEditDialog::CreateControlsBelow(wxPanel *panel)
@@ -1421,23 +1422,6 @@ bool wxOptionsEditDialog::TransferDataToWindow()
 
 bool wxOptionsEditDialog::TransferDataFromWindow()
 {
-   // first decide where to save the changes
-   m_configForSave = NULL;
-   if ( m_chcSources )
-   {
-      const int sel = m_chcSources->GetSelection();
-      if ( sel != -1 )
-      {
-         AllConfigSources::List::iterator
-            i = AllConfigSources::Get().GetSources().begin();
-         for ( int n = 0; n < sel; n++ )
-            ++i;
-
-         m_configForSave = i.operator->();
-      }
-   }
-
-   // now do save them
    const int count = m_notebook->GetPageCount();
    for ( int nPage = 0; nPage < count; nPage++ )
    {
@@ -1489,6 +1473,60 @@ wxOptionsEditDialog::SendOptionsChangeEvent()
 
       MEventManager::Send(data);
    }
+}
+
+void wxOptionsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
+{
+   if ( event.GetEventObject() != m_chcSources )
+   {
+      event.Skip();
+      return;
+   }
+
+   const int sel = m_chcSources->GetSelection();
+   ConfigSource *config = NULL;
+   if ( sel != -1 )
+   {
+      AllConfigSources::List::iterator
+         i = AllConfigSources::Get().GetSources().begin();
+      for ( int n = 0; n < sel; n++ )
+         ++i;
+
+      config = i.operator->();
+   }
+
+   Profile *profile = GetProfile();
+   wxCHECK_RET( profile, _T("no profile in wxOptionsEditDialog?") );
+
+   ConfigSource *configOld = profile->SetConfigSourceForWriting(config);
+
+   // remember the original config source if this is the first time we change
+   // it
+   if ( !m_changedConfigSource )
+   {
+      m_configOld = configOld;
+      m_changedConfigSource = true;
+   }
+}
+
+void wxOptionsEditDialog::EndModal(int rc)
+{
+   if ( m_changedConfigSource )
+   {
+      Profile *profile = GetProfile();
+      if ( profile )
+      {
+         profile->SetConfigSourceForWriting(m_configOld);
+      }
+      else
+      {
+         FAIL_MSG( _T("no profile in wxOptionsEditDialog?") );
+      }
+
+      m_changedConfigSource = false;
+   }
+
+   wxManuallyLaidOutDialog::EndModal(rc);
 }
 
 void wxOptionsEditDialog::EnableButtons(bool enable)

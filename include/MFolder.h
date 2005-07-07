@@ -194,6 +194,18 @@ public:
       /// set the position in the tree (used by wxFolderTree only)
    virtual void SetTreeIndex(int /* pos */) { }
 
+   //@}
+
+   /** @name Profile stuff */
+   //@{
+
+   /**
+     Set the config source to use for saving changes.
+
+     @sa Profile::SetConfigSourceForWriting().
+    */
+   virtual void SetConfigSourceForWriting(ConfigSource *config) = 0;
+
    /**
      Get the profile associated with this folder: it will never be NULL (as
      we fall back to the application profile if we don't have our own) and

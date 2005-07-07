@@ -203,14 +203,6 @@ protected:
       return dialog;
    }
 
-   // get the config source to use for saving
-   ConfigSource *GetConfigForSave() const
-   {
-      wxOptionsEditDialog *dialog = GetOptionsDialog();
-      return dialog ? dialog->GetConfigForSave() : NULL;
-   }
-
-
    // range of our controls in m_aFields
    size_t m_nFirst, m_nLast;
 
