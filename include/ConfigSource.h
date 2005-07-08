@@ -328,7 +328,7 @@ public:
 protected:
    /// Constrructor is protected, you can only create derived classes
    ConfigSource(const String& name, const String& type)
-      : m_name(name.empty() ? _("Local") : name.AfterLast(_T('/'))),
+      : m_name(name.empty() ? String(_("Local")) : name.AfterLast(_T('/'))),
         m_type(type)
    {
    }
