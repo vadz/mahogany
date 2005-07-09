@@ -216,7 +216,7 @@ protected:
       // the local config source
       ConfigSource *config;
       if ( m_path.StartsWith(M_FRAMES_CONFIG_SECTION) ||
-               m_path.StartsWith(_T("/") M_SETTINGS_CONFIG_SECTION +
+               m_path.StartsWith(_T("/") M_SETTINGS_CONFIG_SECTION _T("/") +
                                     wxPSplitterWindow::GetConfigPath()) )
       {
          config = *m_configSources.GetSources().begin().operator->();
