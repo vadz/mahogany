@@ -507,9 +507,10 @@ public:
    /** This function inserts a new object at cursor position xpos.
        @param xpos where to insert new object
        @param obj  the object to insert
+       @param len  effective length of the new object is stored here if not NULL
        @return true if that xpos existed and the object was inserted
    */
-   bool Insert(CoordType xpos, wxLayoutObject *obj);
+   bool Insert(CoordType xpos, wxLayoutObject *obj, CoordType *len = NULL);
 
    /** This function inserts text at cursor position xpos.
        @param xpos where to insert
