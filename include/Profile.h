@@ -224,6 +224,9 @@ public:
       return configOld;
    }
 
+   /// Get config source for saving changes.
+   ConfigSource *GetConfigSourceForWriting() const { return m_configForWriting; }
+
    //@}
 
    /// return true if the entry is defined
@@ -389,9 +392,6 @@ protected:
 
    /// expand env vars if necessary
    String ExpandEnvVarsIfNeeded(const String& val) const;
-
-   /// get config source for saving changes
-   ConfigSource *GetConfigSourceForWriting() const { return m_configForWriting; }
 
 private:
    /// helper for GetAllIdentities/GetAllFilters
