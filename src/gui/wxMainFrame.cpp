@@ -578,7 +578,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                                       wxDefaultPosition, wxDefaultSize,
                                       0);
 
-   wxSize sizeFrame = GetClientSize();
+   // we have to do this to prevent the splitter from clipping the sash
+   // position to its current (== initial, small) size
+   const wxSize sizeFrame = GetClientSize();
    m_splitter->SetSize(sizeFrame);
 
    // insert treectrl in one of the splitter panes
@@ -597,10 +599,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
       winLeft = m_FolderView->GetWindow();
       winRight = m_FolderTree->GetWindow();
    }
-
-   m_splitter->SplitVertically(winLeft, winRight, sizeFrame.x/3);
-
-   m_splitter->SetMinimumPaneSize(50);
 
    // construct the menu and toolbar
    AddFileMenu();
@@ -640,6 +638,12 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    {
       UpdateFolderMenuUI(folder);
    }
+
+   // split the window after creating the menus and toolbars as they change
+   // client frame size and so result in sash repositioning which we avoid by
+   // doing this in the end
+   m_splitter->SetMinimumPaneSize(50);
+   m_splitter->SplitVertically(winLeft, winRight, sizeFrame.x/3);
 
    m_FolderTree->GetWindow()->SetFocus();
 }
