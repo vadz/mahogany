@@ -15,6 +15,7 @@
 #define _GUI_WXOPTIONSPAGE_H
 
 #ifndef USE_PCH
+#       include "guidef.h"              // for GET_PARENT_OF_CLASS
 #       include <wx/control.h>
 #       include <wx/dynarray.h>
 #endif // USE_PCH
