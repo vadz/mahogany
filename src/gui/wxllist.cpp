@@ -920,12 +920,19 @@ wxLayoutLine::FindText(const wxString &needle, CoordType xpos) const
 }
 
 bool
-wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj)
+wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj, CoordType *pLenOrig)
 {
    wxASSERT(xpos >= 0);
    wxASSERT(obj != NULL);
 
    MarkDirty(xpos);
+
+   // ensure that len pointer is always valid
+   CoordType lenLocal;
+   CoordType *pLen = pLenOrig ? pLenOrig : &lenLocal;
+
+   // normal case
+   *pLen = obj->GetLength();
 
    CoordType offset;
    wxLOiterator i = FindObject(xpos, &offset);
@@ -934,7 +941,7 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj)
       if(xpos == 0 ) // aha, empty line!
       {
          m_ObjectList.push_back(obj);
-         m_Length += obj->GetLength();
+         m_Length += *pLen;
          return true;
       }
       else
@@ -945,19 +952,35 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj)
    if(offset == 0 /*&& i != m_ObjectList.begin()*/) // why?
    {  // insert before this object
       m_ObjectList.insert(i,obj);
-      m_Length += obj->GetLength();
+      m_Length += *pLen;
       return true;
    }
    if(offset == len )
    {
       if( i == m_ObjectList.tail()) // last object?
+      {
+         // optimization: it's useless to have 2 command objects in a row as
+         // the latter overrides the former anyhow, so drop the previous one
+         if ( obj->GetType() == WXLO_TYPE_CMD )
+         {
+            if ( m_ObjectList.back()->GetType() == WXLO_TYPE_CMD )
+            {
+               delete m_ObjectList.pop_back();
+
+               // effective length is 0 as we added 1 and removed 1 object of
+               // the same type
+               *pLen = 0;
+            }
+         }
+
          m_ObjectList.push_back(obj);
+      }
       else
       {  // insert after current object
          ++i;
          m_ObjectList.insert(i,obj);
       }
-         m_Length += obj->GetLength();
+      m_Length += *pLen;
       return true;
    }
    /* Otherwise we need to split the current object.
@@ -971,7 +994,7 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj)
    tobj->GetText() = right; // set new text
    // before it we insert the new object
    m_ObjectList.insert(i,obj);
-   m_Length += obj->GetLength();
+   m_Length += *pLen;
    // and before that we insert the left half
    m_ObjectList.insert(i,new wxLayoutObjectText(left));
    return true;
@@ -2246,9 +2269,13 @@ wxLayoutList::Insert(wxLayoutObject *obj)
 
    AddCursorPosToUpdateRect();
 
-   m_CursorLine->Insert(m_CursorPos.x, obj);
-   m_CursorPos.x += obj->GetLength();
-   m_movedCursor = true;
+   CoordType len;
+   m_CursorLine->Insert(m_CursorPos.x, obj, &len);
+   if ( len != 0 )
+   {
+      m_CursorPos.x += len;
+      m_movedCursor = true;
+   }
 
    if(m_AutoFormat)
       m_CursorLine->MarkDirty();
