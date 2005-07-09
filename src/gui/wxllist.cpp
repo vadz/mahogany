@@ -1508,12 +1508,12 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    // make sure there is an empty m_Next line:
    (void) new wxLayoutLine(this, llist);
    wxASSERT(m_Next);
+
    // We need to move this and all following objects to the next
    // line. Starting from the end of line, to keep the order right.
    if(copyObject != m_ObjectList.end())
    {
-      wxLOiterator j;
-      for(j = m_ObjectList.tail(); j != copyObject; j--)
+      for(wxLOiterator j = m_ObjectList.tail(); j != copyObject; j--)
          m_Next->Prepend(*j);
       m_Next->Prepend(*copyObject);
       // and now remove them from this list:
@@ -1525,8 +1525,24 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    }
    m_Length -= shorter;
 
-   if(prependText.Length() > 0)
+   // move the wrapped text itself
+   if ( !prependText.empty() )
       m_Next->Insert(0, prependText);
+
+   // we also need to copy all the style information from the previous line
+   // occuring before the wrap point, otherwise formatting would be broken
+   for ( wxLOiterator j = m_ObjectList.tail(); ; j-- )
+   {
+      if ( j->GetType() == WXLO_TYPE_CMD )
+      {
+         // we have to make a new object to avoid referencing the same pointer
+         // from 2 lines (would result in a crash when deleting them)
+         m_Next->Prepend(j->Copy());
+      }
+
+      if ( j == m_ObjectList.begin() )
+         break;
+   }
 
    // do we need to adjust the cursor position?
    if( this == llist->GetCursorLine() && xpos >= breakpos)
