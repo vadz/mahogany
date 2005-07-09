@@ -176,14 +176,6 @@ public:
       //else: ignore
    }
 
-   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderBaseDialog() { }
-
-protected:
-   // return TRUE if the Ok/Apply buttons should be enabled (depending on the
-   // state of the other controls)
-   bool ShouldEnableOk() const;
-
    // base class pure virtual - return the profile we're working with
    virtual Profile *GetProfile() const
    {
@@ -198,6 +190,14 @@ protected:
       // may be NULL if we're creaing the folder and it hasn't been created yet
       return m_profile;
    }
+
+   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
+   wxFolderBaseDialog() { }
+
+protected:
+   // return TRUE if the Ok/Apply buttons should be enabled (depending on the
+   // state of the other controls)
+   bool ShouldEnableOk() const;
 
    // tell all notebook pages (except the first one) which profile we're
    // working with
@@ -2294,11 +2294,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
           _T("Ok button should be disabled") );
 
    // 0th step: verify if the settings are self-consistent
-   {
-       wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
-       if (folderType == MF_FILE && dlg->GetFolderName() == _T("INBOX"))
-           folderType = MF_INBOX;
-   }
+   wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
+   CHECK( dlg, false, _T("folder page should be in folder dialog!") );
+   if (folderType == MF_FILE && dlg->GetFolderName() == _T("INBOX"))
+      folderType = MF_INBOX;
 
    // is the folder name valid?
    wxString path;
@@ -2426,9 +2425,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // 1st step: create the folder in the MFolder sense. For this we need only
    // the name and the type
-   wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
-
-   CHECK( dlg, false, _T("folder page should be in folder dialog!") );
 
    // FIXME instead of this `if' we should have a virtual function in the
    //       base class to either create or return the folder object
@@ -2450,6 +2446,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    CHECK( folder, false, _T("must have folder by this point") );
 
+   Profile_obj profileDlg(dlg->GetProfile());
+   ConfigSource * const config = profileDlg->GetConfigSourceForWriting();
+   folder->SetConfigSourceForWriting(config);
+
    // 2nd step: put what we can in MFolder
    folder->SetComment(m_comment->GetValue());
 
@@ -2459,6 +2459,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    String fullname = folder->GetFullName();
    m_profile->DecRef();
    m_profile = Profile::CreateProfile(fullname);
+   CHECK( m_profile, false, _T("profile creation shouldn't fail") );
+   m_profile->SetConfigSourceForWriting(config);
 
    // some flags are not set from here, keep their existing value
    flags |= GetFolderFlags(READ_CONFIG(m_profile, MP_FOLDER_TYPE)) &
