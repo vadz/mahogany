@@ -2795,11 +2795,11 @@ FilterRuleApply::CreateProgressDialog()
                (
                   wxString::Format
                   (
-                     _("Filtering %u messages in folder '%s'..."),
+                     _("Filtering %u messages in folder \"%s\":"),
                      m_msgs.GetCount(),
                      m_parent->m_MailFolder->GetName().c_str()
                   ),
-                  _T("\n\n"),  // must be tall enough for 3 lines
+                  _T("\n\n\n"),  // must be tall enough for 4 lines
                   2*m_msgs.GetCount(),
                   frame
                );
@@ -2935,48 +2935,45 @@ String FilterRuleApply::CreditsCommon()
 
 String FilterRuleApply::CreditsForDialog()
 {
-   // TODO: make the format of the string inside the parentheses
-   //       configurable
-
+   // TODO: make the format of the string inside the parentheses configurable
    String textPD;
-   
+
    if( m_pd )
    {
       textPD = CreditsCommon();
-   
-      // make a multiline label for the progress dialog and a more concise
-      // one for the status bar
+
+      // make multiline label for the progress dialog
       if( !TreatAsJunk() )
       {
          String from;
          String subject;
          GetSenderSubject(from, subject, true /* full */);
 
-         textPD << _T('\n') << _("From: ") << from
-                << _T('\n') << _("Subject: ") << subject;
+         textPD << _T("\n\t") << _("From: ") << from
+                << _T("\n\t") << _("Subject: ") << subject;
       }
    }
-   
+
    return textPD;
 }
 
 String FilterRuleApply::CreditsForStatusBar()
 {
    String textLog = CreditsCommon();
-   
+
    if( !TreatAsJunk() )
    {
       String from;
       String subject;
       GetSenderSubject(from, subject, false /* short */);
-   
+
       textLog << _T(" (");
 
       if ( !from.empty() )
       {
          textLog << _("from ") << from << ' ';
       }
-   
+
       if ( !subject.empty() )
       {
          // the length of status bar text is limited under Windows and, anyhow,
@@ -2996,24 +2993,24 @@ String FilterRuleApply::CreditsForStatusBar()
 
       textLog << ')';
    }
-   
+
    return textLog;
 }
 
 String FilterRuleApply::ResultsMessage()
 {
-   String textExtra;
-   
+   String textResult;
+
    if ( !m_retval.IsNumber() )
    {
-      textExtra << _("error!");
+      textResult << _("error!");
    }
    else // filter executed ok
    {
       // if it was caught as a spam, tell the user why do we think so
       if ( !gs_spamTest.empty() )
       {
-         textExtra += String::Format
+         textResult += String::Format
                               (
                                  _("recognized as spam (%s); "),
                                  gs_spamTest.c_str()
@@ -3025,20 +3022,20 @@ String FilterRuleApply::ResultsMessage()
          & FilterRuleImpl::Deleted) != 0;
       if ( !m_parent->m_copiedTo.empty() )
       {
-         textExtra << (wasDeleted ? _("moved to ") : _("copied to "))
+         textResult << (wasDeleted ? _("moved to ") : _("copied to "))
                    << m_parent->m_copiedTo;
       }
       else if ( wasDeleted )
       {
-         textExtra << _("deleted");
+         textResult << _("deleted");
       }
       else // not moved/copied/deleted
       {
-         textExtra << _("done");
+         textResult << _("done");
       }
    }
-   
-   return textExtra;
+
+   return textResult;
 }
 
 bool
@@ -3049,20 +3046,17 @@ FilterRuleApply::UpdateProgressDialog()
    // the text for the progress dialog (verbose) and for the log (terse)
    String textPD = CreditsForDialog();
    String textLog = CreditsForStatusBar();
-   
+
    // and show the result in the progress dialog
-   String textExtra = ResultsMessage();
-   
-   textLog += _T(" - ") + textExtra;
+   String textResult = ResultsMessage();
+
+   textLog += _T(" - ") + textResult;
 
    if ( m_pd )
    {
-      if( !TreatAsJunk() )
-         textPD += _T(" - ");
-      else
-         textPD += _T('\n');
-      textPD += textExtra;
-      
+      textPD += _("\nResult: ");
+      textPD += textResult;
+
       if ( !m_pd->Update(m_idx, textPD) )
       {
          // cancelled by user
