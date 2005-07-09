@@ -61,10 +61,12 @@ public:
 
    virtual void SetPath(const wxString& path)
    {
-      m_path = path;
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       if ( config )
+      {
          config->SetPath(path);
+         m_path = config->GetPath();
+      }
    }
 
    virtual const wxString& GetPath() const { return m_path; }
@@ -367,8 +369,12 @@ bool AllConfigSources::Read(const String& path, LookupData& data) const
 
    String fullpath;
    if ( *key.c_str() != _T('/') )
-      fullpath << path << _T('/');
-   fullpath << key;
+   {
+      fullpath += path;
+      if ( fullpath.empty() || fullpath.Last() != _T('/') )
+         fullpath += _T('/');
+   }
+   fullpath += key;
 
    ASSERT_MSG( *fullpath.c_str() == _T('/'), _T("config paths must be absolute") );
 
