@@ -113,17 +113,6 @@ protected:
    /// is it initialised?
    bool m_initialised;
 
-   // work around wxFrame::Maximize() bug in wxMSW 2.2.x: it shows the frame if
-   // it is hidden and we don't want it
-#ifdef USE_WORKAROUND_FOR_MAXIMIZE
-public:
-   virtual bool Show(bool show = TRUE);
-   virtual void Maximize(bool maximize = TRUE);
-
-private:
-   bool m_shouldMaximizeOnShow;
-#endif // USE_WORKAROUND_FOR_MAXIMIZE
-
 #ifdef USE_PYTHON
    /// update the state (enabled/disabled) of the "Run Python script" menu item
    void UpdateRunPyScriptMenu();
