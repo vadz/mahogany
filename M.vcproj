@@ -1900,6 +1900,15 @@
 				RelativePath=".\include\ViewFilter.h">
 			</File>
 			<File
+				RelativePath=".\include\gui\wxllist.h">
+			</File>
+			<File
+				RelativePath=".\include\gui\wxlparser.h">
+			</File>
+			<File
+				RelativePath=".\include\gui\wxlwindow.h">
+			</File>
+			<File
 				RelativePath=".\include\XFace.h">
 			</File>
 		</Filter>
