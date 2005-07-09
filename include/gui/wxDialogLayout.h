@@ -313,7 +313,7 @@ private:
 
    // original config source used by profile returned by GetProfile(): only
    // valid if m_changedConfigSource == true
-   ConfigSource *m_configOld;
+   class ConfigSource *m_configOld;
 
    // true if we had called SetConfigSourceForWriting() on our profile
    bool m_changedConfigSource;
