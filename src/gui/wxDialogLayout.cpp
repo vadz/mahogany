@@ -1265,19 +1265,11 @@ wxControl *wxOptionsEditDialog::CreateControlsBelow(wxPanel *panel)
 
    wxLayoutConstraints *c;
 
-   wxStaticLine *line = new wxStaticLine(panel, -1);
-   c = new wxLayoutConstraints;
-   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
-   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
-   c->height.AsIs();
-   c->bottom.SameAs(panel, wxBottom, 5*LAYOUT_Y_MARGIN + hBtn);
-   line->SetConstraints(c);
-
    c = new wxLayoutConstraints;
    c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   c->bottom.Above(line, -LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(panel, wxBottom, 5*LAYOUT_Y_MARGIN + hBtn);
    m_chcSources->SetConstraints(c);
 
    wxStaticText *label = new wxStaticText(panel, -1, _("&Save changes to:"));
@@ -1288,7 +1280,15 @@ wxControl *wxOptionsEditDialog::CreateControlsBelow(wxPanel *panel)
    c->centreY.SameAs(m_chcSources, wxCentreY);
    label->SetConstraints(c);
 
-   return m_chcSources;
+   wxStaticLine *line = new wxStaticLine(panel, -1);
+   c = new wxLayoutConstraints;
+   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
+   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   c->bottom.Above(m_chcSources, -LAYOUT_Y_MARGIN);
+   line->SetConstraints(c);
+
+   return line;
 }
 
 void wxOptionsEditDialog::CreateAllControls()
@@ -1384,16 +1384,6 @@ void wxOptionsEditDialog::CreateAllControls()
 
 bool wxOptionsEditDialog::TransferDataToWindow()
 {
-#ifdef OS_WIN
-   // we have a problem under Windows: although initially the focus is set
-   // correctly in the dialog, when we call wxRadioBox::SetSelection from one
-   // of the pages TransferDataToWindow(), it is changed to the radio box which
-   // is wrong as it might go to a hidden page
-   //
-   // this should be somehow fixed in wxMSW but for now do it here
-   wxWindow *focusOld = FindFocus();
-#endif // OS_WIN
-
    const int count = m_notebook->GetPageCount();
    for ( int nPage = 0; nPage < count; nPage++ ) {
       wxWindow *page = m_notebook->GetPage(nPage);
@@ -1401,11 +1391,6 @@ bool wxOptionsEditDialog::TransferDataToWindow()
          return FALSE;
       }
    }
-
-#ifdef OS_WIN
-   if ( focusOld )
-      focusOld->SetFocus();
-#endif // OS_WIN
 
    ResetDirty();
 
@@ -1495,7 +1480,7 @@ void wxOptionsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
       config = i.operator->();
    }
 
-   Profile *profile = GetProfile();
+   Profile_obj profile(GetProfile());
    wxCHECK_RET( profile, _T("no profile in wxOptionsEditDialog?") );
 
    ConfigSource *configOld = profile->SetConfigSourceForWriting(config);
@@ -1513,7 +1498,7 @@ void wxOptionsEditDialog::EndModal(int rc)
 {
    if ( m_changedConfigSource )
    {
-      Profile *profile = GetProfile();
+      Profile_obj profile(GetProfile());
       if ( profile )
       {
          profile->SetConfigSourceForWriting(m_configOld);
