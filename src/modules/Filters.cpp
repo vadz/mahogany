@@ -2949,8 +2949,8 @@ String FilterRuleApply::CreditsForDialog()
          String subject;
          GetSenderSubject(from, subject, true /* full */);
 
-         textPD << _T("\n\t") << _("From: ") << from
-                << _T("\n\t") << _("Subject: ") << subject;
+         textPD << _T("\n    ") << _("From: ") << from
+                << _T("\n    ") << _("Subject: ") << subject;
       }
    }
 
@@ -3048,7 +3048,7 @@ FilterRuleApply::UpdateProgressDialog()
    String textLog = CreditsForStatusBar();
 
    // and show the result in the progress dialog
-   String textResult = ResultsMessage();
+   const String textResult = ResultsMessage();
 
    textLog += _T(" - ") + textResult;
 
