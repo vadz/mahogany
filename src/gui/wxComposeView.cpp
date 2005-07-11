@@ -4396,9 +4396,10 @@ wxComposeView::AddHeaderEntry(const String& name, const String& value)
 {
    // first check if we don't already have a header with this name
    const kbStringList::iterator end = m_extraHeadersNames.end();
-   kbStringList::iterator i, j;
-   for ( i = m_extraHeadersNames.begin(),
-         j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
+   for ( kbStringList::iterator i = m_extraHeadersNames.begin(),
+                                j = m_extraHeadersValues.begin();
+         i != end;
+         ++i, ++j )
    {
       if ( **i == name )
       {
@@ -4412,16 +4413,13 @@ wxComposeView::AddHeaderEntry(const String& name, const String& value)
          {
             **j = value;
          }
-         break;
+         return;
       }
    }
 
    // if we didn't find it, add a new one
-   if ( i == end )
-   {
-      m_extraHeadersNames.push_back(new String(name));
-      m_extraHeadersValues.push_back(new String(value));
-   }
+   m_extraHeadersNames.push_back(new String(name));
+   m_extraHeadersValues.push_back(new String(value));
 }
 
 bool wxComposeView::IsInReplyTo() const
