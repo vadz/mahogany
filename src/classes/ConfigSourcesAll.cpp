@@ -112,12 +112,12 @@ public:
 
    virtual bool HasGroup(const wxString& name) const
    {
-      return m_configSources.HasGroup(name);
+      return m_configSources.HasGroup(MakeFullPath(name));
    }
 
    virtual bool HasEntry(const wxString& name) const
    {
-      return m_configSources.HasEntry(name);
+      return m_configSources.HasEntry(MakeFullPath(name));
    }
 
 
@@ -171,11 +171,7 @@ public:
 
    virtual bool DeleteGroup(const wxString& key)
    {
-      wxString path;
-      if ( *key.c_str() == _T('/') )
-         path = key;
-      else
-         path << m_path << _T('/') << key;
+      const wxString path = MakeFullPath(key);
 
       bool foundAny = false;
       for ( ;; )
@@ -203,6 +199,17 @@ public:
    }
 
 protected:
+   wxString MakeFullPath(const wxString& key) const
+   {
+      wxString path;
+      if ( *key.c_str() == _T('/') )
+         path = key;
+      else
+         path << m_path << _T('/') << key;
+
+      return path;
+   }
+
    bool DoRead(LookupData& ld) const
    {
       return m_configSources.Read(m_path, ld);
