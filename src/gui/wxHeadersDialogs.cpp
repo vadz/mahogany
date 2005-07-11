@@ -1054,11 +1054,10 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
    pathBase = CUSTOM_HEADERS_PREFIX;
    for ( size_t type = 0; type < CustomHeader_Max; type++ )
    {
-      if ( !headersFor[type].IsEmpty() )
-      {
-         m_profile->writeEntry(pathBase + gs_customHeaderSubgroups[type],
-                               strutil_flatten_array(headersFor[type]));
-      }
+      const String name = pathBase + gs_customHeaderSubgroups[type];
+      const String value = strutil_flatten_array(headersFor[type]);
+      if ( m_profile->readEntry(name, _T("")) != value )
+         m_profile->writeEntry(name, value);
    }
 
    // remove the organization header if it hadn't been specified: we must do it
