@@ -200,11 +200,26 @@ PGPEngine::DoExecCommand(const String& options,
    // execute the command. At least, the original message will be visible.
    messageOut = messageIn;
 
+   // check if we have a PGP command: it can be set to nothing to disable pgp
+   // support
+   const String pgp = READ_APPCONFIG_TEXT(MP_PGP_COMMAND);
+   if ( pgp.empty() )
+   {
+      if ( log )
+      {
+         log->AddMessage(_("PGP command not configured, set its value in "
+                           "the \"Helpers\" page of the preferences dialog "
+                           "to enable PGP support"));
+      }
+
+      return OPERATION_CANCELED_BY_USER;
+   }
+
    PGPProcess process;
    String command = wxString::Format
                (
                 _T("%s --status-fd=2 --command-fd 0 --output - -a %s"),
-                READ_APPCONFIG_TEXT(MP_PGP_COMMAND).c_str(),
+                pgp.c_str(),
                 options.c_str()
                );
 
@@ -213,11 +228,7 @@ PGPEngine::DoExecCommand(const String& options,
       log->AddMessage(command);
 #endif
 
-   long pid = wxExecute
-              (command,
-               wxEXEC_ASYNC,
-               &process
-              );
+   long pid = wxExecute(command, wxEXEC_ASYNC, &process);
 
    if ( !pid )
    {

@@ -138,6 +138,16 @@ ClickablePGPInfo::CreateFromSigStatusCode(MCryptoEngine::Status code,
          pgpInfo = new PGPInfoGoodSig(msgView, user);
          break;
 
+      case MCryptoEngine::OPERATION_CANCELED_BY_USER:
+         pgpInfo = new PGPSignatureInfo
+                       (
+                        msgView,
+                        _("Unverified PGP signature"),
+                        _T("pgpsig_bad"),
+                        *wxLIGHT_GREY
+                       );
+         break;
+
       case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
          pgpInfo = new PGPInfoExpiredSig(msgView, user);
          break;
