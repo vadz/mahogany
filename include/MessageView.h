@@ -511,19 +511,21 @@ protected:
    void ProcessMultiPart(const MimePart *part, const String& subtype);
 
    /// process a multipart/alternative part
-   void ProcessAlternativeMultiPart(const MimePart *part);
+   bool ProcessAlternativeMultiPart(const MimePart *part);
 
    /// process a multipart/signed part
-   void ProcessSignedMultiPart(const MimePart *part);
+   bool ProcessSignedMultiPart(const MimePart *part);
 
    /// process a multipart/encrypted part
-   void ProcessEncryptedMultiPart(const MimePart *part);
+   bool ProcessEncryptedMultiPart(const MimePart *part);
 
    /// call ProcessPart() for all subparts of this part
    void ProcessAllNestedParts(const MimePart *part);
+
 public:
    /// show part of any kind
    void ShowPart(const MimePart *part);
+
 protected:
    /// show a text part
    void ShowTextPart(const MimePart *part);

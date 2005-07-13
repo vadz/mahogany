@@ -2005,7 +2005,7 @@ MessageView::ProcessAllNestedParts(const MimePart *mimepart)
    }
 }
 
-void
+bool
 MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart)
 {
    // find the best subpart we can show
@@ -2032,221 +2032,186 @@ MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart)
    }
 
    // show just the best one
-   CHECK_RET(partBest != 0, _T("No part can be displayed !"));
+   CHECK(partBest, false, _T("No part can be displayed !"));
 
    // the content of an alternative is not necessarily a single
    // part, so process it as well.
    ProcessPart(partBest);
+
+   return true;
 }
 
-void
+bool
 MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 {
-   // we use MP_PGP_COMMAND as a boolean switch telling us whether we should
-   // use pgp or not as well
-   if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-signature") &&
-            !READ_APPCONFIG_TEXT(MP_PGP_COMMAND).empty() )
+   if ( mimepart->GetParam(_T("protocol")) != _T("application/pgp-signature") )
    {
-      static const wxChar *sigIgnoredMsg =
-         gettext_noop("\n\nSignature will be ignored");
-
-      MimePart * const signedPart = mimepart->GetNested();
-      MimePart * const signaturePart = signedPart->GetNext();
-      if ( !signedPart || !signaturePart )
-      {
-         wxLogWarning(String(_("This message pretends to be signed but "
-                               "doesn't have the correct MIME structure.")) +
-                      wxGetTranslation(sigIgnoredMsg));
-
-         // still show the message contents
-         ProcessAllNestedParts(mimepart);
-
-         return;
-      }
-
-      // Let's not be too strict on what we receive
-      //CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
-      //            signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
-      //            signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
-      //           _T("Signed part should be 7 bits"));
-      //CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
-      //CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
-
-      if ( signaturePart->GetType().GetFull() != _T("APPLICATION/PGP-SIGNATURE") )
-      {
-         wxLogWarning(String(_("Signed message signature does not have a "
-                               "\"application/pgp-signature\" type.")) +
-                      wxGetTranslation(sigIgnoredMsg));
-
-         ProcessAllNestedParts(mimepart);
-
-         return;
-      }
-
-
-      // the signature is applied to both the headers and the body of the
-      // message and it is done after encoding the latter so we need to get it
-      // in the raw form
-      String signedText = signedPart->GetHeaders();
-
-      unsigned long signedTextLength = 0;
-      const char* c = (const char *)signedPart->GetRawContent(&signedTextLength);
-      signedText += String(wxConvertMB2WX(c), signedTextLength);
-
-      MCryptoEngineFactory * const factory
-         = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
-      if ( factory )
-      {
-         MCryptoEngine* pgpEngine = factory->Get();
-
-         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
-
-         MCryptoEngine::Status
-             status = pgpEngine->VerifyDetachedSignature
-                                 (
-                                    signedText,
-                                    signaturePart->GetTextContent(),
-                                    log
-                                 );
-
-         ClickablePGPInfo *pgpInfo = ClickablePGPInfo::CreateFromSigStatusCode
-                                     (
-                                       status,
-                                       this,
-                                       log
-                                     );
-
-         ProcessPart(signedPart);
-
-         if ( pgpInfo )
-         {
-            pgpInfo->SetLog(log);
-
-            ShowText(_T("\r\n"));
-
-            m_viewer->InsertClickable(pgpInfo->GetBitmap(),
-                                      pgpInfo,
-                                      pgpInfo->GetColour());
-
-            ShowText(_T("\r\n"));
-         }
-         else
-         {
-            delete log;
-         }
-
-         factory->DecRef();
-      }
-      else
-      {
-         FAIL_MSG( _T("failed to create PGPEngineFactory") );
-
-         ProcessPart(signedPart);
-      }
+      // unknown signature protocol, don't try to interpret it
+      return false;
    }
-   else // unknown signature protocol, don't try to interpret it
+
+   static const wxChar *
+      sigIgnoredMsg = gettext_noop("\n\nSignature will be ignored");
+
+   MimePart * const signedPart = mimepart->GetNested();
+   MimePart * const signaturePart = signedPart->GetNext();
+   if ( !signedPart || !signaturePart )
    {
-      ProcessAllNestedParts(mimepart);
+      wxLogWarning(String(_("This message pretends to be signed but "
+                            "doesn't have the correct MIME structure.")) +
+                   wxGetTranslation(sigIgnoredMsg));
+
+      return false;
    }
+
+   // Let's not be too strict on what we receive
+   //CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
+   //            signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
+   //            signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
+   //           _T("Signed part should be 7 bits"));
+   //CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
+   //CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
+
+   if ( signaturePart->GetType().GetFull() != _T("APPLICATION/PGP-SIGNATURE") )
+   {
+      wxLogWarning(String(_("Signed message signature does not have a "
+                            "\"application/pgp-signature\" type.")) +
+                   wxGetTranslation(sigIgnoredMsg));
+
+      return false;
+   }
+
+   // the signature is applied to both the headers and the body of the
+   // message and it is done after encoding the latter so we need to get
+   // it in the raw form
+   String signedText = signedPart->GetHeaders();
+
+   unsigned long signedTextLength = 0;
+   const char *c = static_cast<const char *>(
+                     signedPart->GetRawContent(&signedTextLength));
+   signedText += String(wxConvertMB2WX(c), signedTextLength);
+
+   MCryptoEngineFactory * const factory
+      = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
+   CHECK( factory, false, _T("failed to create PGPEngineFactory") );
+
+   MCryptoEngine *pgpEngine = factory->Get();
+   MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
+
+   MCryptoEngine::Status status = pgpEngine->VerifyDetachedSignature
+                                             (
+                                                signedText,
+                                                signaturePart->GetTextContent(),
+                                                log
+                                             );
+   ClickablePGPInfo *pgpInfo = ClickablePGPInfo::CreateFromSigStatusCode
+                               (
+                                 status,
+                                 this,
+                                 log
+                               );
+
+   ProcessPart(signedPart);
+
+   pgpInfo->SetLog(log);
+
+   ShowText(_T("\r\n"));
+
+   m_viewer->InsertClickable(pgpInfo->GetBitmap(),
+                             pgpInfo,
+                             pgpInfo->GetColour());
+
+   ShowText(_T("\r\n"));
+
+   factory->DecRef();
+
+   return true;
 }
 
-void
+bool
 MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
 {
-   if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-encrypted") )
+   if ( mimepart->GetParam(_T("protocol")) != _T("application/pgp-encrypted") )
    {
-      MimePart * const controlPart = mimepart->GetNested();
-      MimePart * const encryptedPart = controlPart->GetNext();
-
-      if ( !controlPart || !encryptedPart )
-      {
-         wxLogError(_("This message pretends to be encrypted but "
-                      "doesn't have the correct MIME structure."));
-         return;
-      }
-
-      // We could also test some more features:
-      // - that the control part actually has an "application/pgp-encrypted" type
-      // - that it contains a "Version: 1" field (and only that)
-
-      if ( encryptedPart->GetType().GetFull() != _T("APPLICATION/OCTET-STREAM") )
-      {
-         wxLogError(_("The actual encrypted data part does not have a "
-                      "\"application/octet-stream\" type, "
-                      "ignoring it."));
-         return;
-      }
-
-      unsigned long encryptedPartLength = 0;
-      const char* c = (const char *)encryptedPart->GetRawContent(&encryptedPartLength);
-      String encryptedData(wxConvertMB2WX(c), encryptedPartLength);
-
-      MCryptoEngineFactory * const factory
-         = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
-      if ( factory )
-      {
-         MCryptoEngine* pgpEngine = factory->Get();
-
-         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
-
-         String decryptedData;
-         MCryptoEngine::Status status =
-               pgpEngine->Decrypt(encryptedData, decryptedData, log);
-
-         ClickablePGPInfo *pgpInfo = 0;
-         switch ( status )
-         {
-            case MCryptoEngine::OK:
-               pgpInfo = new PGPInfoGoodMsg(this);
-
-               {
-                  MimePartVirtual *mpv = new MimePartVirtual(decryptedData);
-                  AddVirtualMimePart(mpv);
-                  ProcessPart(mpv);
-               }
-               break;
-
-            default:
-               wxLogError(_("Decrypting the PGP message failed."));
-               // fall through
-
-            // if the user cancelled decryption, don't complain about it
-            case MCryptoEngine::OPERATION_CANCELED_BY_USER:
-               // using unmodified text is not very helpful here anyhow so
-               // simply replace it with an icon
-               pgpInfo = new PGPInfoBadMsg(this);
-         }
-
-         if ( pgpInfo )
-         {
-            pgpInfo->SetLog(log);
-
-            ShowText(_T("\r\n"));
-
-            m_viewer->InsertClickable(pgpInfo->GetBitmap(),
-                                      pgpInfo,
-                                      pgpInfo->GetColour());
-
-            ShowText(_T("\r\n"));
-         }
-         else
-         {
-            delete log;
-         }
-
-         factory->DecRef();
-      }
-      else
-      {
-         FAIL_MSG( _T("failed to create PGPEngineFactory") );
-
-         ProcessPart(encryptedPart);
-      }
+      // unknown encryption protocol, don't try to interpret it
+      return false;
    }
-   else // unknown encryption protocol, don't try to interpret it
+
+   MimePart * const controlPart = mimepart->GetNested();
+   MimePart * const encryptedPart = controlPart->GetNext();
+
+   if ( !controlPart || !encryptedPart )
    {
-      ProcessAllNestedParts(mimepart);
+      wxLogError(_("This message pretends to be encrypted but "
+                   "doesn't have the correct MIME structure."));
+      return false;
    }
+
+   // We could also test some more features:
+   // - that the control part actually has an "application/pgp-encrypted" type
+   // - that it contains a "Version: 1" field (and only that)
+
+   if ( encryptedPart->GetType().GetFull() != _T("APPLICATION/OCTET-STREAM") )
+   {
+      wxLogError(_("The actual encrypted data part does not have a "
+                   "\"application/octet-stream\" type, "
+                   "ignoring it."));
+      return false;
+   }
+
+   unsigned long encryptedPartLength = 0;
+   const char* c = (const char *)encryptedPart->GetRawContent(&encryptedPartLength);
+   String encryptedData(wxConvertMB2WX(c), encryptedPartLength);
+
+   MCryptoEngineFactory * const factory
+      = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
+   CHECK( factory, false, _T("failed to create PGPEngineFactory") );
+
+   MCryptoEngine* pgpEngine = factory->Get();
+
+   MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
+
+   String decryptedData;
+   MCryptoEngine::Status status =
+         pgpEngine->Decrypt(encryptedData, decryptedData, log);
+
+   ClickablePGPInfo *pgpInfo = 0;
+   switch ( status )
+   {
+      case MCryptoEngine::OK:
+         pgpInfo = new PGPInfoGoodMsg(this);
+
+         {
+            MimePartVirtual *mpv = new MimePartVirtual(decryptedData);
+            AddVirtualMimePart(mpv);
+            ProcessPart(mpv);
+         }
+         break;
+
+      default:
+         wxLogError(_("Decrypting the PGP message failed."));
+         // fall through
+
+      // if the user cancelled decryption, don't complain about it
+      case MCryptoEngine::OPERATION_CANCELED_BY_USER:
+         // using unmodified text is not very helpful here anyhow so
+         // simply replace it with an icon
+         pgpInfo = new PGPInfoBadMsg(this);
+   }
+
+   pgpInfo->SetLog(log);
+
+   ShowText(_T("\r\n"));
+
+   m_viewer->InsertClickable(pgpInfo->GetBitmap(),
+                             pgpInfo,
+                             pgpInfo->GetColour());
+
+   ShowText(_T("\r\n"));
+
+   factory->DecRef();
+
+   return true;
 }
 
 void
@@ -2254,22 +2219,26 @@ MessageView::ProcessMultiPart(const MimePart *mimepart, const String& subtype)
 {
    // TODO: support for DIGEST and RELATED
 
+   bool processed;
    if ( subtype == _T("ALTERNATIVE") )
    {
-      ProcessAlternativeMultiPart(mimepart);
+      processed = ProcessAlternativeMultiPart(mimepart);
    }
    else if ( subtype == _T("SIGNED") )
    {
-      ProcessSignedMultiPart(mimepart);
+      processed = ProcessSignedMultiPart(mimepart);
    }
    else if ( subtype == _T("ENCRYPTED") )
    {
-      ProcessEncryptedMultiPart(mimepart);
+      processed = ProcessEncryptedMultiPart(mimepart);
    }
    else // process all unknown as MIXED (according to the RFC 2047)
    {
-      ProcessAllNestedParts(mimepart);
+      processed = false;
    }
+
+   if ( !processed )
+      ProcessAllNestedParts(mimepart);
 }
 
 void
