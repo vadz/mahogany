@@ -317,7 +317,11 @@ wxMessageView::CreateViewMenu()
    {
       const int id = WXMENU_VIEW_VIEWERS_BEGIN + 1 + nViewer;
 
-      menuView->AppendRadioItem(id, descViewers[nViewer]);
+      // add an accelerator for the viewer
+      String desc = descViewers[nViewer];
+      desc << _T("\tShift-Ctrl-") << nViewer + 1;
+
+      menuView->AppendRadioItem(id, desc);
 
       if ( m_namesViewers[nViewer] == nameCurViewer )
       {
@@ -349,13 +353,16 @@ wxMessageView::CreateViewMenu()
    bool cont = GetFirstViewFilter(&name, &desc, &enabled, &cookie);
    while ( cont )
    {
+      // remember this filter
       m_namesFilters.Add(name);
       m_statesFilters.Add(enabled);
 
+      // append it to the menu
       menuFlt->AppendCheckItem(id, desc);
       if ( enabled )
          menuFlt->Check(id, true);
 
+      // pass to the next one
       id++;
 
       cont = GetNextViewFilter(&name, &desc, &enabled, &cookie);
@@ -394,17 +401,7 @@ wxMessageView::OnSelectViewer(int id)
    CHECK_RET( n >= 0 && (size_t)n < m_namesViewers.GetCount(),
               _T("invalid viewer selected from the menu?") );
 
-   // this one must not be DecRef()'d
-   Profile * const profile = GetProfile();
-   CHECK_RET( profile, _T("no Profile in wxMessageView?") );
-
-   profile->writeEntry(MP_MSGVIEW_VIEWER, m_namesViewers[n]);
-
-   MEventManager::Send(new MEventOptionsChangeData
-                           (
-                            profile,
-                            MEventOptionsChangeData::Ok
-                           ));
+   ChangeViewer(m_namesViewers[n]);
 }
 
 // ----------------------------------------------------------------------------

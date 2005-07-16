@@ -626,13 +626,34 @@ MessageView::SetViewer(MessageViewer *viewer,
       m_usingDefViewer = false;
    }
 
+   MessageViewer *viewerOld = m_viewer;
+
+   DoSetViewer(viewer, viewerName, parent);
+
+   delete viewerOld;
+}
+
+void
+MessageView::DoSetViewer(MessageViewer *viewer,
+                         const String& viewerName,
+                         wxWindow *parent)
+{
    viewer->Create(this, parent ? parent : GetWindow()->GetParent());
 
    OnViewerChange(m_viewer, viewer, viewerName);
-   delete m_viewer;
 
    m_viewer = viewer;
    m_viewerName = viewerName;
+}
+
+void MessageView::RestoreOldViewer()
+{
+   if ( m_viewerOld )
+   {
+      SetViewer(m_viewerOld, m_viewerNameOld);
+      m_viewerOld = NULL;
+      m_viewerNameOld.clear();
+   }
 }
 
 /**
@@ -2295,88 +2316,6 @@ MessageView::AddVirtualMimePart(MimePart *mimepart)
 // finding the best viewer for the current message
 // ----------------------------------------------------------------------------
 
-#if 0
-String
-MessageView::FindViewerForNestedPart(const MimePart *mimepart)
-{
-   const MimePart *partChild = mimepart->GetNested();
-   while ( partChild )
-   {
-      ProcessPart(partChild);
-
-      partChild = partChild->GetNext();
-   }
-}
-
-String
-MessageView::FindViewerForMultiPart(const MimePart *mimepart,
-                                    const String& subtype)
-{
-   String name;
-
-   if ( subtype == _T("ALTERNATIVE") )
-   {
-      ProcessAlternativeMultiPart(mimepart);
-   }
-   else // process all unknown as MIXED (according to the RFC 2047)
-   {
-      ProcessAllNestedParts(mimepart);
-   }
-
-   return name;
-}
-
-String
-MessageView::FindViewerForPart(const MimePart *mimepart)
-{
-   CHECK_RET( mimepart, _T("NULL mimepart") );
-
-   String name;
-
-   const MimeType type = mimepart->GetType();
-   switch ( type.GetPrimary() )
-   {
-      case MimeType::MULTIPART:
-         name = FindViewerForMultiPart(mimepart, type.GetSubType());
-         break;
-
-      case MimeType::MESSAGE:
-         if ( m_ProfileValues.inlineRFC822 )
-         {
-            name = FindViewerForNestedPart(mimepart);
-            break;
-         }
-         //else: fall through and show it as attachment
-
-      case MimeType::TEXT:
-      case MimeType::APPLICATION:
-      case MimeType::AUDIO:
-      case MimeType::IMAGE:
-      case MimeType::VIDEO:
-      case MimeType::MODEL:
-      case MimeType::OTHER:
-      case MimeType::CUSTOM1:
-      case MimeType::CUSTOM2:
-      case MimeType::CUSTOM3:
-      case MimeType::CUSTOM4:
-      case MimeType::CUSTOM5:
-      case MimeType::CUSTOM6:
-         // a simple part, check 
-         ShowPart(mimepart);
-         break;
-
-      default:
-         FAIL_MSG( _T("unknown MIME type") );
-   }
-
-   return name;
-}
-#endif
-
-// ----------------------------------------------------------------------------
-// showing a new message
-// ----------------------------------------------------------------------------
-
 // bit flags returned by GetPartContent()
 enum
 {
@@ -2490,74 +2429,128 @@ MessageView::AutoAdjustViewer(const MimePart *mimepart)
       // either we don't have any specific viewer to set, in which case we need
       // to just restore the user-chosen one if any, or we need the viewer
       // which had been previously replaced
-      if ( m_viewerOld )
-      {
-         SetViewer(m_viewerOld, m_viewerNameOld);
-         m_viewerOld = NULL;
-         m_viewerNameOld.clear();
-      }
+      RestoreOldViewer();
    }
    else // we need to switch to another viewer
    {
-      MessageViewer *viewer = LoadViewer(viewerName);
-      if ( viewer )
-      {
-         if ( m_viewerOld )
-         {
-            // replace the last automatically set viewer
-            SetViewer(viewer, viewerName);
-         }
-         else // we're using the original user-chosen viewer, keep it as "old"
-         {
-            // we can't use SetViewer() because it deletes the current viewer
-            // and we want to keep it as m_viewerOld and restore it later
-            viewer->Create(this, GetWindow()->GetParent());
-
-            OnViewerChange(m_viewer, viewer, viewerName);
-
-            m_viewerNameOld = m_viewerName;
-            m_viewerName = viewerName;
-
-            m_viewerOld = m_viewer;
-            m_viewer = viewer;
-         }
-      }
+      // don't update the message contents here: we're called from Update()
+      // which is going to do it anyhow
+      ChangeViewerWithoutUpdate(viewerName);
    }
 }
+
+bool MessageView::ChangeViewerWithoutUpdate(const String& viewerName)
+{
+   ASSERT_MSG( !viewerName.empty(), _T("empty viewer name") );
+
+   MessageViewer *viewer = LoadViewer(viewerName);
+   if ( !viewer )
+   {
+      wxLogWarning(_("Viewer \"%s\" couldn't be set."), viewerName.c_str());
+      return false;
+   }
+
+   if ( m_viewerOld )
+   {
+      // replace the last automatically set viewer
+      SetViewer(viewer, viewerName);
+   }
+   else // we're using the original user-chosen viewer, keep it as "old"
+   {
+      // we can't use SetViewer() because it deletes the current viewer
+      // and we want to keep it as m_viewerOld and restore it later
+      m_viewerNameOld = m_viewerName;
+      m_viewerOld = m_viewer;
+      DoSetViewer(viewer, viewerName);
+   }
+
+   return true;
+}
+
+bool MessageView::ChangeViewer(const String& viewerName)
+{
+   if ( !ChangeViewerWithoutUpdate(viewerName) )
+      return false;
+
+   // redisplay the message in the new viewer
+   DisplayMessageInViewer();
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
+// showing a new message
+// ----------------------------------------------------------------------------
 
 void
 MessageView::Update()
 {
+   if ( m_mailMessage )
+   {
+      m_uid = m_mailMessage->GetUId();
+
+      const MimePart *mimepart = m_mailMessage->GetTopMimePart();
+      CHECK_RET( mimepart, _T("No MIME part to show?") );
+
+      // use the encoding of the first body part as the default encoding for
+      // the headers - this cares for the (horribly broken) mailers which send
+      // 8 bit stuff in the headers instead of using RFC 2047
+      m_encodingAuto = mimepart->GetTextEncoding();
+
+      // adjust the viewer to the current message contents
+      if ( m_ProfileValues.autoViewer )
+         AutoAdjustViewer(mimepart);
+      else
+         RestoreOldViewer();
+   }
+   else // no message
+   {
+      m_uid = UID_ILLEGAL;
+      m_encodingAuto = wxFONTENCODING_SYSTEM;
+   }
+
+   // do display it
+   DisplayMessageInViewer();
+
+
+   if ( m_mailMessage )
+   {
+      // if user selects the language from the menu, m_encodingUser is set
+      wxFontEncoding encoding;
+      if ( m_encodingUser != wxFONTENCODING_DEFAULT )
+      {
+         encoding = m_encodingUser;
+      }
+      else if ( m_encodingAuto != wxFONTENCODING_SYSTEM )
+      {
+         encoding = m_encodingAuto;
+      }
+      else
+      {
+         encoding = wxFONTENCODING_DEFAULT;
+      }
+
+      // update the menu of the frame containing us to show the encoding used
+      CheckLanguageInMenu(GetParentFrame(), encoding);
+   }
+}
+
+void
+MessageView::DisplayMessageInViewer()
+{
    if ( m_virtualMimeParts )
       m_virtualMimeParts->clear();
 
-   if( !m_mailMessage )
-   {
-      // no message to display, but still call Update() after Clear()
-      m_viewer->Clear();
-      m_viewer->Update();
-
-      return;
-   }
-
    m_textBody.clear();
-   m_uid = m_mailMessage->GetUId();
-
-   // use the encoding of the first body part as the default encoding for the
-   // headers - this cares for the (horribly broken) mailers which send 8 bit
-   // stuff in the headers instead of using RFC 2047
-   const MimePart *mimepart = m_mailMessage->GetTopMimePart();
-
-   CHECK_RET( mimepart, _T("No MIME part to show?") );
-
-   m_encodingAuto = mimepart->GetTextEncoding();
-
-   // adjust the viewer to the current message contents
-   if ( m_ProfileValues.autoViewer )
-      AutoAdjustViewer(mimepart);
-
 
    m_viewer->Clear();
+
+   if ( !m_mailMessage )
+   {
+      // no message to display, but still call Update() after Clear()
+      m_viewer->Update();
+      return;
+   }
 
    //#define PROFILE_VIEWER
 #ifdef PROFILE_VIEWER
@@ -2571,32 +2564,13 @@ MessageView::Update()
    m_viewer->StartBody();
 
    // ... by recursively showing all the parts
-   ProcessPart(mimepart);
+   ProcessPart(m_mailMessage->GetTopMimePart());
 
    m_viewer->EndBody();
 
 #ifdef PROFILE_VIEWER
    wxLogStatus(_T("Message shown in %ldms"), timeViewer.Time());
 #endif
-
-
-   // if user selects the language from the menu, m_encodingUser is set
-   wxFontEncoding encoding;
-   if ( m_encodingUser != wxFONTENCODING_DEFAULT )
-   {
-      encoding = m_encodingUser;
-   }
-   else if ( m_encodingAuto != wxFONTENCODING_SYSTEM )
-   {
-      encoding = m_encodingAuto;
-   }
-   else
-   {
-      encoding = wxFONTENCODING_DEFAULT;
-   }
-
-   // update the menu of the frame containing us to show the encoding used
-   CheckLanguageInMenu(GetParentFrame(), encoding);
 }
 
 // ----------------------------------------------------------------------------

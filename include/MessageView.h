@@ -274,6 +274,19 @@ public:
    virtual void CreateViewMenu();
 
    /**
+      Change the viewer to the one with the specified name or the default one.
+
+      Note that the viewer is changed only for the current message and will
+      revert back to the default one when the user switches to another message.
+      To change the viewer permanently the appropriate value must be written
+      into Profile.
+
+      @param viewer the name of the viewer to use
+      @return true if the viewer was set successfully or false on error
+    */
+   bool ChangeViewer(const String& viewer);
+
+   /**
       Called when view filter state is toggled.
 
       @param id the corresponding menu id, starting from
@@ -691,6 +704,9 @@ private:
    /**
       Set the viewer.
 
+      Notice that this method automatically deletes the old viewer, use
+      DoSetViewer() if this is undesirable.
+
       @param viewer the viewer to use, may be NULL, then CreateDefaultViewer()
                     is used; this viewer will be deleted automatically when
                     this function is called the next time
@@ -704,6 +720,20 @@ private:
                   wxWindow *parent = NULL);
 
    /**
+      Initializes and sets the given non-NULL viewer.
+
+      Unlike SetViewer(), this method has no side effects (except for calling
+      OnViewerChange()).
+
+      @param viewer non-NULL viewer
+      @param viewerName its name
+      @param parent the parent window or NULL if we already have it
+    */
+   void DoSetViewer(MessageViewer *viewer,
+                    const String& viewerName,
+                    wxWindow *parent = NULL);
+
+   /**
       Reset the viewer to the default one.
 
       @param parent the parent window, may be NULL
@@ -714,6 +744,20 @@ private:
    }
 
    /**
+      Creates the viewer for the given name and sets it as the current one
+      remembering the original viewer.
+
+      This method doesn't update the display, use ChangeViewer() for this.
+
+      It rememebers the current viewer and its name in m_viewerOld and
+      m_viewerNameOld so that they can restored by RestoreOldViewer() later.
+
+      @param viewer the name of the viewer to use
+      @return true if the viewer was set successfully or false on error
+    */
+   bool ChangeViewerWithoutUpdate(const String& viewer);
+
+   /**
       Default viewer creation: we must always have at least this viewer
       available even if no others can be found (they live in modules). This is
       also the viewer we use when there is no folder selected
@@ -722,6 +766,14 @@ private:
 
    /// returns true if we have a non default viewer
    bool HasRealViewer() const { return m_viewer && !m_usingDefViewer; }
+
+   /**
+      Display the message in the current viewer.
+
+      This function does just this and so shouldn't be called directly, it's
+      used by Update() (which does the rest) and ChangeViewer().
+    */
+   void DisplayMessageInViewer();
 
    /// this is a private function used to study what kind of contents we have
    int DeterminePartContent(const MimePart *mimepart);
@@ -736,6 +788,9 @@ private:
       it's called the next time, it restores it.
     */
    void AutoAdjustViewer(const MimePart *mimepart);
+
+   /// Restore the old viewer if we had changed it
+   void RestoreOldViewer();
 
 
    /// the viewer we use
