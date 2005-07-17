@@ -3132,11 +3132,11 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
 
    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
    m_labelText = new wxStaticText(m_frame, -1, text);
-   sizer->Add(m_labelText, 0, wxALL & ~wxRIGHT, 10);
+   sizer->Add(m_labelText, 0, wxALIGN_CENTER_VERTICAL | (wxALL & ~wxRIGHT), 10);
 
    // hack: use a long label for sizer calculations
    m_labelValue = new wxStaticText(m_frame, -1, _("XXXXXX done"));
-   sizer->Add(m_labelValue, 0, wxLEFT | wxRIGHT, 10);
+   sizer->Add(m_labelValue, 0, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 10);
 
    m_frame->SetAutoLayout(TRUE);
    m_frame->SetSizer(sizer);
