@@ -767,8 +767,17 @@
 					<File
 						RelativePath=".\src\Python\InitPython.cpp">
 						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release With Debug Info|Win32">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
@@ -776,8 +785,17 @@
 					<File
 						RelativePath=".\src\Python\PythonDll.cpp">
 						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release With Debug Info|Win32">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
@@ -785,8 +803,17 @@
 					<File
 						RelativePath=".\src\Python\PythonHelp.cpp">
 						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release With Debug Info|Win32">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
