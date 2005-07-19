@@ -2271,7 +2271,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
 }
 
 void
-wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
+wxComposeView::AddRecipientControls(const String& value, RecipientType rt, bool doLayout)
 {
    // remove the place holder we had there before
    if ( m_rcptExtra.IsEmpty() )
@@ -2292,8 +2292,11 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    m_rcptExtra.Insert(rcpt, 0);
 
    m_sizerRcpts->Prepend(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN / 2);
-   m_sizerRcpts->Layout();
-   m_panelRecipients->RefreshScrollbar(m_panelRecipients->GetClientSize());
+   if (doLayout)
+   {
+      m_sizerRcpts->Layout();
+      m_panelRecipients->RefreshScrollbar(m_panelRecipients->GetClientSize());
+   }
 
    // adjust the indexes of all the existing controls
    const size_t count = m_rcptExtra.GetCount();
@@ -2334,7 +2337,7 @@ wxComposeView::OnRemoveRcpt(size_t index)
 }
 
 void
-wxComposeView::AddRecipients(const String& address, RecipientType addrType)
+wxComposeView::AddRecipients(const String& address, RecipientType addrType, bool doLayout)
 {
    // if there is no address, nothing to do
    if ( address.empty() )
@@ -2357,7 +2360,7 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
             size_t count = groups.GetCount();
             for ( size_t n = 0; n < count; n++ )
             {
-               AddRecipient(groups[n], Recipient_Newsgroup);
+               AddRecipient(groups[n], Recipient_Newsgroup, doLayout);
             }
          }
          break;
@@ -2383,7 +2386,7 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
                   String address = addr->GetAddress();
                   if ( !address.empty() )
                   {
-                     AddRecipient(address, addrType);
+                     AddRecipient(address, addrType, doLayout);
                   }
 
                   addr = addrList->GetNext(addr);
@@ -2414,7 +2417,7 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
          else
          {
             // add another folder
-            AddRecipient(address, Recipient_Fcc);
+            AddRecipient(address, Recipient_Fcc, doLayout);
          }
          break;
 
@@ -2425,7 +2428,7 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
 }
 
 void
-wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
+wxComposeView::AddRecipient(const String& addr, RecipientType addrType, bool doLayout)
 {
    // this is a private function, AddRecipients() above is the public one and it
    // does the parameter validation
@@ -2478,7 +2481,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
    }
 
    // do add it if not found
-   AddRecipientControls(addr, addrType);
+   AddRecipientControls(addr, addrType, doLayout);
 }
 
 bool wxComposeView::IsRecipientEnabled(size_t index) const

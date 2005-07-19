@@ -174,7 +174,8 @@ public:
 
    /// adds recipients from addr (Recipient_Max means to reuse the last)
    virtual void AddRecipients(const String& addr,
-                              RecipientType rcptType = Recipient_Max) = 0;
+                              RecipientType rcptType = Recipient_Max,
+                              bool doLayout = true) = 0;
 
    /// adds a "To" recipient
    void AddTo(const String& addr) { AddRecipients(addr, Recipient_To); }

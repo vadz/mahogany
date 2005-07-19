@@ -141,7 +141,8 @@ public:
 
    /// adds recepients from addr (Recepient_Max means to reuse the last)
    void AddRecipients(const String& addr,
-                      RecipientType rcptType = Recipient_Max);
+                      RecipientType rcptType = Recipient_Max,
+                      bool doLayout = true);
 
    /// expands an address
    virtual RecipientType ExpandRecipient(String *text);
@@ -414,10 +415,10 @@ private:
    void DeletePlaceHolder();
 
    // create the new controls for another recipient
-   void AddRecipientControls(const String& value, RecipientType rt);
+   void AddRecipientControls(const String& value, RecipientType rt, bool doLayout);
 
    // adds one recipient, helper of AddRecipients()
-   void AddRecipient(const String& addr, RecipientType rcptType);
+   void AddRecipient(const String& addr, RecipientType rcptType, bool doLayout);
 
    /// enable/disable editing of the message text
    void EnableEditing(bool enable);
