@@ -294,6 +294,25 @@ private:
    DECLARE_NO_COPY_CLASS(FilterProfile)
 };
 
+class TemplateProfile : public ProfileImpl
+{
+public:
+   static TemplateProfile * Create(const String& kind)
+      { return new TemplateProfile(kind); }
+
+   virtual const wxChar * GetProfileSection(void) const
+      {
+         return M_TEMPLATES_CONFIG_SECTION;
+      }
+private:
+   TemplateProfile(const String& kind)
+      {
+         m_ProfileName << GetRootPath() << _T('/') << kind;
+      }
+
+   DECLARE_NO_COPY_CLASS(TemplateProfile)
+};
+
 /// Same as Identity and FilterProfile but for "/Modules" branch
 class ModuleProfile : public ProfileImpl
 {
@@ -482,7 +501,19 @@ Profile::CreateFilterProfile(const String & idName)
 {
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
-   Profile *p =  FilterProfile::Create(idName);
+   Profile *p = FilterProfile::Create(idName);
+   EnforcePolicy(p);
+   return p;
+}
+
+/* static */
+Profile *
+Profile::CreateTemplateProfile(const String& kind)
+{
+   ASSERT_MSG( !kind.empty() && *kind.c_str() != _T('/'),
+                  _T("invalid template name") );
+
+   Profile *p =  TemplateProfile::Create(kind);
    EnforcePolicy(p);
    return p;
 }

@@ -123,6 +123,9 @@ public:
    /// creates/gets a FilterProfile entry in the configuration
    static Profile * CreateFilterProfile(const String &name);
 
+   /// Creates profile for message templates of given kind
+   static Profile * CreateTemplateProfile(const String& kind);
+
    /**
       Create a temporary profile.
 
@@ -155,7 +158,7 @@ public:
    //@{
    /// Read a character entry.
    virtual String readEntry(const String & key,
-                            const String & defaultvalue = (const wxChar*)NULL,
+                            const String & defaultvalue,
                             ReadResult *found = NULL) const = 0;
    /// Read a character entry.
    String readEntry(const String &  key,
