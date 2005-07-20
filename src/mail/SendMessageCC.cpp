@@ -1269,9 +1269,7 @@ SendMessageCC::Build(bool forStorage)
 
    // Date:
    //
-   // NB: we do allow the user to override the date header because this is
-   //     useful when editing a previously postponed message
-   if ( !HasHeaderEntry(_T("Date")) )
+   if ( m_Envelope->remail && !HasHeaderEntry(_T("Date")) )
    {
       char tmpbuf[MAILTMPLEN];
       rfc822_date (tmpbuf);
@@ -1326,6 +1324,10 @@ SendMessageCC::Build(bool forStorage)
          // contents (which is highly undesirable!)
          RemoveHeaderEntry(_T("X-BCC"));
       }
+      
+      char tmpbuf[MAILTMPLEN];
+      rfc822_date (tmpbuf);
+      m_Envelope->date = (unsigned char *)cpystr(tmpbuf);
    }
 
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
