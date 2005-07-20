@@ -24,11 +24,9 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "Profile.h"
-#   include "MApplication.h"
 
 #   include <wx/string.h>       // for wxString
 #   include <wx/log.h>          // for wxLogWarning
-#   include <wx/config.h>
 #endif // USE_PCH
 
 #include <wx/textfile.h>        // for wxTextFileType_Unix
@@ -578,23 +576,12 @@ static String GetTemplateNamePath(MessageTemplateKind kind)
    return path;
 }
 
-// returns the path to the section containing the templates of the given kind
-static String GetTemplateKindSection(MessageTemplateKind kind)
+// returns the profile for the templates of given kind
+//
+// the pointer must be DecRef()'d by caller if not NULL
+static Profile *GetTemplateProfile(MessageTemplateKind kind)
 {
-   String path;
-   path << Profile::GetTemplatesPath() << '/' << GetTemplateKindPath(kind);
-
-   return path;
-}
-
-// returns the path to the value of the template of the given kind and name in
-// the profile
-static String GetTemplateValuePath(MessageTemplateKind kind, const String& name)
-{
-   String path;
-   path << GetTemplateKindSection(kind) << '/' << name;
-
-   return path;
+   return Profile::CreateTemplateProfile(GetTemplateKindPath(kind));
 }
 
 // ----------------------------------------------------------------------------
@@ -608,7 +595,8 @@ extern String
 GetMessageTemplate(MessageTemplateKind kind, Profile *profile)
 {
    // first read the template name
-   String name = profile->readEntry(GetTemplateNamePath(kind), STANDARD_TEMPLATE_NAME);
+   String name = profile->readEntry(GetTemplateNamePath(kind),
+                                    STANDARD_TEMPLATE_NAME);
 
    return GetMessageTemplate(kind, name);
 }
@@ -617,13 +605,19 @@ GetMessageTemplate(MessageTemplateKind kind, Profile *profile)
 extern String
 GetMessageTemplate(MessageTemplateKind kind, const String& name)
 {
-   // the templates contain '$'s so disable variable expansion for now
-   Profile *profile = mApplication->GetProfile();
-   ProfileEnvVarSave noEnvVarExpansion(profile);
+   String value;
 
-   wxConfigBase *config = profile->GetConfig();
+   Profile *profile(GetTemplateProfile(kind));
+   if ( profile )
+   {
+      // the templates contain '$'s so disable variable expansion for now
+      ProfileEnvVarSave noEnvVarExpansion(profile);
 
-   String value = config->Read(GetTemplateValuePath(kind, name), _T(""));
+      value = profile->readEntry(name);
+
+      profile->DecRef();
+   }
+
    if ( value.empty() )
    {
       // we have the default templates for reply, follow-up and forward
@@ -678,15 +672,20 @@ SetMessageTemplate(const String& name,
       (void)profile->writeEntry(GetTemplateNamePath(kind), name);
    }
 
-   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
-   config->Write(GetTemplateValuePath(kind, name), value);
+   Profile_obj profileTemplate(GetTemplateProfile(kind));
+   if ( profileTemplate )
+   {
+      profileTemplate->writeEntry(name, value);
+   }
 }
 
 extern bool
 DeleteMessageTemplate(MessageTemplateKind kind, const String& name)
 {
-   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
-   config->DeleteEntry(GetTemplateValuePath(kind, name));
+   // TODO: check that no profile uses it?
+   Profile_obj profileTemplate(GetTemplateProfile(kind));
+   if ( profileTemplate )
+      profileTemplate->DeleteEntry(name);
 
    return true;
 }
@@ -699,13 +698,11 @@ GetMessageTemplateNames(MessageTemplateKind kind)
    // always add the "Standard" template to the list as it is always present
    names.Add(STANDARD_TEMPLATE_NAME);
 
-   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
-
-   config->SetPath(GetTemplateKindSection(kind));
+   Profile_obj profileTemplate(GetTemplateProfile(kind));
 
    wxString name;
-   long cookie;
-   bool cont = config->GetFirstEntry(name, cookie);
+   Profile::EnumData cookie;
+   bool cont = profileTemplate->GetFirstEntry(name, cookie);
    while ( cont )
    {
       // we already did it for this one above
@@ -714,7 +711,7 @@ GetMessageTemplateNames(MessageTemplateKind kind)
          names.Add(name);
       }
 
-      cont = config->GetNextEntry(name, cookie);
+      cont = profileTemplate->GetNextEntry(name, cookie);
    }
 
    return names;
