@@ -462,7 +462,7 @@ END_EVENT_TABLE()
 // MDebugReport
 // ----------------------------------------------------------------------------
 
-#if wxUSE_DEBUGREPORT
+#if wxUSE_DEBUGREPORT && wxUSE_XML
 
 #include "wx/debugrpt.h"
 #include "wx/file.h"
@@ -726,7 +726,7 @@ wxMApp::OnAbnormalTermination(const char *msgOrig)
       msg << msgComposer << _T('\n');
    }
 
-#if wxUSE_DEBUGREPORT
+#if wxUSE_DEBUGREPORT && wxUSE_XML
    MDebugReport report(msgOrig);
    if ( wxDebugReportPreviewStd().Show(report) )
    {
@@ -901,7 +901,9 @@ bool
 wxMApp::OnInit()
 {
    // we want our OnAbnormalTermination() be called if we crash
+#if wxUSE_ON_FATAL_EXCEPTION
    wxHandleFatalExceptions();
+#endif
 
    // create a semaphore indicating that we're running - or check if another
    // copy already is
