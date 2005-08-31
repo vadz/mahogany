@@ -35,7 +35,7 @@
 #define   OS_SUBTYPE   "unknown"
 
 /// Test for unix flavours:
-#if ( defined(unix) || defined(__unix) || defined(__unix__) ) && ! defined(__CYGWIN__)
+#if defined(__UNIX__) && !defined(__CYGWIN__)
 #  define  OS_UNIX    1
 #  define  OS_TYPE    "unix"
 #  undef   OS_SUBTYPE
@@ -43,13 +43,17 @@
 #     define   OS_LINUX
 #     define   OS_SUBTYPE   "linux-gnu"
 #  endif
-#  ifdef sun
-#     define   OS_SOLARIS
-#     define   OS_SUBTYPE   "solaris"
+#  ifdef __NetBSD__
+#     define   OS_NETBSD
+#     define   OS_SUBTYPE   "netbsd"
 #  endif
 #  ifdef __osf__
 #     define   OS_TRU64
 #     define   OS_SUBTYPE   "tru64"
+#  endif
+#  ifdef sun
+#     define   OS_SOLARIS
+#     define   OS_SUBTYPE   "solaris"
 #  endif
 #endif
 
