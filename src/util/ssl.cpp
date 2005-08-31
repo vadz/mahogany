@@ -44,9 +44,9 @@ extern const MOption MP_SSL_DLL_SSL;
    against these. */
 
 #include <openssl/ssl.h>
+#include <openssl/opensslv.h>
 
 // starting from 0.9.6a, OpenSSL uses void, as it should, instead of char
-#include <openssl/opensslv.h>
 #if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER > 0x0090600fL)
    #define ssl_data_t void *
 #else // old ssl
@@ -57,6 +57,14 @@ extern const MOption MP_SSL_DLL_SSL;
    #define ssl_parg void *
 #else // old ssl
    #define ssl_parg char *
+#endif
+
+// starting from 0.9.7g OpenSSL has discovered const correctness (better late
+// than never)
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x0090707fL)
+   #define ssl_const const
+#else
+   #define ssl_const
 #endif
 
 /* This is our interface to the library and auth_ssl.c in c-client
@@ -102,17 +110,17 @@ SSL_DEF_VOID( SSL_set_read_ahead, (SSL *s, int yes), (s, yes) );
 SSL_DEF( int,  SSL_connect, (SSL *s), (s) );
 SSL_DEF( int,  SSL_read, (SSL *s,ssl_data_t buf,int num), (s, buf, num) );
 SSL_DEF( int,  SSL_write, (SSL *s,const ssl_data_t buf,int num), (s, buf, num) );
-SSL_DEF( int,  SSL_pending, (SSL *s), (s) );
+SSL_DEF( int,  SSL_pending, (ssl_const SSL *s), (s) );
 SSL_DEF( int,  SSL_library_init, (void ), () );
 SSL_DEF_VOID( SSL_load_error_strings, (void ), () );
 SSL_DEF( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth), (meth) );
-SSL_DEF( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c), (c) );
-SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits), (c,alg_bits) );
-SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s), (s) );
-SSL_DEF( int, SSL_get_fd, (SSL *s), (s) );
+SSL_DEF( const char *, SSL_CIPHER_get_name, (ssl_const SSL_CIPHER *c), (c) );
+SSL_DEF( int, SSL_CIPHER_get_bits, (ssl_const SSL_CIPHER *c, int *alg_bits), (c,alg_bits) );
+SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(ssl_const SSL *s), (s) );
+SSL_DEF( int, SSL_get_fd, (ssl_const SSL *s), (s) );
 SSL_DEF( int, SSL_set_fd, (SSL *s, int fd), (s, fd) );
-SSL_DEF( int, SSL_get_error, (SSL *s, int ret_code), (s, ret_code) );
-SSL_DEF( X509 *, SSL_get_peer_certificate, (SSL *s), (s) );
+SSL_DEF( int, SSL_get_error, (ssl_const SSL *s, int ret_code), (s, ret_code) );
+SSL_DEF( X509 *, SSL_get_peer_certificate, (ssl_const SSL *s), (s) );
 
 SSL_DEF_VOID( RAND_seed, (const void *buf,int num), (buf, num) );
 SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
@@ -122,7 +130,7 @@ SSL_DEF( int, SSL_CTX_load_verify_locations, (SSL_CTX *ctx, const char *CAfile, 
 SSL_DEF( int, SSL_CTX_set_default_verify_paths, (SSL_CTX *ctx), (ctx) );
 SSL_DEF_VOID( SSL_set_bio, (SSL *s, BIO *rbio,BIO *wbio), (s,rbio,wbio) );
 SSL_DEF_VOID( SSL_set_connect_state, (SSL *s), (s) );
-SSL_DEF( int, SSL_state, (SSL *ssl), (ssl) );
+SSL_DEF( int, SSL_state, (ssl_const SSL *ssl), (ssl) );
 SSL_DEF( long,    SSL_ctrl, (SSL *ssl,int cmd, long larg, ssl_parg parg), (ssl,cmd,larg,parg) );
 SSL_DEF_VOID( ERR_load_crypto_strings, (void), () );
 SSL_DEF( SSL_METHOD *,TLSv1_server_method, (void), () );
