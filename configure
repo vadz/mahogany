@@ -4602,6 +4602,8 @@ echo "configure:4575: checking for c-client library OS type" >&5
 		CCOSTYPE=osx ;;
 	OpenBSD*)
 		CCOSTYPE=bso ;;
+	NetBSD*)
+		CCOSTYPE=neb ;;
 	cygwin* | CYGWIN*)
 		CCOSTYPE=cyg ;;
 	*)

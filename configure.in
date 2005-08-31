@@ -1039,6 +1039,8 @@ case "$USE_CCOSTYPE" in
 		CCOSTYPE=osx ;;
 	OpenBSD*)
 		CCOSTYPE=bso ;;
+	NetBSD*)
+		CCOSTYPE=neb ;;
 	cygwin* | CYGWIN*)
 		CCOSTYPE=cyg ;;
 	*)
