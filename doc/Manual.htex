@@ -120,6 +120,7 @@ than adding new features. As usual, some of them were still added:
 \item Better support for UTF-7/8 encoded headers
 \item ``Paste quoted'' command added
 \item New command to select all text in the viewer added
+\item New command to toggle the ``answered'' message flag added
 \item New \texttt{--userdir} command line option
 \item \texttt{isfromme()} (was message sent by myself?) filter test added
 \end{itemize}

@@ -174,7 +174,7 @@ protected:
    void DeleteOrTrashMessages(const UIdArray& selections);
    bool DeleteAndExpungeMessages(const UIdArray& selections);
    void UndeleteMessages(const UIdArray& selections);
-   void ToggleMessages(const UIdArray& messages);
+   void ToggleMessagesFlag(const UIdArray& messages, MailFolder::MessageStatus f);
    void MarkRead(const UIdArray& messages, bool read);
 
    Ticket SaveMessagesToFolder(const UIdArray& selections, MFolder *folder = NULL);
@@ -687,7 +687,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          break;
 
       case WXMENU_MSG_FLAG:
-         ToggleMessages(messages);
+      case WXMENU_MSG_MARK_ANSWERED:
+         ToggleMessagesFlag(messages, cmd == WXMENU_MSG_FLAG
+                                       ? MailFolder::MSG_STAT_FLAGGED
+                                       : MailFolder::MSG_STAT_ANSWERED);
          break;
 
       case WXMENU_MSG_MARK_READ:
@@ -1171,13 +1174,14 @@ MsgCmdProcImpl::UndeleteMessages(const UIdArray& selections)
 // ----------------------------------------------------------------------------
 
 void
-MsgCmdProcImpl::ToggleMessages(const UIdArray& messages)
+MsgCmdProcImpl::ToggleMessagesFlag(const UIdArray& messages,
+                                   MailFolder::MessageStatus flag)
 {
    MailFolder_obj mf(GetMailFolder());
-   CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ToggleMessages") );
+   CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ToggleMessagesFlag") );
 
    HeaderInfoList_obj hil(mf->GetHeaders());
-   CHECK_RET( hil, _T("can't toggle messages without folder listing") );
+   CHECK_RET( hil, _T("can't toggle messages flag without folder listing") );
 
    size_t count = messages.GetCount();
    for ( size_t n = 0; n < count; n++ )
@@ -1201,10 +1205,10 @@ MsgCmdProcImpl::ToggleMessages(const UIdArray& messages)
       }
 
       // is the message currently flagged?
-      bool flagged = (hi->GetStatus() & MailFolder::MSG_STAT_FLAGGED) != 0;
+      const bool flagged = (hi->GetStatus() & flag) != 0;
 
       // invert the flag
-      m_asmf->SetMessageFlag(uid, MailFolder::MSG_STAT_FLAGGED, !flagged);
+      m_asmf->SetMessageFlag(uid, flag, !flagged);
    }
 }
 
