@@ -209,7 +209,7 @@ public:
 
 
    /**
-      @name Helper methods for wxConfigMultiplexer only.
+      @name Helper methods for wxConfigMultiplexer and legacy code only.
 
       Do not use these methods from elsewhere.
     */
@@ -223,6 +223,9 @@ public:
 
    /**
       Get wxConfig object associated with the local config source.
+
+      This wxConfig object should be used for storing setting which only make
+      sense for the local machine (typical example: windows positions).
 
       @param config pointer (not to be deleted by caller) or NULL
     */
