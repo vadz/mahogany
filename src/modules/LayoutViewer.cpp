@@ -550,6 +550,10 @@ void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
 {
    wxLayoutList *llist = m_window->GetLayoutList();
 
+   bool hasFont = style.HasFont();
+   if ( hasFont )
+     llist->SetFont(style.GetFont());
+
    wxColour colFg, colBg;
    if ( style.HasTextColour() )
       colFg = style.GetTextColour();
@@ -562,10 +566,6 @@ void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
 
    llist->SetFontColour(colFg.Ok() ? &colFg : NULL,
                         colBg.Ok() ? &colBg : NULL);
-
-   bool hasFont = style.HasFont();
-   if ( hasFont )
-      llist->SetFont(style.GetFont());
 
    wxFontEncoding enc = hasFont ? style.GetFont().GetEncoding()
                                 : wxFONTENCODING_SYSTEM;
