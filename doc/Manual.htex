@@ -388,14 +388,14 @@ to share them between different machines/accounts
 \item There are always some, listed on our bugtracker at http://mahogany.sourceforge.net/bugz/
 and we are working on them.
 \item Version 0.60 suffers from a minor printing bug leading to some overlap
-between strings sometimes, which is due to a bug in wxWindows which
+between strings sometimes, which is due to a bug in wxWidgets which
 will hopefully be fixed fairly soon.
 \end{itemize}
 
 \subsubsection{0.5 against 0.23a}
 
 This release has long been delayed, mainly due to us waiting for changes
-in wxWindows to be completed. As we introduced new features in the
+in wxWidgets to be completed. As we introduced new features in the
 meantime, those introduced new delays, and so on. It has been more
 than half a year since the last release, so changes are major. We
 hope to stick to a much faster cycle of minor update releases for
@@ -743,7 +743,7 @@ use in the \htmladdnormallinkfoot{OpenSSL Toolkit}{http://www.openssl.org/}
 Hudson (tjh@cryptsoft.com)\char`\"{}
 \end{quote}
 
-\subsubsection{wxWidgets (formerly known as wxWindows):}
+\subsubsection{wxWidgets (formerly known as wxWidgets):}
 
 Mahogany is built using \htmladdnormallinkfoot{wxWidgets}{http://www.wxwidgets.org/}
 cross-platform class library -- without it, Mahogany wouldn't have been
@@ -3333,10 +3333,10 @@ at config.log file configure created and include it in your report.
 \item (Unix) If the program crashes mysteriously please make sure you don't
 have incompatible and/or different versions of the program sources,
 headers and modules. Also, please check that you have only one version
-of wxWindows installed. Also, make sure to rebuild everything (ideally,
+of wxWidgets installed. Also, make sure to rebuild everything (ideally,
 create a new build directory) after installing or uninstalling a new
-wxWindows or Mahogany version. If the problem still persists, please
-try building the debug version of the program (you need debug wxWindows
+wxWidgets or Mahogany version. If the problem still persists, please
+try building the debug version of the program (you need debug wxWidgets
 library and run configure with {\tt -{}-enable-debug switch}), run it under
 \noun{gdb} and send us the output of {}``bt{}'' command in the
 debugger when it crashes.
@@ -3491,12 +3491,12 @@ by this. On non-Linux/GNU systems, you need to use the GNU make utility,
 i.e. {}``gmake{}'' rather than the default {}``make{}''.
 
 
-\subsection{Mahogany fails to find wxWindows, configure fails}
+\subsection{Mahogany fails to find wxWidgets, configure fails}
 
 The following steps should identify and solve the problem:
 
 \begin{enumerate}
-\item Do a \char`\"{}make install\char`\"{} for wxWindows and watch the
+\item Do a \char`\"{}make install\char`\"{} for wxWidgets and watch the
 output, it should copy lots of things to /usr/local/....
 \item Do a \char`\"{}which wx-config\char`\"{}, it should report wx-config
 to be in /usr/local/bin
@@ -3507,7 +3507,7 @@ something like \char`\"{}-I/usr/local/include\char`\"{}.
 to remove old configuration info and run ./configure
 \item This {*}should{*} find wx/wx.h if all of the above worked, if not,
 look at the end of config.log to see what went wrong.
-\item If it does not find the wxWindows library, you need to add /usr/local/lib
+\item If it does not find the wxWidgets library, you need to add /usr/local/lib
 to either your LD\_LIBRARY\_PATH or to /etc/ld.so.conf (and run /sbin/ldconfig
 as root), then remove {*}cache{*} and try again. Again, if something
 fails, look at config.log.
