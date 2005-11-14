@@ -3374,10 +3374,7 @@ how to contribute or how to contact us.
 
 \section{Compiling \textsl{Mahogany} from source}
 
-For detailed information on how to compile Mahogany yourself and how
-to change it or get involved in its development, please refer to the
-Hackers' Guide, included either in the \htmladdnormallinkfoot{online docs}{../HackersGuide/index.html}
-or on the \htmladdnormallinkfoot{Mahogany Web page}{http://mahogany.sourceforge.net/docs.html}.
+Run ./configure; make; make doc; make install.
 
 Some quick notes about common compilation problems can be found in
 the FAQ, in section \ref{CompileErrors}.
