@@ -3636,7 +3636,9 @@ but a directory which can be browsed for entries via the popup menu.
 \textit{Can I access multiple different POP3 or IMAP accounts?}
 
 Yes, \textit{Mahogany} allows you to have any number of different
-folders configured. Just right-click on the folder tree control and
+folders configured, and you can choose different account type ("Folder
+Type" setting in "Access" page when creating a folder) for them.
+Just right-click on the folder tree control and
 choose the {}``Create Folder...{}'' option from the popup-menu.
 You can then switch between the different folders by selecting them
 (usually with a double-click on the tree control) for display in the
