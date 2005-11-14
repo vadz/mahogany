@@ -743,7 +743,7 @@ use in the \htmladdnormallinkfoot{OpenSSL Toolkit}{http://www.openssl.org/}
 Hudson (tjh@cryptsoft.com)\char`\"{}
 \end{quote}
 
-\subsubsection{wxWidgets (formerly known as wxWidgets):}
+\subsubsection{wxWidgets (formerly known as wxWindows):}
 
 Mahogany is built using \htmladdnormallinkfoot{wxWidgets}{http://www.wxwidgets.org/}
 cross-platform class library -- without it, Mahogany wouldn't have been
