@@ -71,6 +71,7 @@
 #include <wx/textbuf.h>
 #include <wx/fontmap.h>
 #include <wx/fontutil.h>      // for wxNativeFontInfo
+#include <wx/dnd.h>
 // windows.h included from wx/fontutil.h under Windows #defines this
 #ifdef __CYGWIN__
 #  undef SendMessage
@@ -1906,6 +1907,26 @@ wxSizer *wxComposeView::CreateHeaderFields()
    return sizerTop;
 }
 
+
+class wxComposeViewFileDropTarget : public wxFileDropTarget {
+public:  
+  wxComposeViewFileDropTarget(wxComposeView* composeView)
+    : wxFileDropTarget()
+    , m_composeView(composeView)
+  {}
+  virtual bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames) {
+    size_t countFiles = filenames.GetCount();
+    for ( size_t nFiles = 0; nFiles < countFiles; nFiles++ )
+    {
+      m_composeView->InsertFile(filenames[nFiles]);
+    }
+    return true;
+  }
+
+private:
+  wxComposeView* m_composeView;
+};
+
 void
 wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
 {
@@ -1924,6 +1945,10 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
 
    // and tool/status bars
    CreateToolAndStatusBars();
+
+   m_dropTarget = new wxComposeViewFileDropTarget(this);
+   SetDropTarget(m_dropTarget);
+
 
    // create the child controls
 
