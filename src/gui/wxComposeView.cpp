@@ -1908,23 +1908,31 @@ wxSizer *wxComposeView::CreateHeaderFields()
 }
 
 
+// A simple subclass of wxFileDropTarget so that the composer
+// window can be dropped files to be attached to the message...
+//
+// Todo: also allow messages to be dropped (but this is much more complicated)
+
 class wxComposeViewFileDropTarget : public wxFileDropTarget {
 public:  
-  wxComposeViewFileDropTarget(wxComposeView* composeView)
-    : wxFileDropTarget()
-    , m_composeView(composeView)
-  {}
-  virtual bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames) {
-    size_t countFiles = filenames.GetCount();
-    for ( size_t nFiles = 0; nFiles < countFiles; nFiles++ )
-    {
-      m_composeView->InsertFile(filenames[nFiles]);
-    }
-    return true;
-  }
+   wxComposeViewFileDropTarget(wxComposeView* composeView)
+      : wxFileDropTarget()
+      , m_composeView(composeView)
+   {}
+   
+   // This method is called when a set of files is dropped onto the window
+   virtual bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames) {
+      size_t countFiles = filenames.GetCount();
+      for ( size_t nFiles = 0; nFiles < countFiles; nFiles++ )
+      {
+         // Insert each of them as an attachment
+         m_composeView->InsertFile(filenames[nFiles]);
+      }
+      return true;
+   }
 
 private:
-  wxComposeView* m_composeView;
+   wxComposeView* m_composeView;
 };
 
 void
@@ -1946,8 +1954,9 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // and tool/status bars
    CreateToolAndStatusBars();
 
-   m_dropTarget = new wxComposeViewFileDropTarget(this);
-   SetDropTarget(m_dropTarget);
+   // Create the wxFileDropTarget subclass that allows to
+   // drop files in the Composer window
+   SetDropTarget(new wxComposeViewFileDropTarget(this));
 
 
    // create the child controls
