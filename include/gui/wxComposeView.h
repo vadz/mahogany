@@ -545,6 +545,8 @@ private:
    bool       m_closing;
    //@}
 
+   wxDropTarget* m_dropTarget;
+
 private:
    // it creates us
    friend wxComposeView *CreateComposeView(Profile *profile,
