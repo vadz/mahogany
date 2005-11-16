@@ -71,7 +71,7 @@
 #include <wx/textbuf.h>
 #include <wx/fontmap.h>
 #include <wx/fontutil.h>      // for wxNativeFontInfo
-#include <wx/dnd.h>
+
 // windows.h included from wx/fontutil.h under Windows #defines this
 #ifdef __CYGWIN__
 #  undef SendMessage
@@ -99,6 +99,10 @@
 #include "ColourNames.h"
 
 #include "modules/Calendar.h"
+
+#include "Mdnd.h"
+#include "UIdArray.h"
+
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -1908,32 +1912,111 @@ wxSizer *wxComposeView::CreateHeaderFields()
 }
 
 
-// A simple subclass of wxFileDropTarget so that the composer
-// window can be dropped files to be attached to the message...
+
 //
-// Todo: also allow messages to be dropped (but this is much more complicated)
-
-class wxComposeViewFileDropTarget : public wxFileDropTarget {
-public:  
-   wxComposeViewFileDropTarget(wxComposeView* composeView)
-      : wxFileDropTarget()
-      , m_composeView(composeView)
-   {}
-   
-   // This method is called when a set of files is dropped onto the window
-   virtual bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames) {
-      size_t countFiles = filenames.GetCount();
-      for ( size_t nFiles = 0; nFiles < countFiles; nFiles++ )
-      {
-         // Insert each of them as an attachment
-         m_composeView->InsertFile(filenames[nFiles]);
-      }
-      return true;
-   }
-
+// wxDataObjectCompositeEx: written by Gunnar Roth <gunnar.roth <at> gmx.de>
+// See http://article.gmane.org/gmane.comp.lib.wxwidgets.general/22384
+//
+// The problem with the wxDataObjectComposite is that it is not possible
+// to know which wxDataObject did receive the data...  Let's store it.
+//
+class wxDataObjectCompositeEx : public wxDataObjectComposite
+{
 private:
-   wxComposeView* m_composeView;
+  wxDataObjectSimple *m_dataObjectLast;
+
+public:
+  wxDataObjectCompositeEx()
+  {
+    m_dataObjectLast = NULL;
+  }
+
+  bool SetData(const wxDataFormat& format, size_t len, const void *buf)
+  {
+    m_dataObjectLast = GetObject(format);
+    wxCHECK_MSG( m_dataObjectLast, FALSE, wxT("unsupported format in wxDataObjectCompositeEx"));
+    return m_dataObjectLast->SetData(len, buf);
+  }
+
+  wxDataObjectSimple *GetActualDataObject()
+  {
+    return m_dataObjectLast;
+  }
 };
+
+
+class wxComposeViewDropTarget : public wxDropTarget 
+{
+private:
+  wxComposeView* m_composeView;
+  wxFileDataObject* m_fileDataObject;
+  MMessagesDataObject* m_messageDataObject;
+
+public:
+  wxComposeViewDropTarget(wxComposeView* composeView)
+    : wxDropTarget()
+    , m_composeView(composeView)
+    , m_fileDataObject(new wxFileDataObject())
+    , m_messageDataObject(new MMessagesDataObject())
+  {
+    wxDataObjectComposite* dataObjectComposite = new wxDataObjectCompositeEx();
+    dataObjectComposite->Add(m_messageDataObject);
+    dataObjectComposite->Add(m_fileDataObject);
+    SetDataObject(dataObjectComposite);
+  }
+
+  virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) {
+    if ( !GetData() )
+    {
+      wxLogDebug(_T("Failed to get drag and drop data"));
+      return wxDragNone;
+    }
+
+    // Let's see which wxDataObject got the data...
+    wxDataObjectSimple* dobj = ((wxDataObjectCompositeEx*)GetDataObject())->GetActualDataObject();
+    if ( dobj == (wxDataObjectSimple *)m_messageDataObject ) 
+    {
+      // We got messages dropped (from inside M itself)
+      return OnDropMessages(x, y, m_messageDataObject->GetFolder(), m_messageDataObject->GetMessages()) ? def : wxDragNone;
+    } 
+    else if ( dobj == m_fileDataObject ) 
+    {
+      // We got files dropped from outside M
+      return OnDropFiles(x, y, m_fileDataObject->GetFilenames()) ? def : wxDragNone;
+    }
+    return wxDragNone;
+  }
+
+
+  bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames) {
+    size_t countFiles = filenames.GetCount();
+    if ( countFiles <= 0 ) 
+    {
+      return false;
+    }
+    for ( size_t nFiles = 0; nFiles < countFiles; nFiles++ )
+    {
+      m_composeView->InsertFile(filenames[nFiles]);
+    }
+    return true;
+  }
+
+  bool OnDropMessages(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), MailFolder* folder, const UIdArray& messages) {
+    if ( messages.Count() <= 0 ) 
+    {
+      return false;
+    }
+    for ( size_t i = 0; i < messages.Count(); i++ )
+    {
+      Message_obj msg(folder->GetMessage(messages[i]));
+      wxString str;
+      msg->WriteToString(str);
+      m_composeView->InsertData(wxStrdup(str), str.Length(), _T("message/rfc822"), _T(""));
+    }
+    return true;
+  }
+};
+
 
 void
 wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
@@ -1954,10 +2037,9 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // and tool/status bars
    CreateToolAndStatusBars();
 
-   // Create the wxFileDropTarget subclass that allows to
-   // drop files in the Composer window
-   SetDropTarget(new wxComposeViewFileDropTarget(this));
-
+   // Create the wxDropTarget subclass that allows to
+   // drop files or messages in the Composer window
+   SetDropTarget(new wxComposeViewDropTarget(this));
 
    // create the child controls
 
