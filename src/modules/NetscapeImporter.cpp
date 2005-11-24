@@ -531,7 +531,7 @@ MyHashTable::~MyHashTable()
 {
   // should delete the strings hier;
   m_tbl.BeginFind();
-  wxNode* node = NULL;
+  wxHashTable::Node* node = NULL;
   while ( (node = m_tbl.Next()) != NULL )
    delete (wxString*)node->GetData();
 

@@ -116,9 +116,9 @@ static int TranslateBtnIdToMsgBox(int rc);
 // translate the old wxID values to the new ones
 static int ConvertId(long rc);
 
-#if wxCHECK_VERSION(2, 3, 1)
-    #define Number()    GetCount()
-#endif
+// send a wxCommandEvent of the given type
+static void
+SimulateSelectionEvent(wxControlWithItems *ctrl, wxEventType evtType, int sel);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -530,7 +530,7 @@ void wxPTextEntry::SaveSettings()
             config->Write(_T("0"), text);
         }
 
-        size_t count = (size_t)Number();
+        size_t count = GetCount();
         if ( count > m_countSaveMax ) {
             // too many entries, leave out the oldest ones
             count = m_countSaveMax;
@@ -1047,20 +1047,12 @@ void wxPListBox::RestoreSelection()
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
-        if ( (sel != -1) && (sel < Number()) ) {
+        if ( (sel != -1) && (sel < GetCount()) ) {
             SetSelection(sel);
 
             // emulate the event which would have resulted if the user selected
             // the listbox
-            wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, GetId());
-            event.m_commandInt = sel;
-            if ( HasClientUntypedData() )
-                event.m_clientData = GetClientData(sel);
-            else if ( HasClientObjectData() )
-                event.m_clientData = GetClientObject(sel);
-            event.m_commandString = GetString(sel);
-            event.SetEventObject( this );
-            (void)ProcessEvent(event);
+            SimulateSelectionEvent(this, wxEVT_COMMAND_LISTBOX_SELECTED, sel);
         }
 
         m_persist->RestorePath();
@@ -1167,20 +1159,12 @@ void wxPChoice::RestoreSelection()
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
-        if ( (sel != -1) && (sel < Number()) ) {
+        if ( (sel != -1) && (sel < GetCount()) ) {
             SetSelection(sel);
 
             // emulate the event which would have resulted if the user selected
             // the string from the choice
-            wxCommandEvent event(wxEVT_COMMAND_CHOICE_SELECTED, GetId());
-            event.m_commandInt = sel;
-            if ( HasClientUntypedData() )
-                event.m_clientData = GetClientData(sel);
-            else if ( HasClientObjectData() )
-                event.m_clientData = GetClientObject(sel);
-            event.m_commandString = GetString(sel);
-            event.SetEventObject( this );
-            (void)ProcessEvent(event);
+            SimulateSelectionEvent(this, wxEVT_COMMAND_CHOICE_SELECTED, sel);
         }
 
         m_persist->RestorePath();
@@ -1293,7 +1277,7 @@ void wxPRadioBox::RestoreSelection()
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
-        if ( sel < Number() ) {
+        if ( (sel != -1) && (sel < GetCount()) ) {
             SetSelection(sel);
 
             // emulate the event which would have resulted if the user selected
@@ -2192,6 +2176,20 @@ static int ConvertId(long rc)
         case 0:
             return rc;
     }
+}
+
+static void
+SimulateSelectionEvent(wxControlWithItems *ctrl, wxEventType evtType, int sel)
+{
+    wxCommandEvent event(evtType, ctrl->GetId());
+    event.SetInt(sel);
+    if ( ctrl->HasClientUntypedData() )
+        event.SetClientData(ctrl->GetClientData(sel));
+    else if ( ctrl->HasClientObjectData() )
+        event.SetClientData(ctrl->GetClientObject(sel));
+    event.SetString(ctrl->GetString(sel));
+    event.SetEventObject(ctrl);
+    (void)ctrl->ProcessEvent(event);
 }
 
 /* vi: set ts=4 sw=4: */

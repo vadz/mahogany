@@ -3261,7 +3261,7 @@ wxComposeView::OnMenuCommand(int id)
                              _("Please choose files to insert."),
                              NULL, _T("dead.letter"), NULL,
                              wxGetTranslation(wxALL_FILES),
-                             wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
+                             wxOPEN | wxFILE_MUST_EXIST,
                              this
                             );
             for ( size_t n = 0; n < nFiles; n++ )
@@ -3347,7 +3347,7 @@ wxComposeView::OnMenuCommand(int id)
                                _("Please choose a file to insert."),
                                NULL, _T("dead.letter"), NULL,
                                wxGetTranslation(wxALL_FILES),
-                               wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
+                               wxOPEN | wxFILE_MUST_EXIST,
                                this
                               );
 

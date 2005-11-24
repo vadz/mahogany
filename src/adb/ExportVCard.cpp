@@ -318,7 +318,7 @@ bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
       filename = wxFileSelector(_("Choose the name for vCard file"),
                                 NULL, NULL, _T(".vcf"),
                                 _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
-                                wxSAVE | wxHIDE_READONLY);
+                                wxSAVE);
       if ( !filename )
       {
          // cancelled

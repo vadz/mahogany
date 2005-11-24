@@ -305,7 +305,7 @@ public:
    ~wxFolderTreeImpl();
 
    // accessors
-   wxFolderTreeNode *GetSelection() const { return m_current; }
+   wxFolderTreeNode *GetSelectedNode() const { return m_current; }
 
    // helpers
       // find the tree item by full name (as this function changes the state
@@ -409,10 +409,10 @@ protected:
    bool CanOpen() const
    {
       // is the root item chosen?
-      if ( wxTreeCtrl::GetSelection() == GetRootItem() )
+      if ( GetSelection() == GetRootItem() )
          return false;
 
-      wxFolderTreeNode *node = GetSelection();
+      wxFolderTreeNode *node = GetSelectedNode();
 
       CHECK( node, false, _T("shouldn't be called if no selection") );
 
@@ -820,7 +820,7 @@ MFolder *wxFolderTree::FindNextUnreadFolder(bool next)
 {
    CHECK( m_tree, NULL, _T("you didn't call Init()") );
 
-   wxFolderTreeNode *node = m_tree->GetSelection();
+   wxFolderTreeNode *node = m_tree->GetSelectedNode();
    if ( !node )
       return NULL;
 
@@ -909,7 +909,7 @@ MFolder *wxFolderTree::GetSelection() const
    CHECK( m_tree, NULL, _T("you didn't call Init()") );
 
    // get it from the tree
-   wxFolderTreeNode *node = m_tree->GetSelection();
+   wxFolderTreeNode *node = m_tree->GetSelectedNode();
    if ( node == NULL )
       return NULL;
 
@@ -1348,7 +1348,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    int image = GetFolderIconForDisplay(folder);
 
    // add this item to the tree
-   int id;
+   wxTreeItemId id;
    if ( folder->GetType() == MF_ROOT )
    {
       id = tree->AddRoot(_("All folders"), image, image, this);
@@ -1868,7 +1868,7 @@ void wxFolderTreeImpl::SetOpenFolderName(const String& name)
    if ( !m_openFolderName.empty() )
    {
       // yes, visually emphasize it
-      m_idOpenedHere = wxTreeCtrl::GetSelection();
+      m_idOpenedHere = GetSelection();
       if ( READ_APPCONFIG(MP_FTREE_SHOWOPENED) )
       {
          SetItemBold(m_idOpenedHere, true);
@@ -1878,7 +1878,7 @@ void wxFolderTreeImpl::SetOpenFolderName(const String& name)
 
 void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
 {
-   wxFolderTreeNode *cur = GetSelection();
+   wxFolderTreeNode *cur = GetSelectedNode();
    if ( cur != NULL )
    {
       MFolder *folder = cur->GetFolder();
@@ -2321,7 +2321,7 @@ wxFolderTreeImpl::FindNextUnreadFolder(wxTreeItemId id, bool next) const
 bool wxFolderTreeImpl::GoToNextUnreadFolder(bool next)
 {
    // start from the beginning if no current node
-   wxFolderTreeNode *node = GetSelection();
+   wxFolderTreeNode *node = GetSelectedNode();
    wxTreeItemId id; // NB: gcc 2.91 dies if we use operator ?: here 
    if ( node )
       id = node->GetId();
@@ -2401,7 +2401,7 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
    {
       // leave only the label itself, get rid of suffix showing the number of
       // messages
-      long item = event.GetItem();
+      wxTreeItemId item = event.GetItem();
       wxFolderTreeNode *node = GetFolderTreeNode(item);
 
       wxString label = GetItemText(item);
@@ -2905,7 +2905,7 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
    if ( pt == wxDefaultPosition )
    {
       // show the menu for the currently selected item
-      item = wxTreeCtrl::GetSelection();
+      item = GetSelection();
       if ( !item.IsOk() )
       {
          event.Skip();

@@ -1068,7 +1068,8 @@ wxMFrame::OnPrintSetup()
    wxPrintDialogData printDialogData(*mApplication->GetPrintData());
    wxPrintDialog printerDialog(this, &printDialogData);
 
-   printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
+   // FIXME: this doesn't exist any more in wx 2.6, we need another way to do it
+   //printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
    if ( printerDialog.ShowModal() == wxID_OK )
    {
       mApplication->SetPrintData(

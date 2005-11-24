@@ -2182,7 +2182,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
                       _T("M.adb"),
                       _T("adb"),
                       _("Address books (*.adb)|*.adb|All files (*.*)|*.*"),
-                      wxHIDE_READONLY | (bDoCreate ? 0 : wxFILE_MUST_EXIST),
+                      bDoCreate ? 0 : wxFILE_MUST_EXIST,
                       this
                      );
 
@@ -2287,7 +2287,7 @@ void wxAdbEditFrame::ExportVCardEntry()
                         _T("vcard.vcf"),
                         _T("vcf"),
                         _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
-                        wxHIDE_READONLY,
+                        0,
                         this
                       );
   if ( !!filename )
@@ -2334,7 +2334,7 @@ bool wxAdbEditFrame::ImportVCardEntry()
                         _T("vcard.vcf"),
                         _T("vcf"),
                         _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
-                        wxHIDE_READONLY | wxFILE_MUST_EXIST,
+                        wxFILE_MUST_EXIST,
                         this
                       );
 
