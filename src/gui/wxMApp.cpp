@@ -53,6 +53,10 @@
 
 #include <wx/generic/helpext.h>
 
+#if wxUSE_POSTSCRIPT
+   #include <wx/generic/prntdlgg.h>
+#endif // wxUSE_POSTSCRIPT
+
 #if defined(OS_WIN) || defined(__CYGWIN__)
    #define wxConnection    wxDDEConnection
    #define wxServer        wxDDEServer
@@ -1302,14 +1306,19 @@ void wxMApp::CleanUpPrintData()
    if ( m_PrintData )
    {
 #if wxUSE_POSTSCRIPT
-      m_profile->writeEntry(MP_PRINT_COMMAND, m_PrintData->GetPrinterCommand());
-      m_profile->writeEntry(MP_PRINT_OPTIONS, m_PrintData->GetPrinterOptions());
+      wxPrintNativeDataBase * const dataNative = m_PrintData->GetNativeData();
+      wxPostScriptPrintNativeData * const dataPS =
+         static_cast<wxPostScriptPrintNativeData *>(dataNative);
+
+      m_profile->writeEntry(MP_PRINT_COMMAND, dataPS->GetPrinterCommand());
+      m_profile->writeEntry(MP_PRINT_OPTIONS, dataPS->GetPrinterOptions());
+#endif // wxUSE_POSTSCRIPT
+
       m_profile->writeEntry(MP_PRINT_ORIENTATION, m_PrintData->GetOrientation());
       m_profile->writeEntry(MP_PRINT_MODE, m_PrintData->GetPrintMode());
       m_profile->writeEntry(MP_PRINT_PAPER, m_PrintData->GetPaperId());
       m_profile->writeEntry(MP_PRINT_FILE, m_PrintData->GetFilename());
       m_profile->writeEntry(MP_PRINT_COLOUR, m_PrintData->GetColour());
-#endif // wxUSE_POSTSCRIPT
 
       delete m_PrintData;
       m_PrintData = NULL;
@@ -1317,7 +1326,6 @@ void wxMApp::CleanUpPrintData()
 
    if ( m_PageSetupData )
    {
-#if wxUSE_POSTSCRIPT
       m_profile->writeEntry(MP_PRINT_TOPMARGIN_X,
                             m_PageSetupData->GetMarginTopLeft().x);
       m_profile->writeEntry(MP_PRINT_TOPMARGIN_Y,
@@ -1326,7 +1334,6 @@ void wxMApp::CleanUpPrintData()
                             m_PageSetupData->GetMarginBottomRight().x);
       m_profile->writeEntry(MP_PRINT_BOTTOMMARGIN_Y,
                             m_PageSetupData->GetMarginBottomRight().y);
-#endif // wxUSE_POSTSCRIPT
 
       delete m_PageSetupData;
       m_PageSetupData = NULL;
@@ -1339,10 +1346,12 @@ const wxPrintData *wxMApp::GetPrintData()
 #if wxUSE_PRINTING_ARCHITECTURE
    if ( !m_PrintData )
    {
-#ifdef OS_WIN
-      wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else // Unix
-      wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
+      m_PrintData = new wxPrintData;
+
+#if wxUSE_POSTSCRIPT
+      wxPrintNativeDataBase * const dataNative = m_PrintData->GetNativeData();
+      wxPostScriptPrintNativeData * const dataPS =
+         static_cast<wxPostScriptPrintNativeData *>(dataNative);
 
       // set AFM path
       PathFinder pf(mApplication->GetDataDir() + _T("/afm"), false);
@@ -1351,26 +1360,13 @@ const wxPrintData *wxMApp::GetPrintData()
 
       bool found;
       String afmpath = pf.FindDirFile(_T("Cour.afm"), &found);
-      if(found)
-      {
-        //wxThePrintSetupData->SetAFMPath(afmpath);
-      }
-#endif // Win/Unix
-
-      m_PrintData = new wxPrintData;
-
-#ifndef OS_WIN
       if ( found )
       {
-         m_PrintData->SetFontMetricPath(afmpath);
+         dataPS->SetFontMetricPath(afmpath);
       }
-#endif // !OS_WIN
 
-#if wxUSE_POSTSCRIPT
-      //*m_PrintData = *wxThePrintSetupData;
-
-      m_PrintData->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
-      m_PrintData->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
+      dataPS->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
+      dataPS->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
       m_PrintData->SetOrientation(READ_APPCONFIG(MP_PRINT_ORIENTATION));
       m_PrintData->SetPrintMode((wxPrintMode)(long)READ_APPCONFIG(MP_PRINT_MODE));
       m_PrintData->SetPaperId((wxPaperSize)(long)READ_APPCONFIG(MP_PRINT_PAPER));
