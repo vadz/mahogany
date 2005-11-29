@@ -335,12 +335,12 @@ static const MenuItemInfo g_aMenuItems[] =
    // msg
 
    // the available accelerators for this menu:
-   // FGH
+   // H
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , wxITEM_NORMAL },
    { WXMENU_MSG_EDIT,      gettext_noop("&Edit in composer\tCtrl-E"), gettext_noop("Edit selected message in composer")    , wxITEM_NORMAL },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),    gettext_noop("Print this message")       , wxITEM_NORMAL },
-   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , wxITEM_NORMAL },
+   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Prev&iew"),gettext_noop("Preview a printout of this message")       , wxITEM_NORMAL },
 #ifdef USE_PS_PRINTING
    { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , wxITEM_NORMAL },
    { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , wxITEM_NORMAL },
@@ -427,13 +427,13 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete messages(s) (mark it as deleted or move to trash)")      , wxITEM_NORMAL },
    { WXMENU_MSG_DELETE_EXPUNGE,    gettext_noop("&Zap"), gettext_noop("Permanently and unrecoverably delete message(s)")      , wxITEM_NORMAL },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , wxITEM_NORMAL },
-   { WXMENU_MSG_EXPUNGE,   gettext_noop("E&xpunge"), gettext_noop("Remove all messages marked as deleted from the folder.")                  , wxITEM_NORMAL },
+   { WXMENU_MSG_EXPUNGE,   gettext_noop("Expun&ge"), gettext_noop("Remove all messages marked as deleted from the folder.")                  , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_MSG_GOTO_MSGNO,   gettext_noop("&Jump to message...\tCtrl-J"), gettext_noop("Select the message by its number")     , wxITEM_NORMAL },
-   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , wxITEM_NORMAL },
+   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("Ne&xt unread\tCtrl-U"), gettext_noop("Select next unread message")     , wxITEM_NORMAL },
    { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("Nex&t flagged"), gettext_noop("Select next flagged message")     , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
-   { WXMENU_MSG_FLAG,      gettext_noop("Flag as &important\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , wxITEM_NORMAL },
+   { WXMENU_MSG_FLAG,      gettext_noop("&Flag as important\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , wxITEM_NORMAL },
    { WXMENU_MSG_MARK_ANSWERED, gettext_noop("Mark ans&wered"), gettext_noop("Mark message as answered/not answered")         , wxITEM_NORMAL },
    { WXMENU_MSG_MARK_READ,   gettext_noop("Mark &read"), gettext_noop("Mark message as read"), wxITEM_NORMAL },
    { WXMENU_MSG_MARK_UNREAD,   gettext_noop("Mar&k unread\tShift-Ctrl-U"), gettext_noop("Mark message as unread"), wxITEM_NORMAL },
