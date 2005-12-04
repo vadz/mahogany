@@ -1202,12 +1202,7 @@ void HtmlViewer::EmulateKeyPress(int keycode)
 {
    wxKeyEvent event;
    event.m_keyCode = keycode;
-
-#ifdef __WXGTK__
-   m_window->OnChar(event);
-#else
    m_window->HandleOnChar(event);
-#endif
 }
 
 bool
