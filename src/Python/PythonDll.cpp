@@ -98,7 +98,7 @@ extern "C"
    long (*M_PyLong_AsLong)(PyObject *) = NULL;
    unsigned long (*M_PyLong_AsUnsignedLong)(PyObject *) = NULL;
    PyObject*(*M_PyLong_FromUnsignedLong)(unsigned long) = NULL;
-   PyObject*(*M_PyLong_FromVoidPtr)(unsigned long) = NULL;
+   PyObject*(*M_PyLong_FromVoidPtr)(void *) = NULL;
    PyTypeObject *M_PyInt_Type = NULL;
    PyTypeObject *M_PyLong_Type = NULL;
    PyIntObject *M__Py_TrueStruct = NULL;
