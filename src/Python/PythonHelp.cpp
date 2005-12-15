@@ -35,6 +35,12 @@
 #include "MPython.h"
 #include "InitPython.h"
 
+// suppress VC++ warnings about "unreferenced local function has been removed"
+// as we don't use everything defined in this header
+#ifdef _MSC_VER
+#  pragma warning(disable:4505)
+#endif
+
 #include "Mswigpyrun.h"
 
 #include "Mdefaults.h"
