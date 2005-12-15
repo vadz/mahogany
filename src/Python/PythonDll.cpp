@@ -81,9 +81,8 @@ extern "C"
    PyObject *(*M_PyErr_Format)(PyObject *, const char *, ...) = NULL;
 
    // objects
-   //PyObject*(*M__PyObject_New)(PyTypeObject *, PyObject *) = NULL;
-   //PyObject*(*M__PyObject_Init)(PyObject *, PyTypeObject *) = NULL;
    PyObject *(*M_PyObject_CallFunction)(PyObject *, char *format, ...) = NULL;
+   PyObject *(*M_PyObject_Init)(PyObject *, PyTypeObject *) = NULL;
    PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *) = NULL;
@@ -91,6 +90,7 @@ extern "C"
    void (*M_PyObject_Free)(void *) = NULL;
    int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *) = NULL;
    int (*M_PyObject_Size)(PyObject *) = NULL;
+   void *(*M_PyCObject_Import)(char *module_name, char *cobject_name) = NULL;
 
    // ints and longs
    long(*M_PyInt_AsLong)(PyObject *) = NULL;
@@ -98,6 +98,7 @@ extern "C"
    long (*M_PyLong_AsLong)(PyObject *) = NULL;
    unsigned long (*M_PyLong_AsUnsignedLong)(PyObject *) = NULL;
    PyObject*(*M_PyLong_FromUnsignedLong)(unsigned long) = NULL;
+   PyObject*(*M_PyLong_FromVoidPtr)(unsigned long) = NULL;
    PyTypeObject *M_PyInt_Type = NULL;
    PyTypeObject *M_PyLong_Type = NULL;
    PyIntObject *M__Py_TrueStruct = NULL;
@@ -106,6 +107,7 @@ extern "C"
    // strings
    char*(*M_PyString_AsString)(PyObject *) = NULL;
    int (*M_PyString_AsStringAndSize)(PyObject *, char **, int *) = NULL;
+   PyObject*(*M_PyString_Format)(PyObject *, PyObject *) = NULL;
    PyObject*(*M_PyString_FromString)(const char *) = NULL;
    PyObject*(*M_PyString_FromStringAndSize)(const char *, int) = NULL;
    PyObject*(*M_PyString_FromFormat)(const char *, ...) = NULL;
@@ -114,7 +116,9 @@ extern "C"
    PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
 
    // tuples
+   PyObject *(*M_PyTuple_New)(int size) = NULL;
    PyObject *(*M_PyTuple_GetItem)(PyObject *, int) = NULL;
+   int *(*M_PyTuple_SetItem)(PyObject *, int, PyObject *) = NULL;
 
    // ...
    PyObject* (*M_Py_VaBuildValue)(char *, va_list) = NULL;
@@ -194,6 +198,7 @@ static struct PythonFunc
    PYTHON_FUNC(PyErr_Format)
 
    // objects
+   PYTHON_FUNC(PyObject_Init)
    PYTHON_FUNC(PyObject_CallFunction)
    PYTHON_FUNC(PyObject_CallObject)
    PYTHON_FUNC(PyObject_GetAttr)
@@ -202,11 +207,13 @@ static struct PythonFunc
    PYTHON_FUNC(PyObject_Free)
    PYTHON_FUNC(PyObject_SetAttrString)
    PYTHON_FUNC(PyObject_Size)
+   PYTHON_FUNC(PyCObject_Import)
 
    // ints and longs
    PYTHON_FUNC(PyInt_AsLong)
    PYTHON_FUNC(PyInt_FromLong)
    PYTHON_FUNC(PyLong_FromUnsignedLong)
+   PYTHON_FUNC(PyLong_FromVoidPtr)
    PYTHON_FUNC(PyLong_AsLong)
    PYTHON_FUNC(PyLong_AsUnsignedLong)
    PYTHON_FUNC(PyInt_Type)
@@ -217,6 +224,7 @@ static struct PythonFunc
    // strings
    PYTHON_FUNC(PyString_AsString)
    PYTHON_FUNC(PyString_AsStringAndSize)
+   PYTHON_FUNC(PyString_Format)
    PYTHON_FUNC(PyString_FromString)
    PYTHON_FUNC(PyString_FromStringAndSize)
    PYTHON_FUNC(PyString_FromFormat)
@@ -224,7 +232,9 @@ static struct PythonFunc
    PYTHON_FUNC(PyString_Type)
 
    // tuples
+   PYTHON_FUNC(PyTuple_New)
    PYTHON_FUNC(PyTuple_GetItem)
+   PYTHON_FUNC(PyTuple_SetItem)
 
    // ...
    PYTHON_FUNC(_Py_NoneStruct)

@@ -76,8 +76,7 @@ extern "C"
    extern PyObject *(*M_PyErr_Format)(PyObject *, const char *, ...);
 
    // objects
-   //extern PyObject *(*M__PyObject_New)(PyTypeObject *, PyObject *);
-   //extern PyObject *(*M__PyObject_Init)(PyObject *, PyTypeObject *);
+   extern PyObject *(*M_PyObject_Init)(PyObject *, PyTypeObject *);
    extern PyObject *(*M_PyObject_CallFunction)(PyObject *, char *format, ...);
    extern PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *);
    extern PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *);
@@ -86,11 +85,13 @@ extern "C"
    extern void (*M_PyObject_Free)(void *);
    extern int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *);
    extern int (*M_PyObject_Size)(PyObject *);
+   extern void *(*M_PyCObject_Import)(char *module_name, char *cobject_name);
 
    // ints and longs
    extern long(*M_PyInt_AsLong)(PyObject *);
    extern PyObject*(*M_PyInt_FromLong)(long);
    extern PyObject *(*M_PyLong_FromUnsignedLong)(unsigned long);
+   extern PyObject *(*M_PyLong_FromVoidPtr)(void *);
    extern long (*M_PyLong_AsLong)(PyObject *);
    extern unsigned long (*M_PyLong_AsUnsignedLong)(PyObject *);
    extern PyTypeObject *M_PyInt_Type;
@@ -101,6 +102,7 @@ extern "C"
    // strings
    extern char *(*M_PyString_AsString)(PyObject *);
    extern int (*M_PyString_AsStringAndSize)(PyObject *, char **, int *);
+   extern PyObject *(*M_PyString_Format)(PyObject *, PyObject *);
    extern PyObject *(*M_PyString_FromString)(const char *);
    extern PyObject *(*M_PyString_FromStringAndSize)(const char *, int);
    extern PyObject *(*M_PyString_FromFormat)(const char *, ...);
@@ -109,7 +111,9 @@ extern "C"
    extern PyTypeObject* M_PyString_Type;
 
    // tuples
+   extern PyObject *(*M_PyTuple_New)(int size);
    extern PyObject *(*M_PyTuple_GetItem)(PyObject *, int);
+   extern int *(*M_PyTuple_SetItem)(PyObject *, int, PyObject *);
 
    // ...
    extern PyObject* (*M_Py_VaBuildValue)(char *, va_list);
@@ -168,6 +172,7 @@ extern "C"
 #define PyErr_Format M_PyErr_Format
 
 // objects
+#define PyObject_Init M_PyObject_Init
 #define PyObject_CallFunction M_PyObject_CallFunction
 #define PyObject_CallObject M_PyObject_CallObject
 #define PyObject_GetAttr M_PyObject_GetAttr
@@ -181,11 +186,13 @@ extern "C"
 #endif
 #define PyObject_SetAttrString M_PyObject_SetAttrString
 #define PyObject_Size M_PyObject_Size
+#define PyCObject_Import M_PyCObject_Import
 
 // ints and longs
 #define PyInt_AsLong M_PyInt_AsLong
 #define PyInt_FromLong M_PyInt_FromLong
 #define PyLong_FromUnsignedLong M_PyLong_FromUnsignedLong
+#define PyLong_FromVoidPtr M_PyLong_FromVoidPtr
 #define PyLong_AsLong M_PyLong_AsLong
 #define PyLong_AsUnsignedLong M_PyLong_AsUnsignedLong
 #define PyInt_Type (*M_PyInt_Type)
@@ -196,6 +203,7 @@ extern "C"
 // strings
 #define PyString_AsString M_PyString_AsString
 #define PyString_AsStringAndSize M_PyString_AsStringAndSize
+#define PyString_Format M_PyString_Format
 #define PyString_FromString M_PyString_FromString
 #define PyString_FromStringAndSize M_PyString_FromStringAndSize
 #define PyString_FromFormat M_PyString_FromFormat
@@ -203,7 +211,9 @@ extern "C"
 #define PyString_Type (*M_PyString_Type)
 
 // tuples
+#define PyTuple_New M_PyTuple_New
 #define PyTuple_GetItem M_PyTuple_GetItem
+#define PyTuple_SetItem M_PyTuple_SetItem
 
 // ...
 #define _Py_NoneStruct (*M__Py_NoneStruct)
