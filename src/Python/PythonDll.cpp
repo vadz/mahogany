@@ -108,6 +108,7 @@ extern "C"
    int (*M_PyString_AsStringAndSize)(PyObject *, char **, int *) = NULL;
    PyObject*(*M_PyString_FromString)(const char *) = NULL;
    PyObject*(*M_PyString_FromStringAndSize)(const char *, int) = NULL;
+   PyObject*(*M_PyString_FromFormat)(const char *, ...) = NULL;
    int(*M_PyString_Size)(PyObject *) = NULL;
    PyTypeObject* M_PyString_Type = NULL;
    PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
@@ -218,6 +219,7 @@ static struct PythonFunc
    PYTHON_FUNC(PyString_AsStringAndSize)
    PYTHON_FUNC(PyString_FromString)
    PYTHON_FUNC(PyString_FromStringAndSize)
+   PYTHON_FUNC(PyString_FromFormat)
    PYTHON_FUNC(PyString_InternFromString)
    PYTHON_FUNC(PyString_Type)
 

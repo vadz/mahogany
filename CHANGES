@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2005
 -------------------------------------
 
+2005-11-28 VZ: updated to build with recent swig (>= 1.3.25)
 2005-11-16 XN: added feature that allows user to drop messages from a folder to the composer window
 2005-11-15 XN: added feature that allows user to drop files to the composer window
 2005-09-24 VZ: added "Mark answered" command

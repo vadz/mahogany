@@ -35,14 +35,9 @@
 #include "MPython.h"
 #include "InitPython.h"
 
-#include "Mdefaults.h"
+#include "Mswigpyrun.h"
 
-extern "C"
-{
-   struct swig_type_info;
-   extern swig_type_info *SWIG_TypeQuery(const char *);
-   extern PyObject *SWIG_NewPointerObj(void *, swig_type_info *, int);
-}
+#include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -213,7 +208,7 @@ PythonFunction(const char *func,
       // now build object reference argument:
       String ptrCls(classname);
       ptrCls += _T(" *");
-      PyObject *object = SWIG_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
+      PyObject *object = SWIG_Python_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
 
       // and do call the function
       M_PyObject rc(PyObject_CallFunction(function, "O", object));

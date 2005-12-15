@@ -872,14 +872,67 @@ case "$USE_PYTHON" in
 *)	AC_DEFINE(USE_PYTHON)
 	MAKE_USE_PYTHON="USE_PYTHON=yes"
 	if test "x$USE_SWIG" = "x1"; then
-	    AC_PATH_PROG(SWIG,swig)
-	    case "$SWIG" in '')
-		AC_MSG_WARN([cannot find SWIG - will use precompiled files for
-		    Python support. If you want to be able to modify the
-		    interface files, please install SWIG >= 1.3.9.])
+	    dnl if this changes, don't forget to change the tests for swig_ver
+	    dnl below as well
+	    swig_min_ver=1.3.25
+
+	    AC_PATH_PROG(SWIG, swig)
+	    if test "x$SWIG" = "x"; then
+		AC_MSG_WARN([
+*** Cannot find SWIG -- will use precompiled files for Python support.
+*** If you want to modify the interface files, please install SWIG >= $swig_min_ver.])
 		USE_SWIG=0
-		;;
-	    esac
+	    else
+		AC_MSG_CHECKING([for swig version])
+		swig_ver=`$SWIG -version 2>&1 | grep 'SWIG Version' | sed 's/SWIG Version //'`
+		AC_MSG_RESULT([$swig_ver])
+
+		case "$swig_ver" in
+		    1.1.* | 1.2.* )
+			swig_ver_status="old"
+			;;
+
+		    1.3.*)
+			swig_ver_micro=`echo $swig_ver | sed 's/1\.3\.//'`
+			if test $swig_ver_micro -lt 25; then
+			    swig_ver_status="old"
+			elif test $swig_ver_micro -gt 27; then
+			    swig_ver_status="new"
+			fi
+			;;
+
+		    [2-9]*.[0-9]*.[0-9]*)
+			swig_ver_status="new"
+			;;
+
+		    *)
+			AC_MSG_WARN([Unrecognized swig version format "$swig_ver"])
+			swig_ver_status="bad"
+			;;
+		esac
+
+		case "$swig_ver_status" in
+		    bad )
+			AC_MSG_WARN([
+*** Version of your swig program ($SWIG) couldn't be determined, please report
+*** this to us. Assuming it does not work and continuing without swig.])
+			USE_SWIG=0
+			;;
+
+		    old )
+			AC_MSG_WARN([
+*** Your swig program ($SWIG) is version $swig_ver but at least $swig_min_ver is required.])
+			USE_SWIG=0
+			;;
+
+		    new )
+			AC_MSG_WARN([
+*** Your swig program ($SWIG) is version $swig_ver but the last tested
+*** version is 1.3.24 -- still continuing hoping that it is going to work,
+*** but if it doesn't, please rerun configure with --without-swig option.])
+			;;
+		esac
+	    fi
 	fi
 	;;
 esac

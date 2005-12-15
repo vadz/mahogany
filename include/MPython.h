@@ -103,6 +103,7 @@ extern "C"
    extern int (*M_PyString_AsStringAndSize)(PyObject *, char **, int *);
    extern PyObject *(*M_PyString_FromString)(const char *);
    extern PyObject *(*M_PyString_FromStringAndSize)(const char *, int);
+   extern PyObject *(*M_PyString_FromFormat)(const char *, ...);
    extern PyObject *(*M_PyString_InternFromString)(const char *);
    extern int (*M_PyString_Size)(PyObject *);
    extern PyTypeObject* M_PyString_Type;
@@ -197,6 +198,7 @@ extern "C"
 #define PyString_AsStringAndSize M_PyString_AsStringAndSize
 #define PyString_FromString M_PyString_FromString
 #define PyString_FromStringAndSize M_PyString_FromStringAndSize
+#define PyString_FromFormat M_PyString_FromFormat
 #define PyString_InternFromString M_PyString_InternFromString
 #define PyString_Type (*M_PyString_Type)
 

@@ -21,35 +21,17 @@ $(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $(@:.o=.cpp)
 @rm -f $(@:.o=.cpp)
 endef
 
-# swiglib.i only exists for global stuff to be compiled in it and for this we
-# must define this symbol when compiling it
-#
-# also see "-c" swig option handling below: it must not be specified for
-# swiglib
-CXXFLAGS_Python_swiglib_o := -DSWIG_GLOBAL
-
 ifdef SWIG
 
 # this command replaces #include Python.h in the generated C++ code with
 # #include MPython.h which we need for dynamic Python linking to work
-#
-# further, newer versions of swig (1.3.21) now automatically rename SWIG_xxx
-# functions to SWIG_Python_xxx which is very nice but incompatible with the
-# old versions because we have to also declare these functions ourselves as
-# they're not declared in any header -- and as we don't have an easy way to
-# check how the functionsare called we simply disable the #define's which do
-# the renaming in swig-generated code
 define create_cpp
-	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) \
-	 $(if $(subst swiglib,,$*),-c) -o $(@:.o=.cpp) $< && \
-	sed -e 's/Python\.h/MPython.h/' \
-		 -e '/^#define SWIG_\(\w\+\) \+SWIG_Python_\1/d' \
-		 -e '/^#define SWIG_\w\+(.*\\$$/,/^ \+SWIG_Python_\w\+(/d' \
-		 -e 's/SWIG_Python_/SWIG_/g' $(@:.o=.cpp) \
-			> $(@:.o=.cpp).new && mv $(@:.o=.cpp).new $(@:.o=.cpp)
+	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) -o $(@:.o=.cpp) $< && \
+	    sed -e 's/Python\.h/MPython.h/' $(@:.o=.cpp) > $(@:.o=.cpp).new && \
+		mv $(@:.o=.cpp).new $(@:.o=.cpp)
 endef
 
-SWIGFLAGS := -c++ -python -shadow
+SWIGFLAGS := -c++ -python
 vpath %.i $(IFACE_DIR)
 Python/%.o Python/%.py: %.i
 	$(create_cpp)

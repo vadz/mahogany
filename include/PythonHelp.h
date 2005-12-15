@@ -13,6 +13,8 @@
 #ifndef _PYTHONHELP_H_
 #define _PYTHONHELP_H_
 
+#include "wx/arrstr.h"
+
 class Profile;
 
 /**

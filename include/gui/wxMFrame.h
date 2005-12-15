@@ -31,11 +31,15 @@
 
 class Profile;
 
-/**
-  * A wxWindows Frame class
-  */
+#ifdef USE_PYTHON
+   class PythonOptionChangeHandler;
+#endif
 
-class wxMFrame : public wxFrame, public MFrameBase
+/**
+  A wxWindows frame class.
+ */
+class wxMFrame : public wxFrame,
+                 public MFrameBase
 {
 public:
    // static helper functions (static because they're also used by wxLogWindow
