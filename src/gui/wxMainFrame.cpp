@@ -6,7 +6,7 @@
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$
-// Copyright:   (c) 1998-2005 Mahogany Team
+// Copyright:   (c) 1998-2006 Mahogany Team
 // License:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -569,7 +569,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
-   SetTitle(_("Copyright (C) 1997-2005 The Mahogany Developers Team"));
+   SetTitle(_("Copyright (C) 1997-2006 The Mahogany Developers Team"));
 
    CreateStatusBar();
 

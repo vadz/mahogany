@@ -6,7 +6,7 @@
 % Modified by: Vadim Zeitlin: 11.04.03: now it is pure LaTeX, not LyX any more
 % Created:     1997
 % CVS-ID:      $Id$
-% Copyright:   (c) 1997-2005 M Dev Team
+% Copyright:   (c) 1997-2006 M Dev Team
 % Licence:     M license
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,7 +35,7 @@
 \vfill{}
 
 
-\author{Copyright 1997-2005 by The Mahogany Development Team\\
+\author{Copyright 1997-2006 by The Mahogany Development Team\\
 \vspace{1cm}
 \mailtolink{mahogany-developers@lists.sourceforge.net} \\
 \vspace{1cm}
