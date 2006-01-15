@@ -1944,6 +1944,7 @@ public:
   }
 };
 
+#if wxUSE_DND
 
 class wxComposeViewDropTarget : public wxDropTarget 
 {
@@ -2017,6 +2018,7 @@ public:
   }
 };
 
+#endif // wxUSE_DND
 
 void
 wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
@@ -2037,9 +2039,11 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // and tool/status bars
    CreateToolAndStatusBars();
 
+#if wxUSE_DND
    // Create the wxDropTarget subclass that allows to
    // drop files or messages in the Composer window
    SetDropTarget(new wxComposeViewDropTarget(this));
+#endif // wxUSE_DND
 
    // create the child controls
 
