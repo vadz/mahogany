@@ -63,107 +63,119 @@ inline String GetPythonDllBaseName(const String& version)
 // global data
 // ----------------------------------------------------------------------------
 
+#define M_PY_WRAPPER_DEF(name) M_##name##_t M_##name = NULL
+
+// use 0 and not NULL as not all variables are pointers
+#define M_PY_VAR_DEF(name) M_##name##_t M_##name = 0
+
 extern "C"
 {
-   // startup/shutdown
-   void(*M_Py_Initialize)(void) = NULL;
-   void(*M_Py_Finalize)(void) = NULL;
+   M_PY_WRAPPER_DEF(Py_Initialize);
+   M_PY_WRAPPER_DEF(Py_Finalize);
 
    // errors
-   //int(*M_PyErr_BadArgument)(void) = NULL;
-   void (*M_PyErr_Clear)(void) = NULL;
-   void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **) = NULL;
-   //PyObject*(*M_PyErr_NoMemory)(void) = NULL;
-   PyObject*(*M_PyErr_Occurred)(void) = NULL;
-   void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *) = NULL;
-   //void(*M_PyErr_SetNone)(PyObject *) = NULL;
-   void(*M_PyErr_SetString)(PyObject *, const char *) = NULL;
-   PyObject *(*M_PyErr_Format)(PyObject *, const char *, ...) = NULL;
+   //M_PY_WRAPPER_DEF(PyErr_BadArgument);
+   M_PY_WRAPPER_DEF(PyErr_Clear);
+   M_PY_WRAPPER_DEF(PyErr_Fetch);
+   //M_PY_WRAPPER_DEF(PyErr_NoMemory);
+   M_PY_WRAPPER_DEF(PyErr_Occurred);
+   M_PY_WRAPPER_DEF(PyErr_Restore);
+   //M_PY_WRAPPER_DEF(PyErr_SetNone);
+   M_PY_WRAPPER_DEF(PyErr_SetString);
+   M_PY_WRAPPER_DEF(PyErr_Format);
 
    // objects
-   PyObject *(*M_PyObject_CallFunction)(PyObject *, char *format, ...) = NULL;
-   PyObject *(*M_PyObject_Init)(PyObject *, PyTypeObject *) = NULL;
-   PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *) = NULL;
-   PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *) = NULL;
-   PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *) = NULL;
-   void *(*M_PyObject_Malloc)(size_t) = NULL;
-   void (*M_PyObject_Free)(void *) = NULL;
-   int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *) = NULL;
-   int (*M_PyObject_Size)(PyObject *) = NULL;
-   void *(*M_PyCObject_Import)(char *module_name, char *cobject_name) = NULL;
+   M_PY_WRAPPER_DEF(PyObject_Init);
+   M_PY_WRAPPER_DEF(PyObject_CallFunction);
+   M_PY_WRAPPER_DEF(PyObject_CallObject);
+   M_PY_WRAPPER_DEF(PyObject_GetAttr);
+   M_PY_WRAPPER_DEF(PyObject_GetAttrString);
+   M_PY_WRAPPER_DEF(PyObject_Malloc);
+   M_PY_WRAPPER_DEF(PyObject_Free);
+   M_PY_WRAPPER_DEF(PyObject_SetAttrString);
+   M_PY_WRAPPER_DEF(PyObject_Size);
+   M_PY_WRAPPER_DEF(PyObject_Str);
+   M_PY_WRAPPER_DEF(PyCObject_Import);
+   M_PY_WRAPPER_DEF(PyCObject_FromVoidPtr);
 
    // ints and longs
-   long(*M_PyInt_AsLong)(PyObject *) = NULL;
-   PyObject*(*M_PyInt_FromLong)(long) = NULL;
-   long (*M_PyLong_AsLong)(PyObject *) = NULL;
-   unsigned long (*M_PyLong_AsUnsignedLong)(PyObject *) = NULL;
-   PyObject*(*M_PyLong_FromUnsignedLong)(unsigned long) = NULL;
-   PyObject*(*M_PyLong_FromVoidPtr)(void *) = NULL;
-   PyTypeObject *M_PyInt_Type = NULL;
-   PyTypeObject *M_PyLong_Type = NULL;
-   PyIntObject *M__Py_TrueStruct = NULL;
-   PyIntObject *M__Py_ZeroStruct = NULL;
+   M_PY_WRAPPER_DEF(PyInt_AsLong);
+   M_PY_WRAPPER_DEF(PyInt_FromLong);
+   M_PY_WRAPPER_DEF(PyLong_FromUnsignedLong);
+   M_PY_WRAPPER_DEF(PyLong_FromVoidPtr);
+   M_PY_WRAPPER_DEF(PyLong_AsLong);
+   M_PY_WRAPPER_DEF(PyLong_AsUnsignedLong);
+   M_PY_VAR_DEF(PyInt_Type);
+   M_PY_VAR_DEF(PyLong_Type);
+   M_PY_VAR_DEF(_Py_TrueStruct);
+   M_PY_VAR_DEF(_Py_ZeroStruct);
 
    // strings
-   char*(*M_PyString_AsString)(PyObject *) = NULL;
-   int (*M_PyString_AsStringAndSize)(PyObject *, char **, int *) = NULL;
-   PyObject*(*M_PyString_Format)(PyObject *, PyObject *) = NULL;
-   PyObject*(*M_PyString_FromString)(const char *) = NULL;
-   PyObject*(*M_PyString_FromStringAndSize)(const char *, int) = NULL;
-   PyObject*(*M_PyString_FromFormat)(const char *, ...) = NULL;
-   int(*M_PyString_Size)(PyObject *) = NULL;
-   PyTypeObject* M_PyString_Type = NULL;
-   PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
+   M_PY_WRAPPER_DEF(PyString_AsString);
+   M_PY_WRAPPER_DEF(PyString_AsStringAndSize);
+   M_PY_WRAPPER_DEF(PyString_Format);
+   M_PY_WRAPPER_DEF(PyString_FromString);
+   M_PY_WRAPPER_DEF(PyString_FromStringAndSize);
+   M_PY_WRAPPER_DEF(PyString_FromFormat);
+   M_PY_WRAPPER_DEF(PyString_InternFromString);
+   M_PY_WRAPPER_DEF(PyString_Size);
+   M_PY_VAR_DEF(PyString_Type);
 
    // tuples
-   PyObject *(*M_PyTuple_New)(int size) = NULL;
-   PyObject *(*M_PyTuple_GetItem)(PyObject *, int) = NULL;
-   int *(*M_PyTuple_SetItem)(PyObject *, int, PyObject *) = NULL;
+   M_PY_WRAPPER_DEF(PyTuple_New);
+   M_PY_WRAPPER_DEF(PyTuple_GetItem);
+   M_PY_WRAPPER_DEF(PyTuple_SetItem);
 
    // ...
-   PyObject* (*M_Py_VaBuildValue)(char *, va_list) = NULL;
-#ifdef Py_TRACE_REFS
-   void (*M__Py_Dealloc)(PyObject *) = NULL;
-#endif // Py_TRACE_REFS
-   int(*M_PyArg_Parse)(PyObject *, char *, ...) = NULL;
-   int(*M_PyArg_ParseTuple)(PyObject *, char *, ...) = NULL;
-   int(*M_PyDict_SetItemString)(PyObject *dp, char *key, PyObject *item) = NULL;
-   void(*M_PyEval_RestoreThread)(PyThreadState *) = NULL;
-   PyThreadState*(*M_PyEval_SaveThread)(void) = NULL;
-   PyObject*(*M_PyList_GetItem)(PyObject *, int) = NULL;
-   PyObject*(*M_PyList_New)(int size) = NULL;
-   int(*M_PyList_SetItem)(PyObject *, int, PyObject *) = NULL;
-   int(*M_PyList_Size)(PyObject *) = NULL;
-   PyTypeObject* M_PyList_Type = NULL;
-   PyObject*(*M_PyImport_ImportModule)(const char *) = NULL;
-   PyObject*(*M_PyDict_GetItemString)(PyObject *, const char *) = NULL;
-   PyObject*(*M_PyModule_GetDict)(PyObject *) = NULL;
-   int(*M_PySys_SetObject)(char *, PyObject *) = NULL;
-   PyTypeObject* M_PyType_Type = NULL;
-   PyObject*(*M_Py_BuildValue)(char *, ...) = NULL;
-   PyObject*(*M_Py_FindMethod)(PyMethodDef[], PyObject *, char *) = NULL;
-   PyObject*(*M_Py_InitModule4)(char *, PyMethodDef *, char *, PyObject *, int) = NULL;
-   PyObject *(*M_PyEval_CallObjectWithKeywords)(PyObject *, PyObject *, PyObject *) = NULL;
-   PyObject *(*M_PyFloat_FromDouble)(double) = NULL;
-   PyObject *(*M_PyImport_AddModule)(char *name) = NULL;
-   PyObject *(*M_PyImport_GetModuleDict)(void) = NULL;
-   PyObject *(*M_PyImport_ReloadModule)(PyObject *) = NULL;
-   PyObject *(*M_PyRun_String)(const char *, int, PyObject *, PyObject *) = NULL;
+   M_PY_WRAPPER_DEF(Py_VaBuildValue);
+   M_PY_WRAPPER_DEF(_Py_Dealloc);
+   M_PY_WRAPPER_DEF(PyArg_Parse);
+   M_PY_WRAPPER_DEF(PyArg_ParseTuple);
+   M_PY_WRAPPER_DEF(PyDict_SetItemString);
+   M_PY_WRAPPER_DEF(PyEval_RestoreThread);
+   M_PY_WRAPPER_DEF(PyEval_SaveThread);
+   M_PY_WRAPPER_DEF(PyList_GetItem);
+   M_PY_WRAPPER_DEF(PyList_New);
+   M_PY_WRAPPER_DEF(PyList_SetItem);
+   M_PY_WRAPPER_DEF(PyList_Size);
+   M_PY_VAR_DEF(PyList_Type);
+   M_PY_WRAPPER_DEF(PyImport_ImportModule);
+   M_PY_WRAPPER_DEF(PyDict_GetItemString);
+   M_PY_WRAPPER_DEF(PyModule_GetDict);
+   M_PY_WRAPPER_DEF(PyModule_AddObject);
+   M_PY_WRAPPER_DEF(PySys_SetObject);
+   M_PY_VAR_DEF(PyType_Type);
+   M_PY_WRAPPER_DEF(Py_BuildValue);
+   M_PY_WRAPPER_DEF(Py_FindMethod);
+   M_PY_WRAPPER_DEF(Py_InitModule4);
+   M_PY_WRAPPER_DEF(PyEval_CallObjectWithKeywords);
+   M_PY_WRAPPER_DEF(PyFloat_FromDouble);
+   M_PY_WRAPPER_DEF(PyImport_AddModule);
+   M_PY_WRAPPER_DEF(PyImport_GetModuleDict);
+   M_PY_WRAPPER_DEF(PyImport_ReloadModule);
+   M_PY_WRAPPER_DEF(PyRun_String);
 
-   int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *) = NULL;
-   void (*M__Py_NegativeRefcount)(const char *, int, PyObject *) = NULL;
+   M_PY_WRAPPER_DEF(PyType_IsSubtype);
+   M_PY_WRAPPER_DEF(_Py_NegativeRefcount);
+
+   // other misc functions
+   M_PY_WRAPPER_DEF(PyOS_snprintf);
 
    // variables
-#ifdef Py_REF_DEBUG
-   long M__Py_RefTotal = 0;
-#endif // Py_REF_DEBUG
-   PyTypeObject *M_PyModule_Type = NULL;
-   PyObject* M__Py_NoneStruct = NULL;
+   M_PY_VAR_DEF(_Py_RefTotal);
+   M_PY_VAR_DEF(PyModule_Type);
+   M_PY_VAR_DEF(_Py_NoneStruct);
+   M_PY_VAR_DEF(_Py_NotImplementedStruct);
+   M_PY_VAR_DEF(PyCFunction_Type);
 
    // exception objects
-   PyObject *M_PyExc_NameError = NULL;
-   PyObject *M_PyExc_TypeError = NULL;
+   M_PY_VAR_DEF(PyExc_NameError);
+   M_PY_VAR_DEF(PyExc_NotImplementedError);
+   M_PY_VAR_DEF(PyExc_TypeError);
 }
+
+#undef M_PY_VAR_DEF
+#undef M_PY_WRAPPER_DEF
 
 // ----------------------------------------------------------------------------
 // private data
@@ -207,7 +219,9 @@ static struct PythonFunc
    PYTHON_FUNC(PyObject_Free)
    PYTHON_FUNC(PyObject_SetAttrString)
    PYTHON_FUNC(PyObject_Size)
+   PYTHON_FUNC(PyObject_Str)
    PYTHON_FUNC(PyCObject_Import)
+   PYTHON_FUNC(PyCObject_FromVoidPtr)
 
    // ints and longs
    PYTHON_FUNC(PyInt_AsLong)
@@ -238,6 +252,8 @@ static struct PythonFunc
 
    // ...
    PYTHON_FUNC(_Py_NoneStruct)
+   PYTHON_FUNC(_Py_NotImplementedStruct)
+   PYTHON_FUNC(PyCFunction_Type)
    PYTHON_FUNC_ALT(Py_InitModule4, Py_InitModule4TraceRefs)
    PYTHON_FUNC(Py_BuildValue)
    PYTHON_FUNC(Py_VaBuildValue)
@@ -255,8 +271,10 @@ static struct PythonFunc
    PYTHON_FUNC(PyDict_SetItemString)
    PYTHON_FUNC(PyImport_ImportModule)
    PYTHON_FUNC(PyModule_GetDict)
+   PYTHON_FUNC(PyModule_AddObject)
    PYTHON_FUNC(PyEval_CallObjectWithKeywords)
    PYTHON_FUNC(PyExc_NameError)
+   PYTHON_FUNC(PyExc_NotImplementedError)
    PYTHON_FUNC(PyExc_TypeError)
    PYTHON_FUNC(PyFloat_FromDouble)
    PYTHON_FUNC(PyImport_AddModule)
