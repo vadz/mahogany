@@ -23,12 +23,13 @@ endef
 
 ifdef SWIG
 
-# this command replaces #include Python.h in the generated C++ code with
-# #include MPython.h which we need for dynamic Python linking to work
+# this command runs swig to generate .cpp file from an .i one and then replaces
+# #include Python.h in the generated C++ code with #include MPython.h which we
+# need for dynamic Python linking to work
 define create_cpp
-	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) -o $(@:.o=.cpp) $< && \
-	    sed -e 's/Python\.h/MPython.h/' $(@:.o=.cpp) > $(@:.o=.cpp).new && \
-		mv $(@:.o=.cpp).new $(@:.o=.cpp)
+	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) -o $*.cpp $< && \
+	    sed -e 's/Python\.h/MPython.h/' $*.cpp > $*.cpp.new && \
+		mv $*.cpp.new $*.cpp
 endef
 
 SWIGFLAGS := -c++ -python
