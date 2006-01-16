@@ -1,8 +1,10 @@
-# This file was created automatically by SWIG.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
-# This file is compatible with both classic and new-style classes.
+
 import _MailFolder
-def _swig_setattr(self,class_type,name,value):
+
+# This file is compatible with both classic and new-style classes.
+def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
     if (name == "this"):
         if isinstance(value, class_type):
             self.__dict__[name] = value.this
@@ -11,7 +13,13 @@ def _swig_setattr(self,class_type,name,value):
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    self.__dict__[name] = value
+    if (not static) or hasattr(self,name) or (name == "thisown"):
+        self.__dict__[name] = value
+    else:
+        raise AttributeError("You cannot add attributes to %s" % self)
+
+def _swig_setattr(self,class_type,name,value):
+    return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
     method = class_type.__swig_getmethods__.get(name,None)
@@ -25,6 +33,7 @@ try:
 except AttributeError:
     class _object : pass
     _newclass = 0
+del types
 
 
 class MailFolder(_object):
@@ -32,6 +41,9 @@ class MailFolder(_object):
     __setattr__ = lambda self, name, value: _swig_setattr(self, MailFolder, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, MailFolder, name)
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ MailFolder instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     MSG_STAT_NEW = _MailFolder.MailFolder_MSG_STAT_NEW
     MSG_STAT_SEEN = _MailFolder.MailFolder_MSG_STAT_SEEN
     MSG_STAT_DELETED = _MailFolder.MailFolder_MSG_STAT_DELETED
@@ -88,57 +100,59 @@ class MailFolder(_object):
     if _newclass:ReplyMessage = staticmethod(_MailFolder.MailFolder_ReplyMessage)
     __swig_getmethods__["Subscribe"] = lambda x: _MailFolder.MailFolder_Subscribe
     if _newclass:Subscribe = staticmethod(_MailFolder.MailFolder_Subscribe)
-    def ListFolders(*args): return apply(_MailFolder.MailFolder_ListFolders,args)
-    def IsOpened(*args): return apply(_MailFolder.MailFolder_IsOpened,args)
-    def IsReadOnly(*args): return apply(_MailFolder.MailFolder_IsReadOnly,args)
-    def CanSetFlag(*args): return apply(_MailFolder.MailFolder_CanSetFlag,args)
-    def GetName(*args): return apply(_MailFolder.MailFolder_GetName,args)
-    def GetType(*args): return apply(_MailFolder.MailFolder_GetType,args)
-    def GetFlags(*args): return apply(_MailFolder.MailFolder_GetFlags,args)
-    def GetProfile(*args): return apply(_MailFolder.MailFolder_GetProfile,args)
-    def IsInCriticalSection(*args): return apply(_MailFolder.MailFolder_IsInCriticalSection,args)
-    def GetClassName(*args): return apply(_MailFolder.MailFolder_GetClassName,args)
-    def CreateServerInfo(*args): return apply(_MailFolder.MailFolder_CreateServerInfo,args)
+    def ListFolders(*args): return _MailFolder.MailFolder_ListFolders(*args)
+    def IsOpened(*args): return _MailFolder.MailFolder_IsOpened(*args)
+    def IsReadOnly(*args): return _MailFolder.MailFolder_IsReadOnly(*args)
+    def CanSetFlag(*args): return _MailFolder.MailFolder_CanSetFlag(*args)
+    def GetName(*args): return _MailFolder.MailFolder_GetName(*args)
+    def GetType(*args): return _MailFolder.MailFolder_GetType(*args)
+    def GetFlags(*args): return _MailFolder.MailFolder_GetFlags(*args)
+    def GetProfile(*args): return _MailFolder.MailFolder_GetProfile(*args)
+    def IsInCriticalSection(*args): return _MailFolder.MailFolder_IsInCriticalSection(*args)
+    def GetClassName(*args): return _MailFolder.MailFolder_GetClassName(*args)
+    def CreateServerInfo(*args): return _MailFolder.MailFolder_CreateServerInfo(*args)
     __swig_getmethods__["GetFolderDelimiter"] = lambda x: _MailFolder.MailFolder_GetFolderDelimiter
     if _newclass:GetFolderDelimiter = staticmethod(_MailFolder.MailFolder_GetFolderDelimiter)
-    def NeedsNetwork(*args): return apply(_MailFolder.MailFolder_NeedsNetwork,args)
-    def GetHeaders(*args): return apply(_MailFolder.MailFolder_GetHeaders,args)
-    def GetHeaderInfo(*args): return apply(_MailFolder.MailFolder_GetHeaderInfo,args)
-    def GetMessageCount(*args): return apply(_MailFolder.MailFolder_GetMessageCount,args)
-    def IsEmpty(*args): return apply(_MailFolder.MailFolder_IsEmpty,args)
-    def CountNewMessages(*args): return apply(_MailFolder.MailFolder_CountNewMessages,args)
-    def CountRecentMessages(*args): return apply(_MailFolder.MailFolder_CountRecentMessages,args)
-    def CountUnseenMessages(*args): return apply(_MailFolder.MailFolder_CountUnseenMessages,args)
-    def CountDeletedMessages(*args): return apply(_MailFolder.MailFolder_CountDeletedMessages,args)
-    def CountAllMessages(*args): return apply(_MailFolder.MailFolder_CountAllMessages,args)
-    def GetMsgnoFromUID(*args): return apply(_MailFolder.MailFolder_GetMsgnoFromUID,args)
-    def Ping(*args): return apply(_MailFolder.MailFolder_Ping,args)
-    def Checkpoint(*args): return apply(_MailFolder.MailFolder_Checkpoint,args)
-    def GetMessage(*args): return apply(_MailFolder.MailFolder_GetMessage,args)
-    def DeleteMessage(*args): return apply(_MailFolder.MailFolder_DeleteMessage,args)
-    def UnDeleteMessage(*args): return apply(_MailFolder.MailFolder_UnDeleteMessage,args)
-    def SetMessageFlag(*args): return apply(_MailFolder.MailFolder_SetMessageFlag,args)
-    def SetSequenceFlag(*args): return apply(_MailFolder.MailFolder_SetSequenceFlag,args)
-    def SetFlagForAll(*args): return apply(_MailFolder.MailFolder_SetFlagForAll,args)
-    def SetFlag(*args): return apply(_MailFolder.MailFolder_SetFlag,args)
-    def AppendMessage(*args): return apply(_MailFolder.MailFolder_AppendMessage,args)
-    def ExpungeMessages(*args): return apply(_MailFolder.MailFolder_ExpungeMessages,args)
-    def SearchByFlag(*args): return apply(_MailFolder.MailFolder_SearchByFlag,args)
-    def SearchMessages(*args): return apply(_MailFolder.MailFolder_SearchMessages,args)
-    def SaveMessages(*args): return apply(_MailFolder.MailFolder_SaveMessages,args)
-    def SaveMessagesToFile(*args): return apply(_MailFolder.MailFolder_SaveMessagesToFile,args)
-    def DeleteOrTrashMessages(*args): return apply(_MailFolder.MailFolder_DeleteOrTrashMessages,args)
-    def DeleteMessages(*args): return apply(_MailFolder.MailFolder_DeleteMessages,args)
-    def UnDeleteMessages(*args): return apply(_MailFolder.MailFolder_UnDeleteMessages,args)
-    def ReplyMessages(*args): return apply(_MailFolder.MailFolder_ReplyMessages,args)
-    def ForwardMessages(*args): return apply(_MailFolder.MailFolder_ForwardMessages,args)
-    def SortMessages(*args): return apply(_MailFolder.MailFolder_SortMessages,args)
-    def ThreadMessages(*args): return apply(_MailFolder.MailFolder_ThreadMessages,args)
-    def Lock(*args): return apply(_MailFolder.MailFolder_Lock,args)
-    def UnLock(*args): return apply(_MailFolder.MailFolder_UnLock,args)
-    def IsLocked(*args): return apply(_MailFolder.MailFolder_IsLocked,args)
-    def ProcessNewMail(*args): return apply(_MailFolder.MailFolder_ProcessNewMail,args)
-    def ApplyFilterRules(*args): return apply(_MailFolder.MailFolder_ApplyFilterRules,args)
+    __swig_getmethods__["GetLogicalMailboxName"] = lambda x: _MailFolder.MailFolder_GetLogicalMailboxName
+    if _newclass:GetLogicalMailboxName = staticmethod(_MailFolder.MailFolder_GetLogicalMailboxName)
+    def NeedsNetwork(*args): return _MailFolder.MailFolder_NeedsNetwork(*args)
+    def GetHeaders(*args): return _MailFolder.MailFolder_GetHeaders(*args)
+    def GetHeaderInfo(*args): return _MailFolder.MailFolder_GetHeaderInfo(*args)
+    def GetMessageCount(*args): return _MailFolder.MailFolder_GetMessageCount(*args)
+    def IsEmpty(*args): return _MailFolder.MailFolder_IsEmpty(*args)
+    def CountNewMessages(*args): return _MailFolder.MailFolder_CountNewMessages(*args)
+    def CountRecentMessages(*args): return _MailFolder.MailFolder_CountRecentMessages(*args)
+    def CountUnseenMessages(*args): return _MailFolder.MailFolder_CountUnseenMessages(*args)
+    def CountDeletedMessages(*args): return _MailFolder.MailFolder_CountDeletedMessages(*args)
+    def CountAllMessages(*args): return _MailFolder.MailFolder_CountAllMessages(*args)
+    def GetMsgnoFromUID(*args): return _MailFolder.MailFolder_GetMsgnoFromUID(*args)
+    def Ping(*args): return _MailFolder.MailFolder_Ping(*args)
+    def Checkpoint(*args): return _MailFolder.MailFolder_Checkpoint(*args)
+    def GetMessage(*args): return _MailFolder.MailFolder_GetMessage(*args)
+    def DeleteMessage(*args): return _MailFolder.MailFolder_DeleteMessage(*args)
+    def UnDeleteMessage(*args): return _MailFolder.MailFolder_UnDeleteMessage(*args)
+    def SetMessageFlag(*args): return _MailFolder.MailFolder_SetMessageFlag(*args)
+    def SetSequenceFlag(*args): return _MailFolder.MailFolder_SetSequenceFlag(*args)
+    def SetFlagForAll(*args): return _MailFolder.MailFolder_SetFlagForAll(*args)
+    def SetFlag(*args): return _MailFolder.MailFolder_SetFlag(*args)
+    def AppendMessage(*args): return _MailFolder.MailFolder_AppendMessage(*args)
+    def ExpungeMessages(*args): return _MailFolder.MailFolder_ExpungeMessages(*args)
+    def SearchByFlag(*args): return _MailFolder.MailFolder_SearchByFlag(*args)
+    def SearchMessages(*args): return _MailFolder.MailFolder_SearchMessages(*args)
+    def SaveMessages(*args): return _MailFolder.MailFolder_SaveMessages(*args)
+    def SaveMessagesToFile(*args): return _MailFolder.MailFolder_SaveMessagesToFile(*args)
+    def DeleteOrTrashMessages(*args): return _MailFolder.MailFolder_DeleteOrTrashMessages(*args)
+    def DeleteMessages(*args): return _MailFolder.MailFolder_DeleteMessages(*args)
+    def UnDeleteMessages(*args): return _MailFolder.MailFolder_UnDeleteMessages(*args)
+    def ReplyMessages(*args): return _MailFolder.MailFolder_ReplyMessages(*args)
+    def ForwardMessages(*args): return _MailFolder.MailFolder_ForwardMessages(*args)
+    def SortMessages(*args): return _MailFolder.MailFolder_SortMessages(*args)
+    def ThreadMessages(*args): return _MailFolder.MailFolder_ThreadMessages(*args)
+    def Lock(*args): return _MailFolder.MailFolder_Lock(*args)
+    def UnLock(*args): return _MailFolder.MailFolder_UnLock(*args)
+    def IsLocked(*args): return _MailFolder.MailFolder_IsLocked(*args)
+    def ProcessNewMail(*args): return _MailFolder.MailFolder_ProcessNewMail(*args)
+    def ApplyFilterRules(*args): return _MailFolder.MailFolder_ApplyFilterRules(*args)
     __swig_getmethods__["ExistsMH"] = lambda x: _MailFolder.MailFolder_ExistsMH
     if _newclass:ExistsMH = staticmethod(_MailFolder.MailFolder_ExistsMH)
     __swig_getmethods__["InitializeMH"] = lambda x: _MailFolder.MailFolder_InitializeMH
@@ -159,27 +173,26 @@ class MailFolder(_object):
     if _newclass:Init = staticmethod(_MailFolder.MailFolder_Init)
     __swig_getmethods__["CleanUp"] = lambda x: _MailFolder.MailFolder_CleanUp
     if _newclass:CleanUp = staticmethod(_MailFolder.MailFolder_CleanUp)
-    def SetInteractiveFrame(*args): return apply(_MailFolder.MailFolder_SetInteractiveFrame,args)
-    def GetInteractiveFrame(*args): return apply(_MailFolder.MailFolder_GetInteractiveFrame,args)
+    def SetInteractiveFrame(*args): return _MailFolder.MailFolder_SetInteractiveFrame(*args)
+    def GetInteractiveFrame(*args): return _MailFolder.MailFolder_GetInteractiveFrame(*args)
     __swig_getmethods__["GetLogCircle"] = lambda x: _MailFolder.MailFolder_GetLogCircle
     if _newclass:GetLogCircle = staticmethod(_MailFolder.MailFolder_GetLogCircle)
-    def RequestUpdate(*args): return apply(_MailFolder.MailFolder_RequestUpdate,args)
-    def SuspendUpdates(*args): return apply(_MailFolder.MailFolder_SuspendUpdates,args)
-    def ResumeUpdates(*args): return apply(_MailFolder.MailFolder_ResumeUpdates,args)
-    def __del__(self, destroy= _MailFolder.delete_MailFolder):
+    def RequestUpdate(*args): return _MailFolder.MailFolder_RequestUpdate(*args)
+    def SuspendUpdates(*args): return _MailFolder.MailFolder_SuspendUpdates(*args)
+    def ResumeUpdates(*args): return _MailFolder.MailFolder_ResumeUpdates(*args)
+    def __del__(self, destroy=_MailFolder.delete_MailFolder):
         try:
             if self.thisown: destroy(self)
         except: pass
-    def __init__(self): raise RuntimeError, "No constructor defined"
-    def __repr__(self):
-        return "<C MailFolder instance at %s>" % (self.this,)
+
 
 class MailFolderPtr(MailFolder):
-    def __init__(self,this):
+    def __init__(self, this):
         _swig_setattr(self, MailFolder, 'this', this)
         if not hasattr(self,"thisown"): _swig_setattr(self, MailFolder, 'thisown', 0)
-        _swig_setattr(self, MailFolder,self.__class__,MailFolder)
+        self.__class__ = MailFolder
 _MailFolder.MailFolder_swigregister(MailFolderPtr)
+
 MailFolder_OpenFolder = _MailFolder.MailFolder_OpenFolder
 
 MailFolder_HalfOpenFolder = _MailFolder.MailFolder_HalfOpenFolder
@@ -212,6 +225,8 @@ MailFolder_Subscribe = _MailFolder.MailFolder_Subscribe
 
 MailFolder_GetFolderDelimiter = _MailFolder.MailFolder_GetFolderDelimiter
 
+MailFolder_GetLogicalMailboxName = _MailFolder.MailFolder_GetLogicalMailboxName
+
 MailFolder_ExistsMH = _MailFolder.MailFolder_ExistsMH
 
 MailFolder_InitializeMH = _MailFolder.MailFolder_InitializeMH
@@ -234,27 +249,28 @@ MailFolder_CleanUp = _MailFolder.MailFolder_CleanUp
 
 MailFolder_GetLogCircle = _MailFolder.MailFolder_GetLogCircle
 
-
 class SuspendFolderUpdates(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, SuspendFolderUpdates, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, SuspendFolderUpdates, name)
-    def __init__(self,*args):
-        _swig_setattr(self, SuspendFolderUpdates, 'this', apply(_MailFolder.new_SuspendFolderUpdates,args))
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ SuspendFolderUpdates instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+    def __init__(self, *args):
+        _swig_setattr(self, SuspendFolderUpdates, 'this', _MailFolder.new_SuspendFolderUpdates(*args))
         _swig_setattr(self, SuspendFolderUpdates, 'thisown', 1)
-    def __del__(self, destroy= _MailFolder.delete_SuspendFolderUpdates):
+    def __del__(self, destroy=_MailFolder.delete_SuspendFolderUpdates):
         try:
             if self.thisown: destroy(self)
         except: pass
-    def __repr__(self):
-        return "<C SuspendFolderUpdates instance at %s>" % (self.this,)
+
 
 class SuspendFolderUpdatesPtr(SuspendFolderUpdates):
-    def __init__(self,this):
+    def __init__(self, this):
         _swig_setattr(self, SuspendFolderUpdates, 'this', this)
         if not hasattr(self,"thisown"): _swig_setattr(self, SuspendFolderUpdates, 'thisown', 0)
-        _swig_setattr(self, SuspendFolderUpdates,self.__class__,SuspendFolderUpdates)
+        self.__class__ = SuspendFolderUpdates
 _MailFolder.SuspendFolderUpdates_swigregister(SuspendFolderUpdatesPtr)
+
 
 

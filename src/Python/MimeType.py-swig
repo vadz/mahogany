@@ -1,8 +1,10 @@
-# This file was created automatically by SWIG.
+# This file was created automatically by SWIG 1.3.27.
 # Don't modify this file, modify the SWIG interface instead.
-# This file is compatible with both classic and new-style classes.
+
 import _MimeType
-def _swig_setattr(self,class_type,name,value):
+
+# This file is compatible with both classic and new-style classes.
+def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
     if (name == "this"):
         if isinstance(value, class_type):
             self.__dict__[name] = value.this
@@ -11,7 +13,13 @@ def _swig_setattr(self,class_type,name,value):
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    self.__dict__[name] = value
+    if (not static) or hasattr(self,name) or (name == "thisown"):
+        self.__dict__[name] = value
+    else:
+        raise AttributeError("You cannot add attributes to %s" % self)
+
+def _swig_setattr(self,class_type,name,value):
+    return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
     method = class_type.__swig_getmethods__.get(name,None)
@@ -25,6 +33,7 @@ try:
 except AttributeError:
     class _object : pass
     _newclass = 0
+del types
 
 
 class MimeType(_object):
@@ -32,6 +41,8 @@ class MimeType(_object):
     __setattr__ = lambda self, name, value: _swig_setattr(self, MimeType, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, MimeType, name)
+    def __repr__(self):
+        return "<%s.%s; proxy of C++ MimeType instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
     TEXT = _MimeType.MimeType_TEXT
     MULTIPART = _MimeType.MimeType_MULTIPART
     MESSAGE = _MimeType.MimeType_MESSAGE
@@ -48,32 +59,33 @@ class MimeType(_object):
     CUSTOM5 = _MimeType.MimeType_CUSTOM5
     CUSTOM6 = _MimeType.MimeType_CUSTOM6
     INVALID = _MimeType.MimeType_INVALID
-    def __init__(self,*args):
-        _swig_setattr(self, MimeType, 'this', apply(_MimeType.new_MimeType,args))
+    def __init__(self, *args):
+        _swig_setattr(self, MimeType, 'this', _MimeType.new_MimeType(*args))
         _swig_setattr(self, MimeType, 'thisown', 1)
-    def Assign(*args): return apply(_MimeType.MimeType_Assign,args)
-    def IsOk(*args): return apply(_MimeType.MimeType_IsOk,args)
-    def IsWildcard(*args): return apply(_MimeType.MimeType_IsWildcard,args)
-    def IsText(*args): return apply(_MimeType.MimeType_IsText,args)
-    def GetPrimary(*args): return apply(_MimeType.MimeType_GetPrimary,args)
-    def GetType(*args): return apply(_MimeType.MimeType_GetType,args)
-    def GetSubType(*args): return apply(_MimeType.MimeType_GetSubType,args)
-    def GetFull(*args): return apply(_MimeType.MimeType_GetFull,args)
-    def __ne__(*args): return apply(_MimeType.MimeType___ne__,args)
-    def Matches(*args): return apply(_MimeType.MimeType_Matches,args)
-    def __eq__(*args): return apply(_MimeType.MimeType___eq__,args)
-    def __del__(self, destroy= _MimeType.delete_MimeType):
+    def Assign(*args): return _MimeType.MimeType_Assign(*args)
+    def IsOk(*args): return _MimeType.MimeType_IsOk(*args)
+    def IsWildcard(*args): return _MimeType.MimeType_IsWildcard(*args)
+    def IsText(*args): return _MimeType.MimeType_IsText(*args)
+    def GetPrimary(*args): return _MimeType.MimeType_GetPrimary(*args)
+    def GetType(*args): return _MimeType.MimeType_GetType(*args)
+    def GetSubType(*args): return _MimeType.MimeType_GetSubType(*args)
+    def GetFull(*args): return _MimeType.MimeType_GetFull(*args)
+    def ShouldShowInline(*args): return _MimeType.MimeType_ShouldShowInline(*args)
+    def __ne__(*args): return _MimeType.MimeType___ne__(*args)
+    def Matches(*args): return _MimeType.MimeType_Matches(*args)
+    def __eq__(*args): return _MimeType.MimeType___eq__(*args)
+    def __del__(self, destroy=_MimeType.delete_MimeType):
         try:
             if self.thisown: destroy(self)
         except: pass
-    def __repr__(self):
-        return "<C MimeType instance at %s>" % (self.this,)
+
 
 class MimeTypePtr(MimeType):
-    def __init__(self,this):
+    def __init__(self, this):
         _swig_setattr(self, MimeType, 'this', this)
         if not hasattr(self,"thisown"): _swig_setattr(self, MimeType, 'thisown', 0)
-        _swig_setattr(self, MimeType,self.__class__,MimeType)
+        self.__class__ = MimeType
 _MimeType.MimeType_swigregister(MimeTypePtr)
+
 
 
