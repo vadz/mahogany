@@ -495,7 +495,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                          wxSize(widthLabel, heightLabel));
   if(passwordflag)
   {
-     m_passwd = new wxTextCtrl(this, -1, _T(""),
+     m_passwd = new wxTextCtrl(this, -1, wxEmptyString,
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                                wxSize(widthText, heightText),
                                wxTE_PASSWORD|wxTE_PROCESS_ENTER);
@@ -503,7 +503,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   }
   else
   {
-     m_text = new wxPTextEntry(strConfigPath, this, -1, _T(""),
+     m_text = new wxPTextEntry(strConfigPath, this, -1, wxEmptyString,
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                                wxSize(widthText, heightText));
      m_text->SetFocus();
@@ -1442,7 +1442,7 @@ bool MFolderDialog::TransferDataToWindow()
    wxConfigBase *config = wxConfigBase::Get();
    if ( config )
    {
-      wxString folderName = config->Read(GetConfigPath(), _T(""));
+      wxString folderName = config->Read(GetConfigPath(), wxEmptyString);
       if ( !folderName.empty() )
       {
          // select folder in the tree
@@ -1560,7 +1560,7 @@ class wxDateTextCtrl : public wxTextCtrl
 public:
    wxDateTextCtrl(wxWindow *parent) : wxTextCtrl(parent,-1)
       {
-         m_menu = new wxMenu(_T(""), wxMENU_TEAROFF);
+         m_menu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
          m_menu->SetTitle(_("Format Specifiers:"));
          for ( int n = 0; n < NUM_DATE_FMTS;n++ )
             m_menu->Append(n, wxGetTranslation(DateFormatsLabels[n]));
@@ -1698,7 +1698,7 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
    c->height.AsIs();
    stattext->SetConstraints(c);
 
-   m_statExample = new wxStaticText(this, -1, _T(""));
+   m_statExample = new wxStaticText(this, -1, wxEmptyString);
    c = new wxLayoutConstraints;
    c->left.RightOf(stattext);
    c->top.Below(m_textctrl, 2*LAYOUT_Y_MARGIN);
@@ -1796,7 +1796,7 @@ wxXFaceButton::SetFile(const wxString &filename)
       if(! success)
       {
          bmp = wxBitmap(((wxMApp *)mApplication)->GetStdIcon(wxICON_HAND));
-         m_XFace = _T("");
+         m_XFace = wxEmptyString;
       }
       else
          m_XFace = filename;
@@ -1869,7 +1869,7 @@ wxXFaceDialog::wxXFaceDialog(Profile *profile,
    stattext->SetConstraints(c);
 
 
-   m_Button = new wxXFaceButton(this, -1, _T(""));
+   m_Button = new wxXFaceButton(this, -1, wxEmptyString);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.Below(stattext, 2*LAYOUT_Y_MARGIN);
@@ -1977,8 +1977,8 @@ public:
             Profile_obj profile(folderName);
             if(profile->HasEntry(keys[idx])) // don't work on inherited ones
             {
-               wxString val = profile->readEntry(keys[idx], _T(""));
-               if(val != _T(""))
+               wxString val = profile->readEntry(keys[idx], wxEmptyString);
+               if(val != wxEmptyString)
                {
                   p->writeEntry(MP_CRYPTALGO, m_OldUC);
                   strutil_setpasswd(m_OldPw);
@@ -2116,7 +2116,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
       c->height.AsIs();
       label->SetConstraints(c);
 
-      m_oPassword = new wxTextCtrl(this, -1, _T(""),
+      m_oPassword = new wxTextCtrl(this, -1, wxEmptyString,
                                    wxDefaultPosition, wxDefaultSize,
                                    wxTE_PASSWORD);
       c = new wxLayoutConstraints;
@@ -2141,7 +2141,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    m_text1->SetConstraints(c);
 
-   m_nPassword = new wxTextCtrl(this, -1, _T(""),
+   m_nPassword = new wxTextCtrl(this, -1, wxEmptyString,
                                 wxDefaultPosition, wxDefaultSize,
                                 wxTE_PASSWORD);
    c = new wxLayoutConstraints;
@@ -2159,7 +2159,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    m_text2->SetConstraints(c);
 
-   m_nPassword2 = new wxTextCtrl(this, -1, _T(""),
+   m_nPassword2 = new wxTextCtrl(this, -1, wxEmptyString,
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_PASSWORD);
    c = new wxLayoutConstraints;
@@ -2229,7 +2229,7 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
    // reencrypt all existing passwords with the new one
    if(oldPw != newPw || oldUseCrypt != newUseCrypt)
    {
-      MFolder_obj folderRoot(_T(""));
+      MFolder_obj folderRoot(wxEmptyString);
       ChangePasswdTraversal traverse(folderRoot,
                                      oldUseCrypt, oldPw,
                                      newUseCrypt, newPw);
@@ -2477,7 +2477,7 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
    config->SetPath(root);
 
    wxArrayString entries;
-   dlg.AddAllEntries(config, _T(""), entries);
+   dlg.AddAllEntries(config, wxEmptyString, entries);
 
    long dummy;
    String name;
@@ -3144,7 +3144,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    sizer->SetSizeHints(m_frame);
 
    // and then remove it
-   m_labelValue->SetLabel(_T(""));
+   m_labelValue->SetLabel(wxEmptyString);
 
    m_frame->CentreOnParent();
    m_frame->Show();
@@ -3254,7 +3254,7 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    label = new wxStaticText(this, -1, labels[0]);
    label->SetConstraints(c);
 
-   m_text1 = new wxTextCtrl(this, -1, _T(""));
+   m_text1 = new wxTextCtrl(this, -1, wxEmptyString);
    c = new wxLayoutConstraints;
    c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -3270,7 +3270,7 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    c->top.Below(m_text1, 2*LAYOUT_Y_MARGIN);
    label->SetConstraints(c);
 
-   m_text2 = new wxTextCtrl(this, -1, _T(""),
+   m_text2 = new wxTextCtrl(this, -1, wxEmptyString,
                             wxDefaultPosition, wxDefaultSize,
                             textStyle);
    c = new wxLayoutConstraints;
@@ -3307,7 +3307,7 @@ bool MDialog_GetText2FromUser(const wxString& message,
                               String *value2,
                               wxWindow *parent)
 {
-   MText2Dialog dlg(parent, _T("Text2Dialog"), message, caption, _T(""),
+   MText2Dialog dlg(parent, _T("Text2Dialog"), message, caption, wxEmptyString,
                     prompt1, value1, prompt2, value2);
 
    return dlg.ShowModal() == wxID_OK;

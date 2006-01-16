@@ -113,7 +113,7 @@ class AddressList : public MObjectRC
 public:
    /// create the address list from string (may be empty)
    static AddressList *Create(const String& address,
-                              const String& defhost = _T(""));
+                              const String& defhost = wxEmptyString);
 
    /// create the "From" address using settings in this profile
    static AddressList *CreateFromAddress(Profile *profile);
@@ -147,7 +147,7 @@ private:
 /// declare AddressList_obj class, smart reference to AddressList
 BEGIN_DECLARE_AUTOPTR(AddressList);
 public:
-   AddressList_obj(const String& address, const String& defhost = _T(""))
+   AddressList_obj(const String& address, const String& defhost = wxEmptyString)
       { m_ptr = AddressList::Create(address, defhost); }
 END_DECLARE_AUTOPTR();
 

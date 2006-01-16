@@ -452,7 +452,7 @@ size_t MDialog_GetSelections(const wxString& message,
                              const wxArrayString& choices,
                              wxArrayInt *selections,
                              wxWindow *parent = NULL,
-                             const wxString& confpath = _T(""),
+                             const wxString& confpath = wxEmptyString,
                              const wxSize& sizeDef = wxDefaultSize);
 
 /**

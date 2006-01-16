@@ -557,7 +557,7 @@ public:
    virtual void WorkFunction(void)
       {
          int rc = m_Op == ASMailFolder::Op_SaveMessagesToFile
-                  ? m_MailFolder->SaveMessagesToFile(m_Seq, _T(""), m_Parent)
+                  ? m_MailFolder->SaveMessagesToFile(m_Seq, wxEmptyString, m_Parent)
                   : m_MailFolder->SaveMessages(m_Seq, m_Folder);
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket, m_Op,

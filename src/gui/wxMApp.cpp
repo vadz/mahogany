@@ -791,7 +791,7 @@ wxMApp::CanClose() const
    String path = GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT);
    if ( wxPMessageBoxIsDisabled(path) )
    {
-      if ( !MDialog_YesNoDialog(_T(""), NULL, _T(""),
+      if ( !MDialog_YesNoDialog(wxEmptyString, NULL, wxEmptyString,
                                 M_DLG_NO_DEFAULT, M_MSGBOX_CONFIRM_EXIT) )
       {
          wxLogDebug(_T("Exit confirmation msg box has been disabled on [No], reenabling it."));
@@ -2504,7 +2504,7 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
    {
       // try to find another encoding
       wxFontEncoding encAlt;
-      if ( wxFontMapper::Get()->GetAltForEncoding(*enc, &encAlt, _T(""), mayAskUser) )
+      if ( wxFontMapper::Get()->GetAltForEncoding(*enc, &encAlt, wxEmptyString, mayAskUser) )
       {
          // translate the text (if any) to the equivalent encoding
          if ( text )
@@ -2663,7 +2663,7 @@ bool wxMApp::CallAnother()
           _T("we need to parse the options before doing the remote call") );
 
    wxClient client;
-   wxConnectionBase *conn = client.MakeConnection(_T(""), GetIPCSocket(), IPC_TOPIC);
+   wxConnectionBase *conn = client.MakeConnection(wxEmptyString, GetIPCSocket(), IPC_TOPIC);
    if ( !conn )
    {
       // failed to connect to server at all

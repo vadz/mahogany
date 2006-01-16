@@ -190,7 +190,7 @@ public:
                         bool isInverted,
                         MFDialogTest test,
                         MFDialogTarget target,
-                        String argument = _T("")
+                        String argument = wxEmptyString
       ) = 0;
 
    /// sets the action and its argument

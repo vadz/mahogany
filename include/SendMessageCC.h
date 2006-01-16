@@ -58,12 +58,12 @@ public:
    virtual void SetSubject(const String &subject);
 
    virtual void SetAddresses(const String &To,
-                             const String &CC = _T(""),
-                             const String &BCC = _T(""));
+                             const String &CC = wxEmptyString,
+                             const String &BCC = wxEmptyString);
 
    virtual void SetFrom(const String &from,
-                        const String &replyaddress = _T(""),
-                        const String &sender = _T(""));
+                        const String &replyaddress = wxEmptyString,
+                        const String &sender = wxEmptyString);
 
    virtual void SetNewsgroups(const String &groups);
 

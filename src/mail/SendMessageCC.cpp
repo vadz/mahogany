@@ -416,7 +416,7 @@ void SendMessageCC::InitNew()
    }
 
    if ( READ_CONFIG_BOOL(m_profile, MP_COMPOSE_USE_XFACE) )
-      m_XFaceFile = m_profile->readEntry(MP_COMPOSE_XFACE_FILE, _T(""));
+      m_XFaceFile = m_profile->readEntry(MP_COMPOSE_XFACE_FILE, wxEmptyString);
 
    m_CharSet = READ_CONFIG_TEXT(m_profile,MP_CHARSET);
 }

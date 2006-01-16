@@ -162,7 +162,7 @@ wxMIMETreeCtrl::wxMIMETreeCtrl(wxWindow *parent)
    for ( int i = MimeType::TEXT; i <= MimeType::OTHER; i++ )
    {
       // this is a big ugly: we need to get just the primary MIME type
-      MimeType mt((MimeType::Primary)i, _T(""));
+      MimeType mt((MimeType::Primary)i, wxEmptyString);
       wxIcon icon = iconManager->GetIconFromMimeType(mt.GetType());
       imaglist->Add(icon);
    }
@@ -198,7 +198,7 @@ wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
    // -------------------------------
 
    // the box containing the tree control
-   wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T(""));
+   wxStaticBox *box = new wxStaticBox(this, wxID_ANY, wxEmptyString);
    wxStaticBoxSizer *sizerBox = new wxStaticBoxSizer(box, wxHORIZONTAL);
    sizerBox->Add(m_treectrl, 1, wxEXPAND | wxALL, LAYOUT_MARGIN);
 
@@ -342,7 +342,7 @@ void wxMIMETreeDialog::SaveMessages(size_t count, const MimePart **parts)
    }
 
    // now copy them from there to the folder
-   MFolder_obj folderSrc(MFolder::CreateTempFile(_T(""), filename));
+   MFolder_obj folderSrc(MFolder::CreateTempFile(wxEmptyString, filename));
    if ( folderSrc )
    {
       MailFolder_obj mf(MailFolder::OpenFolder(folderSrc));
@@ -382,7 +382,7 @@ void wxMIMETreeDialog::SaveAttachments(size_t count, const MimePart **parts)
    String dir = MDialog_DirRequester
                 (
                   _("Choose directory to save attachments to:"),
-                  _T(""),
+                  wxEmptyString,
                   this,
                   _T("MimeSave")
                 );

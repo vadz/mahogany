@@ -1158,7 +1158,7 @@ static LastNewUIDList gs_lastNewUIDList;
 // various MailFolderCC statics
 // ----------------------------------------------------------------------------
 
-String MailFolderCC::ms_LastCriticalFolder = _T("");
+String MailFolderCC::ms_LastCriticalFolder = wxEmptyString;
 
 // ----------------------------------------------------------------------------
 // functions working with IMAP specs and flags
@@ -1344,7 +1344,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
                                "root MH directory '%s'."),
                             p, mhRoot.c_str());
 
-                  return _T("");
+                  return wxEmptyString;
                }
             }
 
@@ -1482,7 +1482,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
 static
 String GetFirstPartFromImapSpec(const String &imap)
 {
-   if(imap[0] != '{') return _T("");
+   if(imap[0] != '{') return wxEmptyString;
    String first;
    const wxChar *cptr = imap.c_str()+1;
    while(*cptr && *cptr != '}')
@@ -1502,7 +1502,7 @@ String GetPathFromImapSpec(const String &imap)
    if(*cptr == '}')
       return cptr+1;
    else
-      return _T(""); // error
+      return wxEmptyString; // error
 }
 
 // ----------------------------------------------------------------------------
@@ -5296,7 +5296,7 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
    }
    else
    {
-      ms_LastCriticalFolder = _T("");
+      ms_LastCriticalFolder = wxEmptyString;
    }
 }
 
@@ -5306,7 +5306,7 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
 void
 MailFolderCC::mm_nocritical(MAILSTREAM *stream)
 {
-   ms_LastCriticalFolder = _T("");
+   ms_LastCriticalFolder = wxEmptyString;
    if ( stream )
    {
       MailFolderCC *mf = LookupObject(stream);

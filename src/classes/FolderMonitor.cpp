@@ -195,7 +195,7 @@ class FolderMonitorTraversal : public MFolderTraversal
 {
 public:
    FolderMonitorTraversal(FolderMonitorFolderList& list)
-      : MFolderTraversal(*(m_folder = MFolder::Get(_T("")))), m_list(list)
+      : MFolderTraversal(*(m_folder = MFolder::Get(wxEmptyString))), m_list(list)
       { }
    ~FolderMonitorTraversal()
       { m_folder->DecRef(); }

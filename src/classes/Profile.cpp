@@ -551,7 +551,7 @@ Profile::CreateGlobalConfig(const String& filename)
 
    gs_allConfigSources = AllConfigSources::Init(filename);
 
-   Profile *p = ProfileImpl::CreateProfile(_T(""),NULL);
+   Profile *p = ProfileImpl::CreateProfile(wxEmptyString,NULL);
    EnforcePolicy(p);
    return p;
 }
@@ -784,7 +784,7 @@ ProfileImpl::GetIdentity(void) const
 {
    PCHECK();
 
-   return m_Identity ? m_Identity->GetName() : String(_T(""));
+   return m_Identity ? m_Identity->GetName() : String(wxEmptyString);
 }
 
 // ----------------------------------------------------------------------------
@@ -1118,7 +1118,7 @@ void RestoreArray(wxConfigBase *conf, wxArrayString& astr, const String& key)
       if ( !conf->HasEntry(path+strkey) )
          break;
 
-      strVal = conf->Read(path+strkey, _T(""));
+      strVal = conf->Read(path+strkey, wxEmptyString);
       astr.Add(strVal);
    }
 }

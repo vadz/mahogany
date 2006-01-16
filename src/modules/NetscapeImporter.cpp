@@ -1177,7 +1177,7 @@ bool MNetscapeImporter::ImportNetworkSettings ( MyHashTable& tbl )
   // set the imap host to nil (at least until implemented!)
   // Silly, but to insure that the right WriteProfileEntry
   // is called, not the bool one
-  wxString tmp = _T("");
+  wxString tmp = wxEmptyString;
   WriteProfileEntry(MP_IMAPHOST, tmp, _T("imap server name"));
 
   // for (int i=0; map[i].npKey != "END"; i++)

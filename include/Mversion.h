@@ -21,11 +21,11 @@
 #define M_VERSION_MAJOR   0
 #define M_VERSION_MINOR   66
 #define M_VERSION_RELEASE 0
-#define M_VERSION_STATUS  _T("") // "a"=alpha
+#define M_VERSION_STATUS  wxEmptyString // "a"=alpha
 
 /// the macros to build the version string from the components
-#define M_VER_STR(x) #x
-#define M_MAKE_VERSION(a, b, c) M_VER_STR(a) "." M_VER_STR(b) "." M_VER_STR(c)
+#define M_VER_STR(x) _T(#x)
+#define M_MAKE_VERSION(a, b, c) M_VER_STR(a) _T(".") M_VER_STR(b) _T(".") M_VER_STR(c)
 
 /// short version string (it should always have this format!)
 #define M_VERSION         \

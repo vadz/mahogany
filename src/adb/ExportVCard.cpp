@@ -99,7 +99,7 @@ bool AdbVCardExporter::DoExportEntry(const AdbEntry& entry,
    {
       vcard.SetName(familyName,
                     firstName,
-                    _T(""), // no middle name in the ADB
+                    wxEmptyString, // no middle name in the ADB
                     prefix);
    }
    else

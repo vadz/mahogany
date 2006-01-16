@@ -460,7 +460,7 @@ ExtractListPostAddress(const String& listPostHeader)
                {
                   wxLogDebug(_T("Unknown URL scheme in List-Post (%s)"),
                              listPostHeader.c_str());
-                  return _T("");
+                  return wxEmptyString;
                }
 
                String listPostAddress;
@@ -504,7 +504,7 @@ ExtractListPostAddress(const String& listPostHeader)
             if ( p[1] == 'O' )
             {
                // posting is forbidden, hence no list posting address
-               return _T("");
+               return wxEmptyString;
             }
             //else: fall through
 
@@ -514,7 +514,7 @@ ExtractListPostAddress(const String& listPostHeader)
             // this code
             wxLogDebug(_T("Malformed List-Post header '%s'!"),
                        listPostHeader.c_str());
-            return _T("");
+            return wxEmptyString;
       }
    }
 }

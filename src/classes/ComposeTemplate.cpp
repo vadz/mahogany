@@ -475,7 +475,7 @@ static TemplatePopupMenuItem gs_popupMenu[] =
 };
 
 const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
-   TemplatePopupMenuItem(_T(""), gs_popupMenu, WXSIZEOF(gs_popupMenu));
+   TemplatePopupMenuItem(wxEmptyString, gs_popupMenu, WXSIZEOF(gs_popupMenu));
 
 // ============================================================================
 // implementation
@@ -803,7 +803,7 @@ ExpansionSink::InsertTextInto(Composer& cv) const
 
 const wxChar *VarExpander::ms_templateVarCategories[] =
 {
-   _T(""),
+   wxEmptyString,
    _T("file"),
    _T("attach"),
    _T("cmd"),
@@ -1100,7 +1100,7 @@ VarExpander::ExpandAttach(const String& name,
       // guess MIME type from extension
       m_sink.InsertAttachment(wxStrdup(value->c_str()),
                               value->length(),
-                              _T(""), // will be determined from filename laer
+                              wxEmptyString, // will be determined from filename laer
                               filename);
 
       // avoid inserting file as text additionally
@@ -1351,7 +1351,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                String str;
                m_msg->WriteToString(str);
                m_sink.InsertAttachment(wxStrdup(str), str.Length(),
-                                       _T("message/rfc822"), _T(""));
+                                       _T("message/rfc822"), wxEmptyString);
             }
             else
             {
@@ -1576,7 +1576,7 @@ extern String QuoteText(const String& text,
                         Profile *profile,
                         Message *msgOriginal)
 {
-   CHECK( profile && msgOriginal, _T(""), _T("NULL parameters in QuoteText") );
+   CHECK( profile && msgOriginal, wxEmptyString, _T("NULL parameters in QuoteText") );
 
    const String prefix = GetReplyPrefix(msgOriginal, profile);
 

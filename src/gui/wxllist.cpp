@@ -178,7 +178,7 @@ bool Contains(const wxRect &r, const wxPoint &p)
 static
 void ReadString(wxString &to, wxString &from)
 {
-   to = _T("");
+   to = wxEmptyString;
    const wxChar *cptr = from.c_str();
    while(*cptr && *cptr != '\n')
       to += *cptr++;
@@ -1431,7 +1431,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    wxLOiterator copyObject = m_ObjectList.end();
    // if we split a text-object, we must pre-pend some text to the
    // next line later on, remember it here:
-   wxString prependText = _T("");
+   wxString prependText = wxEmptyString;
    // we might need to adjust the cursor position later, so remember it
    size_t xpos = llist->GetCursorPos().x;
    // by how much did we shorten the current line:

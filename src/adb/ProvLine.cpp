@@ -232,7 +232,7 @@ DEFINE_REF_COUNTER(LineBook)
 // Duplicate of FCBook::GetFullAdbPath. It should be shared somehow.
 String LineBook::GetFullAdbPath(const String& filename)
 {
-   CHECK( !filename.empty(), _T(""), _T("ADB without name?") );
+   CHECK( !filename.empty(), wxEmptyString, _T("ADB without name?") );
    
    String path;
    if ( wxIsAbsolutePath(filename) )
@@ -367,7 +367,7 @@ bool LineBook::Flush()
 {
    if ( IsDirty() )
    {
-      String commit = wxFileName::CreateTempFileName(_T(""));
+      String commit = wxFileName::CreateTempFileName(wxEmptyString);
       
       ofstream stream(commit.fn_str());
       if ( !stream.good() )

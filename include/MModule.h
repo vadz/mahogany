@@ -280,7 +280,7 @@ public:
        @param iface if not empty, will only return modules implementing
                     the given interface, otherwise returns all modules
    */
-   static MModuleListing * ListAvailableModules(const String& iface = _T(""));
+   static MModuleListing * ListAvailableModules(const String& iface = wxEmptyString);
 
    /** Finds the first module which provides the given interface. Only
        searches already loaded modules.

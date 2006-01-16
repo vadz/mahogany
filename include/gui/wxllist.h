@@ -264,7 +264,7 @@ typedef wxLayoutObjectList::iterator wxLOiterator;
 class wxLayoutObjectText : public wxLayoutObject
 {
 public:
-   wxLayoutObjectText(const wxString &txt = _T(""));
+   wxLayoutObjectText(const wxString &txt = wxEmptyString);
 
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
    virtual void Layout(wxDC &dc, wxLayoutList *llist);

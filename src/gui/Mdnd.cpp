@@ -117,7 +117,7 @@ void MMessagesDropTargetBase::OnLeave()
 {
    if ( GetFrame() )
    {
-      GetFrame()->SetStatusText(_T(""));
+      GetFrame()->SetStatusText(wxEmptyString);
    }
 }
 

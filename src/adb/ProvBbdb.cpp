@@ -378,12 +378,12 @@ BbdbEntry::ReadString(String * line, bool *success)
             *success = ReadNil(line);
          else
             ReadNil(line);
-         return _T("");
+         return wxEmptyString;
       }
    }
 
    strutil_delwhitespace(*line);
-   String str = _T("");
+   String str = wxEmptyString;
    const wxChar *cptr = line->c_str();
    bool escaped = false;
 
@@ -580,7 +580,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
           i++, count++)
       {
          ll = *i; // each phone number has a list of strings for itself
-         str = _T("");
+         str = wxEmptyString;
          j = ll->begin(); j++; // skip description
          for(; j != ll->end(); j++)
          {
@@ -614,12 +614,12 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
             field = AdbField_O_AddrPageFirst;
 
          ll = *i; // each address number has a list of strings for itself
-         str = _T("");
+         str = wxEmptyString;
          j = ll->begin(); j++; // skip description
          for(count2 = 1; j != ll->end(); j++,count2++)
          {
             k = (**j).begin(); // the entries are lists with one string each
-            str = _T("");
+            str = wxEmptyString;
             for(;k != (**j).end(); k++)
                str << **k << ' ';
             str = str.Left(str.Length()-1);
@@ -809,7 +809,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
 #endif
             out << "nil ";
             String home;
-            home = _T("");
+            home = wxEmptyString;
             APPEND_FIELD(AdbField_H_POBox, home);
             APPEND_FIELD(AdbField_H_Street, home);
             APPEND_FIELD(AdbField_H_Locality, home);

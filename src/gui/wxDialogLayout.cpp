@@ -232,7 +232,7 @@ wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
    c->right.SameAs(parent, wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxTextCtrl *pText = new wxTextCtrl(parent, -1, _T(""), wxDefaultPosition,
+   wxTextCtrl *pText = new wxTextCtrl(parent, -1, wxEmptyString, wxDefaultPosition,
                                       wxDefaultSize, style);
    pText->SetConstraints(c);
 
@@ -296,7 +296,7 @@ wxRadioBox *CreateRadioBox(wxWindow *parent,
    //       the options dialog, then only the first choice ("No" for the action
    //       choice) means that they should be disabled but this is really just
    //       a dirty hack
-   wxRadioBox *radiobox = new wxRadioBox(parent, -1, _T(""),
+   wxRadioBox *radiobox = new wxRadioBox(parent, -1, wxEmptyString,
                                          wxDefaultPosition, wxDefaultSize,
                                          choices,
                                          1, wxRA_SPECIFY_ROWS);
@@ -789,7 +789,7 @@ wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_RIGHT);
 
-   wxXFaceButton *btn = new wxXFaceButton(GetCanvas(), id, _T(""));
+   wxXFaceButton *btn = new wxXFaceButton(GetCanvas(), id, wxEmptyString);
 
    // for the label
    c = new wxLayoutConstraints;
@@ -875,7 +875,7 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    wxControl *combobox;
    if ( createCombobox )
    {
-      combobox = new wxComboBox(GetCanvas(), -1, _T(""),
+      combobox = new wxComboBox(GetCanvas(), -1, wxEmptyString,
                                 wxDefaultPosition, wxDefaultSize,
                                 choices,
                                 wxCB_DROPDOWN | wxCB_READONLY);

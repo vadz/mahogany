@@ -892,7 +892,7 @@ void IMAPServerPanel::OnText(wxCommandEvent& event)
             wxLogError(_("You can only migrate from or to an IMAP server."));
 
             // it was already changed by the browse button
-            m_textServer->SetValue(_T(""));
+            m_textServer->SetValue(wxEmptyString);
 
             m_folder = NULL;
 
@@ -1271,7 +1271,7 @@ MigrateWizardProgressPage::MigrateWizardProgressPage(MigrateWizard *parent)
 
    sizer->Add(0, 2*LAYOUT_Y_MARGIN);
 
-   m_labelFolder = new wxStaticText(this, -1, _T(""));
+   m_labelFolder = new wxStaticText(this, -1, wxEmptyString);
    sizer->Add(m_labelFolder, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
    m_gaugeFolder = new wxGauge(this, -1, Data().countFolders,
@@ -1279,7 +1279,7 @@ MigrateWizardProgressPage::MigrateWizardProgressPage(MigrateWizard *parent)
                                wxGA_HORIZONTAL | wxGA_SMOOTH);
    sizer->Add(m_gaugeFolder, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
-   m_labelMsg = new wxStaticText(this, -1, _T(""));
+   m_labelMsg = new wxStaticText(this, -1, wxEmptyString);
    sizer->Add(m_labelMsg, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
    m_gaugeMsg = new wxGauge(this, -1, 0, // range will be set later
@@ -1375,7 +1375,7 @@ MailFolder *
 MigrateWizardProgressPage::OpenSource(const MigrateImapServer& imapData,
                                       const String& name)
 {
-   MFolder_obj folderSrc(MFolder::CreateTemp(_T(""), MF_IMAP));
+   MFolder_obj folderSrc(MFolder::CreateTemp(wxEmptyString, MF_IMAP));
    CHECK( folderSrc, NULL, _T("MFolder::CreateTemp() failed?") );
 
    folderSrc->SetServer(imapData.server);
@@ -1449,7 +1449,7 @@ MigrateWizardProgressPage::GetDstNameForSource(const String& name)
       {
          if ( !Data().delimiterDst )
          {
-            MFolder_obj folderDst(MFolder::CreateTemp(_T(""), GetDstType()));
+            MFolder_obj folderDst(MFolder::CreateTemp(wxEmptyString, GetDstType()));
             SetAccessParameters(folderDst);
 
             Data().delimiterDst = MailFolder::GetFolderDelimiter(folderDst);
@@ -1473,7 +1473,7 @@ MigrateWizardProgressPage::GetDstFolder(const String& name, int flags)
 {
    // which kind of folder are we going to create?
    MFolderType folderType = GetDstType();
-   MFolder *folderDst = MFolder::CreateTemp(_T(""), folderType);
+   MFolder *folderDst = MFolder::CreateTemp(wxEmptyString, folderType);
    CHECK( folderDst, NULL, _T("MFolder::CreateTemp() failed?") );
 
    if ( folderType == MF_FILE )
@@ -1875,7 +1875,7 @@ wxWizardPage *MigrateWizard::GetNextPage(Page page)
       {
          MProgressInfo progress(this, _("Accessing IMAP server..."));
 
-         MFolder_obj folderSrc(MFolder::CreateTemp(_T(""), MF_IMAP));
+         MFolder_obj folderSrc(MFolder::CreateTemp(wxEmptyString, MF_IMAP));
 
          const MigrateImapServer& imapData = Data().source;
          folderSrc->SetServer(imapData.server);

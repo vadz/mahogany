@@ -644,7 +644,7 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
    else
    {
       // no folder specified, it can be changed
-      m_folderName = new wxTextCtrl(panel, Folder_Name, _T(""));
+      m_folderName = new wxTextCtrl(panel, Folder_Name, wxEmptyString);
    }
 
    c = new wxLayoutConstraints;
@@ -667,7 +667,7 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
                              wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
 
-   m_parentName = new wxTextCtrl(panel, -1, _T(""));
+   m_parentName = new wxTextCtrl(panel, -1, wxEmptyString);
    if ( m_parentFolder )
    {
       m_parentName->SetValue(m_parentFolder->GetFullName());
@@ -767,7 +767,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolderType folderType)
    if ( !m_parentFolder )
    {
       // take the root by default
-      m_parentFolder = MFolder::Get(_T(""));
+      m_parentFolder = MFolder::Get(wxEmptyString);
    }
 
    m_newFolder = m_parentFolder->CreateSubfolder(m_folderName->GetValue(),
@@ -1987,27 +1987,27 @@ wxFolderPropertiesPage::ClearInvalidFields(RadioIndex sel)
    if ( sel != Radio_News )
    {
       // this is only for news
-      m_newsgroup->SetValue(_T(""));
+      m_newsgroup->SetValue(wxEmptyString);
    }
 
    if ( sel != Radio_File )
    {
       // this is only for files
-      m_path->SetValue(_T(""));
+      m_path->SetValue(wxEmptyString);
    }
 
    if ( sel == Radio_File )
    {
       // this is for everything except local folders
-      m_server->SetValue(_T(""));
-      m_login->SetValue(_T(""));
-      m_password->SetValue(_T(""));
+      m_server->SetValue(wxEmptyString);
+      m_login->SetValue(wxEmptyString);
+      m_password->SetValue(wxEmptyString);
    }
 
    if ( sel != Radio_Imap )
    {
       // this is only for IMAP
-      m_mailboxname->SetValue(_T(""));
+      m_mailboxname->SetValue(wxEmptyString);
    }
 
 }

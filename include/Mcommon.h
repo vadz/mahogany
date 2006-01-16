@@ -115,7 +115,7 @@ extern void CloseSplash();
 #define   NULLstring wxGetEmptyString()
 
 /// defines an empty string for argument lists, needed for scandoc
-#define   M_EMPTYSTRING   _T("")
+#define   M_EMPTYSTRING   wxEmptyString
 
 // ----------------------------------------------------------------------------
 // Python macros

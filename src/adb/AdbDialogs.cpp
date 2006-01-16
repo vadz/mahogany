@@ -210,7 +210,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    //    buttons
 
    // buttons
-   (void)CreateStdButtonsAndBox(_T(""), TRUE /* no box please */);
+   (void)CreateStdButtonsAndBox(wxEmptyString, TRUE /* no box please */);
    m_btnOk = (wxButton *)FindWindow(wxID_OK);
 
    // panel for all other items
@@ -317,7 +317,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    m_listbox->SetConstraints(c);
 
    // final steps
-   String file = wxConfigBase::Get()->Read(GetFileProfilePath(), _T(""));
+   String file = wxConfigBase::Get()->Read(GetFileProfilePath(), wxEmptyString);
    if ( !file.empty() )
    {
       m_text->SetValue(file);
@@ -632,7 +632,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    }
 
    // do import
-   bool ok = AdbImport(filename, adbname, _T(""), importer);
+   bool ok = AdbImport(filename, adbname, wxEmptyString, importer);
 
    // release it only if we created it
    SafeDecRef(importer);

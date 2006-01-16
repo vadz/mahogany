@@ -135,7 +135,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
    // -------------------
 
    // first the buttons and the optional checkbox
-   wxStaticBox *box = CreateStdButtonsAndBox(_T(""));
+   wxStaticBox *box = CreateStdButtonsAndBox(wxEmptyString);
 
    if ( m_allowDisable )
    {

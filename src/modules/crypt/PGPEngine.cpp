@@ -581,7 +581,7 @@ PGPEngine::ExecCommand(const String& options,
                         keyserver.c_str(),
                         log->GetPublicKey().c_str()
                      ),
-                     _T(""),
+                     wxEmptyString,
                      messageOut,
                      log
                   );
@@ -644,7 +644,7 @@ PGPEngine::Decrypt(const String& messageIn,
       return CANNOT_EXEC_PROGRAM;
    }
 
-   return ExecCommand(tmpfname.GetName(), _T(""), messageOut, log);
+   return ExecCommand(tmpfname.GetName(), wxEmptyString, messageOut, log);
 }
 
 
@@ -681,7 +681,7 @@ PGPEngine::VerifySignature(const String& messageIn,
                            String& messageOut,
                            MCryptoEngineOutputLog *log)
 {
-   return ExecCommand(_T(""), messageIn, messageOut, log);
+   return ExecCommand(wxEmptyString, messageIn, messageOut, log);
 }
 
 PGPEngine::Status
@@ -718,7 +718,7 @@ PGPEngine::VerifyDetachedSignature(const String& message,
 
    return ExecCommand(_T("--verify ") + tmpfileSig.GetName() +
                       _T(" ") + tmpfileText.GetName(),
-                      _T(""), messageOut, log);
+                      wxEmptyString, messageOut, log);
 }
 
 // ============================================================================
@@ -752,7 +752,7 @@ PassphraseManager::Get(const String& user, String& passphrase)
                                 "user \"%s\":"), user.c_str()
                             ),
                             _("Mahogany: Please enter the passphrase"),
-                            _T(""),
+                            wxEmptyString,
                             wxOK | wxCANCEL | wxTE_PASSWORD);
 
     if ( dialog.ShowModal() != wxID_OK )

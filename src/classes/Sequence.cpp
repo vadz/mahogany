@@ -274,7 +274,7 @@ UIdType Sequence::GetNext(UIdType n, size_t& cookie) const
 
 String GetSequenceString(const UIdArray *messages)
 {
-   CHECK( messages, _T(""), _T("NULL messages array in GetSequenceString") );
+   CHECK( messages, wxEmptyString, _T("NULL messages array in GetSequenceString") );
 
    Sequence seq;
 

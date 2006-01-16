@@ -537,7 +537,7 @@ private:
 
          if ( isRoot )
          {
-            Append(ShowHidden, _("Show &hidden folders"), _T(""), true);
+            Append(ShowHidden, _("Show &hidden folders"), wxEmptyString, true);
          }
 
          Append(Properties, _("&Properties"));
@@ -960,7 +960,7 @@ void wxFolderTree::OnOpenHere(MFolder *folder)
    }
    else
    {
-      m_tree->SetOpenFolderName(_T(""));
+      m_tree->SetOpenFolderName(wxEmptyString);
    }
 }
 
@@ -1286,7 +1286,7 @@ bool wxFolderTree::OnClose(MFolder *folder)
                _("Folder '%s' closed."),
                folder->GetFullName().c_str());
 
-   m_tree->SetOpenFolderName(_T(""));
+   m_tree->SetOpenFolderName(wxEmptyString);
 
    return true;
 }
@@ -1801,7 +1801,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 #endif // wxUSE_DRAG_AND_DROP
 
    // create the root item
-   MFolder *folderRoot = MFolder::Get(_T(""));
+   MFolder *folderRoot = MFolder::Get(wxEmptyString);
    m_current = new wxFolderTreeNode(this, folderRoot);
 
    // register with the event manager
@@ -3225,7 +3225,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       MEventWithFolderData& event = (MEventWithFolderData &)ev;
       if ( m_openFolderName == event.GetFolder()->GetName() )
       {
-         SetOpenFolderName(_T(""));
+         SetOpenFolderName(wxEmptyString);
       }
    }
 
@@ -3633,7 +3633,7 @@ String GetFolderIconName(size_t n)
    ASSERT_MSG( wxFolderTree::iconFolderMax == WXSIZEOF(aszImages),
                _T("bad number of icon names") );
 
-   CHECK( n < WXSIZEOF(aszImages), _T(""), _T("invalid icon index") );
+   CHECK( n < WXSIZEOF(aszImages), wxEmptyString, _T("invalid icon index") );
 
    return aszImages[n];
 }

@@ -109,7 +109,7 @@ public:
       @return true if the message is deemed to be a spam, false otherwise
     */
    static bool CheckIfSpam(const Message& msg,
-                           const String& param = _T(""),
+                           const String& param = wxEmptyString,
                            String *result = NULL);
 
    /**

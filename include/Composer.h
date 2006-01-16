@@ -198,8 +198,8 @@ public:
        @param BCC blind carbon copy addresses
    */
    void SetAddresses(const String& to,
-                     const String& cc = _T(""),
-                     const String& bcc = _T(""))
+                     const String& cc = wxEmptyString,
+                     const String& bcc = wxEmptyString)
    {
       AddRecipients(to, Recipient_To);
       AddRecipients(cc, Recipient_Cc);

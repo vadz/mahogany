@@ -1967,7 +1967,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
       // we have a handy function in wxFileType which will replace
       // '%s' with the file name or add the file name at the end if
       // there is no '%s'
-      wxFileType::MessageParameters params(sound, _T(""));
+      wxFileType::MessageParameters params(sound, wxEmptyString);
       String command = wxFileType::ExpandCommand(soundCmd, params);
 
       wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ReportNewMail(): playing '%s'"),

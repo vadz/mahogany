@@ -411,12 +411,12 @@ public:
          if(m_Module) m_Module->IncRef();
          return m_Module;
       }
-   MModuleListingEntryImpl(const String &name = _T(""),
-                           const String &interfaceName = _T(""),
-                           const String &shortdesc = _T(""),
-                           const String &desc = _T(""),
-                           const String &version = _T(""),
-                           const String &author = _T(""),
+   MModuleListingEntryImpl(const String &name = wxEmptyString,
+                           const String &interfaceName = wxEmptyString,
+                           const String &shortdesc = wxEmptyString,
+                           const String &desc = wxEmptyString,
+                           const String &version = wxEmptyString,
+                           const String &author = wxEmptyString,
                            MModule *module = NULL)
       {
          m_Name = name;
@@ -502,7 +502,7 @@ private:
 // this function can list all loaded modules (default) or do other things as
 // well depending on the parameters values, so the name is a bit unfortunate
 static MModuleListing *
-DoListLoadedModules(bool listall = false, const String& interfaceName = _T(""))
+DoListLoadedModules(bool listall = false, const String& interfaceName = wxEmptyString)
 {
 #ifdef USE_MODULES_STATIC
    wxArrayString modulesNot;
@@ -544,7 +544,7 @@ DoListLoadedModules(bool listall = false, const String& interfaceName = _T(""))
                   me->m_Name, // module name
                   me->m_Interface,
                   me->m_Description,
-                  _T(""), // long description
+                  wxEmptyString, // long description
                   String(me->m_Version) + _(" (builtin)"),
                   _T("mahogany-developers@lists.sourceforge.net"),
                   me->m_Module
@@ -569,9 +569,9 @@ DoListLoadedModules(bool listall = false, const String& interfaceName = _T(""))
                                  m->GetName(), // module name
                                  m->GetInterface(),
                                  m->GetDescription(),
-                                 _T(""), // long description
+                                 wxEmptyString, // long description
                                  m->GetVersion(),
-                                 _T(""), // author
+                                 wxEmptyString, // author
                                  m
                               );
       (*listing)[count++] = entry;
@@ -840,7 +840,7 @@ GetMModuleProperty(const ModuleProperty *table, const wxChar *name)
       table++;
    }
 
-   return _T("");
+   return wxEmptyString;
 }
 
 MModuleCommon::~MModuleCommon()

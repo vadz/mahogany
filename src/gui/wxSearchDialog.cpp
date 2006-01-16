@@ -144,7 +144,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    wxStaticText *label;
 
    // the buttons at the bottom
-   CreateStdButtonsAndBox(_T(""), StdBtn_NoBox, MH_DIALOG_SEARCHMSGS);
+   CreateStdButtonsAndBox(wxEmptyString, StdBtn_NoBox, MH_DIALOG_SEARCHMSGS);
 
    // the "where to search" box
    wxStaticBox *box = new wxStaticBox(this, -1, _("&Search for messages"));

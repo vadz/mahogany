@@ -220,7 +220,7 @@ bool DoAdbImport(const String& filename,
    {
       // start importing: recursively copy all entries from the foreign ADB into
       // the native one
-      ok = AdbImportGroup(importer, group, _T(""));
+      ok = AdbImportGroup(importer, group, wxEmptyString);
    }
 
    return ok;

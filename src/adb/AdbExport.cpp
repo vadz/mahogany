@@ -43,5 +43,5 @@ bool AdbExport(AdbEntryGroup& group,
                AdbExporter& exporter)
 {
    // simple...
-   return exporter.Export(group, _T(""));
+   return exporter.Export(group, wxEmptyString);
 }

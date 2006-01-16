@@ -935,7 +935,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                   if ( !folder )
                   {
                      // use root folder if no selection
-                     folder = MFolder::Get(_T(""));
+                     folder = MFolder::Get(wxEmptyString);
                   }
 
                   // do create them
@@ -990,7 +990,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             {
                MFolder *folder = m_FolderTree->GetSelection();
                if ( !folder )
-                  folder = MFolder::Get(_T(""));
+                  folder = MFolder::Get(wxEmptyString);
 
                int nUpdated = UpdateFoldersSubtree(*folder, this);
                if ( nUpdated < 0 )
@@ -1213,7 +1213,7 @@ wxMainFrame::MakeModulesMenu(void)
       wxCHECK_RET( menuBar, _T("no menu bar in the main frame?") );
 
       // create the modules menu:
-      m_ModulesMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
+      m_ModulesMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
 
       int pos = menuBar->GetMenuCount();
       wxASSERT_MSG(pos > 1, _T("no menus in the main frame menubar?") );

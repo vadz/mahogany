@@ -70,7 +70,7 @@ struct ConfigValueDefault
 
 struct ConfigValueNone : public ConfigValueDefault
 {
-   ConfigValueNone() : ConfigValueDefault(_T(""),0L) { }
+   ConfigValueNone() : ConfigValueDefault(wxEmptyString,0L) { }
 };
 
 typedef const ConfigValueDefault *ConfigValuesArray;

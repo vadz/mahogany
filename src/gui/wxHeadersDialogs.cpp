@@ -451,7 +451,7 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
 
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      def = m_profile->readEntry(ms_profileNamesDefault[header], _T(""));
+      def = m_profile->readEntry(ms_profileNamesDefault[header], wxEmptyString);
 
       m_textvalues[header]->SetValue(def);
       m_textvalues[header]->DiscardEdits();
@@ -1056,7 +1056,7 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
    {
       const String name = pathBase + gs_customHeaderSubgroups[type];
       const String value = strutil_flatten_array(headersFor[type]);
-      if ( m_profile->readEntry(name, _T("")) != value )
+      if ( m_profile->readEntry(name, wxEmptyString) != value )
          m_profile->writeEntry(name, value);
    }
 
@@ -1189,7 +1189,7 @@ bool ConfigureCustomHeader(Profile *profile,
       path.clear();
       path << CUSTOM_HEADERS_PREFIX << gs_customHeaderSubgroups[type];
       wxArrayString
-         headerNames = strutil_restore_array(profile->readEntry(path, _T("")));
+         headerNames = strutil_restore_array(profile->readEntry(path, wxEmptyString));
       if ( headerNames.Index(*headerName) == wxNOT_FOUND )
       {
          headerNames.Add(*headerName);
@@ -1239,7 +1239,7 @@ size_t GetCustomHeaders(Profile *profile,
 
       // get the names of custom headers for this type
       String hdrs
-          = profile->readEntry(pathBase + gs_customHeaderSubgroups[type], _T(""));
+          = profile->readEntry(pathBase + gs_customHeaderSubgroups[type], wxEmptyString);
 
       // if we have any ...
       if ( !hdrs.empty() )
@@ -1256,7 +1256,7 @@ size_t GetCustomHeaders(Profile *profile,
                  << ':' << gs_customHeaderSubgroups[type];
 
             names->Add(name);
-            values->Add(profile->readEntry(path, _T("")));
+            values->Add(profile->readEntry(path, wxEmptyString));
             if ( types )
                types->Add(type);
          }

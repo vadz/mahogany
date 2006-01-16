@@ -163,7 +163,7 @@ String
 MailFolderVirt::GetFullImapSpec(const MFolder *folder,
                                 const String& /* login */)
 {
-   CHECK( folder, _T(""), _T("NULL folder in MailFolderVirt::GetFullImapSpec") );
+   CHECK( folder, wxEmptyString, _T("NULL folder in MailFolderVirt::GetFullImapSpec") );
 
    String spec;
    spec << folder->GetFullName() << ';' << folder->GetPath();

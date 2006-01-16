@@ -80,7 +80,7 @@ void
 strutil_getstrline(istream &istr, String &str)
 {
    char ch;
-   str = _T("");
+   str = wxEmptyString;
    for(;;)
    {
       istr.get(ch);
@@ -94,7 +94,7 @@ void
 strutil_getfoldedline(istream &istr, String &str)
 {
    char ch;
-   str = _T("");
+   str = wxEmptyString;
    for(;;)
    {
       istr.get(ch);
@@ -118,7 +118,7 @@ strutil_getfoldedline(istream &istr, String &str)
 String
 strutil_before(const String &str, const wxChar delim)
 {
-   String newstr = _T("");
+   String newstr = wxEmptyString;
    const wxChar *cptr = str.c_str();
    while(*cptr && *cptr != delim)
       newstr += *cptr++;
@@ -128,7 +128,7 @@ strutil_before(const String &str, const wxChar delim)
 String
 strutil_after(const String &str, const wxChar delim)
 {
-   String newstr = _T("");
+   String newstr = wxEmptyString;
    const wxChar *cptr = str.c_str();
    while(*cptr && *cptr != delim)
       cptr++;
@@ -143,7 +143,7 @@ strutil_after(const String &str, const wxChar delim)
 void
 strutil_delwhitespace(String &str)
 {
-   String newstr = _T("");
+   String newstr = wxEmptyString;
 
    const wxChar *cptr = str.c_str();
    while(wxIsspace(*cptr))
@@ -156,7 +156,7 @@ strutil_delwhitespace(String &str)
 void
 strutil_toupper(String &str)
 {
-   String s = _T("");
+   String s = wxEmptyString;
    const wxChar *cptr = str.c_str();
    while(*cptr)
       s += toupper(*cptr++);
@@ -166,7 +166,7 @@ strutil_toupper(String &str)
 void
 strutil_tolower(String &str)
 {
-   String s = _T("");
+   String s = wxEmptyString;
    const wxChar *cptr = str.c_str();
    while(*cptr)
       s += tolower(*cptr++);
@@ -453,7 +453,7 @@ strutil_expandpath(const String &ipath)
    String path;
 
    if(strutil_isempty(ipath))
-      return _T("");
+      return wxEmptyString;
 
    if(ipath[0u]=='~')
    {
@@ -499,7 +499,7 @@ strutil_path_parent(String const &path, wxChar separator)
 {
    const wxChar *cptr = wxStrrchr(path.c_str(),separator);
    if(cptr == NULL) // not found
-      return _T("");
+      return wxEmptyString;
 
    return path.Left(cptr - path.c_str());
 }
@@ -515,7 +515,7 @@ strutil_path_filename(String const &path, wxChar separator)
 {
    const wxChar *cptr = wxStrrchr(path.c_str(),separator);
    if(cptr == NULL) // not found
-      return _T("");
+      return wxEmptyString;
 
    return String(cptr+1);
 }
@@ -535,7 +535,7 @@ strutil_enforceCRLF(String const &in)
    bool has_cr =  false;
 
    if(! cptr)
-      return _T("");
+      return wxEmptyString;
    while(*cptr)
    {
       switch(*cptr)
@@ -631,7 +631,7 @@ struct CryptData
 
    String ToHex(void)
       {
-         String to = _T("");
+         String to = wxEmptyString;
          String tmp;
          for(size_t i = 0; i < len; i++)
          {
@@ -650,7 +650,7 @@ struct CryptData
          int val, idx = 0;
          while(*cptr)
          {
-            tmp = _T("");
+            tmp = wxEmptyString;
             tmp << *cptr << *(cptr+1);
             cptr += 2;
             wxSscanf(tmp.c_str(), _T("%02x"), &val);
@@ -815,7 +815,7 @@ strutil_encrypt_tf(const String &original)
       ERRORMESSAGE((_("Impossible to use encryption without password.")));
    }
 
-   return _T("");
+   return wxEmptyString;
 }
 
 static String
@@ -824,7 +824,7 @@ strutil_decrypt_tf(const String &original)
    if(! strutil_has_twofish)
    {
       ERRORMESSAGE((_("Strong encryption algorithm not available.")));
-      return _T("");
+      return wxEmptyString;
    }
    if ( !setup_twofish() )
    {
@@ -839,7 +839,7 @@ strutil_decrypt_tf(const String &original)
    {
       return output.data;
    }
-   return _T("");
+   return wxEmptyString;
 }
 
 /* This is not strictly a string utility function, but somehow it is,
@@ -938,7 +938,7 @@ String
 strutil_encrypt(const String &original)
 {
    if(original.Length() == 0)
-      return _T("");
+      return wxEmptyString;
 
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
@@ -1008,7 +1008,7 @@ String
 strutil_decrypt(const String &original)
 {
    if(original.Length() == 0)
-      return _T("");
+      return wxEmptyString;
 
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
@@ -1021,7 +1021,7 @@ strutil_decrypt(const String &original)
    {
       wxLogWarning(_("Decrypt function called with illegal string."));
 
-      return _T("");
+      return wxEmptyString;
    }
 
    String
@@ -1034,12 +1034,12 @@ strutil_decrypt(const String &original)
    unsigned int i;
    while(*cptr)
    {
-      tmpstr = _T("");
+      tmpstr = wxEmptyString;
       tmpstr << *cptr << *(cptr+1);
       cptr += 2;
       wxSscanf(tmpstr.c_str(), _T("%02x"), &i);
       pair[0] = (unsigned char) i;
-      tmpstr = _T("");
+      tmpstr = wxEmptyString;
       tmpstr << *cptr << *(cptr+1);
       cptr += 2;
       wxSscanf(tmpstr.c_str(), _T("%02x"), &i);

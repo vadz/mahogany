@@ -300,7 +300,7 @@ public:
               AdbTreeNode *parent,
               bool onClipboard = FALSE);
     // a special ctor used by derived classes
-  AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, _T(""), 0)
+  AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, wxEmptyString, 0)
     { m_bWasExpanded = FALSE; m_pGroup = NULL; }
 
     // dtor deletes all children
@@ -1453,7 +1453,7 @@ void wxAdbEditFrame::RestoreSettings1()
       AdbDataProvider::GetProviderByName(_T("PasswdDataProvider"));
     if ( provPasswd )
     {
-      m_astrAdb.Add(_T(""));  // no name for this provider
+      m_astrAdb.Add(wxEmptyString);  // no name for this provider
       m_astrProviders.Add(provPasswd->GetProviderName());
 
       provPasswd->DecRef();
@@ -1874,7 +1874,7 @@ void wxAdbEditFrame::AdvanceToNextFound()
     else {
       // remove the string which might have been left since the last time we
       // were called
-      SetStatusText(_T(""));
+      SetStatusText(wxEmptyString);
     }
 
     MoveSelection(m_aFindResults[m_nFindIndex]);
@@ -2454,11 +2454,11 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
       SetStatusText(((AdbTreeBook *)m_current)->GetName(), 0);
     }
     else {
-      SetStatusText(_T(""), 0);
+      SetStatusText(wxEmptyString, 0);
     }
 
     // clear the text set previously
-    SetStatusText(_T(""), 1);
+    SetStatusText(wxEmptyString, 1);
   }
   else {
     wxString str;
@@ -2800,14 +2800,14 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
        dy = (heightText - heightLabel)/2;
 
   // static box around everything except buttons
-  (void)new wxStaticBox(this, -1, _T(""),  wxPoint(LAYOUT_X_MARGIN, 0),
+  (void)new wxStaticBox(this, -1, wxEmptyString,  wxPoint(LAYOUT_X_MARGIN, 0),
                         wxSize(widthDlg - 2*LAYOUT_X_MARGIN,
                                heightDlg - 2*LAYOUT_Y_MARGIN - heightBtn));
 
   // label and text control
   (void)new wxStaticText(this, -1, label, wxPoint(x, y + dy),
             wxSize(widthLabel, heightLabel));
-  m_textWhat = new wxTextCtrl(this, -1, _T(""),
+  m_textWhat = new wxTextCtrl(this, -1, wxEmptyString,
                               wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                               wxSize(widthText, heightText));
 
@@ -2953,7 +2953,7 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
        dy = (heightText - heightLabel) / 2;
 
   // a box around all entries
-  (void)new wxStaticBox(this, -1, _T(""),
+  (void)new wxStaticBox(this, -1, wxEmptyString,
                         wxPoint(LAYOUT_X_MARGIN, 0),
                         wxSize(widthDlg - 2*LAYOUT_X_MARGIN,
                                heightDlg - 2*LAYOUT_Y_MARGIN - heightBtn));
@@ -2961,7 +2961,7 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
   // label and the text
   (void)new wxStaticText(this, -1, label, wxPoint(x, y + dy),
                          wxSize(widthLabel, heightLabel));
-  m_textName = new wxTextCtrl(this, -1, _T(""),
+  m_textName = new wxTextCtrl(this, -1, wxEmptyString,
                               wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                               wxSize(widthText, heightText));
 
@@ -3016,7 +3016,7 @@ bool wxADBCreateDialog::TransferDataFromWindow()
 // wxADBPropertiesDialog dialog
 // ----------------------------------------------------------------------------
 wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book)
-                     : wxDialog(parent, -1, _T(""),
+                     : wxDialog(parent, -1, wxEmptyString,
                                 wxDefaultPosition,
                                 wxDefaultSize,
                                 wxDEFAULT_DIALOG_STYLE)
@@ -3062,7 +3062,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   SetClientSize(widthDlg, heightDlg);
 
   // and a box around all entries
-  (void)new wxStaticBox(this, -1, _T(""),
+  (void)new wxStaticBox(this, -1, wxEmptyString,
                         wxPoint(LAYOUT_X_MARGIN, 0 /*LAYOUT_Y_MARGIN*/),
                         wxSize(widthDlg - 2*LAYOUT_X_MARGIN,
                                heightDlg - 3*LAYOUT_Y_MARGIN - heightBtn));
@@ -3081,16 +3081,16 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   wxSize sizeText(widthText, heightText);
   x = 3*LAYOUT_X_MARGIN + widthLabelMax;
   y = 2*LAYOUT_Y_MARGIN;
-  m_textName = new wxTextCtrl(this, -1, _T(""), wxPoint(x, y), sizeText);
+  m_textName = new wxTextCtrl(this, -1, wxEmptyString, wxPoint(x, y), sizeText);
   y += heightText;
-  m_textFileName = new wxTextCtrl(this, -1, _T(""),
+  m_textFileName = new wxTextCtrl(this, -1, wxEmptyString,
                                   wxPoint(x, y + dy), sizeText, wxTE_READONLY);
   y += heightText;
-  m_staticFileSize = new wxStaticText(this, -1, _T(""), wxPoint(x, y + dy), sizeLabel);
+  m_staticFileSize = new wxStaticText(this, -1, wxEmptyString, wxPoint(x, y + dy), sizeLabel);
   y += heightText;
-  m_textDescription = new wxTextCtrl(this, -1, _T(""), wxPoint(x, y), sizeText);
+  m_textDescription = new wxTextCtrl(this, -1, wxEmptyString, wxPoint(x, y), sizeText);
   y += heightText;
-  m_staticNumEntries = new wxStaticText(this, -1, _T(""), wxPoint(x, y + dy), sizeLabel);
+  m_staticNumEntries = new wxStaticText(this, -1, wxEmptyString, wxPoint(x, y + dy), sizeLabel);
 
   // finally add buttons
   wxButton *btnOk = new
@@ -3518,7 +3518,7 @@ wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxChar *label,
   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
   c->height.AsIs();
-  wxTextCtrl *pText = new wxTextCtrl(this, -1, _T(""));
+  wxTextCtrl *pText = new wxTextCtrl(this, -1, wxEmptyString);
   pText->SetConstraints(c);
 
   return pText;
@@ -3528,7 +3528,7 @@ wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxChar *label,
 wxTextCtrl *wxAdbPage::CreateMultiLineText(const wxChar *label, wxControl *last)
 {
   wxStaticText *pLabel = new wxStaticText(this, -1, label);
-  wxTextCtrl *textComments = new wxTextCtrl(this, -1, _T(""),
+  wxTextCtrl *textComments = new wxTextCtrl(this, -1, wxEmptyString,
                                             wxDefaultPosition, wxDefaultSize,
                                             wxTE_MULTILINE);
   LayoutBelow(textComments, pLabel, last);

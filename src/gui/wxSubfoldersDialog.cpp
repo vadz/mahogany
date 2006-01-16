@@ -309,7 +309,7 @@ class wxFolderNameTextCtrl : public wxTextCtrl
 public:
    // ctor
    wxFolderNameTextCtrl(wxSubscriptionDialog *dialog)
-      : wxTextCtrl(dialog, -1, _T(""),
+      : wxTextCtrl(dialog, -1, wxEmptyString,
                    wxDefaultPosition, wxDefaultSize,
                    wxTE_PROCESS_TAB)
    {
@@ -785,7 +785,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 
    // create controls
    wxLayoutConstraints *c;
-   m_box = CreateStdButtonsAndBox(_T("")); // label will be set later
+   m_box = CreateStdButtonsAndBox(wxEmptyString); // label will be set later
 
    // first create the label, then the text control - we rely on it in
    // OnNoMoreFolders()
@@ -1213,7 +1213,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
                      (
                         _T("*"),     // everything
                         FALSE,       // subscribed only?
-                        _T(""),      // path relative to the folder
+                        wxEmptyString,      // path relative to the folder
                         this         // data to pass to the callback
                      );
 

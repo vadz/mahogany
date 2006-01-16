@@ -418,7 +418,7 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
 
    m_textFileName->SetValue(
       mApplication->GetProfile()->readEntry(ms_profilePathLastFile,
-                                            _T("")));
+                                            wxEmptyString));
 
    m_textCategoryName->SetValue(
       mApplication->GetProfile()->readEntry(ms_profilePathLastCategory,

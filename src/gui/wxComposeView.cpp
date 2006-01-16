@@ -428,7 +428,7 @@ public:
    wxTextCtrlProcessingEnter(wxWindow *parent, long style = 0)
       : wxTextCtrl(parent,
                    -1,
-                   _T(""),
+                   wxEmptyString,
                    wxDefaultPosition,
                    wxDefaultSize,
                    style | wxTE_PROCESS_ENTER)
@@ -1202,7 +1202,7 @@ void wxRcptMainControl::OnAdd()
    m_composeView->AddRecipients(GetText()->GetValue(), addrType);
 
    // clear the entry zone as recipient(s) were moved elsewhere
-   GetText()->SetValue(_T(""));
+   GetText()->SetValue(wxEmptyString);
 }
 
 wxRcptMainControl::~wxRcptMainControl()
@@ -1525,7 +1525,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
    // first, create the composer
 
    // create dummy params object as we need one for CreateNewMessage()
-   MailFolder::Params params(_T(""));
+   MailFolder::Params params(wxEmptyString);
 
    wxComposeView *cv = (wxComposeView *)CreateNewMessage(params, profile);
 
@@ -1853,7 +1853,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
 
       wxSizer *sizerFrom = new wxBoxSizer(wxHORIZONTAL);
 
-      m_txtFrom = new wxTextCtrl(m_panel, -1, _T(""));
+      m_txtFrom = new wxTextCtrl(m_panel, -1, wxEmptyString);
       sizerFrom->Add(m_txtFrom, 1, wxALIGN_CENTRE_VERTICAL);
       SetTextAppearance(m_txtFrom);
 
@@ -2012,7 +2012,7 @@ public:
       Message_obj msg(folder->GetMessage(messages[i]));
       wxString str;
       msg->WriteToString(str);
-      m_composeView->InsertData(wxStrdup(str), str.Length(), _T("message/rfc822"), _T(""));
+      m_composeView->InsertData(wxStrdup(str), str.Length(), _T("message/rfc822"), wxEmptyString);
     }
     return true;
   }
@@ -3112,7 +3112,7 @@ void wxComposeView::SetEncodingToSameAs(const Message *msg)
 void wxComposeView::EnableEditing(bool enable)
 {
    // indicate the current state in the status bar
-   SetStatusText(enable ? _T("") : _("RO"), 1);
+   SetStatusText(enable ? wxEmptyString : _("RO"), 1);
 
    m_editor->Enable(enable);
 }
@@ -3587,7 +3587,7 @@ bool wxComposeView::StartExternalEditor()
          // we have a handy function in wxFileType which will replace
          // '%s' with the file name or add the file name at the end if
          // there is no '%s'
-         wxFileType::MessageParameters params(tmpFileName.GetName(), _T(""));
+         wxFileType::MessageParameters params(tmpFileName.GetName(), wxEmptyString);
          String command = wxFileType::ExpandCommand(extEdit, params);
 
          // do start the external process
@@ -5089,7 +5089,7 @@ bool Composer::RestoreAll()
    size_t nResumed = 0;
 
    wxString filename;
-   bool cont = dir.GetFirst(&filename, _T(""), wxDIR_FILES);
+   bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
    while ( cont )
    {
       filename = name + filename;

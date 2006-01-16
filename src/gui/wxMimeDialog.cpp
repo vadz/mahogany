@@ -103,7 +103,7 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
    // -------------------
 
    // first the buttons and the optional checkbox
-   wxStaticBox *box = CreateStdButtonsAndBox(_T(""), StdBtn_NoBox);
+   wxStaticBox *box = CreateStdButtonsAndBox(wxEmptyString, StdBtn_NoBox);
 
    // next the controls which are always shown
    wxString msg = wxString::Format

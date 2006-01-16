@@ -316,7 +316,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
                                folderName,
                                MF_GROUP,
                                0,
-                               _T(""),
+                               wxEmptyString,
                                FALSE
                               );
             }

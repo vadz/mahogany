@@ -333,7 +333,7 @@ MessageCC::GetHeaderLines(const wxChar **headersOrig,
    wxArrayString values;
    for ( headers = headersOrig; *headers; headers++ )
    {
-      values.Add(_T(""));
+      values.Add(wxEmptyString);
       if ( encodings )
       {
          encodings->Add(wxFONTENCODING_SYSTEM);
@@ -501,7 +501,7 @@ MessageCC::FetchText(void) const
    {
       if ( !m_mailFullText )
       {
-         CHECK_DEAD_RC(_T(""));
+         CHECK_DEAD_RC(wxEmptyString);
 
          if ( m_folder->Lock() )
          {

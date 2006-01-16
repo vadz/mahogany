@@ -310,7 +310,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
                                              _("MH folders"),
                                              MF_MH,
                                              0,       // flags
-                                             _T(""),
+                                             wxEmptyString,
                                              FALSE);  // don't notify
    if ( !folderMH )
    {
@@ -331,7 +331,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
       else
       {
          MHFoldersImporter importer;
-         asmf->ListFolders(_T("*"), FALSE, _T(""), &importer);
+         asmf->ListFolders(_T("*"), FALSE, wxEmptyString, &importer);
 
          ok = importer.IsOk();
 

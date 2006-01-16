@@ -110,7 +110,7 @@ public:
    virtual Status Encrypt(const String& recipient,
                           const String& messageIn,
                           String &messageOut,
-                          const String& user = _T(""),
+                          const String& user = wxEmptyString,
                           MCryptoEngineOutputLog *log = NULL) = 0;
 
    /**

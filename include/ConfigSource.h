@@ -134,8 +134,8 @@ public:
     */
    static bool Copy(ConfigSource& configDst,
                     const ConfigSource& configSrc,
-                    const String& pathDst = _T(""),
-                    const String& pathSrc = _T(""));
+                    const String& pathDst = wxEmptyString,
+                    const String& pathSrc = wxEmptyString);
 
 
    /**

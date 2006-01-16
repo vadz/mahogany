@@ -381,7 +381,7 @@ MFDialogComponent::WriteTest(void)
       else
       {
          FAIL_MSG(_T("This must not happen!"));
-         return _T("");
+         return wxEmptyString;
       }
    }
 
@@ -459,7 +459,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       && *cptr++ != ',')
       return FALSE;
 
-   m_Argument = _T("");
+   m_Argument = wxEmptyString;
    if(needsArgument)
    {
       if(*cptr != '"') return FALSE;
@@ -540,7 +540,7 @@ public:
                         bool isInverted,
                         MFDialogTest test,
                         MFDialogTarget target,
-                        String argument = _T("")
+                        String argument = wxEmptyString
       )
       {
          MOcheck();
@@ -613,7 +613,7 @@ MFDialogSettingsImpl::WriteAction(void) const
    if(m_Action < 0 || m_Action >= OAC_T_Max)
    {
       ASSERT_MSG(0, _T("illegal action - must not happen"));
-      return _T("");
+      return wxEmptyString;
    }
    bool needsArgument = FilterActionNeedsArg(m_Action);
    program << OAC_T_Names[m_Action];
@@ -662,7 +662,7 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
          return FALSE;
    }
    else
-      m_ActionArgument = _T("");
+      m_ActionArgument = wxEmptyString;
    return TRUE; // we    made it
 }
 
@@ -784,11 +784,11 @@ protected:
    MFilterFromProfile(Profile *p)
       {
          m_Profile = p;
-         m_Name = p->readEntry(MP_FILTER_NAME, _T(""));
+         m_Name = p->readEntry(MP_FILTER_NAME, wxEmptyString);
          m_Settings = NULL;
 
          // use the filter program if we have it
-         m_Rule = p->readEntry(MP_FILTER_RULE, _T(""));
+         m_Rule = p->readEntry(MP_FILTER_RULE, wxEmptyString);
          if( !m_Rule.empty() )
          {
             // try to parse the rule
@@ -806,7 +806,7 @@ protected:
          if ( m_Rule.empty() )
          {
             // use the GUI settings if no rule
-            m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, _T(""));
+            m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, wxEmptyString);
          }
 
          m_dirty = false;
@@ -889,7 +889,7 @@ bool
 MFilter::DeleteFromProfile(const String& name)
 {
    // get parent of all filters
-   Profile_obj p(Profile::CreateFilterProfile(_T("")));
+   Profile_obj p(Profile::CreateFilterProfile(wxEmptyString));
 
    bool rc;
    if ( p )
@@ -910,7 +910,7 @@ static bool CopyFilterEntry(Profile *profileSrc,
                             Profile *profileDst,
                             const String& entry)
 {
-   String value = profileSrc->readEntry(entry, _T(""));
+   String value = profileSrc->readEntry(entry, wxEmptyString);
    if ( !value.empty() )
    {
       if ( !profileDst->writeEntry(entry, value) )

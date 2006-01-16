@@ -886,7 +886,7 @@ void MsgCmdProcImpl::CheckIfSpam(const UIdArray& uids)
       String str(_("The message with subject \"%s\" from \"%s\"\n"));
 
       String result;
-      if ( SpamFilter::CheckIfSpam(*msg, _T(""), &result) )
+      if ( SpamFilter::CheckIfSpam(*msg, wxEmptyString, &result) )
       {
          wxLogWarning(str + _("seems to be a spam (%s)."),
                       msg->Subject().c_str(),

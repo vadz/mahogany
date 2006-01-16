@@ -239,7 +239,7 @@ protected:
 
    virtual bool DoReadString(const wxString& key, wxString *pStr) const
    {
-      LookupData ld(key, _T(""));
+      LookupData ld(key, wxEmptyString);
       if ( !DoRead(ld) )
          return false;
 

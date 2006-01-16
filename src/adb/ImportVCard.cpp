@@ -43,7 +43,7 @@ public:
    virtual ~AdbVCardImporter() { DeleteCards(); }
 
    // implement base class pure virtuals
-   virtual String GetDefaultFilename() const { return _T(""); }
+   virtual String GetDefaultFilename() const { return wxEmptyString; }
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
    virtual size_t GetEntryNames(const String& path,

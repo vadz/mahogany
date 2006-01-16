@@ -416,7 +416,7 @@ bool PasswdBook::IsSameAs(const String& name) const
 
 String PasswdBook::GetFileName() const
 {
-   return _T("");
+   return wxEmptyString;
 }
 
 void PasswdBook::SetName(const String& WXUNUSED(strName))

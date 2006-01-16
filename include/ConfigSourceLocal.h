@@ -33,7 +33,7 @@ public:
 
       @param filename the name of config file or empty to use the default one
     */
-   static ConfigSourceLocal *CreateDefault(const String& filename = _T(""))
+   static ConfigSourceLocal *CreateDefault(const String& filename = wxEmptyString)
    {
       ConfigSourceLocal *config = new ConfigSourceLocal();
       if ( !config->InitDefault(filename) )
@@ -52,7 +52,7 @@ public:
       file name must not be empty here.
     */
    static ConfigSourceLocal *CreateFile(const String& filename,
-                                        const String& name = _T(""))
+                                        const String& name = wxEmptyString)
    {
       ConfigSourceLocal *config = new ConfigSourceLocal(name);
       if ( !config->InitFile(filename) )

@@ -274,7 +274,7 @@ wxMFrame::AddFileMenu(void)
    // FIXME WXWIN-COMPATIBILITY
    wxMenu *fileMenu = new wxMenu();
 #else
-   wxMenu *fileMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
+   wxMenu *fileMenu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
 #endif
 
    AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
@@ -641,7 +641,7 @@ wxMFrame::OnMenuCommand(int id)
                               doExport ? _("Choose file to export settings to")
                                        : _("Choose file to import settings from"),
                               this,
-                              _T(""), _T(""), _T(""), _T(""),
+                              wxEmptyString, wxEmptyString, wxEmptyString, wxEmptyString,
                               doExport    // true => save, false => load
                           );
             if ( path.empty() )
@@ -932,7 +932,7 @@ wxMFrame::OnMenuCommand(int id)
                if ( ident == READ_APPCONFIG(MP_CURRENT_IDENTITY) )
                {
                   // can't keep this one
-                  profile->writeEntry(MP_CURRENT_IDENTITY, _T(""));
+                  profile->writeEntry(MP_CURRENT_IDENTITY, wxEmptyString);
                }
 
                // FIXME: will this really work? if there are objects which

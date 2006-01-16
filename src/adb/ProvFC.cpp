@@ -529,7 +529,7 @@ FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
     String path = GetPath();
     if ( !path || path.Last() != '/' )
        path += '/';
-    if ( !m_pConfig->Write(path, wxString(_T(""))) ) {
+    if ( !m_pConfig->Write(path, wxEmptyString) ) {
       // something went wrong, don't create this group, the next line ensures
       // that IsOk() will return FALSE
       m_pConfig = NULL;
@@ -672,7 +672,7 @@ AdbEntry *FCEntryGroup::FindEntry(const wxChar * /* szName */)
 
 String FCBook::GetFullAdbPath(const String& filename)
 {
-  CHECK( !filename.empty(), _T(""), _T("ADB without name?") );
+  CHECK( !filename.empty(), wxEmptyString, _T("ADB without name?") );
 
   String path;
   if ( wxIsAbsolutePath(filename) )

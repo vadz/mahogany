@@ -1724,7 +1724,7 @@ bool RunInstallWizard(
       // (unwanted) folders, so it doesn't hurt to have the default value
       gs_installWizardData.pop =
       gs_installWizardData.imap =
-      gs_installWizardData.nntp = _T("");
+      gs_installWizardData.nntp = wxEmptyString;
 
       // don't try to send the test message if the SMTP server wasn't
       // configured
@@ -2143,7 +2143,7 @@ UpgradeFrom010()
                     _T("/AdbEditor"), _T("/M/Profiles/AdbEditor")) )
       rc = false;
 
-   Profile_obj p(_T(""));
+   Profile_obj p(wxEmptyString);
    kbStringList
       folders;
    String
@@ -2223,7 +2223,7 @@ public:
          Profile_obj profile(folderName);
 
          Profile::ReadResult found;
-         String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, _T(""), &found);
+         String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, wxEmptyString, &found);
          if ( found == Profile::Read_FromHere )
          {
             // delete the old entry, create the new one
@@ -2257,7 +2257,7 @@ UpgradeFrom020()
     */
 
    // enumerate all folders recursively
-   MFolder_obj folderRoot(_T(""));
+   MFolder_obj folderRoot(wxEmptyString);
    UpgradeFolderFrom020Traversal traverse(folderRoot);
    traverse.Traverse();
 
@@ -2305,7 +2305,7 @@ public:
             String entry = group + templateKinds[n];
             if ( profile->HasEntry(entry) )
             {
-               String templateValue = profile->readEntry(entry, _T(""));
+               String templateValue = profile->readEntry(entry, wxEmptyString);
 
                String entryNew;
                entryNew << M_TEMPLATES_SECTION << '/'
@@ -2361,7 +2361,7 @@ UpgradeFrom050()
    // name of the template to use and not the contents of it
 
    // enumerate all folders recursively
-   MFolder_obj folderRoot(_T(""));
+   MFolder_obj folderRoot(wxEmptyString);
    TemplateFixFolderTraversal traverse(folderRoot);
    traverse.Traverse();
 
@@ -2476,7 +2476,7 @@ UpdateCustomHeadersTo064(wxConfigBase *config)
                cont = config->GetNextEntry(name, cookie) )
          {
             headerNames.Add(name);
-            headerValues.Add(config->Read(name, _T("")));
+            headerValues.Add(config->Read(name, wxEmptyString));
          }
 
          config->SetPath(_T("../.."));
@@ -2514,7 +2514,7 @@ UpdateTemplatesTo064(wxConfigBase *config)
          cont = config->GetNextEntry(name, cookie) )
    {
       names.Add(name);
-      values.Add(config->Read(name, _T("")));
+      values.Add(config->Read(name, wxEmptyString));
    }
 
    config->SetPath(_T(".."));
@@ -2673,7 +2673,7 @@ static bool
 UpgradeFrom064()
 {
    // add MF_FLAGS_MONITOR to all folders with MF_FLAGS_INCOMING flag
-   MFolder_obj folderRoot(_T(""));
+   MFolder_obj folderRoot(wxEmptyString);
    UpgradeFolderFrom064Traversal traverse(folderRoot);
 
    return traverse.Traverse();
@@ -2789,7 +2789,7 @@ static bool
 UpgradeFrom064_1()
 {
    // replace SSL flags with SSL profile settings
-   MFolder_obj folderRoot(_T(""));
+   MFolder_obj folderRoot(wxEmptyString);
    UpgradeFolderFrom0641Traversal traverse(folderRoot);
 
    // it is important to process the parent before its children because by
@@ -3409,7 +3409,7 @@ static inline MFolder *CreateServerEntry(const String& name,
                                          MFolderType type,
                                          int flags)
 {
-   return CreateFolderTreeEntry(NULL, name, type, flags, _T(""), false);
+   return CreateFolderTreeEntry(NULL, name, type, flags, wxEmptyString, false);
 }
 
 /**
@@ -3700,7 +3700,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    tmpfile.Write(msgText, msgText.Length());
    tmpfile.Close();
 
-   wxFileConfig fc(_T(""), _T(""), filename, _T(""), wxCONFIG_USE_LOCAL_FILE);
+   wxFileConfig fc(wxEmptyString, wxEmptyString, filename, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
 
    bool rc = true;
 
@@ -3762,7 +3762,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
          // refresh all existing folder trees
          MEventData *data = new MEventFolderTreeChangeData
                                 (
-                                 _T(""),
+                                 wxEmptyString,
                                  MEventFolderTreeChangeData::CreateUnder
                                 );
          MEventManager::Send(data);
@@ -3866,7 +3866,7 @@ bool SaveRemoteConfigSettings(bool confirm)
    }
 
    wxString filename = wxGetTempFileName(_T("MTemp"));
-   wxFileConfig fc(_T(""), _T(""), filename, _T(""), wxCONFIG_USE_LOCAL_FILE);
+   wxFileConfig fc(wxEmptyString, wxEmptyString, filename, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
 
    bool rc = true;
 
@@ -3989,7 +3989,7 @@ CheckConfiguration(void)
    }
 
    // do we need to upgrade something?
-   String version = profile->readEntry(MP_VERSION, _T(""));
+   String version = profile->readEntry(MP_VERSION, wxEmptyString);
    if ( version != M_VERSION )
    {
       CloseSplash();

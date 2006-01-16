@@ -859,7 +859,7 @@ PalmOSModule::Disconnect(void)
       }
    }
 
-   StatusMessage(_T(""));
+   StatusMessage(wxEmptyString);
 }
 
 // ----------------------------------------------------------------------------

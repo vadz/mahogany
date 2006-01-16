@@ -466,7 +466,7 @@ HtmlViewerWindow::HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent)
 {
    m_viewer = viewer;
 
-   SetRelatedFrame(GetFrame(parent), _T(""));
+   SetRelatedFrame(GetFrame(parent), wxEmptyString);
    SetRelatedStatusBar(0);
 }
 
@@ -625,7 +625,7 @@ void HtmlViewer::Create(MessageView *msgView, wxWindow *parent)
 void HtmlViewer::Clear()
 {
    m_window->ClearClickables();
-   m_window->SetPage(_T(""));
+   m_window->SetPage(wxEmptyString);
 
    m_htmlText.clear();
 

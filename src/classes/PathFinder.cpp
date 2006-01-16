@@ -49,7 +49,7 @@ PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
    wxChar *work = new wxChar[ipathlist.length()+1];
    wxChar   *found, *save_ptr;
    String   tmp;
-   String   subdirList = _T("");
+   String   subdirList = wxEmptyString;
 
    MOcheck();
    wxStrcpy(work,ipathlist.c_str());
@@ -104,7 +104,7 @@ PathFinder::Find(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return _T("");
+   return wxEmptyString;
 }
 
 String
@@ -128,7 +128,7 @@ PathFinder::FindFile(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return _T("");
+   return wxEmptyString;
 }
 
 String
@@ -152,7 +152,7 @@ PathFinder::FindDir(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return _T("");
+   return wxEmptyString;
 }
 
 String
@@ -176,7 +176,7 @@ PathFinder::FindDirFile(const String & filename, bool *found,
    }
    if(found)
       *found = false;
-   return _T("");
+   return wxEmptyString;
 }
 
 // static

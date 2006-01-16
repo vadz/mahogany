@@ -584,8 +584,8 @@ wxConfigBase *ConfigSourceLocal::DoCreateRegConfig()
               (
                   M_APPLICATIONNAME,
                   M_VENDORNAME,
-                  _T(""),
-                  _T(""),
+                  wxEmptyString,
+                  wxEmptyString,
                   wxCONFIG_USE_LOCAL_FILE |
                   wxCONFIG_USE_GLOBAL_FILE
               );

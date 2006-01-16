@@ -156,7 +156,7 @@ void wxFileBrowseButton::DoBrowse()
    if ( m_existingOnly )
       style |= wxFILE_MUST_EXIST;
 
-   wxFileDialog dialog(GetFrame(this), _T(""),
+   wxFileDialog dialog(GetFrame(this), wxEmptyString,
                        strLastDir, strLastFile,
                        wxGetTranslation(wxALL_FILES),
                        style);

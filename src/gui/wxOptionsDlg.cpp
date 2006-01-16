@@ -1307,7 +1307,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,
                                                   -ConfigField_ComposePreview },
 
-   { _T(""),                                           Field_Message, -1},
+   { wxEmptyString,                                Field_Message, -1},
    { gettext_noop("Show \"&From\" field"),         Field_Bool |
                                                    Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
@@ -1436,7 +1436,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prefer &HTML to plain text"),   Field_Bool, ConfigField_MessageViewAutoViewer },
    { gettext_noop("Sho&w HTML if no text"),        Field_Bool, ConfigField_MessageViewAutoViewer },
    { gettext_noop("Ensure &images are shown"),     Field_Bool, ConfigField_MessageViewAutoViewer },
-   { _T(""),                                       Field_Message, -1},
+   { wxEmptyString,                                Field_Message, -1},
 
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font,    -1 },
@@ -2854,7 +2854,7 @@ bool wxOptionsPage::TransferDataToWindow()
             if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE) )
                btnXFace->SetFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
             else
-               btnXFace->SetFile(_T(""));
+               btnXFace->SetFile(wxEmptyString);
          }
          break;
 
@@ -4533,7 +4533,7 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
    if ( profile )
       profile->IncRef();
    else
-      profile = Profile::CreateProfile(_T(""));
+      profile = Profile::CreateProfile(wxEmptyString);
 
 
    for ( size_t n = 0; n < nPages; n++ )

@@ -342,7 +342,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
 
    // a text with a label for entering the custom delimiter
    m_labelCustomSep = new wxStaticText(parent, -1, _("Field &separator:"));
-   m_textCustomSep = new wxPTextEntry(_T("AdbTextExportSep"), parent, -1, _T(""));
+   m_textCustomSep = new wxPTextEntry(_T("AdbTextExportSep"), parent, -1, wxEmptyString);
 
    c = new wxLayoutConstraints;
    c->width.Absolute(5*GetCharWidth());
@@ -359,7 +359,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
    m_labelCustomSep->SetConstraints(c);
 
    // a hack: create an invisible static to take some place
-   wxStaticText *dummy = new wxStaticText(parent, -1, _T(""));
+   wxStaticText *dummy = new wxStaticText(parent, -1, wxEmptyString);
    c = new wxLayoutConstraints;
    c->top.Below(radiobox, 2*LAYOUT_Y_MARGIN);
    c->left.AsIs();

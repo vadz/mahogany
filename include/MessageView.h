@@ -268,7 +268,7 @@ public:
    /// launch a process, returns FALSE if it failed
    bool LaunchProcess(const String& command,    // cmd to execute
                       const String& errormsg,   // err msg to give on failure
-                      const String& tempfile = _T("")); // temp file name if any
+                      const String& tempfile = wxEmptyString); // temp file name if any
 
    /// create the "View" menu for our parent frame
    virtual void CreateViewMenu();

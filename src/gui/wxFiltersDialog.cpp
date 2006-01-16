@@ -494,7 +494,7 @@ public:
    {
       MFDialogTest test = GetTest();
       if ( ! FilterTestNeedsArgument(test) )
-         return _T(""); // Don't return the value if it won't be used
+         return wxEmptyString; // Don't return the value if it won't be used
 
       switch ( test )
       {
@@ -512,7 +512,7 @@ public:
                case ORC_MF_Important: return _T("*");
                case ORC_MF_Recent:    return _T("R");
             }
-            CHECK( false, _T(""), _T("Invalid test message flag") );
+            CHECK( false, wxEmptyString, _T("Invalid test message flag") );
 
          // Argument is used, but not for spam or message flag
          default:
@@ -614,7 +614,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
 
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition,
                          wxDefaultSize, ORC_Msg_Flag_Count, msgflagsTrans);
-   m_Argument = new wxTextCtrl(parent,-1, _T(""), wxDefaultPosition);
+   m_Argument = new wxTextCtrl(parent,-1, wxEmptyString, wxDefaultPosition);
 
    wxString whereTrans[ORC_WhereCount];
    for ( size_t nWhere = 0; nWhere < ORC_WhereCountS; nWhere++ )
@@ -926,7 +926,7 @@ public:
    {
       MFDialogAction action = GetAction();
       if ( ! FilterActionNeedsArg(action) )
-         return _T(""); // Don't return the value if it won't be used
+         return wxEmptyString; // Don't return the value if it won't be used
 
       // message flags are decoded separately
       if ( FilterActionMsgFlag(GetAction()) )
@@ -940,7 +940,7 @@ public:
             case OAC_MF_Important: return _T("*");
          // case OAC_MF_Recent:    return _T("R"); // can't set
          }
-         CHECK( false, _T(""), _T("Invalid action message flag") );
+         CHECK( false, wxEmptyString, _T("Invalid action message flag") );
       }
 
       // Argument is used, but not for message flag
@@ -1038,7 +1038,7 @@ OneActionControl::OneActionControl(wxWindow *parent)
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
                              OAC_Msg_Flag_Count, msgflagsTrans);
 
-   m_Argument = new wxTextCtrl(parent, -1, _T(""));
+   m_Argument = new wxTextCtrl(parent, -1, wxEmptyString);
    m_btnFolder = new wxFolderBrowseButton(m_Argument, parent);
    m_btnColour = new wxColorBrowseButton(m_Argument, parent);
 
@@ -1172,7 +1172,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
 
    // the control allowing to edit directly the filter program
    m_textProgram = new wxTextCtrl(this, Text_Program,
-                                  _T(""),
+                                  wxEmptyString,
                                   wxDefaultPosition, wxDefaultSize,
                                   wxTE_MULTILINE);
    c = new wxLayoutConstraints;
@@ -1579,7 +1579,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_T(""), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(wxEmptyString, FALSE,
                                              MH_DIALOG_FILTERS);
 
    /* This dialog is supposed to look like this:
@@ -1825,7 +1825,7 @@ wxAllFiltersDialog::OnRenameFiter(wxCommandEvent& /* event */)
                    _("Filter renamed"),
                    _T("FilterRenameWarn"));
 #else
-   MFolder_obj folderRoot(_T(""));
+   MFolder_obj folderRoot(wxEmptyString);
    RenameAFilterTraversal traverse(folderRoot, name, nameNew);
    traverse.Traverse();
 #endif
@@ -2542,7 +2542,7 @@ static String CreateNewFilter(wxWindow *parent)
                                    M_DLG_NO_DEFAULT,
                                    M_MSGBOX_FILTER_REPLACE) )
          {
-            return _T("");
+            return wxEmptyString;
          }
       }
 

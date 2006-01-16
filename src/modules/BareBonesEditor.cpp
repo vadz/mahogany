@@ -839,7 +839,7 @@ wxBareBonesTextControl::wxBareBonesTextControl(BareBonesEditor *editor,
                                                wxWindow *parent)
                       : wxTextCtrl(parent,
                                    -1,
-                                   _T(""),
+                                   wxEmptyString,
                                    wxDefaultPosition,
                                    wxDefaultSize,
                                    // use wxTE_RICH to allow for more than 64Kb

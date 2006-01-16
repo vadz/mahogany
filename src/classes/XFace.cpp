@@ -357,7 +357,7 @@ XFace::CreateXpm(String &xpm)
    buf = strutil_strdup(data);
    ptr = buf;
 
-   xpm = _T("");
+   xpm = wxEmptyString;
    xpm +=
       _T("/* XPM */\n"
       "static char *xface[] = {\n"
@@ -455,7 +455,7 @@ XFace::CreateXpm(char ***xpm)
    (*xpm)[line++] = strutil_strdup(". c #ffffff");
    for(l = 0; l < 48; l++)
    {
-      tmp = _T("");
+      tmp = wxEmptyString;
       for(c = 0; c < 3; c++)
       {
          token = strutil_strsep(&ptr,",\n\r");
@@ -521,7 +521,7 @@ XFace::GetHeaderLine(void) const
    if(xface)
       return wxConvertMB2WX(xface);
    else
-      return _T("");
+      return wxEmptyString;
 }
 
 XFace::~XFace()

@@ -124,7 +124,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    m_checklistBox->SetConstraints(c);
 
 
-   m_textCtrl = new wxTextCtrl(this, -1, _T(""), wxDefaultPosition,
+   m_textCtrl = new wxTextCtrl(this, -1, wxEmptyString, wxDefaultPosition,
                                wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);

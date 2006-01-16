@@ -360,7 +360,7 @@ BEGIN_EVENT_TABLE(TextViewerWindow, wxTextCtrl)
 END_EVENT_TABLE()
 
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
-                : wxTextCtrl(parent, -1, _T(""),
+                : wxTextCtrl(parent, -1, wxEmptyString,
                              wxDefaultPosition,
                              parent->GetClientSize(),
                              wxTE_RICH2 |

@@ -1943,7 +1943,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
    // threading
    menu.AppendSeparator();
-   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), _T(""), TRUE);
+   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), wxEmptyString, TRUE);
    menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
 
    // add column-specific entries
@@ -1956,8 +1956,8 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
       case WXFLC_FROM:
          menu.AppendSeparator();
-         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), _T(""), TRUE);
-         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), _T(""), TRUE);
+         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), wxEmptyString, TRUE);
+         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), wxEmptyString, TRUE);
 
          if ( READ_CONFIG(profile, MP_FVIEW_NAMES_ONLY) )
          {
@@ -1972,11 +1972,11 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
       case WXFLC_SIZE:
          menu.AppendSeparator();
-         menu.Append(WXMENU_FVIEW_SIZE_AUTO, _("&Automatic units"), _T(""), wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_AUTOBYTES, _("Automatic b&yte units"), _T(""), wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_BYTES, _("Use &bytes"), _T(""), wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_KBYTES, _("Use &Kbytes"), _T(""), wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_MBYTES, _("Use &Mbytes"), _T(""), wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_AUTO, _("&Automatic units"), wxEmptyString, wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_AUTOBYTES, _("Automatic b&yte units"), wxEmptyString, wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_BYTES, _("Use &bytes"), wxEmptyString, wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_KBYTES, _("Use &Kbytes"), wxEmptyString, wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_MBYTES, _("Use &Mbytes"), wxEmptyString, wxITEM_RADIO);
 
          {
             // we rely on the fact the SIZE_XXX menu items are in the same
@@ -2711,7 +2711,7 @@ void wxFolderListCtrl::SetSortOrder(Profile *profile,
 {
    wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
                GetColumnName(col).Lower().c_str(),
-               reverse ? _(" (reverse)") : _T(""));
+               reverse ? _(" (reverse)") : wxEmptyString);
 
    profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
 

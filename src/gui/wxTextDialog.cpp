@@ -163,7 +163,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
    // create controls
    // ---------------
 
-   m_text = new wxTextCtrl(this, -1, _T(""),
+   m_text = new wxTextCtrl(this, -1, wxEmptyString,
                            wxPoint(0, 0),
                            wxSize(w, h),
                            wxTE_MULTILINE |

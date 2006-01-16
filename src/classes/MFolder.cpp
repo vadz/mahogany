@@ -191,7 +191,7 @@ public:
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
 
-   virtual String GetComment() const { return _T(""); }
+   virtual String GetComment() const { return wxEmptyString; }
    virtual void SetComment(const String& /* comment */) { }
 
    virtual int GetFlags() const { return m_flags; }
@@ -394,7 +394,7 @@ class MRootFolderFromProfile : public MFolderFromProfile
 {
 public:
    // ctor
-   MRootFolderFromProfile() : MFolderFromProfile(_T(""))
+   MRootFolderFromProfile() : MFolderFromProfile(wxEmptyString)
    {
    }
 
@@ -412,7 +412,7 @@ public:
    virtual void DontTryToCreate()
       { FAIL_MSG(_T("doesn't make sense for root folder")); }
 
-   virtual String GetComment() const { return _T(""); }
+   virtual String GetComment() const { return wxEmptyString; }
    virtual void SetComment(const String& /* comment */)
       { FAIL_MSG(_T("can not set root folder attributes.")); }
 
@@ -660,7 +660,7 @@ MFolderFromProfile::~MFolderFromProfile()
 
 bool MFolderFromProfile::Exists(const String& fullname)
 {
-   Profile_obj profile(_T(""));
+   Profile_obj profile(wxEmptyString);
 
    return profile->HasGroup(fullname);
 }
@@ -678,7 +678,7 @@ bool MFolderFromProfile::Create(const String& fullname)
 
    String path, component;
 
-   Profile *profile = Profile::CreateFolderProfile(_T(""));
+   Profile *profile = Profile::CreateFolderProfile(wxEmptyString);
 
    size_t n,
           count = components.GetCount();
@@ -1496,7 +1496,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
 
    // create folders for all files in this dir
    wxString filename;
-   bool cont = dir.GetFirst(&filename, _T(""), wxDIR_FILES);
+   bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
    while ( cont )
    {
       wxString fullname;
@@ -1526,7 +1526,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
 
    // and recursively call us for each subdir
    wxString dirname;
-   cont = dir.GetFirst(&dirname, _T(""), wxDIR_DIRS);
+   cont = dir.GetFirst(&dirname, wxEmptyString, wxDIR_DIRS);
    while ( cont )
    {
       wxString subdir;

@@ -1328,7 +1328,7 @@ static bool findIP(String &header,
             return true;
       }
    }
-   header = _T("");
+   header = wxEmptyString;
    return false;
 }
 

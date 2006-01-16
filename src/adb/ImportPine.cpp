@@ -385,7 +385,7 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
    {
       FAIL_MSG( _T("we may only have simple subgroups in PINE addressbooks") );
 
-      return _T("");
+      return wxEmptyString;
    }
 
    int indexGroup = m_groupNames.Index(components[0u]);
@@ -393,14 +393,14 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
    {
       FAIL_MSG( _T("unknown group") );
 
-      return _T("");
+      return wxEmptyString;
    }
 
    wxString addresses;
    size_t indexLine = m_groupLineNumbers[(size_t)indexGroup];
    if ( !ParsePineADBEntry(&indexLine, NULL, &addresses) )
    {
-      return _T("");
+      return wxEmptyString;
    }
 
    return addresses;

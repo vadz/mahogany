@@ -395,7 +395,7 @@ public:
 
    MEventFolderTreeChangeData(const String& fullname,
                               ChangeKind what,
-                              const String& newname = _T(""))
+                              const String& newname = wxEmptyString)
       : MEventData(MEventId_FolderTreeChange),
         m_fullname(fullname),
         m_newname(newname)

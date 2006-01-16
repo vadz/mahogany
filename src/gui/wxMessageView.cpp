@@ -128,7 +128,7 @@ public:
    virtual bool Find(const String& /* text */) { return false; }
    virtual bool FindAgain() { return false; }
    virtual void SelectAll() { }
-   virtual String GetSelection() const { return _T(""); }
+   virtual String GetSelection() const { return wxEmptyString; }
    virtual void Copy() { }
    virtual bool Print() { return false; }
    virtual void PrintPreview() { }
@@ -484,7 +484,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
       WXMENU_MSG_SHOWMIME,
    };
 
-   wxMenu *menu = new wxMenu(_T(""), wxMENU_TEAROFF);
+   wxMenu *menu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);
    for ( size_t n = 0; n < WXSIZEOF(menuCommands); n++ )
    {
       int cmd = menuCommands[n];

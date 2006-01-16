@@ -2022,7 +2022,7 @@ static Value func_print(ArgList *args, FilterRuleImpl *p)
 
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
 
    // FIXME: this can't work like this!!
 #if 0
@@ -2049,10 +2049,10 @@ static Value func_print(ArgList *args, FilterRuleImpl *p)
 static Value func_subject(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    Message_obj msg(p->GetMessage());
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
 
    return Value(msg->Subject());
 }
@@ -2060,10 +2060,10 @@ static Value func_subject(ArgList *args, FilterRuleImpl *p)
 static Value func_from(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    Message_obj msg(p->GetMessage());
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
 
    return Value(msg->From());
 }
@@ -2071,10 +2071,10 @@ static Value func_from(ArgList *args, FilterRuleImpl *p)
 static Value func_to(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    Message_obj msg(p->GetMessage());
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
 
    String tostr;
    msg->GetHeaderLine(_T("To"), tostr);
@@ -2188,10 +2188,10 @@ static Value func_hasflag(ArgList *args, FilterRuleImpl *p)
 static Value func_header(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    String subj = msg->GetHeader();
    msg->DecRef();
    return Value(subj);
@@ -2200,12 +2200,12 @@ static Value func_header(ArgList *args, FilterRuleImpl *p)
 static Value func_headerline(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 1)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    const Value v1 = args->GetArg(0)->Evaluate();
    String field = v1.ToString();
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    String result;
    msg->GetHeaderLine(field, result);
    msg->DecRef();
@@ -2215,10 +2215,10 @@ static Value func_headerline(ArgList *args, FilterRuleImpl *p)
 static Value func_body(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    String str;
    msg->WriteToString(str, false);
    msg->DecRef();
@@ -2228,10 +2228,10 @@ static Value func_body(ArgList *args, FilterRuleImpl *p)
 static Value func_text(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value(_T(""));
+      return Value(wxEmptyString);
    String str;
    msg->WriteToString(str, true);
    msg->DecRef();
@@ -2668,7 +2668,7 @@ FilterRuleApply::Run()
    // check if Cancel wasn't pressed (we'd exit the loop above by break then)
    if ( m_idx == m_msgs.GetCount() &&
         (!m_pd ||
-            m_pd->Update(m_msgs.GetCount(), GetExecuteProgressString(_T("")))) )
+            m_pd->Update(m_msgs.GetCount(), GetExecuteProgressString(wxEmptyString))) )
    {
       if ( !LoopCopy() )
       {
@@ -2712,7 +2712,7 @@ FilterRuleApply::LoopEvaluate()
       // do it first so that the arrays have the right size even if we hit
       // "continue" below
       m_allOperations.Add(FilterRuleImpl::None);
-      m_destinations.Add(_T(""));
+      m_destinations.Add(wxEmptyString);
 
       if ( !GetMessage() )
       {

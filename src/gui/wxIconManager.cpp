@@ -90,7 +90,7 @@ static const wxChar *wxTraceIconLoading = _T("iconload");
 // ----------------------------------------------------------------------------
 
 /// the path where the last icon was found
-wxString wxIconManager::ms_IconPath = _T("");
+wxString wxIconManager::ms_IconPath = wxEmptyString;
 
 /// valid filename extensions for icon files
 static const wxChar *wxIconManagerFileExtensions[] =

@@ -147,8 +147,8 @@ public:
    // this class should have default ctor for the derived class convenience,
    // although this makes absolutely no sense for us
    wxManuallyLaidOutDialog(wxWindow *parent = NULL,
-                           const wxString& title = _T(""),
-                           const wxString& profileKey = _T(""));
+                           const wxString& title = wxEmptyString,
+                           const wxString& profileKey = wxEmptyString);
 
    // get the minimal size previously set by SetDefaultSize()
    virtual const wxSize& GetMinimalSize() const { return m_sizeMin; }
@@ -176,7 +176,7 @@ protected:
                                                int helpId = -1);
 
    // create just the buttons
-   void CreateStdButtons() { (void)CreateStdButtonsAndBox(_T(""), TRUE); }
+   void CreateStdButtons() { (void)CreateStdButtonsAndBox(wxEmptyString, TRUE); }
 
    // set the diaqlog size if it wasn't restored from profile
    virtual void SetDefaultSize(int width, int height,
@@ -215,7 +215,7 @@ public:
    // ctor
    wxOptionsEditDialog(wxFrame *parent,
                        const wxString& title,
-                       const wxString& profileKey = _T(""));
+                       const wxString& profileKey = wxEmptyString);
 
    // populate the dialog
       // create the controls above the main notebook, return the last control

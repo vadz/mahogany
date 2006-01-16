@@ -101,7 +101,7 @@ PythonCallback(const char *name,
       }
    }
 
-   String nameCB(profile->readEntry(name, _T("")));
+   String nameCB(profile->readEntry(name, wxEmptyString));
 
    if ( nameCB.empty() )
    {

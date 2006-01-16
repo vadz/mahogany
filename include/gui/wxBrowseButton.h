@@ -349,7 +349,7 @@ public:
    // accessors
       // get the selected icon name
    wxString GetIconName() const
-      { return m_nIcon == -1 ? wxString(_T("")) : m_iconNames[(size_t)m_nIcon]; }
+      { return m_nIcon == -1 ? wxString(wxEmptyString) : m_iconNames[(size_t)m_nIcon]; }
 
       // get the selected icon index in the array passed to the ctor or -1 if none
    int GetIconIndex() const { return m_nIcon; }

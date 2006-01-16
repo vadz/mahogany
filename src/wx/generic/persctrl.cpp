@@ -179,7 +179,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // don't allocate memory for static objects
-wxString wxPControls::ms_pathPrefix = _T("");
+wxString wxPControls::ms_pathPrefix = wxEmptyString;
 
 // ----------------------------------------------------------------------------
 // wxPHelper
@@ -483,7 +483,7 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
         realConfigPath += '/';
     }
 
-    m_persist = new wxPHelper(realConfigPath, _T(""), config);
+    m_persist = new wxPHelper(realConfigPath, wxEmptyString, config);
     m_countSaveMax = ms_countSaveDefault;
 
     RestoreStrings();
@@ -506,7 +506,7 @@ bool wxPTextEntry::Create(const wxString& configPath,
                           wxConfigBase *config)
 {
    m_persist->SetConfig(config);
-   m_persist->SetPath(configPath, _T(""));
+   m_persist->SetPath(configPath, wxEmptyString);
 
    if ( wxComboBox::Create(parent, id, value, pos, size, style) ) {
        RestoreStrings();
@@ -587,7 +587,7 @@ void wxPTextEntry::SetConfigObject(wxConfigBase *config)
 
 void wxPTextEntry::SetConfigPath(const wxString& path)
 {
-    m_persist->SetPath(path, _T(""));
+    m_persist->SetPath(path, wxEmptyString);
 }
 
 // ----------------------------------------------------------------------------
@@ -1944,7 +1944,7 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
     configValueFile = configPath.AfterLast('/');
     configValuePath << configValueFile << _T("Path");
 
-    wxPHelper persist(ourPath, _T(""), config);
+    wxPHelper persist(ourPath, wxEmptyString, config);
 
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();
@@ -2102,7 +2102,7 @@ wxString wxPDirSelector(const wxString& configPath,
         if ( path.empty() && !configPath.empty() )
         {
             // use the last directory
-            path = config->Read(configKey, _T(""));
+            path = config->Read(configKey, wxEmptyString);
         }
 
         dir = wxGetDirectory(parent, message, path);

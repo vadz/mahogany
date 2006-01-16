@@ -521,7 +521,7 @@ wxFont MessageView::AllProfileValues::GetFont(wxFontEncoding encoding) const
                     wxFONTSTYLE_NORMAL,
                     wxFONTWEIGHT_NORMAL,
                     FALSE,   // not underlined
-                    _T(""),  // no specific face name
+                    wxEmptyString,  // no specific face name
                     encoding);
    }
 
@@ -770,8 +770,8 @@ MessageView::InitializeViewFilters()
                    (
                      new TransparentFilter(this),
                      ViewFilter::Priority_Lowest,
-                     _T(""),
-                     _T(""),
+                     wxEmptyString,
+                     wxEmptyString,
                      NULL
                    );
 
@@ -3325,7 +3325,7 @@ MessageView::ShowMessage(UIdType uid)
       // to the previous message does not stay there...
       wxFrame *frame = GetParentFrame();
       CHECK_RET( frame, _T("message view without parent frame?") );
-      frame->SetStatusText(_T(""));
+      frame->SetStatusText(wxEmptyString);
    }
 }
 
@@ -3349,7 +3349,7 @@ MessageView::CheckMessageOrPartSize(unsigned long size, bool part) const
                 "more than the current threshold of %d Kbytes.\n"
                 "\n"
                 "Do you still want to download it?"),
-              part ? _(" part") : _T(""), size, maxSize);
+              part ? _(" part") : wxEmptyString, size, maxSize);
 
    return MDialog_YesNoDialog(msg, GetParentFrame());
 }

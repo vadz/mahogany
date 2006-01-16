@@ -71,7 +71,7 @@ class TemplateEditor : public wxTextCtrl
 public:
    // ctor
    TemplateEditor(const TemplatePopupMenuItem& menu, wxWindow *parent)
-      : wxTextCtrl(parent, -1, _T(""), wxDefaultPosition, wxDefaultSize,
+      : wxTextCtrl(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                    wxTE_MULTILINE),
         m_menuInfo(menu)
    {
@@ -494,7 +494,7 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
    wxLayoutConstraints *c;
 
    // first the box around everything
-   wxStaticBox *box = CreateStdButtonsAndBox(_T(""));
+   wxStaticBox *box = CreateStdButtonsAndBox(wxEmptyString);
 
    // then a short help message
    wxStaticText *msg =
@@ -608,7 +608,7 @@ bool wxFolderTemplatesDialog::TransferDataFromWindow()
 wxTemplatesDialogBase::wxTemplatesDialogBase(MessageTemplateKind kind,
                                              const TemplatePopupMenuItem& menu,
                                              wxWindow *parent)
-                    : wxManuallyLaidOutDialog(parent, _T(""), _T("AllTemplates"))
+                    : wxManuallyLaidOutDialog(parent, wxEmptyString, _T("AllTemplates"))
 {
    m_kind = kind;
 

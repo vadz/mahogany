@@ -409,7 +409,7 @@ public:
    virtual void ListFolders(class ASMailFolder *asmf,
                             const String &pattern = _T("*"),
                             bool subscribed_only = false,
-                            const String &reference = _T(""),
+                            const String &reference = wxEmptyString,
                             UserData ud = 0,
                             Ticket ticket = ILLEGAL_TICKET) = 0;
 
@@ -885,7 +885,7 @@ public:
       @param login for the folder, if empty folder->GetLogin() is used
       @return the full IMAP spec for the given folder
    */
-   static String GetImapSpec(const MFolder *folder, const String& login = _T(""));
+   static String GetImapSpec(const MFolder *folder, const String& login = wxEmptyString);
 
    /** Extracts the folder name from the folder specification string used by
        cclient (i.e. {nntp/xxx}news.answers => news.answers and also #mh/Foo

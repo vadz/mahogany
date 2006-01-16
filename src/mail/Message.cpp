@@ -257,8 +257,8 @@ SplitAddress(const String& addr,
 {
    if ( addr.length() == 0 )
    {
-      if(firstName) *firstName = _T("");
-      if(lastName) *lastName = _T("");
+      if(firstName) *firstName = wxEmptyString;
+      if(lastName) *lastName = wxEmptyString;
       return;
    }
 

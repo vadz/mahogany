@@ -1472,7 +1472,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// list of modules to load at startup
 #define MP_MODULES_DEFVAL   _T("Filters:Migrate")
 /// list of modules to not load
-#define MP_MODULES_DONT_LOAD_DEFVAL _T("")
+#define MP_MODULES_DONT_LOAD_DEFVAL wxEmptyString
 /// the user path for template files used for message composition
 #define MP_COMPOSETEMPLATEPATH_USER_DEFVAL   wxEmptyString
 /// the global path for template files used for message composition
