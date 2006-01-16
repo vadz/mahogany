@@ -27,24 +27,26 @@ ifdef SWIG
 # #include Python.h in the generated C++ code with #include MPython.h which we
 # need for dynamic Python linking to work
 define create_cpp
-	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) -o $*.cpp $< && \
-	    sed -e 's/Python\.h/MPython.h/' $*.cpp > $*.cpp.new && \
-		mv $*.cpp.new $*.cpp
+	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) -o $*.cpp.tmp $< && \
+	    sed -e 's/Python\.h/MPython.h/' $*.cpp.tmp > $(@:.o=.cpp) && \
+		rm $*.cpp.tmp
 endef
 
 SWIGFLAGS := -c++ -python
 vpath %.i $(IFACE_DIR)
+
 Python/%.o Python/%.py: %.i
 	$(create_cpp)
+	mv -f $*.py Python
 	$(M_COMPILE_SWIG)
+	@rm -f Python/%.cpp
 
 # define rule for copying the swig-generated files back to the source tree:
 # this is ugly but necessary as we want to store them in the cvs to be able to
 # build M without swig
 .src/Python/%.cpp-swig .src/Python/%.py-swig: %.i
 	$(create_cpp)
-	mv -f $*.cpp .src/Python/$*.cpp-swig
-	cp -f $*.py .src/Python/$*.py-swig
+	mv -f $*.py .src/Python/$*.py-swig
 
 swig-update: $(patsubst %.i,.src/Python/%.cpp-swig,$(IFILES))
 
