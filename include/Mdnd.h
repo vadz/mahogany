@@ -21,6 +21,8 @@
 
 #include <wx/dnd.h>
 
+#if wxUSE_DRAG_AND_DROP
+
 class MsgCmdProc;
 class MailFolder;
 
@@ -148,5 +150,7 @@ private:
 
    DECLARE_NO_COPY_CLASS(MMessagesDropTarget)
 };
+
+#endif // wxUSE_DRAG_AND_DROP
 
 #endif // _MDND_H_
