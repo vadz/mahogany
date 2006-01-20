@@ -1972,7 +1972,7 @@ MessageView::ShowPart(const MimePart *mimepart)
 
    // first check for viewer specific formats, next for text, then for
    // images and finally show all the rest as generic attachment
-   if ( !isAttachment && m_viewer->CanProcess(mimeType) )
+   if ( !isAttachment && CanViewerProcessPart(mimepart) )
    {
       // as we're going to need its contents, we'll have to download it: check
       // if it is not too big before doing this
@@ -2014,20 +2014,27 @@ MessageView::ShowPart(const MimePart *mimepart)
    m_viewer->EndPart();
 }
 
-void
-MessageView::ProcessAllNestedParts(const MimePart *mimepart)
+bool
+MessageView::ProcessAllNestedParts(const MimePart *mimepart,
+                                   MimePartAction action)
 {
+   bool rc = true;
+
    const MimePart *partChild = mimepart->GetNested();
    while ( partChild )
    {
-      ProcessPart(partChild);
+      if ( !ProcessPart(partChild, action) )
+         rc = false;
 
       partChild = partChild->GetNext();
    }
+
+   return rc;
 }
 
 bool
-MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart)
+MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart,
+                                         MimePartAction action)
 {
    // find the best subpart we can show
    //
@@ -2042,8 +2049,7 @@ MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart)
    {
       String mimetype = partChild->GetType().GetFull();
 
-      if ( mimetype == _T("TEXT/PLAIN") ||
-            m_viewer->CanProcess(mimetype) )
+      if ( mimetype == _T("TEXT/PLAIN") || CanViewerProcessPart(partChild) )
       {
          // remember this one as the best so far
          partBest = partChild;
@@ -2057,9 +2063,7 @@ MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart)
 
    // the content of an alternative is not necessarily a single
    // part, so process it as well.
-   ProcessPart(partBest);
-
-   return true;
+   return ProcessPart(partBest, action);
 }
 
 bool
@@ -2235,49 +2239,76 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
    return true;
 }
 
-void
-MessageView::ProcessMultiPart(const MimePart *mimepart, const String& subtype)
+bool
+MessageView::ProcessMultiPart(const MimePart *mimepart,
+                              const String& subtype,
+                              MimePartAction action)
 {
    // TODO: support for DIGEST and RELATED
 
-   bool processed;
+   bool processed = false;
    if ( subtype == _T("ALTERNATIVE") )
    {
-      processed = ProcessAlternativeMultiPart(mimepart);
+      processed = ProcessAlternativeMultiPart(mimepart, action);
    }
    else if ( subtype == _T("SIGNED") )
    {
-      processed = ProcessSignedMultiPart(mimepart);
+      switch ( action )
+      {
+         case Part_Show:
+            processed = ProcessSignedMultiPart(mimepart);
+            break;
+
+         case Part_Test:
+            // all viewers can display signatures
+            processed = true;
+            break;
+
+         default:
+            FAIL_MSG( _T("unknown MIME part processing action") );
+      }
    }
    else if ( subtype == _T("ENCRYPTED") )
    {
-      processed = ProcessEncryptedMultiPart(mimepart);
+      switch ( action )
+      {
+         case Part_Show:
+            processed = ProcessEncryptedMultiPart(mimepart);
+            break;
+
+         case Part_Test:
+            // FIXME: this is wrong, we should examine the parts of the
+            //        encrypted message
+            processed = true;
+            break;
+
+         default:
+            FAIL_MSG( _T("unknown MIME part processing action") );
+      }
    }
-   else // process all unknown as MIXED (according to the RFC 2047)
-   {
-      processed = false;
-   }
+   //else: process all unknown as MIXED (according to the RFC 2047)
 
    if ( !processed )
-      ProcessAllNestedParts(mimepart);
+      processed = ProcessAllNestedParts(mimepart, action);
+
+   return processed;
 }
 
-void
-MessageView::ProcessPart(const MimePart *mimepart)
+bool
+MessageView::ProcessPart(const MimePart *mimepart, MimePartAction action)
 {
-   CHECK_RET( mimepart, _T("MessageView::ProcessPart: NULL mimepart") );
+   CHECK( mimepart, false, _T("MessageView::ProcessPart: NULL mimepart") );
 
    const MimeType type = mimepart->GetType();
    switch ( type.GetPrimary() )
    {
       case MimeType::MULTIPART:
-         ProcessMultiPart(mimepart, type.GetSubType());
-         break;
+         return ProcessMultiPart(mimepart, type.GetSubType(), action);
 
       case MimeType::MESSAGE:
          if ( m_ProfileValues.inlineRFC822 )
          {
-            ProcessAllNestedParts(mimepart);
+            return ProcessAllNestedParts(mimepart, action);
          }
          //else: fall through and show it as attachment
 
@@ -2294,13 +2325,31 @@ MessageView::ProcessPart(const MimePart *mimepart)
       case MimeType::CUSTOM4:
       case MimeType::CUSTOM5:
       case MimeType::CUSTOM6:
-         // a simple part, show it (ShowPart() decides how exactly)
-         ShowPart(mimepart);
+         switch ( action )
+         {
+            case Part_Show:
+               // a simple part, show it (ShowPart() decides how exactly)
+               ShowPart(mimepart);
+               return true;
+
+            case Part_Test:
+               {
+                  const MimeType type = mimepart->GetType();
+                  return (type.GetPrimary() == MimeType::IMAGE &&
+                           m_viewer->CanInlineImages()) ||
+                              m_viewer->CanProcess(type.GetFull());
+               }
+
+            default:
+               FAIL_MSG( _T("unknown MIME part processing action") );
+         }
          break;
 
       default:
          FAIL_MSG( _T("unknown MIME type") );
    }
+
+   return false;
 }
 
 void

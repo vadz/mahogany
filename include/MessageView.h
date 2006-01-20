@@ -517,14 +517,36 @@ protected:
    /// show all configured headers
    void ShowHeaders();
 
-   /// process part and decided what to do with it (call ShowPart or skip)
-   void ProcessPart(const MimePart *part);
+   /**
+      Possible values for the second parameter of ProcessPart.
+    */
+   enum MimePartAction
+   {
+      /// Show the part in the viewer
+      Part_Show,
+
+      /// Just test if the viewer can show this part
+      Part_Test,
+   };
+
+   /**
+      Process part and take the given action.
+
+      @param part the MIME part we work with
+      @param action specifies whether we want to really show this part or just
+                    to test whether we can do it
+      @return true if we can process this part
+    */
+   bool ProcessPart(const MimePart *part, MimePartAction action = Part_Show);
 
    /// process a multipart part
-   void ProcessMultiPart(const MimePart *part, const String& subtype);
+   bool ProcessMultiPart(const MimePart *part,
+                         const String& subtype,
+                         MimePartAction action = Part_Show);
 
    /// process a multipart/alternative part
-   bool ProcessAlternativeMultiPart(const MimePart *part);
+   bool ProcessAlternativeMultiPart(const MimePart *part,
+                                    MimePartAction action = Part_Show);
 
    /// process a multipart/signed part
    bool ProcessSignedMultiPart(const MimePart *part);
@@ -533,7 +555,16 @@ protected:
    bool ProcessEncryptedMultiPart(const MimePart *part);
 
    /// call ProcessPart() for all subparts of this part
-   void ProcessAllNestedParts(const MimePart *part);
+   bool ProcessAllNestedParts(const MimePart *part,
+                              MimePartAction action = Part_Show);
+
+   /**
+      Return true if the current viewer can process the given part.
+    */
+   bool CanViewerProcessPart(const MimePart *part)
+   {
+      return ProcessPart(part, Part_Test);
+   }
 
 public:
    /// show part of any kind
