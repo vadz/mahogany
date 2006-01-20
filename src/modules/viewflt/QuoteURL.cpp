@@ -387,7 +387,7 @@ CountQuoteLevel(const char *string,
       }
 
 
-      // look at what we really have in the previos/next lines
+      // look at what we really have in the previous/next lines
       UpdateLineStatus(c, &prev, &sameAsPrev);
       UpdateLineStatus(c, &next, &sameAsNext);
 

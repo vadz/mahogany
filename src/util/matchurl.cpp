@@ -752,7 +752,7 @@ match:
    }
 
    // truncate any punctuation at the end
-   while ( strchr(".:,)!?", *(p - 1)) )
+   while ( strchr(".:,)]!?", *(p - 1)) )
       p--;
 
    // additional checks for the matches which didn't have an explicit scheme
