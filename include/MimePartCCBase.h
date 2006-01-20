@@ -119,9 +119,6 @@ protected:
    /// list of disposition parameters if we already have them
    MimeParameterList *m_dispositionParameterList;
 
-   /// number of MIME subparts in this part
-   size_t m_numParts;
-
    /**
      A temporarily allocated buffer for GetContent().
 

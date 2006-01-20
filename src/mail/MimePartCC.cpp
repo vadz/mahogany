@@ -63,8 +63,6 @@ void MimePartCC::CreateSubParts()
 {
    if ( m_body->type != TYPEMULTIPART )
    {
-      m_numParts++;
-
       // is it an encapsulated message?
       if ( m_body->type == TYPEMESSAGE &&
                strcmp(m_body->subtype, "RFC822") == 0 )
@@ -84,10 +82,6 @@ void MimePartCC::CreateSubParts()
    }
    else // multi part
    {
-      // note that we don't increment m_numParts here as we only count parts
-      // containing something and MessageCC::GetMimePart(n) ignores multitype
-      // parts
-
       MimePartCCBase **prev = &m_nested;
 
       // NB: message parts are counted from 1
