@@ -886,7 +886,6 @@ void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 
 
 #if wxUSE_WCHAR_T && defined(OS_WIN)
-
 wxWCharBuffer
 wxBareBonesTextControl::GetUnicodeText() const
 {
