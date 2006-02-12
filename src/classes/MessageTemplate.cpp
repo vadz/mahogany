@@ -611,9 +611,11 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
    if ( profile )
    {
       // the templates contain '$'s so disable variable expansion for now
-      ProfileEnvVarSave noEnvVarExpansion(profile);
+      {
+         ProfileEnvVarSave noEnvVarExpansion(profile);
 
-      value = profile->readEntry(name);
+         value = profile->readEntry(name);
+      } // destroy ProfileEnvVarSave before (maybe) destroying profile
 
       profile->DecRef();
    }
