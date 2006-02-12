@@ -3054,6 +3054,7 @@ void wxComposeView::OnFirstTimeModify()
 void
 wxComposeView::SetEncoding(wxFontEncoding encoding, wxFontEncoding encConv)
 {
+   // use the default encoding if no explicit one specified
    if ( encoding == wxFONTENCODING_DEFAULT )
    {
       encoding = (wxFontEncoding)(long)
@@ -3067,7 +3068,18 @@ wxComposeView::SetEncoding(wxFontEncoding encoding, wxFontEncoding encConv)
    }
 
    m_encoding = encoding;
+
+
+   // find the encoding for the editor: it must be one supported by the system
+   if ( encConv == wxFONTENCODING_SYSTEM )
+   {
+      encConv = encoding;
+      if ( !EnsureAvailableTextEncoding(&encConv) )
+         encConv = wxFONTENCODING_SYSTEM;
+   }
+
    m_editor->SetEncoding(encConv == wxFONTENCODING_SYSTEM ? encoding : encConv);
+
 
    // check "Default" menu item if we use the system default encoding in absence
    // of any user-configured default
@@ -3095,9 +3107,7 @@ bool wxComposeView::SetEncodingToSameAs(const MimePart *part)
             }
             else // not Unicode
             {
-               encConv = enc;
-               if ( !EnsureAvailableTextEncoding(&encConv) )
-                  encConv = wxFONTENCODING_SYSTEM;
+               encConv = wxFONTENCODING_SYSTEM;
             }
 
             SetEncoding(enc, encConv);
@@ -3160,12 +3170,21 @@ wxComposeView::OnIdentChange(wxCommandEvent& event)
       // hadn't been modified by the user yet
       if ( !IsModified() )
       {
+         // preserve the original encoding as DoClear() resets it
+         wxFontEncoding encodingOrig = m_encoding;
+
          DoClear();
 
          // forget previously read template if we read it from profile, it
          // could have changed
          if ( !m_customTemplate )
             m_template.clear();
+
+         if ( encodingOrig != wxFONTENCODING_DEFAULT &&
+                  encodingOrig != wxFONTENCODING_SYSTEM )
+         {
+            SetEncoding(encodingOrig);
+         }
 
          DoInitText();
       }
