@@ -71,7 +71,9 @@ skip them unless you're updating from a very old version of Mahogany.
    \item New integrated statistical spam filter (DSPAM)
    \item Better support for sharing preferences between multiple installations
          (see \ref{multiconfigsources})
-   \item Folders can now be dragged in the folder tree to reorder them
+   \item Folders can now be dragged in the folder tree to reorder them. It is
+         also possible to drag and drop messages and files from the file
+         manager to the composer window to attach them.
    \item Mahogany can now select the viewer best suited for the contents of the
          current message, e.g. you can use text viewer by default but the
          program can be configured to switch to a graphical one for the
@@ -85,6 +87,8 @@ skip them unless you're updating from a very old version of Mahogany.
    \item When replying to PGP-encrypted messages, clear text is used for
          replies and not the original message.
    \item New ``Where is filter'' command (\ref{filterdialogs})
+   \item Mahogany will warn you if you start replying to the same message a
+         second time now.
 \end{itemize}
 
 By far the main new feature in this version is the integration of DSPAM

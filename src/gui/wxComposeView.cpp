@@ -149,15 +149,16 @@ extern const MOption MP_USE_SENDMAIL;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_ASK_FOR_EXT_EDIT;
+extern const MPersMsgBox *M_MSGBOX_ASK_SAVE_HEADERS;
 extern const MPersMsgBox *M_MSGBOX_ASK_VCARD;
 extern const MPersMsgBox *M_MSGBOX_CONFIG_NET_FROM_COMPOSE;
 extern const MPersMsgBox *M_MSGBOX_DRAFT_AUTODELETE;
 extern const MPersMsgBox *M_MSGBOX_DRAFT_SAVED;
 extern const MPersMsgBox *M_MSGBOX_FIX_TEMPLATE;
+extern const MPersMsgBox *M_MSGBOX_OPEN_ANOTHER_COMPOSER;
 extern const MPersMsgBox *M_MSGBOX_MIME_TYPE_CORRECT;
-extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
-extern const MPersMsgBox *M_MSGBOX_ASK_SAVE_HEADERS;
 extern const MPersMsgBox *M_MSGBOX_SEND_DIFF_ENCODING;
+extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1467,9 +1468,15 @@ Composer::CreateFollowUpArticle(const MailFolder::Params& params,
                                 Profile *profile,
                                 Message *original)
 {
-   wxComposeView *cv = CreateComposeView(profile, params,
-                                         wxComposeView::Mode_News,
-                                         wxComposeView::Message_Reply);
+   wxComposeView *cv = CreateComposeView
+                       (
+                        profile,
+                        params,
+                        wxComposeView::Mode_News,
+                        wxComposeView::Message_Reply
+                       );
+
+   CHECK( cv, NULL, _T("failed to create composer for a followup article") );
 
    cv->SetOriginal(original);
 
@@ -1495,9 +1502,15 @@ Composer::CreateReplyMessage(const MailFolder::Params& params,
                              Profile *profile,
                              Message *original)
 {
-   wxComposeView *cv = CreateComposeView(profile, params,
-                                         wxComposeView::Mode_Mail,
-                                         wxComposeView::Message_Reply);
+   wxComposeView *cv = CreateComposeView
+                       (
+                        profile,
+                        params,
+                        wxComposeView::Mode_Mail,
+                        wxComposeView::Message_Reply
+                       );
+
+   CHECK( cv, NULL, _T("failed to create composer for a reply message") );
 
    cv->SetOriginal(original);
 
@@ -1509,9 +1522,15 @@ Composer::CreateFwdMessage(const MailFolder::Params& params,
                            Profile *profile,
                            Message *original)
 {
-   wxComposeView *cv = CreateComposeView(profile, params,
-                                         wxComposeView::Mode_Mail,
-                                         wxComposeView::Message_Forward);
+   wxComposeView *cv = CreateComposeView
+                       (
+                        profile,
+                        params,
+                        wxComposeView::Mode_Mail,
+                        wxComposeView::Message_Forward
+                       );
+
+   CHECK( cv, NULL, _T("failed to create composer for a forward message") );
 
    cv->SetOriginal(original);
 
@@ -1648,6 +1667,42 @@ Composer::EditMessage(Profile *profile, Message *msg)
    return cv;
 }
 
+/* static */
+Composer *Composer::CheckForExistingReply(Message *original)
+{
+   CHECK( original, NULL, _T("original message is NULL") );
+
+   for ( ComposerList::iterator i = gs_listOfAllComposers.begin(),
+                              end = gs_listOfAllComposers.end(); i!= end ; ++i )
+   {
+      wxComposeView *cv = *i;
+      if ( cv->IsReplyTo(*original) )
+      {
+         if ( !MDialog_YesNoDialog
+               (
+                  _("Thee is already an existing composer window for this\n"
+                    "message, do you want to reuse it?"),
+                  cv->GetFrame(),
+                  MDIALOG_YESNOTITLE,
+                  M_DLG_YES_DEFAULT | M_DLG_DISABLE,
+                  M_MSGBOX_OPEN_ANOTHER_COMPOSER
+               ) )
+         {
+            // if the user doesn't want to reuse this one, he probably really
+            // wants a new composer so do open it without asking again
+            break;
+         }
+
+         // show the existing composer window
+         cv->GetFrame()->Raise();
+
+         return cv;
+      }
+   }
+
+   return NULL;
+}
+
 // ----------------------------------------------------------------------------
 // wxComposeView ctor/dtor
 // ----------------------------------------------------------------------------
@@ -1678,6 +1733,26 @@ wxComposeView::wxComposeView(const String &name,
 
    m_editor = NULL;
    m_encoding = wxFONTENCODING_SYSTEM;
+}
+
+bool wxComposeView::IsReplyTo(const Message& original) const
+{
+   if ( !m_OriginalMessage )
+      return false;
+
+   // can't compose the messages by pointer, so do a "deep comparison" instead
+
+   // first do quick UIDs comparison
+   if ( m_OriginalMessage->GetUId() != original.GetUId() )
+      return false;
+
+   // for them to be really the same messages, UIDs must belong to the same
+   // folder
+   MailFolder *mf1 = original.GetFolder(),
+              *mf2 = m_OriginalMessage->GetFolder();
+   CHECK( mf1 && mf2, false, _T("messages without mail folder?") );
+
+   return mf1->GetName() == mf2->GetName();
 }
 
 void wxComposeView::SetOriginal(Message *original)
@@ -1947,7 +2022,7 @@ public:
 
 #if wxUSE_DRAG_AND_DROP
 
-class wxComposeViewDropTarget : public wxDropTarget 
+class wxComposeViewDropTarget : public wxDropTarget
 {
 private:
   wxComposeView* m_composeView;
@@ -1976,12 +2051,12 @@ public:
 
     // Let's see which wxDataObject got the data...
     wxDataObjectSimple* dobj = ((wxDataObjectCompositeEx*)GetDataObject())->GetActualDataObject();
-    if ( dobj == (wxDataObjectSimple *)m_messageDataObject ) 
+    if ( dobj == (wxDataObjectSimple *)m_messageDataObject )
     {
       // We got messages dropped (from inside M itself)
       return OnDropMessages(x, y, m_messageDataObject->GetFolder(), m_messageDataObject->GetMessages()) ? def : wxDragNone;
-    } 
-    else if ( dobj == m_fileDataObject ) 
+    }
+    else if ( dobj == m_fileDataObject )
     {
       // We got files dropped from outside M
       return OnDropFiles(x, y, m_fileDataObject->GetFilenames()) ? def : wxDragNone;
@@ -1992,7 +2067,7 @@ public:
 
   bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), const wxArrayString& filenames) {
     size_t countFiles = filenames.GetCount();
-    if ( countFiles <= 0 ) 
+    if ( countFiles <= 0 )
     {
       return false;
     }
@@ -2004,7 +2079,7 @@ public:
   }
 
   bool OnDropMessages(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), MailFolder* folder, const UIdArray& messages) {
-    if ( messages.Count() <= 0 ) 
+    if ( messages.Count() <= 0 )
     {
       return false;
     }

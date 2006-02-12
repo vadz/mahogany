@@ -66,7 +66,12 @@ public:
       Recipient_Max
    };
 
-   /** @name Different ways to create a new composer window */
+   /**
+      @name Different ways to create a new composer window
+
+      Note that composer windows delete themselves when they're closed so you
+      don't need to delete them.
+    */
    //@{
 
    /** Constructor for posting news.
@@ -80,8 +85,10 @@ public:
    static Composer *CreateNewArticle(Profile *profile = NULL)
       { return CreateNewArticle(MailFolder::Params(), profile); }
 
-   /** Constructor for sending a follow-up to newsgroup.
+   /**
+       Constructor for sending a follow-up to newsgroup.
 
+       @param params the parameters for the new composer
        @param profile parent profile
        @param original message that we replied to
        @return pointer to the new compose view
@@ -90,7 +97,10 @@ public:
                                           Profile *profile,
                                           Message * original = NULL);
 
-   /** Constructor for sending mail.
+   /**
+       Constructor for sending mail.
+
+       @param params the parameters for the new composer
        @param profile parent profile
        @return pointer to the new compose view
     */
@@ -103,6 +113,7 @@ public:
 
    /** Constructor for sending a reply to a message.
 
+       @param params the parameters for the new composer
        @param profile parent profile
        @param original message that we replied to
        @return pointer to the new compose view
@@ -113,8 +124,9 @@ public:
 
    /** Constructor for forwarding a message.
 
-       @param templ is the template to use
+       @param params the parameters for the new composer
        @param profile parent profile
+       @param original message that we are forwarding
        @return pointer to the new compose view
     */
    static Composer *CreateFwdMessage(const MailFolder::Params& params,
@@ -125,10 +137,19 @@ public:
      Create a composer window initialized with an existing message.
 
      @param profile the profile to use for the new composer
-     @param msg the message to edit
+     @param message the message to edit
      @return pointer to the new compose view
     */
    static Composer *EditMessage(Profile *profile, Message *message);
+
+   /**
+      Check if there is already a composer window opened with a reply (or
+      followup) to this message.
+
+      @param original to check for replies for
+      @return pointer to an existing composer or @c NULL if none
+    */
+   static Composer *CheckForExistingReply(Message *original);
 
    //@}
 

@@ -113,6 +113,15 @@ public:
    */
    void SetOriginal(Message *original);
 
+   /**
+      Return true if this composer is a reply or followup for the given
+      message.
+
+      @param message the message to compare with
+    */
+   bool IsReplyTo(const Message& original) const;
+
+
    // implement Composer pure virtuals
    virtual void InitText(Message *msg = NULL, const MessageView *msgview = NULL);
    virtual void Launch();

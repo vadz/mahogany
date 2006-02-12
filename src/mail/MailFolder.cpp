@@ -882,6 +882,13 @@ MailFolder::ReplyMessage(Message *msg,
 
    if ( !cv )
    {
+      cv = Composer::CheckForExistingReply(msg);
+      if ( cv )
+      {
+         // we don't need any other initializations for an existing composer
+         return cv;
+      }
+
       MailFolder::ReplyKind replyKind;
       GetReplyKind(params, profile, replyKind);
 
