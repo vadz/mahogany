@@ -95,6 +95,7 @@
 #include "Address.h"
 #include "SendMessage.h"
 #include "Message.h"
+#include "MessageView.h"
 #include "Collect.h"
 #include "ColourNames.h"
 
@@ -1668,7 +1669,6 @@ wxComposeView::wxComposeView(const String &name,
    m_closing = false;
    m_OriginalMessage = NULL;
    m_DraftMessage = NULL;
-   m_msgviewOrig = NULL;
 
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
@@ -2729,9 +2729,6 @@ String wxComposeView::GetSubject() const
 void
 wxComposeView::InitText(Message *msg, const MessageView *msgview)
 {
-   // store it for the future use in DoInitText()
-   m_msgviewOrig = msgview;
-
    if ( m_kind == Message_New )
    {
       // writing a new message/article: wait until the headers are filled
@@ -2762,6 +2759,20 @@ wxComposeView::InitText(Message *msg, const MessageView *msgview)
    else // replying or forwarding - evaluate the template right now
    {
       ASSERT_MSG( m_OriginalMessage, _T("what do we reply to?") );
+
+      // we need to show text in the message view to be able to quote it
+      if ( msg && msgview )
+      {
+         const_cast<MessageView *>(msgview)->ShowMessage(msg->GetUId());
+
+         // needed for the message to appear in the message view (FIXME)
+         MEventManager::DispatchPending();
+
+         // remember the text to quote once and for all, so that we still quote
+         // the same text even if the message view selection changes later (and
+         // we're reinitialized because, e.g., of an identity change)
+         m_textToQuote = msgview->GetText();
+      }
 
       DoInitText(msg);
    }
@@ -2845,7 +2856,7 @@ wxComposeView::DoInitText(Message *msgOrig)
          break;
       }
 
-      if ( !m_msgviewOrig )
+      if ( m_textToQuote.empty() )
       {
          // we don't want to quote anything at all, so remove all occurences of
          // $QUOTE and/or $TEXT templates in the string -- and also remove
@@ -2899,7 +2910,7 @@ wxComposeView::DoInitText(Message *msgOrig)
                m_Profile,
                templateValue,
                msgOrig ? msgOrig : m_OriginalMessage,
-               m_msgviewOrig
+               m_textToQuote
             ) )
       {
          // first show any errors which the call to Parse() above could

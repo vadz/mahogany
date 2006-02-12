@@ -317,7 +317,7 @@ protected:
 
       The parameter is used only if it is not NULL (which only happens when
       we're called directly from InitText()), otherwise the previously
-      remembered (by InitText() itself) m_msgviewOrig is used.
+      remembered (by InitText() itself) m_textToQuote is used.
     */
    void DoInitText(Message *msgOrig = NULL);
 
@@ -503,14 +503,14 @@ private:
    /// the template to use or an empty string
    String m_template;
 
+   /// the text to be quoted in a reply/followup (may be empty)
+   String m_textToQuote;
+
    /// the name of the file we autosaved ourselves to (may be empty)
    String m_filenameAutoSave;
 
    /// the (main) encoding (== charset) to use for the message
    wxFontEncoding m_encoding;
-
-   /// the message view of the original message when replying/forwarding
-   const MessageView *m_msgviewOrig;
 
    /**
      @name external editor support
@@ -581,7 +581,7 @@ extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
                            Message *msgOriginal,
-                           const MessageView *msgview = NULL);
+                           const String& textToQuote);
 
 /**
    Return the string containing quoted (i.e. prefixed with reply marker) text.

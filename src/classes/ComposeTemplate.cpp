@@ -40,8 +40,6 @@
 #include "Address.h"
 #include "Message.h"
 
-#include "MessageView.h"
-
 #include "Mpers.h"
 
 #ifdef USE_PYTHON
@@ -278,18 +276,16 @@ public:
    // category.
    VarExpander(ExpansionSink& sink,
                Composer& cv,
-               Profile *profile = NULL,
-               Message *msg = NULL,
-               const MessageView *msgview = NULL)
-      : m_sink(sink), m_cv(cv)
+               Profile *profile,
+               Message *msg,
+               const String& textToQuote)
+      : m_sink(sink), m_cv(cv), m_textToQuote(textToQuote)
    {
       m_profile = profile ? profile : mApplication->GetProfile();
       m_profile->IncRef();
 
       m_msg = msg;
       SafeIncRef(m_msg);
-
-      m_msgview = msgview;
    }
 
    virtual ~VarExpander()
@@ -358,8 +354,8 @@ private:
    // message (may be NULL for new messages)
    Message *m_msg;
 
-   // the message viewer we use for querying the selection if necessary
-   const MessageView *m_msgview;
+   // the text to be quoted in a reply/followup
+   String m_textToQuote;
 
    // the profile to use for everything (global one by default)
    Profile *m_profile;
@@ -1513,7 +1509,7 @@ String VarExpander::GetSignature() const
 void
 VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
 {
-   if ( !m_msgview )
+   if ( m_textToQuote.empty() )
    {
       // don't quote anything at all
       return;
@@ -1528,7 +1524,7 @@ VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
    }
    //else: template "text", so no reply prefix at all
 
-   *value = ExpandOriginalText(m_msgview->GetText(), prefix, m_profile);
+   *value = ExpandOriginalText(m_textToQuote, prefix, m_profile);
 }
 
 // ----------------------------------------------------------------------------
@@ -1548,19 +1544,10 @@ extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
                            Message *msg,
-                           const MessageView *msgview)
+                           const String& textToQuote)
 {
-   // we need to show text in the message view to be able to quote it
-   if ( msg && msgview )
-   {
-      const_cast<MessageView *>(msgview)->ShowMessage(msg->GetUId());
-
-      // needed for the message to appear in the message view (FIXME)
-      MEventManager::DispatchPending();
-   }
-
    ExpansionSink sink;
-   VarExpander expander(sink, cv, profile, msg, msgview);
+   VarExpander expander(sink, cv, profile, msg, textToQuote);
    MessageTemplateParser parser(templateValue, _("template"), &expander);
    if ( !parser.Parse(sink) )
    {
