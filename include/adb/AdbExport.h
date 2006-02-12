@@ -56,8 +56,6 @@ public:
 
    // export one entry only
    virtual bool Export(const AdbEntry& entry, const String& dest) = 0;
-
-   virtual ~AdbExporter() = 0;
 };
 
 // ----------------------------------------------------------------------------

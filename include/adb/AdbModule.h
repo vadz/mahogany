@@ -94,7 +94,7 @@ public:
    virtual const wxChar *GetFormatDesc() const = 0;
    virtual const wxChar *GetDescription() const = 0;
 
-   virtual ~AdbModule() = 0;
+   virtual ~AdbModule() { }
 
 private:
    friend struct AdbModuleInfo; // give it access to ms_listModules

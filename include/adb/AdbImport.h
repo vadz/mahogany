@@ -98,8 +98,6 @@ public:
    virtual bool ImportEntry(const String& path,
                             size_t index,
                             AdbEntry *entry) = 0;
-
-   virtual ~AdbImporter() = 0;
 };
 
 // ----------------------------------------------------------------------------
