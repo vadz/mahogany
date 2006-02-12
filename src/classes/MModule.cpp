@@ -48,12 +48,6 @@
 #include "MInterface.cpp"
 
 // ----------------------------------------------------------------------------
-// options we use here
-// ----------------------------------------------------------------------------
-
-extern const MOption MP_MODULES_DONT_LOAD;
-
-// ----------------------------------------------------------------------------
 // function prototypes
 // ----------------------------------------------------------------------------
 
@@ -63,6 +57,24 @@ extern const MOption MP_MODULES_DONT_LOAD;
 static wxArrayString BuildListOfModulesDirs();
 
 #endif // USE_MODULES_STATIC
+
+// return the list of blacklisted modules, i.e. the modules which we shouldn't
+// load even if they're present
+static wxArrayString GetBlacklistedModules()
+{
+   String modulesDontLoad;
+
+   // be careful: we can be called from ConfigSources initialization code,
+   // before the app profile is created
+   if ( mApplication && mApplication->GetProfile() )
+   {
+      extern const MOption MP_MODULES_DONT_LOAD;
+
+      modulesDontLoad = READ_APPCONFIG_TEXT(MP_MODULES_DONT_LOAD);
+   }
+
+   return strutil_restore_array(modulesDontLoad);
+}
 
 // ----------------------------------------------------------------------------
 // constants
@@ -505,19 +517,18 @@ static MModuleListing *
 DoListLoadedModules(bool listall = false, const String& interfaceName = wxEmptyString)
 {
 #ifdef USE_MODULES_STATIC
-   wxArrayString modulesNot;
+   wxArrayString modulesBlacklist;
 
    // only exclude modules to ignore if we're looking for modules implementing
    // some interface, not if we want (really) all modules
    if ( listall && !interfaceName.empty() )
    {
-      const String modulesDontLoad = READ_APPCONFIG(MP_MODULES_DONT_LOAD);
-      modulesNot = strutil_restore_array(modulesDontLoad);
+      modulesBlacklist = GetBlacklistedModules();
    }
-#else
+#else // dynamic modules
    // this function only works for loaded modules in dynamic case
    ASSERT_MSG( !listall, _T("this mode is not supported with dynamic modules") );
-#endif // USE_MODULES_STATIC
+#endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
    MModuleListingImpl *listing =
       MModuleListingImpl::Create(GetMModuleList()->size());
@@ -536,7 +547,7 @@ DoListLoadedModules(bool listall = false, const String& interfaceName = wxEmptyS
            (interfaceName.empty() || me->m_Interface == interfaceName) )
       {
          // also ignore the modules excluded by user
-         if ( !listall || modulesNot.Index(me->m_Name) == wxNOT_FOUND )
+         if ( !listall || modulesBlacklist.Index(me->m_Name) == wxNOT_FOUND )
          {
             MModuleListingEntryImpl
                entry
@@ -650,8 +661,7 @@ MModule::ListAvailableModules(const String& interfaceName)
    }
 
    // Second: load list info:
-   const String modulesDontLoad = READ_APPCONFIG(MP_MODULES_DONT_LOAD);
-   const wxArrayString modulesNot = strutil_restore_array(modulesDontLoad);
+   const wxArrayString modulesBlacklist(GetBlacklistedModules());
 
    MModuleListingImpl *listing = MModuleListingImpl::Create(modules.size());
    kbStringList::iterator it;
@@ -696,7 +706,7 @@ MModule::ListAvailableModules(const String& interfaceName)
             // note that this check is only done for a specific interface, if
             // all modules are requested, then return really all of them
             const String name = GetMModuleProperty(props, MMODULE_NAME_PROP);
-            if ( modulesNot.Index(name) != wxNOT_FOUND )
+            if ( modulesBlacklist.Index(name) != wxNOT_FOUND )
             {
                // this module was excluded by user
                continue;
