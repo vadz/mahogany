@@ -99,7 +99,13 @@ public:
 
      @param templ the name of the template
    */
-   void SetTemplate(const String& templ) { m_template = templ; }
+   void SetTemplate(const String& templ)
+   {
+      m_template = templ;
+
+      // don't forget m_template now, even if our identity changes
+      m_customTemplate = true;
+   }
 
    /**
      Set the original message to use when replying or forwarding. Should be
@@ -502,6 +508,9 @@ private:
 
    /// the template to use or an empty string
    String m_template;
+
+   /// True if m_template was specified by the user (and not read from profile)
+   bool m_customTemplate;
 
    /// the text to be quoted in a reply/followup (may be empty)
    String m_textToQuote;

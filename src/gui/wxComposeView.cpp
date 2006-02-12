@@ -1667,6 +1667,7 @@ wxComposeView::wxComposeView(const String &name,
    m_alreadyExtEdited =
    m_sending =
    m_closing = false;
+   m_customTemplate = false;
    m_OriginalMessage = NULL;
    m_DraftMessage = NULL;
 
@@ -2732,8 +2733,8 @@ wxComposeView::InitText(Message *msg, const MessageView *msgview)
    if ( m_kind == Message_New )
    {
       // writing a new message/article: wait until the headers are filled
-      // before evacuating the template
-      if ( !m_template )
+      // before evaluating the template
+      if ( m_template.empty() )
       {
          m_template = GetMessageTemplate(m_mode == Mode_Mail
                                           ? MessageTemplate_NewMessage
@@ -2847,10 +2848,11 @@ wxComposeView::DoInitText(Message *msgOrig)
    do
    {
       // get the template value
-      String templateValue = !m_template ? GetMessageTemplate(kind, m_Profile)
-                                         : m_template;
+      String templateValue = m_template.empty()
+                                 ? GetMessageTemplate(kind, m_Profile)
+                                 : m_template;
 
-      if ( !templateValue )
+      if ( templateValue.empty() )
       {
          // if there is no template just don't do anything
          break;
@@ -2928,7 +2930,7 @@ wxComposeView::DoInitText(Message *msgOrig)
             // whether we use the standard one, we want to propose different
             // fixes
 
-            if ( !m_template )
+            if ( m_template.empty() )
             {
                // invoke the template configuration dialog and if something
                // changed...
@@ -3160,8 +3162,11 @@ wxComposeView::OnIdentChange(wxCommandEvent& event)
       {
          DoClear();
 
-         // forget previously read template, it could have changed
-         m_template.clear();
+         // forget previously read template if we read it from profile, it
+         // could have changed
+         if ( !m_customTemplate )
+            m_template.clear();
+
          DoInitText();
       }
    }
