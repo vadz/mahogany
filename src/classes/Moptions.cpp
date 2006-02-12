@@ -914,6 +914,8 @@ MOption::MOption()
 extern MOptionValue GetOptionValue(Profile *profile, const MOption opt)
 {
    MOptionValue value;
+   CHECK( profile, value, _T("NULL profile") );
+
    const wxChar *name = GetOptionName(opt);
    if ( IsNumeric(opt) )
       value.Set(profile->readEntry(name, GetNumericDefault(opt)));
@@ -925,6 +927,8 @@ extern MOptionValue GetOptionValue(Profile *profile, const MOption opt)
 
 extern long GetNumericOptionValue(Profile *profile, const MOption opt)
 {
+   CHECK( profile, -1, _T("NULL profile") );
+
    const MOptionData& optdata = MOptions[opt.GetId()];
 
    return profile->readEntry(optdata.name, optdata.value.n);
