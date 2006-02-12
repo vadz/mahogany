@@ -348,7 +348,7 @@ public:
    void OnKeyDown(wxTreeEvent& event);
    void OnChar(wxKeyEvent& event);
 
-   void OnRightDown(wxMouseEvent& event);
+   void OnContextMenu(wxContextMenuEvent& event);
 #ifdef USE_MIDDLE_CLICK_HACK
    void OnMiddleDown(wxMouseEvent& event);
 #endif // USE_MIDDLE_CLICK_HACK
@@ -751,7 +751,7 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    EVT_TREE_BEGIN_DRAG(-1, wxFolderTreeImpl::OnTreeBeginDrag)
    EVT_TREE_END_DRAG(-1, wxFolderTreeImpl::OnTreeEndDrag)
 
-   EVT_RIGHT_DOWN(wxFolderTreeImpl::OnRightDown)
+   EVT_CONTEXT_MENU(wxFolderTreeImpl::OnContextMenu)
 #ifdef USE_MIDDLE_CLICK_HACK
    EVT_MIDDLE_DOWN(wxFolderTreeImpl::OnMiddleDown)
 #endif // USE_MIDDLE_CLICK_HACK
@@ -2898,7 +2898,7 @@ bool wxFolderTreeImpl::OnDoubleClick()
    m_sink->OnDoubleClick();
 }
 
-void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
+void wxFolderTreeImpl::OnContextMenu(wxContextMenuEvent& event)
 {
    wxTreeItemId item;
    wxPoint pt = event.GetPosition();

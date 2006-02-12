@@ -576,7 +576,7 @@ public:
 
    void OnChar(wxKeyEvent &event);
 
-   void OnRightClick(wxMouseEvent& event);
+   void OnContextMenu(wxContextMenuEvent& event);
    void OnDoubleClick(wxMouseEvent &event);
    void OnMouseMove(wxMouseEvent &event);
 
@@ -778,7 +778,7 @@ protected:
    /// and the folder submenu for it
    wxFolderMenu *m_menuFolders;
 
-   /// flag to prevent reentrancy in OnRightClick()
+   /// flag to prevent reentrancy in OnContextMenu()
    bool m_isInPopupMenu;
 
 private:
@@ -1469,7 +1469,7 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 
    EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
 
-   EVT_RIGHT_DOWN( wxFolderListCtrl::OnRightClick)
+   EVT_CONTEXT_MENU( wxFolderListCtrl::OnContextMenu)
    EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
    EVT_MOTION(wxFolderListCtrl::OnMouseMove)
 
@@ -1701,7 +1701,7 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
    event.Skip();
 }
 
-void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
+void wxFolderListCtrl::OnContextMenu(wxContextMenuEvent& event)
 {
    if ( !HasFolder() )
       return;
@@ -1788,7 +1788,7 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 
    m_isInPopupMenu = true;
 
-   PopupMenu(m_menu, event.GetX(), event.GetY());
+   PopupMenu(m_menu, event.GetPosition());
 
    m_isInPopupMenu = false;
 
