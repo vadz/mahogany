@@ -2920,6 +2920,8 @@ void wxFolderTreeImpl::OnContextMenu(wxContextMenuEvent& event)
    }
    else // event generated with real mouse click
    {
+      pt = ScreenToClient(pt);
+
       // show the menu for the item under mouse
       item = HitTest(pt);
       if ( !item.IsOk() )

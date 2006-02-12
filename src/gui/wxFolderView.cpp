@@ -1788,7 +1788,7 @@ void wxFolderListCtrl::OnContextMenu(wxContextMenuEvent& event)
 
    m_isInPopupMenu = true;
 
-   PopupMenu(m_menu, event.GetPosition());
+   PopupMenu(m_menu, ScreenToClient(event.GetPosition()));
 
    m_isInPopupMenu = false;
 
