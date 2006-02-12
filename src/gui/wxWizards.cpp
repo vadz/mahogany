@@ -44,6 +44,7 @@
 #include "MailFolderCC.h"
 #include "MFolder.h"
 
+#include <wx/sizer.h>
 #include <wx/wizard.h>
 
 #include "gui/wxBrowseButton.h"
@@ -252,8 +253,8 @@ void MWizardPage::OnWizardCancel(wxWizardEvent& event)
 wxEnhancedPanel *MWizardPage::CreateEnhancedPanel(wxStaticText *text)
 {
    wxSize sizeLabel = text->GetSize();
-   wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
-//   wxSize sizePage = ((wxWizard *)GetParent())->GetSize();
+//   wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
+   wxSize sizePage = ((wxWizard *)GetParent())->GetClientSize();
    wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
 
    wxEnhancedPanel *panel = new wxEnhancedPanel(this, false /* no scrolling */);
@@ -278,7 +279,10 @@ void MWizardPage::SetNextButtonLabel(bool isLast)
 bool
 MWizard::Run()
 {
-   return RunWizard(GetPageById(GetFirstPageId()));
+   wxWizardPage * const pageFirst = GetPageById(GetFirstPageId());
+   GetPageAreaSizer()->Add(pageFirst);
+
+   return RunWizard(pageFirst);
 }
 
 // ----------------------------------------------------------------------------
@@ -1391,9 +1395,10 @@ MWizard_CreateFolder_FinalPage::MWizard_CreateFolder_FinalPage(MWizard *wizard)
       "entry in the tree and choose \"Properties\"."
    ), params->m_Name.c_str());
 
-   MFolderType ftype = MF_ILLEGAL; // init it to suppress compiler warnings
-   if ( CanHaveSubfolders(params->m_FolderType, params->m_FolderFlags, &ftype)
-        && ftype != MF_ILLEGAL )
+   MFolderType ftype = params->m_FolderType;
+   if ( ftype != MF_ILLEGAL &&
+         CanHaveSubfolders(ftype, params->m_FolderFlags, &ftype) &&
+            ftype != MF_ILLEGAL )
    {
       // TODO propose to add all subfolders to the created entry from here
       //      (or, better, show a separate page for this before)
