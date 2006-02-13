@@ -100,6 +100,13 @@
    #define UNUSED_IF_WIN(arg) arg
 #endif
 
+#if defined(__WXGTK20__) && !wxCHECK_VERSION(2, 6, 2)
+   // wxGTK 2.6.1 references this function but it doesn't exist in recent GTK+
+   // versions so stub it out here to make it possible to link the app (it's
+   // not really used anyhow)
+   extern "C" void *pango_x_get_context(void *) { return NULL; }
+#endif
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
