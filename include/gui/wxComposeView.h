@@ -430,10 +430,10 @@ private:
    void DeletePlaceHolder();
 
    // create the new controls for another recipient
-   void AddRecipientControls(const String& value, RecipientType rt, bool doLayout);
+   void AddRecipientControls(const String& value, RecipientType rt);
 
    // adds one recipient, helper of AddRecipients()
-   void AddRecipient(const String& addr, RecipientType rcptType, bool doLayout);
+   void AddRecipient(const String& addr, RecipientType rcptType);
 
    /// enable/disable editing of the message text
    void EnableEditing(bool enable);
