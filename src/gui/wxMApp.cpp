@@ -2504,11 +2504,36 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
    {
       // try to find another encoding
       wxFontEncoding encAlt;
-      if ( wxFontMapper::Get()->GetAltForEncoding(*enc, &encAlt, wxEmptyString, mayAskUser) )
+      if ( wxFontMapper::Get()->
+            GetAltForEncoding(*enc, &encAlt, wxEmptyString, mayAskUser) )
       {
          // translate the text (if any) to the equivalent encoding
-         if ( text )
+         if ( text && !text->empty() )
          {
+#if wxUSE_WCHAR_T
+            // try converting via Unicode
+            wxCSConv a2w(*enc);
+            wxWCharBuffer wbuf(a2w.cMB2WC(text->c_str()));
+            if ( *wbuf )
+            {
+               // special case of UTF-8 which is used all the time under wxGTK
+               if ( encAlt == wxFONTENCODING_UTF8 )
+               {
+                  *text = wxConvUTF8.cWC2MB(wbuf);
+               }
+               else // all the other encodings, use generic converter
+               {
+                  wxCSConv w2a(encAlt);
+                  *text = w2a.cWC2MB(wbuf);
+               }
+
+               if ( !text->empty() )
+                  return true;
+               //else: fall back to wxEncodingConverter
+            }
+            //else: conversion to Unicode failed
+#endif // wxUSE_WCHAR_T
+
             wxEncodingConverter conv;
             if ( !conv.Init(*enc, encAlt) )
             {
@@ -2522,7 +2547,7 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
 
          *enc = encAlt;
       }
-      else //no equivalent encoding
+      else // no equivalent encoding
       {
          return false;
       }
