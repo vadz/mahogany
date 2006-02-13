@@ -3440,7 +3440,21 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_COMPOSE_CLEAR:
-         DoClear();
+         if ( !IsModified() ||
+                 MDialog_YesNoCancel
+                 (
+                     _("Are you sure you want to clear this window?\n"
+                       "\n"
+                       "Please notice that it is currently impossible to\n"
+                       "undo this operation."),
+                     this,
+                     MDIALOG_YESNOTITLE,
+                     M_DLG_NO_DEFAULT
+                 ) == MDlg_Yes )
+         {
+            DoClear();
+         }
+         //else: cancelled
          break;
 
       case WXMENU_COMPOSE_EVAL_TEMPLATE:
