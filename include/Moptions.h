@@ -1342,11 +1342,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL_DEFVAL   1
 /// focus follows mouse?
-#ifdef OS_WIN
 #define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    0l
-#else
-#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    1l
-#endif
 /// dockable menu bars?
 #define   MP_DOCKABLE_MENUBARS_DEFVAL   1l
 /// dockable tool bars?
