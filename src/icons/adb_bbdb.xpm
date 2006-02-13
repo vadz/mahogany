@@ -1,7 +1,5 @@
 /* XPM */
-/* Drawn for the K Desktop Environment */
-/* See http://www.kde.org */
-static char*emacs[]={
+static char **bbdb={
 "16 16 8 1",
 ". c None",
 "a c #303030",
@@ -25,4 +23,5 @@ static char*emacs[]={
 "....#c#ccee......",
 ".....#c#cf#......",
 "......#.#f#......",
-".........#......."};
+".........#.......",
+"................."};
