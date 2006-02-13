@@ -6,14 +6,17 @@ Here is the rough plan for the future of the M development:
 
 * 0.68:
 
-   + spell checker
+   + update to latest version of c-client and dspam (use the hash driver
+     instead of sqlite for the latter)
 
 * 0.69:
 
+   + spell checker
    + implement smart config file synchronization: Mahogany main advantage
      is its cross-platform nature however it's not very useful if you can't
      keep the same (but not exactly the same!) options on all machines you use,
      we must do something about it.
+
 
 * 0.70:
 
@@ -30,6 +33,7 @@ Here is the rough plan for the future of the M development:
         addresses dialog, ...) and it should also support multiple selections
 
    + store ADB on IMAP server and sync it
+   + and/or LDAP support
 
 * 0.75:
 
