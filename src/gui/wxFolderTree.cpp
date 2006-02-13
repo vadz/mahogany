@@ -3051,12 +3051,16 @@ void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
       switch ( keycode )
       {
          case WXK_DOWN:
+         case WXK_NUMPAD_DOWN:
          case WXK_UP:
+         case WXK_NUMPAD_UP:
             // do go to next or previous folder
-            (void)GoToNextUnreadFolder(keycode == WXK_DOWN);
+            (void)GoToNextUnreadFolder(keycode == WXK_DOWN ||
+                                          keycode == WXK_NUMPAD_DOWN);
             break;
 
          case WXK_HOME:
+         case WXK_NUMPAD_HOME:
             GoToHomeFolder();
             break;
 

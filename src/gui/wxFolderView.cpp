@@ -2165,11 +2165,17 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
    switch ( event.GetKeyCode() )
    {
       case WXK_UP:
+      case WXK_NUMPAD_UP:
       case WXK_DOWN:
+      case WXK_NUMPAD_DOWN:
       case WXK_PRIOR:
+      case WXK_NUMPAD_PRIOR:
       case WXK_NEXT:
+      case WXK_NUMPAD_NEXT:
       case WXK_HOME:
+      case WXK_NUMPAD_HOME:
       case WXK_END:
+      case WXK_NUMPAD_END:
       case WXK_SPACE:
          // update the unique selection flag as we can lose it now (the keys
          // above can change the focus/selection)
