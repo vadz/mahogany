@@ -155,9 +155,9 @@ public:
    void SetSubject(const String &subj);
 
    /// adds recepients from addr (Recepient_Max means to reuse the last)
-   void AddRecipients(const String& addr,
-                      RecipientType rcptType = Recipient_Max,
-                      bool doLayout = true);
+   virtual void AddRecipients(const String& addr,
+                              RecipientType rcptType = Recipient_Max,
+                              bool doLayout = true);
 
    /// expands an address
    virtual RecipientType ExpandRecipient(String *text);
