@@ -1478,7 +1478,7 @@ extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
 // FIXME this won't be needed when full Unicode support is available
 wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
 {
-#if !wxUSE_WCHAR_T
+#if !defined __WXGTK20__
    CHECK( strUtf, wxFONTENCODING_SYSTEM, _T("NULL string in ConvertUTFToMB") );
 
    if ( !strUtf->empty() )
@@ -1551,7 +1551,8 @@ wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
    {
       enc = wxFONTENCODING_SYSTEM;
    }
-#endif // !wxUSE_WCHAR_T
+#endif // !__WXGTK20__
+
    return enc;
 }
 
