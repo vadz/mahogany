@@ -204,6 +204,12 @@ private:
 // rather as a (single line) text entry, as its name suggests. In particular,
 // you shouldn't add/remove strings from this combobox manually (but using
 // SetValue (and, of course, GetValue) is perfectly ok).
+//
+// It also has a rather unique feature of being able to fall back to the
+// parents values, i.e. an object with config path Foo/Bar can also use the
+// (existing) string for Foo (even though it will only update Bar subkey). To
+// use this feature, append one or more colons (each one counts for an extra
+// step upwards) to the end of the config path.
 class WXDLLMAYEXP wxPTextEntry : public wxComboBox
 {
 public:
@@ -243,11 +249,14 @@ public:
     void SetConfigPath(const wxString& path);
 
 protected:
+    void Init();
+
     void SaveSettings();
     void RestoreStrings();
 
     static size_t ms_countSaveDefault;  // (default)
     size_t m_countSaveMax;              // max number of strings to save
+    size_t m_numParentsToCheck;         // use that many parent paths
 
     wxPHelper *m_persist;
 

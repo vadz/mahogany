@@ -461,10 +461,17 @@ void wxPListbook::SetConfigPath(const wxString& path)
 // how many strings do we save?
 size_t wxPTextEntry::ms_countSaveDefault = 16;
 
+void wxPTextEntry::Init()
+{
+    m_numParentsToCheck = 0;
+    m_countSaveMax = ms_countSaveDefault;
+}
+
 wxPTextEntry::wxPTextEntry()
 {
+    Init();
+
     m_persist = new wxPHelper;
-    m_countSaveMax = ms_countSaveDefault;
 }
 
 wxPTextEntry::wxPTextEntry(const wxString& configPath,
@@ -477,14 +484,23 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
                            wxConfigBase *config)
            : wxComboBox(parent, id, value, pos, size, style)
 {
+    Init();
+
     wxString realConfigPath(configPath);
+
+    // first of all check if we have any trailing colons: they indicate that we
+    // should also read the values from the parent key(s)
+    while ( !realConfigPath.empty() && realConfigPath.Last() == _T(':') ) {
+        realConfigPath.RemoveLast();
+        m_numParentsToCheck++;
+    }
+
     if ( !realConfigPath.empty() && realConfigPath.Last() != '/' ) {
         // we need a subgroup name, not a key name
         realConfigPath += '/';
     }
 
     m_persist = new wxPHelper(realConfigPath, wxEmptyString, config);
-    m_countSaveMax = ms_countSaveDefault;
 
     RestoreStrings();
 }
@@ -559,20 +575,38 @@ void wxPTextEntry::RestoreStrings()
     if ( m_persist->ChangePath() ) {
         wxConfigBase *config = m_persist->GetConfig();
 
-        // read them all
-        wxString key, val, text;
-        for ( size_t n = 0; ; n++ ) {
-            key.Printf(_T("%lu"), (unsigned long)n);
-            if ( !config->HasEntry(key) )
-                break;
-            val = config->Read(key);
+        wxString text;
+        bool isFirst = true;
+        for ( size_t level = 0; level <= m_numParentsToCheck; level++ ) {
+            // read them all
+            wxString key, val;
+            for ( size_t n = 0; ; n++ ) {
+                key.Printf(_T("%lu"), (unsigned long)n);
+                if ( !config->HasEntry(key) )
+                    break;
+                val = config->Read(key);
 
-            // the first one is the text zone itself
-            if ( n == 0 ) {
-                text = val;
+                // the very first one is the text zone itself
+                if ( isFirst ) {
+                    isFirst = false;
+                    text = val;
+                }
+                else {
+                    // check that we don't already have it, we don't need
+                    // duplicates
+                    if ( FindString(val) != wxNOT_FOUND )
+                        continue;
+                }
+
+                Append(val);
             }
 
-            Append(val);
+            const wxString oldPath = config->GetPath();
+            config->SetPath(_T(".."));
+            if ( config->GetPath() == oldPath ) {
+                // reached the root probably, doesn't make sense to continue
+                break;
+            }
         }
 
         SetValue(text);
