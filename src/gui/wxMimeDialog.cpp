@@ -90,9 +90,9 @@ END_EVENT_TABLE()
 wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
                                            const String& mimetype,
                                            bool *openAsMsg)
-                  : wxManuallyLaidOutDialog(parent,
-                                            _("Open with"),
-                                            _T("MimeOpenWithDialog"))
+                    : wxManuallyLaidOutDialog(parent,
+                                              _("Open with"),
+                                              _T("MimeOpenWithDialog"))
 {
    // init the data
    // -------------
@@ -133,7 +133,15 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
    c->height.AsIs();
    m_labelCommand->SetConstraints(c);
 
-   m_txtCommand = new wxPTextEntry(_T("/Prompts/MimeHandler"), this, wxID_ANY);
+   // we want to default to /Prompts/MimeHandler/Type/Subtype but also fall
+   // back to /Prompts/MimeHandler/Type and even /Prompts/MimeHandler hence we
+   // pass two extra colons at the end to tell wxPTextEntry to recurse upwards
+   m_txtCommand = new wxPTextEntry
+                      (
+                        _T("/Prompts/MimeHandler/") + mimetype + _T("::"),
+                        this,
+                        wxID_ANY
+                      );
    c = new wxLayoutConstraints;
    c->centreY.SameAs(m_labelCommand, wxCentreY);
    c->left.RightOf(m_labelCommand, LAYOUT_X_MARGIN);
