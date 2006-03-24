@@ -435,7 +435,7 @@ ADDRESS *
 MessageCC::GetAddressStruct(MessageAddressType type) const
 {
    CheckEnvelope();
-   CHECK( m_Envelope, NULL, _T("no envelop in GetAddressStruct()") )
+   CHECK( m_Envelope, NULL, _T("no envelop in GetAddressStruct()") );
 
    ADDRESS *addr;
 
