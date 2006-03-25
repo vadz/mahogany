@@ -545,7 +545,7 @@ ostream& operator << (ostream& out, const LineEntryData& entry)
 AdbBook *LineDataProvider::CreateBook(const String& name)
 {
    RefCounter<LineBook> book(new LineBook(name));
-   CHECK ( !book->IsBad(), NULL, _T("Cannot create LineBook") )
+   CHECK ( !book->IsBad(), NULL, _T("Cannot create LineBook") );
    return book.release();
 }
 
