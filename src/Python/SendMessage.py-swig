@@ -1,19 +1,19 @@
-# This file was created automatically by SWIG 1.3.27.
+# This file was created automatically by SWIG 1.3.28.
 # Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
 
 import _SendMessage
-
-# This file is compatible with both classic and new-style classes.
+import new
+new_instancemethod = new.instancemethod
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
+    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if isinstance(value, class_type):
-            self.__dict__[name] = value.this
-            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
-            del value.thisown
+        if type(value).__name__ == 'PySwigObject':
+            self.__dict__[name] = value
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name) or (name == "thisown"):
+    if (not static) or hasattr(self,name):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -22,6 +22,7 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
+    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
@@ -41,9 +42,11 @@ class SendMessage(_object):
     __setattr__ = lambda self, name, value: _swig_setattr(self, SendMessage, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, SendMessage, name)
-    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __init__(self): raise AttributeError, "No constructor defined"
     def __repr__(self):
-        return "<%s.%s; proxy of C++ SendMessage instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+        try: strthis = "at 0x%x" %( self.this, ) 
+        except: strthis = "" 
+        return "<%s.%s; proxy of C++ SendMessage instance %s>" % (self.__class__.__module__, self.__class__.__name__, strthis,)
     NeverQueue = _SendMessage.SendMessage_NeverQueue
     Silent = _SendMessage.SendMessage_Silent
     __swig_getmethods__["Create"] = lambda x: _SendMessage.SendMessage_Create
@@ -68,18 +71,9 @@ class SendMessage(_object):
     def WriteToFolder(*args): return _SendMessage.SendMessage_WriteToFolder(*args)
     def SendOrQueue(*args): return _SendMessage.SendMessage_SendOrQueue(*args)
     def Preview(*args): return _SendMessage.SendMessage_Preview(*args)
-    def __del__(self, destroy=_SendMessage.delete_SendMessage):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
-
-
-class SendMessagePtr(SendMessage):
-    def __init__(self, this):
-        _swig_setattr(self, SendMessage, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, SendMessage, 'thisown', 0)
-        self.__class__ = SendMessage
-_SendMessage.SendMessage_swigregister(SendMessagePtr)
+    __swig_destroy__ = _SendMessage.delete_SendMessage
+    __del__ = lambda self : None;
+_SendMessage.SendMessage_swigregister(SendMessage)
 
 SendMessage_Create = _SendMessage.SendMessage_Create
 

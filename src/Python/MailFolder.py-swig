@@ -1,19 +1,19 @@
-# This file was created automatically by SWIG 1.3.27.
+# This file was created automatically by SWIG 1.3.28.
 # Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
 
 import _MailFolder
-
-# This file is compatible with both classic and new-style classes.
+import new
+new_instancemethod = new.instancemethod
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
+    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if isinstance(value, class_type):
-            self.__dict__[name] = value.this
-            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
-            del value.thisown
+        if type(value).__name__ == 'PySwigObject':
+            self.__dict__[name] = value
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name) or (name == "thisown"):
+    if (not static) or hasattr(self,name):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -22,6 +22,7 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
+    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
@@ -41,9 +42,11 @@ class MailFolder(_object):
     __setattr__ = lambda self, name, value: _swig_setattr(self, MailFolder, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, MailFolder, name)
-    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __init__(self): raise AttributeError, "No constructor defined"
     def __repr__(self):
-        return "<%s.%s; proxy of C++ MailFolder instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+        try: strthis = "at 0x%x" %( self.this, ) 
+        except: strthis = "" 
+        return "<%s.%s; proxy of C++ MailFolder instance %s>" % (self.__class__.__module__, self.__class__.__name__, strthis,)
     MSG_STAT_NEW = _MailFolder.MailFolder_MSG_STAT_NEW
     MSG_STAT_SEEN = _MailFolder.MailFolder_MSG_STAT_SEEN
     MSG_STAT_DELETED = _MailFolder.MailFolder_MSG_STAT_DELETED
@@ -180,18 +183,9 @@ class MailFolder(_object):
     def RequestUpdate(*args): return _MailFolder.MailFolder_RequestUpdate(*args)
     def SuspendUpdates(*args): return _MailFolder.MailFolder_SuspendUpdates(*args)
     def ResumeUpdates(*args): return _MailFolder.MailFolder_ResumeUpdates(*args)
-    def __del__(self, destroy=_MailFolder.delete_MailFolder):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
-
-
-class MailFolderPtr(MailFolder):
-    def __init__(self, this):
-        _swig_setattr(self, MailFolder, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, MailFolder, 'thisown', 0)
-        self.__class__ = MailFolder
-_MailFolder.MailFolder_swigregister(MailFolderPtr)
+    __swig_destroy__ = _MailFolder.delete_MailFolder
+    __del__ = lambda self : None;
+_MailFolder.MailFolder_swigregister(MailFolder)
 
 MailFolder_OpenFolder = _MailFolder.MailFolder_OpenFolder
 
@@ -255,22 +249,16 @@ class SuspendFolderUpdates(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, SuspendFolderUpdates, name)
     def __repr__(self):
-        return "<%s.%s; proxy of C++ SuspendFolderUpdates instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+        try: strthis = "at 0x%x" %( self.this, ) 
+        except: strthis = "" 
+        return "<%s.%s; proxy of C++ SuspendFolderUpdates instance %s>" % (self.__class__.__module__, self.__class__.__name__, strthis,)
     def __init__(self, *args):
-        _swig_setattr(self, SuspendFolderUpdates, 'this', _MailFolder.new_SuspendFolderUpdates(*args))
-        _swig_setattr(self, SuspendFolderUpdates, 'thisown', 1)
-    def __del__(self, destroy=_MailFolder.delete_SuspendFolderUpdates):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
-
-
-class SuspendFolderUpdatesPtr(SuspendFolderUpdates):
-    def __init__(self, this):
-        _swig_setattr(self, SuspendFolderUpdates, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, SuspendFolderUpdates, 'thisown', 0)
-        self.__class__ = SuspendFolderUpdates
-_MailFolder.SuspendFolderUpdates_swigregister(SuspendFolderUpdatesPtr)
+        this = _MailFolder.new_SuspendFolderUpdates(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _MailFolder.delete_SuspendFolderUpdates
+    __del__ = lambda self : None;
+_MailFolder.SuspendFolderUpdates_swigregister(SuspendFolderUpdates)
 
 
 

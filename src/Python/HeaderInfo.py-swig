@@ -1,19 +1,19 @@
-# This file was created automatically by SWIG 1.3.27.
+# This file was created automatically by SWIG 1.3.28.
 # Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
 
 import _HeaderInfo
-
-# This file is compatible with both classic and new-style classes.
+import new
+new_instancemethod = new.instancemethod
 def _swig_setattr_nondynamic(self,class_type,name,value,static=1):
+    if (name == "thisown"): return self.this.own(value)
     if (name == "this"):
-        if isinstance(value, class_type):
-            self.__dict__[name] = value.this
-            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
-            del value.thisown
+        if type(value).__name__ == 'PySwigObject':
+            self.__dict__[name] = value
             return
     method = class_type.__swig_setmethods__.get(name,None)
     if method: return method(self,value)
-    if (not static) or hasattr(self,name) or (name == "thisown"):
+    if (not static) or hasattr(self,name):
         self.__dict__[name] = value
     else:
         raise AttributeError("You cannot add attributes to %s" % self)
@@ -22,6 +22,7 @@ def _swig_setattr(self,class_type,name,value):
     return _swig_setattr_nondynamic(self,class_type,name,value,0)
 
 def _swig_getattr(self,class_type,name):
+    if (name == "thisown"): return self.this.own()
     method = class_type.__swig_getmethods__.get(name,None)
     if method: return method(self)
     raise AttributeError,name
@@ -42,10 +43,13 @@ class HeaderInfo(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, HeaderInfo, name)
     def __repr__(self):
-        return "<%s.%s; proxy of C++ HeaderInfo instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+        try: strthis = "at 0x%x" %( self.this, ) 
+        except: strthis = "" 
+        return "<%s.%s; proxy of C++ HeaderInfo instance %s>" % (self.__class__.__module__, self.__class__.__name__, strthis,)
     def __init__(self, *args):
-        _swig_setattr(self, HeaderInfo, 'this', _HeaderInfo.new_HeaderInfo(*args))
-        _swig_setattr(self, HeaderInfo, 'thisown', 1)
+        this = _HeaderInfo.new_HeaderInfo(*args)
+        try: self.this.append(this)
+        except: self.this = this
     def GetSubject(*args): return _HeaderInfo.HeaderInfo_GetSubject(*args)
     def GetFrom(*args): return _HeaderInfo.HeaderInfo_GetFrom(*args)
     def GetTo(*args): return _HeaderInfo.HeaderInfo_GetTo(*args)
@@ -68,18 +72,9 @@ class HeaderInfo(_object):
     Newsgroup = _HeaderInfo.HeaderInfo_Newsgroup
     __swig_getmethods__["GetFromOrTo"] = lambda x: _HeaderInfo.HeaderInfo_GetFromOrTo
     if _newclass:GetFromOrTo = staticmethod(_HeaderInfo.HeaderInfo_GetFromOrTo)
-    def __del__(self, destroy=_HeaderInfo.delete_HeaderInfo):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
-
-
-class HeaderInfoPtr(HeaderInfo):
-    def __init__(self, this):
-        _swig_setattr(self, HeaderInfo, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, HeaderInfo, 'thisown', 0)
-        self.__class__ = HeaderInfo
-_HeaderInfo.HeaderInfo_swigregister(HeaderInfoPtr)
+    __swig_destroy__ = _HeaderInfo.delete_HeaderInfo
+    __del__ = lambda self : None;
+_HeaderInfo.HeaderInfo_swigregister(HeaderInfo)
 
 HeaderInfo_GetFromOrTo = _HeaderInfo.HeaderInfo_GetFromOrTo
 
@@ -88,9 +83,11 @@ class HeaderInfoList(_object):
     __setattr__ = lambda self, name, value: _swig_setattr(self, HeaderInfoList, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, HeaderInfoList, name)
-    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __init__(self): raise AttributeError, "No constructor defined"
     def __repr__(self):
-        return "<%s.%s; proxy of C++ HeaderInfoList instance at %s>" % (self.__class__.__module__, self.__class__.__name__, self.this,)
+        try: strthis = "at 0x%x" %( self.this, ) 
+        except: strthis = "" 
+        return "<%s.%s; proxy of C++ HeaderInfoList instance %s>" % (self.__class__.__module__, self.__class__.__name__, strthis,)
     __swig_getmethods__["Create"] = lambda x: _HeaderInfo.HeaderInfoList_Create
     if _newclass:Create = staticmethod(_HeaderInfo.HeaderInfoList_Create)
     def Count(*args): return _HeaderInfo.HeaderInfoList_Count(*args)
@@ -121,18 +118,9 @@ class HeaderInfoList(_object):
     def CacheMsgnos(*args): return _HeaderInfo.HeaderInfoList_CacheMsgnos(*args)
     def IsInCache(*args): return _HeaderInfo.HeaderInfoList_IsInCache(*args)
     def ReallyGet(*args): return _HeaderInfo.HeaderInfoList_ReallyGet(*args)
-    def __del__(self, destroy=_HeaderInfo.delete_HeaderInfoList):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
-
-
-class HeaderInfoListPtr(HeaderInfoList):
-    def __init__(self, this):
-        _swig_setattr(self, HeaderInfoList, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, HeaderInfoList, 'thisown', 0)
-        self.__class__ = HeaderInfoList
-_HeaderInfo.HeaderInfoList_swigregister(HeaderInfoListPtr)
+    __swig_destroy__ = _HeaderInfo.delete_HeaderInfoList
+    __del__ = lambda self : None;
+_HeaderInfo.HeaderInfoList_swigregister(HeaderInfoList)
 
 HeaderInfoList_Create = _HeaderInfo.HeaderInfoList_Create
 
