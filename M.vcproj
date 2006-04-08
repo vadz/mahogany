@@ -336,6 +336,9 @@
 					RelativePath=".\src\classes\Profile.cpp">
 				</File>
 				<File
+					RelativePath=".\src\classes\QuotedText.cpp">
+				</File>
+				<File
 					RelativePath=".\src\classes\Sequence.cpp">
 				</File>
 				<File
@@ -2130,6 +2133,9 @@
 			</File>
 			<File
 				RelativePath=".\include\PythonHelp.h">
+			</File>
+			<File
+				RelativePath=".\include\QuotedText.h">
 			</File>
 			<File
 				RelativePath=".\include\SendMessage.h">
