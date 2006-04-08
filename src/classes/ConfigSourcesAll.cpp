@@ -410,15 +410,7 @@ AllConfigSources::Write(const String& path,
                         const LookupData& data,
                         ConfigSource *config)
 {
-   if ( !config )
-   {
-      CHECK( !m_sources.empty(), false,
-               _T("can't write to profile if no config sources exist") );
-
-      List::iterator i = m_sources.end();
-      config = *((--i).operator->());
-   }
-
+   // construct the full path
    const String key = data.GetKey();
    String fullpath;
    if ( *key.c_str() != _T('/') )
@@ -433,6 +425,46 @@ AllConfigSources::Write(const String& path,
                      fullpath[2u] != _T('/'),
                         _T("config path must not start with /M") );
 
+
+   // find where to write the data to
+   if ( !config )
+   {
+      // we need to find the first config source in which this value is already
+      // present as writing it should overwrite any existing value and for this
+      // it has to be written to higher priority config source
+
+      // we also have to check for the normal entries if we're writing a
+      // suspended one
+      extern const char SUSPEND_PATH[]; // from Profile.cpp
+      String fullpathUnsusp;
+      size_t posSusp = fullpath.find(SUSPEND_PATH);
+      if ( posSusp != String::npos )
+      {
+         // +1 for the slash
+         fullpathUnsusp = fullpath;
+         fullpathUnsusp.erase(posSusp, strlen(SUSPEND_PATH) + 1);
+      }
+
+      // note that this loop terminates with config set to the last source if
+      // the element is not found anywhere, just as desired
+      const List::iterator end = m_sources.end();
+      for ( List::iterator i = m_sources.begin(); i != end; ++i )
+      {
+         config = *i;
+         if ( config->HasEntry(fullpath) ||
+               !(fullpathUnsusp.empty() && config->HasEntry(fullpathUnsusp)) )
+         {
+            // write to this one to overwrite the existing entry
+            break;
+         }
+      }
+
+      CHECK( config, false,
+               _T("can't write to profile if no config sources exist") );
+   }
+
+
+   // finally do write it
    return data.GetType() == LookupData::LD_LONG
             ? config->Write(fullpath, data.GetLong())
             : config->Write(fullpath, data.GetString());
