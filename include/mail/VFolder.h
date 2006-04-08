@@ -221,7 +221,7 @@ protected:
    Msg *GetMsgFromMsgno(MsgnoType msgno) const;
 
    /// get the Msg corresponding to the given UID or NULL
-   Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const;
+   Msg *GetMsgFromUID(UIdType uid) const;
 
    /// add a new message (takes ownership of it)
    void AddMsg(Msg *msg);
