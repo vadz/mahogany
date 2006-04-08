@@ -546,7 +546,8 @@ public:
 
       MLocker lock(((wxFolderListCtrl *)this)->m_mutexHeaders);
 
-      return m_headers->GetItem((size_t)item)->GetUId();
+      HeaderInfo *hi = m_headers->GetItem((size_t)item);
+      return hi ? hi->GetUId() : UID_ILLEGAL;
    }
 
    /// get the UID and, optionally, the index of the focused item
