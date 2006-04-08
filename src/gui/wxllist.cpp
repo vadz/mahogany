@@ -1884,8 +1884,8 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
    if(style != -1)     m_CurrentStyleInfo.style = style;
    if(weight != -1)    m_CurrentStyleInfo.weight = weight;
    if(underline != -1) m_CurrentStyleInfo.underline = underline != 0;
-   if(fg) m_CurrentStyleInfo.m_fg = *fg;
-   if(bg) m_CurrentStyleInfo.m_bg = *bg;
+   m_CurrentStyleInfo.m_fg = fg ? *fg : m_DefaultStyleInfo.m_fg;
+   m_CurrentStyleInfo.m_bg = bg ? *bg : m_DefaultStyleInfo.m_bg;
    if(enc != wxFONTENCODING_DEFAULT) m_CurrentStyleInfo.enc = enc;
    Insert(
       new wxLayoutObjectCmd(
@@ -3218,17 +3218,28 @@ wxLayoutList::ApplyStyle(wxLayoutStyleInfo const &si, wxDC &dc)
 #undef COPY_SI
    }
 
-   if(si.m_fg_valid)
+   if ( si.m_fg_valid && m_CurrentStyleInfo.m_fg != si.m_fg )
    {
       m_CurrentStyleInfo.m_fg = si.m_fg;
       m_CurrentStyleInfo.m_fg_valid = true;
       dc.SetTextForeground(m_CurrentStyleInfo.m_fg);
    }
-   if(si.m_bg_valid)
+   else if ( m_CurrentStyleInfo.m_fg != m_DefaultStyleInfo.m_fg )
+   {
+      m_CurrentStyleInfo.m_fg = m_DefaultStyleInfo.m_fg;
+      dc.SetTextForeground(m_DefaultStyleInfo.m_fg);
+   }
+
+   if ( si.m_bg_valid && m_CurrentStyleInfo.m_bg != si.m_bg )
    {
       m_CurrentStyleInfo.m_bg = si.m_bg;
       m_CurrentStyleInfo.m_bg_valid = true;
       dc.SetTextBackground(m_CurrentStyleInfo.m_bg);
+   }
+   else if ( m_CurrentStyleInfo.m_bg != m_DefaultStyleInfo.m_bg )
+   {
+      m_CurrentStyleInfo.m_bg = m_DefaultStyleInfo.m_bg;
+      dc.SetTextBackground(m_DefaultStyleInfo.m_bg);
    }
 }
 
