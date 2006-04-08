@@ -12,6 +12,8 @@
 #ifndef _M_QUOTEDTEXT_H_
 #define _M_QUOTEDTEXT_H_
 
+class Profile;
+
 /**
     An opaque struct used by CountQuoteLevel() to store global information
     about the message.
@@ -76,5 +78,17 @@ CountQuoteLevel(const char *string,
                 int max_white,
                 int max_alpha,
                 QuoteData& quoteData);
+
+/**
+    Return only non-quoted text.
+
+    Simply drops all quoted lines from its input.
+
+    @param text the (multiline) string containing the input text
+    @param profile the profile to use for getting the options we use
+    @return multiline strings containing all non-quoted lines
+ */
+String
+GetUnquotedText(const String& text, Profile *profile);
 
 #endif // _M_QUOTEDTEXT_H_

@@ -99,6 +99,7 @@
 #include "MessageView.h"
 #include "Collect.h"
 #include "ColourNames.h"
+#include "QuotedText.h"
 
 #include "modules/Calendar.h"
 
@@ -4146,7 +4147,7 @@ bool wxComposeView::CheckForForgottenAttachments() const
       switch ( part->GetType() )
       {
          case EditorContentPart::Type_Text:
-            msgText += part->GetText();
+            msgText += GetUnquotedText(part->GetText(), m_Profile);
             break;
 
          default:

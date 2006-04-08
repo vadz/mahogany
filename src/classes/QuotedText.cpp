@@ -25,6 +25,13 @@
 #include "QuotedText.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_MVIEW_QUOTED_MAXWHITESPACE;
+extern const MOption MP_MVIEW_QUOTED_MAXALPHA;
+
+// ----------------------------------------------------------------------------
 // private functions prototypes
 // ----------------------------------------------------------------------------
 
@@ -274,5 +281,39 @@ CountQuoteLevel(const char *string,
    }
 
    return level;
+}
+
+// ============================================================================
+// other public functions
+// ============================================================================
+
+String GetUnquotedText(const String& text, Profile *profile)
+{
+   String unquoted;
+   unquoted.reserve(text.length());
+
+   const int maxWhite = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
+   const int maxAlpha = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXALPHA);
+   QuoteData qd;
+   for ( const char *lineCur = text.c_str(); *lineCur; )
+   {
+      // find the start of the next line
+      const wxChar *lineNext = wxStrchr(lineCur, _T('\n'));
+
+      if ( CountQuoteLevel(lineCur, maxWhite, maxAlpha, qd) == 0 )
+      {
+         // +1 to take '\n' too
+         unquoted += String(lineCur, lineNext ? lineNext + 1 - lineCur
+                                              : String::npos);
+      }
+
+      if ( !lineNext )
+         break;
+
+      // go to the next line (skip '\n')
+      lineCur = lineNext + 1;
+   }
+
+   return unquoted;
 }
 
