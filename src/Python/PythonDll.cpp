@@ -374,9 +374,9 @@ extern bool InitPythonDll()
    static const wxChar *versions[] =
    {
 #ifdef OS_WIN
-      _T("23"), _T("22"), _T("20"), _T("15")
+      _T("24"), _T("23"), _T("22"), _T("20"), _T("15")
 #elif defined(OS_UNIX)
-      _T("2.3"), _T("2.2"), _T("2.0"), _T("1.5")
+      _T("2.4"), _T("2.3"), _T("2.2"), _T("2.0"), _T("1.5")
 #else
     #error "Unknown Python library naming convention under this OS"
 #endif
