@@ -282,7 +282,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    // containing the list ctrl being raised to the top from behind another top
    // level frame
    HWND hwndTop = ::GetForegroundWindow();
-   wxFrame *frame = GetFrame(this);
+   wxWindow *frame = wxGetTopLevelParent(this);
    if ( frame && frame->GetHWND() == (WXHWND)hwndTop )
 #endif // OS_WIN
       if ( (eventId != WXLOWIN_MENU_MOUSEMOVE
