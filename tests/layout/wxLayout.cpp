@@ -260,9 +260,7 @@ void MyFrame::AddSampleText(wxLayoutList *llist)
 
 void MyFrame::Clear()
 {
-    wxColour colBg(0, 0, 0);
-
-    m_lwin->Clear(wxROMAN,16,wxNORMAL,wxNORMAL, false, wxRED, &colBg);
+    m_lwin->Clear(wxROMAN,16,wxNORMAL,wxNORMAL, false, wxBLACK, wxWHITE);
 }
 
 
