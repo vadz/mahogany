@@ -66,6 +66,7 @@ bool CanHaveSubfolders(MFolderType folderType,
          // fall through
 
       case MF_INBOX:
+      case MF_POP:
       case MF_VIRTUAL:     // currently doesn't implement "list subfolders"
          return false;
    }
