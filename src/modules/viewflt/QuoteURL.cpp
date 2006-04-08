@@ -192,7 +192,7 @@ QuoteURLFilter::ReadOptions(QuoteURLFilter::Options& options,
    options.quotedCycleColours =
        READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_CYCLE_COLOURS);
    options.quotedMaxWhitespace =
-       READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
+       READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
    options.quotedMaxAlpha = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXALPHA);
 
    options.highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
