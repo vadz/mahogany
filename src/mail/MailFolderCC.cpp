@@ -203,6 +203,9 @@ extern const MPersMsgBox *M_MSGBOX_NO_NET_PING_ANYWAY;
 extern void Pop3_SaveFlags(const String& folderName, MAILSTREAM *stream);
 extern void Pop3_RestoreFlags(const String& folderName, MAILSTREAM *stream);
 
+bool MailFolderCCInit();
+void MailFolderCCCleanup();
+
 // ----------------------------------------------------------------------------
 // typedefs
 // ----------------------------------------------------------------------------
