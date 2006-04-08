@@ -20,6 +20,9 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
+   #include "Mcommon.h"
+
+   #include "Profile.h"
 #endif
 
 #include "QuotedText.h"
