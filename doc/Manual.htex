@@ -89,6 +89,7 @@ skip them unless you're updating from a very old version of Mahogany.
    \item New ``Where is filter'' command (\ref{filterdialogs})
    \item Mahogany will warn you if you start replying to the same message a
          second time now.
+   \item Detect forgotten attachments before sending the message.
 \end{itemize}
 
 By far the main new feature in this version is the integration of DSPAM

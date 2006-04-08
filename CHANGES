@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2006
 -------------------------------------
 
+2006-04-08 VZ: optionally remind user to add an attachment if it was forgotten
 2006-04-08 VZ: support for using Python 2.4
 2006-02-12 VZ: reuse an existing composer when replying to the same message twice
 2005-11-28 VZ: updated to build with recent swig (>= 1.3.25)

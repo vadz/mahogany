@@ -279,6 +279,10 @@ enum ConfigFields
    ConfigField_ComposeViewBGColour,
    ConfigField_ComposeViewColourHeaders,
 
+   ConfigField_ComposeForgottenAttachmentsHelp,
+   ConfigField_ComposeCheckForgottenAttachments,
+   ConfigField_ComposeCheckAttachmentsRegex,
+
    ConfigField_ComposePreviewHelp,
    ConfigField_ComposePreview,
    ConfigField_ComposeConfirm,
@@ -1279,7 +1283,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // not very useful { gettext_noop("Mail alias substring ex&pansion"), Field_Bool,    -1,                        },
 
    { gettext_noop("\n"
-                  "The following settings control the appearance\n"
+                  "The following settings control the appearance "
                   "of the composer window:"),      Field_Message, -1 },
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font | Field_Global, -1 },
@@ -1294,6 +1298,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Back&ground colour"),           Field_Color | Field_Global,   -1},
    { gettext_noop("Use these settings for &headers too"),
                                                    Field_Bool | Field_Global,   -1},
+
+   { gettext_noop("\n"
+                  "Mahogany can try to detect if you forget to attach a file\n"
+                  "to your message when you mentioned it in the message text.\n"
+                  "If the check is activated, the regular expression below can\n"
+                  "be used to select the words which indicate attachment present."),
+                                                   Field_Message, -1 },
+   { gettext_noop("Check for &forgotten attachments"), Field_Bool, -1 },
+   { gettext_noop("Attachments check rege&x"),     Field_Text,
+                                                   ConfigField_ComposeCheckForgottenAttachments },
 
    { gettext_noop("\n"
                   "The settings below allow you to have a last look at the\n"
@@ -1968,6 +1982,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_COLOUR_HEADERS),
+
+   CONFIG_NONE(), // forgotten attachments help
+   CONFIG_ENTRY(MP_CHECK_FORGOTTEN_ATTACHMENTS),
+   CONFIG_ENTRY(MP_CHECK_ATTACHMENTS_REGEX),
 
    CONFIG_NONE(), // preview help
    CONFIG_ENTRY(MP_PREVIEW_SEND),

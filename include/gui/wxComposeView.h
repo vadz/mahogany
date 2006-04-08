@@ -339,6 +339,9 @@ protected:
    /// InsertData() and InsertFile() helper
    void DoInsertAttachment(EditorContentPart *mc, const wxChar *mimetype);
 
+   /// ask the user for the files to attach and attach them
+   void LetUserAddAttachment();
+
    /// set encoding to use and pass it on to composer (by default same one)
    void SetEncoding(wxFontEncoding encoding,
                     wxFontEncoding encodingEditor = wxFONTENCODING_SYSTEM);
@@ -353,6 +356,10 @@ protected:
 
    /// set the draft message we were started with
    void SetDraft(Message *msg);
+
+   /// check if the user forgot to add an attachment and return false in this
+   /// case
+   bool CheckForForgottenAttachments() const;
 
    /// verify that the message can be sent
    bool IsReadyToSend() const;

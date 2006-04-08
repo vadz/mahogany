@@ -321,6 +321,8 @@ extern const MOption MP_CVIEW_FONT_SIZE;
 extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_BGCOLOUR;
 extern const MOption MP_CVIEW_COLOUR_HEADERS;
+extern const MOption MP_CHECK_FORGOTTEN_ATTACHMENTS;
+extern const MOption MP_CHECK_ATTACHMENTS_REGEX;
 
 // sorting/threading
 extern const MOption MP_MSGS_SERVER_SORT;
@@ -1046,6 +1048,10 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_CVIEW_BGCOLOUR_NAME      _T("CViewBGColout") // typo but do *NOT* fix
 /// use the colours and font for the headers as well?
 #define   MP_CVIEW_COLOUR_HEADERS_NAME _T("CViewColourHeaders")
+/// check for forgotten attachments?
+#define   MP_CHECK_FORGOTTEN_ATTACHMENTS_NAME _T("CheckForgottenAttachments")
+/// regex to use for the attachments check
+#define   MP_CHECK_ATTACHMENTS_REGEX_NAME _T("AttachmentsCheckRegex")
 //@}
 /// highlight signature?
 #define   MP_HIGHLIGHT_SIGNATURE_NAME      _T("HighlightSig")
@@ -2012,6 +2018,10 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_CVIEW_BGCOLOUR_DEFVAL      _T("white")
 /// use the colours and font for the headers as well?
 #define   MP_CVIEW_COLOUR_HEADERS_DEFVAL 0L
+/// check for forgotten attachments?
+#define   MP_CHECK_FORGOTTEN_ATTACHMENTS_DEFVAL 1L
+/// regex to use for the attachments check
+#define   MP_CHECK_ATTACHMENTS_REGEX_DEFVAL _T("[[:<:]](attach|enclose)")
 //@}
 /// highlight signature?
 #define   MP_HIGHLIGHT_SIGNATURE_DEFVAL      1

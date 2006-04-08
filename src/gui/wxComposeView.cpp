@@ -66,6 +66,7 @@
 #include <wx/ffile.h>
 #include <wx/dir.h>
 #include <wx/process.h>
+#include <wx/regex.h>
 #include <wx/mimetype.h>
 #include <wx/tokenzr.h>
 #include <wx/textbuf.h>
@@ -115,6 +116,8 @@ extern const MOption MP_AUTOCOLLECT;
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_NAMED;
 extern const MOption MP_AUTOCOLLECT_OUTGOING;
+extern const MOption MP_CHECK_ATTACHMENTS_REGEX;
+extern const MOption MP_CHECK_FORGOTTEN_ATTACHMENTS;
 extern const MOption MP_COMPOSE_BCC;
 extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_SHOW_FROM;
@@ -151,6 +154,7 @@ extern const MOption MP_USE_SENDMAIL;
 extern const MPersMsgBox *M_MSGBOX_ASK_FOR_EXT_EDIT;
 extern const MPersMsgBox *M_MSGBOX_ASK_SAVE_HEADERS;
 extern const MPersMsgBox *M_MSGBOX_ASK_VCARD;
+extern const MPersMsgBox *M_MSGBOX_CHECK_FORGOTTEN_ATTACHMENTS;
 extern const MPersMsgBox *M_MSGBOX_CONFIG_NET_FROM_COMPOSE;
 extern const MPersMsgBox *M_MSGBOX_DRAFT_AUTODELETE;
 extern const MPersMsgBox *M_MSGBOX_DRAFT_SAVED;
@@ -3363,23 +3367,7 @@ wxComposeView::OnMenuCommand(int id)
    switch(id)
    {
       case WXMENU_COMPOSE_INSERTFILE:
-         {
-            wxArrayString filenames;
-            size_t nFiles = wxPFilesSelector
-                            (
-                             filenames,
-                             _T("MsgInsert"),
-                             _("Please choose files to insert."),
-                             NULL, _T("dead.letter"), NULL,
-                             wxGetTranslation(wxALL_FILES),
-                             wxOPEN | wxFILE_MUST_EXIST,
-                             this
-                            );
-            for ( size_t n = 0; n < nFiles; n++ )
-            {
-               InsertFile(filenames[n]);
-            }
-         }
+         LetUserAddAttachment();
          break;
 
 
@@ -4118,9 +4106,118 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
    }
 }
 
+void wxComposeView::LetUserAddAttachment()
+{
+   wxArrayString filenames;
+   size_t nFiles = wxPFilesSelector
+                   (
+                    filenames,
+                    _T("MsgInsert"),
+                    _("Please choose files to insert."),
+                    NULL, _T("dead.letter"), NULL,
+                    wxGetTranslation(wxALL_FILES),
+                    wxOPEN | wxFILE_MUST_EXIST,
+                    this
+                   );
+   for ( size_t n = 0; n < nFiles; n++ )
+   {
+      InsertFile(filenames[n]);
+   }
+}
+
 // ----------------------------------------------------------------------------
 // wxComposeView sending the message
 // ----------------------------------------------------------------------------
+
+bool wxComposeView::CheckForForgottenAttachments() const
+{
+   if ( !READ_CONFIG(m_Profile, MP_CHECK_FORGOTTEN_ATTACHMENTS) )
+      return true;
+
+   // check if we have any attachments already as, if we do, we don't have to
+   // check if we forgot them (and also retrieve the message text while doing
+   // this)
+   wxString msgText;
+   bool hasAttachments = false;
+   for ( EditorContentPart *part = m_editor->GetFirstPart();
+         part && !hasAttachments;
+         part = m_editor->GetNextPart() )
+   {
+      switch ( part->GetType() )
+      {
+         case EditorContentPart::Type_Text:
+            msgText += part->GetText();
+            break;
+
+         default:
+            hasAttachments = true;
+      }
+
+      part->DecRef();
+   }
+
+   if ( hasAttachments )
+   {
+      // no need to check for anything: there is already at least one
+      // attachment so apparently the user didn't forget to add it
+      return true;
+   }
+
+   const String reText = READ_CONFIG_TEXT(m_Profile, MP_CHECK_ATTACHMENTS_REGEX);
+   wxRegEx re(reText, wxRE_EXTENDED | wxRE_ICASE);
+   if ( !re.IsValid() )
+   {
+      MDialog_ErrorMessage
+      (
+         wxString::Format
+         (
+            _("The regular expression \"%s\" for detecting missing "
+              "attachments is invalid and can't be used.\n"
+              "Please change it in the program options and reenable "
+              "the check for forgotten attachments there\n"
+              "as it will be temporarily disabled now."),
+            reText.c_str()
+         ),
+         this
+      );
+
+      // TODO: should write it to the same path from which
+      //       MP_CHECK_ATTACHMENTS_REGEX was really read
+      m_Profile->writeEntry(MP_CHECK_FORGOTTEN_ATTACHMENTS, false);
+
+      return true;
+   }
+
+   if ( !re.Matches(msgText) )
+      return true;
+
+   if ( !MDialog_YesNoDialog
+         (
+            _("You might have intended to attach a file to this "
+              "message but you are about to send it without any attachments\n"
+              "\n"
+              "Would you like to attach anything before sending?"),
+            this,
+            MDIALOG_YESNOTITLE,
+            M_DLG_YES_DEFAULT,
+            M_MSGBOX_CHECK_FORGOTTEN_ATTACHMENTS
+         ) )
+   {
+      if ( wxPMessageBoxIsDisabled(
+               GetPersMsgBoxName(M_MSGBOX_CHECK_FORGOTTEN_ATTACHMENTS)) )
+      {
+         // the user doesn't want us to bother him any more, so don't
+         mApplication->GetProfile()->
+            writeEntry(MP_CHECK_FORGOTTEN_ATTACHMENTS, false);
+      }
+
+      return true;
+   }
+
+   wx_const_cast(wxComposeView *, this)->LetUserAddAttachment();
+
+   return false;
+}
 
 /// verify that the message is ready to be sent
 bool
@@ -4210,7 +4307,12 @@ wxComposeView::IsReadyToSend() const
       }
    }
 
-   if(!m_editor->FinishWork())
+   // check if the editor has anything to say
+   if ( !m_editor->FinishWork() )
+      return false;
+
+   // check if the user didn't forget to attach the files he wanted to attach
+   if ( !CheckForForgottenAttachments() )
       return false;
 
    // everything is ok

@@ -166,6 +166,7 @@ static const struct
    { _T("RemoveAllAttach"),          gettext_noop("ask for confirmation before removing all attachments from composer") },
    { _T("SendDiffEncoding"),         gettext_noop("ask before sending message in a different encoding than chosen") },
    { _T("OpenAnotherComposer"),      gettext_noop("ask whether to open another reply to the same message") },
+   { _T("CheckForgottenAttachments"),gettext_noop("ask whether to add an attachment if it looks like it was forgotten") },
    //{ wxEmptyString, gettext_noop("") },
 };
 
