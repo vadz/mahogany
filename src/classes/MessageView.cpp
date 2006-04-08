@@ -1970,9 +1970,15 @@ MessageView::ShowPart(const MimePart *mimepart)
    // as an attachment by disabling all the other heuristics
    const bool isAttachment = mimepart->IsAttachment();
 
-   // first check for viewer specific formats, next for text, then for
-   // images and finally show all the rest as generic attachment
-   if ( !isAttachment && CanViewerProcessPart(mimepart) )
+   // check for images before checking for more general viewer-specific part
+   // support as CanViewerProcessPart() returns for images if the viewer
+   // supports their inline display, but images should be inserted with
+   // ShowImage() and not InsertRawContents()
+   if ( primaryType == MimeType::IMAGE )
+   {
+      ShowImage(mimepart);
+   }
+   else if ( !isAttachment && CanViewerProcessPart(mimepart) )
    {
       // as we're going to need its contents, we'll have to download it: check
       // if it is not too big before doing this
@@ -2001,10 +2007,6 @@ MessageView::ShowPart(const MimePart *mimepart)
                 m_ProfileValues.inlineRFC822)) )
    {
       ShowTextPart(mimepart);
-   }
-   else if ( primaryType == MimeType::IMAGE )
-   {
-      ShowImage(mimepart);
    }
    else // attachment
    {
