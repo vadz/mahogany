@@ -87,7 +87,7 @@ PythonCallback(const char *name,
                const char *classname,
                Profile *profile)
 {
-   // first check if Python is not disabled
+   // first check if Python is initialized
    if ( !IsPythonInitialized() )
       return def;
 
@@ -125,8 +125,8 @@ static
 bool
 FindPythonFunction(const char *func, PyObject **module, PyObject **function)
 {
-   // first check if Python is not disabled
-   if ( !READ_APPCONFIG(MP_USEPYTHON) )
+   // first check if Python is initialized
+   if ( !IsPythonInitialized() )
    {
       ERRORMESSAGE(( _("Python support is disabled, please enable it in "
                        "the \"Preferences\" dialog.") ));
@@ -315,14 +315,8 @@ PythonStringFunction(const String& func,
 bool
 PythonRunScript(const char *filename)
 {
-   // first check if Python is not disabled
-   if ( !READ_APPCONFIG(MP_USEPYTHON) )
-   {
-      // normally we shouldn't even get here
-      FAIL_MSG( _T("Python is disabled, can't run script!") );
-
-      return false;
-   }
+   // first check if Python is initialized
+   CHECK( IsPythonInitialized(), false, _T("Can't run Python scripts!") );
 
    // the canonical Python API for what we want is PyRun_SimpleFile() but we
    // can't use it here because it takes a "FILE *" and STDIO data structures
