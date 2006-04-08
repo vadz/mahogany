@@ -307,14 +307,11 @@ void wxMFrame::UpdateRunPyScriptMenu()
    wxMenuBar *mbar = GetMenuBar();
    wxMenuItem *item = mbar->FindItem(WXMENU_FILE_RUN_PYSCRIPT);
 
-   if ( item )
-   {
-      item->Enable(READ_APPCONFIG_BOOL(MP_USEPYTHON));
-   }
-   else
-   {
-      FAIL_MSG( _T("where is \"Run Python script\" menu item?") );
-   }
+   CHECK_RET( item, _T("where is \"Run Python script\" menu item?") );
+
+   extern bool IsPythonInitialized();
+
+   item->Enable(IsPythonInitialized() && READ_APPCONFIG_BOOL(MP_USEPYTHON));
 }
 
 #endif // USE_PYTHON
