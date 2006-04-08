@@ -539,8 +539,8 @@ wxLayoutStyleInfo::wxLayoutStyleInfo(const wxFont& ifont,
 
 void wxLayoutStyleInfo::InitColours(wxColour *fg, wxColour *bg)
 {
-   m_fg_valid = fg != 0;
-   m_bg_valid = bg != 0;
+   m_fg_valid = fg != NULL;
+   m_bg_valid = bg != NULL;
    m_fg = m_fg_valid ? *fg : *wxBLACK;
    m_bg = m_bg_valid ? *bg : *wxWHITE;
 }
@@ -607,10 +607,8 @@ wxLayoutObjectCmd::Copy(void)
       m_StyleInfo->style,
       m_StyleInfo->weight,
       m_StyleInfo->underline,
-      m_StyleInfo->m_fg_valid ?
-      &m_StyleInfo->m_fg : NULL,
-      m_StyleInfo->m_bg_valid ?
-      &m_StyleInfo->m_bg : NULL);
+      m_StyleInfo->m_fg_valid ? &m_StyleInfo->m_fg : NULL,
+      m_StyleInfo->m_bg_valid ? &m_StyleInfo->m_bg : NULL);
    obj->SetUserData(m_UserData);
    return obj;
 }
@@ -959,20 +957,9 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj, CoordType *pLenOrig)
    {
       if( i == m_ObjectList.tail()) // last object?
       {
-         // optimization: it's useless to have 2 command objects in a row as
-         // the latter overrides the former anyhow, so drop the previous one
-         if ( obj->GetType() == WXLO_TYPE_CMD )
-         {
-            if ( m_ObjectList.back()->GetType() == WXLO_TYPE_CMD )
-            {
-               delete m_ObjectList.pop_back();
-
-               // effective length is 0 as we added 1 and removed 1 object of
-               // the same type
-               *pLen = 0;
-            }
-         }
-
+         // TODO: possible optimization is to combine this object with the
+         //       previous one if they are both of type WXLO_TYPE_CMD as it
+         //       would save on calls to ApplyStyle() during Layout()
          m_ObjectList.push_back(obj);
       }
       else
@@ -1884,8 +1871,10 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
    if(style != -1)     m_CurrentStyleInfo.style = style;
    if(weight != -1)    m_CurrentStyleInfo.weight = weight;
    if(underline != -1) m_CurrentStyleInfo.underline = underline != 0;
-   m_CurrentStyleInfo.m_fg = fg ? *fg : m_DefaultStyleInfo.m_fg;
-   m_CurrentStyleInfo.m_bg = bg ? *bg : m_DefaultStyleInfo.m_bg;
+   if ( fg )
+      m_CurrentStyleInfo.m_fg = *fg;
+   if ( bg )
+      m_CurrentStyleInfo.m_bg = *bg;
    if(enc != wxFONTENCODING_DEFAULT) m_CurrentStyleInfo.enc = enc;
    Insert(
       new wxLayoutObjectCmd(
@@ -1904,10 +1893,14 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
                       wxFontEncoding encoding)
 
 {
-   wxColour cfg = wxTheColourDatabase->Find( (fg) ? fg : wxT("BLACK") );
-   wxColour cbg = wxTheColourDatabase->Find( (bg) ? bg : wxT("WHITE") );
+   wxColour cfg, cbg;
+   if ( fg )
+      cfg = wxTheColourDatabase->Find(fg);
+   if ( bg )
+      cbg = wxTheColourDatabase->Find(bg);
 
-   SetFont(family, size, style, weight, underline, &cfg, &cbg, encoding);
+   SetFont(family, size, style, weight, underline,
+           fg ? &cfg : NULL, bg ? &cbg : NULL, encoding);
 }
 
 void
@@ -3221,25 +3214,13 @@ wxLayoutList::ApplyStyle(wxLayoutStyleInfo const &si, wxDC &dc)
    if ( si.m_fg_valid && m_CurrentStyleInfo.m_fg != si.m_fg )
    {
       m_CurrentStyleInfo.m_fg = si.m_fg;
-      m_CurrentStyleInfo.m_fg_valid = true;
       dc.SetTextForeground(m_CurrentStyleInfo.m_fg);
-   }
-   else if ( m_CurrentStyleInfo.m_fg != m_DefaultStyleInfo.m_fg )
-   {
-      m_CurrentStyleInfo.m_fg = m_DefaultStyleInfo.m_fg;
-      dc.SetTextForeground(m_DefaultStyleInfo.m_fg);
    }
 
    if ( si.m_bg_valid && m_CurrentStyleInfo.m_bg != si.m_bg )
    {
       m_CurrentStyleInfo.m_bg = si.m_bg;
-      m_CurrentStyleInfo.m_bg_valid = true;
       dc.SetTextBackground(m_CurrentStyleInfo.m_bg);
-   }
-   else if ( m_CurrentStyleInfo.m_bg != m_DefaultStyleInfo.m_bg )
-   {
-      m_CurrentStyleInfo.m_bg = m_DefaultStyleInfo.m_bg;
-      dc.SetTextBackground(m_DefaultStyleInfo.m_bg);
    }
 }
 
@@ -3293,13 +3274,17 @@ public:
       : wxPrintPreview(p1, p2, dd)
       {
          m_profile = prof;
+#ifdef M_BASEDIR
          m_profile->IncRef();
          SetZoom(READ_CONFIG(m_profile, MP_PRINT_PREVIEWZOOM));
+#endif // M_BASEDIR
       }
    ~wxMVPreview()
       {
+#ifdef M_BASEDIR
          m_profile->writeEntry(MP_PRINT_PREVIEWZOOM, (long) GetZoom());
          m_profile->DecRef();
+#endif // M_BASEDIR
       }
 
 private:
@@ -3316,7 +3301,11 @@ private:
 /* static */
 bool wxLayoutPrintout::Print(wxWindow *window, wxLayoutList *llist)
 {
+#ifdef M_BASEDIR
+   wxPrintDialogData pdd;
+#else
    wxPrintDialogData pdd(*mApplication->GetPrintData());
+#endif // M_BASEDIR
    wxPrinter printer(& pdd);
    wxLayoutPrintout printout(llist);
 
