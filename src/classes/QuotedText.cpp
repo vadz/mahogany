@@ -23,6 +23,8 @@
    #include "Mcommon.h"
 
    #include "Profile.h"
+   #include "Moptions.h"
+   #include "Mdefaults.h"
 #endif
 
 #include "QuotedText.h"
