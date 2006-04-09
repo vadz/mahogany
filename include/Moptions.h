@@ -2021,7 +2021,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// check for forgotten attachments?
 #define   MP_CHECK_FORGOTTEN_ATTACHMENTS_DEFVAL 1L
 /// regex to use for the attachments check
-#define   MP_CHECK_ATTACHMENTS_REGEX_DEFVAL _T("[[:<:]](attach|enclose)")
+#define   MP_CHECK_ATTACHMENTS_REGEX_DEFVAL _T("\\<(attach|enclose)")
 //@}
 /// highlight signature?
 #define   MP_HIGHLIGHT_SIGNATURE_DEFVAL      1

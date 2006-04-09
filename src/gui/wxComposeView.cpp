@@ -4164,7 +4164,16 @@ bool wxComposeView::CheckForForgottenAttachments() const
       return true;
    }
 
-   const String reText = READ_CONFIG_TEXT(m_Profile, MP_CHECK_ATTACHMENTS_REGEX);
+   // wx built-in regex library only understands \< in BREs, not EREs, and
+   // insists on using [[:<:]] which is not supported by glibc so we try to
+   // make everybody happy at once by convertin one to the other as needed
+   String reText = READ_CONFIG_TEXT(m_Profile, MP_CHECK_ATTACHMENTS_REGEX);
+#ifdef wxHAS_REGEX_ADVANCED
+   // only built-in lib supports AREs
+   reText.Replace(_T("\\<"), _T("[[:<:]]"));
+   reText.Replace(_T("\\>"), _T("[[:>:]]"));
+#endif
+
    wxRegEx re(reText, wxRE_EXTENDED | wxRE_ICASE);
    if ( !re.IsValid() )
    {
