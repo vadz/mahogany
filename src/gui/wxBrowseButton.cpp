@@ -429,7 +429,7 @@ void wxFontBrowseButton::DoBrowse()
    wxFontData data;
    data.SetInitialFont(font);
 
-   wxFontDialog dialog(GetFrame(this), &data);
+   wxFontDialog dialog(GetFrame(this), data);
    if ( dialog.ShowModal() == wxID_OK )
    {
       font = dialog.GetFontData().GetChosenFont();
