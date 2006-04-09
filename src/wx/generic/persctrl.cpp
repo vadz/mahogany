@@ -1081,7 +1081,7 @@ void wxPListBox::RestoreSelection()
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
-        if ( (sel != -1) && (sel < GetCount()) ) {
+        if ( (sel != -1) && ((size_t)sel < GetCount()) ) {
             SetSelection(sel);
 
             // emulate the event which would have resulted if the user selected
@@ -1193,7 +1193,7 @@ void wxPChoice::RestoreSelection()
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
-        if ( (sel != -1) && (sel < GetCount()) ) {
+        if ( (sel != -1) && ((size_t)sel < GetCount()) ) {
             SetSelection(sel);
 
             // emulate the event which would have resulted if the user selected
@@ -1311,7 +1311,7 @@ void wxPRadioBox::RestoreSelection()
     if ( m_persist->ChangePath() ) {
         long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
 
-        if ( (sel != -1) && (sel < GetCount()) ) {
+        if ( (sel != -1) && ((size_t)sel < GetCount()) ) {
             SetSelection(sel);
 
             // emulate the event which would have resulted if the user selected

@@ -2870,7 +2870,7 @@ void wxSelectionsOrderDialog::UpdateButtons(int sel)
 {
    // only enable buttons if there is something selected and also if pressing
    // them would do something
-   m_btnDown->Enable(sel != -1 && sel < m_checklstBox->GetCount() - 1);
+   m_btnDown->Enable(sel != -1 && (size_t)sel < m_checklstBox->GetCount() - 1);
    m_btnUp->Enable(sel != -1 && sel > 0);
 }
 
