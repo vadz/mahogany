@@ -389,8 +389,6 @@ public:
    virtual void OnSetTitle(const wxString& title);
    virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
    virtual void OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y);
-   virtual void OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
-                              const wxMouseEvent& event);
 
    virtual wxHtmlOpeningStatus OnOpeningURL(wxHtmlURLType type,
                                             const wxString& url,
@@ -499,10 +497,6 @@ void HtmlViewerWindow::OnSetTitle(const wxString& /* title */)
    // don't do anything, we don't want to show the title at all
 }
 
-void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& /* link */)
-{
-}
-
 void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell,
                                         wxCoord /* x */, wxCoord /* y */)
 {
@@ -526,35 +520,28 @@ void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell,
    frame->SetStatusText(statText);
 }
 
-void HtmlViewerWindow::OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
-                                     const wxMouseEvent& event)
+void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
-   wxHtmlLinkInfo *link = cell->GetLink(x, y);
-   if ( link )
+   String url = link.GetHref();
+   ClickableInfo *ci = GetClickable(url);
+
+   if ( !ci )
    {
-      String url = link->GetHref();
-      ClickableInfo *ci = GetClickable(url);
-
-      if ( !ci )
-      {
-         ci = new ClickableURL(m_viewer->GetMessageView(), url);
-         StoreClickable(ci, url);
-      }
-
-      // left click becomes double click as we want to open the URLs on simple
-      // click
-      m_viewer->GetMessageView()->DoMouseCommand
-                                  (
-                                    event.GetEventType() == wxEVT_LEFT_UP
-                                       ? WXMENU_LAYOUT_DBLCLICK
-                                       : WXMENU_LAYOUT_RCLICK,
-                                    ci,
-                                    event.GetPosition()
-                                  );
+      ci = new ClickableURL(m_viewer->GetMessageView(), url);
+      StoreClickable(ci, url);
    }
 
-   // don't call the base class version, we don't want it to automatically
-   // load any URLs which may be in the text!
+   // left click becomes double click as we want to open the URLs on simple
+   // click
+   const wxMouseEvent& event = *link.GetEvent();
+   m_viewer->GetMessageView()->DoMouseCommand
+                               (
+                                 event.GetEventType() == wxEVT_LEFT_UP
+                                    ? WXMENU_LAYOUT_DBLCLICK
+                                    : WXMENU_LAYOUT_RCLICK,
+                                 ci,
+                                 event.GetPosition()
+                               );
 }
 
 wxHtmlOpeningStatus
