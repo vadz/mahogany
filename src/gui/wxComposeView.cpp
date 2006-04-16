@@ -4443,7 +4443,7 @@ wxComposeView::BuildMessage() const
                msg->AddPart(
                               MimeType::TEXT,
                               *text,
-                              part->GetLength(),
+                              text->length(),
                               _T("PLAIN"),
                               _T("INLINE"),  // disposition
                               NULL,          // disposition parameters
