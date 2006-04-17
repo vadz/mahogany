@@ -4708,9 +4708,12 @@ void MailFolderCC::OnNewMail()
    wxLogTrace(TRACE_MF_EVENTS, _T("Got new mail notification for '%s'"),
               GetName().c_str());
 
-   // should we notify the GUI about the new mail in the folder? initially we
-   // don't need to do it as we are not even sure we actually have any new mail
-   bool shouldNotify = false;
+   // should we notify the GUI about the new mail in the folder?
+   //
+   // normally it should always be done so that the list of messages could be
+   // refreshed, the only case when we don't want to notify the GUI is when all
+   // the new messages are immediately removed by filters and so nothing changes
+   bool shouldNotify = true;
 
    // see if we have any new messages
    if ( m_MailStream->recent )
@@ -4758,14 +4761,11 @@ void MailFolderCC::OnNewMail()
             {
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
-               if ( ProcessNewMail(*uidsNew) && !uidsNew->IsEmpty() )
+               if ( ProcessNewMail(*uidsNew) && uidsNew->IsEmpty() )
                {
-                  // ProcessNewMail() removes the messages removed by filters
-                  // or whatever else it does from uidsNew - if something is
-                  // left there after it finished, we have some new mail to
-                  // notify the GUI about (this has nothing to do with
-                  // notifying the user about new mail!)
-                  shouldNotify = true;
+                  // ProcessNewMail() removes all the messages so no need to
+                  // notify the GUI
+                  shouldNotify = false;
                }
                //else: nothing changed for this folder
             }
@@ -4779,20 +4779,8 @@ void MailFolderCC::OnNewMail()
       }
       //else: this can possibly happen if they were deleted by another client
    }
-   else // no recent messages
-   {
-      // although normally any new message appearing in the folder must be
-      // recent, there are a few exceptions to this rule:
-      //
-      // 1. if another session has this folder opened, only it might see the
-      //    message as recent whereas we won't
-      //
-      // 2. the IMAP server I use is horribly broken for the moment and the
-      //    new messages don't have the recent flag _at_all_ which is, of
-      //    course, clearly a server bug but Mahogany should still be ready to
-      //    handle such madness
-      shouldNotify = true;
-   }
+   //else: no recent messages, this can happen if another session has this
+   //      folder opened, then this one might see the messages as already read
 
    // we delayed sending the update notification in OnMailExists() because we
    // wanted to filter the new messages first - now it is done and we can notify
