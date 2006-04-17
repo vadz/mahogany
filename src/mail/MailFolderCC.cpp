@@ -3845,7 +3845,11 @@ void MailFolderCC::HandleMsgFlags(MsgnoType msgno)
       return;
    }
 
-   if ( IsLocked() )
+   // don't react to unsolicited flags responses from server which can arrive
+   // at a wrong moment (notably Courier IMAP sends us untagged FLAGS response
+   // if a new message appeared in the folder during expunging but we can't do
+   // anything about it at this moment because we're inside c-client)
+   if ( IsLocked() || m_expungeData )
       return;
 
    HeaderInfoList_obj headers(GetHeaders());
