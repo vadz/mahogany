@@ -2300,6 +2300,12 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
       // update the number of items the listctrl thinks to have
       UpdateItemCount();
 
+      // we also need to refresh all the currently shown items because a new
+      // message might replace an old one currently shown in its place because
+      // of sorting/threading (i.e. the new messages are not necessarily at the
+      // end of the list)
+      Refresh();
+
       // keep the same item selected if possible: use its UID as its index
       // might have changed if the sort order in the folder changed
       long posFocus = -1; // the new position of the focused item
