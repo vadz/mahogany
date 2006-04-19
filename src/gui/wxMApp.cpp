@@ -972,10 +972,11 @@ wxMApp::OnInit()
       // TODO should catch the error messages and save them for later
       wxLogNull noLog;
 
+      int lang;
       if ( locale.empty() )
       {
          // use the default system language
-         int lang = wxLocale::GetSystemLanguage();
+         lang = wxLocale::GetSystemLanguage();
          switch ( lang )
          {
             case wxLANGUAGE_ENGLISH:
@@ -996,6 +997,7 @@ wxMApp::OnInit()
             case wxLANGUAGE_ENGLISH_ZIMBABWE:
                // nothing to do -- we don't have to translate the messages from
                // English to English
+               lang = wxLANGUAGE_DEFAULT;
                break;
 
             case wxLANGUAGE_UNKNOWN:
@@ -1009,22 +1011,26 @@ wxMApp::OnInit()
                else
                   locale.Printf(_("unknown language (%d)"), lang);
 
-               m_Locale = new wxLocale(lang);
+               m_Locale = new wxLocale(lang, wxLOCALE_LOAD_DEFAULT);
          }
       }
       else // the user specified a locale
       {
-#if wxCHECK_VERSION(2, 5, 0)
          const wxLanguageInfo *info = wxLocale::FindLanguageInfo(locale);
-         if ( info )
+         lang = info ? info->Language : wxLANGUAGE_UNKNOWN;
+      }
+
+      if ( lang != wxLANGUAGE_DEFAULT )
+      {
+         if ( lang != wxLANGUAGE_UNKNOWN )
          {
-            m_Locale = new wxLocale(info->Language);
+            m_Locale = new wxLocale(lang, wxLOCALE_LOAD_DEFAULT);
          }
-         else // use the same string for locale and the message catalog
-              // locations -- this only really works under Unix but we
-              // can't do much better without FindLanguageInfo()
-#endif // 2.5.0+
+         else if ( !locale.empty() )
          {
+            // use the same string for locale and the message catalog
+            // locations -- this only really works under Unix but we
+            // can't do much better without FindLanguageInfo()
             m_Locale = new wxLocale(locale, locale);
          }
       }
