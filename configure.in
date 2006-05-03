@@ -197,39 +197,6 @@ BUILDDIR=`cd .; exec pwd`
 AC_SUBST(BUILDDIR)
 AC_DEFINE_UNQUOTED(M_TOP_BUILDDIR, _T("$BUILDDIR"))
 
-dnl instead of invoking subsidary configures, we accumulate the flags
-dnl here for some third-party sources, since they would otherwise have
-dnl to repeat much of the same logic just to set a few compiler flags.
-
-IMAP_CPPFLAGS="${CPPFLAGS}"
-if test "$USE_OPT" != "1"; then
-    IMAP_CPPFLAGS="${IMAP_CPPFLAGS} -O0"
-fi
-IMAP_CFLAGS="${CFLAGS}"
-AC_SUBST(IMAP_CPPFLAGS)
-AC_SUBST(IMAP_CFLAGS)
-
-case "$OSTYPE" in
-    darwin* | Darwin*)
-	# Apple gcc version is buggy and requires this switch to compile
-	# compface sources and twofish.c (at least for 3.1 from Dec 2002 dev
-	# tools)
-	CFLAGS="${CFLAGS} -no-cpp-precomp"
-	;;
-esac
-
-CFACE_CPPFLAGS="${CPPFLAGS}"
-CFACE_CFLAGS="${CFLAGS}"
-AC_SUBST(CFACE_CPPFLAGS)
-AC_SUBST(CFACE_CFLAGS)
-
-LIBMAL_CPPFLAGS="${CPPFLAGS}"
-LIBMAL_CFLAGS="${CFLAGS}"
-LIBMAL_CXXFLAGS="${CXXFLAGS}"
-AC_SUBST(LIBMAL_CPPFLAGS)
-AC_SUBST(LIBMAL_CFLAGS)
-AC_SUBST(LIBMAL_CXXFLAGS)
-
 dnl C-compiler checks
 dnl =================
 
@@ -689,7 +656,6 @@ case "$USE_SSL" in
 *)	AC_MSG_WARN([--with-ssl=$USE_SSL ignored, you must specify absolute path])
 	ssl_option=no ;;
 esac
-IMAP_CPPFLAGS=
 
 if test "$ssl_option" = "yes"; then
     AC_DEFINE(USE_SSL)
@@ -1323,6 +1289,40 @@ dnl add other flags
 CFLAGS="$CFLAGS $CODE_GEN_FLAGS"
 CXXFLAGS="$CXXFLAGS $CODE_GEN_FLAGS"
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
+
+dnl imap
+IMAP_CFLAGS="$CFLAGS"
+IMAP_CPPFLAGS="$IMAP_CPPFLAGS $CPPFLAGS"
+if test "$GCC" = "yes"; then
+    dnl there are too many warnings in c-client sources which its author
+    dnl refuses to fix, suppress them when using gcc
+    IMAP_CPPFLAGS="$IMAP_CPPFLAGS -Wno-pointer-sign"
+fi
+AC_SUBST(IMAP_CPPFLAGS)
+AC_SUBST(IMAP_CFLAGS)
+
+dnl compface
+CFACE_CPPFLAGS="${CPPFLAGS}"
+CFACE_CFLAGS="${CFLAGS}"
+case "$OSTYPE" in
+    darwin* | Darwin*)
+	# Apple gcc version is buggy and requires this switch to compile
+	# compface sources and twofish.c (at least for 3.1 from Dec 2002 dev
+	# tools)
+	CFACE_CFLAGS="${CFACE_CFLAGS} -no-cpp-precomp"
+	;;
+esac
+
+AC_SUBST(CFACE_CPPFLAGS)
+AC_SUBST(CFACE_CFLAGS)
+
+dnl libmal
+LIBMAL_CPPFLAGS="${CPPFLAGS}"
+LIBMAL_CFLAGS="${CFLAGS}"
+LIBMAL_CXXFLAGS="${CXXFLAGS}"
+AC_SUBST(LIBMAL_CPPFLAGS)
+AC_SUBST(LIBMAL_CFLAGS)
+AC_SUBST(LIBMAL_CXXFLAGS)
 
 dnl Only now can we add them, or otherwise some tests would have failed
 case "$GCC" in yes)
