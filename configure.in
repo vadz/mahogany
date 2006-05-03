@@ -1240,6 +1240,11 @@ auto|Auto|AUTO|1)
 esac
 
 if test "$m_cv_USE_MODULES" = "dynamic"; then
+    dnl modules need to be compiled as PIC
+    if test "$GCC" = "yes"; then
+	SHARED_CFLAGS="-fPIC"
+    fi
+
     dnl under some systems we have to use -Wl,-export-dynamic or the
     dnl modules don't find symbols in M
     case "$OSTYPE" in
@@ -1251,6 +1256,7 @@ fi
 
 AC_SUBST(MAKE_USE_MODULES)
 AC_SUBST(MODULELDFLAGS)
+AC_SUBST(SHARED_CFLAGS)
 
 dnl --------------------------------------------------------------------------
 dnl set up generators for class documentation

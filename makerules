@@ -88,7 +88,7 @@ vpath %.cpp .src
 
 # as a side-effect of building a .so file, any corresponding .o is removed
 %.so: %.cpp
-	$(CXX) -o $@ $(strip $(M_COMPILE_CXX) $< $(M_LD_FLAGS))
+	$(CXX) -o $@ $(SHARED_CFLAGS) $(strip $(M_COMPILE_CXX) $< $(M_LD_FLAGS))
 	@f=$(notdir $*); test ! -f $$f.d || { sed "s,^$$f\.o:,$@:," $$f.d >$*.o && rm -f $$f.d && mv $*.o $*.d; }
 
 ifdef YACC
