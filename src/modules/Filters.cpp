@@ -2926,9 +2926,11 @@ String FilterRuleApply::CreditsCommon()
    String common(_("Filtering message"));
 
    // don't append "1/1" as it carries no useful information
-   const unsigned count = m_msgs.GetCount();
+   const size_t count = m_msgs.GetCount();
    if ( count != 1 )
-      common += String::Format(_T(" %u/%u"), m_idx + 1, count);
+      common += String::Format(_T(" %lu/%lu"),
+                               (unsigned long)m_idx + 1,
+                               (unsigned long)count);
 
    return common;
 }
