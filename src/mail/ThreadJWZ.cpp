@@ -482,7 +482,7 @@ String Threadable::messageThreadID() const
    }
 
    if (that->m_id->empty()) {
-      *that->m_id = String(_T("<emptyId:")) << (int)this << _T(">");
+      *that->m_id = String::Format(_T("<emptyId:%p>"), this);
    }
 
    return *that->m_id;
