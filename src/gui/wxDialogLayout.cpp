@@ -1107,10 +1107,10 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
 void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
                                              bool setAsMinimalSizeToo)
 {
-   if ( !LastSizeRestored() )
+   int heightInitital;
+   if ( !LastSizeRestored() || setAsMinimalSizeToo )
    {
       int heightScreen = (9*wxGetDisplaySize().y) / 10;
-      int heightInitital;
       if ( height > heightScreen )
       {
          // don't create dialogs taller than the screen
@@ -1120,7 +1120,10 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
       {
          heightInitital = height;
       }
+   }
 
+   if ( !LastSizeRestored() )
+   {
       SetClientSize(width, heightInitital);
 
       Centre(wxCENTER_FRAME | wxBOTH);
@@ -1131,9 +1134,9 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
       // do allow making the dialog smaller because the height might be too
       // big for the screen - but still set some minimal height to prevent it
       // from being shrunk to nothing at all
-      SetSizeHints(width, wxMin(height, 40*hBtn));
+      SetSizeHints(width, wxMin(heightInitital, 40*hBtn));
 
-      m_sizeMin = wxSize(width, height);
+      m_sizeMin = wxSize(width, heightInitital);
    }
 
    Layout();
