@@ -8,8 +8,8 @@
 ###############################################################################
 
 # change the configuration by editing these vars
-#CVSROOT=:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mahogany
-CVSROOT=vadz@cvs.sourceforge.net:/cvsroot/mahogany
+#CVSROOT=:pserver:anonymous@mahogany.cvs.sourceforge.net:/cvsroot/mahogany
+CVSROOT=vadz@mahogany.cvs.sourceforge.net:/cvsroot/mahogany
 TMPDIR=/tmp/makeMtgz-$$
 
 # no need to edit anything below
