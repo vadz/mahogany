@@ -5218,7 +5218,7 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
          break;
    }
 
-   wxLogGeneric(loglevel, msg);
+   wxLogGeneric(loglevel, "%s", msg.c_str());
 }
 
 /** log a debugging message
