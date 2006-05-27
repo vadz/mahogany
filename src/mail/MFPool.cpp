@@ -41,11 +41,8 @@
 #define TRACE_MFPOOL _T("mfpool")
 
 // ----------------------------------------------------------------------------
-// global module variables
+// MFConnection caches information about a single connection
 // ----------------------------------------------------------------------------
-
-// as MFPool is a singleton class we use the module globals instead of the
-// member static variables to reduce compilation dependencies
 
 // a cached folder connection
 struct MFConnection
@@ -61,14 +58,41 @@ struct MFConnection
 
 M_LIST_OWN(MFConnectionList, MFConnection);
 
+// ----------------------------------------------------------------------------
+// MFClassPool caches information about all connections for the given driver
+// ----------------------------------------------------------------------------
+
 // the pool of folders of one class
 struct MFClassPool
 {
-   String driverName;
+   // ctor for a new pool corresponding to the driver with the given name
+   MFClassPool(const String& driverName_) : driverName(driverName_) { }
+
+   // find the class pool for the given driver name
+   //
+   // returns NULL if not found
+   static MFClassPool *Find(const String& driverName);
+
+   // find the connection with the given spec in this pool
+   //
+   // returns NULL if not found
+   MFConnection *FindConnection(const String& spec) const;
+
+
+   const String driverName;
    MFConnectionList connections;
 
-   MFClassPool(const String& kind_) : driverName(kind_) { }
+
+   // no assignment operator because driverName is const
+   MFClassPool& operator=(const MFClassPool&);
 };
+
+// ----------------------------------------------------------------------------
+// global module variables
+// ----------------------------------------------------------------------------
+
+// as MFPool is a singleton class we use the module globals instead of the
+// member static variables to reduce compilation dependencies
 
 // the global pool is a linked list of class pools
 M_LIST_OWN(MFClassPoolList, MFClassPool) gs_pool;
@@ -129,24 +153,10 @@ private:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// MFPool::Cookie
+// MFClassPool
 // ----------------------------------------------------------------------------
 
-MFPool::Cookie::Cookie()
-{
-   m_impl = new CookieImpl;
-}
-
-MFPool::Cookie::~Cookie()
-{
-   delete m_impl;
-}
-
-// ----------------------------------------------------------------------------
-// helper functions
-// ----------------------------------------------------------------------------
-
-static MFClassPool *FindClassPool(const String& driverName)
+MFClassPool *MFClassPool::Find(const String& driverName)
 {
    for ( MFClassPoolList::iterator i = gs_pool.begin();
          i != gs_pool.end();
@@ -159,13 +169,10 @@ static MFClassPool *FindClassPool(const String& driverName)
    return NULL;
 }
 
-static
-MFConnection *
-FindConnectionInPool(const MFClassPool *pool,
-                     const String& spec)
+MFConnection *MFClassPool::FindConnection(const String& spec) const
 {
-   for ( MFConnectionList::iterator i = pool->connections.begin();
-         i != pool->connections.end();
+   for ( MFConnectionList::iterator i = connections.begin();
+         i != connections.end();
          ++i )
    {
       if ( i->spec == spec )
@@ -173,6 +180,20 @@ FindConnectionInPool(const MFClassPool *pool,
    }
 
    return NULL;
+}
+
+// ----------------------------------------------------------------------------
+// MFPool::Cookie
+// ----------------------------------------------------------------------------
+
+MFPool::Cookie::Cookie()
+{
+   m_impl = new CookieImpl;
+}
+
+MFPool::Cookie::~Cookie()
+{
+   delete m_impl;
 }
 
 // ----------------------------------------------------------------------------
@@ -190,7 +211,7 @@ MFPool::Add(MFDriver *driver,
 
    const String driverName = wxConvertMB2WX(driver->GetName());
 
-   MFClassPool *pool = FindClassPool(driverName);
+   MFClassPool *pool = MFClassPool::Find(driverName);
    if ( !pool )
    {
       // create new class pool
@@ -201,7 +222,7 @@ MFPool::Add(MFDriver *driver,
 
    const String spec = driver->GetFullSpec(folder, login);
 
-   MFConnection *conn = FindConnectionInPool(pool, spec);
+   MFConnection *conn = pool->FindConnection(spec);
    CHECK_RET( !conn, _T("MFPool::Add(): folder already in the pool") );
 
    pool->connections.push_back(new MFConnection(mf, spec));
@@ -217,15 +238,15 @@ MFPool::Find(MFDriver *driver,
 {
    CHECK( driver, NULL, _T("MFPool::Find(): NULL driver") );
 
-   MFClassPool *pool = FindClassPool(wxConvertMB2WX(driver->GetName()));
+   MFClassPool *pool = MFClassPool::Find(wxConvertMB2WX(driver->GetName()));
    if ( !pool )
    {
       // no cached folders of this class at all
       return NULL;
    }
 
-   MFConnection *
-      conn = FindConnectionInPool(pool, driver->GetFullSpec(folder, login));
+   MFConnection * const
+      conn = pool->FindConnection(driver->GetFullSpec(folder, login));
 
    if ( !conn )
       return NULL;
