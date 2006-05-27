@@ -24,6 +24,8 @@
 
 #include "MObject.h"         // for MObjectRC
 
+#include "lists.h"
+
 class Profile;
 
 /** A class representing a folder used by M. The folders are organized in a tree
@@ -320,6 +322,8 @@ protected:
    MFolder(const MFolder&);
    MFolder& operator=(const MFolder&);
 };
+
+M_LIST_RC_ABSTRACT(MFolderList, MFolder);
 
 // ----------------------------------------------------------------------------
 // A smart pointer to MFolder: not only it takes care of the ref count itself,

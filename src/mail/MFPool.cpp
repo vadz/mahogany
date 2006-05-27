@@ -30,6 +30,7 @@
 
 #include "lists.h"
 
+#include "MFolder.h"
 #include "mail/Driver.h"
 #include "mail/FolderPool.h"
 
@@ -53,7 +54,24 @@ struct MFConnection
    // the full folder spec as returned by MFDriver::GetFullSpec()
    String spec;
 
-   MFConnection(MailFolder *mf_, const String& s) : spec(s) { mf = mf_; }
+   // also cache the MFolder which can be used to (re)open this mf later
+   MFolder *folder;
+
+
+   MFConnection(MailFolder *mf_, const String& spec_, const MFolder *folder_)
+      : spec(spec_)
+   {
+      mf = mf_;
+      folder = const_cast<MFolder *>(folder_);
+      if ( folder )
+         folder->IncRef();
+   }
+
+   ~MFConnection()
+   {
+      if ( folder )
+         folder->DecRef();
+   }
 };
 
 M_LIST_OWN(MFConnectionList, MFConnection);
@@ -106,7 +124,7 @@ class CookieImpl
 public:
    void Reset() { SetPool(gs_pool.begin()); }
 
-   MailFolder *GetAndAdvance(String *driverName)
+   MailFolder *GetAndAdvance(String *driverName, MFolder **pFolder)
    {
       if ( m_iterPool == gs_pool.end() )
          return NULL;
@@ -115,10 +133,15 @@ public:
       {
          SetPool(++m_iterPool);
 
-         return GetAndAdvance(driverName);
+         return GetAndAdvance(driverName, pFolder);
       }
 
       MailFolder *mf = m_iterConn->mf;
+      if ( pFolder )
+      {
+         *pFolder = m_iterConn->folder;
+         (*pFolder)->IncRef();
+      }
 
       ++m_iterConn;
 
@@ -225,7 +248,7 @@ MFPool::Add(MFDriver *driver,
    MFConnection *conn = pool->FindConnection(spec);
    CHECK_RET( !conn, _T("MFPool::Add(): folder already in the pool") );
 
-   pool->connections.push_back(new MFConnection(mf, spec));
+   pool->connections.push_back(new MFConnection(mf, spec, folder));
 
    wxLogTrace(TRACE_MFPOOL, _T("Added '%s' to the pool."), mf->GetName().c_str());
 }
@@ -305,16 +328,18 @@ void MFPool::DeleteAll()
 // ----------------------------------------------------------------------------
 
 /* static */
-MailFolder *MFPool::GetFirst(Cookie& cookie, String *driverName)
+MailFolder *
+MFPool::GetFirst(Cookie& cookie, String *driverName, MFolder **pFolder)
 {
    cookie.m_impl->Reset();
 
-   return GetNext(cookie, driverName);
+   return GetNext(cookie, driverName, pFolder);
 }
 
 /* static */
-MailFolder *MFPool::GetNext(Cookie& cookie, String *driverName)
+MailFolder *
+MFPool::GetNext(Cookie& cookie, String *driverName, MFolder **pFolder)
 {
-   return cookie.m_impl->GetAndAdvance(driverName);
+   return cookie.m_impl->GetAndAdvance(driverName, pFolder);
 }
 

@@ -549,6 +549,13 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
    EVT_UPDATE_UI(WXMENU_EDIT_FINDAGAIN, wxMainFrame::OnUpdateUIEnableIfHasPreview)
 
    EVT_CHOICE(IDC_IDENT_COMBO, wxMainFrame::OnIdentChange)
+
+#ifdef wxHAS_POWER_EVENTS
+   EVT_POWER_SUSPENDING(wxMainFrame::OnPowerSuspending)
+   EVT_POWER_SUSPENDED(wxMainFrame::OnPowerSuspended)
+   EVT_POWER_SUSPEND_CANCEL(wxMainFrame::OnPowerSuspendCancel)
+   EVT_POWER_RESUME(wxMainFrame::OnPowerResume)
+#endif // wxHAS_POWER_EVENTS
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -566,6 +573,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_searchData = NULL;
    m_FolderTree = NULL;
    m_FolderView = NULL;
+#ifdef wxHAS_POWER_EVENTS
+   m_foldersToReopen = NULL;
+#endif // wxHAS_POWER_EVENTS
 
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
@@ -1070,6 +1080,92 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       wxMFrame::OnMenuCommand(id);
    }
 }
+
+// ----------------------------------------------------------------------------
+// power events
+// ----------------------------------------------------------------------------
+
+#ifdef wxHAS_POWER_EVENTS
+
+void wxMainFrame::OnPowerSuspending(wxPowerEvent& event)
+{
+   ASSERT_MSG( !m_foldersToReopen, _T("didn't resume from last suspend?") );
+
+   m_folderToReopenHere = m_folderName;
+   m_foldersToReopen = new MFolderList;
+   int nClosed = MailFolder::CloseAll(m_foldersToReopen);
+   if ( nClosed < 0 )
+   {
+      DoResume();
+
+      wxLogError(_("The system cannot be suspended because some folders "
+                   "are still opened."));
+      event.Veto();
+   }
+   else if ( nClosed )
+   {
+      wxLogStatus(_("Closed %lu folders which will be reopened on resume."),
+                  (unsigned long)m_foldersToReopen->size());
+   }
+   else // no open folders
+   {
+      delete m_foldersToReopen;
+      m_foldersToReopen = NULL;
+   }
+}
+
+void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
+{
+   // save all options
+   Profile::FlushAll();
+}
+
+void wxMainFrame::DoResume()
+{
+   if ( m_foldersToReopen )
+   {
+      wxLogStatus(_("Reopening %lu folders"),
+                  (unsigned long)m_foldersToReopen->size());
+
+      for ( MFolderList::iterator i = m_foldersToReopen->begin();
+            i != m_foldersToReopen->end();
+            ++i )
+      {
+         MFolder *folder = *i;
+         if ( folder->GetFullName() == m_folderToReopenHere )
+         {
+            OpenFolder(folder);
+         }
+         else // a folder opened elsewhere
+         {
+            // only reopen it this folder should be permanently opened,
+            // otherwise it will be reopened from the folder view which uses it
+            if ( folder->GetFlags() & MF_FLAGS_KEEPOPEN )
+            {
+               MailFolder *mf = MailFolder::OpenFolder(folder);
+               if ( !mf )
+               {
+                  ERRORMESSAGE((_("Failed to reopen folder \"%s\""),
+                                folder->GetFullName().c_str()));
+               }
+               else
+               {
+                  // it won't be really closed but will be kept open in the
+                  // background
+                  mf->DecRef();
+               }
+            }
+         }
+      }
+
+      delete m_foldersToReopen;
+      m_foldersToReopen = NULL;
+
+      m_folderToReopenHere.clear();
+   }
+}
+
+#endif // wxHAS_POWER_EVENTS
 
 void wxMainFrame::DoFolderSearch()
 {

@@ -126,18 +126,25 @@ public:
 
      @param cookie should be passed to GetNext() later
      @param driverName the name of the driver used for this folder, may be NULL
+     @param pFolder filled in with the MFolder originally specified in Add()
+                    if non-NULL; must be DecRef()'d by caller
      @return IncRef()'d pointer to an opened folder or NULL if none
     */
-   static MailFolder *GetFirst(Cookie& cookie, String *driverName = NULL);
+   static MailFolder *GetFirst(Cookie& cookie,
+                               String *driverName = NULL,
+                               MFolder **pFolder = NULL);
 
    /**
      Returns the next opened folder
 
      @param cookie the same one as used with GetFirst()
      @param driverName the name of the driver used for this folder, may be NULL
+     @param pFolder same meaning as for GetFirst()
      @return IncRef()'d pointer to an opened folder or NULL if no more
     */
-   static MailFolder *GetNext(Cookie& cookie, String *driverName = NULL);
+   static MailFolder *GetNext(Cookie& cookie,
+                              String *driverName = NULL,
+                              MFolder **pFolder = NULL);
 
    //@}
 };

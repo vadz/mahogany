@@ -35,6 +35,7 @@ class HeaderInfoList;
 class Message;
 class MessageView;
 class MFolder;
+class MFolderList;
 class MLogCircle;
 class Profile;
 class Sequence;
@@ -269,9 +270,11 @@ public:
    /**
       Closes all currently opened folders
 
+      @param opened if non-NULL is filled with the MFolders corresponding to
+                    the folders which were closed
       @return the number of folders closed, -1 on error
     */
-   static int CloseAll();
+   static int CloseAll(MFolderList *opened = NULL);
 
    /**
      Call Ping() on all opened mailboxes.

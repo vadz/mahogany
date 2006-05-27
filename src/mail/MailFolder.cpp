@@ -298,15 +298,19 @@ MailFolder::CloseFolder(const MFolder *folder, bool mayLinger)
 
 /* static */
 int
-MailFolder::CloseAll()
+MailFolder::CloseAll(MFolderList *opened)
 {
    // count the number of folders we close
    size_t n = 0;
 
+   // if requested, also return the folders we closed
+   MFolder *folder = NULL;
+   MFolder ** const pFolder = opened ? &folder : NULL;
+
    MFPool::Cookie cookie;
-   for ( MailFolder *mf = MFPool::GetFirst(cookie);
+   for ( MailFolder *mf = MFPool::GetFirst(cookie, NULL, pFolder);
          mf;
-         mf = MFPool::GetNext(cookie), n++ )
+         mf = MFPool::GetNext(cookie, NULL, pFolder), n++ )
    {
       // if we want to close all folders we almost surely don't want to keep
       // any outgoing network connections neither
@@ -314,6 +318,9 @@ MailFolder::CloseAll()
 
       // notify any opened folder views
       MEventManager::Send(new MEventFolderClosedData(mf));
+
+      if ( opened )
+         opened->push_back(folder);
 
       mf->DecRef();
    }

@@ -25,7 +25,12 @@
 
 #include "MEvent.h"
 
+#if wxCHECK_VERSION(2,7,0)
+   #include <wx/power.h>
+#endif
+
 class MFolder;
+class MFolderList;
 class wxFolderView;
 class wxFolderTree;
 
@@ -65,6 +70,14 @@ public:
    void OnIdle(wxIdleEvent &event);
    void OnUpdateUIEnableIfHasPreview(wxUpdateUIEvent& event);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
+
+#ifdef wxHAS_POWER_EVENTS
+   void OnPowerSuspending(wxPowerEvent& event);
+   void OnPowerSuspended(wxPowerEvent& event);
+   void OnPowerSuspendCancel(wxPowerEvent& event) { DoResume(); }
+   void OnPowerResume(wxPowerEvent&) { DoResume(); }
+#endif // wxHAS_POWER_EVENTS
+
 
    /// Mahogany event processing
    virtual bool OnMEvent(MEventData& event);
@@ -116,6 +129,18 @@ protected:
 
    /// the MEventManager cookie for ASFolder events
    void *m_cookieASMf;
+
+
+#ifdef wxHAS_POWER_EVENTS
+   /// Reopen the folders closed when we suspended
+   void DoResume();
+
+   // the list of folders automatically closed when we suspended or NULL
+   MFolderList *m_foldersToReopen;
+
+   // the name of the folder which was opened in the main frame
+   String m_folderToReopenHere;
+#endif // wxHAS_POWER_EVENTS
 
 private:
    /// create and initialize the modules menu
