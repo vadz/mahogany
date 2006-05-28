@@ -1043,7 +1043,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
    // FIXME: have to hard code the size because there is no way to get the
    //        size of HTML page
-   sp->SplitHorizontally(top, bottom, 260);
+   sp->SplitHorizontally(top, bottom, 240);
 
    wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
 
@@ -1088,6 +1088,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxString pageHtmlText;
 
    pageHtmlText << _T("<body text=#000000 bgcolor=#ffffff>"
+                   "<body text=#000000 bgcolor=#ffffff>"
                    "<font face=\"Times New Roman,times\">"
 
                    "<h4>") << _("Mahogany information") << _T("</h4>")
@@ -1142,7 +1143,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "<hr>"
                    HTML_IMAGE(wxlogo)
                 << _("Mahogany is built on the cross-platform C++ framework "
-                     "wxWindows (http://www.wxwindows.org/).")
+                     "wxWidgets (http://www.wxwidgets.org/).")
                 << _T("<p>")
                 << _("This product includes software developed and copyright "
                      "by the University of Washington written by Mark Crispin.")
@@ -1208,7 +1209,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       wxDefaultPosition,
                       // hard coding the size is ugly but how to know how much space the HTML
                       // page needs (vertically)? (FIXME)
-                      wxSize(400, 480),
+                      wxSize(320, 480),
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
    wxCHECK_RET( g_pSplashScreen == NULL, _T("one splash is more than enough") );
