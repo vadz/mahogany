@@ -1088,7 +1088,6 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxString pageHtmlText;
 
    pageHtmlText << _T("<body text=#000000 bgcolor=#ffffff>"
-                   "<body text=#000000 bgcolor=#ffffff>"
                    "<font face=\"Times New Roman,times\">"
 
                    "<h4>") << _("Mahogany information") << _T("</h4>")
