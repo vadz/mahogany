@@ -1045,7 +1045,11 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    //        size of HTML page
    sp->SplitHorizontally(top, bottom, 240);
 
-   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
+   // this file is too big to have it as BMP or XPM, we always use PNG for it
+   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT,
+                              mApplication->GetIconManager()->
+                                 wxIconManager::GetBitmap(_T("Msplash")),
+                              MEMORY_FS_FILE_FMT);
 
    wxMemoryFSHandler::AddFile(_T("wxlogo") MEMORY_FS_FILE_EXT, wxBITMAP(wxlogo), MEMORY_FS_FILE_FMT);
 
