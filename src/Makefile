@@ -157,7 +157,7 @@ ifeq ($(USE_MODULES),dynamic)
 	do $(INSTALL_PROGRAM) $$1 $(MODULEDIR); shift; done
 endif
 	$(INSTALL) -d $(DATADIR)/icons
-	for i in .src/icons/*.xpm; \
+	for i in .src/icons/*.xpm ../.src/res/Msplash.png; \
 	do $(INSTALL_DATA) $$i $(DATADIR)/icons; \
 	done
 ifdef USE_PYTHON
