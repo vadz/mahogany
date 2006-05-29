@@ -126,7 +126,6 @@ extern const MPersMsgBox *M_MSGBOX_REENABLE_HINT;
 #  define Mahogany      "Mahogany"
 #  define PythonPowered "PythonPowered"
 #else   //real XPMs
-#  include "../src/icons/Msplash.xpm"
 #  include "../src/icons/wxlogo.xpm"
 #  ifdef USE_SSL
 #     include "../src/icons/ssllogo.xpm"
@@ -2579,7 +2578,10 @@ wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
-   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT,
+                              mApplication->GetIconManager()->
+                                 wxIconManager::GetBitmap(_T("Msplash")),
+                              MEMORY_FS_FILE_FMT);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"
                     "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
