@@ -1042,7 +1042,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
    // FIXME: have to hard code the size because there is no way to get the
    //        size of HTML page
-   sp->SplitHorizontally(top, bottom, 240);
+   sp->SplitHorizontally(top, bottom, 340);
 
    // this file is too big to have it as BMP or XPM, we always use PNG for it
    wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT,
@@ -1133,10 +1133,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                 << "<p>"
                    _T("<h4>") << _("List of contributors:") << _T("</h4>")
                    "<p>"
-                   "Karsten Ball&uuml;der, Vadim Zeitlin,<br> "
-                   "Greg Noel, Nerijus Bali&#363;nas, Xavier Nodet,<br>"
-                   "Vaclav Slavik, Daniel Seifert, Michele Ravani,<br>"
-                   "Michael A Chase, Robert Vazan " << _("and many others") << "<br>"
+                   "Karsten Ball&uuml;der, Vadim Zeitlin, Greg Noel,<br> "
+                   "Nerijus Bali&#363;nas, Xavier Nodet, Vaclav Slavik,<br>"
+                   "Daniel Seifert, Michele Ravani, Michael A Chase,<br>"
+                   "Robert Vazan " << _("and many others") << "<br>"
                    "<br>"
                    _T("<i>") << _("The Mahogany team") << _T("</i><br>")
                    "<font size=2>"
@@ -1211,7 +1211,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       wxDefaultPosition,
                       // hard coding the size is ugly but how to know how much space the HTML
                       // page needs (vertically)? (FIXME)
-                      wxSize(320, 480),
+                      wxSize(450, 600),
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
    wxCHECK_RET( g_pSplashScreen == NULL, _T("one splash is more than enough") );
