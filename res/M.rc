@@ -37,7 +37,6 @@ background	BITMAP	"background.bmp"
 adbimport	BITMAP	"adbimport.bmp"
 
 // splash screen images
-Msplash		BITMAP	"Msplash.bmp"
 wxlogo		BITMAP	"wxlogo.bmp"
 #ifdef USE_SSL
 ssllogo		BITMAP	"ssllogo.bmp"
