@@ -67,14 +67,13 @@
 
 #include "wx/persctrl.h"
 #include <wx/tipdlg.h>
+#include <wx/numdlg.h>
 #include <wx/statline.h>
 #include <wx/minifram.h>
-#include <wx/fs_mem.h> // memory filesystem for startup screen
 #include <wx/confbase.h>
 #include <wx/treectrl.h>
-#if wxCHECK_VERSION(2, 5, 1)
-   #include <wx/numdlg.h>
-#endif // wxWindows 2.5.1+
+#include <wx/html/htmlwin.h>
+#include <wx/fs_mem.h>
 
 #include "MFolderDialogs.h"
 #include "FolderView.h"
@@ -108,7 +107,6 @@ extern const MOption MP_LASTTIP;
 extern const MOption MP_NNTPHOST_LOGIN;
 extern const MOption MP_SHOWTIPS;
 extern const MOption MP_SMTPHOST_PASSWORD;
-extern const MOption MP_SPLASHDELAY;
 extern const MOption MP_WIDTH;
 
 // ----------------------------------------------------------------------------
@@ -117,39 +115,6 @@ extern const MOption MP_WIDTH;
 
 extern const MPersMsgBox *M_MSGBOX_AUTOEXPUNGE;
 extern const MPersMsgBox *M_MSGBOX_REENABLE_HINT;
-
-// ----------------------------------------------------------------------------
-// the images names
-// ----------------------------------------------------------------------------
-
-#if defined(OS_WIN)
-#  define Mahogany      "Mahogany"
-#  define PythonPowered "PythonPowered"
-#else   //real XPMs
-#  include "../src/icons/wxlogo.xpm"
-#  ifdef USE_SSL
-#     include "../src/icons/ssllogo.xpm"
-#  endif
-#  ifdef USE_PYTHON
-#     include "../src/icons/PythonPowered.xpm"
-#  endif
-#endif  //Win/Unix
-
-// under Windows, we might not have PNG support compiled in, btu we always have
-// BMPs, so fall back to them
-#if defined(__WINDOWS__) && !wxUSE_PNG
-   #define MEMORY_FS_FILE_EXT ".bmp"
-   #define MEMORY_FS_FILE_FMT wxBITMAP_TYPE_BMP
-#else // either not Windows or we do have PNG support
-   #define MEMORY_FS_FILE_EXT ".png"
-   #define MEMORY_FS_FILE_FMT wxBITMAP_TYPE_PNG
-#endif
-
-// ----------------------------------------------------------------------------
-// global vars and functions
-// ----------------------------------------------------------------------------
-
-/// wxAboutFrame: g_pSplashScreen and CloseSplash() further down
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -377,7 +342,7 @@ static inline long GetYesNoMsgBoxStyle(int flags)
 
 // needed to fix a bug/misfeature of wxWin 2.2.x: an already deleted window may
 // be used as parent for the newly created dialogs, don't let this happen
-static void ReallyCloseTopLevelWindow(wxFrame *frame)
+extern void ReallyCloseTopLevelWindow(wxFrame *frame)
 {
    frame->Hide(); // immediately
    frame->Close(true /* force */); // will happen later
@@ -897,361 +862,6 @@ String MDialog_DirRequester(const String& message,
                             const wxChar *confpath)
 {
    return wxPDirSelector(confpath, message, pathOrig, parent);
-}
-
-// simple AboutDialog to be displayed at startup
-
-// timer which calls our DoClose() when it expires
-class SplashCloseTimer : public wxTimer
-{
-public:
-   SplashCloseTimer(class wxAboutWindow *window)
-      {
-         m_window = window;
-         Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000, TRUE /* single shot */);
-      }
-
-   virtual void Notify();
-
-private:
-   wxAboutWindow *m_window;
-
-   DECLARE_NO_COPY_CLASS(SplashCloseTimer)
-};
-
-#include "wx/html/htmlwin.h"
-
-// the main difference is that it goes away as soon as you click it
-// or after some time (if not disabled in the ctor).
-//
-// It is also unique and must be removed before showing any message boxes
-// (because it has on top attribute) with CloseSplash() function.
-class wxAboutWindow : public wxWindow
-{
-public:
-  // fills the window with some pretty text
-  wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout = true);
-
-  /// stop the timer
-  void StopTimer(void)
-  {
-     if(m_pTimer)
-     {
-        delete m_pTimer;
-        m_pTimer = NULL;
-     }
-  }
-
-  // close the about frame
-  void DoClose()
-  {
-     StopTimer();
-
-     wxFrame *parent = wxDynamicCast(GetParent(), wxFrame);
-     CHECK_RET( parent, _T("should have the splash frame as parent!") );
-
-     ReallyCloseTopLevelWindow(parent);
-  }
-
-private:
-  SplashCloseTimer  *m_pTimer;
-
-  DECLARE_NO_COPY_CLASS(wxAboutWindow)
-};
-
-void
-SplashCloseTimer::Notify()
-{
-   m_window->DoClose();
-}
-
-class wxAboutFrame : public wxFrame
-{
-public:
-   wxAboutFrame(bool bCloseOnTimeout);
-   virtual ~wxAboutFrame();
-
-   void OnClose(wxCloseEvent& event)
-   {
-      m_Window->StopTimer();
-
-      event.Skip();
-   }
-
-private:
-   wxAboutWindow *m_Window;
-
-   wxLog *m_logSplash;
-
-   DECLARE_EVENT_TABLE()
-   DECLARE_NO_COPY_CLASS(wxAboutFrame)
-};
-
-BEGIN_EVENT_TABLE(wxAboutFrame, wxFrame)
-   EVT_CLOSE(wxAboutFrame::OnClose)
-END_EVENT_TABLE()
-
-class MyHtmlWindow : public wxHtmlWindow
-{
-public:
-   MyHtmlWindow(wxAboutWindow *aw, wxWindow *parent)
-      : wxHtmlWindow(parent, -1)
-      {
-         m_window = aw;
-      }
-   // mouse event handler closes the parent window
-   void OnClick(wxMouseEvent&) { m_window->DoClose(); }
-   void OnChar(wxKeyEvent& ev)
-      {
-         switch(ev.GetKeyCode())
-         {
-         case WXK_UP:
-         case WXK_DOWN:
-         case WXK_PRIOR:
-         case WXK_NEXT:
-            ev.Skip();
-            break;
-         default:
-            m_window->DoClose();
-         }
-      }
-private:
-   wxAboutWindow *m_window;
-
-   DECLARE_EVENT_TABLE()
-   DECLARE_NO_COPY_CLASS(MyHtmlWindow)
-};
-
-BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
-  EVT_LEFT_DOWN(MyHtmlWindow::OnClick)
-  EVT_MIDDLE_DOWN(MyHtmlWindow::OnClick)
-  EVT_RIGHT_DOWN(MyHtmlWindow::OnClick)
-  EVT_CHAR(MyHtmlWindow::OnChar)
-END_EVENT_TABLE()
-
-wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
-             : wxWindow(parent, -1, wxDefaultPosition, parent->GetClientSize())
-{
-
-
-   wxSplitterWindow *sp = new wxSplitterWindow(this, -1,
-                                               wxDefaultPosition,
-                                               GetSize());
-   wxHtmlWindow *top = new MyHtmlWindow(this, sp);
-   wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
-
-   // FIXME: have to hard code the size because there is no way to get the
-   //        size of HTML page
-   sp->SplitHorizontally(top, bottom, 340);
-
-   // this file is too big to have it as BMP or XPM, we always use PNG for it
-   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT,
-                              mApplication->GetIconManager()->
-                                 wxIconManager::GetBitmap(_T("Msplash")),
-                              MEMORY_FS_FILE_FMT);
-
-   wxMemoryFSHandler::AddFile(_T("wxlogo") MEMORY_FS_FILE_EXT, wxBITMAP(wxlogo), MEMORY_FS_FILE_FMT);
-
-#ifdef USE_SSL
-   wxMemoryFSHandler::AddFile(_T("ssllogo") MEMORY_FS_FILE_EXT, wxBITMAP(ssllogo), MEMORY_FS_FILE_FMT);
-#endif // USE_SSL
-
-#ifdef USE_PYTHON
-   wxMemoryFSHandler::AddFile(_T("pythonpowered") MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
-#endif // USE_PYTHON
-
-#define HTML_IMAGE(name) \
-   "<center><img src=\"memory:" #name MEMORY_FS_FILE_EXT "\"></center><br>"
-
-   top->SetPage(_T("<body text=#000000 bgcolor=#ffffff>") HTML_IMAGE(splash));
-
-#define HTML_WARNING "<font color=#ff0000><b>WARNING: </b></font>"
-
-   // build the page text from several strings to be able to translate them
-   // ---------------------------------------------------------------------
-
-#ifdef USE_I18N
-   // make special provision for the translators name
-   static const wxChar *TRANSLATOR_NAME =
-      gettext_noop("Translate this into your name (for About dialog)");
-   wxString translator = wxGetTranslation(TRANSLATOR_NAME);
-   if ( translator == TRANSLATOR_NAME )
-   {
-      // not translated, don't show
-      translator.clear();
-   }
-   else
-   {
-      wxString tmp;
-      tmp << _T(" (") << _("translations by ") << translator << _T(')');
-      translator = tmp;
-   }
-#endif // USE_I18N
-
-   wxString pageHtmlText;
-
-   pageHtmlText << _T("<body text=#000000 bgcolor=#ffffff>"
-                   "<font face=\"Times New Roman,times\">"
-
-                   "<h4>") << _("Mahogany information") << _T("</h4>")
-                << _("Version ") << M_VERSION_STRING
-                << _("  built with ") << wxVERSION_STRING << _T("<br>")
-#ifdef DEBUG
-                   HTML_WARNING << _("This is a debug build") << _T("<br>")
-#else
-                << _("Release build ")
-#endif
-#if wxUSE_UNICODE
-                << _("Unicode build ")
-#endif
-                << _("(compiled at ") << __DATE__ ", " __TIME__ ")<br>"
-
-#if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
-                   _T("<h4>") << _("Extra features:") << _T("</h4>")
-#ifdef USE_SSL
-                << _("SSL support") << _T("<br>")
-#endif
-#ifdef USE_THREADS
-                << _("Threads") << _T("<br>")
-#endif
-#ifdef USE_PYTHON
-                << _("Embedded Python interpreter") << _T("<br>")
-#endif
-#ifdef USE_DIALUP
-                << _("Dial-up support") << _T("<br>")
-#endif
-#ifdef USE_I18N
-                << _("Internationalization") << translator << _T("<br>")
-#endif
-#endif // USE_XXX
-
-#ifdef EXPERIMENTAL
-                << HTML_WARNING << _("Includes experimental code")
-                                << " (" EXPERIMENTAL ")"
-#endif
-
-                << "<p>"
-                   _T("<h4>") << _("List of contributors:") << _T("</h4>")
-                   "<p>"
-                   "Karsten Ball&uuml;der, Vadim Zeitlin, Greg Noel,<br> "
-                   "Nerijus Bali&#363;nas, Xavier Nodet, Vaclav Slavik,<br>"
-                   "Daniel Seifert, Michele Ravani, Michael A Chase,<br>"
-                   "Robert Vazan " << _("and many others") << "<br>"
-                   "<br>"
-                   _T("<i>") << _("The Mahogany team") << _T("</i><br>")
-                   "<font size=2>"
-                   "(<tt>mahogany-developers@lists.sourceforge.net</tt>)"
-                   "</font>"
-                   "<hr>"
-                   HTML_IMAGE(wxlogo)
-                << _("Mahogany is built on the cross-platform C++ framework "
-                     "wxWidgets (http://www.wxwidgets.org/).")
-                << _T("<p>")
-                << _("This product includes software developed and copyright "
-                     "by the University of Washington written by Mark Crispin.")
-                <<
-#ifdef USE_SSL
-                   _T("<p>")
-                   HTML_IMAGE(ssllogo)
-                << _("This product includes software developed by the OpenSSL Project "
-                     "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
-                     "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>"
-                     "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>")
-                <<
-#endif // USE_SSL
-
-#ifdef USE_PYTHON
-                   _T("<p>")
-                   HTML_IMAGE(pythonpowered)
-                << _("This program contains an embedded Python interpreter.")
-                <<
-#endif // USE_PYTHON
-                   _T("<hr>")
-                << _("Special thanks to Daniel Lord for hardware donations.")
-                << _T("<p>")
-                << _("The Mahogany Team would also like to acknowledge "
-                     "the support of ")
-                << _("Anthemion Software, "
-                   "Heriot-Watt University, "
-                   "SourceForge.net, "
-                   "SourceGear.com, "
-                   "GDev.net, "
-                   "Simon Shapiro, "
-                   "VA Linux, "
-                   "and SuSE GmbH.")
-                  ;
-
-#undef HTML_IMAGE
-#undef HTML_WARNING
-
-   bottom->SetPage(pageHtmlText);
-
-   wxMemoryFSHandler::RemoveFile(_T("splash") MEMORY_FS_FILE_EXT);
-   wxMemoryFSHandler::RemoveFile(_T("wxlogo") MEMORY_FS_FILE_EXT);
-#ifdef USE_SSL
-   wxMemoryFSHandler::RemoveFile(_T("ssllogo") MEMORY_FS_FILE_EXT);
-#endif // USE_SSL
-#ifdef USE_PYTHON
-   wxMemoryFSHandler::RemoveFile(_T("pythonpowered") MEMORY_FS_FILE_EXT);
-#endif
-
-   bottom->SetFocus();
-   // start a timer which will close us (if not disabled)
-   if ( bCloseOnTimeout ) {
-     m_pTimer = new SplashCloseTimer(this);
-   }
-   else {
-     // must initialize to NULL because we delete it later unconditionally
-     m_pTimer = NULL;
-   }
-}
-
-wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
-            : wxFrame(NULL, -1, _("Welcome"),
-                      wxDefaultPosition,
-                      // hard coding the size is ugly but how to know how much space the HTML
-                      // page needs (vertically)? (FIXME)
-                      wxSize(450, 600),
-                      /* no border styles at all */ wxSTAY_ON_TOP )
-{
-   wxCHECK_RET( g_pSplashScreen == NULL, _T("one splash is more than enough") );
-
-   g_pSplashScreen = (wxMFrame *)this;
-
-   m_Window = new wxAboutWindow(this, bCloseOnTimeout);
-
-   Centre(wxCENTER_FRAME | wxBOTH);
-   Show(TRUE);
-}
-
-wxAboutFrame::~wxAboutFrame()
-{
-   g_pSplashScreen = NULL;
-}
-
-// ----------------------------------------------------------------------------
-// Splash screen stuff
-// ----------------------------------------------------------------------------
-
-wxFrame *g_pSplashScreen = NULL;
-
-extern void CloseSplash()
-{
-   if ( g_pSplashScreen )
-   {
-      // do close the splash
-      wxAboutFrame *frameSplash = (wxAboutFrame *)g_pSplashScreen;
-
-      ReallyCloseTopLevelWindow(frameSplash);
-   }
-}
-
-void
-MDialog_AboutDialog( const wxWindow * /* parent */, bool bCloseOnTimeout)
-{
-   if(g_pSplashScreen == NULL)
-      (void)new wxAboutFrame(bCloseOnTimeout);
-   wxYield();
 }
 
 void
@@ -2578,17 +2188,17 @@ wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
-   wxMemoryFSHandler::AddFile(_T("splash") MEMORY_FS_FILE_EXT,
+   wxMemoryFSHandler::AddFile(_T("splash.png"),
                               mApplication->GetIconManager()->
-                                 wxIconManager::GetBitmap(_T("Msplash")),
-                              MEMORY_FS_FILE_FMT);
+                                 GetBitmap(_T("Msplash")),
+                              wxBITMAP_TYPE_PNG);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"
-                    "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
+                    "<center><img src=\"memory:splash.png\"><br>"
                     "</center>"
 #include "license.html"
                    );
-   wxMemoryFSHandler::RemoveFile(_T("splash") MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile(_T("splash.png"));
 
 
    wxLayoutConstraints *c = new wxLayoutConstraints;

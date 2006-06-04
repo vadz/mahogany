@@ -451,6 +451,9 @@
 					RelativePath=".\src\gui\wxMsgCmdProc.cpp">
 				</File>
 				<File
+					RelativePath=".\src\gui\wxMSplash.cpp">
+				</File>
+				<File
 					RelativePath=".\src\gui\wxOptionsDlg.cpp">
 				</File>
 				<File
