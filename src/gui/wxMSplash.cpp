@@ -21,6 +21,12 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "Mdefaults.h"
+#  include "MApplication.h"
+#  include "gui/wxMFrame.h"
+#  include "gui/wxIconManager.h"
+
+#  include <wx/timer.h>
 #endif
 
 #include "Mversion.h"
@@ -49,7 +55,7 @@ extern void ReallyCloseTopLevelWindow(wxFrame *frame);
 #  endif
 #endif  //Win/Unix
 
-// under Windows, we might not have PNG support compiled in, btu we always have
+// under Windows, we might not have PNG support compiled in, but we always have
 // BMPs, so fall back to them
 #if defined(__WINDOWS__) && !wxUSE_PNG
    #define MEMORY_FS_FILE_EXT ".bmp"
