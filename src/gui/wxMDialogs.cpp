@@ -27,8 +27,6 @@
 #  include "strutil.h"
 #  include "MFrame.h"
 #  include "Profile.h"
-#  include "MApplication.h"
-#  include "Profile.h"
 #  include "gui/wxMApp.h"
 #  include "gui/wxMIds.h"
 #  include "gui/wxIconManager.h"
@@ -38,53 +36,31 @@
 
 #  include <wx/layout.h>
 #  include <wx/sizer.h>
-#  include <wx/window.h>
 #  include <wx/menu.h>
-#  include <wx/radiobox.h>
 #  include <wx/checklst.h>
-#  include <wx/gauge.h>
-#  include <wx/stattext.h>
-#  include <wx/statbmp.h>
 #  include <wx/statbox.h>
-#  include <wx/choice.h>
-#  include <wx/textdlg.h>
-#  include <wx/utils.h>
 #  include <wx/msgdlg.h>
 #  include <wx/choicdlg.h>
 #  include <wx/filedlg.h>
-#  include <wx/help.h>
 #endif // USE_PCH
 
 #include "Mpers.h"
-#include "MDialogs.h"
-#include "MailFolder.h"
-#include "MModule.h"
 
 #include "XFace.h"
 
 #include "MFolder.h"
-#include "MSearch.h"
 
-#include "wx/persctrl.h"
 #include <wx/tipdlg.h>
 #include <wx/numdlg.h>
 #include <wx/statline.h>
 #include <wx/minifram.h>
-#include <wx/confbase.h>
-#include <wx/treectrl.h>
-#include <wx/html/htmlwin.h>
 #include <wx/fs_mem.h>
 
 #include "MFolderDialogs.h"
 #include "FolderView.h"
 #include "ASMailFolder.h"
 
-#include "adb/AdbEntry.h"
-#include "adb/AdbBook.h"
-#include "adb/AdbManager.h"
-
 #include "gui/wxFolderTree.h"
-#include "gui/wxDialogLayout.h"
 #include "gui/wxSelectionDlg.h"
 #include "gui/wxIdentityCombo.h"
 
