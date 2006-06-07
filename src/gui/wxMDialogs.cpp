@@ -55,6 +55,7 @@
 #include <wx/statline.h>
 #include <wx/minifram.h>
 #include <wx/fs_mem.h>
+#include <wx/html/htmlwin.h>
 
 #include "MFolderDialogs.h"
 #include "FolderView.h"
