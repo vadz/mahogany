@@ -151,9 +151,13 @@ Global
 		{18A0EF1F-2476-46F9-936F-A6B46274FA7A}.Release With Debug Info.ActiveCfg = Release|Win32
 		{18A0EF1F-2476-46F9-936F-A6B46274FA7A}.Release With Debug Info.Build.0 = Release|Win32
 		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Debug.ActiveCfg = Debug|Win32
+		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Debug.Build.0 = Debug|Win32
 		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Debug Purify.ActiveCfg = Debug Purify|Win32
+		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Debug Purify.Build.0 = Debug Purify|Win32
 		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Release.ActiveCfg = Release|Win32
+		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Release.Build.0 = Release|Win32
 		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Release With Debug Info.ActiveCfg = Release|Win32
+		{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}.Release With Debug Info.Build.0 = Release|Win32
 		{62C959C3-EC09-4323-9FB8-DC39A4428CAE}.Debug.ActiveCfg = Debug|Win32
 		{62C959C3-EC09-4323-9FB8-DC39A4428CAE}.Debug.Build.0 = Debug|Win32
 		{62C959C3-EC09-4323-9FB8-DC39A4428CAE}.Debug Purify.ActiveCfg = Debug Purify|Win32
