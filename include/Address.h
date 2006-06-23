@@ -71,15 +71,39 @@ public:
    bool operator==(const String& address) const;
 
    /**
-     Removes Re: Re[n]: Re(n): and the local translation of
-     it from the beginning of a subject line - used to convert the subject to
-     the canonical form
+      Compares two address strings, returns true if they're equal.
+    */
+   static bool Compare(const String& address1, const String& address2);
+
+   /**
+      Removes Re: Re[n]: Re(n): and the local translation of it from the
+      beginning of a subject line.
+
+      This is used to convert the subject to the canonical form before
+      comparing it &c.
     */
    static String NormalizeSubject(const String& subject);
 
    /**
+      Returns a string of the form "personal <address>".
+
+      This function should be used instead of simple string concatenation
+      because the personal part may need to be quoted.
     */
    static String BuildFullForm(const String& personal, const String& address);
+
+   /**
+      Returns true if the address matches any of the entries in the array.
+
+      Array entries may contain wildcards (? and *).
+
+      @param addresses the array of the addresses to check against
+      @param address the address to match
+      @param match if non-NULL, filled in with the matched address
+    */
+   static bool IsInList(const wxArrayString& addresses,
+                        const String& address,
+                        String *match = NULL);
 
 protected:
    /// must have default ctor because we declare copy ctor private
@@ -186,9 +210,6 @@ extern bool ContainsOwnAddress(const String& str,
                                Profile *profile,
                                OwnAddressKind kind = OwnAddress_To,
                                String *own = NULL);
-
-/// Modifies <mailto:(.*)> to <$1> and removes other <[a-z]+:.*> parts
-extern String FilterAddressList(const String& original);
 
 #endif // _ADDRESS_H_
 

@@ -410,24 +410,33 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
          }
 
          // create all entries in this group
+         size_t saved = 0;
          for ( size_t n = 0; n < count; n++ )
          {
-            wxString addr = addresses[selections[n]];
-            wxString name = Message::GetNameFromAddress(addr),
-                     email = Message::GetEMailFromAddress(addr);
+            AddressList_obj addrList(addresses[selections[n]]);
 
-            if ( name.empty() || (name == email) )
+            for ( Address *addr = addrList->GetFirst();
+                  addr;
+                  addr = addrList->GetNext(addr) )
             {
-               name = email.BeforeFirst('@');
-            }
+               String name = addr->GetName(),
+                      email = addr->GetEMail();
 
-            AdbEntry_obj entry(group->CreateEntry(name));
-            entry->SetField(AdbField_NickName, name);
-            entry->SetField(AdbField_FullName, name);
-            entry->SetField(AdbField_EMail, email);
+               if ( name.empty() || name == email )
+               {
+                  name = addr->GetMailbox();
+               }
+
+               AdbEntry_obj entry(group->CreateEntry(name));
+               entry->SetField(AdbField_NickName, name);
+               entry->SetField(AdbField_FullName, name);
+               entry->SetField(AdbField_EMail, email);
+
+               saved++;
+            }
          }
 
-         wxLogStatus(parent, _("Saved %u addresses."), count);
+         wxLogStatus(parent, _("Saved %u addresses."), saved);
        }
        //else: cancelled
     }

@@ -142,7 +142,6 @@ extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_VCARD;
-extern const MOption MP_WHITE_LIST;
 
 #ifdef OS_UNIX
 extern const MOption MP_USE_SENDMAIL;
@@ -2638,7 +2637,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
 
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( Message::CompareAddresses(m_rcptExtra[n]->GetValue(), addr) )
+      if ( Address::Compare(m_rcptExtra[n]->GetValue(), addr) )
       {
          // ok, we already have this address - is it of the same type?
          RecipientType existingType = m_rcptExtra[n]->GetType();

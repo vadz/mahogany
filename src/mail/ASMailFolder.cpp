@@ -406,13 +406,12 @@ public:
       }
    ~MT_AppendMessage()
       {
-         if(m_Message) m_Message->DecRef();
+         m_Message->DecRef();
       }
    virtual void WorkFunction(void)
       {
-         int rc = m_Message ?
-            m_MailFolder->AppendMessage(*m_Message)
-            : m_MailFolder->AppendMessage(m_MsgString);
+         int rc = m_Message ? m_MailFolder->AppendMessage(*m_Message)
+                            : m_MailFolder->AppendMessage(m_MsgString);
          SendEvent(ASMailFolder::ResultInt::
                    Create(m_ASMailFolder, m_Ticket,
                           ASMailFolder::Op_AppendMessage,  NULL,
@@ -774,6 +773,8 @@ public:
    */
    virtual Ticket AppendMessage(const Message *msg, UserData ud )
       {
+         CHECK(msg, ILLEGAL_TICKET, "NULL message");
+
          return (new MT_AppendMessage(this, ud, msg))->Start();
       }
 

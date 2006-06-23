@@ -38,7 +38,7 @@
 
 #include "Sequence.h"
 #include "UIdArray.h"
-#include "Message.h"
+#include "Address.h"
 
 #include "gui/wxMDialogs.h"         // for MProgressInfo
 
@@ -412,7 +412,7 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
       size_t nAdrCount = ownAddresses.GetCount();
       for ( size_t nAdr = 0; nAdr < nAdrCount; nAdr++ )
       {
-         if ( Message::CompareAddresses(*value, ownAddresses[nAdr]) )
+         if ( Address::Compare(*value, ownAddresses[nAdr]) )
          {
             // sender is the user himself, do the replacement
             *value = hi->GetTo();

@@ -484,6 +484,7 @@ enum ConfigFields
    ConfigField_AutoCollectSenderOnly,
    ConfigField_AutoCollectOutgoing,
    ConfigField_AutoCollectNameless,
+   ConfigField_WhiteListHelp,
    ConfigField_WhiteList,
 #ifdef USE_BBDB
    ConfigField_Bbdb_HelpText,
@@ -1658,7 +1659,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Autocollect only &senders' addresses"), Field_Bool, ConfigField_AutoCollect},
    { gettext_noop("Collect addresses in &outgoing mail"), Field_Bool, ConfigField_AutoCollect},
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
-   { gettext_noop("&Whitelist"),                   Field_Text | Field_AppWide, -1 },
+
+   { gettext_noop("\nWhite list is the list of addresses which always pass "
+                  "through the built-in spam filter."),
+                                                    Field_Message, -1 },
+   { gettext_noop("Addresses in &white list"),      Field_List, -1 },
 #ifdef USE_BBDB
    { gettext_noop("The following settings configure the support of the Big Brother\n"
                   "addressbook (BBDB) format. This is supported only for compatibility\n"
@@ -2172,6 +2177,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOCOLLECT_SENDER),
    CONFIG_ENTRY(MP_AUTOCOLLECT_OUTGOING),
    CONFIG_ENTRY(MP_AUTOCOLLECT_NAMED),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_WHITE_LIST),
 #ifdef USE_BBDB
    CONFIG_NONE(),
@@ -4017,19 +4023,27 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
                                 ConfigField_AdbLast,
                                 MH_OPAGE_ADB)
 {
-   m_lboxData = new LboxData;
-   m_lboxData->m_idListbox = ConfigField_OwnAddresses;
-   m_lboxData->m_lboxDlgTitle = _("My own addresses");
-   m_lboxData->m_lboxDlgPrompt = _("Address");
-   m_lboxData->m_lboxDlgPers = _T("LastMyAddress");
+   LboxData *lboxDataOwnAddr = new LboxData;
+   lboxDataOwnAddr->m_idListbox = ConfigField_OwnAddresses;
+   lboxDataOwnAddr->m_lboxDlgTitle = _("My own addresses");
+   lboxDataOwnAddr->m_lboxDlgPrompt = _("Address");
+   lboxDataOwnAddr->m_lboxDlgPers = _T("LastMyAddress");
 
-   LboxData *lboxData2 = new LboxData;
-   lboxData2->m_idListbox = ConfigField_MLAddresses;
-   lboxData2->m_lboxDlgTitle = _("Mailing list addresses");
-   lboxData2->m_lboxDlgPrompt = _("Address");
-   lboxData2->m_lboxDlgPers = _T("LastMLAddress");
+   LboxData *lboxDataMLAddr = new LboxData;
+   lboxDataMLAddr->m_idListbox = ConfigField_MLAddresses;
+   lboxDataMLAddr->m_lboxDlgTitle = _("Mailing list addresses");
+   lboxDataMLAddr->m_lboxDlgPrompt = _("Address");
+   lboxDataMLAddr->m_lboxDlgPers = _T("LastMLAddress");
+   lboxDataMLAddr->m_next = lboxDataOwnAddr;
 
-   m_lboxData->m_next = lboxData2;
+   LboxData *lboxDataWhiteList = new LboxData;
+   lboxDataWhiteList->m_idListbox = ConfigField_WhiteList;
+   lboxDataWhiteList->m_lboxDlgTitle = _("White-listed addresses");
+   lboxDataWhiteList->m_lboxDlgPrompt = _("Address");
+   lboxDataWhiteList->m_lboxDlgPers = _T("LastWhiteList");
+   lboxDataWhiteList->m_next = lboxDataMLAddr;
+
+   m_lboxData = lboxDataWhiteList;
 }
 
 bool wxOptionsPageAdb::TransferDataToWindow()

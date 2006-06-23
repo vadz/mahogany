@@ -631,7 +631,7 @@ InitRecipients(Composer *cv,
       // oneself you don't usually want to reply to you at all but, instead,
       // use the "To:" address of the original message for your reply as well -
       // the code below catches this particular case
-      fromMyself = Message::FindAddress(ownAddresses, rcptMain) != wxNOT_FOUND;
+      fromMyself = Address::IsInList(ownAddresses, rcptMain);
       if ( fromMyself )
       {
          wxArrayString addresses;
@@ -765,15 +765,15 @@ InitRecipients(Composer *cv,
       // in the list reply mode we shouldn't exclude Reply-To addresses as we
       // haven't used them yet
       if ( (replyKind != MailFolder::REPLY_LIST &&
-            Message::FindAddress(replyToAddresses, addr) != wxNOT_FOUND) ||
-           Message::FindAddress(ownAddresses, addr) != wxNOT_FOUND )
+               Address::IsInList(replyToAddresses, addr)) ||
+            Address::IsInList(ownAddresses, addr) )
       {
          addressesToIgnore.Add(n);
       }
 
       // if we're not in REPLY_LIST mode the listAddresses array is empty
       // anyhow so it doesn't hurt
-      if ( Message::FindAddress(listAddresses, addr) != wxNOT_FOUND )
+      if ( Address::IsInList(listAddresses, addr) )
       {
          addressesList.Add(n);
       }
@@ -841,12 +841,11 @@ InitRecipients(Composer *cv,
             // reply to everyone and their dog
             //
             // but if the dog was only cc'ed, we should keep cc'ing it
-            rcptType =
-               Message::FindAddress(replyToAddresses, address) != wxNOT_FOUND
-                  ? Composer::Recipient_To
-                  : Message::FindAddress(ccAddresses, address) == wxNOT_FOUND
-                     ? Composer::Recipient_To
-                     : Composer::Recipient_Cc;
+            rcptType = Address::IsInList(replyToAddresses, address)
+                        ? Composer::Recipient_To
+                        : Address::IsInList(ccAddresses, address)
+                           ? Composer::Recipient_Cc
+                           : Composer::Recipient_To;
             break;
 
          case MailFolder::REPLY_LIST:

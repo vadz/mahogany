@@ -56,12 +56,17 @@ bool Address::operator==(const String& address) const
 
    AddressList_obj addrList(address);
    Address *addr = addrList->GetFirst();
-   if ( !addr || addrList->HasNext(addr) )
-   {
-      return false;
-   }
 
-   return addr->IsSameAs(*this);
+   return addr && !addrList->HasNext(addr) && IsSameAs(*addr);
+}
+
+/* static */
+bool Address::Compare(const String& address1, const String& address2)
+{
+   AddressList_obj addrList(address1);
+   Address *addr = addrList->GetFirst();
+
+   return addr && !addrList->HasNext(addr) && *addr == address2;
 }
 
 Address::~Address()
@@ -249,6 +254,55 @@ String Address::BuildFullForm(const String& name, const String& email)
    return address;
 }
 
+/* static */
+bool
+Address::IsInList(const wxArrayString& addresses,
+                  const String& address,
+                  String *match)
+{
+   const size_t count = addresses.size();
+
+   String mailbox,
+          domain;
+
+   AddressList_obj addrList(address);
+   for ( Address *addr = addrList->GetFirst();
+         addr;
+         addr = addrList->GetNext(addr) )
+   {
+      for ( size_t n = 0; n < count; n++ )
+      {
+         // first tokenize this string: it can be a full address or domain name
+         // only and it may contain '?' and '*' shell pattern metacharacters
+         const wxChar * const start = addresses[n];
+
+         const wxChar *p = wxStrchr(start, _T('@'));
+         if ( p )
+         {
+            mailbox.assign(start, p - start);
+            domain = p + 1;
+         }
+         else // no mailbox part, domain only given
+         {
+            mailbox = _T('*');
+            domain = start;
+         }
+
+         // now we can finally compare the addresses
+         if ( addr->GetMailbox().Matches(mailbox) &&
+                  addr->GetDomain().Matches(domain) )
+         {
+            if ( match )
+               *match = addr->GetAddress();
+
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
 // ----------------------------------------------------------------------------
 // AddressList
 // ----------------------------------------------------------------------------
@@ -294,108 +348,6 @@ ContainsOwnAddress(const String& str,
       WX_APPEND_ARRAY(addresses, addressesML);
    }
 
-   const size_t count = addresses.GetCount();
-
-   // now check whether any of these addresses occurs in str
-   String mailbox,
-          domain;
-
-   AddressList_obj addrList(str, READ_CONFIG(profile, MP_HOSTNAME));
-   for ( Address *addr = addrList->GetFirst();
-         addr;
-         addr = addrList->GetNext(addr) )
-   {
-      for ( size_t n = 0; n < count; n++ )
-      {
-         // first tokenize this string: it can be a full address or domain name
-         // only and it may contain '?' and '*' shell pattern metacharacters
-         const wxChar * const start = addresses[n];
-
-         const wxChar *p = wxStrchr(start, _T('@'));
-         if ( p )
-         {
-            mailbox.assign(start, p - start);
-            domain = p + 1;
-         }
-         else // no mailbox part, domain only given
-         {
-            mailbox = _T('*');
-            domain = start;
-         }
-
-         // now we can finally compare the addresses
-         if ( addr->GetMailbox().Matches(mailbox) &&
-                  addr->GetDomain().Matches(domain) )
-         {
-            if ( own )
-               *own = addr->GetAddress();
-
-            return true;
-         }
-      }
-   }
-
-   return false;
+   return Address::IsInList(addresses, str, own);
 }
 
-extern String FilterAddressList(const String& original)
-{
-   String result;
-
-   size_t each = 0;
-   while( each < original.size() )
-   {
-      bool match = false;
-
-      if( original[each] == _T('<') )
-      {
-         size_t colon = original.find(_T(':'),each);
-         if( colon != String::npos )
-         {
-            bool alpha = true;
-            for( size_t word = each+1; alpha && word < colon; ++word )
-            {
-               if ( !( original[word] >= _T('a')
-                  && original[word] <= _T('z') ) )
-               {
-                  alpha = false;
-               }
-            }
-
-            if( alpha )
-            {
-               size_t right = original.find(_T('>'),colon);
-               if( right != String::npos )
-               {
-                  if( original.substr(each+1,colon-(each+1))
-                     == _T("mailto") )
-                  {
-                     size_t parameters = original.find(_T('?'),colon);
-
-                     size_t end;
-                     if( parameters != String::npos && parameters < right )
-                        end = parameters;
-                     else
-                        end = right;
-
-                     result += _T('<');
-                     result += original.substr(colon+1,end-(colon+1));
-                     result += _T('>');
-                  }
-
-                  match = true;
-                  each = right+1;
-               }
-            }
-         }
-      }
-
-      if( !match )
-      {
-         result += original[each];
-         ++each;
-      }
-   }
-
-   return result;
-}

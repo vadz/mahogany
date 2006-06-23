@@ -37,6 +37,7 @@
 #include "MFilter.h"
 #include "Message.h"
 #include "MFolder.h"
+#include "Address.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -126,12 +127,17 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
    }
    else if ( var == _T("from") )
    {
-      String personalName = Message::GetNameFromAddress(value);
-      if ( !!personalName )
+      AddressList_obj addrList(value);
+      Address *addr = addrList->GetFirst();
+      if ( addr )
       {
-         profile->writeEntry(MP_PERSONALNAME, personalName);
-         wxLogMessage(_("Imported name setting from %s: %s."),
-                      "XFMail", personalName.c_str());
+         const String personalName = addr->GetName();
+         if ( !personalName.empty() )
+         {
+            profile->writeEntry(MP_PERSONALNAME, personalName);
+            wxLogMessage(_("Imported name setting from %s: %s."),
+                         "XFMail", personalName.c_str());
+         }
       }
    }
    else if ( var == _T("replyexand") )

@@ -404,7 +404,7 @@ void SendMessageCC::InitNew()
       m_Sender = READ_CONFIG_TEXT(m_profile, MP_SMTPHOST_LOGIN);
       m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
 
-      if ( Message::CompareAddresses(m_From, m_Sender) )
+      if ( Address::Compare(m_From, m_Sender) )
       {
          // leave Sender empty if it is the same as From, redundant
          m_Sender.clear();

@@ -2284,7 +2284,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_CREATE_INTERNAL_MESSAGE_DEFVAL   1
 
 /// name of addressbook to use in whitelist spam filter
-#define MP_WHITE_LIST_DEFVAL _T("whitelist.adb")
+#define MP_WHITE_LIST_DEFVAL wxEmptyString
 
 /// treat mail in this folder as junk mail
 #define MP_TREAT_AS_JUNK_MAIL_FOLDER_DEFVAL 0L

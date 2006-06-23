@@ -82,6 +82,7 @@
 #include "Sequence.h"
 #include "UIdArray.h"
 #include "MSearch.h"
+#include "Address.h"
 
 #include "MFStatus.h"
 #include "gui/wxMDialogs.h"
@@ -3035,10 +3036,22 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
             // mangling it below)
             if ( GetSettings().senderOnlyNames )
             {
-               String name = Message::GetNameFromAddress(text);
-               if ( !name.empty() )
+               String names;
+
+               AddressList_obj addrList(text);
+               for ( Address *addr = addrList->GetFirst();
+                     addr;
+                     addr = addrList->GetNext(addr) )
                {
-                  text = name;
+                  if ( !names.empty() )
+                     names += ", ";
+
+                  names += addr->GetName();
+               }
+
+               if ( !names.empty() )
+               {
+                  text = names;
                }
                //else: leave address without names as is
             }

@@ -499,6 +499,58 @@ static String GetNameForAddress(Message *msg, MessageAddressType type)
    return value;
 }
 
+// extract first or last name from the given string
+//
+// the logic here is primitive: the last word is taken to be the last name and
+// anything preceding it is the first name
+static String ExtractFirstOrLastName(const String& fullname, bool first)
+{
+   String value;
+
+   AddressList_obj addrList(fullname);
+   for ( Address *addr = addrList->GetFirst();
+         addr;
+         addr = addrList->GetNext(addr) )
+   {
+      if ( !value.empty() )
+         value += ", ";
+
+      const String name = addr->GetName();
+      const size_t posSpace = name.find_last_of(" ");
+      if ( posSpace == String::npos )
+      {
+         // if there are no spaces we have no choice but to take the
+         // entire name, whether we need the first or last name
+         value += name;
+      }
+      else // split the name in first and last parts
+      {
+         if ( first )
+         {
+            // first name is everything before the last word
+            value += name.substr(0, posSpace);
+         }
+         else // extract the last name
+         {
+            // last name is just the last word
+            value += name.substr(posSpace + 1);
+         }
+      }
+   }
+
+   return value;
+}
+
+static inline String ExtractFirstName(const String& fullname)
+{
+   return ExtractFirstOrLastName(fullname, true);
+}
+
+static inline String ExtractLastName(const String& fullname)
+{
+   return ExtractFirstOrLastName(fullname, false);
+}
+
 // return the reply prefix to use for message quoting when replying
 static String GetReplyPrefix(Message *msg, Profile *profile)
 {
@@ -1231,15 +1283,11 @@ VarExpander::ExpandMessage(const String& name, String *value) const
 
       case MessageHeader_FirstName:
       case MessageHeader_LastName:
-         {
-            // FIXME: this won't work if there are several addresses!
-
-            wxString to = m_cv.GetRecipients(Composer::Recipient_To);
-            if ( header == MessageHeader_FirstName )
-               *value = Message::GetFirstNameFromAddress(to);
-            else
-               *value = Message::GetLastNameFromAddress(to);
-         }
+         *value = ExtractFirstOrLastName
+                  (
+                     m_cv.GetRecipients(Composer::Recipient_To),
+                     header == MessageHeader_FirstName
+                  );
          break;
 
       default:
@@ -1303,13 +1351,11 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_FirstName:
-            *value = GetNameForAddress(m_msg, MAT_FROM);
-            *value = Message::GetFirstNameFromAddress(*value);
+            *value = ExtractFirstName(GetNameForAddress(m_msg, MAT_FROM));
             break;
 
          case OriginalHeader_LastName:
-            *value = GetNameForAddress(m_msg, MAT_FROM);
-            *value = Message::GetLastNameFromAddress(*value);
+            *value = ExtractLastName(GetNameForAddress(m_msg, MAT_FROM));
             break;
 
          case OriginalHeader_Newsgroups:
