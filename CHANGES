@@ -9,8 +9,8 @@
 Release 0.67 'Constance' ??? ??, 2006
 -------------------------------------
 
-2006-05-27 VZ: close all opened folders when the machine is suspended and reopen
-                  them on resume
+2006-06-24 VZ: added simple whitelist support
+2006-05-27 VZ: close all opened folders on suspend and reopen them on resume
 2006-04-08 VZ: optionally remind user to add an attachment if it was forgotten
 2006-04-08 VZ: support for using Python 2.4
 2006-02-12 VZ: reuse an existing composer when replying to the same message twice
@@ -61,7 +61,6 @@ Release 0.66 'Clio' January 18, 2004
 2003-10-01 VZ: added popup menu for the attachments in the composer
 2003-09-28 VZ: better UI for disablable dialog boxes
 2003-09-28 VZ: added support for using files, not registry, by default under Win
-2003-09-26 RV: simple whitelist support
 2003-09-23 VZ: respect X-Attribution header when writing replies
 2003-09-19 VZ: added "Reply/Forward To" commands to mail address popup menu
 2003-09-17 VZ: show UTF-7/8-encoded headers [as] correctly [as possible]

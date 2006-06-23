@@ -48,10 +48,6 @@
    #undef USE_RBL
 #endif
 
-// this code is unfinished and I don't know how it's supposed to work, so don't
-// enable this unless you intend to work on it
-//#define USE_WHITELIST
-
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -74,9 +70,7 @@ enum SpamTest
    Spam_Test_HTML,
    Spam_Test_BadMIME,
    Spam_Test_ExeAttachment,
-#ifdef USE_WHITELIST
    Spam_Test_WhiteList,
-#endif // USE_WHITELIST
 #ifdef USE_RBL
    Spam_Test_RBL,
 #endif // USE_RBL
@@ -182,16 +176,6 @@ static const SpamTestDesc spamTestDescs[] =
       false
    },
 
-#ifdef USE_WHITELIST
-   /// no address in whitelist?
-   {
-      _T("whitelist"),
-      _T("SpameWhiteList"),
-      gettext_noop("No match in &whitelist"),
-      false
-   },
-#endif // USE_WHITELIST
-
 #ifdef USE_RBL
    /// blacklisted by the RBL?
    {
@@ -201,6 +185,14 @@ static const SpamTestDesc spamTestDescs[] =
       false
    },
 #endif // USE_RBL
+
+   /// no address in whitelist?
+   {
+      _T("whitelist"),
+      _T("SpameWhiteList"),
+      gettext_noop("... and not &whitelisted"),
+      true
+   },
 };
 
 // ----------------------------------------------------------------------------
@@ -381,15 +373,11 @@ public:
    SpamOptionMime() : SpamOption(Spam_Test_BadMIME) { }
 };
 
-#ifdef USE_WHITELIST
-
 class SpamOptionWhiteList : public SpamOption
 {
 public:
    SpamOptionWhiteList() : SpamOption(Spam_Test_WhiteList) { }
 };
-
-#endif // USE_WHITELIST
 
 #ifdef USE_RBL
 
@@ -455,10 +443,8 @@ private:
    SpamOptionMime m_checkMime;
    SpamOption *PickMime() { return &m_checkMime; }
 
-#ifdef USE_WHITELIST
    SpamOptionWhiteList m_whitelist;
    SpamOption *PickWhiteList() { return &m_whitelist; }
-#endif // USE_WHITELIST
 
 #ifdef USE_RBL
    SpamOptionRbl m_checkRBL;
@@ -933,306 +919,27 @@ static bool CheckForSuspiciousMIME(const Message& msg)
    return subpart && !subpart->GetNext();
 }
 
-#ifdef USE_WHITELIST
-
-static wxArrayString GenerateSuperDomains(const String &domain)
-{
-   wxArrayString parts(strutil_restore_array(domain,_T('.')));
-
-   wxArrayString result;
-   for( size_t count = 1; count <= parts.GetCount(); ++count )
-   {
-      String super;
-      for( size_t each = 0; each < count; ++each )
-      {
-         if( each )
-            super += _T('.');
-         super += parts[parts.GetCount() - count + each];
-      }
-
-      result.Add(super);
-   }
-
-   return result;
-}
-
-static bool WhiteListDomain(RefCounter<AdbBook> book,const String &candidate)
-{
-   wxArrayString domains(GenerateSuperDomains(candidate));
-
-   for( size_t super = 0; super < domains.GetCount(); ++super )
-   {
-      // FIXME: Grammar without escape sequences
-      if( book->Matches(String(_T("*@"))+domains[super],
-            AdbLookup_EMail,AdbLookup_Match) )
-      {
-         return false;
-      }
-
-      // Allow whitelisting domain itself
-      if( book->Matches(domains[super],AdbLookup_EMail,AdbLookup_Match) )
-      {
-         return false;
-      }
-   }
-
-   return true;
-}
-
-static bool WhiteListListId(RefCounter<AdbBook> book,const String &id)
-{
-   size_t left = id.find(_T('<'));
-   if( left != String::npos )
-   {
-      size_t right = id.find(_T('>'),left);
-      if( right != String::npos )
-      {
-         size_t at = id.find(_T('@'),left);
-
-         size_t begin;
-         if( at != String::npos && at < right )
-            begin = at;
-         else
-            begin = left;
-
-         if( !WhiteListDomain(book,id.substr(begin+1,right-(begin+1))) )
-            return false;
-      }
-   }
-
-   return true;
-}
-
-// This is not RFC-compliant address parser and it won't be because
-// it would then generate many false matches. It isn't problem because
-// it is used for parsing non-standard headers anyway.
-static bool IsSaneAddressCharacter(wxChar byte)
-{
-   return byte >= _T('a') && byte <= _T('z')
-      || byte >= _T('A') && byte <= _T('Z')
-      || byte >= _T('0') && byte <= _T('9')
-      || byte == _T('@')
-      || byte == _T('.')
-      || byte == _T('-')
-      || byte == _T('+')
-      || byte == _T('=')
-      || byte == _T('_')
-      || byte == _T('~');
-}
-
-// Extract address(es) from messy string into parseable format
-static String AddressFromFreeStyleHeader(const String &in)
-{
-   String out;
-
-   for( size_t at = in.find(_T('@')); at != String::npos;
-      at = in.find(_T('@'),at+1) )
-   {
-      size_t begin = at;
-      for(;;)
-      {
-         if( !IsSaneAddressCharacter(in[begin])
-            || begin < at && in[begin] == _T('@') )
-         {
-            ++begin;
-            break;
-         }
-         if( begin == 0 )
-            break;
-         --begin;
-      }
-
-      size_t end = at;
-      for(;;)
-      {
-         if( !IsSaneAddressCharacter(in[end])
-            || end > at && in[end] == _T('@') )
-         {
-            --end;
-            break;
-         }
-         if( end == in.size()-1 )
-            break;
-         ++end;
-      }
-
-      if( begin < at && at < end )
-      {
-         size_t dot = in.find(_T('.'),at+1);
-         if( dot != String::npos && dot < end )
-         {
-            if( !out.empty() )
-               out += _T(',');
-            out += in.substr(begin,end-begin+1);
-         }
-      }
-   }
-
-   return out;
-}
-
-static const wxChar *gs_whitelistHeaders[] =
-{
-   // Source
-   _T("From"),
-   _T("Sender"),
-   _T("Reply-To"),
-   // Destination
-   _T("To"),
-   _T("Cc"),
-   _T("Bcc"),
-   // List
-   //_T("List-Id"), // List-Id may contain all sorts of garbage (see below)
-   _T("List-Help"),
-   _T("List-Subscribe"),
-   _T("List-Unsubscribe"),
-   _T("List-Post"),
-   _T("List-Owner"),
-   _T("List-Archive"),
-   // Obscure
-   _T("Resent-To"),
-   _T("Resent-Cc"),
-   _T("Resent-Bcc"),
-   _T("Resent-From"),
-   _T("Resent-Sender"),
-   // Non-standard - some entries can be probably removed without danger
-   _T("Envelope-To"), // Exim
-   _T("X-Envelope-To"), // Sendmail
-   _T("Apparently-To"), // Procmail ^TO
-   _T("X-Envelope-From"), // Procmail ^FROM_DAEMON
-   _T("Mailing-List"), // Ezmlm and Yahoo
-   _T("X-Mailing-List"), // SmartList
-   _T("X-BeenThere"), // Mailman
-   _T("Delivered-To"), // qmail
-   _T("X-Delivered-To"), // fastmail.fm
-   _T("X-Original-To"), // postfix 2.0
-   _T("X-Rcpt-To"), // best.com
-   _T("X-Real-To"), // CommuniGate Pro
-   _T("X-MDMailing-List"), // Nancy Mc'Gough's Procmail Faq
-   _T("Return-Path"), // Nancy Mc'Gough's Procmail Faq
-   NULL
-};
-
-static enum
-{
-   AddressMessStandard, // Standard address fields can be parsed directly
-   AddressMessUrl, // List headers contain URLs and only few are e-mails
-   AddressMessGarbage, // Free style text that may contain addresses
-   AddressMessUnknown // Treated the same as AddressMessGarbage
-}
-gs_whitelistHeaderMess[] =
-{
-   AddressMessStandard, // From
-   AddressMessStandard, // Sender
-   AddressMessStandard, // Reply-To
-   AddressMessStandard, // To
-   AddressMessStandard, // Cc
-   AddressMessStandard, // Bcc
-   AddressMessUrl, // List-Help
-   AddressMessUrl, // List-Subscribe
-   AddressMessUrl, // List-Unsubscribe
-   AddressMessUrl, // List-Post
-   AddressMessUrl, // List-Owner
-   AddressMessUrl, // List-Archive
-   AddressMessStandard, // Resent-To
-   AddressMessStandard, // Resent-Cc
-   AddressMessStandard, // Resent-Bcc
-   AddressMessStandard, // Resent-From
-   AddressMessStandard, // Resent-Sender
-   AddressMessUnknown, // Envelope-To
-   AddressMessUnknown, // X-Envelope-To
-   AddressMessUnknown, // Apparently-To
-   AddressMessUnknown, // X-Envelope-From
-   AddressMessGarbage, // Mailing-List
-   AddressMessGarbage, // X-Mailing-List
-   AddressMessUnknown, // X-BeenThere
-   AddressMessGarbage, // Delivered-To
-   AddressMessGarbage, // X-Delivered-To
-   AddressMessUnknown, // X-Original-To
-   AddressMessUnknown, // X-Rcpt-To
-   AddressMessUnknown, // X-Real-To
-   AddressMessUnknown, // X-MDMailing-List
-   AddressMessUnknown, // Return-Path
-   AddressMessUnknown // NULL
-};
-
-static String SanitizeWhitelistedAddress(const String &in,size_t header)
-{
-   String out;
-
-   switch(gs_whitelistHeaderMess[header])
-   {
-   case AddressMessStandard:
-      out = in;
-      break;
-
-   case AddressMessUrl:
-      out = FilterAddressList(in);
-      break;
-
-   case AddressMessGarbage:
-   case AddressMessUnknown:
-      out = AddressFromFreeStyleHeader(in);
-      break;
-   }
-
-   return out;
-}
-
-static RefCounter<AdbBook> GetWhitelistBook()
-{
-   AdbManager *manager = AdbManager::Get();
-
-   manager->LoadAll(); // HACK: So that AdbEditor's provider list is utilized
-
-   RefCounter<AdbBook> book(
-      manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
-
-   manager->Unget();
-
-   return book;
-}
-
-// check whether any address field (sender or recipient) matches whitelist
+// check whether any address field (sender or recipient) matches whitelist and
+// return true if it does
 static bool CheckWhiteList(const Message& msg)
 {
-   // Go painfully through all headers to debug their format
-   bool result = true;
+   // examine all addresses in the message header for match in the whitelist
+   wxArrayString addresses;
+   const size_t count = msg.ExtractAddressesFromHeader(addresses);
+   if ( !count )
+      return false;
 
-#ifdef DEBUG
-#define RETURN(value) result = value
-#else
-#define RETURN(value) return value
-#endif
+   const wxArrayString
+      whitelist(strutil_restore_array(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
 
-   RefCounter<AdbBook> book(GetWhitelistBook());
-
-   wxArrayString values = msg.GetHeaderLines(gs_whitelistHeaders);
-   for( size_t list = 0; list < values.GetCount(); ++list )
+   for ( size_t n = 0; n < count; n++ )
    {
-      RefCounter<AddressList> parser(AddressList::Create(
-         SanitizeWhitelistedAddress(values[list],list)));
-
-      for( Address *candidate = parser->GetFirst(); candidate;
-         candidate = parser->GetNext(candidate) )
-      {
-         if( !WhiteListDomain(book,candidate->GetDomain()) )
-            RETURN(false);
-      }
+      if ( Address::IsInList(whitelist, addresses[n]) )
+         return true;
    }
 
-   String id;
-   if ( msg.GetHeaderLine(_T("List-Id"),id) )
-   {
-      if( !WhiteListListId(book,id) )
-         RETURN(false);
-   }
-
-   return result;
-#undef RETURN
+   return false;
 }
-
-#endif // USE_WHITELIST
 
 #ifdef USE_RBL
 
@@ -1279,9 +986,9 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
    len = res_query( wxConvertWX2MB(domain.c_str()), C_IN, T_A,
                     (unsigned char *)answerBuffer, PACKETSZ );
 
-   if( len != -1 )
+   if ( len != -1 )
    {
-      if( len > PACKETSZ ) // buffer was too short, re-alloc:
+      if ( len > PACKETSZ ) // buffer was too short, re-alloc:
       {
          delete [] answerBuffer;
          answerBuffer = new char [ len ];
@@ -1308,14 +1015,14 @@ static bool findIP(String &header,
    toExamine = header;
    while(toExamine.Length() > 0)
    {
-      if((pos = toExamine.Find(openChar)) == wxNOT_FOUND)
+      if ((pos = toExamine.Find(openChar)) == wxNOT_FOUND)
          break;
       ip = toExamine.Mid(pos+1);
       closePos = ip.Find(closeChar);
-      if(closePos == wxNOT_FOUND)
+      if (closePos == wxNOT_FOUND)
          // no second bracket found
          break;
-      if(wxSscanf(ip.c_str(), _T("%d.%d.%d.%d"), a,b,c,d) != 4)
+      if (wxSscanf(ip.c_str(), _T("%d.%d.%d.%d"), a,b,c,d) != 4)
       {
          // no valid IP number behind open bracket, continue
          // search:
@@ -1355,12 +1062,13 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
 {
    wxArrayString tests = strutil_restore_array(param);
    const size_t count = tests.GetCount();
+   size_t n;
    if ( !count )
    {
       // use defaults
       Profile_obj profile(Profile::CreateModuleProfile(SPAM_FILTER_INTERFACE));
 
-      for ( size_t n = 0; n < Spam_Test_Max; n++ )
+      for ( n = 0; n < Spam_Test_Max; n++ )
       {
          const SpamTestDesc& desc = spamTestDescs[n];
          if ( profile->readEntry(desc.name, desc.isOnByDefault) )
@@ -1368,9 +1076,21 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
       }
    }
 
+   // check the white list first because it overrides all the others
+   for ( n = 0; n < count; n++ )
+   {
+      if ( tests[n] == spamTestDescs[Spam_Test_WhiteList].token )
+      {
+         if ( CheckWhiteList(msg) )
+            return false;
+      }
+   }
+
+
+   // now check all the other tests
    String value,
           spamResult;
-   for ( size_t n = 0; n < count && spamResult.empty(); n++ )
+   for ( n = 0; n < count && spamResult.empty(); n++ )
    {
       const wxString& test = tests[n];
       if ( test == spamTestDescs[Spam_Test_Subject8Bit].token )
@@ -1438,13 +1158,6 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
          if ( CheckForExeAttach(msg.GetTopMimePart()) )
             spamResult = _("contains Windows executable attachment");
       }
-#ifdef USE_WHITELIST
-      else if ( test == spamTestDescs[Spam_Test_WhiteList].token )
-      {
-         if ( CheckWhiteList(msg) )
-            spamResult = _("not in whitelist");
-      }
-#endif // USE_WHITELIST
 #ifdef USE_RBL
       else if ( test == spamTestDescs[Spam_Test_RBL].token )
       {
@@ -1456,7 +1169,7 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
          bool rc = false;
          while ( !rc && !testHeader.empty() )
          {
-            if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
+            if (findIP(testHeader, '(', ')', &a, &b, &c, &d))
             {
                for ( int i = 0; gs_RblSites[i]; ++i )
                {
@@ -1474,7 +1187,7 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
             testHeader = value;
             while ( !rc && !testHeader.empty() )
             {
-               if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
+               if (findIP(testHeader, '[', ']', &a, &b, &c, &d))
                {
                   for ( int i = 0; gs_RblSites[i] ; ++i )
                   {
@@ -1534,9 +1247,7 @@ const HeadersOptionsPage::PickMember HeadersOptionsPage::ms_members[] =
    &HeadersOptionsPage::PickReceived,
    &HeadersOptionsPage::PickHtml,
    &HeadersOptionsPage::PickMime,
-#ifdef USE_WHITELIST
    &HeadersOptionsPage::PickWhiteList,
-#endif // USE_WHITELIST
 #ifdef USE_RBL
    &HeadersOptionsPage::PickRBL,
 #endif // USE_RBL
