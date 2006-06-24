@@ -84,14 +84,29 @@ public:
       Mode_News
    };
 
-   // a message kind - combined with the mode this determines the template
-   // InitText() will use
+   /**
+      Message kind:combined with the mode this determines the template
+      InitText() will use
+    */
    enum MessageKind
    {
       Message_New,      // either new mail message or new article
       Message_Reply,    // reply or follow-up
       Message_Forward   // this one is incompatible with Mode_NNTP
    };
+
+   /**
+      Common flags used in some functions.
+    */
+   enum
+   {
+      /// Just the absence of Interactive flag
+      NonInteractive = 0,
+
+      /// If this flag is specified, we can ask questions to the user
+      Interactive = 1
+   };
+
 
    /**
      Set the template to use for this message. Should be called before
@@ -385,17 +400,19 @@ protected:
      deleted by the caller (presumably after calling its Send() or
      WriteToString()).
 
+     @param flags by default contains Interactive flag
      @return SendMessage object to be deleted by the caller
    */
-   SendMessage *BuildMessage() const;
+   SendMessage *BuildMessage(int flags = Interactive) const;
 
    /**
      Return the message to be sent as a draft: it simply adds a few additional
      headers which we put in our draft messages and use in EditMessage() later.
 
+     @param flags by default contains Interactive flag
      @return SendMessage object to be deleted by the caller
    */
-   SendMessage *BuildDraftMessage() const;
+   SendMessage *BuildDraftMessage(int flags = Interactive) const;
 
 
    /// Destructor
@@ -515,6 +532,9 @@ private:
 
    /// Have we been modified since the last save?
    bool m_isModified;
+
+   /// Is it ok to send this message in an encoding different from original?
+   mutable bool m_okToConvertOnSend;
 
    /// If replying, this is the original message (may be NULL)
    Message *m_OriginalMessage;

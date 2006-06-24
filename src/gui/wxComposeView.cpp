@@ -1735,6 +1735,8 @@ wxComposeView::wxComposeView(const String &name,
 
    m_isModified = false;
 
+   m_okToConvertOnSend = false;
+
    m_editor = NULL;
    m_encoding = wxFONTENCODING_SYSTEM;
 }
@@ -4329,7 +4331,7 @@ wxComposeView::IsReadyToSend() const
 }
 
 SendMessage *
-wxComposeView::BuildMessage() const
+wxComposeView::BuildMessage(int flags) const
 {
    // create the message object
    // -------------------------
@@ -4403,26 +4405,33 @@ wxComposeView::BuildMessage() const
 
                   if ( !ok )
                   {
-                     if ( !MDialog_YesNoDialog
-                           (
-                              wxString::Format
-                              (
-                                 _("Text of this message can't be converted to "
-                                   "the encoding \"%s\", would you like to "
-                                   "send it in encoding \"%s\" instead?"),
-                                 wxFontMapper::GetEncodingName(encodingMsg).c_str(),
-                                 wxFontMapper::GetEncodingName(encodingPart).c_str()
-                              ),
-                              this,
-                              MDIALOG_YESNOTITLE,
-                              M_DLG_YES_DEFAULT,
-                              M_MSGBOX_SEND_DIFF_ENCODING
-                           ) )
+                     if ( (flags & Interactive) && !m_okToConvertOnSend )
                      {
-                        // send aborted
-                        part->DecRef();
-                        return NULL;
+                        if ( !MDialog_YesNoDialog
+                              (
+                                 wxString::Format
+                                 (
+                                    _("Text of this message can't be converted "
+                                      "to the encoding \"%s\", would you like "
+                                      " to send it in encoding \"%s\" instead?"),
+                                    wxFontMapper::GetEncodingName(encodingMsg).c_str(),
+                                    wxFontMapper::GetEncodingName(encodingPart).c_str()
+                                 ),
+                                 this,
+                                 MDIALOG_YESNOTITLE,
+                                 M_DLG_YES_DEFAULT,
+                                 M_MSGBOX_SEND_DIFF_ENCODING
+                              ) )
+                        {
+                           // send aborted
+                           part->DecRef();
+                           return NULL;
+                        }
+
+                        // don't ask again for this message
+                        m_okToConvertOnSend = true;
                      }
+                     //else: don't ask, convert by default
 
                      // FIXME: this doesn't work if we have 2 text parts in
                      //        different encodings, we should use UTF8 in this
@@ -4502,7 +4511,7 @@ wxComposeView::BuildMessage() const
                             &plist
                           );
                   }
-                  else
+                  else if ( flags & Interactive )
                   {
                      wxLogError(_("Cannot read file '%s' included in "
                                   "this message!"), filename.c_str());
@@ -4510,7 +4519,7 @@ wxComposeView::BuildMessage() const
 
                   delete [] buffer;
                }
-               else
+               else if ( flags & Interactive )
                {
                   wxLogError(_("Cannot open file '%s' included in "
                                "this message!"), filename.c_str());
@@ -5072,12 +5081,13 @@ bool wxComposeView::DeleteDraft()
    return true;
 }
 
-SendMessage *wxComposeView::BuildDraftMessage() const
+SendMessage *wxComposeView::BuildDraftMessage(int flags) const
 {
-   SendMessage *msg = BuildMessage();
+   SendMessage *msg = BuildMessage(flags);
    if ( !msg )
    {
-      wxLogError(_("Failed to create the message to save."));
+      if ( flags & Interactive )
+         wxLogError(_("Failed to create the message to save."));
 
       return NULL;
    }
@@ -5234,7 +5244,7 @@ wxComposeView::AutoSave()
       return true;
    }
 
-   SendMessage_obj msg(BuildDraftMessage());
+   SendMessage_obj msg(BuildDraftMessage(NonInteractive));
    if ( !msg )
       return false;
 
