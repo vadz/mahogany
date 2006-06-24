@@ -41,6 +41,7 @@
 #include "MessageView.h"
 #include "gui/wxMenuDefs.h"
 
+#include "Address.h"
 #include "Composer.h"
 #include "Collect.h"
 
@@ -51,6 +52,25 @@
 #endif
 
 class MPersMsgBox;
+
+// ----------------------------------------------------------------------------
+// menu item ids
+// ----------------------------------------------------------------------------
+
+enum
+{
+   WXMENU_URL_BEGIN,
+   WXMENU_URL_OPEN,
+   WXMENU_URL_OPEN_NEW,
+   WXMENU_URL_COMPOSE,
+   WXMENU_URL_REPLYTO,
+   WXMENU_URL_FORWARDTO,
+   WXMENU_ADD_TO_ADB,
+   WXMENU_ADD_TO_WHITELIST,
+   WXMENU_ADD_DOMAIN_TO_WHITELIST,
+   WXMENU_URL_COPY,
+   WXMENU_URL_END
+};
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -85,6 +105,7 @@ extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_BROWSER;
 extern const MOption MP_BROWSER_INNW;
 extern const MOption MP_BROWSER_ISNS;
+extern const MOption MP_WHITE_LIST;
 
 // ============================================================================
 // UrlPopup implementation
@@ -125,7 +146,9 @@ UrlPopup::UrlPopup(const ClickableURL *clickableURL)
       Append(WXMENU_URL_REPLYTO, _("&Reply to"));
       Append(WXMENU_URL_FORWARDTO, _("&Forward to"));
       AppendSeparator();
-      Append(WXMENU_URL_ADD_TO_ADB, _("&Add to address book..."));
+      Append(WXMENU_ADD_TO_ADB, _("&Add to address book..."));
+      Append(WXMENU_ADD_TO_WHITELIST, _("Add to &whitelist"));
+      Append(WXMENU_ADD_DOMAIN_TO_WHITELIST, _("Add &domain to whitelist"));
    }
    else // !mailto
    {
@@ -182,8 +205,48 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
          }
          break;
 
-      case WXMENU_URL_ADD_TO_ADB:
+      case WXMENU_ADD_TO_ADB:
          m_clickableURL->AddToAddressBook();
+         break;
+
+      case WXMENU_ADD_TO_WHITELIST:
+      case WXMENU_ADD_DOMAIN_TO_WHITELIST:
+         {
+            AddressList_obj addrList(m_clickableURL->GetUrl());
+            Address *addr = addrList->GetFirst();
+            if ( !addr )
+            {
+               wxLogError(_("Failed to parse address \"%s\""),
+                          m_clickableURL->GetUrl().c_str());
+               break;
+            }
+
+            ASSERT_MSG( !addrList->HasNext(addr), "more than one address?" );
+
+            const String str = id == WXMENU_ADD_DOMAIN_TO_WHITELIST
+                                 ? addr->GetDomain()
+                                 : addr->GetEMail();
+
+            // this profile shouldn't be DecRef()'d, don't use Profile_obj
+            Profile *profile = m_clickableURL->GetProfile();
+
+            wxFrame *frame = m_clickableURL->GetMessageView()->GetParentFrame();
+
+            wxArrayString whitelist(strutil_restore_array(
+                                       READ_CONFIG(profile, MP_WHITE_LIST)));
+            if ( whitelist.Index(str) != wxNOT_FOUND )
+            {
+               wxLogStatus(frame, _("\"%s\" is already in the white list"),
+                           str.c_str());
+               break;
+            }
+
+            whitelist.Add(str);
+
+            profile->writeEntry(MP_WHITE_LIST, strutil_flatten_array(whitelist));
+
+            wxLogStatus(frame, _("Added \"%s\" to the white list"), str.c_str());
+         }
          break;
 
       case WXMENU_URL_COPY:
