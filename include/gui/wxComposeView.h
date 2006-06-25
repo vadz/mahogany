@@ -268,6 +268,10 @@ public:
 
       /// called to remove the recipient with this index
    void OnRemoveRcpt(size_t index);
+
+      /// used to layout recepients area only once
+   void OnIdle(wxIdleEvent& event);
+
    //@}
 
    /// is the control with this index enabled?
@@ -532,6 +536,9 @@ private:
 
    /// Have we been modified since the last save?
    bool m_isModified;
+
+   /// Number of recently pending recepients which we have to layout
+   unsigned m_numNewRcpts;
 
    /// Is it ok to send this message in an encoding different from original?
    mutable bool m_okToConvertOnSend;

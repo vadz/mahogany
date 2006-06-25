@@ -734,6 +734,8 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
 
    // identity combo notification
    EVT_CHOICE(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
+
+   EVT_IDLE(wxComposeView::OnIdle)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxRcptTypeChoice, wxChoice)
@@ -1734,6 +1736,7 @@ wxComposeView::wxComposeView(const String &name,
    m_rcptTypeLast = Recipient_To;
 
    m_isModified = false;
+   m_numNewRcpts = 0;
 
    m_okToConvertOnSend = false;
 
@@ -2481,6 +2484,15 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
       DeletePlaceHolder();
    }
 
+   if ( !m_numNewRcpts )
+   {
+      // before adding a new receipient control, prevent the updates: this is
+      // especially useful when many recepients are added at once as is the
+      // case when replying to a message with a lot of addressees, as we avoid
+      // a lot of flicker
+      Freeze();
+   }
+
    // create the controls and add them to the sizer
    wxRcptExtraControl *rcpt = new wxRcptExtraControl(this);
 
@@ -2494,10 +2506,13 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    m_rcptExtra.Insert(rcpt, 0);
 
    m_sizerRcpts->Prepend(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN / 2);
-   m_sizerRcpts->Layout();
-   m_panelRecipients->RefreshScrollbar(m_panelRecipients->GetClientSize());
 
-   // adjust the indexes of all the existing controls
+   // hide the newly added controls for now and set the flag telling our
+   // OnIdle() to show it, after laying it out, later
+   m_sizerRcpts->Hide(sizerRcpt);
+   m_numNewRcpts++;
+
+   // adjust the indexes of all the existing controls after adding a new one
    const size_t count = m_rcptExtra.GetCount();
    for ( size_t n = 1; n < count; n++ )
    {
@@ -3106,6 +3121,25 @@ wxComposeView::DoInitText(Message *msgOrig)
 
    // the text hasn't been modified by the user
    ResetDirty();
+}
+
+void wxComposeView::OnIdle(wxIdleEvent& event)
+{
+   if ( m_numNewRcpts )
+   {
+      for ( unsigned n = 0; n < m_numNewRcpts; n++ )
+         m_sizerRcpts->Show(n);
+
+      m_sizerRcpts->Layout();
+      m_panelRecipients->RefreshScrollbar(m_panelRecipients->GetClientSize());
+
+      m_numNewRcpts = 0;
+
+      // now show all the recepient controls
+      Thaw();
+   }
+
+   event.Skip();
 }
 
 void wxComposeView::OnFirstTimeModify()
