@@ -3012,11 +3012,7 @@ String FilterRuleApply::ResultsMessage()
       // if it was caught as a spam, tell the user why do we think so
       if ( !gs_spamTest.empty() )
       {
-         textResult += String::Format
-                              (
-                                 _("recognized as spam (%s); "),
-                                 gs_spamTest.c_str()
-                              );
+         textResult << '(' << gs_spamTest << ')';
          gs_spamTest.clear();
       }
 

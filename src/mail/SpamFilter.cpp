@@ -249,18 +249,35 @@ SpamFilter::CheckIfSpam(const Message& msg,
       //else: use all filters
 
       // DoCheckIfSpam() may return -1 in addition to true or false which is
-      // treated as "definiively false", i.e. not only this spam filter didn't
+      // treated as "definitively false", i.e. not only this spam filter didn't
       // recognize this message as spam but it shouldn't be even checked with
       // the others (this is mainly used for whitelisting support)
-      int rc = p->DoCheckIfSpam(msg, param, result);
-      if ( rc != false )
+      switch ( p->DoCheckIfSpam(msg, param, result) )
       {
-         if ( result )
-            *result = name + _T(": ") + *result;
+         case true:
+            if ( result )
+            {
+               *result = String::Format("recognized as spam by %s filter: %s",
+                                        name.c_str(), result->c_str());
+            }
+            return true;
 
-         return rc != -1;
+         case -1:
+            if ( result )
+            {
+               *result = String::Format("recognized as non-spam by %s filter: %s",
+                                        name.c_str(), result->c_str());
+            }
+            return false;
+
+         default:
+            FAIL_MSG( "unexpected DoCheckIfSpam() return value" );
+            // fall through
+
+         case false:
+            // continue with the other filters checks
+            break;
       }
-      //else: continue with the other filters checks
    }
 
    return false;
