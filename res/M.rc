@@ -71,7 +71,7 @@ ftplink		ICON	"ftplink.ico"
 
 unknown 	ICON	"unknown.ico"
 
-// toolbar bitmaps (32x32)
+// toolbar bitmaps (24x24)
 tb_adrbook	BITMAP	"tb_adrbook.bmp"
 tb_book_open	BITMAP	"tb_book_open.bmp"
 tb_check_mail		BITMAP	"tb_check_mail.bmp"
