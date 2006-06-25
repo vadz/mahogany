@@ -1122,47 +1122,51 @@ void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
 
 void wxMainFrame::DoResume()
 {
-   if ( m_foldersToReopen )
-   {
-      wxLogStatus(_("Reopening %lu folders"),
-                  (unsigned long)m_foldersToReopen->size());
+   if ( !m_foldersToReopen )
+      return;
 
-      for ( MFolderList::iterator i = m_foldersToReopen->begin();
-            i != m_foldersToReopen->end();
-            ++i )
+   // copy to a temporary variable to avoid problems in case we get several
+   // resume messages (currently happens under Windows sometimes)
+   MFolderList *foldersToReopen = m_foldersToReopen;
+   m_foldersToReopen = NULL;
+
+   wxLogStatus(_("Reopening %lu folders"),
+               (unsigned long)foldersToReopen->size());
+
+   for ( MFolderList::iterator i = foldersToReopen->begin();
+         i != foldersToReopen->end();
+         ++i )
+   {
+      MFolder *folder = *i;
+      if ( folder->GetFullName() == m_folderToReopenHere )
       {
-         MFolder *folder = *i;
-         if ( folder->GetFullName() == m_folderToReopenHere )
+         OpenFolder(folder);
+      }
+      else // a folder opened elsewhere
+      {
+         // only reopen it this folder should be permanently opened,
+         // otherwise it will be reopened from the folder view which uses it
+         if ( folder->GetFlags() & MF_FLAGS_KEEPOPEN )
          {
-            OpenFolder(folder);
-         }
-         else // a folder opened elsewhere
-         {
-            // only reopen it this folder should be permanently opened,
-            // otherwise it will be reopened from the folder view which uses it
-            if ( folder->GetFlags() & MF_FLAGS_KEEPOPEN )
+            MailFolder *mf = MailFolder::OpenFolder(folder);
+            if ( !mf )
             {
-               MailFolder *mf = MailFolder::OpenFolder(folder);
-               if ( !mf )
-               {
-                  ERRORMESSAGE((_("Failed to reopen folder \"%s\""),
-                                folder->GetFullName().c_str()));
-               }
-               else
-               {
-                  // it won't be really closed but will be kept open in the
-                  // background
-                  mf->DecRef();
-               }
+               ERRORMESSAGE((_("Failed to reopen folder \"%s\""),
+                             folder->GetFullName().c_str()));
+            }
+            else
+            {
+               // it won't be really closed but will be kept open in the
+               // background
+               mf->DecRef();
             }
          }
       }
-
-      delete m_foldersToReopen;
-      m_foldersToReopen = NULL;
-
-      m_folderToReopenHere.clear();
    }
+
+   delete foldersToReopen;
+
+   m_folderToReopenHere.clear();
 }
 
 #endif // wxHAS_POWER_EVENTS
