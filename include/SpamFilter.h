@@ -147,15 +147,6 @@ public:
    static void UnloadAll();
 
 
-#if 0
-   /// Get the head of the linked list of the loaded filters
-   static SpamFilter *GetFirst() { return ms_first; }
-
-   /// Get the next filter in the list or NULL
-   SpamFilter *GetNext() const { return m_next; }
-#endif
-
-
 protected:
    /**
       Default ctor.
@@ -225,10 +216,13 @@ protected:
       This is used by the public CheckIfSpam(). The parameter passed to it is
       the RHS of the element in the params array passed to CheckIfSpam() having
       the same name as this spam filter.
+
+      @return true if this is a spam, false if we don't think it's a spam and
+              -1 if we're sure this is not a spam
     */
-   virtual bool DoCheckIfSpam(const Message& msg,
-                              const String& param,
-                              String *result) = 0;
+   virtual int DoCheckIfSpam(const Message& msg,
+                             const String& param,
+                             String *result) = 0;
 
    /**
       Return the name of the icon used by the option page.

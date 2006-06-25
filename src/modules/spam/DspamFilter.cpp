@@ -162,9 +162,9 @@ public:
 protected:
    virtual void DoReclassify(const Message& msg, bool isSpam);
    virtual void DoTrain(const Message& msg, bool isSpam);
-   virtual bool DoCheckIfSpam(const Message& msg,
-                              const String& param,
-                              String *result);
+   virtual int DoCheckIfSpam(const Message& msg,
+                             const String& param,
+                             String *result);
    virtual const wxChar *GetOptionPageIconName() const { return _T("dspam"); }
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
                                              Profile *profile) const;
@@ -341,7 +341,7 @@ void DspamFilter::DoTrain(const Message& msg, bool isSpam)
    DoProcess(msg, handler);
 }
 
-bool
+int
 DspamFilter::DoCheckIfSpam(const Message& msg,
                            const String& param,
                            String *result)

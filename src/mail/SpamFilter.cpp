@@ -248,13 +248,19 @@ SpamFilter::CheckIfSpam(const Message& msg,
       }
       //else: use all filters
 
-      if ( p->DoCheckIfSpam(msg, param, result) )
+      // DoCheckIfSpam() may return -1 in addition to true or false which is
+      // treated as "definiively false", i.e. not only this spam filter didn't
+      // recognize this message as spam but it shouldn't be even checked with
+      // the others (this is mainly used for whitelisting support)
+      int rc = p->DoCheckIfSpam(msg, param, result);
+      if ( rc != false )
       {
          if ( result )
             *result = name + _T(": ") + *result;
 
-         return true;
+         return rc != -1;
       }
+      //else: continue with the other filters checks
    }
 
    return false;

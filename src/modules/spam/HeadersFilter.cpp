@@ -207,9 +207,9 @@ public:
 protected:
    virtual void DoReclassify(const Message& msg, bool isSpam);
    virtual void DoTrain(const Message& msg, bool isSpam);
-   virtual bool DoCheckIfSpam(const Message& msg,
-                              const String& param,
-                              String *result);
+   virtual int DoCheckIfSpam(const Message& msg,
+                             const String& param,
+                             String *result);
    virtual const wxChar *GetOptionPageIconName() const { return _T("spam"); }
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
                                              Profile *profile) const;
@@ -920,8 +920,8 @@ static bool CheckForSuspiciousMIME(const Message& msg)
 }
 
 // check whether any address field (sender or recipient) matches whitelist and
-// return true if it does
-static bool CheckWhiteList(const Message& msg)
+// return true (and fills match with the match in whitelist) if it does
+static bool CheckWhiteList(const Message& msg, String *match)
 {
    // examine all addresses in the message header for match in the whitelist
    wxArrayString addresses;
@@ -934,7 +934,7 @@ static bool CheckWhiteList(const Message& msg)
 
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( Address::IsInList(whitelist, addresses[n]) )
+      if ( Address::IsInList(whitelist, addresses[n], match) )
          return true;
    }
 
@@ -1055,7 +1055,7 @@ void HeadersFilter::DoTrain(const Message& /* msg */, bool /* isSpam */)
    // we're too stupid to be trained -- nothing to do
 }
 
-bool
+int
 HeadersFilter::DoCheckIfSpam(const Message& msg,
                              const String& param,
                              String *result)
@@ -1081,8 +1081,15 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
    {
       if ( tests[n] == spamTestDescs[Spam_Test_WhiteList].token )
       {
-         if ( CheckWhiteList(msg) )
-            return false;
+         String match;
+         if ( CheckWhiteList(msg, &match) )
+         {
+            if ( result )
+               result->Printf("\"%s\" is in the white list", match.c_str());
+
+            // this is definitely not a spam
+            return -1;
+         }
       }
    }
 
