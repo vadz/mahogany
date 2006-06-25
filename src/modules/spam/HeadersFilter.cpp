@@ -923,14 +923,16 @@ static bool CheckForSuspiciousMIME(const Message& msg)
 // return true (and fills match with the match in whitelist) if it does
 static bool CheckWhiteList(const Message& msg, String *match)
 {
+   const wxArrayString
+      whitelist(strutil_restore_array(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
+   if ( whitelist.empty() )
+      return false;
+
    // examine all addresses in the message header for match in the whitelist
    wxArrayString addresses;
    const size_t count = msg.ExtractAddressesFromHeader(addresses);
    if ( !count )
       return false;
-
-   const wxArrayString
-      whitelist(strutil_restore_array(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
 
    for ( size_t n = 0; n < count; n++ )
    {
@@ -1061,9 +1063,8 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
                              String *result)
 {
    wxArrayString tests = strutil_restore_array(param);
-   const size_t count = tests.GetCount();
    size_t n;
-   if ( !count )
+   if ( tests.empty() )
    {
       // use defaults
       Profile_obj profile(Profile::CreateModuleProfile(SPAM_FILTER_INTERFACE));
@@ -1075,6 +1076,8 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
             tests.Add(desc.token);
       }
    }
+
+   const size_t count = tests.size();
 
    // check the white list first because it overrides all the others
    for ( n = 0; n < count; n++ )
