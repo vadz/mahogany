@@ -228,7 +228,7 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
                                  : addr->GetEMail();
 
             // this profile shouldn't be DecRef()'d, don't use Profile_obj
-            Profile *profile = m_clickableURL->GetProfile();
+            Profile *profile = mApplication->GetProfile();
 
             wxFrame *frame = m_clickableURL->GetMessageView()->GetParentFrame();
 
