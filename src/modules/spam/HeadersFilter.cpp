@@ -189,7 +189,7 @@ static const SpamTestDesc spamTestDescs[] =
    /// no address in whitelist?
    {
       _T("whitelist"),
-      _T("SpameWhiteList"),
+      _T("SpamWhiteList"),
       gettext_noop("... and not &whitelisted"),
       true
    },
