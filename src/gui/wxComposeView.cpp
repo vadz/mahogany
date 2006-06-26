@@ -218,18 +218,6 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
    return strMimeType;
 }
 
-// return a transparent bitmap
-static wxBitmap GetTransparentBitmap(const wxChar *name)
-{
-   wxBitmap bmp = mApplication->GetIconManager()->GetBitmap(name);
-
-#ifdef OS_WIN
-   bmp.SetMask(new wxMask(bmp, wxColour(0xc6, 0xc6, 0xc6)));
-#endif // OS_WIN
-
-   return bmp;
-}
-
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -508,8 +496,10 @@ private:
    {
       m_isReply = m_composer->IsInReplyTo();
 
-      SetBitmapLabel(GetTransparentBitmap(m_isReply ? _T("tb_mail_reply")
-                                                    : _T("tb_mail_new")));
+      SetBitmapLabel(mApplication->GetIconManager()->GetBitmap
+                     (
+                        m_isReply ? _T("tb_mail_reply") : _T("tb_mail_new")
+                     ));
       SetToolTip(m_isReply ? _("This is a reply to another message")
                          : _("This is a start of new thread"));
    }
@@ -623,7 +613,8 @@ class wxRcptExpandButton : public IconButton
 {
 public:
    wxRcptExpandButton(wxRcptControl *rcptControl, wxWindow *parent)
-      : IconButton(parent, GetTransparentBitmap(_T("tb_lookup")))
+      : IconButton(parent,
+                   mApplication->GetIconManager()->GetBitmap(_T("tb_lookup")))
       {
          m_rcptControl = rcptControl;
       }
@@ -647,7 +638,8 @@ class wxRcptAddButton : public IconButton
 {
 public:
    wxRcptAddButton(wxRcptMainControl *rcptControl, wxWindow *parent)
-      : IconButton(parent, GetTransparentBitmap(_T("tb_new")))
+      : IconButton(parent, 
+                   mApplication->GetIconManager()->GetBitmap(_T("tb_new")))
       {
          m_rcptControl = rcptControl;
 
@@ -676,7 +668,8 @@ class wxRcptRemoveButton : public IconButton
 {
 public:
    wxRcptRemoveButton(wxRcptExtraControl *rcptControl, wxWindow *parent)
-      : IconButton(parent, GetTransparentBitmap(_T("tb_trash")))
+      : IconButton(parent, 
+                   mApplication->GetIconManager()->GetBitmap(_T("tb_trash")))
       {
          m_rcptControl = rcptControl;
 
