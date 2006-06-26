@@ -538,7 +538,7 @@ private:
    bool m_isModified;
 
    /// Number of recently pending recepients which we have to layout
-   unsigned m_numNewRcpts;
+   size_t m_numNewRcpts;
 
    /// Is it ok to send this message in an encoding different from original?
    mutable bool m_okToConvertOnSend;

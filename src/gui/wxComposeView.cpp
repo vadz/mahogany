@@ -3120,7 +3120,7 @@ void wxComposeView::OnIdle(wxIdleEvent& event)
 {
    if ( m_numNewRcpts )
    {
-      for ( unsigned n = 0; n < m_numNewRcpts; n++ )
+      for ( size_t n = 0; n < m_numNewRcpts; n++ )
          m_sizerRcpts->Show(n);
 
       m_sizerRcpts->Layout();
