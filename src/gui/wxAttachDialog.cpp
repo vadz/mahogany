@@ -71,8 +71,8 @@ private:
 
    // the GUI controls
    wxTextCtrl *m_txtFilename,
-              *m_txtName,
-              *m_txtMime;
+              *m_txtName;
+   wxPTextEntry *m_txtMime;
 
    wxRadioBox *m_radioDisposition;
 
@@ -182,8 +182,10 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
                                        labels[Label_Disposition] +
                                        _T(":&inline:&attachment"),
                                        widthMax, m_txtName, MARGIN);
-   m_txtMime = CreateTextWithLabel(this, labels[Label_MIME],
-                                   widthMax, m_radioDisposition, MARGIN);
+
+   m_txtMime = new wxPTextEntry(_T("AttachMimeType"), this);
+   CreateMessageForControl(this, m_txtMime, labels[Label_MIME],
+                           widthMax, m_radioDisposition, MARGIN);
 
 
    SetDefaultSize(6*wBtn, 10*hBtn);
