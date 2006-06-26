@@ -77,7 +77,8 @@ skip them unless you're updating from a very old version of Mahogany.
    \item Mahogany can now select the viewer best suited for the contents of the
          current message, e.g. you can use text viewer by default but the
          program can be configured to switch to a graphical one for the
-         messages with embedded images.
+         messages with embedded images. It also now displays correctly messages
+         with embedded images.
    \item New \texttt{--import} command line option to simplify sharing
          of Mahogany options between different installations
    \item Options with non default values are now highlighted in the

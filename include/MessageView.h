@@ -545,8 +545,10 @@ protected:
                          MimePartAction action = Part_Show);
 
    /// process a multipart/alternative part
-   bool ProcessAlternativeMultiPart(const MimePart *part,
-                                    MimePartAction action = Part_Show);
+   bool ProcessAlternativeMultiPart(const MimePart *part, MimePartAction action);
+
+   /// process a multipart/related part
+   bool ProcessRelatedMultiPart(const MimePart *mimepart, MimePartAction action);
 
    /// process a multipart/signed part
    bool ProcessSignedMultiPart(const MimePart *part);
@@ -565,6 +567,12 @@ protected:
    {
       return ProcessPart(part, Part_Test);
    }
+
+   /// Store MIME part with the given CID for further access
+   bool StoreMIMEPartData(const MimePart *part, const String& cid);
+
+   /// Clean up all stored MIME parts data
+   void ClearMIMEPartDataStore();
 
 public:
    /// show part of any kind
@@ -856,6 +864,9 @@ private:
 
    /// list of all virtual MIME parts, created on demand
    class VirtualMimePartsList *m_virtualMimeParts;
+
+   /// all Content-IDs which we keep in memory during multipart/related parsing
+   wxArrayString *m_cidsInMemory;
 
 
    friend class ProcessEvtHandler;

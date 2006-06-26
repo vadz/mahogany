@@ -80,6 +80,7 @@
 #include <wx/mstream.h>
 #include <wx/fontutil.h>
 #include <wx/tokenzr.h>
+#include <wx/fs_mem.h>
 
 #ifdef OS_UNIX
    #include <sys/stat.h>
@@ -230,6 +231,16 @@ public:
 
 private:
    const MimePart *m_mimepart;
+};
+
+// a wxFileSystem providing access to MIME parts data
+class MIMEFSHandler : public wxMemoryFSHandler
+{
+public:
+   virtual bool CanOpen(const wxString& location)
+   {
+      return GetProtocol(location) == _T("cid");
+   }
 };
 
 // ----------------------------------------------------------------------------
@@ -563,6 +574,7 @@ MessageView::Init()
    m_viewerOld = NULL;
    m_filters = NULL;
    m_virtualMimeParts = NULL;
+   m_cidsInMemory = NULL;
 
    m_uid = UID_ILLEGAL;
    m_encodingUser = wxFONTENCODING_DEFAULT;
@@ -576,6 +588,8 @@ MessageView::Init()
 MessageView::~MessageView()
 {
    delete m_virtualMimeParts;
+
+   delete m_cidsInMemory;
 
    UnregisterForEvents();
 
@@ -2069,6 +2083,71 @@ MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart,
 }
 
 bool
+MessageView::ProcessRelatedMultiPart(const MimePart *mimepart,
+                                     MimePartAction action)
+{
+   // see RFC 2387: http://www.faqs.org/rfcs/rfc2387.html
+
+   // we need to find the start part: it is specified using the "start"
+   // parameter but usually is just the first one as this parameter is optional
+   const String cidStart = mimepart->GetParam("start");
+
+   const MimePart *partChild = mimepart->GetNested();
+
+   const MimePart *partStart = cidStart.empty() ? partChild : NULL;
+
+   while ( partChild )
+   {
+      // if we're just testing, it's enough to find the start part, it's the
+      // only one which counts
+      if ( action == Part_Test && partStart )
+         break;
+
+      // FIXME: this manual parsing is ugly and probably wrong, should add
+      //        a method to MimePart for this...
+      const String headers = partChild->GetHeaders();
+
+      static const char *CONTENT_ID = "content-id: ";
+      static const size_t CONTENT_ID_LEN = 12; // strlen(CONTENT_ID)
+
+      size_t posCID = headers.Lower().find(CONTENT_ID);
+      if ( posCID != String::npos )
+      {
+         posCID += CONTENT_ID_LEN;
+
+         const size_t posEOL = headers.find_first_of("\r\n", posCID);
+
+         String cid;
+         cid.assign(headers, posCID, posEOL - posCID);
+
+         if ( cid == cidStart )
+         {
+            if ( partStart )
+            {
+               wxLogDebug(_T("Duplicate CIDs in multipart/related message"));
+            }
+
+            partStart = partChild;
+         }
+
+         // if we're going to display the part now we need to store all the
+         // parts except the start part in memory so that the start part could
+         // use them
+         if ( !cid.empty() && action == Part_Show && partChild != partStart )
+         {
+            StoreMIMEPartData(partChild, cid);
+         }
+      }
+
+      partChild = partChild->GetNext();
+   }
+
+   CHECK( partStart, false, _T("No start part in multipart/related") );
+
+   return ProcessPart(partStart, action);
+}
+
+bool
 MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 {
    if ( mimepart->GetParam(_T("protocol")) != _T("application/pgp-signature") )
@@ -2246,12 +2325,16 @@ MessageView::ProcessMultiPart(const MimePart *mimepart,
                               const String& subtype,
                               MimePartAction action)
 {
-   // TODO: support for DIGEST and RELATED
+   // TODO: support for DIGEST
 
    bool processed = false;
    if ( subtype == _T("ALTERNATIVE") )
    {
       processed = ProcessAlternativeMultiPart(mimepart, action);
+   }
+   else if ( subtype == _T("RELATED") )
+   {
+      processed = ProcessRelatedMultiPart(mimepart, action);
    }
    else if ( subtype == _T("SIGNED") )
    {
@@ -2361,6 +2444,48 @@ MessageView::AddVirtualMimePart(MimePart *mimepart)
       m_virtualMimeParts = new VirtualMimePartsList;
 
    m_virtualMimeParts->push_back(mimepart);
+}
+
+bool MessageView::StoreMIMEPartData(const MimePart *part, const String& cid)
+{
+   unsigned long len;
+   const void *data = part->GetContent(&len);
+
+   if ( !data )
+      return false;
+
+   if ( !m_cidsInMemory )
+   {
+      // one-time initialization
+      m_cidsInMemory = new wxArrayString;
+
+      static bool s_mimeHandlerInitialized = false;
+      if ( !s_mimeHandlerInitialized )
+      {
+         s_mimeHandlerInitialized = true;
+
+         wxFileSystem::AddHandler(new MIMEFSHandler);
+      }
+   }
+
+   m_cidsInMemory->Add(cid);
+   MIMEFSHandler::AddFile(cid, data, len);
+
+   return true;
+}
+
+void MessageView::ClearMIMEPartDataStore()
+{
+   if ( !m_cidsInMemory || m_cidsInMemory->empty() )
+      return;
+
+   const size_t count = m_cidsInMemory->size();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      MIMEFSHandler::RemoveFile((*m_cidsInMemory)[n]);
+   }
+
+   m_cidsInMemory->clear();
 }
 
 // ----------------------------------------------------------------------------
@@ -2593,6 +2718,8 @@ MessageView::DisplayMessageInViewer()
       m_virtualMimeParts->clear();
 
    m_textBody.clear();
+
+   ClearMIMEPartDataStore();
 
    m_viewer->Clear();
 

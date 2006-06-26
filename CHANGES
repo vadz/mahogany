@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2006
 -------------------------------------
 
+2006-06-26 VZ: added multipart/related support
 2006-06-24 VZ: added simple whitelist support
 2006-05-27 VZ: close all opened folders on suspend and reopen them on resume
 2006-04-08 VZ: optionally remind user to add an attachment if it was forgotten
