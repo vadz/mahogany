@@ -2332,34 +2332,35 @@ SWIG_Python_MustGetPtr(PyObject *obj, swig_type_info *ty, int argnum, int flags)
 #define SWIGTYPE_p_Composer swig_types[2]
 #define SWIGTYPE_p_HeaderInfoList swig_types[3]
 #define SWIGTYPE_p_MFolder swig_types[4]
-#define SWIGTYPE_p_MFolderType swig_types[5]
-#define SWIGTYPE_p_MLogCircle swig_types[6]
-#define SWIGTYPE_p_MObjectRC swig_types[7]
-#define SWIGTYPE_p_MailFolder swig_types[8]
-#define SWIGTYPE_p_MailFolderStatus swig_types[9]
-#define SWIGTYPE_p_Message swig_types[10]
-#define SWIGTYPE_p_MsgnoType swig_types[11]
-#define SWIGTYPE_p_Params swig_types[12]
-#define SWIGTYPE_p_Profile swig_types[13]
-#define SWIGTYPE_p_SearchCriterium swig_types[14]
-#define SWIGTYPE_p_Sequence swig_types[15]
-#define SWIGTYPE_p_ServerInfoEntry swig_types[16]
-#define SWIGTYPE_p_SortParams swig_types[17]
-#define SWIGTYPE_p_String swig_types[18]
-#define SWIGTYPE_p_SuspendFolderUpdates swig_types[19]
-#define SWIGTYPE_p_ThreadData swig_types[20]
-#define SWIGTYPE_p_ThreadParams swig_types[21]
-#define SWIGTYPE_p_Ticket swig_types[22]
-#define SWIGTYPE_p_UIdArray swig_types[23]
-#define SWIGTYPE_p_UIdType swig_types[24]
-#define SWIGTYPE_p_UserData swig_types[25]
-#define SWIGTYPE_p_char swig_types[26]
-#define SWIGTYPE_p_wxChar swig_types[27]
-#define SWIGTYPE_p_wxFontEncoding swig_types[28]
-#define SWIGTYPE_p_wxFrame swig_types[29]
-#define SWIGTYPE_p_wxWindow swig_types[30]
-static swig_type_info *swig_types[32];
-static swig_module_info swig_module = {swig_types, 31, 0, 0, 0, 0};
+#define SWIGTYPE_p_MFolderList swig_types[5]
+#define SWIGTYPE_p_MFolderType swig_types[6]
+#define SWIGTYPE_p_MLogCircle swig_types[7]
+#define SWIGTYPE_p_MObjectRC swig_types[8]
+#define SWIGTYPE_p_MailFolder swig_types[9]
+#define SWIGTYPE_p_MailFolderStatus swig_types[10]
+#define SWIGTYPE_p_Message swig_types[11]
+#define SWIGTYPE_p_MsgnoType swig_types[12]
+#define SWIGTYPE_p_Params swig_types[13]
+#define SWIGTYPE_p_Profile swig_types[14]
+#define SWIGTYPE_p_SearchCriterium swig_types[15]
+#define SWIGTYPE_p_Sequence swig_types[16]
+#define SWIGTYPE_p_ServerInfoEntry swig_types[17]
+#define SWIGTYPE_p_SortParams swig_types[18]
+#define SWIGTYPE_p_String swig_types[19]
+#define SWIGTYPE_p_SuspendFolderUpdates swig_types[20]
+#define SWIGTYPE_p_ThreadData swig_types[21]
+#define SWIGTYPE_p_ThreadParams swig_types[22]
+#define SWIGTYPE_p_Ticket swig_types[23]
+#define SWIGTYPE_p_UIdArray swig_types[24]
+#define SWIGTYPE_p_UIdType swig_types[25]
+#define SWIGTYPE_p_UserData swig_types[26]
+#define SWIGTYPE_p_char swig_types[27]
+#define SWIGTYPE_p_wxChar swig_types[28]
+#define SWIGTYPE_p_wxFontEncoding swig_types[29]
+#define SWIGTYPE_p_wxFrame swig_types[30]
+#define SWIGTYPE_p_wxWindow swig_types[31]
+static swig_type_info *swig_types[33];
+static swig_module_info swig_module = {swig_types, 32, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3207,7 +3208,30 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MailFolder_CloseAll(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MailFolder_CloseAll__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MFolderList *arg1 = (MFolderList *) 0 ;
+  int result;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MailFolder_CloseAll",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MFolderList, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MailFolder_CloseAll" "', argument " "1"" of type '" "MFolderList *""'"); 
+  }
+  arg1 = reinterpret_cast<MFolderList * >(argp1);
+  result = (int)MailFolder::CloseAll(arg1);
+  
+  resultobj = SWIG_From_int(static_cast<int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MailFolder_CloseAll__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int result;
   
@@ -3217,6 +3241,35 @@ SWIGINTERN PyObject *_wrap_MailFolder_CloseAll(PyObject *SWIGUNUSEDPARM(self), P
   resultobj = SWIG_From_int(static_cast<int >(result));
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MailFolder_CloseAll(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[2];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = PyObject_Length(args);
+  for (ii = 0; (ii < argc) && (ii < 1); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 0) {
+    return _wrap_MailFolder_CloseAll__SWIG_1(self, args);
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_MFolderList, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_MailFolder_CloseAll__SWIG_0(self, args);
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"No matching function for overloaded 'MailFolder_CloseAll'");
   return NULL;
 }
 
@@ -8735,6 +8788,7 @@ static swig_type_info _swigt__p_ArrayHeaderInfo = {"_p_ArrayHeaderInfo", "ArrayH
 static swig_type_info _swigt__p_Composer = {"_p_Composer", "Composer *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_HeaderInfoList = {"_p_HeaderInfoList", "HeaderInfoList *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MFolder = {"_p_MFolder", "MFolder *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_MFolderList = {"_p_MFolderList", "MFolderList *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MFolderType = {"_p_MFolderType", "MFolderType *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MLogCircle = {"_p_MLogCircle", "MLogCircle *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MObjectRC = {"_p_MObjectRC", "MObjectRC *", 0, 0, (void*)0, 0};
@@ -8768,6 +8822,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Composer,
   &_swigt__p_HeaderInfoList,
   &_swigt__p_MFolder,
+  &_swigt__p_MFolderList,
   &_swigt__p_MFolderType,
   &_swigt__p_MLogCircle,
   &_swigt__p_MObjectRC,
@@ -8801,6 +8856,7 @@ static swig_cast_info _swigc__p_ArrayHeaderInfo[] = {  {&_swigt__p_ArrayHeaderIn
 static swig_cast_info _swigc__p_Composer[] = {  {&_swigt__p_Composer, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_HeaderInfoList[] = {  {&_swigt__p_HeaderInfoList, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MFolder[] = {  {&_swigt__p_MFolder, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_MFolderList[] = {  {&_swigt__p_MFolderList, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MFolderType[] = {  {&_swigt__p_MFolderType, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MLogCircle[] = {  {&_swigt__p_MLogCircle, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MObjectRC[] = {  {&_swigt__p_MailFolder, _p_MailFolderTo_p_MObjectRC, 0, 0},  {&_swigt__p_MObjectRC, 0, 0, 0},{0, 0, 0, 0}};
@@ -8834,6 +8890,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Composer,
   _swigc__p_HeaderInfoList,
   _swigc__p_MFolder,
+  _swigc__p_MFolderList,
   _swigc__p_MFolderType,
   _swigc__p_MLogCircle,
   _swigc__p_MObjectRC,

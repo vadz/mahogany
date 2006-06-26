@@ -124,33 +124,9 @@ class Message(_object):
     MSG_TYPEMODEL = _Message.Message_MSG_TYPEMODEL
     MSG_TYPEOTHER = _Message.Message_MSG_TYPEOTHER
     MSG_TYPEINVALID = _Message.Message_MSG_TYPEINVALID
-    __swig_getmethods__["GetFirstNameFromAddress"] = lambda x: _Message.Message_GetFirstNameFromAddress
-    if _newclass:GetFirstNameFromAddress = staticmethod(_Message.Message_GetFirstNameFromAddress)
-    __swig_getmethods__["GetLastNameFromAddress"] = lambda x: _Message.Message_GetLastNameFromAddress
-    if _newclass:GetLastNameFromAddress = staticmethod(_Message.Message_GetLastNameFromAddress)
-    __swig_getmethods__["GetNameFromAddress"] = lambda x: _Message.Message_GetNameFromAddress
-    if _newclass:GetNameFromAddress = staticmethod(_Message.Message_GetNameFromAddress)
-    __swig_getmethods__["GetEMailFromAddress"] = lambda x: _Message.Message_GetEMailFromAddress
-    if _newclass:GetEMailFromAddress = staticmethod(_Message.Message_GetEMailFromAddress)
-    __swig_getmethods__["CompareAddresses"] = lambda x: _Message.Message_CompareAddresses
-    if _newclass:CompareAddresses = staticmethod(_Message.Message_CompareAddresses)
-    __swig_getmethods__["FindAddress"] = lambda x: _Message.Message_FindAddress
-    if _newclass:FindAddress = staticmethod(_Message.Message_FindAddress)
 _Message.Message_swigregister(Message)
 
 Message_Create = _Message.Message_Create
-
-Message_GetFirstNameFromAddress = _Message.Message_GetFirstNameFromAddress
-
-Message_GetLastNameFromAddress = _Message.Message_GetLastNameFromAddress
-
-Message_GetNameFromAddress = _Message.Message_GetNameFromAddress
-
-Message_GetEMailFromAddress = _Message.Message_GetEMailFromAddress
-
-Message_CompareAddresses = _Message.Message_CompareAddresses
-
-Message_FindAddress = _Message.Message_FindAddress
 
 
 

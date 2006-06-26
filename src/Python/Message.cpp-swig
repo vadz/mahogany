@@ -3751,7 +3751,7 @@ SWIGINTERN PyObject *_wrap_Message_ExtractAddressesFromHeader(PyObject *SWIGUNUS
   if (!PyArg_ParseTuple(args,(char *)"OO:Message_ExtractAddressesFromHeader",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Message, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Message_ExtractAddressesFromHeader" "', argument " "1"" of type '" "Message *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Message_ExtractAddressesFromHeader" "', argument " "1"" of type '" "Message const *""'"); 
   }
   arg1 = reinterpret_cast<Message * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_wxArrayString,  0 );
@@ -3762,7 +3762,7 @@ SWIGINTERN PyObject *_wrap_Message_ExtractAddressesFromHeader(PyObject *SWIGUNUS
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Message_ExtractAddressesFromHeader" "', argument " "2"" of type '" "wxArrayString &""'"); 
   }
   arg2 = reinterpret_cast<wxArrayString * >(argp2);
-  result = (arg1)->ExtractAddressesFromHeader(*arg2);
+  result = ((Message const *)arg1)->ExtractAddressesFromHeader(*arg2);
   
   resultobj = SWIG_From_size_t(static_cast<size_t >(result));
   return resultobj;
@@ -4887,165 +4887,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Message_GetFirstNameFromAddress(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  String *arg1 = 0 ;
-  String result;
-  String tempstr1 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Message_GetFirstNameFromAddress",&obj0)) SWIG_fail;
-  {
-    char * temps; int templ;
-    if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
-    tempstr1 = String(temps, templ);
-    arg1 = &tempstr1;
-  }
-  result = Message::GetFirstNameFromAddress((String const &)*arg1);
-  
-  resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Message_GetLastNameFromAddress(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  String *arg1 = 0 ;
-  String result;
-  String tempstr1 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Message_GetLastNameFromAddress",&obj0)) SWIG_fail;
-  {
-    char * temps; int templ;
-    if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
-    tempstr1 = String(temps, templ);
-    arg1 = &tempstr1;
-  }
-  result = Message::GetLastNameFromAddress((String const &)*arg1);
-  
-  resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Message_GetNameFromAddress(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  String *arg1 = 0 ;
-  String result;
-  String tempstr1 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Message_GetNameFromAddress",&obj0)) SWIG_fail;
-  {
-    char * temps; int templ;
-    if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
-    tempstr1 = String(temps, templ);
-    arg1 = &tempstr1;
-  }
-  result = Message::GetNameFromAddress((String const &)*arg1);
-  
-  resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Message_GetEMailFromAddress(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  String *arg1 = 0 ;
-  String result;
-  String tempstr1 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Message_GetEMailFromAddress",&obj0)) SWIG_fail;
-  {
-    char * temps; int templ;
-    if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
-    tempstr1 = String(temps, templ);
-    arg1 = &tempstr1;
-  }
-  result = Message::GetEMailFromAddress((String const &)*arg1);
-  
-  resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Message_CompareAddresses(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  String *arg1 = 0 ;
-  String *arg2 = 0 ;
-  bool result;
-  String tempstr1 ;
-  String tempstr2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Message_CompareAddresses",&obj0,&obj1)) SWIG_fail;
-  {
-    char * temps; int templ;
-    if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
-    tempstr1 = String(temps, templ);
-    arg1 = &tempstr1;
-  }
-  {
-    char * temps; int templ;
-    if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
-    tempstr2 = String(temps, templ);
-    arg2 = &tempstr2;
-  }
-  result = (bool)Message::CompareAddresses((String const &)*arg1,(String const &)*arg2);
-  
-  resultobj = SWIG_From_bool(static_cast<bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Message_FindAddress(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  wxArrayString *arg1 = 0 ;
-  String *arg2 = 0 ;
-  int result;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  String tempstr2 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Message_FindAddress",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_wxArrayString,  0  | 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Message_FindAddress" "', argument " "1"" of type '" "wxArrayString const &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Message_FindAddress" "', argument " "1"" of type '" "wxArrayString const &""'"); 
-  }
-  arg1 = reinterpret_cast<wxArrayString * >(argp1);
-  {
-    char * temps; int templ;
-    if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
-    tempstr2 = String(temps, templ);
-    arg2 = &tempstr2;
-  }
-  result = (int)Message::FindAddress((wxArrayString const &)*arg1,(String const &)*arg2);
-  
-  resultobj = SWIG_From_int(static_cast<int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *Message_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O|swigregister", &obj)) return NULL;
@@ -5097,12 +4938,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Message_GetDisposition", _wrap_Message_GetDisposition, METH_VARARGS, NULL},
 	 { (char *)"Message_FetchText", _wrap_Message_FetchText, METH_VARARGS, NULL},
 	 { (char *)"Message_WriteToString", _wrap_Message_WriteToString, METH_VARARGS, NULL},
-	 { (char *)"Message_GetFirstNameFromAddress", _wrap_Message_GetFirstNameFromAddress, METH_VARARGS, NULL},
-	 { (char *)"Message_GetLastNameFromAddress", _wrap_Message_GetLastNameFromAddress, METH_VARARGS, NULL},
-	 { (char *)"Message_GetNameFromAddress", _wrap_Message_GetNameFromAddress, METH_VARARGS, NULL},
-	 { (char *)"Message_GetEMailFromAddress", _wrap_Message_GetEMailFromAddress, METH_VARARGS, NULL},
-	 { (char *)"Message_CompareAddresses", _wrap_Message_CompareAddresses, METH_VARARGS, NULL},
-	 { (char *)"Message_FindAddress", _wrap_Message_FindAddress, METH_VARARGS, NULL},
 	 { (char *)"Message_swigregister", Message_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
