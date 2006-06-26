@@ -206,12 +206,12 @@ CreateMessage(wxWindow *parent, const wxChar *label, wxControl *last)
    return pLabel;
 }
 
-wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
-                                const wxChar *label,
-                                long widthMax,
-                                wxControl *last,
-                                wxCoord nRightMargin,
-                                int style)
+wxStaticText *CreateMessageForControl(wxWindow *parent,
+                                      wxWindow *control,
+                                      const wxChar *label,
+                                      long widthMax,
+                                      wxControl *last,
+                                      wxCoord nRightMargin)
 {
    wxLayoutConstraints *c;
 
@@ -226,17 +226,30 @@ wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
                                            wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
 
-   // for the text control
+   // for the control
    c = new wxLayoutConstraints;
    c->centreY.SameAs(pLabel, wxCentreY);
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
    c->right.SameAs(parent, wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxTextCtrl *pText = new wxTextCtrl(parent, -1, wxEmptyString, wxDefaultPosition,
-                                      wxDefaultSize, style);
-   pText->SetConstraints(c);
+   control->SetConstraints(c);
 
-   return pText;
+   return pLabel;
+}
+
+wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
+                                const wxChar *label,
+                                long widthMax,
+                                wxControl *last,
+                                wxCoord nRightMargin,
+                                int style)
+{
+   wxTextCtrl *text = new wxTextCtrl(parent, -1, wxEmptyString,
+                                     wxDefaultPosition, wxDefaultSize, style);
+
+   CreateMessageForControl(parent, text, label, widthMax, last, nRightMargin);
+
+   return text;
 }
 
 wxCheckBox *CreateCheckBox(wxWindow *parent,

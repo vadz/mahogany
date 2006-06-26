@@ -684,6 +684,15 @@ private:
 // for font calculations)
 extern long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win);
 
+// set layout constraints for the given control and create the label
+// to go with it
+extern wxStaticText *CreateMessageForControl(wxWindow *parent,
+                                             wxWindow *control,
+                                             const wxChar *label,
+                                             long widthMax,
+                                             wxControl *last,
+                                             wxCoord nRightMargin = 0);
+
 // all these functions correspond to the wxEnhancedPanel methods except that
 // they take an additional parent parameter
 extern wxStaticText *CreateMessage(wxWindow *parent,
