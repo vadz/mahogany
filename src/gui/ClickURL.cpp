@@ -26,6 +26,8 @@
    #include "Mdefaults.h"
    #include "guidef.h"
    #include "MApplication.h"
+   #include "Profile.h"
+   #include "strutil.h"
 
    #include <wx/menu.h>
    #include <wx/dataobj.h>
