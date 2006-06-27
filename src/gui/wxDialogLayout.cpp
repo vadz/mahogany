@@ -234,6 +234,14 @@ wxStaticText *CreateMessageForControl(wxWindow *parent,
    c->height.AsIs();
    control->SetConstraints(c);
 
+   // we have to make sure that the control is follows the label id as the code
+   // elsewhere relies on this
+   int idLabel = pLabel->GetId();
+   ASSERT_MSG( control->GetId() == wxWindow::PrevControlId(idLabel),
+               _T("control should have been created right before") );
+   pLabel->SetId(control->GetId());
+   control->SetId(idLabel);
+
    return pLabel;
 }
 
