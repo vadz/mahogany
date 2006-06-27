@@ -1247,7 +1247,9 @@ bool HtmlViewer::ShouldInlineImage(const String& url) const
    const ProfileValues& profileValues = GetOptions();
 
    return profileValues.inlineGFX &&
-            (url.StartsWith(_T("memory:")) || profileValues.showExtImages);
+            (url.StartsWith(_T("memory:")) ||
+               url.StartsWith(_T("cid:")) ||
+                  profileValues.showExtImages);
 }
 
 // this is called by MessageView to ask us if, in principle, we can inline
