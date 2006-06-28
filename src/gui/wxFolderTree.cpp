@@ -2286,17 +2286,13 @@ wxFolderTreeImpl::FindNextUnreadFolder(wxTreeItemId id, bool next) const
    if ( !mfStatus )
       return wxTreeItemId();
 
-   id = GetNextItem(id, next);
-   if ( !id.IsOk() )
-   {
-      return id;
-   }
-
    // check first this item, then the next one(s)
-   do
+   for ( id = GetNextItem(id, next); id.IsOk(); id = GetNextItem(id, next) )
    {
-      MFolder *folder = GetFolderTreeNode(id)->GetFolder();
-      wxString name = folder->GetFullName();
+      MFolder *folder = GetFolderFromTreeItem(id);
+      if ( !folder )
+         continue;
+
       Profile_obj profile(folder->GetProfile());
 
       // this folder may be explicitly excluded from this search (it makes
@@ -2305,15 +2301,13 @@ wxFolderTreeImpl::FindNextUnreadFolder(wxTreeItemId id, bool next) const
       {
          // does it have any unread messages?
          MailFolderStatus status;
-         if ( mfStatus->GetStatus(name, &status) && status.unread )
+         if ( mfStatus->GetStatus(folder->GetFullName(), &status) &&
+               status.unread )
          {
             return id;
          }
       }
-
-      id = GetNextItem(id, next);
    }
-   while ( id.IsOk() );
 
    return id;
 }
