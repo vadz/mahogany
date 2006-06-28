@@ -220,7 +220,7 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
          // to check whether the file is text, just read its first 256 bytes
          // and check if there are any non-alnum characters among them and,
          // also, if there are any new lines
-         char buf[256];
+         unsigned char buf[256];
          ssize_t len = file.Read(buf, WXSIZEOF(buf));
          if ( len != -1 )
          {
@@ -228,7 +228,7 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
                  ctrl = false;
             for ( ssize_t n = 0; n < len && !ctrl; n++ )
             {
-               const char ch = buf[n];
+               const unsigned char ch = buf[n];
                switch ( ch )
                {
                   case '\r':
@@ -245,7 +245,7 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
                }
             }
 
-            isBinary = !ctrl && eol;
+            isBinary = ctrl || !eol;
          }
       }
 
