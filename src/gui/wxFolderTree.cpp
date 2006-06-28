@@ -1785,7 +1785,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
       if ( !imageList )
       {
          imageList = new wxImageList(bmp.GetWidth(), bmp.GetHeight(),
-                                     false, nIcons);
+                                     true, nIcons);
       }
 
       imageList->Add(bmp);
