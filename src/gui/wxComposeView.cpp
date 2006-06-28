@@ -209,8 +209,47 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
    wxFileType *fileType = mimeManager.GetFileTypeFromExtension(strExt);
    if ( (fileType == NULL) || !fileType->GetMimeType(&strMimeType) )
    {
-      // can't find MIME type from file extension, set some default one
-      strMimeType = _T("APPLICATION/OCTET-STREAM");
+      // can't find MIME type from file extension, set some default one: use
+      // TEXT/PLAIN for text files and APPLICATION/OCTET-STREAM for binary ones
+
+      bool isBinary = true;
+      if ( wxFile::Access(filename, wxFile::read) )
+      {
+         wxFile file(filename);
+
+         // to check whether the file is text, just read its first 256 bytes
+         // and check if there are any non-alnum characters among them and,
+         // also, if there are any new lines
+         char buf[256];
+         ssize_t len = file.Read(buf, WXSIZEOF(buf));
+         if ( len != -1 )
+         {
+            bool eol = false,
+                 ctrl = false;
+            for ( ssize_t n = 0; n < len && !ctrl; n++ )
+            {
+               const char ch = buf[n];
+               switch ( ch )
+               {
+                  case '\r':
+                  case '\n':
+                     eol = true;
+                     break;
+
+                  case '\t':
+                     break;
+
+                  default:
+                     if ( ch < ' ' || ch == 0x7f )
+                        ctrl = true;
+               }
+            }
+
+            isBinary = !ctrl && eol;
+         }
+      }
+
+      strMimeType = isBinary ? _T("APPLICATION/OCTET-STREAM") : _T("TEXT/PLAIN");
    }
 
    delete fileType;  // may be NULL, ok
