@@ -4341,9 +4341,10 @@ wxFolderView::HandleMsgViewCharEvent(wxKeyEvent& event)
       switch ( event.GetKeyCode() )
       {
          case WXK_SPACE:
+#if !defined DEBUG_nerijus
             m_MessagePreview->PageDown();
             return true;
-
+#endif
          case WXK_RETURN:
             m_MessagePreview->LineDown();
             return true;
@@ -4630,7 +4631,9 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
       case WXK_HOME:
       case WXK_END:
       case WXK_RETURN:
-      case ' ':
+#if !defined DEBUG_nerijus
+      case WXK_SPACE:
+#endif
          // let the control process these keys as they're used for navigation
          event.Skip();
          return false;
