@@ -276,13 +276,10 @@ MAppBase::ContinueStartup()
 
    if ( !foldername.empty() )
    {
-      MFolder *folder = MFolder::Get(foldername);
+      MFolder_obj folder(foldername);
       if ( folder )
       {
-         // make sure it doesn't go away after OpenFolder()
-         folder->IncRef();
          ((wxMainFrame *)m_topLevelFrame)->OpenFolder(folder);
-         folder->DecRef();
       }
       else // invalid folder name
       {

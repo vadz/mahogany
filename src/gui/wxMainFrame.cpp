@@ -136,20 +136,30 @@ public:
 
    virtual void OnOpenHere(MFolder *folder)
    {
-      // attention, base version of OnOpenHere() will DecRef() the folder, so
-      // compensate for it
-      SafeIncRef(folder);
-      wxFolderTree::OnOpenHere(folder);
+      CHECK_RET( folder, _T("can't open a NULL folder") );
 
-      m_frame->OpenFolder(folder);
+      if ( !m_frame->OpenFolder(folder) )
+      {
+         // normally the base class version DecRef()s it but as we're going to
+         // pass NULL to it, do it ourselves
+         folder->DecRef();
+         folder = NULL;
+      }
+
+      wxFolderTree::OnOpenHere(folder);
    }
 
    virtual void OnView(MFolder *folder)
    {
-      SafeIncRef(folder);
-      wxFolderTree::OnView(folder);
+      CHECK_RET( folder, _T("can't view a NULL folder") );
 
-      m_frame->OpenFolder(folder, true /* RO */);
+      if ( !m_frame->OpenFolder(folder, true /* RO */) )
+      {
+         folder->DecRef();
+         folder = NULL;
+      }
+
+      wxFolderTree::OnView(folder);
    }
 
    virtual bool OnClose(MFolder *folder)
@@ -191,7 +201,7 @@ public:
       }
 
       // no more unread messages here, go to the next unread folder
-      MFolder *folder = m_mainFrame->GetFolderTree()->FindNextUnreadFolder();
+      MFolder_obj folder(m_mainFrame->GetFolderTree()->FindNextUnreadFolder());
       if ( !folder )
       {
          // no unread folders neither, what can we do?
@@ -681,53 +691,48 @@ wxMainFrame::CloseFolder(MFolder *folder)
    //else: otherwise, we don't have it opened
 }
 
-void
+bool
 wxMainFrame::OpenFolder(MFolder *pFolder, bool readonly)
 {
-#ifdef HAS_DYNAMIC_MENU_SUPPORT
-   static bool s_hasMsgMenu = false;
-#endif
+   CHECK( pFolder, false, "can't open NULL folder" );
 
+   pFolder->IncRef(); // to compensate for DecRef() by MFolder_obj
    MFolder_obj folder(pFolder);
 
    // don't do anything if there is nothing to change
-   if ( folder.IsOk() && (m_folderName == folder->GetFullName()) )
+   const String folderName = folder->GetFullName();
+   if ( m_folderName == folderName )
    {
       wxLogStatus(this, _("The folder '%s' is already opened."),
                   m_folderName.c_str());
 
-      return;
+      return true;
    }
-   else if ( folder )
-      m_folderName = folder->GetFullName();
-   else if ( m_folderName.empty() )
-      return;
-   else
-      m_folderName.Empty();
 
-   if ( folder )
+   // save the full folder name in m_folderName for use from elsewhere
+   m_folderName = folderName;
+
+
+   // and do try to open the folder
+   if ( !m_FolderView->OpenFolder(folder, readonly) )
    {
-      // we want save the full folder name in m_folderName
-      ASSERT( folder->GetFullName() == m_folderName );
-
-      if ( !m_FolderView->OpenFolder(folder, readonly) )
+      if ( mApplication->GetLastError() == M_ERROR_CANCEL )
       {
-         if ( mApplication->GetLastError() == M_ERROR_CANCEL )
-         {
-            // don't set the unaccessible flag - may be it's ok
-            wxLogStatus(this, _("Opening folder '%s' cancelled."),
-                        m_folderName.c_str());
-         }
+         // don't set the unaccessible flag - may be it's ok
+         wxLogStatus(this, _("Opening folder '%s' cancelled."),
+                     m_folderName.c_str());
+      }
 
-         m_folderName.clear();
-      }
-      else // select the folder on screen as well
-      {
-         m_FolderTree->SelectFolder(folder);
-      }
-  }
+      m_folderName.clear();
+   }
+   else // select the folder on screen as well
+   {
+      m_FolderTree->SelectFolder(folder);
+   }
+
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    // only add the msg menu once
+   static bool s_hasMsgMenu = false;
    if ( !s_hasMsgMenu )
    {
       AddMessageMenu();
@@ -735,10 +740,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder, bool readonly)
    }
 #endif // HAS_DYNAMIC_MENU_SUPPORT
 
-#ifdef HAS_DYNAMIC_MENU_SUPPORT
-      // TODO remove the message menu - wxMenuBar::Delete() not implemented
-      //      currently in wxGTK and is somewhat broken in wxMSW
-#endif // HAS_DYNAMIC_MENU_SUPPORT
+   return !m_folderName.empty();
 }
 
 bool

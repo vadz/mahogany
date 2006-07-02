@@ -53,7 +53,7 @@ public:
 
    // open the given folder in the integrated folder view (may be called
    // multiple times) in read write (default) or read only mode
-   void OpenFolder(MFolder *folder, bool readonly = false);
+   bool OpenFolder(MFolder *folder, bool readonly = false);
 
    // close the given folder if it is opened
    void CloseFolder(MFolder *folder);
