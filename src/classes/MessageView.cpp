@@ -2446,7 +2446,7 @@ MessageView::AddVirtualMimePart(MimePart *mimepart)
    m_virtualMimeParts->push_back(mimepart);
 }
 
-bool MessageView::StoreMIMEPartData(const MimePart *part, const String& cid)
+bool MessageView::StoreMIMEPartData(const MimePart *part, const String& cidOrig)
 {
    unsigned long len;
    const void *data = part->GetContent(&len);
@@ -2467,6 +2467,16 @@ bool MessageView::StoreMIMEPartData(const MimePart *part, const String& cid)
          wxFileSystem::AddHandler(new MIMEFSHandler);
       }
    }
+
+   // cid could be quoted with <...>, unquote it then as it's referenced
+   // without the quotes in the other parts
+   CHECK( !cidOrig.empty(), false, "empty CID not allowed" );
+
+   String cid;
+   if ( *cidOrig.begin() == '<' && *cidOrig.rbegin() == '>' )
+      cid.assign(cidOrig, 1, cidOrig.length() - 2);
+   else
+      cid = cidOrig;
 
    m_cidsInMemory->Add(cid);
    MIMEFSHandler::AddFile(cid, data, len);
