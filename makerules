@@ -99,12 +99,14 @@ vpath %.y .src
 	@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.c,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
 	@rm -f $*.c
 else
+# we have to rename the file to have .c extension, otherwise some compilers
+# refuse to accept it
 vpath %.c-yacc .src
-%.c: %.c-yacc
+%.y.c: %.c-yacc
 	@cp $< $@
 
-%.o: %.c
-	$(CC) -o $@ $(M_COMPILE_CC) $*.c
+%.o: %.y.c
+	$(CC) -o $@ $(M_COMPILE_CC) $<
 	@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.c,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
 endif
 
