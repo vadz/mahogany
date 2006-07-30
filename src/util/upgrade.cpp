@@ -215,7 +215,8 @@ enum MVersion
    Version_064_2 = Version_064_1, // no changes
    Version_065,      // SSL flag is not boolean any more and not a flag at all
    Version_066,      // "/M/Profiles" -> "/Profiles"
-   Version_Last = Version_066,// last existing version
+   Version_067 = Version_066,     // no changes
+   Version_Last = Version_067,    // last existing version
    Version_Unknown   // some unrecognized version
 };
 
@@ -2869,6 +2870,10 @@ Upgrade(const String& fromVersion)
       if ( version.Last() == 'a' )
          version.Truncate(version.Len() - 1);
 
+      // trailing ".0" is not significant neither
+      if ( version.Right(2) == _T(".0") )
+         version.Truncate(version.Len() - 2);
+
       if ( version == _T("0.01") )
          oldVersion = Version_Alpha001;
       else if ( version == _T("0.02") || version == _T("0.10"))
@@ -2886,9 +2891,9 @@ Upgrade(const String& fromVersion)
          oldVersion = Version_064;
       else if ( version == _T("0.64.1") || version == _T("0.64.2") )
          oldVersion = Version_064_1;
-      else if ( version == _T("0.65") || version == _T("0.65.0") )
+      else if ( version == _T("0.65") )
          oldVersion = Version_065;
-      else if ( version == _T("0.66") )
+      else if ( version == _T("0.66") || version == _T("0.67") )
          oldVersion = Version_066;
       else
          oldVersion = Version_Unknown;

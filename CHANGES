@@ -6,8 +6,8 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.67 'Constance' ??? ??, 2006
--------------------------------------
+Release 0.67 'Constance' August 1, 2006
+---------------------------------------
 
 2006-06-26 VZ: added multipart/related support
 2006-06-24 VZ: added simple whitelist support
