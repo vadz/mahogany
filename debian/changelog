@@ -1,3 +1,19 @@
+mahogany (0.67.0) stable; urgency=low
+
+   * New integrated statistical spam filter (DSPAM)
+   * Better support for sharing preferences between multiple installations
+   * Folders can now be dragged in the folder tree to reorder them
+   * Select the viewer best suited for the contents of the current message
+   * Highlight options with non default values in the preferences dialog
+   * New nop() (stop filter processing) filter action added
+   * The "Set From from To" option is now more useful
+   * Use clear text when replying to PGP-encrypted messages
+   * New ``Where is filter'' command
+   * Warning if you start replying to the same message a second time
+   * Detect forgotten attachments before sending the message
+
+ -- Vadim Zeitlin <vadim@wxwindows.org>  Mon, 01 Aug 2006 00:46:12 +0100
+
 mahogany (0.66.0) stable; urgency=low
 
   * new text-only composer
@@ -28,7 +44,3 @@ mahogany (0.60) stable; urgency=medium
 
  -- Karsten Ballueder <mahogany-developers@lists.sourceforge.net>  Sun, 25 Apr 1999 20:54:01 +0100
 
-Local variables:
-mode: debian-changelog
-add-log-mailing-address: "mahogany-developers@lists.sourceforge.net"
-End:

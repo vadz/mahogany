@@ -2,8 +2,8 @@ Source: mahogany
 Section: x11
 Priority: optional
 Maintainer: Vadim Zeitlin <mahogany-developers@lists.sourceforge.net>
-Build-Depends: debmake, g++, make, tetex, tetex-extra, latex2html
-Standards-Version: 2.5.0
+Build-Depends: debhelper (>= 4.0), debmake, autoconf2.13, g++, make, tetex, tetex-extra, latex2html, libwxgtk2.7-ansi-dev, wx-common
+Standards-Version: 3.6.2.1
 
 Package: mahogany
 Architecture: any
