@@ -4780,7 +4780,8 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(Profile *profile,
       }
 
       m_checklistBox->Append(
-            wxStripMenuCodes(wxGetTranslation(wxOptionsPageStandard::ms_aFields[n].label)));
+            wxStripMenuCodes(wxString(
+                wxGetTranslation(wxOptionsPageStandard::ms_aFields[n].label))));
    }
 
    // set the initial and minimal size
