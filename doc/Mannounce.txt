@@ -67,39 +67,33 @@ Acknowledgements
 
 Mahogany is written using the OpenSource wxWindows framework for GUI
 C++ applications, building on the GTK+ toolkit on Unix and native
-Win32 API under Windows. The imap-2000 (c-client) library developed
+Win32 API under Windows. The imap-200x (c-client) library developed
 by University of Washington is used for mail folder access. We also
 use OpenSSL for SSL support and compface for X-Face support. We wish
 to thank all the people whose work has made writing Mahogany much
 simpler (and even possible at all)!
 
-Changes Since Release 0.65
+Changes Since Release 0.66
 =====================================================================
 
-Key changes are:
+Most important changes are:
 
-* new, more usable, composer
-* embedded Python interpreter works again
-* working Mac OS X version
+* New integrated statistical spam filter (DSPAM)
+* Better support for sharing preferences between multiple installations
+* Unix port now uses GTK+ 2 toolkit
+* Folders can now be dragged in the folder tree to reorder them
+* Select the viewer best suited for the contents of the current message
+* Highlight options with non default values in the preferences dialog
+* New nop() (stop filter processing) filter action added
+* The "Set From from To" option is now more useful
+* Use clear text when replying to PGP-encrypted messages
+* New ``Where is filter'' command
+* Warning if you start replying to the same message a second time
+* Detect forgotten attachments before sending the message
+* Innumerable bug fixes 
 
-Some of new features:
-
-* several convenient new commands: quick search ('/', '?'), "Paste
-  quoted", "Select all"
-* viewer improvements: text one now supports printing, HTML viewer
-  supports selection
-* better support for UTF-7/8 encoded headers
-* new template variable ($header)
-* new filter function (isfromme())
-
-Other noticeable improvements:
-
-* better crash reporting in Win32 builds
-* and, of course, many bug fixes, as usual
-
-
-Please see the CHANGES file in the distribution for an even more
-detailed list of changes.
+Please see the CHANGES file in the distribution for more detailed list
+of changes.
 
 
  Hoping you will enjoy Mahogany!
