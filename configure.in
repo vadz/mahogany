@@ -89,7 +89,7 @@ case "$USE_DEBUG" in
     dnl options which only make sense if debug was given
     *)
 	M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
-	--with-wxdebug          use debug wxWindows libraries)
+	--with-wxdebug          use debug wxWidgets libraries)
 
 	M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
 	--with-dmalloc          use dmalloc (http://dmalloc.com/) for debugging)
@@ -355,14 +355,14 @@ case "$m_cv_cxx_opernames" in yes)
 			if test -f /etc/redhat-release -a ! grep "7\.0" /etc/redhat-release
 			then workarroundmsg="
 	It seems you are using Red Hat Linux 7.0. A workaround for your
-	problem is to use egcs to compile wxWindows and Mahogany:
+	problem is to use egcs to compile wxWidgets and Mahogany:
 		- at your bash prompt type:
 			export CC=egcs
 			export CXX=egcs++
-		- reconfigure and rebuild wxWindows and Mahogany
+		- reconfigure and rebuild wxWidgets and Mahogany
 		(don't forget to remove the config.cache files
 		located in the source code directories of
-		wxWindows and Mahogany before reconfiguring them."
+		wxWidgets and Mahogany before reconfiguring them."
 			else workarroundmsg=""
 			fi
 			AC_MSG_ERROR([Sorry, it seems that you have a buggy gcc version which is
@@ -927,18 +927,18 @@ dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
-dnl check for wxWindows installation¤
+dnl check for wxWidgets installation¤
 AM_PATH_WXCONFIG(2.5.2,wxOK=1)
 
 if test "$wxOK" != 1; then
    AC_MSG_ERROR([
-	   Mahogany requires wxWindows to be installed on your system
+	   Mahogany requires wxWidgets to be installed on your system
 	   but wx-config script couldn't be found.
 
 	   Please check that wx-config is in PATH, the directory
-	   where wxWindows libraries are installed (returned by
+	   where wxWidgets libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWindows version is 2.5.2 or above.
+	   equivalent variable and wxWidgets version is 2.5.2 or above.
    ])
 fi
 
@@ -976,7 +976,7 @@ if test "$USE_MAC" = 1; then
     AC_SUBST(REZFLAGS)
 fi
 
-dnl we want to have a user-readable wxWindows port name
+dnl we want to have a user-readable wxWidgets port name
 WX_NAME=`$WX_CONFIG_WITH_ARGS --basename | sed 's/^wx_//'`
 WX_NAME_NO_DEBUG=`echo $WX_NAME | sed 's/d$//'`
 if test "$WX_NAME_NO_DEBUG" != "$WX_NAME"; then
@@ -984,7 +984,7 @@ if test "$WX_NAME_NO_DEBUG" != "$WX_NAME"; then
 fi
 
 case "$USE_THREADS" in 1)
-	AC_CACHE_CHECK(if wxWindows was compiled with threads,
+	AC_CACHE_CHECK(if wxWidgets was compiled with threads,
 		m_cv_wx_threads,
 		[AC_TRY_RUN([#include "wx/setup.h"
 			int main(){
@@ -1513,7 +1513,7 @@ dnl show the configuration used
 echo
 echo "Configured Mahogany ${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
 echo ""
-echo "	wxWindows port used:			${WX_NAME} ${WX_VERSION}"
+echo "	wxWidgets port used:			${WX_NAME} ${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
 echo "	SSL support:				${ssl_option}"
 echo "	Modules support:			${m_cv_USE_MODULES}"

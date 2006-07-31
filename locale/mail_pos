@@ -32,11 +32,11 @@ You should find two different .po files included here:
       language as you submitted it earlier, but amended to
       include new strings
 
-    - a xx.po file for wxWindows which will either be an	
+    - a xx.po file for wxWidgets which will either be an	
       existing translation for your language, or the German
       one to be used as a starting point
 
-While the wxWindows translations are not that important,
+While the wxWidgets translations are not that important,
 they are needed to have Mahogany completely translated.
     
 To help you with the work, this mail will first include
@@ -63,7 +63,7 @@ __EOF__
 ./poempty.pl $po >> /tmp/mail_pos$$
 echo ----------------------------------------------------------- >>/tmp/mail_pos$$
 cat $po >> /tmp/mail_pos$$
-#echo ------wxstd.po for wxWindows: ----------------------------- >>/tmp/mail_pos$$
+#echo ------wxstd.po for wxWidgets: ----------------------------- >>/tmp/mail_pos$$
 #if [ -f wxstd/$po ]
 #then
 #    cat wxstd/$po >>/tmp/mail_pos$$

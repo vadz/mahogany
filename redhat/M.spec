@@ -67,7 +67,7 @@ if [ "x%{MAKETARGET}" = "xquartstatic" ]; then
                 --static --libs | \
                     sed 's@^.* \(/.*/libwx_based-[0-9.]\+.a\) .*$@\1@')
     if [ ! -f $libwx ]; then
-        echo "You need to build static wxWindows library $libwx first!"
+        echo "You need to build static wxWidgets library $libwx first!"
         exit 1
     fi
 fi

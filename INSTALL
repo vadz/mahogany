@@ -2,7 +2,7 @@ File:		build_win.txt
 Summary:	contains instructions for building Mahogany under Unix
 Audience:	Mahogany developers and end users
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	2004-07-13
+Last modified:	2006-07-31
 Version:	accurate for 0.67 release
 
 
@@ -31,15 +31,13 @@ Unix compilation instructions
 
 Required software:
 
-   - wxGTK (GTK+ port of wxWindows) 2.5.2 or above (note that 2.5.3
-     is not yet released as of time of this writing but if it is
-     when you read this, do use it)
+   - wxGTK (GTK+ port of wxWidgets) 2.6.0 or above.
 
    - GTK+ 1.2.3 or above, 1.2.10 recommended. Mahogany can also be
      built with GTK+ 2 but this is still considered to be
      experimental.
 
-   - GNU make: both wxWindows and Mahogany may be compiled with many
+   - GNU make: both wxWidgets and Mahogany may be compiled with many
      different C++ compilers (i.e. not only g++) but they both
      require GNU make, please install it if you don't have it yet
      (it might be available as gmake on some systems)
@@ -83,13 +81,13 @@ Please review configure output and config.log file after running
 configure.
 
 
-1. Compilation of wxWindows
+1. Compilation of wxWidgets
 ---------------------------
 
 Before you can compile Mahogany, you will need to have installed
-wxWindows compiled for the GTK library (wxGTK).
+wxWidgets compiled for the GTK library (wxGTK).
 
-The recommended way to build wxWindows is (from the directory where
+The recommended way to build wxWidgets is (from the directory where
 it was unpacked):
 
       mkdir build_dir
@@ -102,7 +100,7 @@ the GNU make) but notice that you don't have to do "make install"
 (although you can if you want to, of course).
 
 If you encounter fatal problems with Mahogany, please try rebuilding
-wxWindows in debug mode:
+wxWidgets in debug mode:
 
       mkdir debug_build_dir
       cd debug_build_dir
@@ -127,10 +125,10 @@ Mahogany directory:
       make install
 
 The --with-wxdir allows you to use a not installed version of
-wxWindows. You may also add other configure options, of course.
+wxWidgets. You may also add other configure options, of course.
 If you use --enable-debug please use --with-wxdir=debug_build_dir,
 i.e. always build debug version of Mahogany with debug version of
-wxWindows.
+wxWidgets.
 
 Depending on whether you have installed all required programs in the
 right versions, "make doc" and "make install" might fail. Please
