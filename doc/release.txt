@@ -32,8 +32,8 @@ d) doc/release.txt to add any steps which are not yet in this file :-)
 
 e) po files: make -C locale mergecat
 
-f) Web pages in MahoganyWeb module: at least download.ht4, status.ht4 and
-   ChangeLog.ht4
+f) Web pages in MahoganyWeb module: at least index.ht4, download.ht4,
+   status.ht4 and ChangeLog.ht4
 
 
 3. Testing
