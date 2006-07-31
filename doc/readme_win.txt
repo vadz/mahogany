@@ -1,6 +1,6 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: January 4, 2004
-Version: the information in this file applies to version 0.66
+Date: August 1, 2006
+Version: the information in this file applies to version 0.67
 
 0. Requirements
 --------------

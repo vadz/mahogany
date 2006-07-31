@@ -18,11 +18,11 @@ If you have any problems, please contact us on our mailing lists:
 
 In this message:
 
-1. Announcing Mahogany Version 0.66
+1. Announcing Mahogany Version 0.67
 2. Acknowledgements
 3. Changes Against the Previous Release
 
-Announcing Mahogany Version 0.66
+Announcing Mahogany Version 0.67
 ====================================================================
 
 Mahogany is an OpenSource(TM) cross-platform mail news client. It is
