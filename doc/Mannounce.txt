@@ -65,7 +65,7 @@ The main "selling points" of Mahogany in our opinion are:
 Acknowledgements
 =====================================================================
 
-Mahogany is written using the OpenSource wxWindows framework for GUI
+Mahogany is written using the OpenSource wxWidgets framework for GUI
 C++ applications, building on the GTK+ toolkit on Unix and native
 Win32 API under Windows. The imap-200x (c-client) library developed
 by University of Washington is used for mail folder access. We also
