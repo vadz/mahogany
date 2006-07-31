@@ -65,13 +65,13 @@ b) RPM
 
 c) DEB
 
-Under Debian. unpack the tarball from (a), go inside it and do
-"fakeroot ./debian/rules binary", this will create the .deb.
-You may set CONFIG_FLAGS to contain any extra configure arguments.
+Under Debian or Ubuntu. unpack the tarball from (a), go inside it and do
+"fakeroot ./debian/rules binary", this will create the .deb. You may set
+CONFIG_FLAGS to contain any extra configure arguments.
 
 d) Win32 binaries
 
-- build the project M.dsw in "release with debug info" configuration
+- build the project M.sln in "release with debug info" configuration
 - save the resulting PDB and MAP files (for crash reports!)
 - build doc/HtmlHlp/Manual.chm
 - run Inno Setup on extra/setup/M.iss
@@ -128,7 +128,7 @@ Update the following template and send it to lsm@execpc.com:
 
 Begin4
 Title:          Mahogany
-Version:        0.65
+Version:        0.67
 Entered-date:   2003-08-13
 Description:    A powerful and flexible cross-platform GUI email client
 Keywords:       mail news SMTP POP IMAP NNTP MIME Python vCard Palm
