@@ -513,7 +513,7 @@ static String ExtractFirstOrLastName(const String& fullname, bool first)
          addr = addrList->GetNext(addr) )
    {
       if ( !value.empty() )
-         value += ", ";
+         value += _T(", ");
 
       const String name = addr->GetName();
       const size_t posSpace = name.find_last_of(" ");
