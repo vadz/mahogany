@@ -60,17 +60,17 @@ fi
 CFLAGS="$RPM_OPT_FLAGS" \
    ./configure --prefix=$RPM_BUILD_ROOT/%{prefix} $CONFIG_FLAGS
 
-if [ "x%{MAKETARGET}" = "xquartstatic" ]; then
+#if [ "x%{MAKETARGET}" = "xquartstatic" ]; then
     # be nice and check for existence of static library before starting to build
     # (see bug http://zeitlin.homeunix.com/cgi-bin/mbugs/show_bug.cgi?id=873)
-    libwx=$($(echo @WX_CONFIG_PATH@ | sed `grep WX_CONFIG_PATH config.status`) \
-                --static --libs | \
-                    sed 's@^.* \(/.*/libwx_based-[0-9.]\+.a\) .*$@\1@')
-    if [ ! -f $libwx ]; then
-        echo "You need to build static wxWidgets library $libwx first!"
-        exit 1
-    fi
-fi
+#    libwx=$($(echo @WX_CONFIG_PATH@ | sed `grep WX_CONFIG_PATH config.status`) \
+#                --static --libs | \
+#                    sed 's@^.* \(/.*/libwx_based-[0-9.]\+.a\) .*$@\1@')
+#    if [ ! -f $libwx ]; then
+#        echo "You need to build static wxWidgets library $libwx first!"
+#        exit 1
+#    fi
+#fi
 
 # also check if we have everything we need to build the docs (bug 874)
 if [ $(echo @MAKE_HAVE_DOCTOOLS@ | \
@@ -79,6 +79,7 @@ if [ $(echo @MAKE_HAVE_DOCTOOLS@ | \
         echo "Please download Mdocs-%{VERSION}.tar.gz file or install "\
              "the missing tools required for the docs generation!"
         exit 1
+    fi
 fi
 
 # we have to fix M_PREFIX in config.h because the package will be later
