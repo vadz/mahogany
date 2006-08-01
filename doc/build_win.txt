@@ -61,7 +61,7 @@ b) DSPAM
 --------
 
    Building Mahogany with DSPAM requires SQlite library: http://www.sqlite.org/
-Note that you need SQlite version 2 (currently the latest version is 2.8.15)
+Note that you need SQlite version 2 (currently the latest version is 2.8.17)
 and not version 3 as they're incompatible and dspam driver only works with
 SQlite 2. You should download its sources and build it using lib\sqlite.vcproj
 project file (you will need to copy it to the directory where you unpacked
