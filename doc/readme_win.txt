@@ -18,7 +18,7 @@ Version: the information in this file applies to version 0.67
 
  c) If you plan to use Python scripting with Mahogany, you need to
     have Python installed on your system. All Python versions are
-    normally supported but the latest, 2.3, is recommended. Please
+    normally supported but the latest, 2.4.3, is recommended. Please
     get it from http://www.python.org/.
 
 1. Installation
