@@ -61,11 +61,11 @@ eval `grep "^#define M_VERSION_[MR]" M/include/Mversion.h | \
 M_FULLNAME="mahogany-$M_VERSION_MAJOR.$M_VERSION_MINOR"
 
 # remove the stuff not needed in the distribution
-rm M/*.ds[pw] M/M.DSP M/M.MAK M/TODO M/maketags.cmd M/cvsfix
+rm M/M.sln M/TODO M/maketags.cmd M/cvsfix
 
 mv M $M_FULLNAME
 OUTPUT_FILE=$OUTPUT_DIR/$M_FULLNAME.tar.$GZ
-if ! tar cf - $M_FULLNAME --exclude="CVS" | $GZIP -c9 > $OUTPUT_FILE; then
+if ! tar cf - --exclude="CVS" --exclude=".cvsignore" --exclude="*.vcproj" $M_FULLNAME | $GZIP -c9 > $OUTPUT_FILE; then
    echo "Creating $OUTPUT_FILE failed."
    RC=3
 fi
