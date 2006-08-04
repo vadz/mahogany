@@ -2,7 +2,7 @@
 # Project:     M - cross platform e-mail GUI client
 # File name:   src/Python/Scripts/Minit.py
 # Purpose:     example of a Python module read by Mahogany on startup
-# Author:      Karsten Ballüder, Vadim Zeitlin
+# Author:      Karsten Ballueder, Vadim Zeitlin
 # Modified by:
 # Created:     1998
 # CVS-ID:      $Id$
