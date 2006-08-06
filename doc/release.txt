@@ -118,7 +118,7 @@ c) Freshmeat
 
 Update the FM record
 
-d) GNOME app map: http://www.gnome.org/softwaremap/projects/mahogany/
+d) GNOME app map: http://www.gnomefiles.org/app.php/Mahogany
 
 e) GNU Free Software Directory: http://www.gnu.org/directory/mahogany.html
 
