@@ -18,7 +18,7 @@ AppName=Mahogany
 AppVerName=Mahogany 0.67 "Constance"
 
 ; --- setup compiler params
-OutputBaseFilename=Mahogany-0.67.0a
+OutputBaseFilename=Mahogany-0.67.0
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
 AllowRootDirectory=1
@@ -63,9 +63,8 @@ Name: "i18n"; Description: "Translations to other languages"; Types: full
 Source: "ReleaseDebug\M.EXE"; DestDir: "{app}";
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
-; do we need to include VC++ run time?
-;Source: "w:\winnt40\system32\msvcirt.dll"; DestDir: "{sys}"
-;Source: "w:\winnt40\system32\msvcrt.dll"; DestDir: "{sys}"
+Source: "{#env SystemRoot}\system32\msvcp71.dll"; DestDir: "{app}"
+Source: "{#env SystemRoot}\system32\msvcr71.dll"; DestDir: "{app}"
 
 ; --- misc stuff
 Source: "extra\setup\autocollect.adb"; DestDir: "{app}"; Flags: onlyifdoesntexist
@@ -87,8 +86,6 @@ Source: "doc\HtmlHlp\Manual.chm"; DestDir: "{app}\help"; Components: help
 
 ; --- python support
 
-;Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"; Components: python
-;
 Source: "src\Python\HeaderInfo.py-swig"; DestName: "HeaderInfo.py"; DestDir: "{app}\Python"; Components: python
 Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{app}\Python"; Components: python
 Source: "src\Python\MDialogs.py-swig"; DestName: "MDialogs.py"; DestDir: "{app}\Python"; Components: python
