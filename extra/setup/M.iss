@@ -113,6 +113,12 @@ Source: "locale\pt_br.mo"; DestDir: "{app}\locale\pt_BR"; DestName: "M.mo"; Comp
 ; delete all precompiled python files
 Type: files; Name: "{app}\Python\*.pyc"; Components: python
 
+[Tasks]
+Name: "run"; Description: "Run the program"
+
+[Run]
+Filename: {app}\M.exe; Tasks: run; Flags: nowait
+
 [Icons]
 Name: "{group}\Mahogany"; Filename: "{app}\M.EXE"; WorkingDir: "{app}"
 Name: "{group}\Mahogany Help"; Filename: "{app}\help\Manual.chm"; Components: help
