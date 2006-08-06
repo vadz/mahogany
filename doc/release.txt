@@ -50,7 +50,8 @@ b) test Win32 install under Win9x/NT
 a) tarball
 
 Just do a fresh checkout, rename the directory to mahogany-%{VERSION} and tar
-gzip. The script extra/scripts/makeMtgz automates it (also creates .tar.bz2)
+gzip. The script extra/scripts/makeMtgz automates it (it can also create
+.tar.bz2 if USE_BZIP2 environment variable is set)
 
 b) RPM
 
@@ -66,7 +67,7 @@ b) RPM
 c) DEB
 
 Under Debian or Ubuntu. unpack the tarball from (a), go inside it and do
-"fakeroot ./debian/rules binary", this will create the .deb. You may set
+"dpkg-buildpackage -rfakeroot", this will create the .deb. You may set
 CONFIG_FLAGS to contain any extra configure arguments.
 
 d) Win32 binaries

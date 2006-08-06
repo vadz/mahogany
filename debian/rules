@@ -11,7 +11,6 @@ configure-stamp:
 
 build: build-stamp configure-stamp
 	dh_testdir
-	dh_testroot
 	dh_installmenu
 	mkdir build-debian; \
 	cd build-debian; \
@@ -22,6 +21,7 @@ build: build-stamp configure-stamp
 clean:
 	dh_testdir
 	dh_clean
+	-rm -rf build-debian build-stamp configure-stamp debian/postinst.debhelper debian/postrm.debhelper
 
 binary-indep: build
 # There are no architecture-independent files to be uploaded
@@ -29,6 +29,12 @@ binary-indep: build
 # made here.
 
 binary-arch: build
+	dh_testdir
+	dh_testroot
+	dh_installdocs
+	dh_installchangelogs
+	dh_installmenu
+	dh_link
 	-rm -rf debian/mahogany
 	install -d debian/mahogany
 	cd debian/mahogany && install -d `cat ../dirs`
@@ -37,9 +43,7 @@ binary-arch: build
 	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
-	chown -R root.root debian/mahogany
-	chmod -R go=rX debian/mahogany
-	dpkg --build debian/mahogany ..
+	dh_builddeb
 
 binary: binary-indep binary-arch
 
