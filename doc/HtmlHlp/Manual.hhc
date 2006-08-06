@@ -7,9 +7,8 @@
 <OBJECT type="text/site properties">
  <param name="ImageType" value="Folder">
 </OBJECT>
-<UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html">
+<param name="Local" value="Manual.html#SECTION00200000000000000000">
 <param name="Name" value="Using Mahogany ">
 </OBJECT>
 <UL>
@@ -89,6 +88,10 @@
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00233000000000000000">
 <param name="Name" value="Registry (Windows only)">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00234000000000000000">
+<param name="Name" value="Using multiple configuration sources">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
@@ -179,57 +182,75 @@
 </UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00270000000000000000">
-<param name="Name" value="Understanding program options">
+<param name="Name" value="Message Templates">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00271000000000000000">
-<param name="Name" value="Hierarchical options organization">
+<param name="Name" value="What are they?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00272000000000000000">
-<param name="Name" value="Automatically remembered options">
+<param name="Name" value="Templates syntax">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00273000000000000000">
-<param name="Name" value="Other options">
-</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00274000000000000000">
-<param name="Name" value="Remote configuration synchronisation">
-</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00275000000000000000">
-<param name="Name" value="Some Other Dialogs You May Encounter">
-</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00276000000000000000">
-<param name="Name" value="Mahogany Plugin Modules">
+<param name="Name" value="Template variables">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00280000000000000000">
-<param name="Name" value="The Address Database">
+<param name="Name" value="Understanding program options">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00281000000000000000">
-<param name="Name" value="The native Address Book ">
+<param name="Name" value="Hierarchical options organization">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00282000000000000000">
-<param name="Name" value="The Address Book Editor">
+<param name="Name" value="Automatically remembered options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00283000000000000000">
-<param name="Name" value="Support for BBDB Address Books">
+<param name="Name" value="Other options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00284000000000000000">
-<param name="Name" value="One Address per Line File Address Books">
+<param name="Name" value="Remote configuration synchronisation">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00285000000000000000">
+<param name="Name" value="Some Other Dialogs You May Encounter">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00286000000000000000">
+<param name="Name" value="Mahogany Plugin Modules">
+</OBJECT>
+</UL>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00290000000000000000">
+<param name="Name" value="The Address Database">
+</OBJECT>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00291000000000000000">
+<param name="Name" value="The native Address Book ">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00292000000000000000">
+<param name="Name" value="The Address Book Editor">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00293000000000000000">
+<param name="Name" value="Support for BBDB Address Books">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00294000000000000000">
+<param name="Name" value="One Address per Line File Address Books">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00295000000000000000">
 <param name="Name" value="Support for Palm Address Books">
 </OBJECT>
 </UL>
@@ -317,16 +338,16 @@
 <UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00510000000000000000">
-<param name="Name" value="Compiling <I>Mahogany</I> from source">
+<param name="Name" value="Compiling Mahogany from source">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00520000000000000000">
-<param name="Name" value="Using <I>Mahogany</I> more efficiently">
+<param name="Name" value="Using Mahogany more efficiently">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00521000000000000000">
-<param name="Name" value="Speeding up <I>Mahogany</I> startup">
+<param name="Name" value="Speeding up Mahogany startup">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00522000000000000000">
@@ -358,7 +379,7 @@
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00614000000000000000">
-<param name="Name" value="Mahogany fails to find wxWindows, configure fails">
+<param name="Name" value="Mahogany fails to find wxWidgets, configure fails">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00615000000000000000">
