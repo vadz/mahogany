@@ -2146,29 +2146,27 @@ extern "C"
 
 
 
-class wxLicenseDialog : public wxOptionsPageSubdialog
+class wxLicenseDialog : public wxManuallyLaidOutDialog
 {
 public:
-   wxLicenseDialog(Profile *profile, wxWindow *parent);
+   wxLicenseDialog(wxWindow *parent);
 
 private:
    DECLARE_NO_COPY_CLASS(wxLicenseDialog)
 };
 
-wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
-               : wxOptionsPageSubdialog(profile,
-                                        parent,
-                                        _("Mahogany Licensing Conditions"),
-                                        _T("LicensingDialog"))
+wxLicenseDialog::wxLicenseDialog(wxWindow *parent)
+               : wxManuallyLaidOutDialog(parent,
+                                         _("Mahogany Licensing Conditions"))
 {
    wxStaticBox *box = CreateStdButtonsAndBox(_("Licensing Conditions"), FALSE,
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
-   wxMemoryFSHandler::AddFile(_T("splash.png"),
-                              mApplication->GetIconManager()->
-                                 GetBitmap(_T("Msplash")),
-                              wxBITMAP_TYPE_PNG);
+   wxBitmap bmp(mApplication->GetIconManager()-> GetBitmap(_T("Msplash")));
+   const int w = bmp.Ok() ? bmp.GetWidth() : 400;
+
+   wxMemoryFSHandler::AddFile(_T("splash.png"), bmp, wxBITMAP_TYPE_PNG);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"
                     "<center><img src=\"memory:splash.png\"><br>"
@@ -2179,27 +2177,27 @@ wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
 
 
    wxLayoutConstraints *c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(box, wxBottom, 6*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    license->SetConstraints(c);
 
    wxButton *button = (wxButton *) FindWindow(wxID_OK);
-   button->SetLabel(_("Accept"));
+   button->SetLabel(_("&Accept"));
 
    button = (wxButton *) FindWindow(wxID_CANCEL);
-   button->SetLabel(_("Reject"));
+   button->SetLabel(_("&Reject"));
 
    SetAutoLayout(TRUE);
-   SetDefaultSize(400, 400, FALSE /* not minimal */);
+   SetDefaultSize(w + 12*LAYOUT_X_MARGIN, (3*w)/2);
 }
 
 
 extern
 bool ShowLicenseDialog(wxWindow *parent)
 {
-   wxLicenseDialog dlg(mApplication->GetProfile(), parent);
+   wxLicenseDialog dlg(parent);
 
    return dlg.ShowModal() == wxID_OK;
 }
