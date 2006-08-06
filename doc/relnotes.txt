@@ -1,12 +1,8 @@
-Release notes for Mahogany 0.65
+Release notes for Mahogany 0.67
 =====================================================================
 
 0. General
 ----------
-
-The binary distribution contains the version of Mahogany compiled
-with SSL support but without Python support. To use the latter you
-should recompile the program from sources yourself.
 
 Please remember that you can always ask about any problems you have
 on our mailing list:
@@ -17,14 +13,20 @@ on our mailing list:
 1. Unix
 -------
 
- The provided binary RPM are for x86 RedHat 8/9 systems, if you use
-another system or architecture please rebuild the RPM from the source
-RPM.
+ We don't provide binary RPMs for this version, however it is possible to
+easily build them from the provided SRPM. We do provide unofficial binary
+packages for Ubuntu Linux Dapper, please add the line
 
- Of course, you can always build the program from sources yourself as
-well. If you are going to do this, you may need to download the
-prebuilt Mdocs.tar.gz file if your system doesn't have all the tools
-needed to build the documentation (LaTeX, makeindex, dvips, ps2pdf
+   deb http://apt.tt-solutions.com/ubuntu/ dapper main
+
+to /etc/apt/sources.list file of your Ubuntu system to be able to
+"apt-get install mahogany".
+
+
+ For the other systems, please build the program from sources yourself as
+described in the INSTALL file. . If you are going to do this, you may need to
+download the prebuilt Mdocs.tar.gz file if your system doesn't have all the
+tools needed to build the documentation (LaTeX, makeindex, dvips, ps2pdf
 and latex2html).
 
 2. Win32
