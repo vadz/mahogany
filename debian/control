@@ -2,13 +2,13 @@ Source: mahogany
 Section: x11
 Priority: optional
 Maintainer: Vadim Zeitlin <mahogany-developers@lists.sourceforge.net>
-Build-Depends: debhelper (>= 4.0), debmake, autoconf2.13, g++, make, tetex, tetex-extra, latex2html, libwxgtk2.7-ansi-dev, wx-common
+Build-Depends: debhelper (>= 4.0), autoconf2.13, g++, make, latex2html, libwxgtk2.7-ansi-dev, wx-common
 Standards-Version: 3.6.2.1
 
 Package: mahogany
 Architecture: any
 Depends: ${shlibs:Depends}
-Recommends: libssl09
+Recommends: libssl0.9.7 | libssl0.9.8
 Suggests: python
 Description: Powerful and user-friendly portable GUI mail client with SSL support.
  This package contains Mahogany, a powerful, flexible GUI mail and news client
