@@ -47,9 +47,10 @@ EOF
 			# entry start
 			$in_entry = 1;
 		}
-		elsif ( /<.*UL>/ ) {
-			# leave ULs as is
-			print OUT_HHC
+		elsif ( /(<.*UL)( CLASS="TofC")*>/ ) {
+			# leave ULs as is but remove the optional class, HTML
+			# Help Workshop doesn't like it
+			print OUT_HHC "$1>"
 		}
 		elsif ( /^ +HREF="([^"]+)">(.+)<\/A>$/ ) {
 			# entry body

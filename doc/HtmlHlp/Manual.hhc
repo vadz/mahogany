@@ -7,17 +7,15 @@
 <OBJECT type="text/site properties">
  <param name="ImageType" value="Folder">
 </OBJECT>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00200000000000000000">
 <param name="Name" value="Using Mahogany ">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00210000000000000000">
 <param name="Name" value="Release Notes">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00211000000000000000">
 <param name="Name" value="Changes against the previous versions">
 </OBJECT>
@@ -49,13 +47,11 @@
 <param name="Local" value="Manual.html#SECTION00218000000000000000">
 <param name="Name" value="Additional Credits">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00220000000000000000">
 <param name="Name" value="Introduction / Tutorial">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00221000000000000000">
 <param name="Name" value="Getting started">
 </OBJECT>
@@ -71,13 +67,11 @@
 <param name="Local" value="Manual.html#SECTION00224000000000000000">
 <param name="Name" value="How to set up your mail accounts">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00230000000000000000">
 <param name="Name" value="Setting up Mahogany, its configuration files">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00231000000000000000">
 <param name="Name" value="Mahogany command line options">
 </OBJECT>
@@ -93,13 +87,11 @@
 <param name="Local" value="Manual.html#SECTION00234000000000000000">
 <param name="Name" value="Using multiple configuration sources">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00240000000000000000">
 <param name="Name" value="The User Interface">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00241000000000000000">
 <param name="Name" value="The Main Window">
 </OBJECT>
@@ -119,13 +111,11 @@
 <param name="Local" value="Manual.html#SECTION00245000000000000000">
 <param name="Name" value="Migrating from another mail client">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00250000000000000000">
 <param name="Name" value="Reading Mail">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00251000000000000000">
 <param name="Name" value="The INBOX Folder">
 </OBJECT>
@@ -153,13 +143,11 @@
 <param name="Local" value="Manual.html#SECTION00257000000000000000">
 <param name="Name" value="Spam filtering">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00260000000000000000">
 <param name="Name" value="Sending Mail">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00261000000000000000">
 <param name="Name" value="To: CC: and BCC: Settings">
 </OBJECT>
@@ -179,13 +167,11 @@
 <param name="Local" value="Manual.html#SECTION00265000000000000000">
 <param name="Name" value="The News Article Composition Window">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00270000000000000000">
 <param name="Name" value="Message Templates">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00271000000000000000">
 <param name="Name" value="What are they?">
 </OBJECT>
@@ -197,13 +183,11 @@
 <param name="Local" value="Manual.html#SECTION00273000000000000000">
 <param name="Name" value="Template variables">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00280000000000000000">
 <param name="Name" value="Understanding program options">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00281000000000000000">
 <param name="Name" value="Hierarchical options organization">
 </OBJECT>
@@ -227,13 +211,11 @@
 <param name="Local" value="Manual.html#SECTION00286000000000000000">
 <param name="Name" value="Mahogany Plugin Modules">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00290000000000000000">
 <param name="Name" value="The Address Database">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00291000000000000000">
 <param name="Name" value="The native Address Book ">
 </OBJECT>
@@ -253,19 +235,15 @@
 <param name="Local" value="Manual.html#SECTION00295000000000000000">
 <param name="Name" value="Support for Palm Address Books">
 </OBJECT>
-</UL>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL></UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00300000000000000000">
 <param name="Name" value="Scripting and Extending Mahogany">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00310000000000000000">
 <param name="Name" value="Python Scripting">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00311000000000000000">
 <param name="Name" value="Introduction">
 </OBJECT>
@@ -293,13 +271,11 @@
 <param name="Local" value="Manual.html#SECTION00317000000000000000">
 <param name="Name" value="Supported Classes">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00320000000000000000">
 <param name="Name" value="Plugins">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00321000000000000000">
 <param name="Name" value="Introduction">
 </OBJECT>
@@ -311,14 +287,11 @@
 <param name="Local" value="Manual.html#SECTION00323000000000000000">
 <param name="Name" value="The PalmOS Module">
 </OBJECT>
-</UL>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL></UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00400000000000000000">
 <param name="Name" value="Getting Help and Support">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00410000000000000000">
 <param name="Name" value="Troubleshooting">
 </OBJECT>
@@ -330,13 +303,11 @@
 <param name="Local" value="Manual.html#SECTION00430000000000000000">
 <param name="Name" value="Mailing Lists">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00500000000000000000">
 <param name="Name" value="Advanced Usage">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00510000000000000000">
 <param name="Name" value="Compiling Mahogany from source">
 </OBJECT>
@@ -344,8 +315,7 @@
 <param name="Local" value="Manual.html#SECTION00520000000000000000">
 <param name="Name" value="Using Mahogany more efficiently">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00521000000000000000">
 <param name="Name" value="Speeding up Mahogany startup">
 </OBJECT>
@@ -353,19 +323,15 @@
 <param name="Local" value="Manual.html#SECTION00522000000000000000">
 <param name="Name" value="Limiting Amount of Data Transferred">
 </OBJECT>
-</UL>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL></UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00600000000000000000">
 <param name="Name" value="FAQ - Frequently Asked Questions">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00610000000000000000">
 <param name="Name" value="Installation Problems">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00611000000000000000">
 <param name="Name" value="All Mahogany icons show a question mark">
 </OBJECT>
@@ -385,13 +351,11 @@
 <param name="Local" value="Manual.html#SECTION00615000000000000000">
 <param name="Name" value="SSL does not work">
 </OBJECT>
-</UL>
-	<LI> <OBJECT type="text/sitemap">
+</UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00620000000000000000">
 <param name="Name" value="Other Problems / Questions">
 </OBJECT>
-<UL>
-	<LI> <OBJECT type="text/sitemap">
+<UL>	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00621000000000000000">
 <param name="Name" value="The Preferences Dialog does not show up properly">
 </OBJECT>
@@ -451,5 +415,4 @@
 <param name="Local" value="Manual.html#SECTION006215000000000000000">
 <param name="Name" value="Can I ``Follow-up'' to the message?">
 </OBJECT>
-</UL></UL></UL>
-</BODY></HTML>
+</UL></UL></UL></BODY></HTML>
