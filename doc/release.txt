@@ -22,7 +22,8 @@ e) "cvs rtag" the files
 2. Updating the files
 ---------------------
 
-a) Manual.htex
+a) Manual.htex (=> also do "make -C doc/HtmlHlp update" and commit the
+   changed Manual.hhc and Manual.html files to use them in step 4(d))
 
 b) doc/Mannounce.txt
 
