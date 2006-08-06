@@ -71,7 +71,6 @@ if ! tar cf - --exclude="CVS" --exclude=".cvsignore" --exclude="*.vcproj" $M_FUL
 fi
 
 # finally, clean up
-cd -
 cleanup
 
 exit ${RC-0}
