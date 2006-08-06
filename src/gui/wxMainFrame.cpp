@@ -67,6 +67,7 @@
 enum
 {
    WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1,
+   WXMENU_DEBUG_SHOW_LICENCE,
    WXMENU_DEBUG_TOGGLE_LOG,
    WXMENU_DEBUG_CRASH
 };
@@ -634,6 +635,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #ifdef DEBUG
    wxMenu *menuDebug = new wxMenu;
    menuDebug->Append(WXMENU_DEBUG_WIZARD, _T("Run install &wizard..."));
+   menuDebug->Append(WXMENU_DEBUG_SHOW_LICENCE, _T("Show &licence dialog..."));
    menuDebug->AppendCheckItem(WXMENU_DEBUG_TOGGLE_LOG,
                               _T("Toggle &debug logging\tCtrl-Alt-D"));
    menuDebug->Append(WXMENU_DEBUG_CRASH, _T("Provoke a c&rash"));
@@ -1060,6 +1062,10 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             {
                wxLogWarning(_T("Wizard failed!"));
             }
+            break;
+
+         case WXMENU_DEBUG_SHOW_LICENCE:
+            ShowLicenseDialog(this);
             break;
 
          case WXMENU_DEBUG_TOGGLE_LOG:
