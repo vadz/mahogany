@@ -934,14 +934,6 @@ wxFont ComposerOptions::GetFont() const
       }
    }
 
-   if ( !font.Ok() )
-   {
-      font = wxFont(m_fontSize,
-                    m_fontFamily,
-                    wxFONTSTYLE_NORMAL,
-                    wxFONTWEIGHT_NORMAL);
-   }
-
    return font;
 }
 
@@ -2288,7 +2280,9 @@ void wxComposeView::SetTextAppearance(wxTextCtrl *text)
    {
       text->SetForegroundColour(m_options.m_fg);
       text->SetBackgroundColour(m_options.m_bg);
-      text->SetFont(m_options.GetFont());
+      wxFont font(m_options.GetFont());
+      if ( font.Ok() )
+         text->SetFont(font);
 
       wxSizer *sizer = text->GetContainingSizer();
       if ( sizer )

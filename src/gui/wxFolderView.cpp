@@ -1618,13 +1618,10 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
       }
    }
 
-   if ( !font.Ok() )
+   if ( font.Ok() )
    {
-      font = wxFont(fontSize, fontFamily,
-                    wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+      SetFont(font);
    }
-
-   SetFont(font);
 
    if ( memcmp(m_columns, columns, sizeof(m_columns)) != 0 )
    {
