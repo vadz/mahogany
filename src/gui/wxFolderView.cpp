@@ -4633,7 +4633,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          // always flags in this case and won't match...) and we just lose the
          // current selection, so prevent this from happening by *not* calling
          // event.Skip() in this case
-         if ( !isalnum(key) )
+         if ( key >= 0x7f || !isalnum(key) )
          {
             // let the control process other keys (some are used for navigation
             // in it)
