@@ -527,10 +527,14 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
       listbox->Append(wxGetTranslation(gs_templateNames[n]));
    }
 
+   int wLbox = listbox->GetBestSize().x;
+   if ( wLbox > 3*wBtn )
+      wLbox = 3*wBtn;
+
    c = new wxLayoutConstraints;
    c->top.Below(msg, LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->width.AsIs();
+   c->width.Absolute(wLbox);
    c->height.Absolute(5*hBtn);
    listbox->SetConstraints(c);
 
@@ -612,7 +616,7 @@ wxTemplatesDialogBase::wxTemplatesDialogBase(MessageTemplateKind kind,
 {
    m_kind = kind;
 
-   SetDefaultSize(6*wBtn, 10*hBtn);
+   SetDefaultSize(10*wBtn, 10*hBtn);
 }
 
 bool wxTemplatesDialogBase::TransferDataToWindow()
@@ -755,11 +759,15 @@ wxChooseTemplateDialog::wxChooseTemplateDialog(MessageTemplateKind kind,
    // now lay them out
    // ----------------
 
+   int wLbox = m_listbox->GetBestSize().x;
+   if ( wLbox > 3*wBtn )
+      wLbox = 3*wBtn;
+
    wxLayoutConstraints *c;
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->width.AsIs();
+   c->width.Absolute(wLbox);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
 
@@ -887,10 +895,14 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(const TemplatePopupMenuItem& menu,
    // constraints
    FillListBox();
 
+   int wLbox = m_listbox->GetBestSize().x;
+   if ( wLbox > 3*wBtn )
+      wLbox = 3*wBtn;
+
    c = new wxLayoutConstraints;
    c->top.Below(combo, 2*LAYOUT_Y_MARGIN);
    c->left.SameAs(msg, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->width.AsIs();
+   c->width.Absolute(wLbox);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
 
