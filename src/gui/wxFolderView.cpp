@@ -4626,26 +4626,20 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          }
          break;
 
-      case WXK_UP:
-      case WXK_DOWN:
-      case WXK_HOME:
-      case WXK_END:
-      case WXK_RETURN:
-#if !defined DEBUG_nerijus
-      case WXK_SPACE:
-#endif
-         // let the control process these keys as they're used for navigation
-         event.Skip();
-         return false;
-
       default:
          // pressing any alphanumeric character in the list control starts
          // incremental search in it which is worse than useless in our case
          // because it's never going to find anything (the first column is
-         // always flags in this case and won't match...) and we just lost the
+         // always flags in this case and won't match...) and we just lose the
          // current selection, so prevent this from happening by *not* calling
-         // event.Skip() here
-         ;
+         // event.Skip() in this case
+         if ( !isalnum(key) )
+         {
+            // let the control process other keys (some are used for navigation
+            // in it)
+            event.Skip();
+            return false;
+         }
    }
 
    if ( cmd )
