@@ -1754,7 +1754,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
                                    wxWindow *parent, wxWindowID id,
                                    const wxPoint& pos, const wxSize& size)
                 : wxPTreeCtrl(_T("FolderTree"), parent, id, pos, size,
-                              wxTR_HAS_BUTTONS | wxTR_EDIT_LABELS)
+                              wxTR_DEFAULT_STYLE | wxTR_EDIT_LABELS)
 {
    // init member vars
    m_current = NULL;
