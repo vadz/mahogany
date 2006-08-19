@@ -549,7 +549,9 @@ void TextViewer::Clear()
 
    const ProfileValues& profileValues = GetOptions();
 
-   m_window->SetFont(profileValues.GetFont());
+   wxFont font(profileValues.GetFont());
+   if ( font.Ok() )
+      m_window->SetFont(font);
    m_window->SetForegroundColour(profileValues.FgCol);
    m_window->SetBackgroundColour(profileValues.BgCol);
 }

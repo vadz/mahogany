@@ -924,17 +924,7 @@ void ComposerOptions::Read(Profile *profile)
 
 wxFont ComposerOptions::GetFont() const
 {
-   wxFont font;
-   if ( !m_font.empty() )
-   {
-      wxNativeFontInfo fontInfo;
-      if ( fontInfo.FromString(m_font) )
-      {
-         font.SetNativeFontInfo(fontInfo);
-      }
-   }
-
-   return font;
+   return CreateFontFromDesc(m_font, m_fontSize, m_fontFamily);
 }
 
 // ----------------------------------------------------------------------------

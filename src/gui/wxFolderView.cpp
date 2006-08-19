@@ -1608,16 +1608,7 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
    SetTextColour( fg );
    SetBackgroundColour( bg );
 
-   wxFont font;
-   if ( !fontDesc.empty() )
-   {
-      wxNativeFontInfo fontInfo;
-      if ( fontInfo.FromString(fontDesc) )
-      {
-         font.SetNativeFontInfo(fontInfo);
-      }
-   }
-
+   wxFont font(CreateFontFromDesc(fontDesc, fontSize, fontFamily));
    if ( font.Ok() )
    {
       SetFont(font);

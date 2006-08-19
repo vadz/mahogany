@@ -15,14 +15,6 @@
 
 class Profile;
 
-// under Windows 12pt font looks too huge, letters are like in a book for
-// children
-#ifdef OS_WIN
-#  define DEFAULT_FONT_SIZE 10l
-#else
-#  define DEFAULT_FONT_SIZE 12l
-#endif
-
 /** @name Levels of  interaction, do something or not?
 
     NB: these values can't be changed as they are written to (and read from)

@@ -439,6 +439,9 @@
 					RelativePath=".\src\gui\wxMFrame.cpp">
 				</File>
 				<File
+					RelativePath=".\src\gui\wxMGuiUtils.cpp">
+				</File>
+				<File
 					RelativePath=".\src\gui\wxMimeDialog.cpp">
 				</File>
 				<File

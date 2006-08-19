@@ -505,35 +505,17 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
 
 wxFont MessageView::AllProfileValues::GetFont(wxFontEncoding encoding) const
 {
-   wxFont font;
+   wxFont font(CreateFontFromDesc(fontDesc, fontSize, fontFamily));
 
-   if ( !fontDesc.empty() )
+   // assume that iso8859-1 text can be shown in any encoding - it's
+   // true for all normal fonts
+   if ( encoding != wxFONTENCODING_DEFAULT &&
+            encoding != wxFONTENCODING_ISO8859_1 )
    {
-      wxNativeFontInfo fontInfo;
-      if ( fontInfo.FromString(fontDesc) )
-      {
-         font.SetNativeFontInfo(fontInfo);
+      if ( !font.Ok() )
+         font = *wxNORMAL_FONT;
 
-         // assume that iso8859-1 text can be shown in any encoding - it's
-         // true for all normal fonts
-         if ( font.Ok() &&
-               (encoding != wxFONTENCODING_DEFAULT) &&
-                  (encoding != wxFONTENCODING_ISO8859_1) )
-         {
-            font.SetEncoding(encoding);
-         }
-      }
-   }
-
-   if ( !font.Ok() )
-   {
-      font = wxFont(fontSize,
-                    fontFamily,
-                    wxFONTSTYLE_NORMAL,
-                    wxFONTWEIGHT_NORMAL,
-                    FALSE,   // not underlined
-                    wxEmptyString,  // no specific face name
-                    encoding);
+      font.SetEncoding(encoding);
    }
 
    return font;

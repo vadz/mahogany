@@ -1906,9 +1906,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// message view title
 #define   MP_MVIEW_TITLE_FMT_DEFVAL   _("from $from about \"$subject\"")
 /// which font to use
-#define   MP_MVIEW_FONT_DEFVAL         6L
+#define   MP_MVIEW_FONT_DEFVAL         0L
 /// which font size
-#define   MP_MVIEW_FONT_SIZE_DEFVAL         DEFAULT_FONT_SIZE
+#define   MP_MVIEW_FONT_SIZE_DEFVAL         -1
 /// the full font desc (replaces the 2 settings above)
 #define   MP_MVIEW_FONT_DESC_DEFVAL   wxEmptyString
 /// which foreground colour for the font
@@ -1944,9 +1944,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /**@name  Font settings for message view */
 //@{
 /// which font to use
-#define   MP_FVIEW_FONT_DEFVAL         4L
+#define   MP_FVIEW_FONT_DEFVAL         0L
 /// which font size
-#define   MP_FVIEW_FONT_SIZE_DEFVAL         DEFAULT_FONT_SIZE
+#define   MP_FVIEW_FONT_SIZE_DEFVAL         -1
 /// the full font desc (replaces the 2 settings above)
 #define   MP_FVIEW_FONT_DESC_DEFVAL   wxEmptyString
 /// don't show full e-mail, only sender's name
@@ -2007,9 +2007,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /**@name Font settings for compose view */
 //@{
 /// which font to use
-#define   MP_CVIEW_FONT_DEFVAL         6L
+#define   MP_CVIEW_FONT_DEFVAL         0L
 /// which font size
-#define   MP_CVIEW_FONT_SIZE_DEFVAL    DEFAULT_FONT_SIZE
+#define   MP_CVIEW_FONT_SIZE_DEFVAL    -1
 /// the full font desc (replaces the 2 settings above)
 #define   MP_CVIEW_FONT_DESC_DEFVAL   wxEmptyString
 /// which foreground colour for the font

@@ -140,8 +140,8 @@ private:
    // add "attr=#colour" attribute to m_htmlText if col is valid
    void AddColourAttr(const wxChar *attr, const wxColour& col);
 
-   // calculate font size
-   int CalculateFontSize(int diff);
+   // calculate HTML font size for the given font
+   int CalculateFontSize(const wxFont& font);
 
    // get the name of the virtual file for the n-th image we use
    wxString GetVirtualFileName(size_t n) const;
@@ -844,12 +844,19 @@ void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
    }
 }
 
-int HtmlViewer::CalculateFontSize(int diff)
+int HtmlViewer::CalculateFontSize(const wxFont& font)
 {
+   if ( !font.Ok() )
+   {
+      // use default size
+      return 0;
+   }
+
    // map the point size into the HTML font size so that if the standard font
    // size is 12pt, 6pt is very small and 24pt is very big
    //
    // this is not very rigorous, of course...
+   int diff = font.GetPointSize() - wxNORMAL_FONT->GetPointSize();
    if ( diff > 0 )
       diff /= 4;
    else
@@ -901,9 +908,8 @@ void HtmlViewer::StartHeaders()
    // close <body> tag
    m_htmlText += _T(">");
 
-   wxFont font = profileValues.GetFont();
-
-   int diff = CalculateFontSize(font.GetPointSize() - DEFAULT_FONT_SIZE);
+   wxFont font(profileValues.GetFont());
+   int diff = CalculateFontSize(font);
    if ( diff )
    {
       m_htmlText << _T("<font size=") << wxString::Format(_T("%+d"), diff) << _T(">");
@@ -913,7 +919,7 @@ void HtmlViewer::StartHeaders()
    // map the font family into HTML font face name
    //
    // TODO: use <font face="...">
-   if ( font.IsFixedWidth() )
+   if ( font.Ok() && font.IsFixedWidth() )
    {
       m_htmlText << _T("<tt>");
       m_htmlEnd.Prepend(_T("</tt>"));
@@ -925,10 +931,7 @@ void HtmlViewer::StartHeaders()
 
 void HtmlViewer::ShowRawHeaders(const String& header)
 {
-   const ProfileValues& profileValues = GetOptions();
-   wxFont font = profileValues.GetFont();
-
-   int diff = CalculateFontSize(font.GetPointSize() - DEFAULT_FONT_SIZE);
+   int diff = CalculateFontSize(GetOptions().GetFont());
    m_htmlText << _T("<pre>") << _T("<font size=") << wxString::Format(_T("%+d"), diff) << _T(">")
               << MakeHtmlSafe(header) << _T("</font>") << _T("</pre>");
 }

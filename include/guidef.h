@@ -1,14 +1,16 @@
-/*-*- c++ -*-********************************************************
- * guidef.h define the GUI implementation                           *
- *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   guidef.h
+// Purpose:     miscellaneous GUI helpers
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2006 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
-#ifndef GUIDEF_H
-#define GUIDEF_H
+#ifndef M_GUIDEF_H_
+#define M_GUIDEF_H_
 
 #ifndef USE_PCH
 #  include <wx/frame.h>
@@ -63,8 +65,6 @@ inline wxFrame *GetFrame(const wxWindow *win)
   find a replacement encoding - if this succeeds, the text is translated into
   this encoding and the encoding parameter is modified in place.
 
-  Note that this function is implemented in wxMApp.cpp.
-
   @param encoding the encoding to check, may be modified
   @param text the text we want to show in this encoding, may be translated
   @return true if this or equivalent encoding is available, false otherwise
@@ -72,6 +72,24 @@ inline wxFrame *GetFrame(const wxWindow *win)
 extern bool EnsureAvailableTextEncoding(wxFontEncoding *encoding,
                                         wxString *text = NULL,
                                         bool mayAskUser = false);
+
+/**
+   Create a font from the given native font description or font family and
+   size.
+
+   Notice that if neither of the parameters is specified (description is empty
+   and the other ones are -1), an invalid font is returned and the caller
+   should check for it and avoid using it in this case to avoid overriding the
+   default system font if the user didn't set any specific font to use.
+
+   @param fontDesc opaque string returned by wxFont::GetNativeFontInfoDesc()
+   @param fontSize font size, -1 if not specified
+   @param fontFamily font family, wxFONTFAMILY_DEFAULT if not specified
+   @return font which may be invalid, to be checked by the caller
+ */
+extern wxFont
+CreateFontFromDesc(const String& fontDesc, int fontSize, int fontFamily);
+
 
 // Prevent MEvent dispatch inside wxYield
 extern int g_busyCursorYield;
@@ -86,4 +104,4 @@ public:
    ~MBusyCursor() { MEndBusyCursor(); }
 };
 
-#endif // GUIDEF_H
+#endif // M_GUIDEF_H_
