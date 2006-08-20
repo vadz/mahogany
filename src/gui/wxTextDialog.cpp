@@ -173,7 +173,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
    m_text->SetValue(text);
 
    // use fixed-width font
-   m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
+   m_text->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE,
                           wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
    // in TAB order we want "Save" to get focus before "Close", so create
@@ -199,16 +199,13 @@ MTextDialog::MTextDialog(wxWindow *parent,
    // set the sizer &c
    // ----------------
 
-   SetSizer(sizerTop);
-   SetAutoLayout(TRUE);
-
-   // FIXME: bug in wxMSW? without Layout() the buttons are not positioned
-   //        correctly initially
-#ifdef __WXMSW__
-   Layout();
-#endif
+   SetSizerAndFit(sizerTop);
 
    m_text->SetFocus();
+
+   // under wxGTK SetFocus() scrolls the control to the bottom for some reason
+   // while we always want to show the top of the message
+   m_text->SetInsertionPoint(0);
 
    Show(TRUE);
 }
