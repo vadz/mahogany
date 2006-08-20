@@ -913,8 +913,9 @@ wxMApp::OnClose()
 bool
 wxMApp::OnInit()
 {
-   // we want our OnAbnormalTermination() be called if we crash
-#if wxUSE_ON_FATAL_EXCEPTION
+   // we want our OnAbnormalTermination() be called if we crash but don't use
+   // it in debug builds as it interferes with the debugger
+#if wxUSE_ON_FATAL_EXCEPTION && !defined(__WXDEBUG__)
    wxHandleFatalExceptions();
 #endif
 
