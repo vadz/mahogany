@@ -1102,6 +1102,24 @@ wxMApp::OnInit()
    }
 #endif // USE_I18N
 
+#ifdef __WXGTK20__
+   // we need UTF-8 support to be able to work with messages in different
+   // encodings
+   if ( wxLocale::GetSystemEncoding() != wxFONTENCODING_UTF8 )
+   {
+      // TODO: set encoding to UTF-8 (but keeping the current language)
+      //       ourselves
+      wxLogWarning(_("Your current locale doesn't use UTF-8 encoding!\n"
+                     "\n"
+                     "This means that Mahogany will not be able to work "
+                     "with texts in encodings other than the default one\n"
+                     "which may result in messages not being displayed or "
+                     "even sent correctly.\n"
+                     "\n"
+                     "Please change the system locale to UTF-8."));
+   }
+#endif // GTK+ 2.0
+
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
 //   wxFileSystem::AddHandler(new wxZipFSHandler); // for zipped docs
