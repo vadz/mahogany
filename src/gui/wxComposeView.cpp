@@ -3748,8 +3748,8 @@ bool wxComposeView::StartExternalEditor()
          // we have a handy function in wxFileType which will replace
          // '%s' with the file name or add the file name at the end if
          // there is no '%s'
-         wxFileType::MessageParameters params(tmpFileName.GetName());
-         String command = wxFileType::ExpandCommand(extEdit, params);
+         String
+            command = wxFileType::ExpandCommand(extEdit, tmpFileName.GetName());
 
          // do start the external process
          m_procExtEdit = new wxProcess(this, HelperProcess_Editor);
