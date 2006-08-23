@@ -48,6 +48,7 @@
 #include "Collect.h"
 
 #include <wx/clipbrd.h>
+#include <wx/mimetype.h>
 
 #ifdef OS_UNIX
    #include <sys/stat.h>
@@ -260,9 +261,9 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
             }
             else
             {
-               wxTheClipboard->UsePrimarySelection();
-               wxTheClipboard->SetData(new
-                     wxTextDataObject(m_clickableURL->GetUrl()));
+               wxURLDataObject *dobj = new wxURLDataObject;
+               dobj->SetURL(m_clickableURL->GetUrl());
+               wxTheClipboard->SetData(dobj);
             }
          }
          break;
@@ -500,8 +501,7 @@ void ClickableURL::OpenInBrowser(int options) const
       // either not netscape or ns isn't running or we have non-UNIX
       if(! bOk)
       {
-         command = browser;
-         command << _T(' ') << m_url;
+         String command = wxFileType::ExpandCommand(browser, m_url);
 
          wxString errmsg;
          errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
