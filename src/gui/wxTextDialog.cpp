@@ -199,7 +199,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
    // set the sizer &c
    // ----------------
 
-   SetSizerAndFit(sizerTop);
+   SetSizer(sizerTop);
 
    m_text->SetFocus();
 
