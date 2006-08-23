@@ -2740,7 +2740,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    m_frame->CentreOnParent();
    m_frame->Show();
 
-   wxYield();
+   m_frame->Update();
 }
 
 void MProgressInfo::SetLabel(const wxString& label)
