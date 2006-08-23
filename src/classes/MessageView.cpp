@@ -507,10 +507,9 @@ wxFont MessageView::AllProfileValues::GetFont(wxFontEncoding encoding) const
 {
    wxFont font(CreateFontFromDesc(fontDesc, fontSize, fontFamily));
 
-   // assume that iso8859-1 text can be shown in any encoding - it's
-   // true for all normal fonts
-   if ( encoding != wxFONTENCODING_DEFAULT &&
-            encoding != wxFONTENCODING_ISO8859_1 )
+   // assume that wxFONTENCODING_DEFAULT (US-ASCII) text can be shown in any
+   // encoding
+   if ( encoding != wxFONTENCODING_DEFAULT )
    {
       if ( !font.Ok() )
          font = *wxNORMAL_FONT;
