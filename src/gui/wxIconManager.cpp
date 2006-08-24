@@ -556,12 +556,13 @@ wxIconManager::GetIcon(const String &iconNameOrig)
       return icon;
 
    // next step: try to load the icon files .png,.xpm,.gif:
-   bool found = false;
    if(m_GlobalDir.Length())
    {
       PathFinder pf(READ_APPCONFIG(MP_ICONPATH));
 
 #ifdef M_TOP_SOURCEDIR
+      // look in the source directory to make it possible to use the program
+      // without installing it
       pf.AddPaths(String(M_TOP_SOURCEDIR) + _T("/src/icons"));
 #endif // M_TOP_SOURCEDIR
 
@@ -580,11 +581,16 @@ wxIconManager::GetIcon(const String &iconNameOrig)
       String name;
       for ( int ext = 0; wxIconManagerFileExtensions[ext]; ext++ )
       {
-         // Use iconNameOrig to preserve captialisation:
-         name = iconNameOrig + wxIconManagerFileExtensions[ext];
-         name = pf.FindFile(name, &found);
+         // use iconNameOrig here to preserve the original case
+         name = pf.FindFile(iconNameOrig + wxIconManagerFileExtensions[ext]);
 
-         if( found )
+         // but if it's not found, also fall back to the usual lower case
+         if ( name.empty() )
+         {
+            name = pf.FindFile(iconName + wxIconManagerFileExtensions[ext]);
+         }
+
+         if ( !name.empty() )
          {
             ms_IconPath = name.BeforeLast('/');
 
