@@ -143,29 +143,12 @@ MTextDialog::MTextDialog(wxWindow *parent,
 
    m_configPath = configPath;
 
-   // we may have or not the location in config where the dialogs position/size
-   // are stored
-   int x, y, w, h;
-   if ( m_configPath )
-   {
-      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
-   }
-   else
-   {
-      x =
-      y = -1;
-      w = 500;
-      h = 300;
-   }
-
-   SetSize(x, y, w, h);
-
    // create controls
    // ---------------
 
    m_text = new wxTextCtrl(this, -1, wxEmptyString,
-                           wxPoint(0, 0),
-                           wxSize(w, h),
+                           wxDefaultPosition,
+                           wxDefaultSize,
                            wxTE_MULTILINE |
                            wxTE_READONLY |
                            wxTE_NOHIDESEL |
@@ -204,16 +187,33 @@ MTextDialog::MTextDialog(wxWindow *parent,
    sizerTop->Add(m_text, 1, wxEXPAND);
    sizerTop->Add(sizerBtns, 0, wxCENTRE | wxTOP | wxBOTTOM, LAYOUT_Y_MARGIN);
 
-   // set the sizer &c
-   // ----------------
-
    SetSizer(sizerTop);
+
+   // final initialization
+   // --------------------
 
    m_text->SetFocus();
 
    // under wxGTK SetFocus() scrolls the control to the bottom for some reason
    // while we always want to show the top of the message
    m_text->SetInsertionPoint(0);
+
+   // we may have or not the location in config where the dialogs position/size
+   // are stored
+   int x, y, w, h;
+   if ( m_configPath )
+   {
+      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
+   }
+   else
+   {
+      x =
+      y = -1;
+      w = 500;
+      h = 300;
+   }
+
+   SetSize(x, y, w, h);
 
    Show(TRUE);
 }
