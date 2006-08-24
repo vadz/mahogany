@@ -170,11 +170,19 @@ MTextDialog::MTextDialog(wxWindow *parent,
                            wxTE_READONLY |
                            wxTE_NOHIDESEL |
                            wxTE_RICH2);
-   m_text->SetValue(text);
 
-   // use fixed-width font
+   // use fixed-width font and latin1 encoding in which all text is valid:
+   // without encoding information (which wouldn't make sense anyhow as we can
+   // have multiple parts using different encodings) we must do this to at
+   // least show something to the user while using the default UTF-8 encoding
+   // of GTK+ 2 could result in nothing being shown at all
    m_text->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE,
-                          wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+                          wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
+                          false /* not underlined */, wxEmptyString,
+                          wxFONTENCODING_ISO8859_1));
+
+   // now that the encoding is set, we can show the text
+   m_text->SetValue(text);
 
    // in TAB order we want "Save" to get focus before "Close", so create
    // them in order
