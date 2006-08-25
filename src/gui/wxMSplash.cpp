@@ -174,7 +174,8 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
    wxStaticBitmap *top = new wxStaticBitmap(this, wxID_ANY, bmp,
                                             wxPoint(0, 0), sizeBmp);
    wxHtmlWindow *bottom = new wxHtmlWindow(this, wxID_ANY,
-                                           wxPoint(0, sizeBmp.y + 1), sizeBmp);
+                                           wxPoint(0, sizeBmp.y + 1), sizeBmp,
+                                           wxHW_DEFAULT_STYLE | wxHW_NO_SELECTION);
 
    ConnectMouseAndKeyEvents(top);
    ConnectMouseAndKeyEvents(bottom);
