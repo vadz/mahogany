@@ -564,6 +564,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
       // look in the source directory to make it possible to use the program
       // without installing it
       pf.AddPaths(String(M_TOP_SOURCEDIR) + _T("/src/icons"));
+      pf.AddPaths(String(M_TOP_SOURCEDIR) + _T("/res"));
 #endif // M_TOP_SOURCEDIR
 
       pf.AddPaths(m_GlobalDir, false);
