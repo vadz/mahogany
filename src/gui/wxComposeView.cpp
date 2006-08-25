@@ -4058,12 +4058,10 @@ wxComposeView::InsertFileAsText(const String& filename,
       }
       else // non empty file
       {
-         wxChar *p = text.GetWriteBuf(lenFile + 1);
-         p[lenFile] = '\0';
+         wxStringBuffer buf(text, lenFile + 1);
+         buf[lenFile] = '\0';
 
-         ok = file.Read(p, lenFile) != wxInvalidOffset;
-
-         text.UngetWriteBuf();
+         ok = file.Read(buf, lenFile) != wxInvalidOffset;
       }
    }
 
@@ -4079,11 +4077,37 @@ wxComposeView::InsertFileAsText(const String& filename,
    return true;
 }
 
-/// inserts a text
 void
 wxComposeView::InsertText(const String &text)
 {
-   m_editor->InsertText(text, MessageEditor::Insert_Append);
+   // the text here may come from a file and so can be in an encoding different
+   // from the one we currently use, but we -- unfortunately -- have no way of
+   // knowing about it, except in the special case when we use UTF-8 and then
+   // we must check if text is a valid UTF-8 string as otherwise inserting it
+   // is going to fail
+   String textCopy;
+   if ( wxLocale::GetSystemEncoding() == wxFONTENCODING_UTF8 )
+   {
+      if ( wxConvUTF8.MB2WC(NULL, text, 0) == (size_t)-1 )
+      {
+         // not a valid UTF-8 string, must suppose it's in some other encoding
+         // and as we have no idea about what it is, choose latin1 as the most
+         // common (among Mahogany users, anyhow)
+         if ( m_encoding == wxFONTENCODING_SYSTEM )
+         {
+            // change the encoding to latin1 if none explicitly specified
+            SetEncoding(wxFONTENCODING_ISO8859_1);
+         }
+         else // we already have an existing encoding
+         {
+            // transform the text from latin1 to the current encoding
+            textCopy = wxCSConv(m_encoding).cWC2MB(wxConvISO8859_1.cMB2WC(text));
+         }
+      }
+   }
+
+   m_editor->InsertText(textCopy.empty() ? text : textCopy,
+                        MessageEditor::Insert_Append);
 }
 
 void
