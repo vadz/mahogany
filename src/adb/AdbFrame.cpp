@@ -3166,7 +3166,7 @@ bool wxADBPropertiesDialog::TransferDataFromWindow()
 
 wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
          : wxTreeCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
-                      wxTR_HAS_BUTTONS | wxSUNKEN_BORDER)
+                      wxTR_DEFAULT_STYLE | wxSUNKEN_BORDER)
 {
   m_frame = frame;
   m_menu = NULL;
