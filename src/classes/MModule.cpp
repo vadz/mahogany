@@ -158,8 +158,8 @@ void MAppBase::RemoveModule(MModuleCommon *module)
    wxDynamicLibrary *dll = module->GetDLL();
 
    // call cleanup function, if any
+   if ( dll->HasSymbol(MMODULE_CLEANUP_FUNCTION) )
    {
-      wxLogNull noLog;
       MModule_CleanUpFuncType funcCleanup =
          (MModule_CleanUpFuncType)dll->GetSymbol(MMODULE_CLEANUP_FUNCTION);
       if ( funcCleanup )
