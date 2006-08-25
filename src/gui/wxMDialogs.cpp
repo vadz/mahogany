@@ -2163,8 +2163,10 @@ wxLicenseDialog::wxLicenseDialog(wxWindow *parent)
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
-   wxBitmap bmp(mApplication->GetIconManager()-> GetBitmap(_T("Msplash")));
-   const int w = bmp.Ok() ? bmp.GetWidth() : 400;
+   wxBitmap bmp(mApplication->GetIconManager()->GetBitmap(_T("Msplash")));
+   int w = bmp.Ok() ? bmp.GetWidth() : 0;
+   if ( w < 400 )
+      w = 400;
 
    wxMemoryFSHandler::AddFile(_T("splash.png"), bmp, wxBITMAP_TYPE_PNG);
 
