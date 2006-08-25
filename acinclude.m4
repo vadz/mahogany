@@ -169,3 +169,20 @@ AC_DEFUN([M_CHECK_MYHEADER_VER],
     fi
   ]
 )
+
+dnl M_GCC_OPTION(OPTION, ACTION-IF-SUPPORTED, ACTION-IF-NOT-SUPPORTED)
+dnl
+dnl Check if gcc supports the given option (fails if compiler is not gcc)
+AC_DEFUN([M_GCC_OPTION], [
+   AC_REQUIRE([AC_PROG_CC])
+   if test "x$GCC" = "xyes"; then
+      echo 'void f(){}' >conftest.c
+      case "`$CC $1 -c conftest.c 2>&1`" in
+         '') ifelse([$2], , :, [$2]) ;;
+         *)  ifelse([$3], , :, [$3]) ;;
+      esac
+      rm -f conftest.*
+   else
+      ifelse([$3], , :, [$3])
+   fi
+])
