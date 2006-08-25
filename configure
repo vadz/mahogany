@@ -5324,8 +5324,30 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 
 IMAP_CFLAGS="$CFLAGS"
 IMAP_CPPFLAGS="$IMAP_CPPFLAGS $CPPFLAGS"
-if test "$GCC" = "yes"; then
-            IMAP_CPPFLAGS="$IMAP_CPPFLAGS -Wno-pointer-sign"
+echo $ac_n "checking whether $CC accepts -Wno-pointer-sign""... $ac_c" 1>&6
+echo "configure:5329: checking whether $CC accepts -Wno-pointer-sign" >&5
+if eval "test \"`echo '$''{'m_cv_cc_no_warn_ptr_sign'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+   
+   if test "x$GCC" = "xyes"; then
+      echo 'void f(){}' >conftest.c
+      case "`$CC -Wno-pointer-sign -c conftest.c 2>&1`" in
+         '') m_cv_cc_no_warn_ptr_sign="yes" ;;
+         *)  m_cv_cc_no_warn_ptr_sign="no" ;;
+      esac
+      rm -f conftest.*
+   else
+      m_cv_cc_no_warn_ptr_sign="no"
+   fi
+
+
+fi
+
+echo "$ac_t""$m_cv_cc_no_warn_ptr_sign" 1>&6
+if test $m_cv_cc_no_warn_ptr_sign="yes"; then
+    IMAP_CPPFLAGS="$IMAP_CPPFLAGS -Wno-pointer-sign"
 fi
 
 
@@ -5380,7 +5402,7 @@ fi
 if test "x$DEPFLAGS" != "x"; then
             if test "x$GXX" != "xyes"; then
 	echo $ac_n "checking whether ${CXX} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5384: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
+echo "configure:5406: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_cxx_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5403,7 +5425,7 @@ echo "$ac_t""$m_cv_cxx_depflags" 1>&6
     if test "x$DEPFLAGS" != "x"; then
 	if test "x$GCC" != "xyes"; then
 	    echo $ac_n "checking whether ${CC} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5407: checking whether ${CC} accepts ${DEPFLAGS}" >&5
+echo "configure:5429: checking whether ${CC} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_c_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
