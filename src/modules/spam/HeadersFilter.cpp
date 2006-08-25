@@ -70,10 +70,10 @@ enum SpamTest
    Spam_Test_HTML,
    Spam_Test_BadMIME,
    Spam_Test_ExeAttachment,
-   Spam_Test_WhiteList,
 #ifdef USE_RBL
    Spam_Test_RBL,
 #endif // USE_RBL
+   Spam_Test_WhiteList,
 
    Spam_Test_Max
 };
