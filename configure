@@ -16,7 +16,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --disable-optimize      disable optimization (automatic if debugging)"
 ac_help="$ac_help
-  --with-wxdebug          use debug wxWindows libraries"
+  --with-wxdebug          use debug wxWidgets libraries"
 ac_help="$ac_help
   --with-dmalloc          use dmalloc (http://dmalloc.com/) for debugging"
 ac_help="$ac_help
@@ -568,7 +568,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.316 2006/05/03 20:16:04 vadz Exp 
+# From configure.in Id: configure.in,v 1.317 2006/07/31 00:32:44 nerijus Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -2143,14 +2143,14 @@ echo "$ac_t""$m_cv_gcc_buggy_fno_operator_names" 1>&6
 			if test -f /etc/redhat-release -a ! grep "7\.0" /etc/redhat-release
 			then workarroundmsg="
 	It seems you are using Red Hat Linux 7.0. A workaround for your
-	problem is to use egcs to compile wxWindows and Mahogany:
+	problem is to use egcs to compile wxWidgets and Mahogany:
 		- at your bash prompt type:
 			export CC=egcs
 			export CXX=egcs++
-		- reconfigure and rebuild wxWindows and Mahogany
+		- reconfigure and rebuild wxWidgets and Mahogany
 		(don't forget to remove the config.cache files
 		located in the source code directories of
-		wxWindows and Mahogany before reconfiguring them."
+		wxWidgets and Mahogany before reconfiguring them."
 			else workarroundmsg=""
 			fi
 			{ echo "configure: error: Sorry, it seems that you have a buggy gcc version which is
@@ -4481,13 +4481,13 @@ echo "configure:4383: checking for wxWidgets static library" >&5
 
 if test "$wxOK" != 1; then
    { echo "configure: error: 
-	   Mahogany requires wxWindows to be installed on your system
+	   Mahogany requires wxWidgets to be installed on your system
 	   but wx-config script couldn't be found.
 
 	   Please check that wx-config is in PATH, the directory
-	   where wxWindows libraries are installed (returned by
+	   where wxWidgets libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWindows version is 2.5.2 or above.
+	   equivalent variable and wxWidgets version is 2.5.2 or above.
    " 1>&2; exit 1; }
 fi
 
@@ -4559,8 +4559,8 @@ if test "$WX_NAME_NO_DEBUG" != "$WX_NAME"; then
 fi
 
 case "$USE_THREADS" in 1)
-	echo $ac_n "checking if wxWindows was compiled with threads""... $ac_c" 1>&6
-echo "configure:4564: checking if wxWindows was compiled with threads" >&5
+	echo $ac_n "checking if wxWidgets was compiled with threads""... $ac_c" 1>&6
+echo "configure:4564: checking if wxWidgets was compiled with threads" >&5
 if eval "test \"`echo '$''{'m_cv_wx_threads'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5958,7 +5958,7 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 echo
 echo "Configured Mahogany ${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
 echo ""
-echo "	wxWindows port used:			${WX_NAME} ${WX_VERSION}"
+echo "	wxWidgets port used:			${WX_NAME} ${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
 echo "	SSL support:				${ssl_option}"
 echo "	Modules support:			${m_cv_USE_MODULES}"
