@@ -220,6 +220,7 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
    wxString pageHtmlText;
 
    pageHtmlText << _T("<body text=#000000 bgcolor=#ffffff>"
+                   "<meta HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html;charset=windows-1257\">"
                    "<font face=\"Times New Roman,times\">"
 
                    "<h4>") << _("Mahogany information") << _T("</h4>")
