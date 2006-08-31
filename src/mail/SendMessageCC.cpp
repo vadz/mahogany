@@ -43,6 +43,10 @@
 #include "Message.h"
 #include "MFolder.h"
 
+#ifdef OS_UNIX
+#  include "sysutil.h"
+#endif // OS_UNIX
+
 // has to be included before SendMessage.h, as it includes windows.h which
 // defines SendMessage under Windows
 #include <wx/fontmap.h>          // for GetEncodingName()
@@ -1920,8 +1924,8 @@ SendMessageCC::Send(int flags)
 
             // write to temp file:
             wxFile out;
-            const String filename = wxFileName::CreateTempFileName(
-               _T("Mtemp"), &out);
+            MTempFileName tmpFN(&out);
+            const String& filename = tmpFN.GetName();
 
             bool success = false;
             if ( !filename.empty() )
@@ -1930,18 +1934,21 @@ SendMessageCC::Send(int flags)
                out.Close();
                if ( written == lfOnly.Length() )
                {
-                  String command;
-                  command.Printf(_T("%s < '%s'; exec /bin/rm -f '%s'"),
-                                 m_SendmailCmd.c_str(),
-                                 filename.c_str(), filename.c_str());
-                  // HORRIBLE HACK: this should be `const char *' but wxExecute's
-                  // prototype doesn't allow it...
-                  wxChar *argv[4];
-                  argv[0] = (wxChar *)"/bin/sh";
-                  argv[1] = (wxChar *)"-c";
-                  argv[2] = (wxChar *)command.c_str();
-                  argv[3] = 0;  // NULL
-                  success = wxExecute(argv) != 0;
+                  int rc = system(m_SendmailCmd + " < " + filename);
+                  if ( WEXITSTATUS(rc) != 0 )
+                  {
+                     ERRORMESSAGE((_("Failed to execute local MTA \"%s\""),
+                                   m_SendmailCmd.c_str()));
+                  }
+                  else
+                  {
+                     success = true;
+                  }
+               }
+               else
+               {
+                  ERRORMESSAGE((_("Failed to write to temporary file \"%s\""),
+                                filename.c_str()));
                }
             }
             else
@@ -1961,8 +1968,11 @@ SendMessageCC::Send(int flags)
             }
             else
             {
-               ERRORMESSAGE((_("Failed to send message via '%s'"),
-                             m_SendmailCmd.c_str()));
+               ERRORMESSAGE((_("Failed to send message via local MTA, maybe "
+                               "it's not configured correctly?\n"
+                               "\n"
+                               "Please try using an SMTP server if you are not "
+                               " sure.")));
             }
 
             return success;
