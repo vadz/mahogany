@@ -263,8 +263,8 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
                 << "<p>"
                    _T("<h4>") << _("List of contributors:") << _T("</h4>")
                    "<p>"
-                   "Karsten Ball\u00fcder, Vadim Zeitlin, Greg Noel,<br> "
-                   "Nerijus Bali\u016bnas, Xavier Nodet, Vaclav Slavik,<br>"
+                   "Karsten Ball" "\xC3\xBC" "der, Vadim Zeitlin, Greg Noel,<br>"
+                   "Nerijus Bali" "\xC5\xAB" "nas, Xavier Nodet, Vaclav Slavik,<br>"
                    "Daniel Seifert, Michele Ravani, Michael A Chase,<br>"
                    "Robert Vazan " << _("and many others") << "<br>"
                    "<br>"
