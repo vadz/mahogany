@@ -261,6 +261,10 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
             }
             else
             {
+#ifdef DEBUG_nerijus
+               wxTheClipboard->UsePrimarySelection();
+               wxTheClipboard->SetData(new wxTextDataObject(m_clickableURL->GetUrl()));
+#endif
                wxURLDataObject *dobj = new wxURLDataObject;
                dobj->SetURL(m_clickableURL->GetUrl());
                wxTheClipboard->SetData(dobj);
