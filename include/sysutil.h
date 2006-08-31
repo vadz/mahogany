@@ -1,18 +1,17 @@
-/*-*- c++ -*-********************************************************
- * sysutil.h : utility functions for various OS functionality       *
- *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   include/sysutil.h
+// Purpose:     utility functions for various OS-level functionality
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Created:     1999
+// CVS-ID:      $Id$
+// Copyright:   (c) 1999 Karsten Ballüder
+//              (c) 2000-2006 Vadim Zeitlin <vadim@wxwindows.org>
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef SYSUTIL_H
-#define SYSUTIL_H
-
-#ifndef  USE_PCH
-#endif // USE_PCH
+#ifndef M_SYSUTIL_H
+#define M_SYSUTIL_H
 
 #include <wx/filename.h>
 
@@ -38,27 +37,50 @@ bool sysutil_compare_filenames(String const &file1, String const &file2);
 class MTempFileName
 {
 public:
-   // def ctor: creates the temp file and doesn't delete it unless told to do
-   // so (i.e. Ok() is called)
-   MTempFileName() : m_name (wxFileName::CreateTempFileName(_T("Mahogany")))
-      { m_ok = false; }
+   /**
+      Ctor creates a temporary file name and possibly associates it with the
+      specified file.
 
-   // ctor which takes a temp file name: still won't be deleted unless Ok() is
-   // called
-   MTempFileName(const String& name) : m_name(name) { m_ok = false; }
+      If the temp file name is used for writing some data to it, the file
+      parameter must be specified as otherwise the operation wouldn't be atomic
+      and race conditions could occur. Do close the file before this object
+      goes out of scope in this case though as otherwise we could fail to
+      delete the temp file under Windows.
 
-   /// returns FALSE if temp file name couldn't be generated
-   bool IsOk() const { return !!m_name; }
+      @param file if non-NULL, the file to open (for writing) with the
+                  temporary file name
+    */
+   MTempFileName(wxFile *file = NULL)
+      : m_name(wxFileName::CreateTempFileName(_T("Mahogany"), file))
+   {
+      m_keepFile = false;
+   }
 
-   /// get the name of the temp file
+   /**
+      Ctor from an existing temporary file name.
+
+      The specified file will be deleted when this object is destroyed unless
+      Ok() is called.
+
+      @param name of the existing temporary file
+    */
+   MTempFileName(const String& name) : m_name(name)
+   {
+      m_keepFile = false;
+   }
+
+   /// Returns false if temp file name couldn't be generated
+   bool IsOk() const { return !m_name.empty(); }
+
+   /// Get the name of the temp file
    const String& GetName() const { return m_name; }
 
-   /// tells us not to delete the temp file
-   void Ok() { m_ok = true; }
+   /// Tells us not to delete the temp file
+   void Ok() { m_keepFile = true; }
 
    ~MTempFileName()
    {
-      if ( !m_ok && !m_name.empty() )
+      if ( !m_keepFile && !m_name.empty() )
       {
          if ( wxRemove(m_name) != 0 )
          {
@@ -69,9 +91,10 @@ public:
 
 private:
    String m_name;
-   bool   m_ok;
+   bool   m_keepFile;
 };
 
 //@}
-#endif
+
+#endif // M_SYSUTIL_H
 
