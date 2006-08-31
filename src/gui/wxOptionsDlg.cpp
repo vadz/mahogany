@@ -2818,9 +2818,6 @@ bool wxOptionsPage::TransferDataToWindow()
                strValue = strutil_decrypt(strValue);
 
          case Field_Font:
-            strValue = wxFontBrowseButton::FontDescToUser(strValue);
-            // fall through
-
          case Field_Dir:
          case Field_File:
          case Field_Folder:
@@ -2987,8 +2984,6 @@ bool wxOptionsPage::TransferDataFromWindow()
             // post processing is needed for some fields
             if ( fieldType == Field_Passwd )
                strValue = strutil_encrypt(strValue);
-            else if ( fieldType == Field_Font )
-               strValue = wxFontBrowseButton::FontDescFromUser(strValue);
             else if ( fieldType == Field_Number ) {
                wxASSERT( m_aDefaults[n].IsNumeric() );
 

@@ -384,35 +384,6 @@ wxFontBrowseButton::wxFontBrowseButton(wxTextCtrl *text, wxWindow *parent)
 {
 }
 
-// FIXME: these methods rely on internals of wxNativeFontInfo because they
-//        know that it prepends the format version number (currently 0) to
-//        the real font desc string - they shouldn't but we should add methods
-//        to wxNativeFontInfo to do this conversion instead!
-
-String wxFontBrowseButton::FontDescToUser(const String& desc)
-{
-   String user = desc;
-   if ( user.length() > 2 && user[0u] == '0' && user[1u] == ';' )
-   {
-      user.erase(0, 2);
-   }
-
-   return user;
-}
-
-String wxFontBrowseButton::FontDescFromUser(const String& user)
-{
-   String desc;
-   if ( !user.empty() )
-   {
-      desc = _T("0;");
-   }
-
-   desc += user;
-
-   return desc;
-}
-
 void wxFontBrowseButton::DoBrowse()
 {
    wxFont font;
@@ -420,7 +391,7 @@ void wxFontBrowseButton::DoBrowse()
    wxString desc = GetText();
    if ( !desc.empty() )
    {
-      if ( fontInfo.FromString(FontDescFromUser(desc)) )
+      if ( fontInfo.FromString(desc) )
       {
          font.SetNativeFontInfo(fontInfo);
       }
@@ -434,7 +405,7 @@ void wxFontBrowseButton::DoBrowse()
    {
       font = dialog.GetFontData().GetChosenFont();
 
-      SetText(FontDescToUser(font.GetNativeFontInfoDesc()));
+      SetText(font.GetNativeFontInfoDesc());
    }
 }
 

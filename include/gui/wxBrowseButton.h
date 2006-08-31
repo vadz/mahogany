@@ -293,11 +293,6 @@ public:
    // show the font selection dialog
    virtual void DoBrowse();
 
-   // convert between wxNativeFontInfo description and the string we show to
-   // the user in the text control
-   static String FontDescToUser(const String& desc);
-   static String FontDescFromUser(const String& desc);
-
 private:
    DECLARE_NO_COPY_CLASS(wxFontBrowseButton)
 };
