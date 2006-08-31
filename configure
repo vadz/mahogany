@@ -568,7 +568,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.317 2006/07/31 00:32:44 nerijus Exp 
+# From configure.in Id: configure.in,v 1.318 2006/08/25 15:39:12 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -5346,7 +5346,7 @@ else
 fi
 
 echo "$ac_t""$m_cv_cc_no_warn_ptr_sign" 1>&6
-if test $m_cv_cc_no_warn_ptr_sign="yes"; then
+if test $m_cv_cc_no_warn_ptr_sign = "yes"; then
     IMAP_CPPFLAGS="$IMAP_CPPFLAGS -Wno-pointer-sign"
 fi
 

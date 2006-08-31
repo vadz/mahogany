@@ -1301,7 +1301,7 @@ AC_CACHE_CHECK([whether $CC accepts -Wno-pointer-sign],
 	m_cv_cc_no_warn_ptr_sign="yes",
 	m_cv_cc_no_warn_ptr_sign="no")]
 )
-if test $m_cv_cc_no_warn_ptr_sign="yes"; then
+if test $m_cv_cc_no_warn_ptr_sign = "yes"; then
     IMAP_CPPFLAGS="$IMAP_CPPFLAGS -Wno-pointer-sign"
 fi
 AC_SUBST(IMAP_CPPFLAGS)
