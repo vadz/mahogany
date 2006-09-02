@@ -1102,7 +1102,9 @@ wxMApp::OnInit()
    }
 #endif // USE_I18N
 
-#ifdef __WXGTK20__
+   // wxLocale::GetSystemEncoding() is broken in wx <= 2.6.3, it returns
+   // ISO-8859-1 for UTF-8 locale
+#if defined(__WXGTK20__) && wxCHECK_VERSION(2, 6, 4)
    // we need UTF-8 support to be able to work with messages in different
    // encodings
    if ( wxLocale::GetSystemEncoding() != wxFONTENCODING_UTF8 )
