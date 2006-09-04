@@ -47,9 +47,9 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #include <stdio.h>
 #include <fcntl.h>
 
-#ifdef __WINE__
+#ifndef USE_PCH
 #include <wx/wxchar.h>    // for wxStricmp
-#endif // __WINE__
+#endif // USE_PCH
 
 #define NAME_OF(o)				o->id
 #define VALUE_TYPE(o)			o->valType

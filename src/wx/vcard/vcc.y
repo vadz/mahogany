@@ -107,9 +107,9 @@ int yylex();
 #include <ctype.h>
 #include "vcc.h"
 
-#ifdef __WINE__
+#ifndef USE_PCH
 #include <wx/wxchar.h>    // for wxStricmp
-#endif // __WINE__
+#endif // USE_PCH
 
 /****  Types, Constants  ****/
 
