@@ -1946,7 +1946,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
    {
       String sound = READ_CONFIG(profile, MP_NEWMAIL_SOUND_FILE);
 
-#if defined(OS_WIN) && !defined(__CYGWIN__) && !defined(__MINGW32__) // FIXME
+#if defined(OS_WIN) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__WINE__) // FIXME
       DWORD flags = SND_ASYNC;
 
       if ( sound.empty() )
@@ -1974,7 +1974,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                  folder->GetFullName().c_str(), command.c_str());
 
       if ( !wxExecute(command, false /* async */) )
-#elif defined(__MINGW32__)
+#elif defined(__MINGW32__) || defined(__WINE__)
 #else // other platform
    #error "don't know how to play sounds on this platform"
 #endif

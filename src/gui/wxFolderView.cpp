@@ -46,6 +46,9 @@
 
 #  include <wx/sizer.h>
 #  include <wx/accel.h>
+#ifdef __WINE__
+#  include <wx/timer.h>   // for wxTimerEvent
+#endif // __WINE__
 #endif // USE_PCH
 
 #include <ctype.h>

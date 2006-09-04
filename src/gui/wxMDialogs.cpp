@@ -42,6 +42,12 @@
 #  include <wx/msgdlg.h>
 #  include <wx/choicdlg.h>
 #  include <wx/filedlg.h>
+#ifdef __WINE__
+#  include <wx/dcclient.h>  // for wxClientDC
+#  include <wx/settings.h>  // for wxSystemSettings
+#  include <wx/stattext.h>  // for wxStaticText
+#  include <wx/timer.h>     // for wxTimer
+#endif // __WINE__
 #endif // USE_PCH
 
 #include "Mpers.h"

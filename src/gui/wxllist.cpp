@@ -50,6 +50,9 @@
 #   include <wx/log.h>
 #   include <wx/filefn.h>
 #   include <wx/msgdlg.h>
+#ifdef __WINE__
+#   include <wx/dcprint.h>       // for wxPrinterDC
+#endif // __WINE__
 #endif // USE_PCH
 
 #ifdef M_BASEDIR

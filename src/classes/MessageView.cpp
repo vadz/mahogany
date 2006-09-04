@@ -35,6 +35,10 @@
 #  include "Profile.h"
 
 #  include "gui/wxMApp.h"      // for PrepareForPrinting()
+// windows.h defines ERROR
+#ifdef __WINE__
+#  undef   ERROR
+#endif // __WINE__
 #  include "MHelp.h"
 #  include "sysutil.h"
 #  include "gui/wxIconManager.h"

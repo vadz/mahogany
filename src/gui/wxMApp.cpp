@@ -34,6 +34,9 @@
 #  include <wx/msgdlg.h>   // for wxMessageBox
 #  include <wx/menu.h>
 #  include <wx/statusbr.h>
+#ifdef __WINE__
+#  include <wx/timer.h>    // for wxTimer
+#endif // __WINE__
 #endif // USE_PCH
 
 #include "wx/persctrl.h" // for wxPMessageBoxEnable
@@ -1382,7 +1385,7 @@ const wxPrintData *wxMApp::GetPrintData()
    {
       m_PrintData = new wxPrintData;
 
-#if wxUSE_POSTSCRIPT
+#if wxUSE_POSTSCRIPT && !defined(__WINE__)
       wxPrintNativeDataBase * const dataNative = m_PrintData->GetNativeData();
       wxPostScriptPrintNativeData * const dataPS =
          static_cast<wxPostScriptPrintNativeData *>(dataNative);

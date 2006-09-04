@@ -30,7 +30,10 @@
    #include <wx/statbox.h>
 #ifdef OS_WIN // cygwin and mingw
    #include <wx/settings.h>
-#endif
+#ifdef __WINE__
+   #include <wx/dcclient.h>     // for wxClientDC
+#endif // __WINE__
+#endif // OS_WIN
 #endif // USE_PCH
 
 #include "gui/wxDialogLayout.h"

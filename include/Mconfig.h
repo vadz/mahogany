@@ -35,7 +35,7 @@
 #define   OS_SUBTYPE   "unknown"
 
 /// Test for unix flavours:
-#if defined(__UNIX__) && !defined(__CYGWIN__)
+#if defined(__UNIX__) && !defined(__CYGWIN__) && !defined(__WINE__)
 #  define  OS_UNIX    1
 #  define  OS_TYPE    "unix"
 #  undef   OS_SUBTYPE

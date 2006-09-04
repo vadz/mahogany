@@ -38,6 +38,10 @@
 #include "MModule.h"
 
 #include <wx/dynlib.h>
+#ifdef __WINE__
+// it includes wrapwin.h which includes windows.h which defines SendMessage under Windows
+#undef SendMessage
+#endif // __WINE__
 #include <wx/textfile.h>        // for wxTextFile
 
 // ----------------------------------------------------------------------------

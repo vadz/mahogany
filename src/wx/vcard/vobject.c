@@ -47,6 +47,9 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #include <stdio.h>
 #include <fcntl.h>
 
+#ifdef __WINE__
+#include <wx/wxchar.h>    // for wxStricmp
+#endif // __WINE__
 
 #define NAME_OF(o)				o->id
 #define VALUE_TYPE(o)			o->valType
@@ -400,7 +403,7 @@ DLLEXPORT(VObject*) isAPropertyOf(VObject *o, const char *id)
     initPropIterator(&i,o);
     while (moreIteration(&i)) {
 	VObject *each = nextVObject(&i);
-	if (!stricmp(id,each->id))
+	if (!wxStricmp(id,each->id))
 	    return each;
 	}
     return (VObject*)0;
@@ -653,7 +656,7 @@ DLLEXPORT(const char*) lookupStr(const char *s)
     unsigned int h = hashStr(s);
     if ((t = strTbl[h]) != 0) {
 	do {
-	    if (stricmp(t->s,s) == 0) {
+	    if (wxStricmp(t->s,s) == 0) {
 		t->refCnt++;
 		return t->s;
 		}
@@ -672,7 +675,7 @@ DLLEXPORT(void) unUseStr(const char *s)
     if ((t = strTbl[h]) != 0) {
 	p = t;
 	do {
-	    if (stricmp(t->s,s) == 0) {
+	    if (wxStricmp(t->s,s) == 0) {
 		t->refCnt--;
 		if (t->refCnt == 0) {
 		    if (p == strTbl[h]) {
@@ -954,7 +957,7 @@ static struct PreDefProp* lookupPropInfo(const char* str)
     int i;
 	
     for (i = 0; propNames[i].name; i++)
-	if (stricmp(str, propNames[i].name) == 0) {
+	if (wxStricmp(str, propNames[i].name) == 0) {
 	    return &propNames[i];
 	    }
     
@@ -967,7 +970,7 @@ DLLEXPORT(const char*) lookupProp_(const char* str)
     int i;
 	
     for (i = 0; propNames[i].name; i++)
-	if (stricmp(str, propNames[i].name) == 0) {
+	if (wxStricmp(str, propNames[i].name) == 0) {
 	    const char* s;
 	    s = propNames[i].alias?propNames[i].alias:propNames[i].name;
 	    return lookupStr(s);
@@ -981,7 +984,7 @@ DLLEXPORT(const char*) lookupProp(const char* str)
     int i;
 	
     for (i = 0; propNames[i].name; i++)
-	if (stricmp(str, propNames[i].name) == 0) {
+	if (wxStricmp(str, propNames[i].name) == 0) {
 	    const char *s;
 	    fieldedProp = propNames[i].fields;
 	    s = propNames[i].alias?propNames[i].alias:propNames[i].name;
@@ -1258,7 +1261,7 @@ static int inList(const char **list, const char *s)
 {
     if (list == 0) return 0;
     while (*list) {
-	if (stricmp(*list,s) == 0) return 1;
+	if (wxStricmp(*list,s) == 0) return 1;
 	list++;
 	}
     return 0;
@@ -1285,7 +1288,7 @@ static void writeProp(OFile *fp, VObject *o)
 	    const char *s;
 	    VObject *eachProp = nextVObject(&t);
 	    s = NAME_OF(eachProp);
-	    if (stricmp(VCGroupingProp,s) && !inList(fields_,s))
+	    if (wxStricmp(VCGroupingProp,s) && !inList(fields_,s))
 		writeAttrValue(fp,eachProp);
 	    }
 	if (fields_) {

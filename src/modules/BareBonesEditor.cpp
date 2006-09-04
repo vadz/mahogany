@@ -885,7 +885,7 @@ void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 }
 
 
-#if wxUSE_WCHAR_T && defined(OS_WIN)
+#if wxUSE_WCHAR_T && defined(OS_WIN) && !defined(__WINE__)
 wxWCharBuffer
 wxBareBonesTextControl::GetUnicodeText() const
 {
@@ -1221,7 +1221,7 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
 
-#if wxUSE_WCHAR_T && defined(OS_WIN)
+#if wxUSE_WCHAR_T && defined(OS_WIN) && !defined(__WINE__)
    wxFontEncoding encPart = wxFONTENCODING_SYSTEM;
    wxWCharBuffer wbuf = m_textControl->GetUnicodeText();
 

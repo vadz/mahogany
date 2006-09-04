@@ -15,6 +15,12 @@
 
 #include "ConfigSource.h"
 
+#ifndef USE_PCH
+#ifdef __WINE__
+   #include "Profile.h"                // for M_PROFILE_CONFIG_SECTION
+#endif // __WINE__
+#endif // USE_PCH
+
 /**
    ConfigSourceLocal uses wxConfig to implement ConfigSource.
 

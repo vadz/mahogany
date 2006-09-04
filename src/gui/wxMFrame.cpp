@@ -60,6 +60,10 @@
 #include "gui/wxMenuDefs.h"
 
 #include <wx/fontmap.h>          // for GetEncodingDescription()
+#ifdef __WINE__
+// it includes wrapwin.h which includes windows.h which defines CreateFile under Windows
+#undef CreateFile
+#endif // __WINE__
 #include <wx/confbase.h>
 
 #include <wx/printdlg.h>

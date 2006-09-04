@@ -32,7 +32,7 @@
 
 // under Unix we have to load libssl and libcrypto to provide access to them to
 // c-client
-#if defined(OS_UNIX) || defined(__CYGWIN__)
+#if (defined(OS_UNIX) || defined(__CYGWIN__)) && !defined(__WINE__)
 
 #include <wx/dynlib.h>
 

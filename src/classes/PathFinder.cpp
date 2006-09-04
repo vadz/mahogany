@@ -23,7 +23,7 @@
 #  include   "kbList.h"
 #endif // USE_PCH
 
-#ifdef OS_WIN // cygwin and mingw
+#if defined(OS_WIN) && !defined(__WINE__) // cygwin and mingw
 #  include  <io.h> // for access()
 #endif
 

@@ -29,7 +29,10 @@
 
 #ifdef OS_WIN // cygwin and mingw
 #  include "MApplication.h" // for mApplication
-#endif
+#ifdef __WINE__
+#  include "Mdefaults.h"    // for READ_APPCONFIG
+#endif // __WINE__
+#endif // OS_WIN
 #endif // USE_PCH
 
 #include "ASMailFolder.h"

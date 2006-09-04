@@ -78,16 +78,16 @@
 class MPersMsgBox;
 
 // windows.h included from fontutil.h defines ERROR
-#if defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__WINE__)
 #  undef   ERROR
 #endif
 #include <wx/fontmap.h>      // DecodeHeader() uses CharsetToEncoding()
-#if defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__WINE__)
 #  undef   ERROR
 #  define  ERROR (long) 2 // HACK - redefine again as in extra/src/c-client/mail.h
 #endif
 
-#if defined(OS_UNIX) && !defined(__CYGWIN__)
+#if defined(OS_UNIX) && !defined(__CYGWIN__) && !defined(__WINE__)
    #include <signal.h>
 
    // wxTYPE_SA_HANDLER is defined by wxWindows configure script in its setup.h
@@ -4861,7 +4861,7 @@ MailFolderCC::CClientInit(void)
    // attack Exchange server (!)
    mail_parameters(NULL, SET_DISABLE822TZTEXT, (void *)1);
 
-#if defined(OS_UNIX) && !defined(__CYGWIN__)
+#if defined(OS_UNIX) && !defined(__CYGWIN__) && !defined(__WINE__)
    // install our own sigpipe handler to ignore (and not die) if a SIGPIPE
    // happens
    struct sigaction sa;

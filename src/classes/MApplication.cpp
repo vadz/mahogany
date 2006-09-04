@@ -74,6 +74,11 @@
    #include <wx/msw/winundef.h>
 
    #include <wx/dynlib.h>
+#ifdef __WINE__
+   // it includes wrapwin.h which includes windows.h which defines SendMessage under Windows
+   #undef SendMessage
+   #undef CreateFile
+#endif // __WINE__
 #endif // OS_WIN
 
 class MOption;

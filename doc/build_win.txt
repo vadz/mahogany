@@ -127,9 +127,6 @@ e) Common problems
 + check that you installed sqlite as explained above
 
 
-
-
-
 2. Cygwin
 ---------
 
@@ -169,5 +166,20 @@ disable debugging if you experience out of memory problems.
 SSL does not work with cygwin.
 
 IMAP does not work with mingw.
+
+
+3. WINE
+-------
+
+Although it's not for building under MS Windows, we'll describe it here.
+
+a) Build process
+----------------
+
+cd <path to Mahogany sources>
+mkdir build.wine
+cd build.wine
+CC=winegcc CXX=wineg++ ../configure --without-python --without-dspam --with-modules=static --disable-dialup --without-ssl
+make
 
 vi: ts=8 sw=3 nolist nocin ai:

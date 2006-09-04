@@ -32,6 +32,9 @@
    #include "MApplication.h"
    #include "Mdefaults.h"
    #include <wx/fileconf.h>               // for wxFileConfig
+#ifdef __WINE__
+   #include <wx/msw/regconf.h>            // for wxRegConfig
+#endif // __WINE__
 #endif // USE_PCH
 
 #include <wx/confbase.h>

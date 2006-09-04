@@ -133,7 +133,7 @@ wxVCard::~wxVCard()
     {
         while ( vObj )
         {
-            if ( stricmp(vObjectName(vObj), VCCardProp) == 0 )
+            if ( wxStricmp(vObjectName(vObj), VCCardProp) == 0 )
             {
                 vcards.Add(new wxVCard(vObj));
             }
@@ -327,7 +327,7 @@ VObject *wxVCard::GetNextPropOfName(const char *name, void **cookie) const
         while ( moreIteration(iter) )
         {
             VObject *vObj = nextVObject(iter);
-            if ( stricmp(vObjectName(vObj), name) == 0 )
+            if ( wxStricmp(vObjectName(vObj), name) == 0 )
             {
                 // found one with correct name
                 return vObj;

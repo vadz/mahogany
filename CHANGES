@@ -6,6 +6,11 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
+Release 0.68 '' September xx, 2006
+---------------------------------------
+
+2006-09-05 NB: Mahogany can now be compiled with wxWine
+
 Release 0.67 'Constance' August 1, 2006
 ---------------------------------------
 

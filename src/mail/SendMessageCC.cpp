@@ -50,7 +50,7 @@
 // has to be included before SendMessage.h, as it includes windows.h which
 // defines SendMessage under Windows
 #include <wx/fontmap.h>          // for GetEncodingName()
-#if defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__WINE__)
 #  undef SendMessage
 #endif
 

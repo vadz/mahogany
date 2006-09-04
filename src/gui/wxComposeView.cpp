@@ -71,6 +71,10 @@
 #include <wx/tokenzr.h>
 #include <wx/textbuf.h>
 #include <wx/fontmap.h>
+#ifdef __WINE__
+// it includes wrapwin.h which includes windows.h which defines SendMessage under Windows
+#undef SendMessage
+#endif // __WINE__
 #include <wx/fontutil.h>      // for wxNativeFontInfo
 
 // windows.h included from wx/fontutil.h under Windows #defines this
