@@ -23,9 +23,9 @@
 #  include "Mcommon.h"
 #  include "guidef.h"
 
-#  include <wx/fontmap.h>
 #endif // USE_PCH
 
+#include <wx/fontmap.h>
 #include <wx/encconv.h>
 
 // ============================================================================
