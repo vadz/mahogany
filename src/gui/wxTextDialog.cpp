@@ -27,6 +27,7 @@
    #include <wx/sizer.h>
    #include <wx/button.h>
    #include <wx/filedlg.h>
+   #include <wx/settings.h>
    #include <wx/textctrl.h>
 #endif // USE_PCH
 
@@ -159,10 +160,21 @@ MTextDialog::MTextDialog(wxWindow *parent,
    // have multiple parts using different encodings) we must do this to at
    // least show something to the user while using the default UTF-8 encoding
    // of GTK+ 2 could result in nothing being shown at all
-   m_text->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE,
-                          wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
-                          false /* not underlined */, wxEmptyString,
-                          wxFONTENCODING_ISO8859_1));
+   //
+   // also use wxSYS_ANSI_VAR_FONT and not wxSYS_DEFAULT_GUI_FONT (also used by
+   // wxNORMAL_FONT) because its size is too small for fixed width font under
+   // Windows currently
+   m_text->SetFont(wxFont
+                   (
+                     wxSystemSettings::GetFont(wxSYS_ANSI_VAR_FONT).
+                        GetPointSize(),
+                     wxFONTFAMILY_TELETYPE,
+                     wxFONTSTYLE_NORMAL,
+                     wxFONTWEIGHT_NORMAL,
+                     false /* not underlined */,
+                     wxEmptyString,
+                     wxFONTENCODING_ISO8859_1
+                   ));
 
    // now that the encoding is set, we can show the text
    m_text->SetValue(text);
