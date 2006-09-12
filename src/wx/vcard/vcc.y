@@ -107,10 +107,6 @@ int yylex();
 #include <ctype.h>
 #include "vcc.h"
 
-#ifndef USE_PCH
-#include <wx/wxchar.h>    // for wxStricmp
-#endif // USE_PCH
-
 /****  Types, Constants  ****/
 
 #define YYDEBUG		0	/* 1 to compile in some debugging code */
@@ -439,10 +435,10 @@ static void enterAttr(const char *s1, const char *s2)
 	}
     else
 	addProp(curProp,p1);
-    if (wxStricmp(p1,VCBase64Prop) == 0 || (s2 && wxStricmp(p2,VCBase64Prop)==0))
+    if (stricmp(p1,VCBase64Prop) == 0 || (s2 && stricmp(p2,VCBase64Prop)==0))
 	lexPushMode(L_BASE64);
-    else if (wxStricmp(p1,VCQuotedPrintableProp) == 0
-	    || (s2 && wxStricmp(p2,VCQuotedPrintableProp)==0))
+    else if (stricmp(p1,VCQuotedPrintableProp) == 0
+	    || (s2 && stricmp(p2,VCQuotedPrintableProp)==0))
 	lexPushMode(L_QUOTED_PRINTABLE);
     deleteStr(s1); deleteStr(s2);
     }
@@ -777,10 +773,10 @@ static int match_begin_name(int end) {
     char *n = lexLookaheadWord();
     int token = ID;
     if (n) {
-	if (!wxStricmp(n,"vcard")) token = end?END_VCARD:BEGIN_VCARD;
-	else if (!wxStricmp(n,"vcalendar")) token = end?END_VCAL:BEGIN_VCAL;
-	else if (!wxStricmp(n,"vevent")) token = end?END_VEVENT:BEGIN_VEVENT;
-	else if (!wxStricmp(n,"vtodo")) token = end?END_VTODO:BEGIN_VTODO;
+	if (!stricmp(n,"vcard")) token = end?END_VCARD:BEGIN_VCARD;
+	else if (!stricmp(n,"vcalendar")) token = end?END_VCAL:BEGIN_VCAL;
+	else if (!stricmp(n,"vevent")) token = end?END_VEVENT:BEGIN_VEVENT;
+	else if (!stricmp(n,"vtodo")) token = end?END_VTODO:BEGIN_VTODO;
 	deleteStr(n);
 	return token;
 	}
@@ -1090,10 +1086,10 @@ int yylex() {
 		    if (isalpha(c)) {
 			char *t = lexGetWord();
 			yylval.str = t;
-			if (!wxStricmp(t, "begin")) {
+			if (!stricmp(t, "begin")) {
 			    return match_begin_end_name(0);
 			    }
-			else if (!wxStricmp(t,"end")) {
+			else if (!stricmp(t,"end")) {
 			    return match_begin_end_name(1);
 			    }
 		        else {
