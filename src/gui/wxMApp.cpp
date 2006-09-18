@@ -621,6 +621,23 @@ wxMApp::OnIdle(wxIdleEvent &event)
    event.Skip();
 }
 
+int wxMApp::FilterEvent(wxEvent& event)
+{
+   // quickly bail out if we're not inside c-client currently
+   if ( AllowBgProcessing() )
+      return -1;
+
+   if ( event.IsCommandEvent() || event.GetEventType() == wxEVT_CHAR )
+   {
+      // these events are dangerous to handle now as they can result in another
+      // call to c-client being made so just ignore them
+      return false;
+   }
+
+   // the other events should be safe to handle
+   return -1;
+}
+
 bool
 wxMApp::AllowBgProcessing() const
 {
