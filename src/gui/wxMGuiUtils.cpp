@@ -22,7 +22,6 @@
 #ifndef  USE_PCH
 #  include "Mcommon.h"
 #  include "guidef.h"
-
 #endif // USE_PCH
 
 #include <wx/fontmap.h>
@@ -111,7 +110,7 @@ CreateFontFromDesc(const String& fontDesc, int fontSize, int fontFamily)
 
    // if we don't, or if creating font from it failed, create the font with the
    // given size and family if we have [either of] them
-   if ( !font.Ok() && (fontSize != -1 || fontFamily != -1) )
+   if ( !font.Ok() && (fontSize != -1 || fontFamily != wxFONTFAMILY_DEFAULT) )
    {
       font = wxFont
              (
