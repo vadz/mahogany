@@ -429,10 +429,7 @@ static inline bool IsAlnum(unsigned char c)
 inline bool IsURLMark(char c)
 {
    return c == '-' || c == '_' || c == '.' || c == '!' || c == '~' ||
-          c == '*'
-          // these don't appear in the URLs in practice
-          //|| c == '\'' || c == '(' || c == ')'
-          ;
+          c == '*' || c == '\'' || c == '(' || c == ')';
 }
 
 /// checks a character to be 'reserved' as from RFC2396
