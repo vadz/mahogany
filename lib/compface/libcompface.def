@@ -1,0 +1,12 @@
+LIBRARY
+; zlib data compression library
+
+EXPORTS
+    CompAll
+    Compress
+    GenFace
+    ReadFace
+    UnCompAll
+    UnCompress
+    UnGenFace
+    WriteFace

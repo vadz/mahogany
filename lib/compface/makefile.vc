@@ -1,0 +1,46 @@
+#
+#	Simple MS VC++ Makefile
+#
+#	To build:
+#       C:\src\compface> nmake /f makefile.vc all
+#
+
+NAME	= compface
+UNNAME	= uncompface
+LIBNAME = lib$(NAME)
+STATICLIB = $(LIBNAME).lib
+SHAREDLIB = $(LIBNAME).dll
+NAMEEXE	= $(NAME).exe
+UNNAMEEXE = $(UNNAME).exe
+
+CC      = cl
+INCL	= -I. 
+LIBS    = 
+CFLAGS  = -nologo -W3 -O2 -MD $(INCL) -DSTDC_HEADERS=1 -DHAVE_FCNTL_H=1 -DHAVE_STRERROR=1 -DHAVE_ERRNO_H=1 -DHAVE_CONFIG_H=1 -DHAVE_IO_H=1
+LDFLAGS	= -nologo -release
+
+
+OBJ	= \
+	arith.obj \
+	file.obj \
+	compress.obj \
+	gen.obj \
+	uncompface.obj
+    
+all:	$(STATICLIB) $(SHAREDLIB) $(NAMEEXE) $(UNNAMEEXE)
+
+$(STATICLIB):	$(OBJ)
+	lib -out:$(STATICLIB) $(OBJ)
+
+$(SHAREDLIB):	$(OBJ)
+	link $(LDFLAGS) -def:$(LIBNAME).def -dll -implib:$(LIBNAME)_i.lib \
+	-out:$@ $(OBJ) $(LIBS)
+
+$(NAMEEXE) :	cmain.obj compface.obj $(STATICLIB)
+		link $(LDFLAGS) -out:$@ cmain.obj compface.obj $(STATICLIB)
+
+$(UNNAMEEXE) :	uncmain.obj $(STATICLIB)
+		link $(LDFLAGS) -out:$@ uncmain.obj $(STATICLIB)
+
+clean:
+	del *.obj *.lib $(SHAREDLIB)
