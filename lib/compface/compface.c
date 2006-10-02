@@ -13,8 +13,6 @@
  *  to me, then an attempt will be made to fix them.
  */
 
-#define MAIN
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

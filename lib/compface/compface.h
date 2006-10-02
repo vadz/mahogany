@@ -20,7 +20,7 @@
 
 /* For all function declarations, if ANSI then use a prototype. */
 
-#if  defined(__STDC__)
+#if  defined(__STDC__) || defined(__cplusplus)
 #define P(args)  args
 #else  /* ! __STDC__ */
 #define P(args)  ()

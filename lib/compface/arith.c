@@ -17,6 +17,7 @@
 #include "config.h"
 #endif
 
+#include <stdio.h>
 #include "compface.h"
 
 void

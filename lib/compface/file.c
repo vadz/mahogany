@@ -20,6 +20,9 @@
 
 #include "compface.h"
 
+#include <string.h>
+#include <stdio.h>
+
 int compface_xbitmap=0;
 
 void

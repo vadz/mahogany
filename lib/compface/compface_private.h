@@ -15,8 +15,13 @@
 
 #include "compface.h"
 
+#ifdef MAIN
 #define EXTERN
 #define INIT(x) = x
+#else /* !MAIN */
+#define EXTERN extern
+#define INIT(x)
+#endif /* MAIN/!MAIN */
 
 /* need to know how many bits per hexadecimal digit for io */
 EXTERN char HexDigits[] INIT("0123456789ABCDEF");
@@ -28,8 +33,10 @@ EXTERN BigInt B;
 
 /* data.h was established by sampling over 1000 faces and icons */
 EXTERN Guesses G
+#ifdef MAIN
 =
 #include "data.h"
+#endif
 ;
 
 /* A stack of probability values */
@@ -37,6 +44,7 @@ EXTERN Prob *ProbBuf[PIXELS * 2];
 EXTERN int NumProbs INIT(0);
 
 EXTERN Prob levels[4][3]
+#ifdef MAIN
 =
 {
 	{{1, 255},	{251, 0},	{4, 251}},	/* Top of tree almost always grey */
@@ -44,9 +52,11 @@ EXTERN Prob levels[4][3]
 	{{33, 223},	{159, 0},	{64, 159}},
 	{{131, 0},	{0, 0}, 	{125, 131}}	/* Grey disallowed at bottom */
 }
+#endif
 ;
 
 EXTERN Prob freqs[16]
+#ifdef MAIN
 =
 {
 	{0, 0}, 	{38, 0},	{38, 38},	{13, 152},
@@ -54,6 +64,7 @@ EXTERN Prob freqs[16]
 	{38, 114},	{13, 191},	{13, 204},	{6, 236},
 	{13, 217},	{6, 242},	{5, 248},	{3, 253}
 }
+#endif
 ;
 
 EXTERN int status;
