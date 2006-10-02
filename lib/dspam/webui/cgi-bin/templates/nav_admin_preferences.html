@@ -1,0 +1,127 @@
+<HTML>
+<HEAD><TITLE>DSPAM v3 Administrative Suite</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$" title="Home"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+		Statistical SPAM Protection for <strong>Administrator ($REMOTE_USER$)</strong>
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+	<ul id="navlist">
+		<li><a href="$CGI$?$USER$template=status">System Status</a></li>
+		<li><a href="$CGI$?$USER$template=user">User Statistics</a></li>
+		<li id="active"><a id="current" href="$CGI$?$USER$template=preferences">Administration</a></li>
+		<li><a href="dspam.cgi">Control Center</a></li>
+		$NAV_ADMIN$
+	</ul>
+</div>
+
+<div id="panel">
+
+<FORM ACTION="$CGI$">
+
+<p>
+This page lets you edit the preferences for any user. You can also edit DSPAM's default preferences by leaving the input field empty.
+</p>
+
+<p>
+Enter user name:
+<INPUT NAME=username VALUE=$USERNAME$> <INPUT TYPE=SUBMIT VALUE=Edit>
+</p>
+
+<p>
+$ERROR$
+</p>
+
+<INPUT TYPE=HIDDEN NAME="template" VALUE="preferences">
+
+<div id="content">
+	<h3><strong>Training</strong> - Configure how the filter learns as it processes messages</h3>
+<table class="hollow">
+<tr><td>
+DSPAM should train:<br><br>
+<INPUT TYPE=RADIO NAME=trainingMode VALUE="TEFT" $S_TEFT$>
+On every new message scanned by the filter<BR>
+<INPUT TYPE=RADIO NAME=trainingMode VALUE="TOE" $S_TOE$>
+Only when the filter makes a mistake<BR>
+<INPUT TYPE=RADIO NAME=trainingMode VALUE="TUM" $S_TUM$>
+Only with new data or if the filter makes a mistake
+</td><td width=20>
+ &nbsp;</td><td>
+When I train DSPAM, I prefer:<br><br>
+<INPUT TYPE=RADIO NAME=signatureLocation VALUE="message" $S_LOC_MESSAGE$>
+To <u>forward</u> my spams (signature appears in message body)<BR>
+<INPUT TYPE=RADIO NAME=signatureLocation VALUE="headers" $S_LOC_HEADERS$>
+To <u>bounce</u> my spams (signature appears in message headers)<BR>
+<INPUT TYPE=RADIO NAME=signatureLocation VALUE="attachment" $S_LOC_ATTACHMENT$>
+To have DSPAM add its signature as an <u>attachment</u><BR>
+</td></tr>
+</table>
+
+<p>
+Filter sensitivity <strong>during</strong> the training period:<br>
+<span class="small">Catch SPAM (More in Quarantine)</span>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=0 $SEDATION_0$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=1 $SEDATION_1$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=2 $SEDATION_2$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=3 $SEDATION_3$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=4 $SEDATION_4$>
+    | <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=5 $SEDATION_5$> |
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=6 $SEDATION_6$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=7 $SEDATION_7$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=8 $SEDATION_8$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=9 $SEDATION_9$>
+    <INPUT TYPE=RADIO NAME=statisticalSedation VALUE=10 $SEDATION_10$> 
+<span class="small">Assume Good (Fewer in Quarantine)</span>
+</p>
+
+</div>
+
+<div id="content">
+	<h3><strong>Message Handling</strong> - Configure how SPAM is handled</h3>
+<p>
+When a SPAM message is identified:<br><br>
+<INPUT TYPE=RADIO NAME=spamAction VALUE="quarantine" $S_ACTION_QUARANTINE$>Quarantine the message<BR>
+<INPUT TYPE=RADIO NAME=spamAction VALUE="tag" $S_ACTION_TAG$>Tag the Subject header with <INPUT NAME=spamSubject VALUE="$SPAM_SUBJECT$" SIZE=8><BR>
+<INPUT TYPE=RADIO NAME=spamAction VALUE="deliver" $S_ACTION_DELIVER$>Deliver the message normally with a X-DSPAM-Result header<BR>
+</p>
+
+</div>
+
+<div id="content">
+	<h3><strong>Features</strong> - Tuning SPAM filtering</h3>
+<p>
+<INPUT TYPE=CHECKBOX NAME=enableBNR $C_BNR$>
+Enable noise reduction, which usually improves filtering accuracy<br>
+<INPUT TYPE=CHECKBOX NAME=enableWhitelist $C_WHITELIST$>
+Enable automatic whitelisting to record frequent correspondence<br>
+<INPUT TYPE=CHECKBOX NAME=showFactors $C_FACTORS$>
+Add the factoring tokens in each email into the message's full headers
+</p>
+
+</div>
+
+<p>
+<INPUT TYPE=SUBMIT NAME=submit VALUE="Submit Changes">
+</p>
+
+</FORM>
+
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a> Copyright &copy; 2005, Jonathan A. Zdziarski
+</p>
+</div>
+
+</BODY>
+</HTML>

@@ -1,0 +1,154 @@
+/* global */
+
+body, input, textarea, select {
+	font-family: "Lucida Grande", Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+
+table {
+	border: 1px solid black;
+}
+th {
+	font-size: 11px;
+	background-color: black;
+	color: white;
+	font-weight: bold;
+	text-align: left;
+}
+td {
+	font-size: 11px;
+}
+em {
+	color: red;
+	font-weight: bold;
+	font-style: normal;
+}
+
+/* classes */
+
+.rowEven {background-color: #dddddd;}
+.rowOdd {background-color: #eeeeee;}
+.rowAlert {background-color: yellow;}
+.rowHighlight {background-color: white; font-weight: bold;}
+.rowDivider {border-left: 1px solid black;}
+
+.innocent {color: limegreen; background-color: green;}
+.whitelisted {color: magenta; background-color: purple;}
+.spam {color: red; background-color: darkred;}
+.false {color: white; font-weight: bold; background-color: green;}
+.missed {color: white; font-weight: bold; background-color: darkred;}
+.inoculation {color: dodgerblue; background-color: darkblue;}
+.corpus {color: black; background-color: white;}
+.relay {color: white; background-color: #994400;}
+.low {color: darkblue; font-weight: bold;}
+.medium {color: steelblue; font-weight: bold;}
+.high {color: darkorange; font-weight: bold;}
+
+.small { font-size: 9px;}
+.hollow { border: 0px; }
+
+
+/* ids */
+
+#header {
+	padding: 0;
+	margin: 0;
+	height: 25px;
+}
+#logo {
+	text-align: right;
+	float: right;
+}
+#logo img {
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+#userinfo {
+}
+
+#navcontainer ul {
+	display: block;
+	list-style: none outside;
+	padding: 0;
+	margin: 24px 0 0 0;
+}
+#navcontainer li {
+	margin: 0 4px 0 0;
+	background-color: lightgray;
+	color: white;
+	font-weight: bold;
+	/* the next 4 lines are magic:  moves box up to handle link elements */
+	display: block;
+	float: left;
+	position: relative;
+	top: -1.55em;
+}
+#navcontainer a:link, #navcontainer a:visited {
+	background-color: lightgray;
+	color: black;
+	text-decoration: none;
+	padding: 4px;
+}
+#navcontainer a:hover {
+	background-color: darkgray;
+	color: white;
+}
+#navcontainerclear {
+	 display: none;
+}
+html>body #navcontainerclear {
+	display: block;
+	clear: both;
+}
+#navcontainer li#active a {
+	background-color: black;
+	color: white;
+}
+
+#panel {
+	background-color: #f7f7f7;
+	border: 2px solid black;
+	padding: 8px;
+}
+
+#content {
+	text-align: left;
+	display: table;
+	width: 100%;
+	background-color: #dddddd;
+	margin-bottom: 8px;
+}
+#content h3 {
+	font-size: 11px;
+	font-weight: normal;
+	background-color: #bbbbbb;
+	margin: 0;
+	padding: 2px;
+}
+#content h3 strong {
+	font-weight: bold;
+}
+#content table,img {
+	margin: 8px;
+	display: block;
+	float: left;
+}
+#content img {
+	padding: 4px;
+	background-color:#ddd;
+}
+#content p {
+	padding: 8px;
+	padding-top: 0px;
+	clear: left;
+	float: none;
+}
+
+#footer a {
+	color: #666666;
+}
+#footer p {
+	color: #666666;
+	padding: 8px;
+}

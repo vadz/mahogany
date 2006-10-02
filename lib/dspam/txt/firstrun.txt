@@ -1,0 +1,21 @@
+To: $u@configureme.com
+From: Technical Support <support@configureme.com>
+Subject: Spam Filtering is Active
+
+Dear Valued Customer,
+
+This email is to inform you that spam filtering has been activated on this account and provide you with some basic instructions to assist in filtering spam from your email. The filtering software we are using is called DSPAM and is capable of dynamically learning your specific email behavior.  We have started you off with a pre-configured spam dictionary which will help filter a limited amount of spam immediately for you.  As you continue to receive email, your specific email patterns will be learned by the spam software, which will result in increasing accuracy in catching spam. For this reason, it is important that you forward any spam you receive for this email account into the filtering software.  By forwarding your spam, the software is capable of learning from its mistakes and will improve itself to do better next time.
+
+To forward a spam into the system, please use the 'Forward' button in whatever email client you are using and send the spam to $u-spam@configureme.com.  It is not necessary to provide an explanation of the message, as it will not be opened by a human, but processed by the software.  
+
+The software also quarantines all messages that it believes are spam.  From time to time, you should check this quarantine to insure that it has not caught any legitimate email.  This too plays a significant role in the learning process.  To check your quarantine, use a web browser and go to the following URL:
+
+http://www.yourdomain.com/dspam/
+
+You will be prompted for your username and password.  Use the same login and password you use to check your email.  From here, you can peruse your quarantine box.  If any legitimate messages have been caught, click on the message and then click 'THIS IS NOT SPAM!'.  The message will then be delivered and the software will re-learn so as not to make the same mistake next time.  Once you have marked any legitimate messages, you may delete the messages in your quarantine by clicking the 'DELETE ALL' button at the bottom of the page.
+
+Thank you, and please feel free to contact us if you have any questions.
+
+Technical Support
+support@configureme.com
+

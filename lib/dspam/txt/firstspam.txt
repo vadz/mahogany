@@ -1,0 +1,19 @@
+To: $u@configureme.com
+From: Technical Support <support@configureme.com>
+Subject: Your first spam has been caught
+
+Dear Valued Customer,
+
+This email is to inform you that our spam filtering software, DSPAM, has caught its first spam for your account.  This message will only be sent once and contains useful information for accessing your quarantine box.
+
+Your quarantine box contains all messages that our software believed were spam.  You should check your quarantine periodically to insure that no legitimate messages have been accidentally caught.  To check your quarantine, use a web browser and go to the following URL:
+
+http://www.yourdomain.com/dspam/
+
+You will be prompted for your username and password.  Use the same login and password you use to check your email.  From here, you can peruse your quarantine box.  If any legitimate messages have been caught, click on the message and then click 'THIS IS NOT SPAM!'.  The message will then be delivered and the software will re-learn so as not to make the same mistake next time.  Once you have marked any legitimate messages, you may delete the messages in your quarantine by clicking the 'DELETE ALL' button at the bottom of the page.
+
+Thank you, and please feel free to contact us if you have any questions.
+
+Technical Support
+support@configureme.com
+

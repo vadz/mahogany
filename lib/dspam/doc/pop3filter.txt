@@ -1,0 +1,46 @@
+$Id: pop3filter.txt,v 1.1 2005/03/11 21:16:03 jonz Exp $
+
+POP3FILTER INTEGRATION
+
+Please follow the instructions in the README for building DSPAM. Once DSPAM
+has been built, the following instructions may be used to integrate it with
+pop3filter.
+
+pop3filter is an open-source POP3 proxy tool which can be used to provide
+spam filtering without the need for inbound mail server integration.  The
+software is configured to run as a "proxy"; that is, users are directed to
+check their email using the proxy's ip address (or are transparently
+redirected there) at which point the proxy will open up a connection to
+the mail server and filter mail as it is being downloaded by the user.
+
+pop3filter can be downloaded from http://pop3filter.sourceforge.net/.
+
+The easiest way to set up pop3filter is to have it call DSPAM using the
+--stdout command, at which point DSPAM will check the message and return
+it with X-DSPAM headers identifying the message as spam or innocent.  To
+do this, follow these steps:
+
+1. Compile and install pop3filter
+2. Compile and install DSPAM on the same machine
+
+   You may optionally wish to the spamSubject and spamAction=tag preferences
+   so that a tag will be prepended to the subject header of messages
+   suspected to be spam.
+
+3. Configure pop3filter to run as follows:
+
+ pop3filter --fork [mail server IP] 110 110 "/usr/local/bin/dspam --user \
+  \$POP3_USERNAME --stdout --deliver=innocent,spam "
+
+a full blown example would look like:
+
+ pop3filter --fork 10.0.0.1 110 110 "/usr/local/bin/dspam --user \
+  \$POP3_USERNAME --stdout --deliver=innocent,spam"
+
+The POP3_USERNAME variable will be automatically replaced with the username
+provided by the client at connect time.
+
+Mail will then be checked by DSPAM and an X-DSPAM-Result field will be
+appended to the message headers identifying the classification of the
+message.
+

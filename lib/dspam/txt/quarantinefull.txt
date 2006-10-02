@@ -1,0 +1,19 @@
+To: $u@configureme.com
+From: Technical Support <support@configureme.com>
+Subject: Your quarantine box is getting full
+
+Dear Valued Customer,
+
+This email is to inform you that your spam quarantine box is growing quite large and should be checked to insure that no legitimate messages were caught.  
+
+Your quarantine box contains all messages that our spam filtering software, DSPAM, believed were spam.  You should check your quarantine periodically to insure that no legitimate messages have been accidentally caught.  To check your quarantine, use a web browser and go to the following URL:
+
+http://www.yourdomain.com/dspam/
+
+You will be prompted for your username and password.  Use the same login and password you use to check your email.  From here, you can peruse your quarantine box.  If any legitimate messages have been caught, click on the message and then click 'THIS IS NOT SPAM!'.  The message will then be delivered and the software will re-learn so as not to make the same mistake next time.  Once you have marked any legitimate messages, you may delete the messages in your quarantine by clicking the 'DELETE ALL' button at the bottom of the page.  
+
+Thank you, and please feel free to contact us if you have any questions.
+
+Technical Support
+support@configureme.com
+

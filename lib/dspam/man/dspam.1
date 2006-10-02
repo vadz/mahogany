@@ -1,0 +1,309 @@
+.\" $Id: dspam.1,v 1.12 2006/05/14 15:37:30 jonz Exp $
+.\"  -*- nroff -*-
+.\"
+.\" dspam3.2
+.\"
+.\" Authors:    Jonathan A. Zdziarski <jonathan@nuclearelephant.com>
+.\"
+.\" Copyright (c) 2002-2006 Jonathan A. Zdziarski
+.\" All rights reserved
+.\"
+.TH DSPAM 1  "Sep 29, 2004" "DSPAM" "DSPAM"
+
+.SH NAME
+dspam \- DSPAM Anti-Spam Agent
+
+.SH SYNOPSIS
+.na
+.B dspam
+[\c
+.BI \--mode=[teft|toe|tum|notrain|unlearn]\fR\c
+]
+[\c
+.BI \--user\ user1
+user2\ ...\ userN\fR\c
+]
+[\c
+.BI \--feature\c
+=[ch,no,wh,tb=N,sb]\fR\c
+]
+[\c
+.B \--class\c
+=[spam|innocent]\fR\c
+]
+[\c
+.B \--source\c
+=[error|corpus|inoculation] \c
+]
+[\c
+.B \--profile\c
+=[PROFILE] \c
+]
+.B \--deliver\c
+=[spam,innocent] \c
+]
+[\c
+.B \--help \c
+]
+[\c
+.B \--process \c
+]
+[\c
+.B \--classify \c
+]
+[\c
+.B \--signature\c
+=[signature] \c
+]
+[\c
+.BI \--stdout \c
+]
+[\c
+.BI \--debug \c
+]
+[\c
+.BI \--daemon \c
+]
+[\c
+.BI \--client \c
+]
+[\c
+.BI \--rcpt-to \c
+]
+[\c
+.BI \--mail-from\c
+=[address] \c
+]
+[\c
+.I \ delivery\_arguments \fR\c
+]
+
+.ad
+.SH DESCRIPTION 
+.LP
+.B The DSPAM agent 
+provides a direct interface to mail servers for command-line
+spam filtering. The agent can masquerade as the mail server's local delivery
+agent and will process any email passed to it. The agent will then call whatever
+delivery agent was specified at compile time or quarantine/tag/drop messages
+identified as spam. The DSPAM agent can function locally or as a proxy. It
+is also responsible for processing classification errors so that DSPAM can 
+learn from its mistakes.
+
+.SH OPTIONS
+.LP
+.ne 3
+.TP
+.BI \--user\ user1 \ user2\ ...\ userN\fR\c
+Specifies the destination users of the incoming message. In most cases this is
+the local user on the system, however some implementations may call for virtual
+usernames, specific to DSPAM, to be assigned.  The agent processes an
+incoming message once for each user specified. If the message is to be
+delivered, the $u (or %u) parameters of the argument string will be interpolated
+for the current user being processed.
+ 
+.n3 3
+.TP
+.BI \--mode= [toe|tum|teft|notrain]\c
+Configures the training mode to be used for this process, overriding any
+defaults in dspam.conf:
+
+.B teft
+: Train-Everything.  Trains on all messages processed.  This is a very thorough training approach and should be considered the standard training approach for most users.  TEFT may, however, prove too volatile on installations with extremely high per-user traffic, or prove not very scalable on systems with extremely large user-bases.  In the event that TEFT is proving ineffective, one of the other modes is recommended.
+
+.B toe
+: Train-on-Error.  Trains only on a classification error, once the user's metadata has matured to 2500 innocent messages.  This training mode is much less resource intensive, as only occasional metadata writes are necessary.  It is also far less volatile than the TEFT mode of training.  One drawback, however, is that TOE only learns when DSPAM has made a mistake - which means the data is sometimes too static, and unable to "ease into" a different type of behavior.
+
+.B tum
+: Train-until-Mature.  This training mode is a hybrid between the other two training modes and provides a great balance between volatility and static metadata.  TuM will train on a per-token basis only tokens which have had fewer than 25 "hits" on them, unless an error is being retrained in which case all tokens are trained.  This training mode provides a solid core of stable tokens to keep accuracy consistent, but also allows for dynamic adaptation to any new types of email behavior a user might be experiencing.
+
+.B notrain
+: No training.  Do not train the user's data, and do not keep totals.  This should only be used in cases where you want to process mail for a particular user (based on a group, for example), but don't want the user to accumulate any learning data.
+
+.B unlearn
+: Unlearn original training. Use this if you wish to unlearn a previously learned message. Be sure to specify --source=error and --class to whatever the original classification the message was learned under. If not using TrainPristine, this will require the original signature from training.
+
+.ne 3
+.TP
+.BI \--feature= [chained,noise,tb=N,whitelist] \c
+Specifies the features that should be activated for this filter instance.  The following features may be used individually or combined using a comma as a delimiter:
+
+.B chained
+: Chained Tokens (also known as biGrams).  Chained Tokens combines adjacent tokens, presently with a window size of 2, to form token "chains".  Chained tokens uses additional storage resources, but greatly improves accuracy.  Recommended as a default feature.
+
+.B noise
+:  Bayesian Noise Reduction (BNR).  Bayesian Noise Reduction kicks in at 2500 innocent messages and provides an advanced progressive noise logic to reduce Bayesian Noise (wordlist attacks) in spams.  See http://bnr.nuclearelephant.com for more information.
+
+.B tb\=N
+:  Sets the training loop buffering level.  Training loop buffering is the amount of statistical sedation performed to water down statistics and avoid false positives during the user's training loop.  The training buffer sets the buffer sensitivity, and should be a number between 0 (no buffering whatsoever) to 10 (heavy buffering).  The default is 5, half of what previous versions of DSPAM used.  To avoid dulling down statistics at all during the training loop, set this to 0.
+
+.B whitelist
+:  Automatic whitelisting.  DSPAM will keep track of the entire "From:" line for each message received per user, and automatically whitelist messages from senders with more than 20 innocent messages and zero spams.  Once the user reports a spam from the sender, automatic whitelisting will automatically be deactivated for that sender.  Since DSPAM uses the entire "From:" line, and not just the sender's email address, automatic whitelisting is a very safe approach to improving accuracy especially during initial training.
+
+.B sbph
+:  Sparse Binary Polynomial Hashing. Bill Yerazunis' tokenizer method from CRM114. Tokenizer method only - works with existing combination algorithms.
+
+.ne 3
+.TP
+.BI \--class= [spam|innocent] \c
+Identifies the disposition (if any) of the message being presented. This flag
+should be used when a misclassification has occured, when the user is
+corpus-feeding a message, or when an inoculation is being presented. This
+flag should not be used for standard processing. This flag must be used in
+conjunction with the --source flag. Omitting this flag causes DSPAM to
+determine the disposition of the message on its own (the standard operating
+mode).
+ 
+.ne 3
+.TP
+.BI \--source= [error|corpus|inoculation] \c
+Where 
+.B --class
+is used, the source of the classification must also be provided. The source
+tells dspam how to learn the message being presented:
+
+ 
+.B error
+: The message being presented was a message previously misclassified by DSPAM.  When 'error' is provided as a source, DSPAM requires that the DSPAM signature be present in the message, and will use the signature to recall the original training metadata.  If the signature is not present, the message will be rejected.  In this source mode, DSPAM will also decrement each token's previous classification's count as well as the user totals.
+
+You should use error only when DSPAM has made an error in classifying the message, and should present the modified version of the message with the DSPAM signature when doing so.
+
+.B corpus
+: The message being presented is from a mail corpus, and should be trained as a new message, rather than re-trained based on a signature.  The message's full headers and body will be analyzed and the correct classification will be incremented, without its opposite being decremented.
+
+You should use corpus only when feeding messages in from corpus.
+                                                                                
+.B inoculation
+: The message being presented is in pristine form, and should be trained as an inoculation.  Inoculations are a more intense mode of training designed to cause DSPAM to train the user's metadata repeatedly on previoulsy unknown tokens, in an attempt to vaccinate the user from future messages similar to the one being presented.  You should use inoculation only on honeypots and the like.
+
+.ne 3
+.TP
+.BI \--profile= [PROFILE]\c
+Specify a storage profile from dspam.conf. The storage profile selected will be used for all database connectivity. See dspam.conf for more information. 
+
+.ne 3
+.TP
+.BI \--deliver= [innocent,spam]\c
+Tells
+.B DSPAM
+to deliver the message if its result falls within the criteria specified. For example, --deliver=innocent will cause DSPAM to only deliver the message if its classification has been determined as innocent. Providing --deliver=innocent,spam will cause DSPAM to deliver the message regardless of its classification. This flag provides a significant amount of flexibility for nonstandard implementations.
+
+.ne 3
+.TP
+.B \--stdout \c
+If the message is indeed deemed "deliverable" by the
+.B \--deliver
+flag, this flag will cause DSPAM to deliver the message to stdout, rather than the configured delivery agent.
+
+.ne 3
+.TP
+.B \--process \c
+Tells
+.B DSPAM
+to process the message. This is the default behavior, and the flag is implied unless 
+.B \--classify
+is used.
+
+.ne 3
+.TP
+.BI \--classify\c
+Tells
+.B DSPAM
+to only classify the message, and not perform any writes to the user's
+data or attempt to deliver/quarantine the message. The results of a
+classification are printed to stdout in the following format:
+
+X-DSPAM-Result: User; result="Spam"; probability=1.0000; confidence=0.80
+
+.B NOTE
+: The output of the classification is specific to a user's own data, and
+does not include the output of any groups they might be affiliated with,
+so it is entirely possible that the message would be caught as spam by a
+group the user belongs to, and appear as innocent in the output of a 
+classification. To get the classification for the
+.B group
+, use the group name as the user instead of an individual.
+
+.ne 3
+.TP
+.BI \--signature =[signature]
+If only the signature is available for training, and not the entire message,
+the --signature flag may be used to feed the signature into DSPAM and forego
+the reading of stdin. DSPAM will process the signature with whatever
+commandline classification was specified. NOTE: This should only be used
+with
+.B --source=error
+
+.ne 3
+.TP
+.BI \--debug\c
+If
+.B DSPAM
+was compiled with
+.B --enable-debug
+then using --debug will turn on debugging messages to /tmp/dspam.debug.
+
+.ne 3
+.TP
+.BI \--daemon\c
+If
+.B DSPAM
+was compiled with
+.B --enable-daemon
+then using --daemon will cause DSPAM to enter daemon mode, where it will listen
+for DSPAM clients to connect and actively service requests.
+
+.ne 3
+.TP
+.BI \--client\c
+If
+.B DSPAM
+was compiled with
+.B --enable-daemon
+then using --client will cause DSPAM to act as a client and attempt to connect to the DSPAM server specified in the client's configuration within dspam.conf. If client behavior is desired, this option
+.B must
+be specified, otherwise the agent simply operate as self-contained and processes the message on its own, eliminating any benefit of using the daemon.
+
+.ne 3
+.TP
+.BI \--rcpt-to\c
+If
+.B DSPAM
+will be configured to deliver via LMTP or SMTP, this flag may be used to define the RCPT TOs which will be used for the delivery of each user specified with --user. If no recipients are provided, the RCPT TOs will match the username.
+NOTE: The recipient list should always be balanced with the user list, or empty. Specifying an unbalanced number of recipients to users will result in undefined behavior.
+
+.ne 3
+.TP
+.BI \--mail-from=\c
+If
+.B DSPAM
+will be cofigured to deliver via LMTP or SMTP, this flag will set the MAIL FROM sent on delivery of the message. The default MAIL FROM depends on how the message was originally relayed to DSPAM. If it was relayed via the commandline, an empty MAIL FROM will be used. If it was relayed via LMTP, the original MAIL FROM will be used. 
+
+.SH EXIT VALUE
+.LP
+.ne 3
+.PD 0
+.TP
+.B 0
+Operation was successful.
+.ne 3
+.TP
+.B other
+Operation resulted in an error. If the error involved an error in calling the
+delivery agent, the exit value of the delivery agent will be returned.
+.PD
+
+.SH AUTHORS
+.LP
+
+Jonathan A. Zdziarski
+
+For more information, see http://dspam.nuclearelephant.com.
+
+.SH SEE ALSO
+.BR dspam_stats (1),
+.BR dspam_train (1),
+.BR dspam_clean (1),
+.BR dspam_dump (1),
+.BR dspam_merge (1)
+

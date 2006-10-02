@@ -1,0 +1,61 @@
+$Id: qmail.txt,v 1.1 2005/03/11 21:16:03 jonz Exp $
+
+QMAIL and VPOPMAIL INTEGRATION
+
+qmail is designed with a modular system architecture, so there are a couple
+of places to add dspam to such a system.  VPopmail extends the base qmail 
+delivery process to handle virtual domains and users, which can reside in 
+several different user databases.  Whether you want to add dspam at the
+virtual domain level or user level largely determines the best way to add
+it to your system.
+
+USER-LEVEL INTEGRATION
+
+If you are only configuring dspam for a small percentage of your users,
+this is the best method. Configure dspam to use a standalone local delivery
+agent like safecat (if you already use procmail or maildrop as an LDA, you
+should call dspam from those tools directly). 
+
+First, create a small script called maildir_mod in /usr/local/bin...
+
+  #!/bin/sh
+  VPOPDOMAINS="/home/vpopmail/domains"
+  if [[ "$2" = "-d" ]]; then
+      user=`eval echo $3 | cut -f 1 -d "@"`
+      domain=`eval echo $3 | cut -f 2 -d "@"`
+      cd $VPOPDOMAINS/"$domain"/"$user"
+  fi
+  /usr/local/bin/safecat "$1"/tmp "$1"/new 1>/dev/null
+
+  NOTE: Be sure to configure VPOPDOMAINS to point to the path for your virtual
+        domain directories
+
+Now configure DSPAM:
+
+./configure \
+  --with-dspam-owner=vpopmail \
+  --with-dspam-group=vchkpw \
+  --with-delivery-agent="/usr/local/bin/maildir_mod Maildir -d %u" \
+  # Your arguments
+
+Next, create a .qmail file in the directory for the user with a line to
+call dspam, like this:
+
+ | /usr/local/bin/dspam --deliver=innocent --user $EXT@$USER
+
+The two environment variables $EXT and $USER are created by the qmail-local 
+program which begins the local delivery process.
+
+DOMAIN-LEVEL INTEGRATION
+
+If you're adding dspam for all users in a domain, you can add dspam
+directly inline with the vpopmail LDA: vdelivermail.  In this mode, you don't
+need to configure dspam to use a custom LDA, nor do you need to add a .qmail 
+file for all users. Instead, you replace the existing line to the 
+.qmail-default file at the virtual domain level, like this:
+
+ | /usr/local/bin/dspam  --deliver=innocent --user $EXT@$USER  --stdout | /home/vpopmail/bin/vdelivermail '' bounce-no-mailbox
+
+In essence, you just add the call to dspam (with the appropiate options
+including --stdout) to the front of the existing line which vadddomain
+creates when you add a domain.

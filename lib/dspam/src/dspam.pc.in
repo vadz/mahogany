@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: DSPAM
+Description: DSPAM Anti-Spam Library
+Version: @VERSION@
+Libs: -L${libdir} -ldspam
+Cflags: -I${includedir}/dspam

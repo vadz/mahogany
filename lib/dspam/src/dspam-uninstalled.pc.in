@@ -1,0 +1,8 @@
+Name: DSPAM Uninstalled
+Description: DSPAM Anti-Spam Library, Not Installed
+Version: @VERSION@
+Libs: -L${libdir} -ldspam
+Cflags: -I${includedir}/dspam
+Libs: ${pc_top_builddir}/${pcfiledir}/libdspam.la
+Cflags: -I${pc_top_builddir}/${pcfiledir}/@srcdir@
+

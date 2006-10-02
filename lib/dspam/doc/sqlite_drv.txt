@@ -1,0 +1,103 @@
+ sqlite_drv: SQLite storage driver for DSPAM <jonathan@nuclearelephant.com>
+sqlite3_drv: SQLite3 storage driver for DSPAM <jonathan@nuclearelephant.com>
+Copyright (c) 2002-2006 Jonathan A. Zdziarski
+http://www.nuclearelephant.com/projects/dspam/
+
+LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; version 2
+of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+ABOUT
+
+sqlite_drv and sqlite3_drv are SQLite storage drivers for DSPAM v3.0 and above.
+These drivers enables DSPAM to read and write all token, signature, and 
+statistics data from individual SQLite databases created for each user.
+
+WARNING: SQLite is not designed to function over NFS. If your system is large            enough to require NFS, it is strongly recommended you use a stateful
+         SQL driver, such as MySQL or PostgreSQL.
+
+1. CONFIGURING DSPAM
+
+To configure DSPAM to use a driver, use the following arguments while running
+DSPAM's configure:
+
+--with-storage-driver=sqlite_drv 
+Tells DSPAM to use the sqlite_drv driver
+
+--with-storage-driver=sqlite3_drv
+Tells DSPAM to use the sqlite3_drv driver (for SQLite v3.x)
+
+
+--with-sqlite-libraries=/path/to/libs
+Tells DSPAM where to find the SQLite library (libsqlite.so).
+
+--with-sqlite-includes=/path/to/includes
+Tells DSPAM where to find the SQLite headers.
+
+After configure has successfully finished, build and install DSPAM using the
+instructions from DSPAM's readme. 
+
+2. OBJECT CREATION
+
+The drivers will automatically create the necessary database objects for each
+user upon first use of DSPAM by that user.
+
+3. PURGING
+
+The purge script should be run against all databases periodically. The best
+way to do this is to use a find recipe such as:
+
+find /usr/local/var/dspam/data -name "*.sdb" -exec sqlite {} < /var/dspam/purge-2.sql \;
+
+or use sqlite3 and purge-3.sql if you're running sqlite3_drv.
+
+You may also wish to occasionally compact your databases. This should only
+be run once in a great while, and is not entirely necessary as sqlite will
+automatically reclaim space the next time it is used.  Nevertheless, some
+databases can grow quite large if not purged well enough. Another find
+recipe such as the one below can be used to compact all databases on a
+system.
+
+find /usr/local/var/dspam/data -name "*.sdb" -exec echo 'vacuum;' \| sqlite {} \;
+
+or sqlite3, if you're running sqlite3_drv.
+
+4. TUNING
+
+There are some tuning parameters which can be set, discussed here:
+http://sqlite.org/lang.html#pragma
+
+Whenever sqlite_drv connects to a database, it will read 
+$DSPAM_HOME/sqlite.pragma and execute any commands found in the file. For
+example, if you wish to turn off synchronous mode (which speeds up queries by
+as much as 50x, but could potentially risk database corruption on system
+crash), you could add this line to sqlite.pragma:
+
+PRAGMA synchronous = OFF
+
+Note: Do not put a semicolon at the end of any statements in sqlite.pragma. 
+
+ERRORS
+
+Any SQL errors will be reported to /tmp/sql.errors as well as the standard
+syslog facilities (although the query will be truncated).
+
+QUESTIONS
+
+Please contact the dspam-dev mailing list with any questions or constructive
+feedback.
+
+Jonathan A. Zdziarski
+<jonathan@nuclearelephant.com>

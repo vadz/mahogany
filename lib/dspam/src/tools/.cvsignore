@@ -1,0 +1,17 @@
+.deps
+.libs
+Makefile
+Makefile.in
+dspam_clean
+dspam_convert
+dspam_train
+dspam_crc
+dspam_dump
+dspam_genaliases
+dspam_merge
+dspam_ngstats
+*_purge
+dspam_stats
+dspam_2sql
+dspam_corpus
+dspam_admin

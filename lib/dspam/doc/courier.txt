@@ -1,0 +1,38 @@
+$Id: courier.txt,v 1.1 2005/03/11 21:16:03 jonz Exp $
+
+COURIER INTEGRATION
+
+Please follow the instructions in the README for building DSPAM. Once DSPAM
+has been built, the following instructions may be used to integrate it with
+courier.
+
+STEP 1: CONFIGURING DSPAM AS DELIVERY AGENT
+
+To configure Courier to use DSPAM as its delivery agent, you'll want to
+change the DEFAULTDELIVERY parameter. In the file /etc/courier/courierd,
+find the line for DEFAULTDELIVERY and change it to:
+
+DEFAULTDELIVERY="| /usr/local/bin/dspam --deliver=innocent --user $USER"
+
+STEP 2: CONFIGURING MAILDROP AS DSPAM'S DELIVERY AGENT
+
+Maildrop is Courier's native equivalent of procmail.  To configure DSPAM to 
+use it, set the following in dspam.conf:
+
+TrustedDeliveryAgent "/usr/bin/maildrop -d %u"
+
+...or configure with --with-delivery-agent="/usr/bin/maildrop -d %u"
+
+You'll also need to configure your untrusted delivery agent as Courier drops
+to the uid of the destination user and changes to that users homedir before
+calling the LDA.  Accomplish this by using the same argument for
+UntrustedDeliveryAgent in dspam.conf.
+
+UntrustedDeliveryAgent "/usr/bin/maildrop -d %u"
+
+STEP 3: CONFIGURE DSPAM ALIASES
+
+The aliases for missed spam/false positives should be added to the file
+/etc/courier/aliases/system.  After adding new aliases, run 'makealiases'
+and restart Courier. See the README for intructions on creating aliases.
+ 

@@ -1,0 +1,32 @@
+$Id: sendmail.txt,v 1.1 2005/03/11 21:16:03 jonz Exp $
+
+SENDMAIL INTEGRATION
+
+Please follow the instructions in the README for building DSPAM. Once DSPAM
+has been built, the following instructions may be used to integrate it with
+sendmail.
+ 
+DSPAM is best integrated with sendmail by masquerading as the local delivery
+agent. This can be done by adding two lines to your config.mc file and
+rebuilding your configuration:
+
+define(`LOCAL_MAILER_PATH', `/usr/local/bin/dspam')
+define(`LOCAL_MAILER_ARGS', `dspam "--deliver=innocent" --user $u -d %u') 
+
+Make sure these definitions are placed before the MAILER(local) definition.
+
+Alternatively, you may define additional procmail arguments if you are using
+procmail. For example:
+
+define(`LOCAL_MAILER_PATH', `/usr/local/bin/dspam')
+define(`LOCAL_MAILER_ARGS', 
+      `dspam -t -Y -a $h "--deliver=innocent" --user $u -d %u')
+
+If you don't feel like rebuilding your .cf files, you can alternatively
+just replace your local mailer in the Mlocal block of sendmail.cf and
+submit.cf. Be sure to update the path (P=) as well as arguments (A=).
+
+NOTE: If you are using sendmail restricted shell (smrsh), you will
+      need to either disable it, or add /usr/local/bin/dspam to the allow list. 
+      Some administrators have experienced problems using smrsh with DSPAM.
+

@@ -1,0 +1,96 @@
+.\" $Id: dspam_stats.1,v 1.7 2006/05/14 15:37:30 jonz Exp $
+.\"  -*- nroff -*-
+.\"
+.\" dspam_stats3.2
+.\"
+.\" Authors:    Jonathan A. Zdziarski <jonathan@nuclearelephant.com>
+.\"
+.\" Copyright (c) 2002-2006 Jonathan A. Zdziarski
+.\" All rights reserved
+.\"
+.TH dspam_stats 1  "May 31, 2004" "DSPAM" "DSPAM"
+
+.SH NAME
+dspam_stats - display spam statistics
+
+.SH SYNOPSIS
+.na
+.B dspam_stats
+[\c
+.BI \-HhrSst\fR\c
+]
+[\c
+.I \ username \fR\c
+]
+
+.ad
+.SH DESCRIPTION 
+.LP
+.B dspam_stats
+displays the spam filtering statistics for one or all users on the system. Displays TS (Total Spams), TI (Total Innocent), TM (Total Spam Misses) and FP (Total False Positives).  To calculate the total number of spams caught by DSPAM, subtract TM from TS.
+
+.SH OPTIONS
+.LP
+.ne 3
+.TP
+.BI \-H\fR\c
+Uses multi-line, human-readable output displaying the fully-qualified names for
+each class of totals, instead of their abbreviated terms.
+ 
+.ne 3
+.TP
+.BI \-h\fR\c
+Displays help syntax
+
+.ne 3
+.TP
+.BI \-r\fR\c
+Resets the current snapshot
+
+.ne 3
+.TP
+.BI \-s\fR\c
+Displays stats since last snapshot (instead of since epoch)
+
+.ne 3
+.TP
+.BI \-S\fR\c
+Displays accuracy percentages in addition to stats
+
+.ne 3
+.TP
+.BI \-t\fR\c
+Displays a total of all statistics displayed
+
+.n3 3
+.TP
+.BI \[username]\c
+Specifies the username to query. If no username is provided, all users will be
+queried.
+
+.SH EXIT VALUE
+.LP
+.ne 3
+.PD 0
+.TP
+.B 0
+Operation was successful.
+.ne 3
+.TP
+.B other
+Operation resulted in an error. 
+.PD
+
+.SH AUTHORS
+.LP
+
+Jonathan A. Zdziarski
+
+For more information, see http://www.nuclearelephant.com.
+
+.SH SEE ALSO
+.BR dspam (1),
+.BR dspam_train (1),
+.BR dspam_clean (1),
+.BR dspam_dump (1),
+.BR dspam_merge (1)

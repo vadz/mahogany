@@ -1,0 +1,87 @@
+<HTML>
+<HEAD><TITLE>DSPAM v3 Control Center</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$" title="Home"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+                $FORM_USER$
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+	<ul id="navlist">
+		<li><a href="$CGI$?$USER$template=performance">Performance</a></li>
+		<li><a href="$CGI$?$USER$template=preferences">Preferences</a></li>
+		<li><a href="$CGI$?$USER$template=alerts">Alerts</a></li>
+		<li id="active"><a id="current" href="$CGI$?$USER$template=quarantine">Quarantine ($TOTAL_QUARANTINED_MESSAGES$)</a></li>
+		<li><a href="$CGI$?$USER$template=analysis">Analysis</a></li>
+		<li><a href="$CGI$?$USER$template=history&history_page=1">History</a></li>
+		$NAV_ADMIN$
+	</ul>
+</div>
+
+<div id="panel">
+
+<p>
+The messages below have not been been delivered to your normal e-mail application because they are believed to be spam.
+Click on the Subject line to view the message or choose a sort option to
+change how messages are sorted.
+Use the checkboxes and <strong>Deliver Checked</strong> to deliver messages you want to read, or use <strong>Delete All</strong> to empty the quarantine.
+</p>
+
+<form action="$CGI$" method="get">
+<p>
+<input type="hidden" name="command" value="processQuarantine" >
+<input type="hidden" name="template" value="quarantine" >
+<input type="hidden" name="user" value="$REMOTE_USER$" >
+<input type="hidden" name="sortby" value="$SORTBY$" >
+<input type="submit" value="Deliver Checked" NAME="manyNotSpam" >
+&nbsp;
+<input type="submit" value="Delete Checked" onClick="if (confirm('Are you sure you want to delete SELECTED messages in quarantine?')==false) { return false; }" />
+&nbsp;
+<input type="submit" value="Delete All" name="deleteAll" onClick="if (confirm('Are you sure you want to delete ALL messages in quarantine?')==false) { return false; }" >
+
+&nbsp;&nbsp;$SORT_SELECTOR$
+
+</p>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+	<tr>
+		<th>&nbsp;</th>
+		<th>Rating</th>
+                <th>Date</th>
+		<th>From</th>
+		<th>Subject</th>
+	</tr>
+$QUARANTINE$
+</table>
+
+<p>
+<input type="submit" value="Deliver Checked" NAME="manyNotSpam" >
+&nbsp;
+<input type="submit" value="Delete Checked" onClick="if (confirm('Are you sure you want to delete SELECTED messages in quarantine?')==false) { return false; }" /> 
+&nbsp;
+<input type="submit" value="Delete All" name="deleteAll" onClick="if (confirm('Are you sure you want to delete ALL messages in quarantine?')==false) { return false; }" />
+</p>
+
+</form>
+
+<p>
+Color key: <span class="low">Lower SPAM rating</span>, <span class="medium">Medium SPAM rating, <span class="high">Higher SPAM rating</span>
+</p>
+
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a>. Copyright &copy; 2005, Jonathan A. Zdziarski
+</p>
+</div>
+
+</BODY>
+</HTML>

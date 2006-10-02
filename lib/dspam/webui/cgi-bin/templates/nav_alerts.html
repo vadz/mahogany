@@ -1,0 +1,55 @@
+<HTML>
+<HEAD><TITLE>DSPAM v3 Control Center</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$" title="Home"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+                $FORM_USER$
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+	<ul id="navlist">
+		<li><a href="$CGI$?$USER$template=performance">Performance</a></li>
+		<li><a href="$CGI$?$USER$template=preferences">Preferences</a></li>
+		<li id="active"><a id="current" href="$CGI$?$USER$template=alerts">Alerts</a></li>
+		<li><a href="$CGI$?$USER$template=quarantine">Quarantine ($TOTAL_QUARANTINED_MESSAGES$)</a></li>
+		<li><a href="$CGI$?$USER$template=analysis">Analysis</a></li>
+		<li><a href="$CGI$?$USER$template=history&history_page=1">History</a></li>
+		$NAV_ADMIN$
+	</ul>
+</div>
+
+<div id="panel">
+
+<p>
+Alerts will help you locate messages in the Quarantine list. If the text of the alert is found in a message, its row will be highlighted, helping you to identify messages that might not be SPAM.
+</p>
+
+$ALERTS$
+<p>
+<FORM ACTION="$CGI$">
+<INPUT TYPE=HIDDEN NAME=command VALUE=addAlert>
+<INPUT TYPE=HIDDEN NAME=template VALUE=alerts>
+<INPUT TYPE=HIDDEN NAME=user VALUE="$REMOTE_USER$">
+<INPUT NAME=ALERT> &nbsp;<INPUT TYPE=SUBMIT VALUE="Add Alert">
+</FORM>
+</p>
+
+
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a> Copyright &copy; 2005, Jonathan A. Zdziarski
+</p>
+</div>
+
+</BODY>
+</HTML>

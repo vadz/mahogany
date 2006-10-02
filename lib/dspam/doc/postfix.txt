@@ -1,0 +1,176 @@
+$Id: postfix.txt,v 1.3 2006/01/18 16:48:53 jonz Exp $
+
+POSTFIX INTEGRATION
+
+Please follow the instructions in the README for building DSPAM. Once DSPAM
+has been built, the following instructions may be used to integrate it with
+postfix.
+
+INTEGRATING DSPAM AS A CONTENT FILTER
+
+The most seamless way to integrate DSPAM into Postfix is as a content filter.
+This requires very little work, and allows the two to communicate seamlessly.
+You may want to first read Postfix's FILTER_README from the Postfix source tree
+to familiarize yourself with what we're doing. In a nutshell, Postfix sends all
+mail to the content filter instead of delivering it. It's the content filter's
+job to then pass the [modified] message back into Postfix (called reinjection)
+or do something else with the message. By default, DSPAM will quarantine 
+what it believes is spam, but it can be configured to tag it instead. We will
+use DSPAM's LMTP and SMTP functionality to integrate the two seamlessly
+together like so:
+
+[Postfix] (LMTP) -> [DSPAM]                     [Postfix] -> { Delivery }
+                       |___ (SMTP Reinjection) ____|
+
+Step 1: Configure DSPAM as a server daemon
+
+  The first step is to configure DSPAM to listen as an LMTP server on a local
+  UNIX socket. This is what Postfix will connect to when it sends messages to
+  DSPAM. Be sure you have configured DSPAM with the --enable-daemon option.
+  You will need to use an MT-safe storage driver, such as MySQL or PostgreSQL.
+  Once you have DSPAM installed, make the following changes in dspam.conf:
+
+ServerMode		auto
+ServerParameters        "--deliver=innocent"
+ServerIdent             "localhost.localdomain"
+ServerPID               /var/run/dspam.pid
+ServerDomainSocketPath	"/tmp/dspam.sock"
+
+  This will tell DSPAM to listen on /tmp/dspam.sock using the options above.
+  
+  You'll also need to configure DSPAM to pass the good mail back into Postfix.
+  Comment out any "TrustedDeliveryAgent" option in dspam.conf and replace it
+  with the options below. We'll use local TCP port 10026 in our example. 
+
+DeliveryHost        127.0.0.1
+DeliveryPort        10026
+DeliveryIdent       localhost
+DeliveryProto       SMTP
+
+  This tells DSPAM to deliver using SMTP to port 10026 on the local machine.
+  We'll configure Postfix to listen on this port for reinjection.
+
+  Finally, you'll want to use DSPAM's ParseToHeader option. This option tells
+  DSPAM to automatically train when it sees a spam- or notspam- address in
+  the To: header. Depending on how you have configured DSPAM to manage users,
+  your settings may be slightly different. On a typical setup, where the
+  entire email address is the user's DSPAM username, you would use something 
+  like this:
+
+ParseToHeaders on
+ChangeModeOnParse on
+ChangeUserOnParse full
+
+  This means if a user forwards their spam to spam-bob@domain.com, the
+  username will be set to bob@domain.com and the training mode will be set to
+  "learn spam".
+
+  You can then start DSPAM:  dspam --daemon &
+
+Step 2: Configure Postfix to use a content filter
+
+  The next step is to configure Postfix to use DSPAM as a content filter. 
+  This is relatively simple and requires only a minor change to your 
+  master.cf file:
+
+  Change:
+
+smtp      inet  n       -       n       -       -        smtpd
+
+  To:
+
+smtp      inet  n       -       n       -       -        smtpd
+            -o content_filter=lmtp:unix:/tmp/dspam.sock
+
+  This tells Postfix to send all mail to DSPAM for content filtering.
+
+Step 3: Configure a Reinjection Port
+
+  You'll also need to configure Postfix to listen on a local port for 
+  reinjection. This is where DSPAM sends back the "good" mail (or alternatively,
+  tagged mail also). Add this to your master.cf:
+
+localhost:10026 inet  n -       n       -       -        smtpd
+  -o content_filter=
+  -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
+  -o smtpd_helo_restrictions=
+  -o smtpd_client_restrictions=
+  -o smtpd_sender_restrictions=
+  -o smtpd_recipient_restrictions=permit_mynetworks,reject
+  -o mynetworks=127.0.0.0/8
+  -o smtpd_authorized_xforward_hosts=127.0.0.0/8
+ 
+  Any mail sent to localhost:10026 will be delivered in whatever way you
+  have configured Postfix, without being passed through DSPAM again. This is
+  also where DSPAM will deliver false positives to when they are retrained by
+  the user.
+
+You're now good to go! Turn on Postfix and do a little testing. Send a message
+to yourself on port 25. It should have X-DSPAM headers. Send a message to
+yourself on port 10026. It should not.
+
+If you are deadset against running DSPAM as a server daemon, this design can
+be changed to call DSPAM via commandline, and have DSPAM reinject by calling
+Postfix's sendmail function. I wouldn't recommend this, but here's how.
+Instead of configuring DSPAM's DeliveryHost and Server options, you'll want to
+configure DSPAM to call sendmail to deliver mail:
+
+TrustedDeliveryAgent	/usr/sbin/sendmail
+Trust postfix
+
+Use the same ParseToHeader options already outlined above. Next, instead of
+having Postfix pass the message to DSPAM via LMTP, you can use:
+
+smtp inet n - - - - smtpd -o content_filter=dspam: 
+
+dspam unix - n n - 10 pipe 
+  flags=Ru user=vmail argv=/usr/local/bin/dspam --deliver=innocent 
+  --user ${recipient} -i -f $sender -- $recipient  
+ 
+INTEGRATING DSPAM AS A DELIVERY PROXY
+
+Postfix can optionally be configured to integrate with DSPAM as a delivery
+proxy if you're using a third party delivery agent for final delivery to
+your mailbox.  
+
+The first step in getting DSPAM to work is to get mail delivery to work with 
+one of these external LDAs before integrating DSPAM with postfix.
+
+You can configure DSPAM with the appropriate LDA using --with-delivery-agent=
+at configure time or by specifying TrustedDeliveryAgent in dspam.conf. 
+For example:
+
+TrustedDeliveryAgent "/usr/bin/procmail" 
+
+You'll also want to configure the untrusted delivery agent in a similar
+fashion:
+
+UntrustedDeliveryAgent "/usr/bin/procmail -d %u"
+
+If you are using maildrop, you'll need to be sure you've compiled maildrop to
+trust the user that dspam is running as.
+
+Once you have configured a local delivery agent into DSPAM, the simplest way 
+to configure postfix for local users is to set the mailbox_command directive 
+to point to DSPAM. This can be done by editing /etc/postfix/main.cf:
+
+mailbox_command = /usr/local/bin/dspam --deliver=innocent --user $USER -- -d %u
+
+If you're running a delivery agent (such as cyrdeliver) that has a problem
+with the top 'From' header, you may need to perform some sed magic:
+
+mailbox_command = sed '1{/^From /d;}' | /usr/local/bin/dspam --deliver=innocent --user $USER -- -d %u
+
+Now, configure the aliases as prescribed in the README and you're good to go!
+
+CYRUS INTEGRATION
+
+If you're using Cyrus to deliver mail locally, you'll want to specify the
+following in dspam.conf:
+
+TrustedDeliveryAgent "/usr/sbin/cyrdeliver $u"
+
+Then use the following in Postfix:
+
+mailbox_command = /usr/local/bin/dspam --user ${user} --deliver=innocent
+

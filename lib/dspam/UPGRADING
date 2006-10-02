@@ -1,0 +1,68 @@
+$Id: UPGRADING,v 1.25 2006/05/22 19:34:30 jonz Exp $
+
+Follow the steps sequentially from the base version you are running up to
+the top.
+
+UPGRADING FROM 3.6
+------------------
+
+1. Add 'Tokenizer' setting to dspam.conf
+   The 'Tokenizer' setting in 3.8.0 replaces tokenizer definitions in the 
+   "Feature" clause of previous version configurations. See src/dspam.conf
+   (after make) for more information about this seting.
+ 
+2. Check calls to dspam_logrotate
+   Earlier versions of 3.6 did not prepend a leading "-l" flag to specifying
+   log file selection. This is now required.
+
+3. Ensure 3.6.0 malaligned hash databases are converted
+   Version 3.6.0 failed to align hash databases to 8-byte boundaries. If you
+   are upgrading from v3.6.0 and are using the hash_drv storage driver, you
+   should run cssconvert to upgrade your .css files to a fully aligned format.
+
+4. Invert "SupressWebStats" setting in dspam.conf
+   SupressWebStats has been changed to simply WebStats, and the setting is
+   inverted. Be sure to update this in dspam.conf.
+
+5. Add "ProcessorURLContext" setting in dspam.conf
+   ProcessorURLContext has been added to toggle whether URL specific tokens
+   are created in the tokenizer process. The "on" value is default for previous
+   versions of DSPAM.
+
+UPGRADING FROM 3.4
+------------------
+
+Follow all of the steps above, and the following steps:
+
+1. Add "ProcessorBias" setting to dspam.conf
+   ProcessorBias has been added to dspam.conf and must be specified.
+   Since ProcessorBias is the default behavior for previous versions of DSPAM,
+   you will need to add "ProcessorBias on" to dspam.conf. If you have
+   specifically disabled bias, or are using a technique such as Markovian
+   discrimination, you may leave this feature off.
+
+2. Ensure references to SBLQueue are changed to RABLQueue.
+   Older versions of DSPAM used the SBLQueue setting to write files for a 
+   DSPAM SBL setup. This has been renamed to RABLQueue. Please change this in 
+   dspam.conf if you are writing to a SBL/RABL installation.
+
+3. Add "TestConditionalTraining" setting to dspam.conf
+   TestConditionalTraining has been added to dspam.conf and must be specified
+   to be enabled. Since TestConditionalTraining is the default behavior
+   in DSPAM, it is strongly recommended that you add 
+   "TestConditionalTraining on" to dspam.conf
+
+4. Ensure PostgreSQL installation have a lookup_tokens function
+   PostgreSQL systems running v8.0+ must create the function lookup_tokens
+   added to pgsql_objects.sql. The driver now checks your version and uses this
+   function to improve performance on 8.0+.
+
+5. Ensure you are specifying the correct storage driver.
+   hash_drv is now the new default storage driver. hash_drv has no dependencies
+   and is extremely fast/efficient. If you're not familiar with it, you should
+   check out the readme. If you were previously using SQLite, you will now need
+   to specify it as the storage driver: --with-storage-driver=sqlite_drv
+
+   NOTE: Berkeley DB drivers (libdb3_drv, libdb4_drv) are deprecated and have
+         been removed from the build. You will need to select an alternative
+         storage driver in order to upgrade.

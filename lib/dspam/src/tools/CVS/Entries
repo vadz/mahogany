@@ -1,0 +1,12 @@
+/.cvsignore/1.2/Tue Jan 24 15:43:12 2006//
+/Makefile.am/1.7/Sat May 13 01:04:46 2006//
+/dspam_2sql.c/1.11/Sat May 13 01:13:01 2006//
+/dspam_admin.c/1.18/Sat May 13 01:13:01 2006//
+/dspam_clean.c/1.22/Sat May 13 01:13:01 2006//
+/dspam_crc.c/1.5/Sat May 13 01:13:01 2006//
+/dspam_dump.c/1.13/Sat May 13 01:13:01 2006//
+/dspam_logrotate/1.2/Tue Jan 10 14:51:04 2006//
+/dspam_merge.c/1.15/Sat May 13 01:13:01 2006//
+/dspam_stats.c/1.25/Sat May 13 01:13:01 2006//
+/dspam_train.in/1.5/Tue May 23 19:52:40 2006//
+D

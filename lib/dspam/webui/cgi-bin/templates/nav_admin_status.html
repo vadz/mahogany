@@ -1,0 +1,120 @@
+<HTML>
+<HEAD><TITLE>DSPAM v3 Administrative Suite</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$" title="Home"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+		Statistical SPAM Protection for <strong>Administrator ($REMOTE_USER$)</strong>
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+	<ul id="navlist">
+		<li id="active"><a id="current" href="$CGI$?$USER$template=status">System Status</a></li>
+		<li><a href="$CGI$?$USER$template=user">User Statistics</a></li>
+		<li><a href="$CGI$?$USER$template=preferences">Administration</a></li>
+		<li><a href="dspam.cgi">Control Center</a></li>
+	</ul>
+</div>
+
+<div id="panel">
+
+<p>
+The following graphs and tables summarize the processing done by the filter.
+</p>
+
+<div id="content">
+	<h3><strong>Overview</strong></h3>
+			
+	<table border="0" cellspacing="0" cellpadding="4">
+		<tr>
+			<th>Messages</th>
+			<th>Today</th>
+			<th>This Hour</th>
+		</tr>
+		<tr class="rowEven">
+			<td>Spam</td>
+			<td>$SPAM_TODAY$</td>
+			<td>$SPAM_THIS_HOUR$</td>
+		</tr>
+		<tr class="rowOdd">
+			<td>Good</td>
+			<td>$NONSPAM_TODAY$</td>
+			<td>$NONSPAM_THIS_HOUR$</td>
+		</tr>
+		<tr class="rowEven">
+			<td>Spam Misses</td>
+			<td>$SM_TODAY$</td>
+			<td>$SM_THIS_HOUR$</td>
+		</tr>
+		<tr class="rowOdd">
+			<td>False Positives</td>
+			<td>$FP_TODAY$</td>
+			<td>$FP_THIS_HOUR$</td>
+		</tr>
+		<tr class="rowEven">
+			<td>Inoculations</td>
+			<td>$INOC_TODAY$</td>
+			<td>$INOC_THIS_HOUR$</td>
+		</tr>
+		<tr class="rowHighlight">
+			<td>Total</td>
+			<td>$TOTAL_TODAY$</td>
+			<td>$TOTAL_THIS_HOUR$</td>
+		</tr>
+	</table>
+
+	<table border="0" cellspacing="0" cellpadding="4">
+		<tr>
+			<th>Status</th>
+			<th>Current Value</th>
+		</tr>
+		<tr class="rowEven">
+			<td>Average message processing time</td>
+			<td>$AVG_PROCESSING_TIME$ sec.</td>
+		</tr>
+		<tr class="rowOdd">
+			<td>Average throughput</td>
+			<td>$AVG_MSG_PER_SECOND$ messages/sec.</td>
+		</tr>
+		<tr class="rowEven">
+			<td>DSPAM instances</td>
+			<td>$DSPAM_PROCESSES$ processes</td>
+		</tr>
+		<tr class="rowOdd">
+			<td>System uptime</td>
+			<td>$UPTIME$</td>
+		</tr>
+		<tr class="rowEven">
+			<td>Mail queue length</td>
+			<td>$MAIL_QUEUE$ messages</td>
+		</tr>
+	</table>
+</div>
+
+<div id="content">
+	<h3><strong>24 Hour Activity</strong> - $TS_DAILY$ SPAM, $TI_DAILY$ Good, $SM_DAILY$ Spam Misses, $FP_DAILY$ False Positives, $INOC_DAILY$ Inoculations</h3>
+	<img src="./admingraph.cgi?data=$DATA_DAILY$&x_label=Hour+of+the+day" />
+</div>
+
+<div id="content">
+	<h3><strong>Daily Activity</strong> - $TS_WEEKLY$ SPAM, $TI_WEEKLY$ Good, $SM_WEEKLY$ Spam Misses, $FP_WEEKLY$ False Positives, $INOC_WEEKLY$ Inoculations</h3>
+	<img src="./admingraph.cgi?data=$DATA_WEEKLY$&graph=period&x_label=Date" />
+</div>
+
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a> Copyright &copy; 2005, Jonathan A. Zdziarski
+</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+.\" $Id: dspam_clean.1,v 1.5 2006/05/14 15:37:30 jonz Exp $
+.\"  -*- nroff -*-
+.\"
+.\" dspam_clean3.2
+.\"
+.\" Authors:    Jonathan A. Zdziarski <jonathan@nuclearelephant.com>
+.\"
+.\" Copyright (c) 2002-2006 Jonathan A. Zdziarski
+.\" All rights reserved
+.\"
+.TH dspam_clean 1  "May 31, 2004" "DSPAM" "DSPAM"
+
+.SH NAME
+dspam_clean - perform periodic maintenance of metadata
+
+.SH SYNOPSIS
+.na
+.B dspam_clean
+[\c
+.I \-s[signature_life]\fR\c
+]
+[\c
+.I \-p[probability_life]\fR\c
+]
+[\c
+.I \-u[sl,hcl,shl,ihl]\fR
+]
+[\c
+.I \ user1 user2 ... userN \fR
+]
+
+.ad
+.SH DESCRIPTION 
+.LP
+.B dspam_clean
+is used to perform periodic housecleaning on DSPAM's metadata dictionary by
+deleting old or useless data. 
+
+.SH OPTIONS
+.LP
+.ne 3
+.TP
+.BI \-s\fR\c
+Performs stale signature purging. If a value is specified, the default value of
+14 days will be overridden. Specifying an age of 0 will delete all signatures
+from the user(s) processed.
+
+.n 3
+.TP
+.BI \-p\fR\c
+Deletes all tokens from the target user(s) database whose probability is
+between 0.35 and 0.65 (fairly neutral, useless data). If a value is
+specified, the default life of 30 days will be overridden. It's a good idea
+to use this flag once with a life of 0 days for users after a significant amount
+of corpus training. 
+
+.n 3
+.TP
+.BI \-u\fR\c
+Deletes all unused tokens from a user's dataset. Four different life values
+are used:
+
+.B sl
+Stale tokens which have not been used for a long period of time
+
+.B hcl
+Tokens with a total hit count below 5 (which will be assigned a hapaxial value
+by DSPAM)
+
+.B shl
+Tokens witha single spam hit
+
+.B ihl
+Tokens with a single innocent hit
+
+Ages may be overridden by specifying a format string, such as -u30,15,10,10
+where each number represents the respective life. Specifying a life of zero
+will delete all unused tokens in the category.
+
+.n 3
+.TP
+.BI \ user1\ user2\ ...\ userN\fR\c
+Specify the username(s) to perform the selected maintenance operations on. If
+no username is specified, all users are processed.
+
+.SH EXIT VALUE
+.LP
+.ne 3
+.PD 0
+.TP
+.B 0
+Operation was successful.
+.ne 3
+.TP
+.B other
+Operation resulted in an error. 
+.PD
+
+.SH AUTHORS
+.LP
+
+Jonathan A. Zdziarski
+
+For more information, see http://www.nuclearelephant.com.
+
+.SH SEE ALSO
+.BR dspam (1),
+.BR dspam_stats (1),
+.BR dspam_dump (1),
+.BR dspam_train (1),
+.BR dspam_merge (1)

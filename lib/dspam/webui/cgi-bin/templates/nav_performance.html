@@ -1,0 +1,112 @@
+<HTML>
+<HEAD><TITLE>DSPAM v3 Control Center</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$" title="Home"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+		$FORM_USER$
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+	<ul id="navlist">
+		<li id="active"><a id="current" href="$CGI$?$USER$template=performance">Performance</a></li>
+		<li><a href="$CGI$?$USER$template=preferences">Preferences</a></li>
+		<li><a href="$CGI$?$USER$template=alerts">Alerts</a></li>
+		<li><a href="$CGI$?$USER$template=quarantine">Quarantine ($TOTAL_QUARANTINED_MESSAGES$)</a></li>
+		<li><a href="$CGI$?$USER$template=analysis">Analysis</a></li>
+		<li><a href="$CGI$?$USER$template=history&history_page=1">History</a></li>
+		$NAV_ADMIN$
+	</ul>
+</div>
+
+<div id="panel">
+
+<p>
+If you receive a message in your e-mail application that was not caught by
+the filter, please forward it to 
+<strong>spam-$REMOTE_USER$$LOCAL_DOMAIN$</strong>
+so that it can be analyzed and learned as SPAM. This will improve the filter's accuracy in the future.
+</p>
+
+<div id="content">
+	<h3><strong>Performance Statistics</strong> - $TIME$</h3>
+
+	<table border="0" cellspacing="0" cellpadding="4">
+		<tr>
+			<th>Metric</th>
+			<th>&nbsp;</th>
+			<th>Calculated as</th>
+		</tr>
+		<tr class="rowEven">
+			<td>Overall accuracy (since last reset)</td>
+			<td><strong>$OVERALL_ACCURACY$%</strong></td>
+			<td class="rowDivider"><span class="small">(SPAM messages caught + Good messages delivered) / Total number of messages</span></td>
+		</tr>
+                <tr class="rowOdd">
+                        <td>Spam identification (since last reset)</td>
+                        <td><strong>$SPAM_ACCURACY$%</strong></td>
+                        <td class="rowDivider"><span class="small">(Spam catch rate only)</td>
+               </tr>
+		<tr class="rowEven">
+			<td>Spam ratio (of total processed)</td>
+			<td><strong>$SPAM_RATIO$%</strong></td>
+			<td class="rowDivider"><span class="small">Total SPAM messages (both caught & missed) / Total number of messages</span></td>
+		</tr>
+	</table>
+	<table border="0" cellspacing="0" cellpadding="4">
+		<tr>
+			<th>&nbsp;</th>
+			<th>SPAM messages</th>
+			<th>Good messages</th>
+		</tr>
+		<tr class="rowEven">
+			<td rowspan="3" valign="top" nowrap>Since last reset</td>
+			<td>$TOTAL_SPAM_MISSED$ missed</td>
+			<td>$TOTAL_NONSPAM_MISSED$ missed</td>
+		</tr>
+		<tr class="rowEven">
+			<td>$TOTAL_SPAM_CAUGHT$ caught</td>
+			<td>$TOTAL_NONSPAM_CAUGHT$ delivered</td>
+		</tr>
+		<tr class="rowEven">
+			<td>$SPAM_ACCURACY$% caught</td>
+			<td>$NONSPAM_ERROR_RATE$% missed</td>
+		</tr>
+		<tr class="rowOdd">
+			<td rowspan="2" valign="top" nowrap>Total processed by filter</td>
+			<td>$TOTAL_SPAM_LEARNED$ missed</td>
+			<td>$TOTAL_NONSPAM_LEARNED$ missed</td>
+		</tr>
+		<tr class="rowOdd">
+			<td>$TOTAL_SPAM_SCANNED$ caught</td>
+			<td>$TOTAL_NONSPAM_SCANNED$ delivered</td>
+		</tr>
+		<tr class="rowEven">
+			<td valign="top" nowrap>From corpus</td>
+			<td>$TOTAL_SPAM_CORPUSFED$ fed</td>
+			<td>$TOTAL_NONSPAM_CORPUSFED$ fed</td>
+		</tr>
+	</table>
+
+	<p>
+		<a href="$CGI$?$USER$command=resetStats" title="Reset the statistics">Reset</a> | <a href="$CGI$?$USER$command=tweak" title="Adjustment for messages that are forwarded to the filter">Tweak -1</a>
+	</p>
+</div>
+
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a>. Copyright &copy; 2005, Jonathan A. Zdziarski
+</p>
+</div>
+
+</body>
+</html>

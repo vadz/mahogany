@@ -1,0 +1,63 @@
+Various DSPAM Configurations Tested 
+All variables not mentioned are stock
+Classifier Version: CVS-20060517
+
+Prefixes:		Flags:
+  T - Tokenizer Mode      B - Use Bias (toward innocent)
+  P - Probability Rule    N - No Bias
+  C - Combination Rule    E - No TestConditionalTraining
+
+SPAMASSASSIN PUBLIC CORPUS
+http://spamassassin.apache.org/publiccorpus
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Tosb,Pmarkov,Cgraham+burton,teft,N   TP:  1730 TN:  4147 FP:     3 FN:   166 
+Tosb,Pbcr,Cgraham+burton,teft,N      TP:  1795 TN:  4143 FP:     7 FN:   101
+Tosb,Pbcr,Cgraham+burton,teft,B      TP:  1677 TN:  4147 FP:     3 FN:   219
+Tchain,Pbcr,Cgraham+burton,teft,B    TP:  1693 TN:  4148 FP:     2 FN:   203 
+Tchain,Pbcr,Cgraham+burton,teft,N    TP:  1799 TN:  4143 FP:     7 FN:    97
+
+Tosb,Pmarkov,Cgraham+burton,tum,N    TP:  1730 TN:  4147 FP:     3 FN:   166
+Tsbph,Pmarkov,Cgraham+burton,tum,N   TP:  1740 TN:  4133 FP:    17 FN:   156
+
+Tword,Pbcr,Cgraham+burton,tum,B      TP:  1605 TN:  4147 FP:     3 FN:   291
+Tchain,Pbcr,Cgraham+burton,tum,B     TP:  1735 TN:  4146 FP:     4 FN:   161
+Tsbph,Pbcr,Cgraham+burton,tum,B      TP:  1757 TN:  4146 FP:     4 FN:   139
+Tosb,Pbcr,Cgraham+burton,tum,B       TP:  1677 TN:  4147 FP:     3 FN:   219 
+Tosb,Pbcr,Cgraham+burton,tum,N       TP:  1808 TN:  4142 FP:     8 FN:    88
+
+Tchain,Pbcr,Cburton,tum,N            TP:  1804 TN:  4141 FP:     9 FN:    92
+Tosb,Pbcr,Cburton,tum,B              TP:  1636 TN:  4148 FP:     2 FN:   260 
+Tosb,Pbcr,Cburton,tum,N              TP:  1777 TN:  4143 FP:     7 FN:   119
+
+Tword,Pbcr,Cgraham,tum,B             TP:  1592 TN:  4147 FP:     3 FN:   304
+Tchain,Pbcr,Cgraham,tum,B            TP:  1669 TN:  4148 FP:     2 FN:   227
+Tsbph,Pbcr,Cgraham,tum,B             TP:  1736 TN:  4147 FP:     3 FN:   160 
+Tosb,Pbcr,Cgraham,tum,B              TP:  1650 TN:  4148 FP:     2 FN:   246
+
+Tword,Pbcr,Cgraham+burton,toe,B      TP:  1641 TN:  4345 FP:     8 FN:   262 
+Tchain,Pbcr,Cgraham+burton,toe,B     TP:  1720 TN:  4271 FP:     8 FN:   183
+Tsbph,Pbcr,Cgraham+burton,toe,B      TP:  1824 TN:  4179 FP:    58 FN:   128
+Tosb,Pbcr,Cgraham+burton,toe,B       TP:  1703 TN:  4292 FP:    15 FN:   208
+
+Tsbph,Pmarkov,Cgraham+burton,toe,N   TP:  1919 TN:  4127 FP:    89 FN:    66 
+Tsbph,Pbcr,Cgraham+burton,toe,N      TP:  1899 TN:  4116 FP:    93 FN:    86
+Tosb,Pmarkov,Cgraham+burton,toe,N    TP:  1898 TN:  4148 FP:    69 FN:    67
+Tosb,Pbcr,Cgraham+burton,toe,N       TP:  1789 TN:  4220 FP:    36 FN:   143
+
+TREC 05P-1 TEST CORPUS
+http://trec.nist.gov/data/spam.html
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Tword,Pbcr,Cgraham,teft,BE           TP: 51213 TN: 39367 FP:    32 FN:  1577
+Tosb,Pbcr,Cgraham,teft,BE            TP: 50574 TN: 39357 FP:    42 FN:  2216
+Tchain,Pbcr,Cgraham+burton,teft,B    TP: 51831 TN: 39342 FP:    57 FN:   959
+Tchain,Pbcr,Cgraham+burton,teft,BE   TP: 51596 TN: 39354 FP:    45 FN:  1194
+Tchain,Pbcr,Cgraham,teft,B           TP: 51643 TN: 39352 FP:    47 FN:  1147
+Tosb,Pbcr,Cburton,teft,B             TP: 51186 TN: 39347 FP:    52 FN:  1604
+Tosb,Pbcr,Cgraham+burton,teft,B      TP: 51312 TN: 39342 FP:    57 FN:  1478 
+Tosb+word,Pbcr,Cgraham+burton,teft,B TP: 51357 TN: 39343 FP:    56 FN:  1433
+Tosb,Pbcr,Cgraham+burton,tum,N       TP: 52020 TN: 39210 FP:   189 FN:   770
+Tosb,Pmarkov,Cburton,tum,N           TP: 51958 TN: 39042 FP:   357 FN:   832
+Tosb,Pmarkov,Cburton,toe,N           TP: 52725 TN: 39464 FP:   571 FN:   636 
+Tosb,Pbcr,Cgraham+burton,toe,B       TP: 51864 TN: 40309 FP:   377 FN:  1303

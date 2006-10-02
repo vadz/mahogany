@@ -1,0 +1,166 @@
+$Id: pgsql_drv.txt,v 1.5 2005/09/24 17:48:58 jonz Exp $
+
+pgsql_drv: PostgreSQL storage driver for DSPAM
+API v3.0
+http://www.nuclearelephant.com/projects/dspam/
+
+LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; version 2
+of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+ABOUT
+
+pgsql_drv is a PostgreSQL storage driver for DSPAM. This driver enables DSPAM
+to read and write all token, signature, and statistics data from a PostgreSQL 
+database. The advantages of using a SQL backend are obvious:
+
+- Centralized data storage
+- Structured queries for information
+- No need for context locking mechanisms
+
+REQUIREMENTS
+
+pgsql_drv storage driver requires PostgreSQL version 7.3 or higher.
+
+1. CONFIGURING DSPAM
+
+To configure DSPAM to use pgsql_drv, use the following arguments while running
+DSPAM's configure:
+
+--with-storage-driver=pgsql_drv
+Tells DSPAM to use the pgsql_drv driver
+
+--with-pgsql-libraries=/path/to/libs
+Tells DSPAM where to find the Postgres client libraries.  They are usually
+located in /usr/local/pgsql/lib
+
+--with-pgsql-includes=/path/to/libs
+Tells DSPAM where to find the Postgres headers.  They are usually located in
+/usr/local/pgsql/include
+
+--enable-virtual-users
+Tells DSPAM to create virtual user ids for each dspam user.  Use this if your
+users don't really exist on the system (e.g. via getpwuid) or if you're doing
+something weird like sharing uids.
+
+After configure has successfully finished, build and install DSPAM using the
+instructions from DSPAM's readme.
+
+2. CREATING PGSQL OBJECTS
+
+Before pgsql_drv will function, you must run pgsql_objects.sql file
+(located in src/tools.pgsql_drv) to create the table objects required by the 
+driver.
+
+If you plan on enabling virtual users (something you'll need to do if the users
+don't actually exist on your system), also run virtual_users.sql.
+
+NOTE: If you plan on having more than 32,768 users, you'll want to change
+smallint to int for all uid fields.
+
+NOTE: If you are running pgsql < v8.0, you may get an error when running
+pgsql_objects.sql. It is safe to disregard this error, as it is for a function
+that is only used in v8.0+.
+
+NOTE: Install 'plpgsql' language on your dspam database before creating 
+      actual dspam objects if postgresql server version 8.0 or higher:
+      $ createlang plpgsql dspam_db
+
+3. CREATING A CONNECT DATA FILE
+
+pgsql_drv needs to know how to connect to your PostgreSQL database. You will
+need to specify this in dspam.conf. The file should already contain an example
+as shown below:
+
+PgSQLServer    127.0.0.1
+PgSQLPort      5432
+PgSQLUser      dspam
+PgSQLPass      changeme
+PgSQLDb        dspam
+
+Or if you'd like to connect using /tmp/.s.PGSQL.5432, use:
+
+PgSQLServer    /tmp
+PgSQLPort      
+PgSQLUser      dspam
+PgSQLPass      changeme
+PgSQLDb        dspam
+
+DSPAM checks to see if the first character of the HOSTNAME field is a slash,
+and if so will treat it like a socket file.
+
+4. NIGHTLY PURGE
+
+If you would like to purge the many stale tokens DSPAM will have lying around 
+the database, you should run one of the provided purge scripts nightly. The 
+dspam_clean tool may also be used for deeper cleansing.  See DSPAM's README 
+for more information about the dspam_clean tool.  
+
+If you are supporting TOE-mode users on your system, you will want to do one
+of the following:
+
+  1. TOE-Mode a user preference
+
+     If you will support TOE-mode as a user option (preference), it is
+     recommended that you enable preferences-extension support and recompile,
+     then use the purge-pe.sql script nightly. The preferences-extension will 
+     store user preferences in the database so that Postgres can query them.
+
+     NOTE: You should add a preference for any global users on your system, so
+     that their data is purged as if TOE-based (since global user data is
+     rarely updated). You can do this using:
+                                                                                
+     dspam_admin add pref [username] trainingMode TOE
+
+  2. Global TOE Support
+
+     If you will be using TOE mode globally (for all users), then you should
+     use purge.sql, but remove the following lines:
+
+     DELETE FROM dspam_token_data
+       WHERE CURRENT_DATE - last_hit > 90;
+
+     This will prevent the purging of stale tokens, which could cause serious
+     data loss in TOE databases (because tokens are never touched unless
+     an error has occured).  All other purges should be safe even for TOE-mode
+     users.
+
+If you will NOT be supporting TOE users on your system, you may simply run
+the purge.sql script nightly, as-is.
+
+5. TUNING
+
+PostgreSQL use sequential scan for newly created objects which will slow 
+down everything. To use index scan force statistics collection by executing
+"ANALYSE" query manually, right after training first few mails. "ANALYSE" is
+included in purge.sql script. Thus new statistics will be collected daily.
+
+By default PostgreSQL sets tuneable parameters to minimum (i.e. shared memory
+size). To increase performance change "shared_buffers" and other values in 
+postgresql.conf file. Kernel's shared memory related parameters also need to 
+be tuned.
+
+ERRORS
+
+Any SQL errors will be reported to LOGDIR/sql.errors as well as the standard
+syslog facilities (although the query will be truncated).
+
+QUESTIONS
+
+Please contact the dspam-dev mailing list with any questions or constructive
+feedback.
+
+Rustam Aliyev
+<rustam@azernews.com>

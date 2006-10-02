@@ -1,0 +1,154 @@
+.\" $Id: libdspam.3,v 1.6 2006/05/14 15:37:30 jonz Exp $
+.\"  -*- nroff -*-
+.\"
+.\" dspam3.2
+.\"
+.\" Authors:    Jonathan A. Zdziarski <jonathan@nuclearelephant.com>
+.\"
+.\" Copyright (c) 2002-2006 Jonathan A. Zdziarski
+.\" All rights reserved
+.\"
+.TH libdspam 1  "Sep 29, 2004" "libdspam" "libdspam"
+
+.SH NAME
+libdspam, dspam_init, dspam_create, dspam_addattribute, dspam_attach, dspam_process, dspam_getsource, dspam_detach, dspam_clearattributes, dspam_destroy 
+.PP
+DSPAM Core Analyis Engine Functions
+
+.SH SYNOPSIS
+.nf
+.B #include <libdspam.h>
+.sp
+.BI "DSPAM_CTX *dspam_init(const char *" user ", const char *" group ", " 
+.BI "  const char *" home ", int " mode ", u_int32_t " flags ");"
+.sp
+.BI "DSPAM_CTX *dspam_create(const char *" user ", const char *" group ", "
+.BI "  const char *" home ", int " mode ", u_int32_t " flags ");"
+.sp
+.BI "int dspam_addattribute(DSPAM_CTX *" CTX ", const char *" name ", "
+.BI "  const char *" value ");"
+.sp
+.BI "int dspam_clearattributes(DSPAM_CTX *" CTX ");"
+.sp
+.BI "int dspam_attach(DSPAM_CTX *" CTX ", void *" dbh ");"
+.sp
+.BI "int dspam_process(DSPAM_CTX *" CTX ", const char *" message ");"
+.sp
+.BI "int dspam_getsource(DSPAM_CTX *" CTX ", char *" buf ", size_t " size ");"
+.sp
+.BI "int dspam_detach(DSPAM_CTX *" CTX ");"
+.sp
+.BI "int dspam_destroy(DSPAM_CTX *" CTX ");"
+.fi
+.SH DESCRIPTION 
+\fBlibdspam\fP provides core message processing and classification 
+functionality. 
+.PP
+The \fBdspam_init()\fP function creates and initializes a new classification
+context and attaches the context to whatever backend storage facility was
+configured. The \fBuser\fP and \fBgroup\fP arguments provided are used to
+read and write information stored for the user and group specified. The 
+\fBhome\fP argument is used to configure libdspam's storage around the
+base directory specified. The \fBmode\fP specifies the operating mode to
+initialize the classification context with and may be one of:
+.PP
+ \fBDSM_PROCESS\fP   Process the message and return a result
+ \fBDSM_CLASSIFY\fP  Classify message only, no learning
+ \fBDSM_TOOLS\fP     No processing, attach to storage only
+.PP
+The \fBflags\fP provided further tune the classification context for a specific
+function. Multiple flags may be OR'd together.
+.PP
+ \fBDSF_CHAINED\fP   Use a Chained (Multi-Word) Tokenizer  
+ \fBDSF_SBPH\fP      Use Sparse Binary Polynomial Hashing Tokenizer
+ \fBDSF_SIGNATURE\fP A binary signature is requested/provided
+ \fBDSF_NOISE\fP     Apply Bayesian Noise Reduction logic
+ \fBDSF_WHITELIST\fP Use automatic whitelisting logic
+ \fBDSF_MERGED\fP    Merge group metadata with user's in memory
+.PP
+Upon successful completion, \fBdspam_init()\fP will return a pointer to a new
+\fBclassification context\fP structure containing a copy of the configuration 
+passed into dspam_init(), a connected storage driver handle, and a set of
+preliminary user control data read from storage.
+.PP
+The \fBdspam_create()\fP function performs in exactly the same manner as
+the dspam_init() function, but does not attach to storage. Instead, the
+caller must also call \fBdspam_attach()\fP after setting any storage-
+specific attributes using \fBdspam_addattribute()\fP. This is useful for
+cases where the implementor would prefer to configure storage internally
+rather than having libdspam read a configuration from a file.
+.PP
+The \fBdspam_addattribute()\fP function is called to set attributes within
+the classification context. Some storage drivers support the use of passing 
+specific attributes such as server connect information. The driver-independent
+attributes supported by DSPAM include:
+.PP
+ \fBIgnoreHeader\fP   Specify a specific header to ignore 
+ \fBLocalMX\fP        Specify a local mail exchanger to assist in 
+                correct results from \fBdspam_getsource()\fP.
+.PP
+Only driver-dependent attributes need be set prior to a call to 
+\fBdspam_attach()\fP. Driver-independent attributes may be set both before
+and after storage has been attached.
+.PP
+The \fBdspam_attach()\fP function attaches the storage interface to the
+classification context and alternatively established an initial connection with
+storage if \fBdbh\fP is \fBNULL\fP. Some storage drivers support only a
+NULL value for dbh, while others (such as mysql_drv, pgsql_drv, and 
+sqlite_drv) allow an open database handle to be attached. This function 
+should only be called after an initial call to \fBdspam_create()\fP and
+should never be called if using \fBdspam_init()\fP, as storage is
+automatically attached by a call to dspam_init().
+.PP
+The \fBdspam_process()\fP function performs analysis of the \fBmessage\fP
+passed into it and will return zero on successful completion. If successful,
+CTX->result will be set to one of three classification results:
+.PP
+ \fBDSR_ISSPAM\fP        Message was classified as spam
+ \fBDSR_ISINNOCENT\fP    Message was classified as nonspam
+ \fBDSR_ISWHITELISTED\fP Recipient was automatically whitelisted
+.PP
+Should the call fail, one of the following errors will be returned:
+.PP
+ \fBEINVAL\fP    An invalid call or invalid parameter used.
+ \fBEUNKNOWN\fP  Unexpected error, such as malloc() failure
+ \fBEFILE\fP     Error opening or writing to a file or file handle
+ \fBELOCK\fP     Locking failure
+ \fBEFAILURE\fP  The operation itself has failed
+.PP
+The \fBdspam_getsource()\fP function extracts the source sender from the
+message passed in during a call to \fBdspam_process()\fP and writes not more
+than \fBsize\fP bytes to \fBbuf\fP.
+.PP
+The \fBdspam_detach()\fP function can be called when a detachment from
+storage is desired, but the context is still needed. The storage driver
+is closed, leaving the classification context in place. Once the context
+is no longer needed, another call to \fBdspam_destroy()\fP should be
+made. If you are closing storage and destroying the context at the same
+time, it is not necessary to call this function. Instead you may call
+\fBdspam_destroy()\fP directly.
+.PP
+The \fBdspam_clearattributes()\fP function is called to clear any attributes
+previously set using \fBdspam_addattribute()\fP within the classification
+context. It is necessary to call this function prior to replacing any
+attributes already written.
+.PP
+The \fBdspam_destroy()\fP function should be called when the context is
+no longer needed. If a connection was established to storage internally,
+the connection is closed and all data is flushed and written. If a 
+handle was attached, the handle will remain open.
+.PP 
+.SH AUTHORS
+.LP
+
+Jonathan A. Zdziarski
+
+For more information, see http://www.nuclearelephant.com.
+
+.SH "SEE ALSO"
+.BR dspam_stats (1),
+.BR dspam_train (1),
+.BR dspam_clean (1),
+.BR dspam_dump (1),
+.BR dspam_merge (1)
+

@@ -1,0 +1,131 @@
+$Id: exim.txt,v 1.1 2005/03/11 21:16:03 jonz Exp $
+
+EXIM 4 INTEGRATION
+
+Please follow the instructions in the README for building DSPAM. Once DSPAM
+has been built, the following instructions may be used to integrate it with
+exim.
+ 
+To integrate DSPAM with exim 4, you'll need to create a new director in the 
+exim configuration.  First, add the following code to the directors:
+
+spamscan:
+  no_verify
+  condition = "${if and {{!eq {$received_protocol}{spam-scanned}} {!eq {$received_protocol}{local}} } {1}{0}}"
+  driver = accept
+  transport = spamcheck
+  require_files = /usr/local/var/dspam:\
+    +/usr/local/bin
+
+This code tells exim to run spamcheck unless the message was marked by
+the agent with the spam-scanned protocol, or if it is local mail (to prevent
+loops).
+
+If you're using an alternative prefix, adjust the pathnames to match.
+
+Then add the following code to the transports section. This code defines
+how dspam is called by exim for scanning email:
+
+spamcheck:
+  driver = pipe
+  command = /usr/local/bin/dspam --deliver=innocent --user $local_part -- %u
+  user = mail
+  group = mail
+  return_path_add = false
+  log_output = true
+  return_fail_output = true
+
+If you're using virtual users on the system, you may wish to include the
+domain as part of the username: 
+
+  command = /usr/local/bin/dspam --deliver=innocent --user "$local_part@$domain" -- %u
+
+Finally, you will need to configure and compile DSPAM. DSPAM will most likely
+end up calling exim again for delivery, using the spam-scanned protocol to
+identify scanned messages. The most common example is:
+
+   ./configure --with-delivery-agent="/usr/sbin/exim -oMr spam-scanned"
+
+RUNNING WITHOUT PRIVILEGED EXIM USERS
+
+The problem with setting the $received_protocol in the transport is that only
+privileged Exim users are allowed to do so. With the setup below, DSPAM can
+run as a nonprivileged user. The problem, however, is that this header could
+be easily spoofed:
+
+   condition = "${if and {\
+                         {!def:h_X-DSPAM-Check:}\
+                 }{1}{0}}"
+   headers_add = "X-DSPAM-Check: by $primary_hostname on $tod_full"
+
+
+DIRECTORY SETTINGS
+
+When changing the user/group it is highly advisable to set "home_directory"
+and "current_directory" to match the DSPAM home:
+
+home_directory = "/usr/local/var/dspam" # or /tmp
+current_directory = "/usr/local/var/dspam" # or /tmp
+
+Otherwise, the transport might try to run DSPAM in something like /home/bob
+under certain circumstances. This will most likely fail if DSPAM runs as
+"mail".
+
+PASS-THROUGH
+
+For a pass-through setup where DSPAM feeds all processed messages back to
+Exim it is also a good idea to set "prefix" and "suffix" to an empty
+string:
+  prefix = ""
+  suffix = ""
+
+ALIASES
+
+There is no need to create aliases for every user on the system in order to
+handle spam reports and false positives. They can be handled by directors
+and transports, using the following directors:
+
+   dspam_addspam:
+     prefix = spam-
+     driver = localuser
+     transport = addspam
+
+   dspam_falsepositive:
+     prefix = falsepos-
+     driver = localuser
+     transport = falsepositive
+
+For every $user on the system, these directors will handle messages
+addressed to "spam-$user@localhost" and "falsepos-$user@localhost", strip
+the prefix from the address, and pass the message to the respective
+transport. This requires two additional transports:
+
+addspam:
+  driver = pipe
+  command = "/path/to/dspam --user $local_part --class=spam --source=error"
+  return_path_add = false
+  return_fail_output = true
+  log_output = true
+  home_directory = "/path/to/dspam/dspam-home" # or "/tmp"
+  current_directory = "/path/to/dspam/dspam-home" # or "/tmp"
+  user = mail
+  group = mail
+  prefix = ""
+  suffix = ""
+falsepositive:
+  driver = pipe
+  command = "/path/to/dspam --user $local_part --class=innocent --source=error --deliver=innocent %u"
+  return_path_add = false
+  return_fail_output = true
+  log_output = true
+  home_directory = "/path/to/dspam-home" # or "/tmp"
+  current_directory = "/path/to/dspam-home" # or "/tmp"
+  user = mail
+  group = mail
+  prefix = ""
+  suffix = ""
+
+This way, all users are handled transparently. No fiddling with aliases is
+required as you add or remove users.
+
+

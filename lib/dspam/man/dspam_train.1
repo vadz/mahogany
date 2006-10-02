@@ -1,0 +1,89 @@
+.\" $Id: dspam_train.1,v 1.3 2006/05/14 15:37:30 jonz Exp $
+.\"  -*- nroff -*-
+.\"
+.\" dspam_train3.6
+.\"
+.\" Authors:    Jonathan A. Zdziarski <jonathan@nuclearelephant.com>
+.\"
+.\" Copyright (c) 2002-2006 Jonathan A. Zdziarski
+.\" All rights reserved
+.\"
+.TH dspam_train 1  "Jan 24, 2006" "DSPAM" "DSPAM"
+
+.SH NAME
+dspam_train - train a corpus of mail
+
+.SH SYNOPSIS
+.na
+.B dspam_train
+[\c
+.BI \ username \fR
+]
+[\c
+.BI \ spam_dir \fR
+]
+[\c
+.BI \ nonspam_dir \fR
+]
+
+.ad
+.SH DESCRIPTION 
+.LP
+.B dspam_train
+is used to train and test a corpus of mail (in maildir format). This 
+tool will present each message to dspam for a classification and then
+retrain only if the message was incorrect. This provides close to real-world
+training and should be used to build pretrained databases. Upon execution,
+the tool will automatically determine the ratio of spam:nonspam and train
+based on that ratio to ensure both corpora are trained consecutively. This
+tool can also be used as a test jig to measure the efficiency and accuracy
+of a particular corpus against dspam in a given configuration.
+
+.SH OPTIONS
+.LP
+.ne 3
+.TP
+
+.n3 3
+.TP
+.BI [username]\c
+Specifies the user to train.
+
+.n3 3
+.TP
+.BI [spam_dir]\c
+Specifies the pathname to the directory containing the corpus of spam. Each
+message should be separate in its own file.
+
+.n3 3
+.TP
+.BI [nonspam_dir]\c
+Specifies the pathname to the directory containing the corpus of nonspam. Each 
+message should be separate in its own file.
+
+.SH EXIT VALUE
+.LP
+.ne 3
+.PD 0
+.TP
+.B 0
+Operation was successful.
+.ne 3
+.TP
+.B other
+Operation resulted in an error. 
+.PD
+
+.SH AUTHORS
+.LP
+
+Jonathan A. Zdziarski
+
+For more information, see http://www.nuclearelephant.com.
+
+.SH SEE ALSO
+.BR dspam (1),
+.BR dspam_stats (1),
+.BR dspam_clean (1),
+.BR dspam_dump (1),
+.BR dspam_merge (1)

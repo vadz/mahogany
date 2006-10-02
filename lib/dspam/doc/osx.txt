@@ -1,0 +1,37 @@
+$Id: osx.txt,v 1.1 2005/03/11 21:16:03 jonz Exp $
+
+MAC OSX NOTES
+
+DSPAM builds well on OSX, with a few minor caveats, as described below.
+
+Autogen
+If you're building from CVS, you'll need a few tools in order to perform an
+autogen. The latest versions of autoconf, automake, and libtool will need to
+be installed first. This can be done quite easily using an OSX package tool.
+Visit http://www.darwinports.com or http://fink.sf.net for more information.
+Once you've installed these latest tools, you'll need to run autogen-glibtool.sh
+to generate a new configure script . Be sure that the path to these new binaries
+comes first in your path. This is usually /opt/local/bin (darwinports) or
+/sw/local/bin (fink).
+
+Library Patches
+OSX complains about libraries containing "common symbols". In order to build
+DSPAM with certain backends, it will be necessary to reassemble the library.
+The example below shows how to do this with the MySQL client library. If you're
+using a different backend, you may need to tailor this to your particular
+problem.
+
+% cd /usr/local/mysql/lib
+% mv libmysqlclient.a libmysqlclient.a.original
+% mkdir /tmp/mysql
+% cd /tmp/mysql
+% ar x /usr/local/mysql/lib/libmysqlclient.a.original
+% ld -r -d my_error.o
+% mv a.out my_error.o
+% libtool -o /usr/local/mysql/lib/libmysqlclient.a *.o
+
+... ignore any warnings about "no symbols"
+
+Once you've configured and compiled DSPAM on OSX, see one of the other README
+files for more information about integrating it with your favorite MTA.
+

@@ -1,0 +1,175 @@
+Configuring DSPAM as a seamless front-end relay using Postfix
+
+This HOWTO explains how to set up DSPAM as a front-end relay.  Using this 
+configuration, you can point your MX records to the DSPAM server and
+then have DSPAM pass along any valid email to your mail server. The example
+provided also provides personalized training for each user it is protecting,
+even if users have multiple email aliases. This allows you to create more than
+just a dumb gateway server, but something smart enough to learn each user's
+mail. You may either account for all addresses behind your mail server (to
+ward off dictionary attacks) or configure pass-thru for unprovisioned users
+on the system to lighten the work load by provisioning only users who want 
+filtering.
+
+When configuring DSPAM as a relay, it's generally a good idea to set 
+up DSPAM on its own server. Therefore, we will assume you've got a fresh server
+running *NIX with an existing MySQL 4.1+ installation (you'll want at least 
+4.1.12 to avoid some nasty bugs in MySQL which affect DSPAM).
+
+Step 1: Configure, compile and install Postfix with MySQL support
+
+To do this, you'll need to init a set of makefiles including the path to your
+MySQL includes and libraries...
+
+make -f Makefile.init makefiles \
+    'CCARGS=-DHAS_MYSQL -I/usr/local/mysql/include' \
+    'AUXLIBS=-L/usr/local/mysql/lib -lmysqlclient -lz -lm'
+
+Then simply
+
+make && make install
+
+Step 2: Configure, compile  and install DSPAM with daemon + mysql support
+
+You'll need the following options:
+  MySQL
+  Virtual Users
+  Daemon mode
+
+It may also be a good idea to enable:
+  Preferences extension
+  Debug
+
+For example:
+
+./configure     --with-storage-driver=mysql_drv \
+                --with-mysql-libraries=/usr/local/mysql/lib \
+                --with-mysql-includes=/usr/local/mysql/include \
+                --enable-virtual-users \
+                --enable-preferences-extension \
+                --enable-daemon 
+
+Step 3: Install DSPAM MySQL Objects (With a twist)
+
+Create the MySQL objects as outlined in the mysql DSPAM doc, but use the 
+virtual_user_aliases.sql script instead of virtual-users.sql script to create
+a table without a primary key. This will allow you to create multiple email
+addresses with the same uid, which is how DSPAM recognizes users.
+
+Step 4: Configure DSPAM to receive LMTP and delivery SMTP
+
+We're going to configure postfix to connect to DSPAM via LMTP using a domain
+socket. The following configuration properties should be set in dspam.conf:
+
+ServerQueueSize		32
+ServerPID		/var/run/dspam.pid
+ServerMode		standard
+ServerParameters	"--deliver=innocent"
+ServerIdent		"localhost.localdomain"
+ServerDomainSocketPath	/tmp/dspam.sock
+
+You'll also want to use the following ParseToHeader parameters:
+
+ParseToHeaders on
+ChangeModeOnParse on
+ChangeUserOnParse off
+
+This prevents Postfix from needing to use any aliases for retraining. When
+users email spam-name@domain.com, DSPAM will automatically realize that it
+needs to retrain the message. I'll explain how to set this up in a bit.
+
+Step 5: Configure Postfix to use DSPAM + virtual UIDs table
+
+The following is a sample configuration that will tell postfix to use DSPAM
+as its virtual transport (passing all mail to DSPAM via LMTP) and to use the
+dspam_virtual_uids table as its source for mailbox aliases. You can build on
+this and add mysql support for virtual_mailbox_domains, but you'll need to
+maintain your own database table for that.
+
+virtual_transport = lmtp:unix:/tmp/dspam.sock
+virtual_mailbox_domains = mydomain.com
+virtual_mailbox_maps = mysql:/etc/postfix/vmailbox.cf
+
+vmailbox.cf should look something like:
+
+user = [mysql username]
+password = [mysql password]
+dbname = [mysql db]
+query = SELECT username FROM dspam_virtual_uids WHERE username='%s'
+table = dspam_virtual_uids
+host = 127.0.0.1
+select_field = username
+where_field = username
+additiona_conditions =
+
+Step 6: Add a localStore preference for each user
+
+The localStore preference defines the web directory name for each user (for
+the WebUI). Since users might have multiple email addresses, you want to avoid
+having a directory for each alias. You can do this by setting their web
+directory to match their uid.
+
+To do this, you'll first need to allow the localStore override in dspam.conf:
+
+AllowOverride	localStore
+
+Next, set the localStore preference for that user to their uid or some other
+unique identifier:
+
+dspam_admin ch pref jonathan@nuclearelephant.com localStore 1 
+
+Now, whenever any address pertaining to this user is emailed, information
+will be stored in $DSPAM_HOME/data/1
+
+Step 7: Configure user aliases for dspam_virtual_uids 
+
+Postfix is now set up to do a lookup in dspam_virtual_uids. It _must_ find a
+valid address in this table in order to accept the message. What you'll need
+to do now is to create email addresses (and spam addresses) in this table
+for each user behind your mail server. You will need to assign any aliases
+under the same UID, and you'll also need to create a spam alias in this
+table. For example:
+
+UID	Username
+1	jonathan@nuclearelephant.com
+1	spam-jonathan@nuclearelephant.com
+1	jon@nuclearelephant.com			<- An alias 
+1	jonz@nuclearelephant.com		<- Another alias	
+
+When any of these destination addresses is specified, DSPAM will process
+mail under the same user so that only one database is used for all of these
+addresses. You can create as many aliases as you like, and in fact should 
+probably write a script to pull this from your existing production system.
+
+Congratulations! You're now set up. You can start DSPAM using dspam --daemon.
+You might want to run with verbose debug to test and ensure everything is
+working properly.
+
+GLOBAL DATABASES
+
+If you're thinking about going with a global database, I strongly recommend
+using merged groups + toe instead of a single global group. To do this, just
+follow the README directions for setting one up and leave everything the way
+it is. If, however, you insist on a single global group, you'll need to make
+one change to dspam.conf to accomodate this configuration. Add
+--user [globaluser] to your ServerParameters property. This will cause all
+mail to be processed using this user, but will still deliver using the
+recipient information.
+
+ALIASES
+
+If you have some aliases, you'll need to also set them up on your relay
+so that DSPAM can process the individual users. To do this, add the
+following lines to postfix's main.cf:
+
+virtual_alias_domains =
+virtual_alias_maps = mysql:/etc/postfix/valiases.cf
+
+now create a valiases.cf similar to vmailbox.cf, only you'll want to create
+a new table just for aliases. the field pulled from should be a list of
+recipient addresses, for example:
+
+list@domain.com		jonz@domain.com,bob@domain.com
+
+postfix will now deliver to each of these mailboxes instead of an alias address
+

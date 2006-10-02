@@ -1,0 +1,57 @@
+<HTML>
+<HEAD><TITLE>DSPAM v3 Control Center</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$" title="Home"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+		Statistical SPAM Protection for <strong>$REMOTE_USER$</strong>
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+	<ul id="navlist">
+		<li><a href="$CGI$?$USER$template=performance">Performance</a></li>
+		<li><a href="$CGI$?$USER$template=preferences">Preferences</a></li>
+		<li><a href="$CGI$?$USER$template=alerts">Alerts</a></li>
+		<li id="active"><a id="current" href="$CGI$?$USER$template=quarantine">Quarantine (View)</a></li>
+		<li><a href="$CGI$?$USER$template=analysis">Analysis</a></li>
+		<li><a href="$CGI$?$USER$template=history&history_page=1">History</a></li>
+		$NAV_ADMIN$
+	</ul>
+</div>
+
+<div id="panel">
+
+<p>
+The contents of the message in the quarantine is shown below.
+</p>
+
+<FORM ACTION="$CGI$">
+<INPUT TYPE=HIDDEN NAME=signatureID VALUE="$MESSAGE_ID$">
+<INPUT TYPE=HIDDEN NAME=command VALUE="processFalsePositive">
+<INPUT TYPE=HIDDEN NAME=template VALUE="quarantine">
+<INPUT TYPE=HIDDEN NAME=user VALUE="$REMOTE_USER$">
+<INPUT TYPE=SUBMIT VALUE="Deliver Message"> because it is <strong>not</strong> SPAM
+</FORM>
+<BR>
+<TEXTAREA ROWS=36 COLS=80 READONLY>
+$MESSAGE$
+</TEXTAREA>
+</FORM>
+
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a> Copyright &copy; 2005, Jonathan A. Zdziarski
+</p>
+</div>
+
+</BODY>
+</HTML>
