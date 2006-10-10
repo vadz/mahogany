@@ -37,10 +37,10 @@
 #  include <wx/stattext.h>
 #  include <wx/statbox.h>
 #  include <wx/statbmp.h>
+#  include <wx/dcclient.h>       // for wxClientDC
+#  include <wx/settings.h>       // for wxSystemSettings
 #ifdef __WINE__
-#  include <wx/scrolwin.h>  // for wxScrolledWindow
-#  include <wx/dcclient.h>  // for wxClientDC
-#  include <wx/settings.h>  // for wxSystemSettings
+#  include <wx/scrolwin.h>       // for wxScrolledWindow
 #endif // __WINE__
 #endif // USE_PCH
 

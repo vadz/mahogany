@@ -31,19 +31,17 @@
 #  include "Mdefaults.h"
 #  include "Profile.h"
 
-#  include <wx/msgdlg.h>   // for wxMessageBox
+#  include <wx/msgdlg.h>     // for wxMessageBox
 #  include <wx/menu.h>
 #  include <wx/statusbr.h>
-#ifdef __WINE__
-#  include <wx/timer.h>    // for wxTimer
-#endif // __WINE__
+#  include <wx/timer.h>      // for wxTimer
 #endif // USE_PCH
 
-#include "wx/persctrl.h" // for wxPMessageBoxEnable
+#include "wx/persctrl.h"     // for wxPMessageBoxEnable
 #include <wx/ffile.h>
 #include <wx/fs_mem.h>
 #include <wx/cmdline.h>
-#include <wx/encconv.h>         // for wxEncodingConverter
+#include <wx/encconv.h>      // for wxEncodingConverter
 
 #ifdef USE_DIALUP
 #  include <wx/dialup.h>

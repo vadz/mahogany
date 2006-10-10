@@ -30,6 +30,7 @@
 #   include <wx/sizer.h>
 #   include <wx/textctrl.h>
 #   include <wx/button.h>        // for wxButton
+#   include <wx/panel.h>         // for wxPanel
 #endif // USE_PCH
 
 #include <wx/imaglist.h>         // for wxImageList

@@ -28,12 +28,8 @@
    #include <wx/layout.h>
    #include <wx/stattext.h>     // for wxStaticText
    #include <wx/statbox.h>
-#ifdef OS_WIN // cygwin and mingw
-   #include <wx/settings.h>
-#ifdef __WINE__
    #include <wx/dcclient.h>     // for wxClientDC
-#endif // __WINE__
-#endif // OS_WIN
+   #include <wx/settings.h>     // for wxSystemSettings
 #endif // USE_PCH
 
 #include "gui/wxDialogLayout.h"
