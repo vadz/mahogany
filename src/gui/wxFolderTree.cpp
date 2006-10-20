@@ -1702,38 +1702,11 @@ wxString wxFolderTreeNode::GetName() const
          if ( !isValid )
             break;
 
-         // valid IMAP modified UTF-7 mailbox name, converting to
-         // environment's default encoding for now (FIXME)
-
-         //Convert UTF-7 to UTF-8. Instead of this we could just use
-         //wxString(nameutf7.wc_str(wxConvUTF7), wxConvLocal);
-         //but wxWindows does not support UTF-7 yet, so we first convert
-         //UTF-7 to UTF-8 using c-client function and then convert
-         //UTF-8 to current environment's encoding.
-
-         nameutf7 << _T("-");
-
-         SIZEDTEXT *text7 = new SIZEDTEXT;
-         SIZEDTEXT *text8 = new SIZEDTEXT;
-         text7->data = (unsigned char *) nameutf7.c_str();
-         text7->size = nameutf7.Length();
-
-         utf8_text_utf7 (text7, text8);
-
-         //we cannot use "nameutf8 << text8->data" here as utf8_text_utf7()
-         //returns text8->data which is longer than text8->size:
-         String nameutf8;
-         nameutf8.reserve(text8->size);
-         for ( unsigned long k = 0; k < text8->size; k++ )
-         {
-            nameutf8 << wxChar(text8->data[k]);
-         }
-         // convert nameutf8 from UTF-8 to current environment's encoding:
-         nameutf8 = wxString(nameutf8.wc_str(wxConvUTF8), wxConvLocal);
-         name << nameutf8;
          i = j;
-         free(text7);
-         free(text8);
+
+         // valid IMAP modified UTF-7 mailbox name, convert to the encoding
+         // used by the GUI
+         name << wxString(nameutf7.wc_str(wxConvUTF7), *wxConvUI);
       }
       else // s != '&'
       {
