@@ -568,7 +568,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.318 2006/08/25 15:39:12 vadz Exp 
+# From configure.in Id: configure.in 7145 2006-10-20 00:37:46Z vadz 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4326,7 +4326,7 @@ fi
   if test "$WX_CONFIG_PATH" != "no" ; then
     WX_VERSION=""
 
-    min_wx_version=2.5.2
+    min_wx_version=2.7.1
     if test -z "" ; then
       echo $ac_n "checking for wxWidgets version >= $min_wx_version""... $ac_c" 1>&6
 echo "configure:4333: checking for wxWidgets version >= $min_wx_version" >&5
@@ -4335,7 +4335,7 @@ echo "configure:4333: checking for wxWidgets version >= $min_wx_version" >&5
 echo "configure:4336: checking for wxWidgets version >= $min_wx_version ()" >&5
     fi
 
-    WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args  "
+    WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args  adv,base,core,html,net,qa"
 
     WX_VERSION=`$WX_CONFIG_WITH_ARGS --version 2>/dev/null`
     wx_config_major_version=`echo $WX_VERSION | \
@@ -4912,79 +4912,8 @@ MAKE_USE_DSPAM=
 using_dspam="no"
 case "$USE_DSPAM" in
     1)
-				ac_safe=`echo "sqlite.h" | sed 'y%./+-%__p_%'`
-echo $ac_n "checking for sqlite.h""... $ac_c" 1>&6
-echo "configure:4918: checking for sqlite.h" >&5
-if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 4923 "configure"
-#include "confdefs.h"
-#include <sqlite.h>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4928: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=yes"
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=no"
-fi
-rm -f conftest*
-fi
-if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
-  echo "$ac_t""yes" 1>&6
-  echo $ac_n "checking for main in -lsqlite""... $ac_c" 1>&6
-echo "configure:4945: checking for main in -lsqlite" >&5
-ac_lib_var=`echo sqlite'_'main | sed 'y%./+-%__p_%'`
-if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_save_LIBS="$LIBS"
-LIBS="-lsqlite  $LIBS"
-cat > conftest.$ac_ext <<EOF
-#line 4953 "configure"
-#include "confdefs.h"
-
-int main() {
-main()
-; return 0; }
-EOF
-if { (eval echo configure:4960: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
-  rm -rf conftest*
-  eval "ac_cv_lib_$ac_lib_var=yes"
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  eval "ac_cv_lib_$ac_lib_var=no"
-fi
-rm -f conftest*
-LIBS="$ac_save_LIBS"
-
-fi
-if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
-  echo "$ac_t""yes" 1>&6
-  using_dspam="yes"
-		MAKE_USE_DSPAM="USE_DSPAM=1"
-else
-  echo "$ac_t""no" 1>&6
-echo "configure: warning: Cannot find sqlite library - support for DSPAM disabled." 1>&2
-	    
-fi
-
-else
-  echo "$ac_t""no" 1>&6
-echo "configure: warning: Cannot find sqlite header - support for DSPAM disabled." 1>&2
-	
-fi
-
+	using_dspam="yes"
+	MAKE_USE_DSPAM="USE_DSPAM=1"
 	;;
 esac
 
@@ -5024,7 +4953,7 @@ EOF
 	;;
 auto|Auto|AUTO|1)
 	echo $ac_n "checking how to link modules""... $ac_c" 1>&6
-echo "configure:5028: checking how to link modules" >&5
+echo "configure:4957: checking how to link modules" >&5
 		if test "$USE_MAC" = 0; then
 	    LDD="ldd"
 	else
@@ -5081,7 +5010,7 @@ MAKE_HAVE_DOCTOOLS='HAVE_DOCTOOLS=yes'
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5085: checking for $ac_word" >&5
+echo "configure:5014: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5116,7 +5045,7 @@ case "$PERL" in '') MAKE_HAVE_DOCTOOLS='' PERL='false "No perl available"';; esa
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5120: checking for $ac_word" >&5
+echo "configure:5049: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5151,7 +5080,7 @@ case "$LATEX" in '') MAKE_HAVE_DOCTOOLS='' LATEX='false "No latex available"';; 
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5155: checking for $ac_word" >&5
+echo "configure:5084: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5186,7 +5115,7 @@ case "$MAKEINDEX" in '') MAKE_HAVE_DOCTOOLS='' MAKEINDEX='false "No makeindex av
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5190: checking for $ac_word" >&5
+echo "configure:5119: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5221,7 +5150,7 @@ case "$DVIPS" in '') MAKE_HAVE_DOCTOOLS='' DVIPS='false "No dvips available"';; 
 # Extract the first word of "ps2pdf", so it can be a program name with args.
 set dummy ps2pdf; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5225: checking for $ac_word" >&5
+echo "configure:5154: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PSTOPDF'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5256,7 +5185,7 @@ case "$PSTOPDF" in '') MAKE_HAVE_DOCTOOLS='' PSTOPDF='false "No ps2pdf available
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5260: checking for $ac_word" >&5
+echo "configure:5189: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5325,7 +5254,7 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 IMAP_CFLAGS="$CFLAGS"
 IMAP_CPPFLAGS="$IMAP_CPPFLAGS $CPPFLAGS"
 echo $ac_n "checking whether $CC accepts -Wno-pointer-sign""... $ac_c" 1>&6
-echo "configure:5329: checking whether $CC accepts -Wno-pointer-sign" >&5
+echo "configure:5258: checking whether $CC accepts -Wno-pointer-sign" >&5
 if eval "test \"`echo '$''{'m_cv_cc_no_warn_ptr_sign'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5402,7 +5331,7 @@ fi
 if test "x$DEPFLAGS" != "x"; then
             if test "x$GXX" != "xyes"; then
 	echo $ac_n "checking whether ${CXX} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5406: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
+echo "configure:5335: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_cxx_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5425,7 +5354,7 @@ echo "$ac_t""$m_cv_cxx_depflags" 1>&6
     if test "x$DEPFLAGS" != "x"; then
 	if test "x$GCC" != "xyes"; then
 	    echo $ac_n "checking whether ${CC} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5429: checking whether ${CC} accepts ${DEPFLAGS}" >&5
+echo "configure:5358: checking whether ${CC} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_c_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5480,10 +5409,6 @@ for dir in `cd $srcdir; find include lib extra src locale doc res -type d -print
     case "$dir" in
 	CVS | */CVS | \
 	lib/imap/* | \
-	extra/src/c-client | \
-	extra/src/compface | \
-	extra/src/imap* | \
-	extra/src/libmal*)
 	    # ignore
 	    ;;
 
