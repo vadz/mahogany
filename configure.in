@@ -928,7 +928,7 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wxWidgets installation¤
-AM_PATH_WXCONFIG(2.5.2,wxOK=1)
+AM_PATH_WXCONFIG(2.7.1, wxOK=1,, [adv,base,core,html,net,qa])
 
 if test "$wxOK" != 1; then
    AC_MSG_ERROR([
@@ -1440,10 +1440,6 @@ for dir in `cd $srcdir; find include lib extra src locale doc res -type d -print
     case "$dir" in
 	CVS | */CVS | \
 	lib/imap/* | \
-	extra/src/c-client | \
-	extra/src/compface | \
-	extra/src/imap* | \
-	extra/src/libmal*)
 	    # ignore
 	    ;;
 
@@ -1533,4 +1529,4 @@ echo "Please look at config.log for more details."
 
 exit 0
 
-dnl vi: set noet ts=8 sw=4 nolist sta comments+=\:dnl:
+dnl vi: set noet ts=8 sw=4 nolist sta:
