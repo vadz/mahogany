@@ -1131,17 +1131,8 @@ MAKE_USE_DSPAM=
 using_dspam="no"
 case "$USE_DSPAM" in
     1)
-	dnl check for sqlite as we use sqlite driver for dspam
-	dnl
-	dnl TODO: support for other drivers
-	AC_CHECK_HEADER(sqlite.h,
-	    AC_CHECK_LIB(sqlite, main,
-		using_dspam="yes"
-		MAKE_USE_DSPAM="USE_DSPAM=1",
-		AC_MSG_WARN(Cannot find sqlite library - support for DSPAM disabled.)
-	    ),
-	    AC_MSG_WARN(Cannot find sqlite header - support for DSPAM disabled.)
-	)
+	using_dspam="yes"
+	MAKE_USE_DSPAM="USE_DSPAM=1"
 	;;
 esac
 
