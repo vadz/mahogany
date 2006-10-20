@@ -90,7 +90,9 @@ extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_PREVIEW_SEND;
 extern const MOption MP_REPLY_ADDRESS;
 extern const MOption MP_SENDER;
+#ifdef USE_OWN_CCLIENT
 extern const MOption MP_SMTP_DISABLED_AUTHS;
+#endif // USE_OWN_CCLIENT
 extern const MOption MP_SMTP_USE_8BIT;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_SMTPHOST_LOGIN;
@@ -1881,6 +1883,7 @@ SendMessageCC::Send(int flags)
                options |= SOP_8BITMIME;
             }
 
+#ifdef USE_OWN_CCLIENT
             // do we need to disable any authentificators (presumably because
             // they're incorrectly implemented by the server)?
             const String authsToDisable(READ_CONFIG_TEXT(m_profile,
@@ -1898,6 +1901,7 @@ SendMessageCC::Send(int flags)
             {
                smtp_parameters(SET_SMTPDISABLEDAUTHS, NIL);
             }
+#endif // USE_OWN_CCLIENT
          }
          break;
 

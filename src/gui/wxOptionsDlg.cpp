@@ -174,8 +174,10 @@ enum ConfigFields
    ConfigField_SenderHelp,
    ConfigField_GuessSender,
    ConfigField_Sender,
+#ifdef USE_OWN_CCLIENT
    ConfigField_DisabledAuthsHelp,
    ConfigField_DisabledAuths,
+#endif // USE_OWN_CCLIENT
 #ifdef USE_SSL
    ConfigField_SSLHelp,
    ConfigField_SmtpServerSSL,
@@ -1057,6 +1059,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_Advanced, ConfigField_MailServerLogin,           },
    { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
 
+#ifdef USE_OWN_CCLIENT
    { gettext_noop("\n"
                   "Final complication with SMTP authentication is that\n"
                   "some servers (notably qmail and Exim 3) advertise the\n"
@@ -1068,6 +1071,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced, ConfigField_MailServerLogin },
    { gettext_noop("Methods NOT to use"),           Field_Text |
                                                    Field_Advanced, ConfigField_MailServerLogin },
+#endif // USE_OWN_CCLIENT
+
 #ifdef USE_SSL
    { gettext_noop("\n"
                   "Mahogany can attempt to use either SSL or TLS to send\n"
@@ -1881,8 +1886,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),    // "Sender" help
    CONFIG_ENTRY(MP_GUESS_SENDER),
    CONFIG_ENTRY(MP_SENDER),
+#ifdef USE_OWN_CCLIENT
    CONFIG_NONE(),    // disabled auths help
    CONFIG_NONE(),    // almost CONFIG_ENTRY(MP_SMTP_DISABLED_AUTHS)
+#endif // USE_OWN_CCLIENT
 #ifdef USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),
@@ -3715,6 +3722,7 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
 // dynamicially fill the RAS connections combo box under Windows
 bool wxOptionsPageNetwork::TransferDataToWindow()
 {
+#ifdef USE_OWN_CCLIENT
    m_oldAuthsDisabled = READ_CONFIG_TEXT(m_Profile, MP_SMTP_DISABLED_AUTHS);
    wxTextCtrl *text = wxDynamicCast(GetControl(ConfigField_DisabledAuths),
                                     wxTextCtrl);
@@ -3728,6 +3736,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 
       text->SetValue(m_oldAuthsDisabled);
    }
+#endif // USE_OWN_CCLIENT
 
    bool bRc = wxOptionsPage::TransferDataToWindow();
 
@@ -3769,6 +3778,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 
 bool wxOptionsPageNetwork::TransferDataFromWindow()
 {
+#ifdef USE_OWN_CCLIENT
    // we need to massage the disabled authentificators string a bit to fit it
    wxTextCtrl *text = wxDynamicCast(GetControl(ConfigField_DisabledAuths),
                                     wxTextCtrl);
@@ -3789,6 +3799,7 @@ bool wxOptionsPageNetwork::TransferDataFromWindow()
          m_Profile->writeEntry(MP_SMTP_DISABLED_AUTHS, authsDisabled);
       }
    }
+#endif // USE_OWN_CCLIENT
 
    return wxOptionsPage::TransferDataFromWindow();
 }

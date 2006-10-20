@@ -29,7 +29,9 @@
 extern "C"
 {
    long pop3_send (MAILSTREAM *stream,char *command,char *args);
+#ifdef USE_OWN_CCLIENT
    NETSTREAM *pop3_getnetstream(MAILSTREAM *stream);
+#endif // USE_OWN_CCLIENT
 }
 
 #include <wx/textfile.h>
@@ -221,6 +223,7 @@ bool PopFlagsCacheFile::DoSave(wxTempFile& file)
 
 static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
 {
+#ifdef USE_OWN_CCLIENT
    if ( !pop3_send(stream, "UIDL", NIL) )
    {
       // TODO: don't use it the next time
@@ -296,6 +299,9 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
    }
 
    return true;
+#else // !USE_OWN_CCLIENT
+   return false;
+#endif // USE_OWN_CCLIENT/!USE_OWN_CCLIENT
 }
 
 // ============================================================================

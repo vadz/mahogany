@@ -555,7 +555,9 @@ private:
    }
 
 
+#ifdef USE_OWN_CCLIENT
    wxString m_oldAuthsDisabled;
+#endif // USE_OWN_CCLIENT
 
    DECLARE_NO_COPY_CLASS(wxOptionsPageNetwork)
 };

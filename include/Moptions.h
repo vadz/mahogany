@@ -154,7 +154,9 @@ extern const MOption MP_SMTPHOST_PASSWORD;
 extern const MOption MP_SMTPHOST_USE_SSL;
 extern const MOption MP_SMTPHOST_USE_SSL_UNSIGNED;
 extern const MOption MP_SMTP_USE_8BIT;
+#ifdef USE_OWN_CCLIENT
 extern const MOption MP_SMTP_DISABLED_AUTHS;
+#endif // USE_OWN_CCLIENT
 
 #ifdef OS_UNIX
 extern const MOption MP_SENDMAILCMD;
