@@ -38,8 +38,10 @@
 
 extern "C"
 {
+   #define class klass
    #include <libdspam.h>
-   #include <sqlite_drv.h>
+   #include <hash_drv.h>
+   #undef class
 }
 
 // ----------------------------------------------------------------------------
@@ -53,76 +55,37 @@ public:
    // create the context
    DspamCtx(int mode, unsigned flags)
    {
-      m_ctx = dspam_create
+      m_ctx = dspam_init
               (
                   "mahogany", // user
                   NULL,       // no group
-                  mApplication->GetLocalDir().ToAscii(),
+                  mApplication->GetLocalDir().fn_str(),
                   mode,
                   flags
               );
-
-      // this is unsafe as it means that the database could become corrupted if
-      // the system crashes at a bad moment but it is about 10 times faster
-      // than the default "synchronous = NORMAL" so well worth it for non
-      // critical data such as spam database
-      dspam_addattribute(m_ctx, "SQLitePragma", "synchronous = OFF");
-
-      dspam_attach(m_ctx, ms_dbh);
-      if ( !ms_dbh )
-      {
-         // we haven't had database connection yet, so dspam_attach must have
-         // created a new one -- detach it from the context to avoid deleting
-         // it and reuse it for subsequent contexts
-         _sqlite_drv_storage *storage = (_sqlite_drv_storage *)m_ctx->storage;
-         ms_dbh = storage->dbh;
-         storage->dbh_attached = 1;
-      }
    }
 
    // destroy the context
    ~DspamCtx()
    {
-      if ( dspam_destroy(m_ctx) != 0 )
-      {
-         wxLogDebug(_T("dspam_destroy() failed"));
-      }
+      dspam_destroy(m_ctx);
    }
 
    operator DSPAM_CTX *() const { return m_ctx; }
    DSPAM_CTX *operator->() const { return m_ctx; }
 
-   // close the database connection
-   static void CloseDatabase()
-   {
-      if ( ms_dbh )
-      {
-         sqlite_close(ms_dbh);
-         ms_dbh = NULL;
-      }
-   }
-
 private:
-   // the database connection reused by all contexts
-   static sqlite *ms_dbh;
-
-
    DSPAM_CTX *m_ctx;
 
    DECLARE_NO_COPY_CLASS(DspamCtx);
 };
-
-sqlite *DspamCtx::ms_dbh = NULL;
-
-MMODULE_CLEANUP(DspamCtx::CloseDatabase)
-
 
 // normal DSPAM context
 class DspamProcessCtx : public DspamCtx
 {
 public:
    DspamProcessCtx()
-      :  DspamCtx(DSM_PROCESS, DSF_CHAINED | DSF_NOISE | DSF_WHITELIST)
+      :  DspamCtx(DSM_PROCESS, DSF_NOISE | DSF_WHITELIST)
    {
    }
 
@@ -272,8 +235,6 @@ END_EVENT_TABLE()
 
 DspamFilter::DspamFilter()
 {
-   dspam_init_driver();
-
    m_ctx = NULL;
 }
 
