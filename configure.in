@@ -490,7 +490,6 @@ AC_SUBST(MAKE_DEBUG)
 if test "$USE_WXDEBUG" = 1; then
    USE_OPT=0
    dnl FIXME: shouldn't hard code wxWin version here!
-   WX_CONFIG_NAME="wxgtkd-2.5-config"
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
@@ -1430,7 +1429,7 @@ DIR=
 for dir in `cd $srcdir; find include lib extra src locale doc res -type d -print`; do
     case "$dir" in
 	CVS | */CVS | \
-	lib/imap/* | \
+	lib/imap/*)
 	    # ignore
 	    ;;
 
