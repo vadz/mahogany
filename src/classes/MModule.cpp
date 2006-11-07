@@ -782,7 +782,7 @@ static wxArrayString BuildListOfModulesDirs()
    // program/bundle directory elsewhere (not that it mattered anyhow as
    // dynamic modules are not supported neither under Windows nor under Mac
    // right now...)
-   const String globalDir = M_PREFIX;
+   const String globalDir = mApplication->GetGlobalDir();
    if ( globalDir != localDir )
    {
       String pathSystem;
