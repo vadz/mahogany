@@ -676,7 +676,11 @@ wxIconManager::GetIconFromMimeType(const String& type, const String& ext)
    // now try to find it by name
    icon = GetIcon(type);
 
+#if wxCHECK_VERSION(2, 7, 2)
+   if ( icon.IsSameAs(m_unknownIcon) )
+#else
    if ( icon == m_unknownIcon )
+#endif
    {
       // the generic icon for this class of things
       String primType = type.BeforeLast(_T('/'));
