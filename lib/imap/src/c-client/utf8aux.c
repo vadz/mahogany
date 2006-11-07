@@ -34,6 +34,8 @@
 #include "misc.h"
 #include "rfc822.h"
 #include "utf8.h"
+
+static void utf8_stringlist (STRINGLIST *st,char *charset);
 
 /* Convert charset labelled searchpgm to UTF-8 in place
  * Accepts: search program

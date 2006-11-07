@@ -544,7 +544,6 @@ long utf8_strwidth (unsigned char *s);
 long utf8_textwidth (SIZEDTEXT *utf8);
 unsigned long ucs4_decompose (unsigned long c,void **more);
 void utf8_searchpgm (SEARCHPGM *pgm,char *charset);
-static void utf8_stringlist (STRINGLIST *st,char *charset);
 long utf8_mime2text (SIZEDTEXT *src,SIZEDTEXT *dst,long flags);
 unsigned char *mime2_token (unsigned char *s,unsigned char *se,
 			    unsigned char **t);
