@@ -23,12 +23,20 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	10 April 2001
- * Last Edited:	30 August 2006
+ * Last Edited:	25 October 2006
  */
  
 #undef flock			/* name is used as a struct for fcntl */
 #undef fork			/* make damn sure that we don't use vfork!! */
-#include "nfstest.c"		/* get NFS tester */
+
+#ifndef NOFSTATVFS		/* thank you, SUN.  NOT! */
+# ifndef NOFSTATVFS64
+#  ifndef _LARGEFILE64_SOURCE
+#   define _LARGEFILE64_SOURCE
+#  endif	/* _LARGEFILE64_SOURCE */
+# endif		/* NOFSTATVFFS64 */
+#include <sys/statvfs.h>
+#endif		/* NOFSTATVFS */
 
 #ifndef NSIG			/* don't know if this can happen */
 #define NSIG 32			/* a common maximum */
@@ -44,6 +52,8 @@ int flocksim (int fd,int op)
 {
   char tmp[MAILTMPLEN];
   int logged = 0;
+  struct stat sbuf;
+  struct ustat usbuf;
   struct flock fl;
 				/* lock zero bytes at byte 0 */
   fl.l_whence = SEEK_SET; fl.l_start = fl.l_len = 0;
@@ -62,6 +72,8 @@ int flocksim (int fd,int op)
     errno = EINVAL;
     return -1;
   }
+				/* always return success if disabled */
+  if (mail_parameters (NIL,GET_DISABLEFCNTLLOCK,NIL)) return 0;
 
   /*  Make fcntl() locking of NFS files be a no-op the way it is with flock()
    * on BSD.  This is because the rpc.statd/rpc.lockd daemons don't work very
@@ -70,12 +82,57 @@ int flocksim (int fd,int op)
    * on NFS-mounted files.  If you are wise, you'll use IMAP instead of NFS
    * for mail files.
    *
-   *  Sun alleges that it doesn't matter, because they say they have fixed all
-   * the rpc.statd/rpc.lockd bugs.  This is absolutely not true; huge amounts
-   * of user and support time have been wasted in cluster-wide hangs.
+   *  Sun alleges that it doesn't matter, and that they have fixed all the
+   * rpc.statd/rpc.lockd bugs.  As of October 2006, that is still false.
+   *
+   *  We need three tests for three major historical variants in SVR4:
+   *  1) In NFSv2, ustat() would return -1 in f_tinode for NFS.
+   *  2) When fstatvfs() was introduced with NFSv3, ustat() was "fixed".
+   *  3) When 64-bit filesystems were introduced, fstatvfs() would return
+   *	 EOVERFLOW; you have to use fstatvfs64() even though you don't care
+   *	 about any of the affected values.
+   *
+   * We can't use fstatfs() because fstatfs():
+   * . is documented as being deprecated in SVR4.
+   * . has inconsistent calling conventions (there are two additional int
+   *   arguments on Solaris and I don't know what they do).
+   * . returns inconsistent statfs structs.  On Solaris, the file system type
+   *   is a short called f_fstyp.  On AIX, it's an int called f_type that is
+   *   documented as always being 0!
+   *
+   * For what it's worth, here's the scoop on fstatfs() elsewhere:
+   *
+   *  On Linux, the file system type is a long called f_type that has a file
+   * system type code.  A different module (flocklnx.c) uses this because
+   * some knothead "improved" flock() to return ENOLCK on NFS files instead
+   * of being a successful no-op.  This "improvement" apparently has been
+   * reverted, but not before it got to many systems in the field.
+   *
+   *  On BSD, it's a short called either f_otype or f_type that is documented
+   * as always being zero.  Fortunately, BSD has flock() the way it's supposed
+   * to be, and none of this nonsense is necessary.
    */
-  if (test_nfs (fd) || mail_parameters (NIL,GET_DISABLEFCNTLLOCK,NIL))
-    return 0;			/* fcntl() locking disabled, return success */
+  if (!fstat (fd,&sbuf))	{ /* no hope of working if can't fstat()! */
+    /* Any base type that begins with "nfs" or "afs" is considered to be a
+     * network filesystem.
+     */
+#ifndef NOFSTATVFS
+    struct statvfs vsbuf;
+#ifndef NOFSTATVFS64
+    struct statvfs64 vsbuf64;
+    if (!fstatvfs64 (fd,&vsbuf64) && (vsbuf64.f_basetype[1] == 'f') &&
+	(vsbuf64.f_basetype[2] == 's') &&
+	((vsbuf64.f_basetype[0] == 'n') || (vsbuf64.f_basetype[0] == 'a')))
+      return 0;
+#endif		/* NOFSTATVFS64 */
+    if (!fstatvfs (fd,&vsbuf) && (vsbuf.f_basetype[1] == 'f') &&
+	(vsbuf.f_basetype[2] == 's') &&
+	((vsbuf.f_basetype[0] == 'n') || (vsbuf.f_basetype[0] == 'a')))
+      return 0;
+#endif		/* NOFSTATVFS */
+    if (!ustat (sbuf.st_dev,&usbuf) && !++usbuf.f_tinode) return 0;
+  }
+
 				/* do the lock */
   while (fcntl (fd,(op & LOCK_NB) ? F_SETLK : F_SETLKW,&fl))
     if (errno != EINTR) {
