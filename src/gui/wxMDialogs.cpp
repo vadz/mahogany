@@ -329,25 +329,6 @@ extern void ReallyCloseTopLevelWindow(wxFrame *frame)
 {
    frame->Hide(); // immediately
    frame->Close(true /* force */); // will happen later
-
-#if !wxCHECK_VERSION(2, 3, 0)
-   // unset the given frame as the main app window: otherwise we risk to create
-   // the dialogs with splash as parent and a crash later when the dialog is
-   // closed as its parent will have already been deleted
-   //
-   // NB: use mApplication and not wxTheApp now as the latter could still be
-   //     NULL if we're called from OnInit()!
-   if ( mApplication )
-   {
-      wxMApp *mapp = (wxMApp *)mApplication;
-      if ( mapp->GetTopWindow() == frame )
-      {
-         mapp->SetTopWindow(NULL);
-
-         wxTopLevelWindows.DeleteObject(frame);
-      }
-   }
-#endif // wxWin 2.3+
 }
 
 wxWindow *GetParentOfClass(const wxWindow *win, wxClassInfo *classinfo)
@@ -2485,11 +2466,7 @@ void wxSelectionsOrderDialog::OnButtonMove(bool up)
     {
         wxString label = m_checklstBox->GetString(selection);
 
-#if wxCHECK_VERSION(2, 3, 2)
         int count = m_checklstBox->GetCount();
-#else
-        int count = m_checklstBox->Number();
-#endif
         int positionNew = up ? selection - 1 : selection + 2;
         if ( positionNew >= 0 && positionNew <= count )
         {
@@ -2756,9 +2733,7 @@ void MProgressInfo::SetLabel(const wxString& label)
    m_labelText->SetLabel(label);
 
    // update the frame
-#if wxCHECK_VERSION(2, 2, 6)
    wxYieldIfNeeded();
-#endif // wxWin 2.2.6+
 }
 
 void MProgressInfo::SetValue(size_t numDone)
@@ -2766,9 +2741,7 @@ void MProgressInfo::SetValue(size_t numDone)
    m_labelValue->SetLabel(wxString::Format(_("%u done"), numDone));
 
    // update the frame
-#if wxCHECK_VERSION(2, 2, 6)
    wxYieldIfNeeded();
-#endif // wxWin 2.2.6+
 }
 
 MProgressInfo::~MProgressInfo()

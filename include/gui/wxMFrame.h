@@ -24,11 +24,6 @@
 
 #include <wx/frame.h>
 
-// enable workaround broken maximize?
-#if defined(__WXMSW__) && !wxCHECK_VERSION(2, 3, 0)
-   #define USE_WORKAROUND_FOR_MAXIMIZE
-#endif // wxMSW < 2.3.0
-
 class Profile;
 
 #ifdef USE_PYTHON
@@ -69,11 +64,8 @@ public:
    /// return true if initialised
    bool  IsInitialised(void) const { return m_initialised; }
 
-   // if we use this hack, Show() is implemented below
-#ifndef USE_WORKAROUND_FOR_MAXIMIZE
    /// make it visible or invisible
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
-#endif // USE_WORKAROUND_FOR_MAXIMIZE
 
    /// used to set the title of the window class
    void  SetTitle(String const & name);

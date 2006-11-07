@@ -25,9 +25,7 @@
 
 #include "MEvent.h"
 
-#if wxCHECK_VERSION(2,7,0)
-   #include <wx/power.h>
-#endif
+#include <wx/power.h>
 
 class MFolder;
 class MFolderList;

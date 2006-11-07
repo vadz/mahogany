@@ -4798,11 +4798,7 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
 {
    // delete the values of all selected settings in this profile - this will
    // effectively restore their default values
-#if wxCHECK_VERSION(2, 3, 2)
    size_t count = (size_t)m_checklistBox->GetCount();
-#else
-   size_t count = (size_t)m_checklistBox->Number();
-#endif
    for ( size_t n = 0; n < count; n++ )
    {
       if ( m_checklistBox->IsChecked(n) )

@@ -188,8 +188,6 @@ private:
    int SizeWithoutNewline(const String &paragraph);
    int FindLineLength(
       const String &paragraph,int lineStart,int paragraphEnd) const;
-   size_t RFind(const String &where,wxChar what,size_t start) const;
-   size_t FindLastNotOf(const String &where,wxChar what,size_t start) const;
    void FindSignature();
    bool PastSignature() { return m_from >= m_signature; }
 
@@ -527,7 +525,7 @@ int FormattedParagraph::FindLineLength(
 
    // Try to find at least one space on the line. Pick the last one.
    // Include one character past margin in case it is space.
-   size_t findSpace = RFind(paragraph,_T(' '),lineStart+m_margin);
+   size_t findSpace = paragraph.rfind(_T(' '),lineStart+m_margin);
    if(findSpace != paragraph.npos && (int)findSpace >= lineStart)
    {
       // There are spaces and wrapping within margin is possible.
@@ -565,50 +563,6 @@ int FormattedParagraph::FindLineLength(
    }
 
    return lineLength;
-}
-
-size_t FormattedParagraph::RFind(
-   const String &where,wxChar what,size_t start) const
-{
-#if wxCHECK_VERSION(2,5,0) // Bug in wxWindows implementation of rfind
-   size_t result = where.rfind(what,start);
-#else
-   size_t result = where.npos;
-   int cursor;
-
-   for( cursor = start; cursor >= 0; --cursor )
-   {
-      if( where[cursor] == what )
-      {
-         result = (size_t)cursor;
-         break;
-      }
-   }
-#endif
-
-   return result;
-}
-
-size_t FormattedParagraph::FindLastNotOf(
-   const String &where,wxChar what,size_t start) const
-{
-#if wxCHECK_VERSION(2,5,0) // Bug in wxWindows implem. of find_last_not_of
-   size_t result = where.find_last_not_of(what,start);
-#else
-   size_t result = where.npos;
-   int cursor;
-
-   for( cursor = start; cursor >= 0; --cursor )
-   {
-      if( where[cursor] != what )
-      {
-         result = (size_t)cursor;
-         break;
-      }
-   }
-#endif
-
-   return result;
 }
 
 void FormattedParagraph::FindSignature()

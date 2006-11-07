@@ -101,13 +101,6 @@
    #define UNUSED_IF_WIN(arg) arg
 #endif
 
-#if defined(__WXGTK20__) && !wxCHECK_VERSION(2, 6, 2)
-   // wxGTK 2.6.1 references this function but it doesn't exist in recent GTK+
-   // versions so stub it out here to make it possible to link the app (it's
-   // not really used anyhow)
-   extern "C" void *pango_x_get_context(void *) { return NULL; }
-#endif
-
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -961,7 +954,6 @@ wxMApp::OnInit()
                    "program instances are running."));
    }
 
-#if wxCHECK_VERSION(2, 3, 2)
    // parse our command line options inside OnInit()
    if ( !wxApp::OnInit() )
    {
@@ -969,7 +961,6 @@ wxMApp::OnInit()
 
       return false;
    }
-#endif // wxWin 2.3.2+
 
 #ifdef OS_WIN
    // stupidly enough wxWin resets the default timestamp under Windows :-(
@@ -1122,7 +1113,7 @@ wxMApp::OnInit()
 
    // wxLocale::GetSystemEncoding() is broken in wx <= 2.6.3, it returns
    // ISO-8859-1 for UTF-8 locale
-#if defined(__WXGTK20__) && wxCHECK_VERSION(2, 6, 4)
+#if defined(__WXGTK20__)
    // we need UTF-8 support to be able to work with messages in different
    // encodings
    if ( wxLocale::GetSystemEncoding() != wxFONTENCODING_UTF8 )
@@ -1882,8 +1873,6 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what, bool
 // Customize wxApp behaviour
 // ----------------------------------------------------------------------------
 
-#if wxCHECK_VERSION(2, 3, 0)
-
 // never return splash frame from here
 wxWindow *wxMApp::GetTopWindow() const
 {
@@ -1893,8 +1882,6 @@ wxWindow *wxMApp::GetTopWindow() const
 
    return win;
 }
-
-#endif // 2.3.0
 
 // return our icons
 wxIcon

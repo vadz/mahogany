@@ -118,8 +118,8 @@
 // wxWindows stuff
 // ----------------------------------------------------------------------------
 
-#if !wxCHECK_VERSION(2, 5, 1)
-#  error "This version of Mahogany requires wxWindows 2.5.1 or higher."
+#if !wxCHECK_VERSION(2, 7, 2)
+#  error "This version of Mahogany requires wxWindows 2.7.2 or higher."
 #endif
 
 #ifdef USE_THREADS

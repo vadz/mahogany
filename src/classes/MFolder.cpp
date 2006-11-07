@@ -1316,11 +1316,7 @@ void MFolderCache::Remove(MFolder *folder)
    CHECK_RET( index != wxNOT_FOUND,
               _T("can't remove folder from cache because it's not in it") );
 
-#if wxCHECK_VERSION(2, 2, 8)
    ms_aFolderNames.RemoveAt((size_t)index);
-#else
-   ms_aFolderNames.Remove((size_t)index);
-#endif
 
    ms_aFolders.RemoveAt((size_t)index);
 }

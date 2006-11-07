@@ -1338,9 +1338,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 
       if ( event.ShiftDown() || !IsModified() )
       {
-#if wxCHECK_VERSION(2, 5, 2)
          Navigate(event.ShiftDown() ? 0 : wxNavigationKeyEvent::IsForward);
-#endif // wx 2.5.2+
       }
       else
       {

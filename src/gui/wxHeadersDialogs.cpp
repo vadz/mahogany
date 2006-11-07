@@ -548,11 +548,7 @@ bool wxMsgViewHeadersDialog::TransferDataFromWindow()
 {
    // copy all entries from the checklistbox to the profile
    wxString shownHeaders, allHeaders, header;
-#if wxCHECK_VERSION(2, 3, 2)
    size_t count = (size_t)m_checklstBox->GetCount();
-#else
-   size_t count = (size_t)m_checklstBox->Number();
-#endif
    for ( size_t n = 0; n < count; n++ )
    {
       header = m_checklstBox->GetString(n);

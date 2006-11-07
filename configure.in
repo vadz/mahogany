@@ -927,7 +927,7 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wxWidgets installation¤
-AM_PATH_WXCONFIG(2.7.1, wxOK=1,, [adv,base,core,html,net,qa])
+AM_PATH_WXCONFIG(2.7.2, wxOK=1,, [adv,base,core,html,net,qa])
 
 if test "$wxOK" != 1; then
    AC_MSG_ERROR([

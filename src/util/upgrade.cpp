@@ -30,9 +30,7 @@
 #  include "gui/wxIconManager.h"
 
 #  include <wx/stattext.h>              // for wxStaticText
-#  if wxCHECK_VERSION(2,5,0)
-#     include <wx/sizer.h>              // for wxBoxSizer
-#  endif
+#  include <wx/sizer.h>                // for wxBoxSizer
 #endif  //USE_PCH
 
 #include "Mpers.h"
@@ -40,7 +38,6 @@
 #include "MFolder.h"
 #include "Message.h"
 
-#include <wx/version.h>                // for wxCHECK_VERSION
 #include <wx/file.h>                   // for wxFile
 #include <wx/fileconf.h>
 
@@ -743,19 +740,8 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 
 wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
 {
-#if !wxCHECK_VERSION(2,5,0)
-   wxSize sizeLabel = text->GetSize();
-   wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
-//   wxSize sizePage = ((wxWizard *)GetParent())->GetSize();
-   wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
-#endif
-
    wxEnhancedPanel *panel = new wxEnhancedPanel(this, true /* scrolling */);
-#if !wxCHECK_VERSION(2,5,0)
-   panel->SetSize(0, y, sizePage.x, sizePage.y - y);
-#endif
 
-#if wxCHECK_VERSION(2,5,0)
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    SetSizer(pageSizer);
 
@@ -771,7 +757,6 @@ wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
       1, // Vertical stretching
       wxEXPAND // No border, horizontal stretching
    );
-#endif
 
    panel->SetAutoLayout(true);
 
@@ -790,9 +775,7 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 {
    m_useWizard = true;
 
-#if wxCHECK_VERSION(2,5,0)
    wxStaticText *introduction =
-#endif // 2.5.0+
    new wxStaticText(this, -1, _(
       "Welcome to Mahogany!\n"
       "\n"
@@ -818,13 +801,6 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
                   _("I'm an &expert and don't need the wizard")
                 );
 
-#if !wxCHECK_VERSION(2,5,0)
-   wxSize sizeBox = m_checkbox->GetSize(),
-          sizePage = wizard->GetPageSize();
-
-   // adjust the vertical position
-   m_checkbox->Move(5, sizePage.y - 2*sizeBox.y);
-#else // 2.5.x
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    pageSizer->Add(
       introduction,
@@ -841,7 +817,6 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 
    SetSizer(pageSizer);
    pageSizer->Fit(this);
-#endif // 2.5.x
 }
 
 InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
@@ -901,11 +876,7 @@ InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
    panel->CreateButton(_("&Import..."), NULL);
 
-#if !wxCHECK_VERSION(2,5,0)
-   panel->Layout();
-#else
    GetSizer()->Fit(this);
-#endif
 }
 
 void InstallWizardImportPage::OnImportButton(wxCommandEvent&)
@@ -947,11 +918,7 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
    m_login = panel->CreateTextWithLabel(labels[2], widthMax, m_organization);
    m_email = panel->CreateTextWithLabel(labels[3], widthMax, m_login);
 
-#if !wxCHECK_VERSION(2,5,0)
-   panel->Layout();
-#else
    GetSizer()->Fit(this);
-#endif
 }
 
 bool InstallWizardIdentityPage::TransferDataToWindow()
@@ -1045,11 +1012,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    m_smtp = panel->CreateTextWithLabel(labels[3], widthMax, m_leaveOnServer);
    m_nntp = panel->CreateTextWithLabel(labels[4], widthMax, m_smtp);
 
-#if !wxCHECK_VERSION(2,5,0)
-   panel->Layout();
-#else
    GetSizer()->Fit(this);
-#endif
 }
 
 bool InstallWizardServersPage::TransferDataToWindow()
@@ -1221,11 +1184,7 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    m_disconnect = panel->CreateTextWithLabel(labels[1], widthMax, m_connect);
 #endif // platform
 
-#if !wxCHECK_VERSION(2,5,0)
-   panel->Layout();
-#else
    GetSizer()->Fit(this);
-#endif
 }
 
 bool InstallWizardDialUpPage::TransferDataFromWindow()
@@ -1424,11 +1383,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
                                                widthMax, text6);
 #endif // USE_PYTHON
 
-#if !wxCHECK_VERSION(2,5,0)
-   panel->Layout();
-#else
    GetSizer()->Fit(this);
-#endif
 }
 
 #ifdef USE_HELPERS_PAGE
@@ -1505,11 +1460,7 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       m_checkboxSendTestMsg = NULL;
    }
 
-#if !wxCHECK_VERSION(2,5,0)
-   panel->Layout();
-#else
    GetSizer()->Fit(this);
-#endif
 }
 
 bool InstallWizardFinalPage::TransferDataToWindow()
@@ -1642,12 +1593,9 @@ bool RunInstallWizard(
                         NULL,                         // parent
                         -1,                           // id
                         _("Mahogany Installation"),   // title
-                        iconManager->GetBitmap(_T("install_welcome")) // def image
-#if wxCHECK_VERSION(2,5,0)
-                        ,
+                        iconManager->GetBitmap(_T("install_welcome")), // def image
                         wxDefaultPosition,
                         wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
-#endif
                       );
 
    // NULL the pages array
@@ -1658,7 +1606,6 @@ bool RunInstallWizard(
 
    gs_wizardPages[InstallWizard_WelcomePage] = welcomePage;
 
-#if wxCHECK_VERSION(2,5,0)
    // we need to add to the sizer all pages not reachable from the initial one
    // by calling GetNext()
    wizard->GetPageAreaSizer()->Add(welcomePage);
@@ -1667,7 +1614,6 @@ bool RunInstallWizard(
             welcomePage->GetPageById(InstallWizard_DialUpPage)
       );
    #endif // USE_DIALUP
-#endif // wxWindows 2.5.0+
 
    // the wizard may be either cancelled or a checkbox may be used to skip it
    // entirely (besides, this is confusing - the checkbox is probably useless,

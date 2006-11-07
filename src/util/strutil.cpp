@@ -1485,26 +1485,6 @@ wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
    {
       if ( enc == wxFONTENCODING_UTF7 )
       {
-#if !wxCHECK_VERSION(2, 5, 4)
-         // wxWindows does not support UTF-7 yet, so we first convert
-         // UTF-7 to UTF-8 using c-client function and then convert
-         // UTF-8 to current environment's encoding.
-         SIZEDTEXT text7, text8;
-         text7.data = (unsigned char *) strUtf->c_str();
-         text7.size = strUtf->length();
-
-         utf8_text_utf7 (&text7, &text8);
-
-         strUtf->clear();
-         strUtf->reserve(text8.size);
-         for ( unsigned long k = 0; k < text8.size; k++ )
-         {
-            *strUtf << wxChar(text8.data[k]);
-         }
-
-         return ConvertUTF8ToMB(strUtf);
-#else // wx >= 2.5.4
-
          // try to determine which multibyte encoding is best suited for this
          // Unicode string
          wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF7));
@@ -1539,7 +1519,6 @@ wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
                *strUtf = str;
             }
          }
-#endif // 2.5.4
       }
       else
       {

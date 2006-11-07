@@ -1667,13 +1667,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
    // enable folder subtype combobox only if we're creating because (folder
    // type can't be changed later) and if there are any subtypes
    EnableControlWithLabel(m_folderSubtype,
-                          IsCreating() &&
-#if wxCHECK_VERSION(2, 3, 2)
-                             m_folderSubtype->GetCount() > 0
-#else
-                             m_folderSubtype->Number() > 0
-#endif
-                          );
+                          IsCreating() && !m_folderSubtype->IsEmpty());
 
    dlg->SetMayEnableOk(TRUE);
 }

@@ -63,13 +63,6 @@ extern "C"
    #include "utf8.h"  // for utf8_text_utf7()
 }
 
-// support for UTF-8 has been only added in 2.3.0
-#if wxCHECK_VERSION(2, 3, 0)
-   #define USE_UTF8
-#else
-   #undef USE_UTF8
-#endif // wxWin 2.3.0
-
 // wxMSW treectrl has a bug: it's impossible to prevent it from
 // collapsing/expanding a branch when it is double clicked, even if we do
 // process the activate message
@@ -212,12 +205,7 @@ public:
    wxFolderTreeNode *GetParent() const { return m_parent; }
 
       // get the name (base part of the label) of this folder
-   String GetName() const
-#ifdef USE_UTF8
-      ;
-#else
-      { return m_folder->GetName(); }
-#endif
+   String GetName() const;
 
    // expanded flag
       // must be called from OnTreeExpanding() only!
@@ -1633,8 +1621,6 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
 // wxFolderTreeNode UTF8 support
 // ----------------------------------------------------------------------------
 
-#ifdef USE_UTF8
-
 // Folder names (IMAP, but can be used for local mailboxes also) may contain
 // characters encoded in "modified-UTF7" (RFC 2060)
 
@@ -1716,8 +1702,6 @@ wxString wxFolderTreeNode::GetName() const
 
    return isValid ? name : nameOrig;
 }
-
-#endif // USE_UTF8
 
 // ----------------------------------------------------------------------------
 // wxFolderTreeImpl
@@ -1935,11 +1919,7 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
          Expand(current);
       }
 
-#if wxCHECK_VERSION(2, 5, 0)
       wxTreeItemIdValue cookie;
-#else
-      long cookie;
-#endif
       wxTreeItemId child = GetFirstChild(current, cookie);
       while ( child.IsOk() )
       {
@@ -2196,11 +2176,7 @@ wxTreeItemId wxFolderTreeImpl::GetNextItem(wxTreeItemId id, bool next) const
    // garbage in, garbage out
    CHECK( id.IsOk(), id, _T("invalid tree item in GetNextItem") );
 
-#if wxCHECK_VERSION(2, 5, 0)
    wxTreeItemIdValue cookie;
-#else
-   long cookie;
-#endif
    wxTreeItemId idNext;
 
    if ( next )
@@ -3262,11 +3238,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 
                // insert the new folder at the right place
                int pos = 0;
-#if wxCHECK_VERSION(2, 5, 0)
                wxTreeItemIdValue cookie;
-#else
-               long cookie;
-#endif
                wxTreeItemId item = GetFirstChild(parent, cookie);
                while ( item.IsOk() )
                {
