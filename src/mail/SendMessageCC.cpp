@@ -1868,7 +1868,7 @@ SendMessageCC::Send(int flags)
       }
    }
 
-   int options = READ_CONFIG(m_profile, MP_DEBUG_CCLIENT) ? OP_DEBUG : 0;
+   int options = READ_CONFIG(m_profile, MP_DEBUG_CCLIENT) ? SOP_DEBUG : 0;
 
    switch ( m_Protocol )
    {
@@ -1893,9 +1893,11 @@ SendMessageCC::Send(int flags)
                smtp_parameters(SET_SMTPDISABLEDAUTHS,
                                  (char *)authsToDisable.c_str());
             }
+#endif // USE_OWN_CCLIENT
 
             stream = smtp_open(hostlist, options);
 
+#ifdef USE_OWN_CCLIENT
             // don't leave any dangling pointers
             if ( !authsToDisable.empty() )
             {
