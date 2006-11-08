@@ -944,7 +944,7 @@ if test "$wxOK" != 1; then
 	   Please check that wx-config is in PATH, the directory
 	   where wxWidgets libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWidgets version is 2.7.1 or above
+	   equivalent variable and wxWidgets version is 2.7.2 or above
 	   and is available in $wxkind version.
    ])
 fi
