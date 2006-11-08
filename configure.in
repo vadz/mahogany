@@ -927,17 +927,25 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wxWidgets installation¤
-AM_PATH_WXCONFIG(2.7.2, wxOK=1,, [adv,base,core,html,net,qa])
+AM_PATH_WXCONFIG(2.7.2, wxOK=1,, [adv,base,core,html,net,qa],
+		 [--unicode=no --debug=$debug_option])
 
 if test "$wxOK" != 1; then
-   AC_MSG_ERROR([
+    if test $debug_option = "yes"; then
+	wxkind=debug
+    else
+	wxkind=release
+    fi
+
+    AC_MSG_ERROR([
 	   Mahogany requires wxWidgets to be installed on your system
-	   but wx-config script couldn't be found.
+	   but the required wxWidgets version couldn't be found.
 
 	   Please check that wx-config is in PATH, the directory
 	   where wxWidgets libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWidgets version is 2.5.2 or above.
+	   equivalent variable and wxWidgets version is 2.7.1 or above
+	   and is available in $wxkind version.
    ])
 fi
 
