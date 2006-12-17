@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="versit"
+	ProjectGUID="{E46C11C7-5924-4F7C-B82E-5BEB8856A8BC}"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
