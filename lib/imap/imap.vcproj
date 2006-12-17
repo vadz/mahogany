@@ -24,7 +24,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="src\c-client,src\osdep\nt,src\charset"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;CHUNKSIZE=65536"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -74,7 +74,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="src\c-client,src\osdep\nt,src\charset"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;CHUNKSIZE=65536"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -124,7 +124,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="src\c-client,src\osdep\nt,src\charset"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;CHUNKSIZE=65536"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -170,662 +170,69 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
 				RelativePath="src\osdep\nt\dummynt.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						UsePrecompiledHeader="0"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						UsePrecompiledHeader="0"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						UsePrecompiledHeader="0"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\osdep\nt\fdstring.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\flstring.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\imap4r1.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\mail.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\osdep\nt\mbxnt.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions="CHUNKSIZE=65536"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions="CHUNKSIZE=65536"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions="CHUNKSIZE=65536"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\osdep\nt\mhnt.c">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\misc.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\osdep\nt\mtxnt.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\netmsg.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\osdep\nt\newsnt.c">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\newsrc.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\nntp.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\osdep\nt\os_nt.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\pop3.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\osdep\nt\pseudo.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\rfc822.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\smanager.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\c-client\smtp.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\osdep\nt\tenexnt.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="src\osdep\nt\unixnt.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						CompileAs="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="CHUNKSIZE=65536"
-						ExceptionHandling="FALSE"
-						BasicRuntimeChecks="3"
-						CompileAs="1"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\c-client\utf8.c">
+			</File>
+			<File
+				RelativePath=".\src\c-client\utf8aux.c">
 			</File>
 		</Filter>
 		<Filter

@@ -50,3 +50,7 @@
 
 #undef noErr
 #undef MAC
+
+typedef int (*select_t) (struct _finddata_t *name);
+typedef int (*compar_t) (const void *d1,const void *d2); 
+int scandir (char *dirname,struct _finddata_t ***namelist,select_t select, compar_t compar);
