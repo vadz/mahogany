@@ -28,6 +28,10 @@
  *   is a small window-size of 'peak' values, such as the 15 bayes slots.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <auto-config.h>
+#endif
+
 #include <stdlib.h>
 #include <math.h>
 #include "heap.h"

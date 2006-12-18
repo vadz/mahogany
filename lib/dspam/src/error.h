@@ -45,13 +45,21 @@ extern int DO_DEBUG;
 #endif
 
 #ifndef DEBUG
+#ifdef HAVE_VARIADIC_MACROS
 #define LOGDEBUG( ... );
+#else
+inline void LOGDEBUG (const char *err, ...) { }
+#endif
 #else
 void LOGDEBUG (const char *err, ... );
 #endif
 
 #ifdef _WIN32
+#ifdef HAVE_VARIADIC_MACROS
 #define LOG ( ... );
+#else
+inline void LOG (int priority, const char *err, ... ) { priority; err; }
+#endif
 #else
 void LOG (int priority, const char *err, ... );
 #endif

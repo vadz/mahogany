@@ -58,6 +58,7 @@
 #include "libdspam.h"
 
 #ifdef _WIN32
+    #include <winsock.h>
     #include <direct.h>
 
     #define mkdir(filename, perm) _mkdir(filename)
@@ -175,10 +176,7 @@ rtrim (char *str)
  * If retval >= siz, truncation occurred.
  */
 size_t
-strlcat (dst, src, siz)
-     char *dst;
-     const char *src;
-     size_t siz;
+strlcat (char *dst, const char *src, size_t siz)
 {
   register char *d = dst;
   register const char *s = src;
@@ -213,10 +211,7 @@ strlcat (dst, src, siz)
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
 size_t
-strlcpy (dst, src, siz)
-     char *dst;
-     const char *src;
-     size_t siz;
+strlcpy (char *dst, const char *src, size_t siz)
 {
   register char *d = dst;
   register const char *s = src;
@@ -631,6 +626,8 @@ double chi2Q (double x, int v)
 
 int _ds_get_fcntl_lock(int fd) {
 #ifdef _WIN32
+  fd;
+
   return 0;
 #else
   struct flock f;
@@ -646,6 +643,8 @@ int _ds_get_fcntl_lock(int fd) {
 
 int _ds_free_fcntl_lock(int fd) {
 #ifdef _WIN32
+  fd;
+
   return 0;
 #else
   struct flock f;
@@ -677,8 +676,7 @@ float _ds_round(float n) {
 
 #ifndef HAVE_STRCASESTR
 char *
-strcasestr(s, find)
-	const char *s, *find;
+strcasestr(const char *s, const char *find)
 {
 	char c, sc;
 	size_t len;
@@ -743,7 +741,7 @@ inet_ntoa_r(struct in_addr in, char *buf, int len)
   snprintf(b, sizeof(b),
   "%d.%d.%d.%d", UC(p[0]), UC(p[1]), UC(p[2]), UC(p[3]));
 
-  if (len <= strlen(b)) {
+  if (len <= (int)strlen(b)) {
     errno = ERANGE;
     return(NULL);
   }
@@ -751,3 +749,44 @@ inet_ntoa_r(struct in_addr in, char *buf, int len)
   return strcpy(buf, b);
 }
 #endif
+
+#ifdef _WIN32
+
+const char *_ds_win32_configfile()
+{
+  static char s_dspamConfig[MAX_FILENAME_LENGTH];
+
+  if ( !*s_dspamConfig ) {
+    snprintf(s_dspamConfig, sizeof(s_dspamConfig) - 1,
+             "%s/dspam.conf", _ds_win32_dir());
+    s_dspamConfig[sizeof(s_dspamConfig) - 1] = '\0';
+  }
+
+  return s_dspamConfig;
+}
+
+const char *_ds_win32_dir()
+{
+  static char s_dspamDir[MAX_FILENAME_LENGTH];
+
+  if ( !*s_dspamDir ) {
+    /*
+       We should normally use SHGetFolderLocation() for this but it doesn't
+       exist on all Win32 systems and loading it dynamically is painful.
+       SHGetSpecialFolderLocation() does exist everywhere but we need to
+       initialize OLE and use IMalloc to free its return value which is quite
+       painful too. So just use the standard environment variables instead.
+     */
+    const char *home = getenv("USERPROFILE");
+    if ( !home )
+      home = getenv("HOME");
+    if ( !home )
+      home = "c:"; /* have to fall back on something... */
+
+    strlcpy(s_dspamDir, home, sizeof(s_dspamDir));
+  }
+
+  return s_dspamDir;
+}
+
+#endif /* _WIN32 */

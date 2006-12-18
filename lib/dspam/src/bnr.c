@@ -68,7 +68,7 @@ BNR_CTX *bnr_init(int type, char identifier)
   BTX->identifier  = identifier;
   BTX->window_size = 3;
   BTX->ex_radius   = 0.25;
-  BTX->in_radius   = 0.33;
+  BTX->in_radius   = 0.33f;
   BTX->stream     = bnr_list_create(type);
   BTX->patterns   = bnr_hash_create(1543ul);
   if (BTX->stream == NULL || BTX->patterns == NULL) {
@@ -120,7 +120,7 @@ int bnr_add(BNR_CTX *BTX, void *token, float value) {
 
 int bnr_instantiate(BNR_CTX *BTX) {
   int BNR_SIZE = BTX->window_size;
-  float previous_bnr_probs[BNR_SIZE];
+  float *previous_bnr_probs = malloc(BNR_SIZE*sizeof(float));
   struct bnr_list_node *node_list;
   struct bnr_list_c c_list;
   char bnr_token[64];
@@ -151,6 +151,8 @@ int bnr_instantiate(BNR_CTX *BTX) {
     bnr_hash_hit (BTX->patterns, bnr_token);
     node_list = c_bnr_list_next(BTX->stream, &c_list);
   }
+
+  free(previous_bnr_probs);
 
   return 0;
 }
@@ -256,8 +258,9 @@ float _bnr_round(float n) {
 
 int bnr_finalize(BNR_CTX *BTX) {
   int BNR_SIZE = BTX->window_size;
-  struct bnr_list_node * previous_bnr_tokens[BNR_SIZE];
-  float previous_bnr_probs[BNR_SIZE];
+  struct bnr_list_node **
+    previous_bnr_tokens = malloc(BNR_SIZE*sizeof(struct bnr_list_node *));
+  float *previous_bnr_probs = malloc(BNR_SIZE*sizeof(float));
   struct bnr_list_node *node_list;
   struct bnr_list_c c_list;
   char bnr_token[64];
@@ -320,6 +323,9 @@ int bnr_finalize(BNR_CTX *BTX) {
 
     node_list = c_bnr_list_next(BTX->stream, &c_list);
   }
+
+  free(previous_bnr_probs);
+  free(previous_bnr_tokens);
 
   return 0;
 }

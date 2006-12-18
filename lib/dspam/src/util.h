@@ -28,13 +28,15 @@
 #endif
 
 #include <sys/types.h>
+
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-#ifndef _WIN32
 #include <pwd.h>
-#endif
+#else /* _WIN32 */
+#include <winsock2.h>
+#endif /* !_WIN32/_WIN32 */
 
 void	chomp	(char *string);
 char *	ltrim	(char *str);
@@ -120,5 +122,20 @@ double chi2Q
   (double x, int v);
 float _ds_round
   (float n);
+
+#ifdef _WIN32
+
+/*
+ * Win32 support functions:
+ *
+ *   _ds_win32_dir() returns the directory for DSPAM data/config files
+ *
+ *   _ds_win32_configfile() returns the default config file name
+ */
+
+const char *_ds_win32_configfile();
+const char *_ds_win32_dir();
+
+#endif /* _WIN32 */
 
 #endif /* _UTIL_H */

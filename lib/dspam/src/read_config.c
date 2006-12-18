@@ -122,11 +122,15 @@ config_t read_config(const char *path) {
     chomp(buffer);
 
     /* Remove comments */
-    if ((c = strchr(buffer, '#')) || (c = strchr(buffer, ';')))
+    c = strchr(buffer, '#');
+    if (!c)
+      c = strchr(buffer, ';');
+    if (c)
       *c = 0;
 
     /* Parse attribute name */
-    if (!(a = tokenize(buffer, &bufptr)))
+    a = tokenize(buffer, &bufptr);
+    if (!a)
       continue; /* Ignore whitespace-only lines */
 
     while ((v = tokenize(NULL, &bufptr)) != NULL) {

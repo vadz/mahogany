@@ -186,7 +186,13 @@ int _ds_pref_del(
 #define DRS_OFFLINE	0x02
 #define DRS_UNKNOWN	0xFF
 
-#define CONTROL_TOKEN	11624422384514212933llu
+#ifdef _MSC_VER
+  #define ULL_CONST(x)  x ## ui64
+#else
+  #define ULL_CONST(x)  x ## llu
+#endif
+
+#define CONTROL_TOKEN	ULL_CONST(11624422384514212933)
 			/* $$CONTROL$$ */
 
 #endif /* _STORAGE_DRIVER_H */

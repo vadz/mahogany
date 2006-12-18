@@ -1,0 +1,38 @@
+/* src/auto-config.h for Win32 systems */
+
+
+#ifndef __auto_config_h
+#define __auto_config_h
+
+#define CONFIG_DEFAULT (_ds_win32_configfile())
+#define LOGDIR  (_ds_win32_dir())
+
+/* Dynamic drivers loading not supported under Windows currently */
+#define STATIC_DRIVER
+
+#ifdef _DEBUG
+  #define DEBUG
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+  #undef HAVE_VARIADIC_MACROS
+#endif
+
+#ifdef _MSC_VER
+  #define inline _inline
+  #define snprintf _snprintf
+  #define strcasecmp _stricmp
+  #define strncasecmp _strnicmp
+  #define vsnprintf _vsnprintf
+
+  /*
+     this is a potentially useful warning (about possible loss of data due to
+     implicit conversions between types) but there are too many instances of it
+     in dspam sources currently so disable it to be able to compile at max
+     warning level otherwise
+   */
+  #pragma warning(disable:4244)
+#endif
+
+#endif /* !__auto_config_h */
+

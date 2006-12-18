@@ -170,6 +170,8 @@ agent_pref_t _ds_ff_pref_load(
   char *p, *q, *bufptr;
   int i = 0;
 
+  config; ignore; /* unused parameters */
+
   if (PTX == NULL) {
     LOG(LOG_CRIT, ERR_MEM_ALLOC);
     return NULL;
@@ -306,6 +308,8 @@ int _ds_ff_pref_set (
   char filename[MAX_FILENAME_LENGTH];
   FILE *out_file;
 
+  config; ignore; /* unused parameters */
+
   if (username == NULL) {
     snprintf(filename, MAX_FILENAME_LENGTH, "%s/default.prefs", home);
   } else {
@@ -332,6 +336,8 @@ int _ds_ff_pref_del (
   char filename[MAX_FILENAME_LENGTH];
   FILE *out_file;
   int nlines; 
+
+  config; ignore; /* unused parameters */
 
   if (username == NULL) {
     snprintf(filename, MAX_FILENAME_LENGTH, "%s/default.prefs", home);

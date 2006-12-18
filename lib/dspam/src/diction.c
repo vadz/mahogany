@@ -157,7 +157,7 @@ ds_diction_touch(
   const char *name, 
   int flags)
 {
-  unsigned long bucket = key % diction->size;
+  unsigned long long bucket = key % diction->size;
   ds_term_t parent = NULL;
   ds_term_t insert = NULL;
   ds_term_t term;
@@ -202,7 +202,7 @@ ds_diction_touch(
 void
 ds_diction_delete(ds_diction_t diction, ds_key_t key)
 {
-  unsigned long bucket = key % diction->size;
+  unsigned long long bucket = key % diction->size;
   ds_term_t parent = NULL;
   ds_term_t delete = NULL;
   ds_term_t term;

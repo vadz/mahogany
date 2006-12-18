@@ -49,7 +49,9 @@ void *_drv_handle;
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 
 #ifdef TIME_WITH_SYS_TIME
 #   include <sys/time.h>
@@ -90,6 +92,12 @@ void *_drv_handle;
 
 #ifdef DEBUG
 int DO_DEBUG = 0;
+
+/* TODO-WIN32: timings debugging code currently doesn't compile */
+#ifndef _WIN32
+#define DEBUG_TIMINGS
+#endif
+
 #endif
 
 #ifdef NCORE
@@ -452,14 +460,14 @@ dspam_destroy (DSPAM_CTX * CTX)
 int
 dspam_process (DSPAM_CTX * CTX, const char *message)
 {
-#ifdef DEBUG
+#ifdef DEBUG_TIMINGS
   struct timeval tp1, tp2;
   struct timezone tzp;
 #endif
   buffer *header, *body;
   int spam_result = 0, is_toe = 0, is_undertrain = 0;
 
-#ifdef DEBUG
+#ifdef DEBUG_TIMINGS
   if (DO_DEBUG)
     gettimeofday(&tp1, &tzp);
 #endif
@@ -604,7 +612,7 @@ dspam_process (DSPAM_CTX * CTX, const char *message)
   if (is_undertrain)
     CTX->training_mode = DST_TOE;
 
-#ifdef DEBUG
+#ifdef DEBUG_TIMINGS
   if (DO_DEBUG) {
     if (CTX->source == DSS_NONE) {
       gettimeofday(&tp2, &tzp);
@@ -1547,9 +1555,10 @@ _ds_calc_stat (
 int
 _ds_calc_result(DSPAM_CTX *CTX, ds_heap_t heap_sort, ds_diction_t diction)
 {
-  struct _ds_spam_stat stat;
+  struct _ds_spam_stat stat = { 0. };
   ds_heap_element_t node_heap;
-  ds_heap_element_t heap_list[heap_sort->items];
+  ds_heap_element_t *
+    heap_list = malloc(heap_sort->items*sizeof(ds_heap_element_t));
 
   /* Naive-Bayesian */
   float nbay_top = 0.0;
@@ -1585,7 +1594,7 @@ _ds_calc_result(DSPAM_CTX *CTX, ds_heap_t heap_sort, ds_diction_t diction)
   long chi_used  = 0, chi_sx = 0, chi_hx = 0;
   double chi_s = 1.0, chi_h = 1.0;
   struct nt *factor_chi = nt_create(NT_PTR);
-  int i;
+  unsigned i;
 
   /* Invert the heap */
   node_heap = heap_sort->root;
@@ -1758,6 +1767,8 @@ _ds_calc_result(DSPAM_CTX *CTX, ds_heap_t heap_sort, ds_diction_t diction)
       }
     }
   }
+
+  free(heap_list);
 
   /* END Combine Token Values */
 
@@ -2147,6 +2158,8 @@ int libdspam_init(const char *driver) {
       return EFAILURE;
     }
   }
+#else
+  driver; /* unused parameter */
 #endif
 
 #ifdef NCORE

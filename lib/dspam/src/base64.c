@@ -40,7 +40,7 @@
 char *
 base64decode (const char *buf)
 {
-  unsigned char alphabet[64] =
+  unsigned char alphabet[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   static char first_time = 1,inalphabet[256], decoder[256];
   int i, bits, c, char_count, errors = 0;
@@ -130,7 +130,7 @@ base64decode (const char *buf)
 char *
 base64encode (const char *buf)
 {
-  unsigned char alphabet[64] =
+  unsigned char alphabet[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   int cols, bits, c, char_count;
   char *out;

@@ -40,11 +40,13 @@
 
 #include <string.h>
 #include <sys/types.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
+#ifndef _WIN32
+#include <sys/mman.h>
 #include <sys/uio.h>
 #include <dirent.h>
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -60,6 +62,23 @@
 #   else
 #       include <time.h>
 #   endif
+#endif
+
+#ifdef _WIN32
+#   include <winsock2.h>
+#   include <windows.h>
+#   include <io.h>
+#   include <process.h>
+
+#   define close _close
+#   define getpid _getpid
+#   define lseek _lseek
+#   define open _open
+#   define stat _stat
+#   define write _write
+
+#   define O_RDWR _O_RDWR
+#   define MAP_FAILED NULL
 #endif
 
 #include "storage_driver.h"
@@ -244,6 +263,8 @@ dspam_shutdown_driver (DRIVER_CTX *DTX)
       }
     }
   }
+#else
+  DTX; /* unused parameter */
 #endif
 
   return 0;
@@ -305,9 +326,11 @@ int _hash_drv_open(
   int flags) 
 {
   struct _hash_drv_header header;
-  int open_flags = O_RDWR;
-  int mmap_flags = PROT_READ + PROT_WRITE;
+#ifdef _WIN32
+  HANDLE hMapping;
+#endif
 
+  int open_flags = O_RDWR;
   map->fd = open(filename, open_flags);
 
   /*
@@ -319,7 +342,7 @@ int _hash_drv_open(
   if (map->fd < 0 && recmaxifnew) {
     FILE *f;
     struct _hash_drv_spam_record rec;
-    int i;
+    unsigned i;
 
     memset(&header, 0, sizeof(struct _hash_drv_header));
     memset(&rec, 0, sizeof(struct _hash_drv_spam_record));
@@ -355,7 +378,19 @@ int _hash_drv_open(
   read(map->fd, map->header, sizeof(struct _hash_drv_header));
   map->file_len = lseek(map->fd, 0, SEEK_END); 
 
-  map->addr = mmap(NULL, map->file_len, mmap_flags, MAP_SHARED, map->fd, 0);
+#ifndef _WIN32
+  map->addr = mmap(NULL, map->file_len, PROT_READ | PROT_WRITE,
+                   MAP_SHARED, map->fd, 0);
+#else /* _WIN32 */
+  hMapping = CreateFileMapping((HANDLE)_get_osfhandle(map->fd), NULL,
+                               PAGE_READWRITE, 0, 0, NULL);
+  map->addr = MapViewOfFile(hMapping, FILE_MAP_WRITE, 0, 0, 0);
+
+  /* we can close this handle immediately because the mapping created by
+   * MapViewOfFile() uses it too so the file mapping will continue to exist
+   * until we call UnmapViewOfFile() later */
+  CloseHandle(hMapping);
+#endif /* !_WIN32/_WIN32 */
   if (map->addr == MAP_FAILED) {
     free(map->header);
     close(map->fd);
@@ -383,10 +418,19 @@ _hash_drv_close(hash_drv_map_t map) {
 
   memcpy(&header, map->header, sizeof(struct _hash_drv_header));
 
+#ifndef _WIN32
   r = munmap(map->addr, map->file_len);
   if (r) {
     LOG(LOG_WARNING, "munmap failed on error %d: %s", r, strerror(errno));
   }
+#else /* _WIN32 */
+  if ( !UnmapViewOfFile(map->addr) ) {
+    LOG(LOG_WARNING, "UnmapViewOfFile failed with error %lu", GetLastError());
+    r = -1;
+  }
+  else
+    r = 0;
+#endif /* !_WIN32/_WIN32 */
  
   lseek (map->fd, 0, SEEK_SET);
   write (map->fd, &header, sizeof(struct _hash_drv_header));
@@ -525,8 +569,10 @@ int
 _ds_shutdown_storage (DSPAM_CTX * CTX)
 {
   struct _hash_drv_storage *s;
+#ifndef _WIN32
   struct nt_node *node_nt;
   struct nt_c c_nt;
+#endif
   int lock_result;
 
   if (!CTX || !CTX->storage)
@@ -536,6 +582,8 @@ _ds_shutdown_storage (DSPAM_CTX * CTX)
 
   /* Close open file handles to directories (iteration functions) */
 
+  /* FIXME-WIN32: this code is currently unused and doesn't compile */
+#ifndef _WIN32
   node_nt = c_nt_first (s->dir_handles, &c_nt);
   while (node_nt != NULL)
   {
@@ -544,6 +592,7 @@ _ds_shutdown_storage (DSPAM_CTX * CTX)
     closedir (dir);
     node_nt = c_nt_next (s->dir_handles, &c_nt);
   }
+#endif /* _WIN32 */
   nt_destroy (s->dir_handles);
 
   if (CTX->operating_mode != DSM_CLASSIFY)
@@ -785,6 +834,7 @@ _ds_get_signature (DSPAM_CTX * CTX, struct _ds_spam_signature *SIG,
 
 void *_ds_connect (DSPAM_CTX *CTX)
 {
+  CTX; /* unused parameter */
   return NULL;
 }
 
@@ -795,6 +845,8 @@ _ds_create_signature_id (DSPAM_CTX * CTX, char *buf, size_t len)
   char digit[6];
   int pid, j;
  
+  CTX; /* unused parameter */
+
   pid = getpid ();
   snprintf (session, sizeof (session), "%8lx%d", (long) time (NULL), pid);
  
@@ -835,7 +887,7 @@ _ds_get_nexttoken (DSPAM_CTX * CTX)
   struct _hash_drv_storage *s = (struct _hash_drv_storage *) CTX->storage;
   struct _hash_drv_spam_record rec;
   struct _ds_storage_record *sr;
-  struct _ds_spam_stat stat;
+  struct _ds_spam_stat stat = { 0 };
 
   rec.hashcode = 0;
 
@@ -846,7 +898,7 @@ _ds_get_nexttoken (DSPAM_CTX * CTX)
   }
 
   if (s->offset_nexttoken == 0) {
-    s->offset_header = s->map->addr;
+    s->offset_header = (hash_drv_header_t)s->map->addr;
     s->offset_nexttoken = sizeof(struct _hash_drv_header);
     memcpy(&rec,
            s->map->addr+s->offset_nexttoken, 
@@ -867,8 +919,8 @@ _ds_get_nexttoken (DSPAM_CTX * CTX)
       (s->offset_header->hash_rec_max * sizeof(struct _hash_drv_spam_record)))
     { 
       if (s->offset_nexttoken < s->map->file_len) {
-        s->offset_header = s->map->addr + 
-          (s->offset_nexttoken - sizeof(struct _hash_drv_spam_record));
+        s->offset_header = (hash_drv_header_t)(s->map->addr + 
+          (s->offset_nexttoken - sizeof(struct _hash_drv_spam_record)));
 
         s->offset_nexttoken += sizeof(struct _hash_drv_header);
         s->offset_nexttoken -= sizeof(struct _hash_drv_spam_record);
@@ -907,6 +959,8 @@ _ds_delete_signature (DSPAM_CTX * CTX, const char *signature)
   return unlink(filename);
 }
 
+/* FIXME-WIN32: this code doesn't compile currently but it's only for tools */
+#ifndef _WIN32
 char * 
 _ds_get_nextuser (DSPAM_CTX * CTX) 
 {
@@ -1021,16 +1075,19 @@ _ds_get_nextuser (DSPAM_CTX * CTX)
   user[0] = 0;
   return NULL;
 }
+#endif /* _WIN32 */
 
 struct _ds_storage_signature *
 _ds_get_nextsignature (DSPAM_CTX * CTX)
 {
+  CTX; /* unused parameter */
   return NULL;
 }
 
 int
 _ds_delall_spamrecords (DSPAM_CTX * CTX, ds_diction_t diction)
 {
+  CTX; diction; /* unused parameter */
   return 0;
 }
 
@@ -1041,7 +1098,7 @@ int _hash_drv_autoextend(
 {
   struct _hash_drv_header header;
   struct _hash_drv_spam_record rec;
-  int i;
+  unsigned i;
 
   _hash_drv_close(map);
 
@@ -1079,7 +1136,7 @@ unsigned long _hash_drv_seek(
   unsigned long long hashcode,
   int flags)
 {
-  hash_drv_header_t header = map->addr + offset;
+  hash_drv_header_t header = (hash_drv_header_t)(map->addr + offset);
   hash_drv_spam_record_t rec;
   unsigned long long fpos;
   unsigned long iterations = 0;
@@ -1090,7 +1147,7 @@ unsigned long _hash_drv_seek(
   fpos = sizeof(struct _hash_drv_header) + 
     ((hashcode % header->hash_rec_max) * sizeof(struct _hash_drv_spam_record));
 
-  rec = map->addr + offset + fpos;
+  rec = (hash_drv_spam_record_t)(map->addr + offset + fpos);
   while(rec->hashcode != hashcode  &&   /* Match token     */ 
         rec->hashcode != 0         &&   /* Insert on empty */
         iterations < map->max_seek)     /* Max Iterations  */
@@ -1100,7 +1157,7 @@ unsigned long _hash_drv_seek(
 
     if (fpos >= (header->hash_rec_max * sizeof(struct _hash_drv_spam_record)))
       fpos = sizeof(struct _hash_drv_header);
-    rec = map->addr + offset + fpos;
+    rec = (hash_drv_spam_record_t)(map->addr + offset + fpos);
   }     
 
   if (rec->hashcode == hashcode) 
@@ -1125,13 +1182,13 @@ _hash_drv_set_spamrecord (
     return EINVAL;
 
   if (map_offset) {
-    rec = map->addr + map_offset;
+    rec = (hash_drv_spam_record_t)(map->addr + map_offset);
   } else {
     while(rec_offset <= 0 && offset < map->file_len)
     {
       rec_offset = _hash_drv_seek(map, offset, wrec->hashcode, HSEEK_INSERT);
       if (rec_offset <= 0) {
-        hash_drv_header_t header = map->addr + offset;
+        hash_drv_header_t header = (hash_drv_header_t)(map->addr + offset);
         offset += sizeof(struct _hash_drv_header) +
           (sizeof(struct _hash_drv_spam_record) * header->hash_rec_max);
         last_extent_size = header->hash_rec_max;
@@ -1153,7 +1210,7 @@ _hash_drv_set_spamrecord (
       }
     }
   
-    rec = map->addr + offset + rec_offset;
+    rec = (hash_drv_spam_record_t)(map->addr + offset + rec_offset);
   }
   rec->hashcode = wrec->hashcode;
   rec->nonspam  = wrec->nonspam;
@@ -1181,7 +1238,7 @@ _hash_drv_get_spamrecord (
   {
     rec_offset = _hash_drv_seek(map, offset, wrec->hashcode, 0);
     if (rec_offset <= 0) {
-      hash_drv_header_t header = map->addr + offset;
+      hash_drv_header_t header = (hash_drv_header_t)(map->addr + offset);
       offset += sizeof(struct _hash_drv_header) +
         (sizeof(struct _hash_drv_spam_record) * header->hash_rec_max);
       extents++;
@@ -1192,7 +1249,7 @@ _hash_drv_get_spamrecord (
     return 0;
 
   offset += rec_offset;
-  rec = map->addr + offset;
+  rec = (hash_drv_spam_record_t)(map->addr + offset);
   
   wrec->nonspam  = rec->nonspam;
   wrec->spam     = rec->spam;

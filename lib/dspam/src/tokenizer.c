@@ -528,8 +528,8 @@ _ds_map_header_token (DSPAM_CTX * CTX, char *token,
                       char **previous_tokens, ds_diction_t diction,
                       const char *heading, const char *bitpattern)
 {
-  int i, t, keylen, breadth;
-  u_int32_t mask;
+  int i, t, keylen;
+  u_int32_t mask, breadth;
   unsigned long long crc;
   char key[256];
   int active = 0, top, tokenizer = CTX->tokenizer;
@@ -633,12 +633,12 @@ _ds_map_body_token (
   ds_diction_t diction, 
   const char *bitpattern)
 {
-  int i, t, keylen, breadth;
+  int i, t, keylen;
   int top, tokenizer = CTX->tokenizer;
   unsigned long long crc;
   char key[256];
   int active = 0;
-  u_int32_t mask;
+  u_int32_t mask, breadth;
 
   /* Shift all previous tokens up */
   for(i=0;i<SPARSE_WINDOW_SIZE-1;i++) {
@@ -1052,7 +1052,7 @@ char *_ds_generate_bitpattern(int breadth) {
 
   bitpattern = malloc(SPARSE_WINDOW_SIZE * breadth);
 
-  for(mask=0;mask<breadth;mask++) {
+  for(mask=0;mask<(unsigned long)breadth;mask++) {
       for(i=0;i<SPARSE_WINDOW_SIZE;i++) {
           exp = (i) ? _ds_pow2(i) : 1;
           /* Reverse pos = SPARSE_WINDOW_SIZE - (i+1); */
