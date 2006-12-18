@@ -282,6 +282,12 @@ MAppBase::ContinueStartup()
    if ( !foldername.empty() )
    {
       MFolder_obj folder(foldername);
+      if ( !folder )
+      {
+         // if it's not an existing folder, maybe it's a file?
+         folder.Set(MFolder::CreateTempFile(foldername, foldername, 0));
+      }
+
       if ( folder )
       {
          ((wxMainFrame *)m_topLevelFrame)->OpenFolder(folder);
