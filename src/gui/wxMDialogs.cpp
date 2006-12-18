@@ -991,6 +991,14 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
             // folder (file) chosen
             if ( TransferDataFromWindow() )
             {
+               // at least under Windows we must really delete the file dialog
+               // created above before destroying its parent (this dialog),
+               // otherwise wx currently crashes and we just call the idle
+               // handler which does the cleanup directly (this is a very bad
+               // idea in general but it's here only as a temporary workaround)
+               wxIdleEvent e;
+               wxTheApp->OnIdle(e);
+
                EndModal(wxID_OK);
             }
          }
