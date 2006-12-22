@@ -5912,12 +5912,12 @@ echo
 echo "Configured Mahogany ${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
 echo ""
 echo "	wxWidgets port used:		${WX_NAME} ${WX_VERSION}"
-echo "	Debug mode:				${debug_option}"
-echo "	SSL support:				${ssl_option}"
-echo "	Modules support:			${m_cv_USE_MODULES}"
-echo "	Embedded Python:			${PYTHON_VER:-none}"
+echo "	Debug mode:			${debug_option}"
+echo "	SSL support:			${ssl_option}"
+echo "	Modules support:		${m_cv_USE_MODULES}"
+echo "	Embedded Python:		${PYTHON_VER:-none}"
 if test "$USE_PYTHON" != 0 -a "$USE_SWIG" = 1; then
-    echo "	      with swig:			${SWIG}"
+    echo "	      with swig:		${SWIG}"
 fi
 echo "	DSPAM spam filtering:		${using_dspam}"
 echo ""
