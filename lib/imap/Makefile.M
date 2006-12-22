@@ -60,7 +60,7 @@ $(OSDEP):
 	@chmod +x c-client/drivers c-client/mkauths
 	@$(MAKE) -C c-client $(IMAP_OSTYPE) --no-print-directory \
 		MAKE="$(MAKE)" CC="$(CC)" \
-		$(IMAP_SSLTYPE) \
+		SSLTYPE="$(IMAP_SSLTYPE)" \
 		EXTRACFLAGS="$(IMAP_CPPFLAGS)"
 
 # subsequent make call, only call c-client's Makefile if it looks
@@ -70,11 +70,8 @@ $(LIBRARY): $(OSDEP) $(wildcard c-client/*.c) $(wildcard c-client/*.h)
 
 # we don't want to call ssl_onceonlyinit() from linkage.c, instead we do it
 # ourselves later (the first time SSL is needed)
-#
-# c-client also disables plain passwords if using SSL by default, prevent this
-# from happening
 $(LINKAGE): c-client/linkage.c
-	grep -v ssl_onceonlyinit $< | grep -v SET_DISABLEPLAINTEXT > $@
+	grep -v ssl_onceonlyinit $< > $@
 
 c-client/linkage.c: $(OSDEP)
 	@true

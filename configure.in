@@ -673,9 +673,14 @@ if test "$ssl_option" = "yes"; then
 
     IMAP_CPPFLAGS="-I$ssl_inc/openssl $SSL_CPPFLAGS $IMAP_CPPFLAGS"
     CPPFLAGS="$SSL_CPPFLAGS $CPPFLAGS"
+
+    dnl c-client default is "nopwd" which means that plain text authentication
+    dnl is disabled for non encrypted session, we prefer traditional Unix
+    dnl behaviour (which can be less safe but let's people do what they want)
+    IMAP_SSLTYPE="unix"
 else
     dnl tell c-client that we don't want to use SSL
-    IMAP_SSLTYPE="SSLTYPE=none"
+    IMAP_SSLTYPE="none"
 fi
 
 AC_SUBST(IMAP_SSLTYPE)
