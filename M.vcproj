@@ -36,7 +36,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib sqlited.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
@@ -89,7 +89,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib sqlite.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				AdditionalDependencies="lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
@@ -147,7 +147,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib sqlite.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				AdditionalDependencies="lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
@@ -205,7 +205,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib sqlited.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
