@@ -370,8 +370,8 @@ const char * _ds_userdir_path (char *path, const char *home, const char *filenam
     snprintf(path, MAX_FILENAME_LENGTH, "%s/.dspam/%s.%s", userhome, username,
              extension);
 #else
-    snprintf (path, MAX_FILENAME_LENGTH, "%s/data/%s/%s.%s",
-              home, userpath, username, extension);
+    snprintf (path, MAX_FILENAME_LENGTH, "%s/%s.%s",
+              home, username, extension);
 #endif
   }
 #endif
