@@ -63,6 +63,10 @@ public:
                   mode,
                   flags
               );
+
+      // use default algorithm/tokenizer
+      m_ctx->algorithms = DSA_GRAHAM | DSA_BURTON | DSP_GRAHAM;
+      m_ctx->tokenizer = DSZ_CHAIN;
    }
 
    // destroy the context
