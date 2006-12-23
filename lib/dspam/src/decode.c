@@ -148,7 +148,8 @@ _ds_actualize_message (const char *message)
           }
 
           /* Our concatenated data doesn't have any whitespace between lines */
-          for(eow=line;eow[0] && isspace((int) eow[0]);eow++) { }
+          for ( eow = line; *eow && *eow < 255 && isspace(*eow); eow++ )
+            ;
 
           ptr =
             realloc (current_heading->concatenated_data,
@@ -1095,7 +1096,7 @@ _ds_extract_boundary (char *buf, size_t size, char *mem)
         return EFAILURE;
       }
       ptr++;
-      while(isspace((int) ptr[0]))
+      while(*ptr < 255 && isspace(*ptr))
         ptr++;
       if (ptr[0] == '"')
         ptr++;
