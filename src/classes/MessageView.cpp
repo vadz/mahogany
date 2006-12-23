@@ -2492,7 +2492,10 @@ enum
 {
    PartContent_Text = 0x01,
    PartContent_Image = 0x02,
-   PartContent_HTML = 0x04
+   PartContent_HTML = 0x04,
+
+   // this one is set when we have images only used by HTML part of the message
+   PartContent_HTMLImage = 0x08
 };
 
 int
@@ -2515,11 +2518,29 @@ MessageView::DeterminePartContent(const MimePart *mimepart)
 
          case MimeType::MULTIPART:
             {
+               // the automatic viewer determination logic is the same for
+               // multipart/alternative and multipart/mixed and we don't really
+               // support anything else for now (except multipart/related which
+               // is accounted for below)
                for ( const MimePart *partChild = mimepart->GetNested();
                      partChild;
                      partChild = partChild->GetNext() )
                {
                   contents |= DeterminePartContent(partChild);
+               }
+
+               if ( type.GetSubType() == _T("RELATED") )
+               {
+                  // this is, of course, just a particular cas but a very
+                  // common one so we handle the situation when we have
+                  // multipart/related with an HTML part and an image part
+                  // specially: this almost certainly means that the images can
+                  // be seen *only* when HTML is viewed
+                  if ( (contents & PartContent_HTML) &&
+                           (contents & PartContent_Image) )
+                  {
+                     contents |= PartContent_HTMLImage;
+                  }
                }
             }
             break;
@@ -2567,9 +2588,13 @@ MessageView::AutoAdjustViewer(const MimePart *mimepart)
    if ( contents & PartContent_HTML )
    {
       // use HTML viewer when the user prefers HTML to plain text or when there
-      // is nothing but HTML
+      // is nothing but HTML or when we have images embedded in HTML (so they
+      // won't be shown if we don't use the HTML viewer) and we do want to see
+      // images inline
       if ( m_ProfileValues.preferHTML ||
-            (!(contents & PartContent_Text) && m_ProfileValues.allowHTML) )
+            (!(contents & PartContent_Text) && m_ProfileValues.allowHTML) ||
+               ((contents & PartContent_HTMLImage) &&
+                  m_ProfileValues.allowImages) )
       {
          viewerName = _T("HtmlViewer");
       }
