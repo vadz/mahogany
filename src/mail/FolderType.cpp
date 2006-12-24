@@ -81,6 +81,7 @@ bool CanCreateMessagesInFolder(MFolderType folderType)
       case MF_NNTP:
       case MF_NEWS:
       case MF_GROUP:
+      case MF_POP:
       case MF_ROOT:
       case MF_VIRTUAL:     // so far we don't support this, maybe later
          return false;
@@ -96,7 +97,6 @@ bool CanCreateMessagesInFolder(MFolderType folderType)
       case MF_FILE:
       case MF_MH:
       case MF_IMAP:
-      case MF_POP:
       case MF_MFILE:
       case MF_MDIR:
          ; // don't put return false here to avoid VC++ warnings
