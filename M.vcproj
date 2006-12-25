@@ -859,8 +859,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
-"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -868,8 +868,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat &quot;$(InputDir)&quot; &quot;$(InputDir)&quot;
-"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -877,8 +877,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat &quot;$(InputDir)&quot; &quot;$(InputDir)&quot;
-"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -886,8 +886,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
-"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
 				</File>
