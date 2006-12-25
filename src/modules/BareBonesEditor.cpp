@@ -1169,9 +1169,6 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
 // BareBonesEditor contents: enumerating the different parts
 // ----------------------------------------------------------------------------
 
-// from strutil.cpp
-extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz);
-
 EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;

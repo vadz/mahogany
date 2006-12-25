@@ -1379,7 +1379,7 @@ wxArrayString strutil_uniq_array(const wxSortedArrayString& addrSorted)
 }
 
 // guess the charset of the given Unicode text
-extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
+wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
 {
    typedef const unsigned short *codepage;
    struct CodePageInfo
@@ -1459,83 +1459,24 @@ extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
       if ( wxFontMapper::Get()->IsEncodingAvailable(encodings[nEnc]) )
       {
          enc = encodings[nEnc];
-         break;
+
+         // test if we can convert the entire text using it
+         //
+         // NB: normally we shouldn't do the real conversion here as it is
+         //     awfully wasteful but currently it's possible for wxCSConv::
+         //     WC2MB() to return successfully when it's used for just testing
+         //     and not real conversion under Win32
+         if ( !wxString(pwz, wxCSConv(enc)).empty() )
+            break;
       }
    }
-#ifdef DEBUG_nerijus
-   // temporary HACK - Lithuanian input in both Windows and X is
-   // ISO-8859-13 (or Windows-1257), not ISO-8859-4
-   if ( enc == wxFONTENCODING_ISO8859_4 || enc == wxFONTENCODING_ISO8859_1 || enc == wxFONTENCODING_ISO8859_2 ) enc = wxFONTENCODING_ISO8859_13;
-#endif
-   return enc;
-}
-
-// convert a string in UTF-8 or 7 into the string in some multibyte encoding:
-// of course, this doesn't work in general as Unicode is not representable as
-// an 8 bit charset but it works in some common cases and is better than no
-// UTF-8 support at all
-//
-// FIXME this won't be needed when full Unicode support is available
-wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
-{
-#if !defined __WXGTK20__
-   CHECK( strUtf, wxFONTENCODING_SYSTEM, _T("NULL string in ConvertUTFToMB") );
-
-   if ( !strUtf->empty() )
-   {
-      if ( enc == wxFONTENCODING_UTF7 )
-      {
-         // try to determine which multibyte encoding is best suited for this
-         // Unicode string
-         wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF7));
-         if ( !wbuf )
-         {
-            // invalid UTF-7 data, leave it as is
-            enc = wxFONTENCODING_SYSTEM;
-         }
-         else // try to find a multibyte encoding we can show this in
-         {
-            enc = GuessUnicodeCharset(wbuf);
-
-            // finally convert to multibyte
-            wxString str;
-            if ( enc == wxFONTENCODING_SYSTEM )
-            {
-               str = wxString(wbuf);
-            }
-            else
-            {
-               wxCSConv conv(enc);
-               str = wxString(wbuf, conv);
-            }
-            if ( str.empty() )
-            {
-               // conversion failed - use original text (and display incorrectly,
-               // unfortunately)
-               wxLogDebug(_T("conversion from UTF-7 to default encoding failed"));
-            }
-            else
-            {
-               *strUtf = str;
-            }
-         }
-      }
-      else
-      {
-         ASSERT_MSG( enc == wxFONTENCODING_UTF8, _T("unknown Unicode encoding") );
-         return ConvertUTF8ToMB(strUtf);
-      }
-   }
-   else // doesn't really matter what we return from here
-   {
-      enc = wxFONTENCODING_SYSTEM;
-   }
-#endif // !__WXGTK20__
 
    return enc;
 }
 
-wxFontEncoding ConvertUTF8ToMB(wxString *strUtf)
+#ifndef __WXGTK20__
+
+static wxFontEncoding ConvertToMB(wxString *strUtf, const wxMBConv& conv)
 {
    wxFontEncoding enc;
    CHECK( strUtf, wxFONTENCODING_SYSTEM, _T("NULL string in ConvertUTF8ToMB") );
@@ -1544,7 +1485,7 @@ wxFontEncoding ConvertUTF8ToMB(wxString *strUtf)
    {
       // try to determine which multibyte encoding is best suited for this
       // Unicode string
-      wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF8));
+      wxWCharBuffer wbuf(strUtf->wc_str(conv));
       if ( !wbuf )
       {
          // invalid UTF-8 data, leave it as is
@@ -1565,11 +1506,14 @@ wxFontEncoding ConvertUTF8ToMB(wxString *strUtf)
             wxCSConv conv(enc);
             str = wxString(wbuf, conv);
          }
+
          if ( str.empty() )
          {
             // conversion failed - use original text (and display incorrectly,
             // unfortunately)
             wxLogDebug(_T("conversion from UTF-8 to default encoding failed"));
+
+            enc = wxFONTENCODING_SYSTEM;
          }
          else
          {
@@ -1583,6 +1527,45 @@ wxFontEncoding ConvertUTF8ToMB(wxString *strUtf)
    }
 
    return enc;
+}
+
+#endif // __WXGTK20__
+
+// convert a string in UTF-8 or 7 into the string in some multibyte encoding:
+// of course, this doesn't work in general as Unicode is not representable as
+// an 8 bit charset but it works in some common cases and is better than no
+// UTF-8 support at all
+//
+// FIXME this won't be needed when full Unicode support is available
+wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
+{
+   CHECK( strUtf, wxFONTENCODING_SYSTEM, _T("NULL string in ConvertUTFToMB") );
+
+   wxFontEncoding encConv;
+   if ( !strUtf->empty() )
+   {
+      if ( enc == wxFONTENCODING_UTF7 )
+      {
+         encConv = ConvertToMB(strUtf, wxConvUTF7);
+      }
+      else
+      {
+         ASSERT_MSG( enc == wxFONTENCODING_UTF8, _T("unknown Unicode encoding") );
+
+         // in GTK+ 2.0 we can use UTF-8 directly
+#ifdef __WXGTK20__
+         encConv = wxFONTENCODING_SYSTEM;
+#else
+         return ConvertToMB(strUtf, wxConvUTF8);
+#endif // !__WXGTK20__
+      }
+   }
+   else // doesn't really matter what we return from here
+   {
+      encConv = wxFONTENCODING_SYSTEM;
+   }
+
+   return encConv;
 }
 
 // return the length of the line terminator if we're at the end of line or 0
