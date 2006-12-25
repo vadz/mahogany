@@ -148,7 +148,7 @@ _ds_actualize_message (const char *message)
           }
 
           /* Our concatenated data doesn't have any whitespace between lines */
-          for ( eow = line; *eow && *eow < 255 && isspace(*eow); eow++ )
+          for ( eow = line; *eow && isspace((unsigned char)*eow); eow++ )
             ;
 
           ptr =
@@ -1096,7 +1096,7 @@ _ds_extract_boundary (char *buf, size_t size, char *mem)
         return EFAILURE;
       }
       ptr++;
-      while(*ptr < 255 && isspace(*ptr))
+      while(isspace((unsigned char)*ptr))
         ptr++;
       if (ptr[0] == '"')
         ptr++;
