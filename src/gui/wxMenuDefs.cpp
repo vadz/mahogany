@@ -334,8 +334,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // msg
 
-   // the available accelerators for this menu:
-   // H
+   // the available accelerators for this menu: none!
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , wxITEM_NORMAL },
    { WXMENU_MSG_EDIT,      gettext_noop("&Edit in composer\tCtrl-E"), gettext_noop("Edit selected message in composer")    , wxITEM_NORMAL },
@@ -443,6 +442,7 @@ static const MenuItemInfo g_aMenuItems[] =
       { WXMENU_MSG_SPAM_UNMARK, gettext_noop("Mark as &ham"), gettext_noop("Classify the message as non-spam"), wxITEM_NORMAL },
       { WXMENU_MSG_SPAM_CHECK, gettext_noop("Chec&k message...\tShift-Ctrl-K"), gettext_noop("Check if this message is spam"), wxITEM_NORMAL },
    { WXMENU_SUBMENU,       wxEmptyString, wxEmptyString, wxITEM_NORMAL },
+   { WXMENU_MSG_REMOVE_ATTACHMENTS, gettext_noop("Remove attac&hments..."), gettext_noop("Remove the attachments from the selected message"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extract &addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), wxITEM_NORMAL },
 

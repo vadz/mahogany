@@ -9,6 +9,7 @@
 Release 0.68 '' September xx, 2006
 ---------------------------------------
 
+2006-12-25 VZ: Added "Remove attachments" command
 2006-09-05 NB: Mahogany can now be compiled with wxWine
 
 Release 0.67 'Constance' August 1, 2006

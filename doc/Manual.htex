@@ -31,7 +31,7 @@
 
 \vfill{}
 \title{{\LARGE \textsl{Mahogany User Manual}}\\
-{\Large Version 0.67 ``Constance''}}
+{\Large Version 0.68 ``Constance''}}
 \vfill{}
 
 
@@ -64,6 +64,14 @@ any problems with building it.
 
 All sections here except the first one present only historical interest, please
 skip them unless you're updating from a very old version of Mahogany.
+
+\subsubsection{0.68 against 0.67}
+
+\begin{itemize}
+   \item A much faster DSPAM storage driver is used now.
+   \item Added ``Remove attachments'' command which can be used to strip the
+         unwanted attachments from a message in a local or IMAP folder.
+\end{itemize}
 
 \subsubsection{0.67 against 0.66}
 

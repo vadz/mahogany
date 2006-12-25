@@ -40,6 +40,7 @@
 #include "gui/wxMenuDefs.h"
 
 #include "HeaderInfo.h"
+#include "Sequence.h"
 
 #include "TemplateDialog.h"
 #include "MessageView.h"
@@ -53,6 +54,7 @@
 #include "SpamFilter.h"
 
 #include "MIMETreeDialog.h"
+#include "MFui.h"
 
 #include "gui/wxDialogLayout.h"
 
@@ -204,6 +206,9 @@ protected:
 
    /// Check whether the message is spam
    void CheckIfSpam(const UIdArray& uids);
+
+   /// Remove attachments from the message
+   void RemoveAttachments(UIdType uid);
 
    //@}
 
@@ -745,6 +750,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          CheckIfSpam(messages);
          break;
 
+      case WXMENU_MSG_REMOVE_ATTACHMENTS:
+         RemoveAttachments(messages[0]);
+         break;
+
       default:
          // try passing it to message view
          if ( !m_msgView->DoMenuCommand(cmd) )
@@ -821,6 +830,135 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
    // for the MIME parts - but for this we must be previewing this message!
    ShowMIMETreeDialog(part, GetFrame(),
                            m_msgView->GetUId() == uid ? m_msgView : NULL);
+}
+
+void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
+{
+   // check that we can modify messages in this folder
+   Message_obj msg(GetMessage(uid));
+   if ( !msg )
+   {
+      wxLogError(_("Failed to access the message"));
+      return;
+   }
+
+   // this object shouldn't be DecRef()'d
+   MailFolder * const mf = msg->GetFolder();
+   CHECK_RET( mf, _T("message without folder?") );
+
+   // before doing anything else, ensure that we can write to the folder
+   if ( !CanCreateMessagesInFolder(mf->GetType()) )
+   {
+      wxLogError(_("Messages in the folder \"%s\" can't be modified, "
+                   "please copy the message to a local or IMAP folder "
+                   "before removing attachments from it."),
+                 mf->GetName().c_str());
+      return;
+   }
+
+   if ( mf->IsReadOnly() )
+   {
+      wxLogError(_("Folder \"%s\" is read-only, please reopen it in "
+                   "read-write mode."), mf->GetName().c_str());
+      return;
+   }
+
+
+   // ask the user which attachments should be removed
+   wxArrayString partsDescs;
+   wxArrayInt partsRemove;
+   const int count = msg->CountParts();
+   int i;
+   for ( i = 0; i < count; i++ )
+   {
+      const MimePart * const mimepart = msg->GetMimePart(i);
+      MimeType mimetype = mimepart->GetType();
+
+      String desc = mimepart->GetDescription();
+      if ( desc.empty() )
+         desc = mimepart->GetParam("name");
+      if ( desc.empty() )
+         desc = mimepart->GetFilename();
+      if ( desc.empty() )
+         desc.Printf(_("Unnamed %s #%d"), mimetype.GetFull().c_str(), i);
+
+      desc << " ("
+           << SizeInBytesToString(mimepart->GetSize(), SizeToString_Medium)
+           << ")";
+      partsDescs.push_back(desc);
+
+      // remove all attachments by default
+      if ( mimepart->IsAttachment() || mimetype.GetPrimary() != MimeType::TEXT )
+         partsRemove.push_back(i);
+   }
+
+   if ( partsDescs.empty() )
+   {
+      wxLogWarning(_("There are no attachments to remove in this message."));
+      return;
+   }
+
+   size_t numRemove = MDialog_GetSelections
+                      (
+                        _("Please check the attachments to be deleted.\n"
+                          "\n"
+                          "This operation cannot be undone, the selected "
+                          "attachments will be permanently deleted,\n"
+                          "please make sure to save them first if you need them!"),
+                        String(M_TITLE_PREFIX) + _("Remove Attachments"),
+                        partsDescs,
+                        &partsRemove,
+                        GetFrame(),
+                        "RemoveAttachments"
+                      );
+   if ( numRemove == 0 )
+      return;  // cancelled by the user
+
+   // create a copy of the message without the attachments
+   SendMessage_obj msgCopy(SendMessage::CreateFromMsg
+                           (
+                               GetProfile(),
+                               msg.Get(),
+                               Prot_SMTP,
+                               GetFrame(),
+                               &partsRemove
+                           ));
+
+   // and save it to the same folder: note that we don't use MailFolder::
+   // AppendMessage(Message) overload as this would modify the date header and
+   // we want to preserve it
+   String msgstr;
+   if ( !msgCopy->WriteToString(msgstr) || !mf->AppendMessage(msgstr) )
+      return;
+
+   // copy the flags of the original message
+   {
+      bool flagsOk = false;
+
+      HeaderInfoList_obj headers(HeaderInfoList::Create(mf));
+      const HeaderInfo * const hi = headers ? headers->GetEntryUId(uid) : NULL;
+      if ( hi )
+      {
+         const int flags = hi->GetStatus();
+
+         // the message we've just appended must be the last one
+         Sequence seq;
+         seq.Add(headers->Count());
+         flagsOk = mf->SetSequenceFlag(MailFolder::SEQ_MSGNO, seq, flags);
+      }
+
+      if ( !flagsOk )
+         wxLogWarning(_("Failed to preserve the message flags"));
+   }
+
+   // finally delete the old one
+   UIdArray uids;
+   uids.push_back(uid);
+   if ( !mf->DeleteMessages(&uids, MailFolder::DELETE_EXPUNGE) )
+   {
+      wxLogWarning(_("Failed to delete the original message after creating "
+                     "the message copy without attachments."));
+   }
 }
 
 void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
