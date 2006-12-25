@@ -41,7 +41,8 @@ SizeToString(unsigned long sizeBytes,
              MessageSizeShow show,
              int flags)
 {
-   const bool verbose = (flags & SizeToString_Verbose) != 0;
+   const bool terse = flags == SizeToString_Terse;
+   const bool verbose = flags == SizeToString_Verbose;
 
    String s;
 
@@ -66,20 +67,20 @@ SizeToString(unsigned long sizeBytes,
          }
          else if ( sizeBytes < 10*1024 )
          {
-            s = SizeToString(sizeBytes, 0, MessageSize_Bytes);
+            s = SizeToString(sizeBytes, 0, MessageSize_Bytes, flags);
          }
          else if ( sizeBytes < 10*1024*1024 )
          {
-            s = SizeToString(sizeBytes, 0, MessageSize_KBytes);
+            s = SizeToString(sizeBytes, 0, MessageSize_KBytes, flags);
          }
          else // Mb
          {
-            s = SizeToString(sizeBytes, 0, MessageSize_MBytes);
+            s = SizeToString(sizeBytes, 0, MessageSize_MBytes, flags);
          }
          break;
 
       case MessageSize_Bytes:
-         s.Printf(_("%lu%s"), sizeBytes, verbose ? _(" bytes") : wxEmptyString);
+         s.Printf(_("%lu%s"), sizeBytes, terse ? wxEmptyString : _(" bytes"));
          break;
 
       case MessageSize_KBytes:

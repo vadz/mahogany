@@ -42,11 +42,17 @@ enum MessageSizeShow
 /// SizeToString() flags
 enum
 {
-   /// terse size string by default
-   SizeToString_Default,
+   /// terse size strings: indicate Kb/Mb but omit "bytes"
+   SizeToString_Terse,
 
-   /// verbose size string
-   SizeToString_Verbose
+   /// use bytes/Kb/Mb
+   SizeToString_Medium,
+
+   /// verbose size string: use full strings (bytes/kilobytes/megabytes/...)
+   SizeToString_Verbose,
+
+   /// tersest possible size string by default
+   SizeToString_Default = SizeToString_Terse
 };
 
 // ----------------------------------------------------------------------------
@@ -72,13 +78,25 @@ extern String ConvertMessageStatusToString(int status);
  @param sizeBytes the size of the message in bytes
  @param sizeLines the size of message in lines (only if text)
  @param show how should we show the size?
- @param verbose returns verbose string if equal to SizeToString_Verbose
+ @param flags returns verbose string if equal to SizeToString_Verbose
  @return string containing the text for display
 */
 extern String SizeToString(unsigned long sizeBytes,
                            unsigned long sizeLines = 0,
                            MessageSizeShow show = MessageSize_Automatic,
-                           int verbose = SizeToString_Default);
+                           int flags = SizeToString_Default);
+/**
+   Wrapper for SizeToString() returning the size in bytes alwats.
+
+   @param sizeBytes the size of the message in bytes
+   @param flags returns verbose string if equal to SizeToString_Verbose
+   @return string containing the text for display
+ */
+inline String
+SizeInBytesToString(unsigned long sizeBytes, int flags = SizeToString_Default)
+{
+   return SizeToString(sizeBytes, 0, MessageSize_AutoBytes, flags);
+}
 
 //@}
 
