@@ -220,7 +220,8 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
    wxString pageHtmlText;
 
    pageHtmlText << _T("<body text=#000000 bgcolor=#ffffff>"
-                   "<meta HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html;charset=UTF-8\">"
+                   "<meta http-equiv=\"Content-Type\" "
+                         "content=\"text/html;charset=ISO-8859-13\">"
                    "<font face=\"Times New Roman,times\">"
 
                    "<h4>") << _("Mahogany information") << _T("</h4>")
@@ -263,8 +264,8 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
                 << "<p>"
                    _T("<h4>") << _("List of contributors:") << _T("</h4>")
                    "<p>"
-                   "Karsten Ball" "\xC3\xBC" "der, Vadim Zeitlin, Greg Noel,<br>"
-                   "Nerijus Bali" "\xC5\xAB" "nas, Xavier Nodet, Vaclav Slavik,<br>"
+                   "Karsten Ball\374der, Vadim Zeitlin, Greg Noel,<br>"
+                   "Nerijus Bali\373nas, Xavier Nodet, Vaclav Slavik,<br>"
                    "Daniel Seifert, Michele Ravani, Michael A Chase,<br>"
                    "Robert Vazan " << _("and many others") << "<br>"
                    "<br>"
