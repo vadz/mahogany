@@ -264,7 +264,7 @@ dspam_shutdown_driver (DRIVER_CTX *DTX)
     }
   }
 #else
-  DTX; /* unused parameter */
+  UNUSED(DTX);
 #endif
 
   return 0;
@@ -834,7 +834,7 @@ _ds_get_signature (DSPAM_CTX * CTX, struct _ds_spam_signature *SIG,
 
 void *_ds_connect (DSPAM_CTX *CTX)
 {
-  CTX; /* unused parameter */
+  UNUSED(CTX);
   return NULL;
 }
 
@@ -845,7 +845,7 @@ _ds_create_signature_id (DSPAM_CTX * CTX, char *buf, size_t len)
   char digit[6];
   int pid, j;
  
-  CTX; /* unused parameter */
+  UNUSED(CTX);
 
   pid = getpid ();
   snprintf (session, sizeof (session), "%8lx%d", (long) time (NULL), pid);
@@ -1080,14 +1080,15 @@ _ds_get_nextuser (DSPAM_CTX * CTX)
 struct _ds_storage_signature *
 _ds_get_nextsignature (DSPAM_CTX * CTX)
 {
-  CTX; /* unused parameter */
+  UNUSED(CTX);
   return NULL;
 }
 
 int
 _ds_delall_spamrecords (DSPAM_CTX * CTX, ds_diction_t diction)
 {
-  CTX; diction; /* unused parameter */
+  UNUSED(CTX);
+  UNUSED(diction);
   return 0;
 }
 

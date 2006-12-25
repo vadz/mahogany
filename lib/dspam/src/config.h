@@ -27,6 +27,11 @@
 #include <auto-config.h>
 #endif
 
+#ifndef UNUSED
+/* if UNUSED macro is not defined in auto-config.h, remove it completely */
+#define UNUSED(param)
+#endif
+
 #include <limits.h>
 #ifndef _WIN32
 #include <sys/param.h>

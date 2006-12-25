@@ -2159,7 +2159,7 @@ int libdspam_init(const char *driver) {
     }
   }
 #else
-  driver; /* unused parameter */
+  UNUSED(driver);
 #endif
 
 #ifdef NCORE

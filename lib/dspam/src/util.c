@@ -626,7 +626,7 @@ double chi2Q (double x, int v)
 
 int _ds_get_fcntl_lock(int fd) {
 #ifdef _WIN32
-  fd;
+  UNUSED(fd);
 
   return 0;
 #else
@@ -643,7 +643,7 @@ int _ds_get_fcntl_lock(int fd) {
 
 int _ds_free_fcntl_lock(int fd) {
 #ifdef _WIN32
-  fd;
+  UNUSED(fd);
 
   return 0;
 #else

@@ -48,7 +48,7 @@ extern int DO_DEBUG;
 #ifdef HAVE_ISO_VARARGS
 #define LOGDEBUG( ... );
 #else
-inline void LOGDEBUG (const char *err, ...) { }
+inline void LOGDEBUG (const char *err, ...) { UNUSED(err); }
 #endif
 #else
 void LOGDEBUG (const char *err, ... );
@@ -58,10 +58,10 @@ void LOGDEBUG (const char *err, ... );
 #ifdef HAVE_ISO_VARARGS
 #define LOG ( ... );
 #else
-inline void LOG (int priority, const char *err, ... ) { priority; err; }
+inline void LOG (int prio, const char *err, ... ) { UNUSED(prio); UNUSED(err); }
 #endif
 #else
-void LOG (int priority, const char *err, ... );
+void LOG (int prio, const char *err, ... );
 #endif
 
 char *format_date_r (char *buf);
