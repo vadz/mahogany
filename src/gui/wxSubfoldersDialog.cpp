@@ -41,9 +41,6 @@
 
 #include "gui/wxDialogLayout.h"
 
-// TODO: this code doesn't work yet, finish it
-//#define USE_SELECT_BUTTONS
-
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -60,19 +57,14 @@ extern const MPersMsgBox *M_MSGBOX_ADD_ALL_SUBFOLDERS;
 // constants
 // ----------------------------------------------------------------------------
 
-#ifdef USE_SELECT_BUTTONS
+// how often to update the progress display?
+static const size_t PROGRESS_THRESHOLD = 10;
 
 // control ids
 enum
 {
-   Button_SelectAll = 100,
-   Button_UnselectAll
+   Button_AddAll = 100
 };
-
-#endif // USE_SELECT_BUTTONS
-
-// how often to update the progress display?
-static const size_t PROGRESS_THRESHOLD = 10;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -259,11 +251,8 @@ public:
    // events from "quick search" text control
    void OnText(wxCommandEvent& event);
 
-#ifdef USE_SELECT_BUTTONS
-   // select/unselect all button handlers
-   void OnSelectAll(wxCommandEvent& event);
-   void OnUnselectAll(wxCommandEvent& event);
-#endif // USE_SELECT_BUTTONS
+   // add all folders and close the dialog
+   void OnAddAll(wxCommandEvent& event);
 
    // called by wxFolderNameTextCtrl (see below)
    bool OnComplete(wxTextCtrl *textctrl);
@@ -292,6 +281,9 @@ private:
 
    // the folder itself
    MFolder *m_folder;
+
+   // and the underlying mail folder
+   ASMailFolder *m_asmf;
 
    // returns the separator of the folder name components
    wxChar GetFolderNameSeparator() const
@@ -333,13 +325,6 @@ public:
    ListFolderEventReceiver()
    {
       m_progressInfo = NULL;
-
-      m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
-   }
-
-   virtual ~ListFolderEventReceiver()
-   {
-      MEventManager::Deregister(m_regCookie);
    }
 
    // do retrieve all folders and create them
@@ -350,9 +335,6 @@ public:
    virtual void OnNoMoreFolders();
 
 private:
-   // MEventReceiver cookie for the event manager
-   void *m_regCookie;
-
    // the progress meter
    MProgressInfo *m_progressInfo;
 
@@ -390,10 +372,7 @@ BEGIN_EVENT_TABLE(wxSubscriptionDialog, wxManuallyLaidOutDialog)
    EVT_TREE_ITEM_EXPANDED(-1, wxSubscriptionDialog::OnTreeExpanded)
    EVT_TREE_SEL_CHANGED(-1, wxSubscriptionDialog::OnTreeSelect)
 
-#ifdef USE_SELECT_BUTTONS
-   EVT_BUTTON(Button_SelectAll, wxSubscriptionDialog::OnSelectAll)
-   EVT_BUTTON(Button_UnselectAll, wxSubscriptionDialog::OnUnselectAll)
-#endif // USE_SELECT_BUTTONS
+   EVT_BUTTON(Button_AddAll, wxSubscriptionDialog::OnAddAll)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -781,6 +760,8 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    m_folder = folder;
    m_folder->IncRef();
    m_folderType = folder->GetType();
+   m_asmf = mailFolder;
+   m_asmf->IncRef();
    m_settingFromProgram = false;
 
    // create controls
@@ -805,9 +786,14 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    c->centreY.SameAs(label, wxCentreY);
    m_textFind->SetConstraints(c);
 
-#ifdef USE_SELECT_BUTTONS
-   m_btnSelectAll = new wxButton(this, , _("&Select all"));
-#endif // USE_SELECT_BUTTONS
+   wxButton *btnAddAll = new wxButton(this, Button_AddAll, _("&Add all"));
+   wxWindow *btnOk = FindWindow(wxID_OK);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(btnOk, wxTop);
+   c->height.AsIs();
+   c->width.AsIs();
+   c->right.SameAs(btnOk, wxLeft, 2*LAYOUT_X_MARGIN);
+   btnAddAll->SetConstraints(c);
 
    m_treectrl = new wxSubfoldersTree(this, folder, mailFolder);
    c = new wxLayoutConstraints;
@@ -827,6 +813,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 wxSubscriptionDialog::~wxSubscriptionDialog()
 {
    m_folder->DecRef();
+   m_asmf->DecRef();
 }
 
 void wxSubscriptionDialog::SelectRecursively(const wxString& path)
@@ -970,37 +957,6 @@ void wxSubscriptionDialog::SelectRecursively(const wxString& path)
 }
 
 
-#ifdef USE_SELECT_BUTTONS
-
-void wxSubscriptionDialog::OnSelectAll(wxCommandEvent& event)
-{
-   wxTreeItemId root = m_treectrl->GetRootItem();
-   SelectAllUnder(root);
-}
-
-void wxSubscriptionDialog::SelectAllUnder(const wxTreeItemId& item)
-{
-   wxTreeItemId child = m_treectrl->GetFirstChild(item, cookie);
-   while ( child.IsOk() )
-   {
-      m_treectrl->Select(child);
-
-      if ( m_treectrl->ItemHasChildren() )
-      {
-         SelectAllUnder(child);
-      }
-
-      child = m_treectrl->GetNextChild(item, cookie);
-   }
-}
-
-void wxSubscriptionDialog::OnUnselectAll(wxCommandEvent& event)
-{
-   m_treectrl->UnselectAll();
-}
-
-#endif // USE_SELECT_BUTTONS
-
 // update the number of items in the box
 void wxSubscriptionDialog::OnTreeExpanded(wxTreeEvent& event)
 {
@@ -1055,6 +1011,18 @@ bool wxSubscriptionDialog::OnComplete(wxTextCtrl *textctrl)
    m_settingFromProgram = false;
 
    return true;
+}
+
+void wxSubscriptionDialog::OnAddAll(wxCommandEvent& WXUNUSED(event))
+{
+   if ( !AddAllSubfoldersToTree(m_folder, m_asmf) )
+   {
+      wxLogError(_("Failed to add all subfolders to the tree."));
+   }
+   else
+   {
+      EndModal(wxID_OK);
+   }
 }
 
 bool wxSubscriptionDialog::TransferDataFromWindow()
