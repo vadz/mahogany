@@ -52,19 +52,24 @@ EnsureAvailableTextEncoding(wxFontEncoding *enc, wxString *text, bool mayAskUser
             wxWCharBuffer wbuf(a2w.cMB2WC(text->c_str()));
             if ( *wbuf )
             {
+               wxString textConv;
+
                // special case of UTF-8 which is used all the time under wxGTK
                if ( encAlt == wxFONTENCODING_UTF8 )
                {
-                  *text = wxConvUTF8.cWC2MB(wbuf);
+                  textConv = wxConvUTF8.cWC2MB(wbuf);
                }
                else // all the other encodings, use generic converter
                {
                   wxCSConv w2a(encAlt);
-                  *text = w2a.cWC2MB(wbuf);
+                  textConv = w2a.cWC2MB(wbuf);
                }
 
-               if ( !text->empty() )
+               if ( !textConv.empty() )
+               {
+                  *text = textConv;
                   return true;
+               }
                //else: fall back to wxEncodingConverter
             }
             //else: conversion to Unicode failed
