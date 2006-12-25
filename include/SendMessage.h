@@ -89,12 +89,17 @@ public:
 
       @param profile pointer to the profile to use (must be non NULL)
       @param message the original message (can't be NULL)
+      @param protocol which protocol to use for sending
       @param frame the parent window for dialogs, may be NULL
+      @param partsToOmit if non NULL, contains the indices of the MIME parts of
+                         the message (consistent with Message::GetMimePart()
+                         interpretation) to not copy to the new one
     */
    static SendMessage *CreateFromMsg(Profile *profile,
                                      const Message *message,
                                      Protocol protocol = Prot_Default,
-                                     wxFrame *frame = NULL);
+                                     wxFrame *frame = NULL,
+                                     const wxArrayInt *partsToOmit = NULL);
 
    //@}
 

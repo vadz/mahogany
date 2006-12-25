@@ -217,7 +217,12 @@ SendMessage::CreateResent(Profile *profile,
                           const Message *message,
                           wxFrame *frame)
 {
-   return new SendMessageCC(profile, Prot_Default, frame, message, true);
+   CHECK( message, NULL, _T("no Message in SendMessage::CreateResent()") );
+
+   SendMessageCC *msg = new SendMessageCC(profile, Prot_Default, frame, message);
+   if ( msg )
+      msg->InitResent(message);
+   return msg;
 }
 
 /* static */
@@ -225,11 +230,15 @@ SendMessage *
 SendMessage::CreateFromMsg(Profile *profile,
                            const Message *message,
                            Protocol protocol,
-                           wxFrame *frame)
+                           wxFrame *frame,
+                           const wxArrayInt *partsToOmit)
 {
    CHECK( message, NULL, _T("no Message in SendMessage::CreateFromMsg()") );
 
-   return new SendMessageCC(profile, protocol, frame, message, false);
+   SendMessageCC *msg = new SendMessageCC(profile, protocol, frame, message);
+   if ( msg )
+      msg->InitFromMsg(message, partsToOmit);
+   return msg;
 }
 
 SendMessage::~SendMessage()
@@ -243,8 +252,7 @@ SendMessage::~SendMessage()
 SendMessageCC::SendMessageCC(Profile *profile,
                              Protocol protocol,
                              wxFrame *frame,
-                             const Message *message,
-                             bool resend)
+                             const Message *message)
 {
    m_frame = frame;
    m_encHeaders = wxFONTENCODING_SYSTEM;
@@ -363,17 +371,9 @@ SendMessageCC::SendMessageCC(Profile *profile,
    if ( READ_CONFIG(profile,MP_USEOUTGOINGFOLDER) )
       m_FccList.push_back(new String(READ_CONFIG_TEXT(profile,MP_OUTGOINGFOLDER)));
 
-   // finally, special init for resent messages
-   // -----------------------------------------
-
-   if ( message )
-   {
-      if ( resend )
-         InitResent(message);
-      else
-         InitFromMsg(message);
-   }
-   else
+   // initialize the message body, unless it's going to be done by our caller
+   // for resent/cloned messages
+   if ( !message )
    {
       InitNew();
    }
@@ -492,7 +492,7 @@ void SendMessageCC::InitResent(const Message *message)
 }
 
 void
-SendMessageCC::InitFromMsg(const Message *message)
+SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit)
 {
    // the headers must be already encoded in the existing message, don't encode
    // them twice
@@ -569,6 +569,9 @@ SendMessageCC::InitFromMsg(const Message *message)
    const int count = message->CountParts();
    for(int i = 0; i < count; i++)
    {
+      if ( partsToOmit && partsToOmit->Index(i) != wxNOT_FOUND )
+         continue;
+
       unsigned long len;
       const void *data = message->GetPartContent(i, &len);
       String dispType;

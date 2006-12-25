@@ -118,8 +118,7 @@ protected:
    SendMessageCC(Profile *profile,
                  Protocol protocol,
                  wxFrame *frame,
-                 const Message *message = NULL,
-                 bool resend = false);
+                 const Message *message = NULL);
 
    /// init the fields for a new message
    void InitNew();
@@ -128,7 +127,7 @@ protected:
    void InitResent(const Message *message);
 
    /// init the header and contents from an existing message
-   void InitFromMsg(const Message *message);
+   void InitFromMsg(const Message *message, const wxArrayInt *partsToOmit);
 
    /// common part of InitNew() and InitFromMsg()
    void InitBody();
