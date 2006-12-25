@@ -15,8 +15,11 @@ if errorlevel 1 goto no_m4
 goto end
 
 :no_m4
-copy %2\MInterface.cpp.m4 %1\MInterface.cpp
-copy %2\MInterface.h.m4 %1\MInterface.h
+echo m4 not available (please ignore the error above), use preprocessed files
+
+rem use type + redirection to ensure that output files have timestamp of now
+type %2\MInterface.cpp.m4 > %1\MInterface.cpp
+type %2\MInterface.h.m4 > %1\MInterface.h
 goto end
 
 :usage
