@@ -137,9 +137,11 @@ public:
 
    virtual void OnOpenHere(MFolder *folder)
    {
-      CHECK_RET( folder, _T("can't open a NULL folder") );
-
-      if ( !m_frame->OpenFolder(folder) )
+      if ( !folder )
+      {
+         m_frame->CloseFolder();
+      }
+      else if ( !m_frame->OpenFolder(folder) )
       {
          // normally the base class version DecRef()s it but as we're going to
          // pass NULL to it, do it ourselves
@@ -684,7 +686,7 @@ wxMainFrame::UpdateFolderMenuUI(MFolder *sel)
 void
 wxMainFrame::CloseFolder(MFolder *folder)
 {
-   if ( folder && folder->GetFullName() == m_folderName )
+   if ( !folder || folder->GetFullName() == m_folderName )
    {
       m_FolderView->SetFolder(NULL);
 

@@ -53,8 +53,9 @@ public:
    // multiple times) in read write (default) or read only mode
    bool OpenFolder(MFolder *folder, bool readonly = false);
 
-   // close the given folder if it is opened
-   void CloseFolder(MFolder *folder);
+   // close the given folder if it is opened or the currently opened one if
+   // folder is NULL
+   void CloseFolder(MFolder *folder = NULL);
 
    // add the folder menu to the menu bar
    void AddFolderMenu(void);
