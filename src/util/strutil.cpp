@@ -1546,9 +1546,17 @@ wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
    {
       if ( enc == wxFONTENCODING_UTF7 )
       {
+#ifdef __WXGTK20__
+         // with GTK+ 2.0 we can convert everything to Unicode
+         encConv = wxFONTENCODING_SYSTEM;
+         wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF7));
+         if ( wbuf )
+            *strUtf = wxConvUTF8.cWC2MB(wbuf);
+#else
          encConv = ConvertToMB(strUtf, wxConvUTF7);
+#endif
       }
-      else
+      else // !UTF-7
       {
          ASSERT_MSG( enc == wxFONTENCODING_UTF8, _T("unknown Unicode encoding") );
 
@@ -1557,7 +1565,7 @@ wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
          encConv = wxFONTENCODING_SYSTEM;
 #else
          return ConvertToMB(strUtf, wxConvUTF8);
-#endif // !__WXGTK20__
+#endif
       }
    }
    else // doesn't really matter what we return from here
