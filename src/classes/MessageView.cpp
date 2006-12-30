@@ -3487,8 +3487,15 @@ MessageView::SetFolder(ASMailFolder *asmf)
    }
    else // no folder
    {
-      // on the contrary, revert to the default ones if we don't have any
-      // folder any more
+      // forget the viewer to restore: it won't make sense for the new folder
+      if ( m_viewerOld )
+      {
+         delete m_viewerOld;
+         m_viewerOld = NULL;
+         m_viewerNameOld.clear();
+      }
+
+      // revert to the default viewer if we don't have any folder any more
       ResetViewer();
 
       // make sure the viewer will be recreated the next time we are called
