@@ -1,3 +1,4 @@
+///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/AdbDialogs.cpp - assorted ADB-related dialogs
 // Purpose:     dialogs to import an ADB, select ADB entry expansion, ...
@@ -157,7 +158,7 @@ private:
    wxButton *m_btnMore,
             *m_btnDelete;
 
-   // the main and additional alements array
+   // the main and additional elements array
    ArrayAdbElements& m_aEverything;
    ArrayAdbEntries& m_aMoreEntries;
 
@@ -453,7 +454,8 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
    if ( m_btnMore )
    {
 #if wxUSE_TOOLTIPS
-      m_btnMore->SetToolTip(_("Show more matching entries"));
+      m_btnMore->SetToolTip(_("Show all entries, include those matching "
+                              "less precisely"));
 #endif // wxUSE_TOOLTIPS
 
       c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
@@ -501,7 +503,7 @@ void wxAdbExpandDialog::OnBtnMore(wxCommandEvent&)
    }
 
    // nothing more to add
-   m_btnMore->Disable();
+   m_btnMore->Hide();
 }
 
 void wxAdbExpandDialog::OnBtnDelete(wxCommandEvent& WXUNUSED(event))
