@@ -416,7 +416,7 @@ static const MenuItemInfo g_aMenuItems[] =
       },
    { WXMENU_SUBMENU,       wxEmptyString, wxEmptyString, wxITEM_NORMAL },
    { WXMENU_MSG_BOUNCE,    gettext_noop("&Bounce..."), gettext_noop("Redirect the selected messages to another recipient"), wxITEM_NORMAL },
-   { WXMENU_MSG_RESEND,    gettext_noop("Rese&nd..."), gettext_noop("Send the selected messages again."), wxITEM_NORMAL },
+   { WXMENU_MSG_RESEND,    gettext_noop("Rese&nd"), gettext_noop("Send the selected messages again."), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_MSG_FILTER,    gettext_noop("Appl&y filter rules..."), gettext_noop("Apply filter rules to selected messages")     , wxITEM_NORMAL },
    { WXMENU_MSG_QUICK_FILTER, gettext_noop("&Quick filter..."), gettext_noop("Create a new filter for the selected message")     , wxITEM_NORMAL },
