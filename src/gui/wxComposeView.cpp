@@ -2201,15 +2201,15 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // set def values for all headers
    SetDefaultFrom();
 
-   // don't add default "To:" header if this is a reply, this usually just
-   // results in address duplication
-   if ( m_kind != Message_Reply )
-      AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
-   AddCc(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
-   AddBcc(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
-
+   // do it in the reverse order so that the most important header (To) is
+   // added last and so appears first/top-most in the UI
    if ( READ_CONFIG(m_Profile, MP_USEOUTGOINGFOLDER) )
       AddFcc(READ_CONFIG_TEXT(m_Profile, MP_OUTGOINGFOLDER));
+
+   AddBcc(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
+   AddCc(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
+
+   AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
 }
 
 /// create the compose window itself
