@@ -359,9 +359,6 @@ AdbExpandSingleAddress(String *address,
 
    // remove "mailto:" prefix if it's there - this is convenient when you paste
    // in an URL from the web browser
-   //
-   // TODO: add support for the mailto URL parameters, i.e. should support
-   //       things like "mailto:foo@bar.com?subject=Please%20help"
    String newText;
    if ( !textOrig.StartsWith(_T("mailto:"), &newText) )
    {
@@ -407,7 +404,48 @@ AdbExpandSingleAddress(String *address,
          }
       }
    }
-   //else: address following mailto: doesn't need to be expanded
+   else // address following mailto: doesn't need to be expanded
+   {
+      // this is a non-standard but custom extension: mailto URLs can have
+      // extra parameters introduced by '?' and separated by '&'
+      const size_t posQuestion  = newText.find('?');
+      for ( size_t posParamStart = posQuestion; posParamStart != String::npos; )
+      {
+         posParamStart++;
+         size_t posEq = newText.find('=', posParamStart);
+         if ( posEq != String::npos )
+         {
+            size_t posParamEnd = newText.find('&', posEq);
+
+            const String param(newText, posParamStart, posEq - posParamStart),
+                         value(newText, posEq + 1,
+                               posParamEnd == String::npos
+                                 ? posParamEnd
+                                 : posParamEnd - posEq - 1);
+;
+            if ( stricmp(param, "subject") == 0 )
+            {
+               *subject = value;
+            }
+            else
+            {
+               // at least cc, bcc and body are also possible
+               wxLogDebug("Ignoring unknown mailto: URL parameter %s=\"%s\"",
+                          param.c_str(), value.c_str());
+            }
+
+            posParamStart = posParamEnd;
+         }
+         else // unknown parameter
+         {
+            wxLogDebug("Ignoring unknown mailto: URL parameter without value");
+
+            posParamStart = newText.find('&', posParamStart);
+         }
+      }
+
+      newText.erase(posQuestion, String::npos);
+   }
 
    *address = newText;
 
