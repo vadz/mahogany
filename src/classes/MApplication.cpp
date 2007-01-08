@@ -231,19 +231,16 @@ MAppBase::ProcessSendCmdLineOptions(const CmdLineOptions& cmdLineOpts)
 
    if ( composer )
    {
+      composer->AddRecipients(cmdLineOpts.composer.to, Recipient_To);
       composer->AddRecipients(cmdLineOpts.composer.bcc, Recipient_Bcc);
       composer->AddRecipients(cmdLineOpts.composer.cc, Recipient_Cc);
       composer->AddRecipients(cmdLineOpts.composer.newsgroups,
                               Recipient_Newsgroup);
 
-      // the "to" parameter may be a mailto: URL, pass it through our expansion
-      // function first
-      String to = cmdLineOpts.composer.to;
-      composer->ExpandRecipient(&to);
-
-      composer->AddRecipients(to, Recipient_To);
-
-      composer->SetSubject(cmdLineOpts.composer.subject);
+      if ( !cmdLineOpts.composer.subject.empty() )
+         composer->SetSubject(cmdLineOpts.composer.subject);
+      //else: don't override the subject which could have been specified as
+      //      part of "To:" recipient (common for mailto: URLs)
 
       composer->InsertText(cmdLineOpts.composer.body);
       composer->ResetDirty();

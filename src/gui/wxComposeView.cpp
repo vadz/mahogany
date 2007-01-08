@@ -86,6 +86,7 @@
 
 #include "HeadersDialogs.h"
 
+#include "gui/AddressExpander.h"
 #include "gui/wxIdentityCombo.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxDialogLayout.h"
@@ -581,7 +582,8 @@ private:
 // different roles rather than because it is really needed.
 // ----------------------------------------------------------------------------
 
-class wxAddressTextCtrl : public wxTextCtrlProcessingEnter
+class wxAddressTextCtrl : public wxTextCtrlProcessingEnter,
+                          public AddressExpander
 {
 public:
    // ctor
@@ -1217,15 +1219,33 @@ void wxRcptMainControl::OnTypeChange(RecipientType rcptType)
 void wxRcptMainControl::OnAdd()
 {
    // expand before adding (make this optional?)
-   RecipientType addrType = GetText()->DoExpand();
-   if ( addrType == Recipient_None )
+   wxArrayString addresses;
+   wxArrayInt rcptTypes;
+   String subject;
+   const int count = GetText()->ExpandAll(addresses, rcptTypes, &subject);
+   if ( count == -1 )
    {
-      // cancelled or address is invalid
+      // cancelled by user
       return;
    }
 
-   // add new recipient(s)
-   m_composeView->AddRecipients(GetText()->GetValue(), addrType);
+   if ( !subject.empty() )
+      m_composeView->SetSubject(subject);
+
+   for ( unsigned n = 0; n < (unsigned)count; n++ )
+   {
+      // add new recipient(s)
+      RecipientType rcptType = (RecipientType)rcptTypes[n];
+      if ( rcptType == Recipient_None )
+      {
+         // use the default one
+         rcptType = GetType();
+      }
+
+      // don't [try to] expand the address again here
+      m_composeView->AddRecipients(addresses[n], rcptType,
+                                   !Composer::AddRcpt_Expand);
+   }
 
    // clear the entry zone as recipient(s) were moved elsewhere
    GetText()->SetValue(wxEmptyString);
@@ -1320,7 +1340,9 @@ void wxTextCtrlProcessingEnter::OnEnter(wxCommandEvent& /* event */)
 
 wxAddressTextCtrl::wxAddressTextCtrl(wxWindow *parent,
                                      wxRcptControl *rcptControl)
-                 : wxTextCtrlProcessingEnter(parent, wxTE_PROCESS_TAB)
+                 : wxTextCtrlProcessingEnter(parent, wxTE_PROCESS_TAB),
+                   AddressExpander(this,
+                                     rcptControl->GetComposer()->GetProfile())
 {
    m_rcptControl = rcptControl;
 }
@@ -1377,15 +1399,11 @@ RecipientType wxAddressTextCtrl::DoExpand()
       case Recipient_Cc:
       case Recipient_Bcc:
          {
-            String text = GetValue();
+            String subject;
+            rcptType = ExpandLast(&subject);
 
-            rcptType = GetComposer()->ExpandRecipient(&text);
-
-            if ( rcptType != Recipient_None )
-            {
-               SetValue(text);
-               SetInsertionPointEnd();
-            }
+            if ( !subject.empty() )
+               m_rcptControl->GetComposer()->SetSubject(subject);
          }
          break;
 
@@ -2301,198 +2319,6 @@ void wxComposeView::DoClear()
 // wxComposeView address headers stuff
 // ----------------------------------------------------------------------------
 
-RecipientType
-wxComposeView::ExpandRecipient(String *textAddress)
-{
-   // don't do anything for the newsgroups
-   //
-   // TODO-NEWS: expand using .newsrc?
-   if ( m_mode == wxComposeView::Mode_News )
-   {
-      return Recipient_Newsgroup;
-   }
-
-   // try to expand the last component
-   String& text = *textAddress;
-
-   // trim spaces from left, but not (all) from right -- this allows "Dan " to
-   // be expanded into "Dan Black" but not in "Danish Guy"
-   text.Trim(FALSE);
-   bool hasSpaceAtEnd = !text.empty() && text.Last() == ' ';
-   text.Trim(TRUE);
-   if ( !text.empty() && hasSpaceAtEnd )
-      text += ' ';
-
-   // check for the lone '"' simplifies the code for finding the starting
-   // position below: it should be done here, otherwise the following loop
-   // will crash!
-   if ( text.empty() || text == '"' )
-   {
-      // don't do anything
-      wxLogStatus(GetFrame(),
-                  _("Nothing to expand - please enter something."));
-
-      return Recipient_None;
-   }
-
-   // find the starting position of the last address in the address list
-   size_t nLastAddr;
-   bool quoted = text.Last() == '"';
-   if ( quoted )
-   {
-      // just find the matching quote (not escaped)
-      const wxChar *pStart = text.c_str();
-      const wxChar *p;
-      for ( p = pStart + text.length() - 2; p >= pStart; p-- )
-      {
-         if ( *p == '"' )
-         {
-            // check that it's not escaped
-            if ( (p == pStart) || (*(p - 1) != '\\') )
-            {
-               // ok, found it!
-               break;
-            }
-         }
-      }
-
-      nLastAddr = p - pStart;
-   }
-   else // unquoted
-   {
-      // search back until the last address separator
-      for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
-      {
-         wxChar c = text[nLastAddr];
-         if ( (c == ',') || (c == ';') )
-            break;
-      }
-
-      if ( nLastAddr > 0 )
-      {
-         // move beyond the ',' or ';' which stopped the scan
-         nLastAddr++;
-      }
-
-      // the address will probably never start with spaces but if it does, it
-      // will be enough to just take it into quotes
-      while ( wxIsspace(text[nLastAddr]) )
-      {
-         nLastAddr++;
-      }
-   }
-
-   // so now we've got the text we'll be trying to expand
-   String textOrig = text.c_str() + nLastAddr;
-
-   // do we have an explicit address type specifier
-   RecipientType addrType = Recipient_Max;
-   if ( textOrig.length() > 3 )
-   {
-      // check for to:, cc: or bcc: prefix
-      if ( textOrig[2u] == ':' )
-      {
-         if ( toupper(textOrig[0u]) == 'T' && toupper(textOrig[1u]) == 'O' )
-            addrType = Recipient_To;
-         else if ( toupper(textOrig[0u]) == 'C' && toupper(textOrig[1u]) == 'C' )
-            addrType = Recipient_Cc;
-      }
-      else if ( textOrig[3u] == ':' && textOrig(0, 3).Upper() == _T("BCC") )
-      {
-         addrType = Recipient_Bcc;
-      }
-
-      if ( addrType != Recipient_Max )
-      {
-         // erase the colon as well
-         textOrig.erase(0, addrType == Recipient_Bcc ? 4 : 3);
-      }
-   }
-
-   // remove "mailto:" prefix if it's there - this is convenient when you paste
-   // in an URL from the web browser
-   //
-   // TODO: add support for the mailto URL parameters, i.e. should support
-   //       things like "mailto:foo@bar.com?subject=Please%20help"
-   String newText;
-   if ( !textOrig.StartsWith(_T("mailto:"), &newText) )
-   {
-      // if the text already has a '@' inside it and looks like a full email
-      // address assume that it doesn't need to be expanded (this saves a lot
-      // of time as expanding a non existing address looks through all address
-      // books...)
-      size_t pos = textOrig.find('@');
-      if ( pos != String::npos && pos > 0 && pos < textOrig.length() )
-      {
-         // also check that the host part of the address is expanded - it
-         // should contain at least one dot normally
-         if ( wxStrchr(textOrig.c_str() + pos + 1, '.') )
-         {
-            // looks like a valid address - nothing to do
-            newText = textOrig;
-         }
-      }
-
-      if ( newText.empty() )
-      {
-         wxArrayString expansions;
-
-         if ( !AdbExpand(expansions,
-                         textOrig,
-                         READ_CONFIG(GetProfile(), MP_ADB_SUBSTRINGEXPANSION)
-                           ? AdbLookup_Substring
-                           : AdbLookup_StartsWith,
-                         this) )
-         {
-            // cancelled, don't do anything
-            return Recipient_None;
-         }
-
-         // construct the replacement string(s)
-         size_t nExpCount = expansions.GetCount();
-         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
-         {
-            if ( nExp > 0 )
-               newText += CANONIC_ADDRESS_SEPARATOR;
-
-            newText += expansions[nExp];
-         }
-      }
-   }
-
-   // find the end of the previous address
-   size_t nPrevAddrEnd;
-   if ( nLastAddr > 0 )
-   {
-      // undo "++" above
-      nLastAddr--;
-   }
-
-   for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
-   {
-      wxChar c = text[nPrevAddrEnd];
-      if ( !wxIsspace(c) && (c != ',') && (c != ';') )
-      {
-         // this character is a part of previous string, leave it there
-         nPrevAddrEnd++;
-
-         break;
-      }
-   }
-
-   // keep the text up to the address we expanded/processed
-   wxString oldText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
-   if ( !oldText.empty() )
-   {
-      // there was something before, add separator
-      oldText += CANONIC_ADDRESS_SEPARATOR;
-   }
-
-   text = oldText + newText;
-
-   return addrType;
-}
-
 void
 wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
 {
@@ -2569,11 +2395,15 @@ wxComposeView::OnRemoveRcpt(size_t index)
 }
 
 void
-wxComposeView::AddRecipients(const String& address, RecipientType addrType, bool doLayout)
+wxComposeView::AddRecipients(const String& addressOrig,
+                             RecipientType addrType,
+                             int flags)
 {
    // if there is no address, nothing to do
-   if ( address.empty() )
+   if ( addressOrig.empty() )
       return;
+
+   String address = addressOrig;
 
    // invalid rcpt type means to reuse the last one
    if ( addrType == Recipient_Max )
@@ -2605,6 +2435,15 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType, bool
       case Recipient_To:
       case Recipient_Cc:
       case Recipient_Bcc:
+         if ( flags & AddRcpt_Expand )
+         {
+            String subject;
+            AdbExpandSingleAddress(&address, &subject, GetProfile(), this);
+
+            if ( !subject.empty() )
+               SetSubject(subject);
+         }
+
          // an email address
          {
             // split the string in addreses and add all of them

@@ -17,6 +17,8 @@
 
 #include "adb/AdbEntry.h"   // for AdbLookup_xxx constants
 
+#include "RecipientType.h"
+
 #ifndef USE_PCH
 #  include <wx/dynarray.h>
 #endif // USE_PCH
@@ -24,6 +26,8 @@
 // forward declaration for classes we use
 class AdbBook;
 class AdbDataProvider;
+
+class WXDLLEXPORT wxFrame;
 
 // arrays
 WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
@@ -186,10 +190,70 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
 
   @return FALSE if no matches, TRUE if at least one item matched
 */
-class wxFrame;
 extern bool AdbExpand(wxArrayString& results,
                       const String& what,
                       int how,
                       wxFrame *frame);
+
+/**
+   Expand a single address coming from the user input.
+
+   The user input can be a full address, a mailto: URL or a string to be
+   expanded using AdbExpand().
+
+   This function doesn't support multiple comma-separated addresses, use
+   AdbExpandRecipients() for this. Nor does it support "cc:"-like
+   prefixes selecting the recipient type, as AdbExpandSingleRecipient() does.
+
+   @param address the address string, modified in place by this function
+   @param subject filled with the subject on output if it's specified as
+                  part of the address (currently only happens with mailto)
+                  and is left empty otherwise
+   @param profile to use for expansion options
+   @param parent window to use as parent for the dialogs
+   @return true if the address was expanded, false if the expansion was
+           cancelled (address is unchanged then)
+ */
+bool AdbExpandSingleAddress(String *address,
+                            String *subject,
+                            Profile *profile,
+                            wxFrame *win);
+
+/**
+   Expand a single address coming from the user input, possibly with a
+   recipient type string.
+
+   This function does the same thing as AdbExpandSingleAddress() except that
+   accepts "to:", "cc:" &c prefixes.
+
+   Returns the recipient type (which can be Recipient_None if none was
+   explicitly specified) or Recipient_Max is expansion was cancelled and the
+   address is unchanged.
+ */
+RecipientType AdbExpandSingleRecipient(String *address,
+                                       String *subject,
+                                       Profile *profile,
+                                       wxFrame *win);
+
+/**
+   Expand all addresses in the specified string.
+
+   Returns the number of addresses which can be 0 if the control was empty
+   or -1 if the expansion was cancelled.
+
+   @param text contains the addresses to expand
+   @param addresses filled in with the addresses on return
+   @param rcptTypes filled in with RecipientType enum elements
+   @param subject filled with the subject on output
+   @param profile to use for expansion options
+   @param parent window to use as parent for the dialogs
+   @return number of addresses expanded or -1 if cancelled
+ */
+int AdbExpandAllRecipients(const String& text,
+                           wxArrayString& addresses,
+                           wxArrayInt& rcptTypes,
+                           String *subject,
+                           Profile *profile,
+                           wxFrame *win);
 
 #endif  //_ADBMANAGER_H

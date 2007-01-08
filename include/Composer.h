@@ -56,6 +56,13 @@ struct ComposerOptions
 class Composer
 {
 public:
+   /// Flags for AddRecipients()
+   enum
+   {
+      /// Expand the address before adding it
+      AddRcpt_Expand = 1
+   };
+
    /**
       @name Different ways to create a new composer window
 
@@ -186,7 +193,7 @@ public:
    /// adds recipients from addr (Recipient_Max means to reuse the last)
    virtual void AddRecipients(const String& addr,
                               RecipientType rcptType = Recipient_Max,
-                              bool doLayout = true) = 0;
+                              int flags = AddRcpt_Expand) = 0;
 
    /// adds a "To" recipient
    void AddTo(const String& addr) { AddRecipients(addr, Recipient_To); }
@@ -222,15 +229,6 @@ public:
        @param value value of header entry
    */
    virtual void AddHeaderEntry(const String& entry, const String& value) = 0;
-
-   /**
-      Expand the given string: this method handles address book completion and
-      mailto: URLs parsing. It modifies the string passed to it in place.
-
-      @param text the text to expand, modified by the method
-      @return the inferred recipient type or Recipient_None if invalid address
-   */
-   virtual RecipientType ExpandRecipient(String *text) = 0;
 
    //@}
 

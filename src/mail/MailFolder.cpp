@@ -680,7 +680,7 @@ InitRecipients(Composer *cv,
 
       while ( n-- )
       {
-         cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n], (n > 0 ? false : true));
+         cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n]);
       }
 
       return;
@@ -869,7 +869,7 @@ InitRecipients(Composer *cv,
 
    while ( n-- )
    {
-      cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n], !n);
+      cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n]);
    }
 }
 

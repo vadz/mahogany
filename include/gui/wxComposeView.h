@@ -169,13 +169,10 @@ public:
    /// sets Subject field
    void SetSubject(const String &subj);
 
-   /// adds recepients from addr (Recepient_Max means to reuse the last)
+   /// adds recipients from addr (Recipient_Max means to reuse the last)
    virtual void AddRecipients(const String& addr,
                               RecipientType rcptType = Recipient_Max,
-                              bool doLayout = true);
-
-   /// expands an address
-   virtual RecipientType ExpandRecipient(String *text);
+                              int flags = AddRcpt_Expand);
 
    /// get from value (empty means default)
    String GetFrom() const;

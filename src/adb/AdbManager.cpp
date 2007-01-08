@@ -39,6 +39,12 @@
 #include "adb/AdbDialogs.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_ADB_SUBSTRINGEXPANSION;
+
+// ----------------------------------------------------------------------------
 // types
 // ----------------------------------------------------------------------------
 
@@ -337,6 +343,204 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
   }
 
   return !results.IsEmpty();
+}
+
+bool
+AdbExpandSingleAddress(String *address,
+                       String *subject,
+                       Profile *profile,
+                       wxFrame *win)
+{
+   CHECK( address && subject, false, "NULL input address" );
+
+   subject->clear();
+
+   String textOrig = *address;
+
+   // remove "mailto:" prefix if it's there - this is convenient when you paste
+   // in an URL from the web browser
+   //
+   // TODO: add support for the mailto URL parameters, i.e. should support
+   //       things like "mailto:foo@bar.com?subject=Please%20help"
+   String newText;
+   if ( !textOrig.StartsWith(_T("mailto:"), &newText) )
+   {
+      // if the text already has a '@' inside it and looks like a full email
+      // address assume that it doesn't need to be expanded (this saves a lot
+      // of time as expanding a non existing address looks through all address
+      // books...)
+      size_t pos = textOrig.find('@');
+      if ( pos != String::npos && pos > 0 && pos < textOrig.length() )
+      {
+         // also check that the host part of the address is expanded - it
+         // should contain at least one dot normally
+         if ( wxStrchr(textOrig.c_str() + pos + 1, '.') )
+         {
+            // looks like a valid address - nothing to do
+            newText = textOrig;
+         }
+      }
+
+      if ( newText.empty() )
+      {
+         wxArrayString expansions;
+
+         if ( !AdbExpand(expansions,
+                         textOrig,
+                         READ_CONFIG(profile, MP_ADB_SUBSTRINGEXPANSION)
+                           ? AdbLookup_Substring
+                           : AdbLookup_StartsWith,
+                         win) )
+         {
+            // cancelled, indicate it by returning invalid recipient type
+            return false;
+         }
+
+         // construct the replacement string(s)
+         size_t nExpCount = expansions.GetCount();
+         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
+         {
+            if ( nExp > 0 )
+               newText += ", ";
+
+            newText += expansions[nExp];
+         }
+      }
+   }
+   //else: address following mailto: doesn't need to be expanded
+
+   *address = newText;
+
+   return true;
+}
+
+RecipientType
+AdbExpandSingleRecipient(String *address,
+                         String *subject,
+                         Profile *profile,
+                         wxFrame *win)
+{
+   CHECK( address, Recipient_Max, "NULL input address" );
+
+   String text = *address;
+   RecipientType rcptType = Recipient_None;
+   if ( text.length() > 3 )
+   {
+      // check for to:, cc: or bcc: prefix
+      if ( text[2u] == ':' )
+      {
+         if ( toupper(text[0u]) == 'T' && toupper(text[1u]) == 'O' )
+            rcptType = Recipient_To;
+         else if ( toupper(text[0u]) == 'C' && toupper(text[1u]) == 'C' )
+            rcptType = Recipient_Cc;
+      }
+      else if ( text[3u] == ':' && text(0, 3).Upper() == _T("BCC") )
+      {
+         rcptType = Recipient_Bcc;
+      }
+
+      if ( rcptType != Recipient_None )
+      {
+         // erase the prefix (length 2 or 3) with the colon
+         text.erase(0, rcptType == Recipient_Bcc ? 4 : 3);
+      }
+   }
+
+   if ( !AdbExpandSingleAddress(&text, subject, profile, win) )
+     return Recipient_Max;
+
+   *address = text;
+
+   return rcptType;
+}
+
+int
+AdbExpandAllRecipients(const String& text,
+                       wxArrayString& addresses,
+                       wxArrayInt& rcptTypes,
+                       String *subject,
+                       Profile *profile,
+                       wxFrame *win)
+{
+   addresses.clear();
+   rcptTypes.clear();
+
+   int count = 0;
+   bool expandedSomething = false; // will be set to true if expand any address
+
+   // expand all addresses, one by one
+   const size_t len = text.length();
+   String address;
+   address.reserve(len);
+   bool quoted = false;
+   for ( size_t n = 0; n <= len; n++ )
+   {
+      switch ( const wxChar ch = n == len ? '\0' : text[n] )
+      {
+         case '"':
+            quoted = !quoted;
+            break;
+
+         case '\\':
+            // backslash escapes the next character (if there is one), so
+            // append it without special handling, even if it's a quote or
+            // address separator
+            if ( n < len - 1 )
+               address += text[++n];
+            else
+               wxLogWarning(_("Trailing backslash ignored."));
+            break;
+
+         case ' ':
+            // skip leading spaces unless they're quoted (note that we don't
+            // ignore trailing spaces because we want "Dan " to expand into
+            // "Dan Black" but not into "Danish guy")
+            if ( quoted || !address.empty() )
+               address += ch;
+            break;
+
+         case '\0':
+            if ( quoted )
+            {
+               wxLogWarning(_("Closing open quote implicitly."));
+               quoted = false;
+            }
+            // fall through
+
+         case ',':
+         case ';':
+            if ( !quoted )
+            {
+               // end of this address component, expand and remember it
+               RecipientType rcptType =
+                 AdbExpandSingleRecipient(&address, subject, profile, win);
+               if ( rcptType != Recipient_Max )
+               {
+                  expandedSomething = true;
+               }
+               else // expansion of this address failed
+               {
+                  // still continue with the other ones but don't set
+                  // expandedSomething so that our caller will know if we
+                  // didn't do anything at all
+                  rcptType = Recipient_None;
+               }
+
+               addresses.push_back(address);
+               rcptTypes.push_back(rcptType);
+               count++;
+               address.clear();
+               break;
+            }
+            //else: quoted address separators are not special, fall through
+
+         default:
+            // just accumulate in the current address
+            address += ch;
+      }
+   }
+
+   return expandedSomething ? count : -1;
 }
 
 // ----------------------------------------------------------------------------

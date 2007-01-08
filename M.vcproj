@@ -373,6 +373,9 @@
 				Name="gui"
 				Filter="">
 				<File
+					RelativePath=".\src\gui\AddressExpander.cpp">
+				</File>
+				<File
 					RelativePath=".\src\gui\ClickAtt.cpp">
 				</File>
 				<File
@@ -859,7 +862,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
+"
 							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
@@ -868,7 +872,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
+"
 							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
@@ -877,7 +882,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
+"
 							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
@@ -886,7 +892,8 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
+"
 							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
@@ -1878,6 +1885,9 @@
 			</File>
 			<File
 				RelativePath=".\include\AddressCC.h">
+			</File>
+			<File
+				RelativePath=".\include\gui\AddressExpander.h">
 			</File>
 			<File
 				RelativePath=".\include\ASMailFolder.h">
