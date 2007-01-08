@@ -22,6 +22,10 @@
 
 #include "RecipientType.h"
 
+#ifndef USE_PCH
+#   include "Profile.h"        // for Profile_obj
+#endif // USE_PCH
+
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxTextCtrl;
 

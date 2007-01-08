@@ -25,6 +25,8 @@
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "guidef.h"
+#  include "Moptions.h"		// for MOption
+#  include "Mdefaults.h"	// for READ_CONFIG
 
 #  include <wx/log.h>           // for wxLogStatus
 #  include <wx/config.h>

@@ -20,6 +20,7 @@
 #include "RecipientType.h"
 
 #ifndef USE_PCH
+#  include "Profile.h"      // for Profile
 #  include <wx/dynarray.h>
 #endif // USE_PCH
 

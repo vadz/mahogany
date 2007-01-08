@@ -21,6 +21,7 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include <wx/textctrl.h>        // for wxTextCtrl
 #endif
 
 #include "adb/AdbManager.h"
