@@ -272,20 +272,36 @@ Address::IsInList(const wxArrayString& addresses,
    {
       for ( size_t n = 0; n < count; n++ )
       {
-         // first tokenize this string: it can be a full address or domain name
-         // only and it may contain '?' and '*' shell pattern metacharacters
          const wxChar * const start = addresses[n];
 
-         const wxChar *p = wxStrchr(start, _T('@'));
+         // first obtain the address part only: we don't care about everything
+         // else, "Foo <foobar@my.org>" and "Bar <foobar@my.org>" are the same
+         //
+         // NB: this is of course not a correct way to parse an address but we
+         //     can't use AddressList here as this might be just a domain name
+         //     and not a valid address
+         const wxChar *startAddr = wxStrchr(start, _T('<')),
+                      *endAddr = NULL;
+         if ( startAddr )
+            endAddr = wxStrchr(++startAddr, _T('>'));
+         else
+            startAddr = start;
+
+         if ( !endAddr )
+            endAddr = start + addresses[n].length();
+
+         // next tokenize this string: it can be a full address or domain name
+         // only and it may contain '?' and '*' shell pattern metacharacters
+         const wxChar *p = wxStrchr(startAddr, _T('@'));
          if ( p )
          {
-            mailbox.assign(start, p - start);
-            domain = p + 1;
+            mailbox.assign(startAddr, p - startAddr);
+            domain.assign(p + 1, endAddr);
          }
          else // no mailbox part, domain only given
          {
             mailbox = _T('*');
-            domain = start;
+            domain.assign(startAddr, endAddr);
          }
 
          // now we can finally compare the addresses
