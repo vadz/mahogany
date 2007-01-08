@@ -425,7 +425,7 @@ AdbExpandSingleAddress(String *address,
                                  ? posParamEnd
                                  : posParamEnd - posEq - 1);
 ;
-            if ( stricmp(param, "subject") == 0 )
+            if ( wxStricmp(param, "subject") == 0 )
             {
                *subject = value;
             }
