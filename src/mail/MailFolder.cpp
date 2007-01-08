@@ -639,20 +639,20 @@ InitRecipients(Composer *cv,
          for ( n = 0; n < count; n++ )
          {
             rcptAddresses.Add(addresses[n]);
-            rcptTypes.Add(Composer::Recipient_To);
+            rcptTypes.Add(Recipient_To);
          }
       }
       else // not from myself
       {
          rcptAddresses.Add(rcptMain);
-         rcptTypes.Add(Composer::Recipient_To);
+         rcptTypes.Add(Recipient_To);
 
          // add the remaining Reply-To addresses (usually there will be none)
          for ( n = 1; n < countReplyTo; n++ )
          {
             // FIXME: same as above
             rcptAddresses.Add(MailFolder::DecodeHeader(replyToAddresses[n]));
-            rcptTypes.Add(Composer::Recipient_To);
+            rcptTypes.Add(Recipient_To);
          }
       }
    }
@@ -680,7 +680,7 @@ InitRecipients(Composer *cv,
 
       while ( n-- )
       {
-         cv->AddRecipients(rcptAddresses[n], (Composer::RecipientType)rcptTypes[n], (n > 0 ? false : true));
+         cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n], (n > 0 ? false : true));
       }
 
       return;
@@ -789,7 +789,7 @@ InitRecipients(Composer *cv,
          for ( size_t n = 0; n < countLists; n++ )
          {
             rcptAddresses.Add(uniqueAddresses[addressesList[n]]);
-            rcptTypes.Add(Composer::Recipient_To);
+            rcptTypes.Add(Recipient_To);
          }
       }
       else // no mailing list addresses found
@@ -824,7 +824,7 @@ InitRecipients(Composer *cv,
       String address = uniqueAddresses[n];
 
       // what we do with this address depends on the kind of reply
-      Composer::RecipientType rcptType;
+      RecipientType rcptType;
       switch ( replyKind )
       {
          default:
@@ -834,7 +834,7 @@ InitRecipients(Composer *cv,
          case MailFolder::REPLY_SENDER:
             // still add addresses  to allow easily adding them to the
             // recipient list - just disable them by default
-            rcptType = Composer::Recipient_None;
+            rcptType = Recipient_None;
             break;
 
          case MailFolder::REPLY_ALL:
@@ -842,10 +842,10 @@ InitRecipients(Composer *cv,
             //
             // but if the dog was only cc'ed, we should keep cc'ing it
             rcptType = Address::IsInList(replyToAddresses, address)
-                        ? Composer::Recipient_To
+                        ? Recipient_To
                         : Address::IsInList(ccAddresses, address)
-                           ? Composer::Recipient_Cc
-                           : Composer::Recipient_To;
+                           ? Recipient_Cc
+                           : Recipient_To;
             break;
 
          case MailFolder::REPLY_LIST:
@@ -854,7 +854,7 @@ InitRecipients(Composer *cv,
                continue;
 
             // do keep the others but disabled by default
-            rcptType = Composer::Recipient_None;
+            rcptType = Recipient_None;
             break;
       }
 
@@ -869,7 +869,7 @@ InitRecipients(Composer *cv,
 
    while ( n-- )
    {
-      cv->AddRecipients(rcptAddresses[n], (Composer::RecipientType)rcptTypes[n], (n > 0 ? false : true));
+      cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n], !n);
    }
 }
 

@@ -15,6 +15,8 @@
 
 #include "MailFolder.h"    // for MailFolder::Params
 
+#include "RecipientType.h"
+
 #include <wx/colour.h>     // wxColour
 
 class Profile;
@@ -54,18 +56,6 @@ struct ComposerOptions
 class Composer
 {
 public:
-   /// recipient address types
-   enum RecipientType
-   {
-      Recipient_To,
-      Recipient_Cc,
-      Recipient_Bcc,
-      Recipient_Newsgroup,
-      Recipient_Fcc,
-      Recipient_None,
-      Recipient_Max
-   };
-
    /**
       @name Different ways to create a new composer window
 

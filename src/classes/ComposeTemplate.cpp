@@ -200,7 +200,7 @@ public:
 
    // the variables in "message" category
    //
-   // NB: the values should be identical to wxComposeView::RecipientType enum
+   // NB: the values should be identical to RecipientType enum
    //     (or the code in ExpandMessage should be changed)
    enum MessageHeader
    {
@@ -1285,7 +1285,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
       case MessageHeader_LastName:
          *value = ExtractFirstOrLastName
                   (
-                     m_cv.GetRecipients(Composer::Recipient_To),
+                     m_cv.GetRecipients(Recipient_To),
                      header == MessageHeader_FirstName
                   );
          break;
@@ -1296,7 +1296,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
 
          // the MessageHeader enum values are the same as RecipientType ones,
          // so no translation is needed
-         *value = m_cv.GetRecipients((Composer::RecipientType)header);
+         *value = m_cv.GetRecipients((RecipientType)header);
    }
 
    return TRUE;

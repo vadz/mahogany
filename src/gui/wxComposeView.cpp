@@ -310,16 +310,16 @@ public:
    virtual wxSizer *CreateControls(wxWindow *parent);
 
    // initialize the controls
-   void InitControls(const String& value, wxComposeView::RecipientType rt);
+   void InitControls(const String& value, RecipientType rt);
 
    // get our text control
    wxAddressTextCtrl *GetText() const { return m_text; }
 
    // get the currently selected address type
-   wxComposeView::RecipientType GetType() const;
+   RecipientType GetType() const;
 
    // change the address type
-   void SetType(wxComposeView::RecipientType rcptType);
+   void SetType(RecipientType rcptType);
 
    // get the current value of the text field
    wxString GetValue() const;
@@ -327,7 +327,7 @@ public:
    // starting from now, all methods are for the wxRcptXXX controls only
 
    // change type of this one -- called by choice
-   virtual void OnTypeChange(wxComposeView::RecipientType rcptType);
+   virtual void OnTypeChange(RecipientType rcptType);
 
    // expand our text: called by the "Expand" button and
    // wxAddressTextCtrl::OnChar()
@@ -371,7 +371,7 @@ public:
    virtual wxSizer *CreateControls(wxWindow *parent);
 
    // notify the composer that the default recipient type changed
-   virtual void OnTypeChange(wxComposeView::RecipientType rcptType);
+   virtual void OnTypeChange(RecipientType rcptType);
 
    // callback for "add new recipient" button
    void OnAdd();
@@ -447,7 +447,7 @@ private:
    // the back pointer to the entire group of controls
    wxRcptControl *m_rcptControl;
 
-   static const wxChar *ms_addrTypes[wxComposeView::Recipient_Max];
+   static const wxChar *ms_addrTypes[Recipient_Max];
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxRcptTypeChoice)
@@ -588,7 +588,7 @@ public:
    wxAddressTextCtrl(wxWindow *parent, wxRcptControl *rcptControl);
 
    // expand the text in the control using the address book(s)
-   Composer::RecipientType DoExpand();
+   RecipientType DoExpand();
 
    // callbacks
    void OnChar(wxKeyEvent& event);
@@ -1049,7 +1049,7 @@ wxSizer *wxRcptControl::CreateControls(wxWindow *parent)
 }
 
 void wxRcptControl::InitControls(const String& value,
-                                  wxComposeView::RecipientType rt)
+                                  RecipientType rt)
 {
    CHECK_RET( m_choice, _T("must call CreateControls first") );
 
@@ -1067,25 +1067,25 @@ wxRcptControl::~wxRcptControl()
    delete m_btnExpand;
 }
 
-void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
+void wxRcptControl::OnTypeChange(RecipientType rcptType)
 {
    switch ( rcptType )
    {
-      case Composer::Recipient_To:
-      case Composer::Recipient_Cc:
-      case Composer::Recipient_Bcc:
+      case Recipient_To:
+      case Recipient_Cc:
+      case Recipient_Bcc:
          m_btnExpand->Enable();
 #if wxUSE_TOOLTIPS
          m_btnExpand->SetToolTip(_("Expand the address using address books"));
 #endif // wxUSE_TOOLTIPS
          break;
 
-      case Composer::Recipient_Newsgroup:
+      case Recipient_Newsgroup:
          // TODO-NEWS: we can't browse for newsgroups yet
          m_btnExpand->Disable();
          break;
 
-      case Composer::Recipient_Fcc:
+      case Recipient_Fcc:
          // browse for folder now
          m_btnExpand->Enable();
 #if wxUSE_TOOLTIPS
@@ -1093,11 +1093,11 @@ void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
 #endif // wxUSE_TOOLTIPS
          break;
 
-      case Composer::Recipient_None:
+      case Recipient_None:
          m_btnExpand->Disable();
          break;
 
-      case Composer::Recipient_Max:
+      case Recipient_Max:
       default:
          FAIL_MSG( _T("unexpected rcpt type on wxRcptControl") );
    }
@@ -1107,13 +1107,13 @@ void wxRcptControl::OnExpand()
 {
    switch ( GetType() )
    {
-      case Composer::Recipient_To:
-      case Composer::Recipient_Cc:
-      case Composer::Recipient_Bcc:
+      case Recipient_To:
+      case Recipient_Cc:
+      case Recipient_Bcc:
          {
-            Composer::RecipientType rcptType = m_text->DoExpand();
-            if ( rcptType != Composer::Recipient_None &&
-                  rcptType != Composer::Recipient_Max )
+            RecipientType rcptType = m_text->DoExpand();
+            if ( rcptType != Recipient_None &&
+                  rcptType != Recipient_Max )
             {
                // update the type of the choice control
                SetType(rcptType);
@@ -1121,7 +1121,7 @@ void wxRcptControl::OnExpand()
          }
          break;
 
-      case Composer::Recipient_Fcc:
+      case Recipient_Fcc:
          // browse for folder
          {
             MFolder_obj folder(MDialog_FolderChoose
@@ -1150,9 +1150,9 @@ void wxRcptControl::OnExpand()
          }
          break;
 
-      case Composer::Recipient_Newsgroup:
-      case Composer::Recipient_None:
-      case Composer::Recipient_Max:
+      case Recipient_Newsgroup:
+      case Recipient_None:
+      case Recipient_Max:
       default:
          FAIL_MSG( _T("unexpected wxRcptControl::OnExpand() call") );
    }
@@ -1160,15 +1160,15 @@ void wxRcptControl::OnExpand()
 
 bool wxRcptControl::IsEnabled() const
 {
-   return m_choice->GetSelection() != Composer::Recipient_None;
+   return m_choice->GetSelection() != Recipient_None;
 }
 
-Composer::RecipientType wxRcptControl::GetType() const
+RecipientType wxRcptControl::GetType() const
 {
-   return (Composer::RecipientType)m_choice->GetSelection();
+   return (RecipientType)m_choice->GetSelection();
 }
 
-void wxRcptControl::SetType(Composer::RecipientType rcptType)
+void wxRcptControl::SetType(RecipientType rcptType)
 {
    m_choice->SetSelection(rcptType);
 
@@ -1198,8 +1198,8 @@ wxSizer *wxRcptMainControl::CreateControls(wxWindow *parent)
    sizer->Add(m_btnAdd, 0, wxLEFT, LAYOUT_MARGIN);
 
    // TODO-NEWS: set to Newsgroup for News
-   GetChoice()->Delete(Composer::Recipient_None);
-   GetChoice()->SetSelection(Composer::Recipient_To);
+   GetChoice()->Delete(Recipient_None);
+   GetChoice()->SetSelection(Recipient_To);
 
    // init the m_btnExpand button here
    wxRcptControl::OnTypeChange(GetType());
@@ -1207,7 +1207,7 @@ wxSizer *wxRcptMainControl::CreateControls(wxWindow *parent)
    return sizer;
 }
 
-void wxRcptMainControl::OnTypeChange(Composer::RecipientType rcptType)
+void wxRcptMainControl::OnTypeChange(RecipientType rcptType)
 {
    wxRcptControl::OnTypeChange(rcptType);
 
@@ -1217,8 +1217,8 @@ void wxRcptMainControl::OnTypeChange(Composer::RecipientType rcptType)
 void wxRcptMainControl::OnAdd()
 {
    // expand before adding (make this optional?)
-   Composer::RecipientType addrType = GetText()->DoExpand();
-   if ( addrType == Composer::Recipient_None )
+   RecipientType addrType = GetText()->DoExpand();
+   if ( addrType == Recipient_None )
    {
       // cancelled or address is invalid
       return;
@@ -1294,7 +1294,7 @@ wxRcptTypeChoice::wxRcptTypeChoice(wxRcptControl *rcptControl, wxWindow *parent)
 void wxRcptTypeChoice::OnChoice(wxCommandEvent& event)
 {
    // notify the others (including the composer indirectly)
-   m_rcptControl->OnTypeChange((Composer::RecipientType)event.GetSelection());
+   m_rcptControl->OnTypeChange((RecipientType)event.GetSelection());
 
    event.Skip();
 }
@@ -1367,21 +1367,21 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    event.Skip();
 }
 
-Composer::RecipientType wxAddressTextCtrl::DoExpand()
+RecipientType wxAddressTextCtrl::DoExpand()
 {
-   Composer::RecipientType rcptType;
+   RecipientType rcptType;
 
    switch ( m_rcptControl->GetType() )
    {
-      case Composer::Recipient_To:
-      case Composer::Recipient_Cc:
-      case Composer::Recipient_Bcc:
+      case Recipient_To:
+      case Recipient_Cc:
+      case Recipient_Bcc:
          {
             String text = GetValue();
 
             rcptType = GetComposer()->ExpandRecipient(&text);
 
-            if ( rcptType != Composer::Recipient_None )
+            if ( rcptType != Recipient_None )
             {
                SetValue(text);
                SetInsertionPointEnd();
@@ -1389,24 +1389,24 @@ Composer::RecipientType wxAddressTextCtrl::DoExpand()
          }
          break;
 
-      case Composer::Recipient_Newsgroup:
+      case Recipient_Newsgroup:
          // TODO-NEWS: we should expand the newsgroups too
-         rcptType = Composer::Recipient_Newsgroup;
+         rcptType = Recipient_Newsgroup;
          break;
 
-      case Composer::Recipient_Fcc:
+      case Recipient_Fcc:
          // TODO: we could expand the folder names -- but for now we don't
-         rcptType = Composer::Recipient_Fcc;
+         rcptType = Recipient_Fcc;
          break;
 
-      case Composer::Recipient_Max:
+      case Recipient_Max:
       default:
          FAIL_MSG( _T("unexpected wxRcptControl type") );
          // fall through
 
-      case Composer::Recipient_None:
+      case Recipient_None:
          // nothing to do
-         rcptType = Composer::Recipient_None;
+         rcptType = Recipient_None;
          break;
    }
 
@@ -2301,7 +2301,7 @@ void wxComposeView::DoClear()
 // wxComposeView address headers stuff
 // ----------------------------------------------------------------------------
 
-Composer::RecipientType
+RecipientType
 wxComposeView::ExpandRecipient(String *textAddress)
 {
    // don't do anything for the newsgroups
@@ -2309,7 +2309,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
    // TODO-NEWS: expand using .newsrc?
    if ( m_mode == wxComposeView::Mode_News )
    {
-      return Composer::Recipient_Newsgroup;
+      return Recipient_Newsgroup;
    }
 
    // try to expand the last component
@@ -2332,7 +2332,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
       wxLogStatus(GetFrame(),
                   _("Nothing to expand - please enter something."));
 
-      return Composer::Recipient_None;
+      return Recipient_None;
    }
 
    // find the starting position of the last address in the address list
@@ -2386,26 +2386,26 @@ wxComposeView::ExpandRecipient(String *textAddress)
    String textOrig = text.c_str() + nLastAddr;
 
    // do we have an explicit address type specifier
-   Composer::RecipientType addrType = Composer::Recipient_Max;
+   RecipientType addrType = Recipient_Max;
    if ( textOrig.length() > 3 )
    {
       // check for to:, cc: or bcc: prefix
       if ( textOrig[2u] == ':' )
       {
          if ( toupper(textOrig[0u]) == 'T' && toupper(textOrig[1u]) == 'O' )
-            addrType = Composer::Recipient_To;
+            addrType = Recipient_To;
          else if ( toupper(textOrig[0u]) == 'C' && toupper(textOrig[1u]) == 'C' )
-            addrType = Composer::Recipient_Cc;
+            addrType = Recipient_Cc;
       }
       else if ( textOrig[3u] == ':' && textOrig(0, 3).Upper() == _T("BCC") )
       {
-         addrType = Composer::Recipient_Bcc;
+         addrType = Recipient_Bcc;
       }
 
-      if ( addrType != Composer::Recipient_Max )
+      if ( addrType != Recipient_Max )
       {
          // erase the colon as well
-         textOrig.erase(0, addrType == Composer::Recipient_Bcc ? 4 : 3);
+         textOrig.erase(0, addrType == Recipient_Bcc ? 4 : 3);
       }
    }
 
@@ -2445,7 +2445,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
                          this) )
          {
             // cancelled, don't do anything
-            return Composer::Recipient_None;
+            return Recipient_None;
          }
 
          // construct the replacement string(s)
@@ -2763,7 +2763,7 @@ wxComposeView::SaveRecipientsAddresses(MAction collect,
 // helper of GetRecipients(): add the address from this control if it is of
 // correct type, to the address array
 static void
-GetRecipientFromControl(wxComposeView::RecipientType type,
+GetRecipientFromControl(RecipientType type,
                         wxRcptControl *rcpt,
                         wxArrayString& list)
 {
