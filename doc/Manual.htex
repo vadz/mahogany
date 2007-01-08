@@ -1683,6 +1683,14 @@ names. Aliases must be expanded by using the tabulator key or the
 Expand button next to the fields. If multiple entries match the text,
 you will be prompted with a list to choose from.
 
+Notice that when entering addresses in the main (topmost) text entry zone, you
+can use prefixes \texttt{to:}, \texttt{cc:} and \texttt{bcc:} to modify the
+interpretation of the recipient following them.
+
+Finally, you can directly paste a \textit{mailto} URL from a web browser here:
+Mahogany will recognize it and automatically remove the URL prefix, there is no
+need to do it manually.
+
 
 \subsubsection{Using Folder names as an address}
 
