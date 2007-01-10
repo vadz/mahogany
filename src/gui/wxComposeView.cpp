@@ -184,9 +184,6 @@ extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
 #define GEOMETRY_MAXIMIZED _T("M")
 #define GEOMETRY_FORMAT _T("%dx%d-%dx%d")
 
-// the composer frame title
-#define COMPOSER_TITLE _("Message Composition")
-
 // separate multiple addresses with commas
 #define CANONIC_ADDRESS_SEPARATOR   _T(", ")
 
@@ -487,11 +484,28 @@ protected:
 class wxSubjectTextCtrl : public wxTextCtrlProcessingEnter
 {
 public:
-   wxSubjectTextCtrl(wxWindow *parent) : wxTextCtrlProcessingEnter(parent) { }
+   wxSubjectTextCtrl(wxWindow *parent, wxComposeView *composeView)
+      : wxTextCtrlProcessingEnter(parent)
+   {
+      m_composeView = composeView;
+   }
 
 private:
+   void OnChange(wxCommandEvent& WXUNUSED(event))
+   {
+      // update the subject shown in the title bar
+      m_composeView->UpdateTitle();
+   }
+
+   wxComposeView *m_composeView;
+
+   DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxSubjectTextCtrl)
 };
+
+BEGIN_EVENT_TABLE(wxSubjectTextCtrl, wxTextCtrlProcessingEnter)
+   EVT_TEXT(wxID_ANY, wxSubjectTextCtrl::OnChange)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // IconButton: class used for small buttons in the header
@@ -1482,7 +1496,7 @@ CreateComposeView(Profile *profile,
                            );
 
    cv->SetTemplate(params.templ);
-   cv->SetTitle(COMPOSER_TITLE);
+   cv->UpdateTitle();
    cv->Create(parent, profile);
 
    return cv;
@@ -1776,6 +1790,8 @@ wxComposeView::wxComposeView(const String &name,
 
    m_editor = NULL;
    m_encoding = wxFONTENCODING_SYSTEM;
+
+   m_txtSubject = NULL;
 }
 
 bool wxComposeView::IsReplyTo(const Message& original) const
@@ -1996,7 +2012,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
                      0, wxALIGN_CENTRE_VERTICAL);
 
    wxSizer *sizerSubj = new wxBoxSizer(wxHORIZONTAL);
-   m_txtSubject = new wxSubjectTextCtrl(m_panel);
+   m_txtSubject = new wxSubjectTextCtrl(m_panel, this);
    sizerSubj->Add(m_txtSubject, 1, wxALIGN_CENTRE_VERTICAL);
    SetTextAppearance(m_txtSubject);
 
@@ -2313,6 +2329,23 @@ void wxComposeView::DoClear()
 
    // we're not modified [any more]
    ResetDirty();
+}
+
+void wxComposeView::UpdateTitle()
+{
+   String title(_("Composer"));
+   if ( m_txtSubject && !m_txtSubject->IsEmpty() )
+   {
+      title << _(" - ") << m_txtSubject->GetValue();
+   }
+
+   if ( IsExternalEditorRunning() )
+      title << _(" (frozen: external editor running)");
+
+   wxFrame *frame = GetFrame();
+   CHECK_RET( frame, _T("composer without frame?") );
+   if ( title != frame->GetTitle() )
+      frame->SetTitle(title);
 }
 
 // ----------------------------------------------------------------------------
@@ -3613,19 +3646,7 @@ bool wxComposeView::StartExternalEditor()
             EnableEditing(false);
 
             // and reflect it in the title
-            wxFrame *frame = GetFrame();
-            if ( frame )
-            {
-               wxString title;
-               title << COMPOSER_TITLE
-                     << _(" (frozen: external editor running)");
-
-               frame->SetTitle(title);
-            }
-            else
-            {
-               FAIL_MSG( _T("composer without frame?") );
-            }
+            UpdateTitle();
 
             launchedOk = true;
          }
@@ -3677,16 +3698,6 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 
    // reenable editing the text in the built-in editor
    EnableEditing(true);
-
-   wxFrame *frame = GetFrame();
-   if ( frame )
-   {
-      frame->SetTitle(COMPOSER_TITLE);
-   }
-   else
-   {
-      FAIL_MSG( _T("composer without frame?") );
-   }
 
    bool ok = false;
 
@@ -3747,6 +3758,9 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 
    delete m_procExtEdit;
    m_procExtEdit = NULL;
+
+
+   UpdateTitle();
 
    // show the frame which might had been obscured by the other windows
    Raise();

@@ -312,6 +312,16 @@ public:
     */
    bool ConfigureInReplyTo();
 
+
+   /**
+      Update the composer frame title.
+
+      This should be called whenever the subject (shown in the title bar) or
+      the external editor status (shown too) changes and is only used
+      internally.
+    */
+   void UpdateTitle();
+
 protected:
    /** quasi-Constructor
        @param parent parent window
@@ -395,6 +405,9 @@ protected:
 
    /// Launch the external editor
    bool StartExternalEditor();
+
+   /// Return true if the external editor is currently running
+   bool IsExternalEditorRunning() const { return m_procExtEdit != NULL; }
 
    /**
      Return a SendMessage object filled with all data we have. It must be
