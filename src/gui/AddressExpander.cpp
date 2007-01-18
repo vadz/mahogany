@@ -106,7 +106,6 @@ RecipientType AddressExpander::ExpandLast(String *subject)
 
    // preserve the part before the address start
    String textBefore;
-   start++;
    textBefore.assign(text, 0, start);
    text.erase(0, start);
    text.Trim(false /* from left */);
