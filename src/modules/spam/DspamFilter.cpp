@@ -55,7 +55,7 @@ public:
    // create the context
    DspamCtx(int mode, unsigned flags)
    {
-      m_ctx = dspam_init
+      m_ctx = dspam_create
               (
                   "mahogany", // user
                   NULL,       // no group
@@ -63,16 +63,30 @@ public:
                   mode,
                   flags
               );
+      if ( !m_ctx )
+         return;
 
       // use default algorithm/tokenizer
       m_ctx->algorithms = DSA_GRAHAM | DSA_BURTON | DSP_GRAHAM;
       m_ctx->tokenizer = DSZ_CHAIN;
+
+      // unlimit the hash table size for now to avoid "hash table full" errors
+      dspam_addattribute(m_ctx, "HashAutoExtend", "on");
+
+      // and now that the attributes are set we can attach the context to the
+      // storage
+      if ( dspam_attach(m_ctx, NULL) != 0 )
+      {
+         dspam_destroy(m_ctx);
+         m_ctx = NULL;
+      }
    }
 
    // destroy the context
    ~DspamCtx()
    {
-      dspam_destroy(m_ctx);
+      if ( m_ctx )
+         dspam_destroy(m_ctx);
    }
 
    operator DSPAM_CTX *() const { return m_ctx; }
