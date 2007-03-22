@@ -3091,7 +3091,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 
       case WXFLC_MSGNO:
          // users, unlike programmers, count from 1, not 0 - hence +1
-         text.Printf(_T("%ld"), item + 1);
+         text.Printf(_T("%4ld"), item + 1);
          break;
 
       default:
