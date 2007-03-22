@@ -126,17 +126,7 @@ String strutil_ultoa(unsigned long i);
     @param the string to duplicate
     @return the newly allocated string, must be deleted[] by caller
 */
-#if wxUSE_UNICODE
-wxChar * strutil_strdup(const wxChar *in);
-#endif
 char * strutil_strdup(const char *in);
-
-/** Duplicate a string.
-
-    @param the string to duplicate
-    @return the newly allocated string, must be deleted[] by caller
-*/
-wxChar *strutil_strdup(String const &in);
 
 /**
    This takes the string and splits it into tokens delimited by the
