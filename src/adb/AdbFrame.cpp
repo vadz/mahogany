@@ -1846,7 +1846,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     m_treeAdb->SelectAndShow(idNewSel);
   }
 
-  strWhat[0u] = toupper(strWhat[0u]);
+  strWhat[0u] = (wxChar)toupper(strWhat[0u]);
   wxLogStatus(this, _("%s '%s' deleted."), strWhat.c_str(), strName.c_str());
 }
 
