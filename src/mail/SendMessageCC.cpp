@@ -748,7 +748,7 @@ SendMessageCC::EncodeHeaderString(const String& header)
       // only encode the strings which contain the characters unallowed in RFC
       // 822 headers
       const unsigned char *p;
-      for ( p = (unsigned char *)header.c_str(); *p; p++ )
+      for ( p = (const unsigned char *)header.c_str(); *p; p++ )
       {
          if ( NeedsEncodingInHeader(*p) )
             break;

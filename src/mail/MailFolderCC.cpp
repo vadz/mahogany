@@ -5436,10 +5436,9 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    (
       m_MailStream,
       NULL,
-      const_cast<char *>(
-         (spec + reference + (pattern.empty() ? String(_T("*")) : pattern))
-            .c_str()
-      )
+      (char *)
+      (spec + reference + (pattern.empty() ? String(_T("*"))
+                                           : pattern)).c_str()
    );
 
    // send event telling about end of listing:

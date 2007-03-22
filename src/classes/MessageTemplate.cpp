@@ -404,7 +404,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                }
                else if ( (len > alignWidth) && truncate )
                {
-                  *value = value->c_str() + len - alignWidth;
+                  *value = value->c_str() + (len - alignWidth);
                }
                //else: value is already wide enough, but we don't truncate it
                break;

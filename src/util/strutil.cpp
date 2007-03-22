@@ -159,7 +159,7 @@ strutil_toupper(String &str)
    String s = wxEmptyString;
    const wxChar *cptr = str.c_str();
    while(*cptr)
-      s += toupper(*cptr++);
+      s += (wxChar)toupper(*cptr++);
    str = s;
 }
 
@@ -169,7 +169,7 @@ strutil_tolower(String &str)
    String s = wxEmptyString;
    const wxChar *cptr = str.c_str();
    while(*cptr)
-      s += tolower(*cptr++);
+      s += (wxChar)tolower(*cptr++);
    str = s;
 }
 

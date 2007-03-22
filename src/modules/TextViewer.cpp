@@ -292,7 +292,7 @@ wxString wxTextEasyPrinting::ControlToHtml(wxTextCtrl *text)
       }
 #endif // 0
 
-      switch ( ch[0u] )
+      switch ( (wxChar)ch[0u] )
       {
          case '<':
             s += _T("&lt;");

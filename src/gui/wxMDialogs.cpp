@@ -632,7 +632,8 @@ bool MDialog_Message(wxChar const *message,
       configPath = GetPersMsgBoxName(persMsg);
 
    return MDialog_Message(message, parent, title,
-                          persMsg ? configPath.c_str() : NULL, flags);
+                          persMsg ? configPath.c_str()
+                                  : (wxChar *)NULL, flags);
 }
 
 MDlgResult MDialog_YesNoCancel(wxChar const *message,

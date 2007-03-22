@@ -3652,7 +3652,7 @@ String MessageView::GetText() const
 
    // trim trailing empty lines, it is annoying to have to delete them manually
    // when replying
-   const wxChar *p = m_textBody.end() - 1;
+   wxString::const_iterator p = m_textBody.end() - 1;
    while ( *p == _T('\r') || *p == _T('\n') )
       p--;
 

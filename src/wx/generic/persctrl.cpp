@@ -842,7 +842,7 @@ void wxPListCtrl::RestoreWidths()
             char *p = (char *)str.c_str();
             for ( int col = 0; col < countCol; col++ )
             {
-                if ( IsEmpty(p) )
+                if ( wxIsEmpty(p) )
                     break;
 
                 char *end = strchr(p, ':');

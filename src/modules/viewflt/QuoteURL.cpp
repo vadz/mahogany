@@ -329,7 +329,8 @@ QuoteURLFilter::DoProcess(String& text,
       }
 
       // finally insert everything after the last URL (if any)
-      String textAfter(endURL, lineNext ? lineNext + 1 : text.end());
+      String textAfter(endURL, lineNext ? lineNext + 1
+                                        : text.c_str() + text.length());
       m_next->Process(textAfter, viewer, style);
 
       if ( !lineNext )

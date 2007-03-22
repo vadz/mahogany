@@ -231,7 +231,7 @@ UIdType Sequence::GetFirst(size_t& cookie) const
 
 UIdType Sequence::GetNext(UIdType n, size_t& cookie) const
 {
-   switch ( m_seq[cookie] )
+   switch ( (wxChar)m_seq[cookie] )
    {
       case ':':
          // we're inside a range, check if we didn't exhaust it

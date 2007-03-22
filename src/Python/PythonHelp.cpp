@@ -181,8 +181,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    }
    //else: if reloading failed, fall back to the original module
 
-   *function = PyObject_GetAttrString(*module,
-                     const_cast<char *>(functionName.c_str()));
+   *function = PyObject_GetAttrString(*module, (char *)functionName.c_str());
    if ( !*function )
    {
       Py_XDECREF(*module);

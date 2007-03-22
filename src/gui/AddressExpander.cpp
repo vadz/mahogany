@@ -72,7 +72,7 @@ RecipientType AddressExpander::ExpandLast(String *subject)
    bool quoted = false;
    for ( size_t n = 0; n < len; n++ )
    {
-      switch ( text[n] )
+      switch ( (wxChar)text[n] )
       {
          case '\\':
             // skip the next character, even if it's a quote or separator
