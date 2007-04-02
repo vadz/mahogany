@@ -3229,14 +3229,13 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
       wxString path, name, ext;
       wxSplitPath(filename, &path, &name, &ext);
 
-      filename = wxPFileSelector(_T("MimeSave"),_("Save attachment as:"),
-                                 NULL, // no default path
-                                 name, ext,
-                                 NULL,
-                                 wxFILEDLG_USE_FILENAME |
-                                 wxSAVE |
-                                 wxOVERWRITE_PROMPT,
-                                 GetParentFrame());
+      filename = wxPSaveFileSelector
+                 (
+                     GetParentFrame(),
+                     "MimeSave",
+                     _("Save attachment as:"),
+                     NULL /* no default path */, name, ext
+                 );
    }
    else
       filename = ifilename;

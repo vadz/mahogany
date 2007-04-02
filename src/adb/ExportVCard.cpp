@@ -27,7 +27,6 @@
    #include "guidef.h"
 
    #include <wx/dirdlg.h>
-   #include <wx/filedlg.h>
 #endif // USE_PCH
 
 #include "adb/AdbEntry.h"
@@ -35,6 +34,7 @@
 
 #include <wx/dir.h>
 #include <wx/datetime.h>
+#include <wx/persctrl.h>
 #include <wx/vcard.h>
 
 // ----------------------------------------------------------------------------
@@ -315,10 +315,14 @@ bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
    wxString filename = dest;
    if ( !filename )
    {
-      filename = wxFileSelector(_("Choose the name for vCard file"),
-                                NULL, NULL, _T(".vcf"),
-                                _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
-                                wxSAVE);
+      filename = wxPSaveFileSelector
+                 (
+                     NULL, // no parent
+                     "vcard",
+                     _("Choose the name for vCard file"),
+                     NULL, NULL, _T(".vcf"),
+                     _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*")
+                 );
       if ( !filename )
       {
          // cancelled

@@ -1471,11 +1471,13 @@ String VarExpander::GetSignature() const
                                      M_DLG_YES_DEFAULT,
                                      M_MSGBOX_ASK_FOR_SIG) )
             {
-               strSignFile = wxPFileSelector(_T("sig"),
-                                             _("Choose signature file"),
-                                             NULL, _T(".signature"), NULL,
-                                             wxGetTranslation(wxALL_FILES),
-                                             0, m_cv.GetFrame());
+               strSignFile = wxPLoadExistingFileSelector
+                             (
+                                 m_cv.GetFrame(),
+                                 "sig",
+                                 _("Choose signature file"),
+                                 NULL, _T(".signature"), NULL
+                             );
             }
             else
             {
