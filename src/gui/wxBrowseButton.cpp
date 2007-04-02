@@ -152,9 +152,9 @@ void wxFileBrowseButton::DoBrowse()
    wxString strLastDir, strLastFile, strLastExt, strPath = GetText();
    wxSplitPath(strPath, &strLastDir, &strLastFile, &strLastExt);
 
-   long style = m_open ? wxOPEN : wxSAVE | wxOVERWRITE_PROMPT;
+   long style = m_open ? wxFD_OPEN : wxFD_SAVE | wxFD_OVERWRITE_PROMPT;
    if ( m_existingOnly )
-      style |= wxFILE_MUST_EXIST;
+      style |= wxFD_FILE_MUST_EXIST;
 
    wxFileDialog dialog(GetFrame(this), wxEmptyString,
                        strLastDir, strLastFile,

@@ -695,14 +695,11 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    if ( fileName.empty() )
    {
       // ask the user
-      fileName = wxPFileSelector
+      fileName = wxPSaveFileSelector
                  (
+                  parent,
                   _T("MsgSave"),
-                  _("Choose file to save message to"),
-                  NULL, NULL, NULL,
-                  _("All files (*.*)|*.*"),
-                  wxSAVE | wxOVERWRITE_PROMPT,
-                  parent
+                  _("Choose file to save message to")
                  );
 
       if ( fileName.empty() )

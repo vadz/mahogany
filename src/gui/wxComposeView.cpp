@@ -2982,11 +2982,14 @@ wxComposeView::DoInitText(Message *msgOrig)
             {
                wxString pattern;
                pattern << _("vCard files (*.vcf)|*.vcf") << _T('|') << wxGetTranslation(wxALL_FILES);
-               filename = wxPFileSelector(_T("vcard"),
-                                          _("Choose vCard file"),
-                                          NULL, _T("vcard.vcf"), NULL,
-                                          pattern,
-                                          0, this);
+               filename = wxPLoadExistingFileSelector
+                          (
+                              this,
+                              "vcard",
+                              _("Choose vCard file"),
+                              NULL, _T("vcard.vcf"), NULL,
+                              pattern
+                          );
             }
             else
             {
@@ -3380,14 +3383,12 @@ wxComposeView::OnMenuCommand(int id)
 
       case WXMENU_COMPOSE_LOADTEXT:
          {
-            String filename = wxPFileSelector
+            String filename = wxPLoadExistingFileSelector
                               (
+                               this,
                                _T("MsgInsertText"),
                                _("Please choose a file to insert."),
-                               NULL, _T("dead.letter"), NULL,
-                               wxGetTranslation(wxALL_FILES),
-                               wxOPEN | wxFILE_MUST_EXIST,
-                               this
+                               NULL, _T("dead.letter"), NULL
                               );
 
             if ( filename.empty() )
@@ -3409,14 +3410,12 @@ wxComposeView::OnMenuCommand(int id)
       case WXMENU_COMPOSE_SAVETEXT:
          if(m_editor->FinishWork())
          {
-            String filename = wxPFileSelector
+            String filename = wxPSaveFileSelector
                               (
+                               this,
                                _T("MsgSaveText"),
                                _("Choose file to append message to"),
-                               NULL, _T("dead.letter"), NULL,
-                               wxGetTranslation(wxALL_FILES),
-                               wxSAVE,
-                               this
+                               NULL, _T("dead.letter"), NULL
                               );
 
             if ( filename.empty() )
@@ -4047,7 +4046,7 @@ void wxComposeView::LetUserAddAttachment()
                     _("Please choose files to insert."),
                     NULL, _T("dead.letter"), NULL,
                     wxGetTranslation(wxALL_FILES),
-                    wxOPEN | wxFILE_MUST_EXIST,
+                    wxFD_OPEN | wxFD_FILE_MUST_EXIST,
                     this
                    );
    for ( size_t n = 0; n < nFiles; n++ )

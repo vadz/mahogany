@@ -248,13 +248,11 @@ MTextDialog::~MTextDialog()
 // save the text controls contents to file
 void MTextDialog::OnSave(wxCommandEvent&)
 {
-   String filename = wxPFileSelector
+   String filename = wxPSaveFileSelector
                      (
+                       this,
                        _T("RawText"),
-                       _("Mahogany: Please choose where to save the text"),
-                       NULL, NULL, NULL, NULL,
-                       wxSAVE | wxOVERWRITE_PROMPT,
-                       this
+                       _("Mahogany: Please choose where to save the text")
                      );
    if ( !filename.empty() )
    {

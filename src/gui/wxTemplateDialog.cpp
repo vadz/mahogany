@@ -342,11 +342,12 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
       case TemplatePopupMenuItem::File:
          // choose the file (can't be more specific in messages because we
          // don't really know what is it for...)
-         value = wxPFileSelector(_T("TemplateFile"),
-                                 _("Please choose a file"),
-                                 NULL, NULL, NULL, NULL,
-                                 wxOPEN | wxFILE_MUST_EXIST,
-                                 this);
+         value = wxPLoadExistingFileSelector
+                 (
+                     this,
+                     "TemplateFile",
+                     _("Please choose a file")
+                 );
          if ( !value )
          {
             // user cancelled

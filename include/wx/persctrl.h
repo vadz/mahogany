@@ -31,6 +31,7 @@ class wxPHelper;
 #  include <wx/radiobox.h>
 #endif // USE_PCH
 
+#include <wx/filedlg.h>
 #include <wx/notebook.h>
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
@@ -724,15 +725,47 @@ enum
     wxFILEDLG_USE_FILENAME = 0x2000 // don't override with config setting
 };
 
-extern WXDLLMAYEXP wxString wxPFileSelector(const wxString& configPath,
-                                            const wxString& title,
-                                            const wxChar *defpath = NULL,
-                                            const wxChar *defname = NULL,
-                                            const wxChar *extension = NULL,
-                                            const wxChar *filter = NULL,
-                                            int flags = 0,
-                                            wxWindow *parent = NULL,
-                                            wxConfigBase *config = NULL);
+extern WXDLLMAYEXP wxString
+wxPFileSelector(const wxString& configPath,
+                const wxString& title,
+                const wxChar *defpath = NULL,
+                const wxChar *defname = NULL,
+                const wxChar *extension = NULL,
+                const wxChar *filter = NULL,
+                int flags = 0,
+                wxWindow *parent = NULL,
+                wxConfigBase *config = NULL);
+
+// convenient wrappers for wxPFileSelector to use when loading/saving files
+inline wxString
+wxPLoadExistingFileSelector(wxWindow *parent,
+                            const wxString& configPath,
+                            const wxString& title,
+                            const wxChar *defpath = NULL,
+                            const wxChar *defname = NULL,
+                            const wxChar *extension = NULL,
+                            const wxChar *filter = NULL,
+                            wxConfigBase *config = NULL)
+{
+    return wxPFileSelector(configPath, title, defpath, defname, extension,
+                           filter, wxFD_OPEN | wxFD_FILE_MUST_EXIST,
+                           parent, config);
+}
+
+inline wxString
+wxPSaveFileSelector(wxWindow *parent,
+                    const wxString& configPath,
+                    const wxString& title,
+                    const wxChar *defpath = NULL,
+                    const wxChar *defname = NULL,
+                    const wxChar *extension = NULL,
+                    const wxChar *filter = NULL,
+                    wxConfigBase *config = NULL)
+{
+    return wxPFileSelector(configPath, title, defpath, defname, extension,
+                           filter, wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
+                           parent, config);
+}
 
 // return the number of filenames selected, the filenames themselves are in
 // the array passed by reference

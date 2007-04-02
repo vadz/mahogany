@@ -583,13 +583,11 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
             wxLog::GetActiveTarget()->Flush();
          }
 
-         filename = wxPFileSelector
+         filename = wxPLoadExistingFileSelector
                     (
+                     frame,
                      _T("AdbImportFile"),
-                     _("Please select source address book file"),
-                     NULL, NULL, NULL, NULL,
-                     wxOPEN | wxFILE_MUST_EXIST,
-                     frame
+                     _("Please select source address book file")
                     );
       }
 

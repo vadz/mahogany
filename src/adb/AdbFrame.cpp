@@ -2182,7 +2182,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
                       _T("M.adb"),
                       _T("adb"),
                       _("Address books (*.adb)|*.adb|All files (*.*)|*.*"),
-                      bDoCreate ? 0 : wxFILE_MUST_EXIST,
+                      bDoCreate ? 0 : wxFD_FILE_MUST_EXIST,
                       this
                      );
 
@@ -2279,16 +2279,15 @@ void wxAdbEditFrame::ExportVCardEntry()
   }
 
   // ask the user for the file name
-  wxString filename = wxPFileSelector
+  wxString filename = wxPSaveFileSelector
                       (
+                        this,
                         ADB_CONFIG_PATH _T("/AdbVCardFile"),
                         _("Choose the name of vCard file"),
                         READ_APPCONFIG_TEXT(MP_USERDIR),
                         _T("vcard.vcf"),
                         _T("vcf"),
-                        _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
-                        0,
-                        this
+                        _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*")
                       );
   if ( !!filename )
   {
@@ -2326,16 +2325,15 @@ bool wxAdbEditFrame::ImportVCardEntry()
   }
 
   // choose the file
-  wxString filename = wxPFileSelector
+  wxString filename = wxPLoadExistingFileSelector
                       (
+                        this,
                         ADB_CONFIG_PATH _T("/AdbVCardFile"),
                         _("Choose the name of vCard file"),
                         READ_APPCONFIG_TEXT(MP_USERDIR),
                         _T("vcard.vcf"),
                         _T("vcf"),
-                        _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
-                        wxFILE_MUST_EXIST,
-                        this
+                        _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*")
                       );
 
   if ( !!filename )
@@ -2757,10 +2755,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
                                  wxPTextEntry *text,
                                  int *where,
                                  int *how)
-               : wxDialog(parent, -1, _("Find address book entry"),
-                          wxDefaultPosition,
-                          wxDefaultSize,
-                          wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+               : wxDialog(parent, -1, _("Find address book entry"))
 {
   // init member vars
   // ----------------
@@ -2925,10 +2920,7 @@ bool wxADBFindDialog::TransferDataFromWindow()
 wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
                                      const wxString& strName,
                                      bool bGroup)
-   : wxDialog(parent, -1, _("Create a new entry/group"),
-              wxDefaultPosition,
-              wxDefaultSize,
-              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
+   : wxDialog(parent, -1, _("Create a new entry/group")),
      m_strName(strName), m_bGroup(bGroup)
 {
   const wxChar *label = _("&New entry/group name:");

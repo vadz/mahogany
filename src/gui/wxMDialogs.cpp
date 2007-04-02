@@ -380,10 +380,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strConfigPath,
                                    const wxString& strDefault,
                                    bool passwordflag)
-   : wxDialog(parent, -1, wxString(M_TITLE_PREFIX) + strCaption,
-              wxDefaultPosition,
-              wxDefaultSize,
-              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+   : wxDialog(parent, -1, wxString(M_TITLE_PREFIX) + strCaption)
 {
   // text is the default value normally read from config and it may be
   // overriden by strDefault parameter if it is not empty
@@ -980,13 +977,16 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
    switch ( ev.GetId() )
    {
       case wxID_OPEN:
-         m_FileName = wxPFileSelector(_T("FolderDialogFile"),
-                                      _("Mahogany: Please choose a folder file"),
-                                      NULL, NULL, NULL, NULL,
-                                      m_flags & MDlg_Folder_Open
-                                       ? wxOPEN | wxFILE_MUST_EXIST
-                                       : wxSAVE,
-                                      this);
+         m_FileName = wxPFileSelector
+                      (
+                        "FolderDialogFile",
+                        _("Mahogany: Please choose a folder file"),
+                        NULL, NULL, NULL, NULL,
+                        m_flags & MDlg_Folder_Open
+                           ? wxFD_OPEN | wxFD_FILE_MUST_EXIST
+                           : wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
+                        this
+                      );
          if ( !!m_FileName )
          {
             // folder (file) chosen
@@ -1497,10 +1497,13 @@ wxXFaceDialog::OnButton(wxCommandEvent & event )
       xface = m_Button->GetFile();
       path = xface.BeforeLast('/');
       file = xface.AfterLast('/');
-      newface = wxPFileSelector(GetProfile()->GetName() + _T("/xfacefilerequester"),
-                                _("Please pick an image file"),
-                                path, file, NULL,
-                                NULL, 0, this);
+      newface = wxPLoadExistingFileSelector
+                (
+                  this,
+                  GetProfile()->GetName() + _T("/xfacefilerequester"),
+                  _("Please pick an image file"),
+                  path, file, NULL
+                );
       m_Button->SetFile(newface);
    }
    m_Button->Enable(m_Checkbox->GetValue() != 0);

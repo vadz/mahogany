@@ -410,18 +410,13 @@ void wxMIMETreeDialog::SaveAttachments(size_t count, const MimePart **parts)
       String filename;
       if ( needToAsk )
       {
-         filename = wxPFileSelector
+         filename = wxPSaveFileSelector
                     (
+                        this,
                         _T("MimeSave"),
                         _("Attachment has a name of existing file,\n"
                           "please choose another one:"),
-                        dir,  // default path
-                        NULL, // default name
-                        NULL, // default ext
-                        NULL, // default filter
-                        wxSAVE |
-                        wxOVERWRITE_PROMPT,
-                        this
+                        dir  // default path
                     );
 
          if ( filename.empty() )
