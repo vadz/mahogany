@@ -932,7 +932,8 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wxWidgets installation¤
-AM_PATH_WXCONFIG(2.7.2, [wxOK=1],, [adv,base,core,html,net,qa],
+MIN_WX_VERSION=2.8.4
+AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],, [adv,base,core,html,net,qa],
 		 [--unicode=no --debug=$debug_option])
 
 if test "$wxOK" != 1; then
@@ -949,7 +950,7 @@ if test "$wxOK" != 1; then
 	   Please check that wx-config is in PATH, the directory
 	   where wxWidgets libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWidgets version is 2.7.2 or above
+	   equivalent variable and wxWidgets version is $MIN_WX_VERSION or above
 	   and is available in $wxkind version.
    ])
 fi
