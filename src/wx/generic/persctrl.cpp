@@ -838,31 +838,24 @@ void wxPListCtrl::RestoreWidths()
         wxString str = m_persist->GetConfig()->Read(m_persist->GetKey());
         if ( !str.empty() )
         {
-            int countCol = GetColumnCount();
-            char *p = (char *)str.c_str();
-            for ( int col = 0; col < countCol; col++ )
+            const wxArrayString widths(wxStringTokenize(str, _T(":")));
+            const size_t count = widths.size();
+            if ( (int)count != GetColumnCount() )
             {
-                if ( wxIsEmpty(p) )
-                    break;
+                wxLogDebug(_T("columns count mismatch"));
+                return;
+            }
 
-                char *end = strchr(p, ':');
-                if ( end )
-                    *end = '\0';    // temporarily truncate
-
-                int width;
-                if ( sscanf(p, "%d", &width) == 1 )
+            for ( size_t n = 0; n < count; n++ )
+            {
+                unsigned long w;
+                if ( !widths[n].ToULong(&w) )
                 {
-                    SetColumnWidth(col, width);
-                }
-                else
-                {
-                    wxFAIL_MSG(_T("wxPListCtrl: corrupted config entry?"));
+                    wxLogDebug(_T("corrupted column widths data?"));
+                    continue;
                 }
 
-                if ( !end )
-                    break;
-
-                p = end + 1;
+                SetColumnWidth(n, w);
             }
         }
 
