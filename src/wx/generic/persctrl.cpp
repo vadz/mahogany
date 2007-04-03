@@ -2075,7 +2075,7 @@ size_t wxPFilesSelector(wxArrayString& filenames,
                                                     defname,
                                                     defext,
                                                     filter,
-                                                    flags | wxMULTIPLE,
+                                                    flags | wxFD_MULTIPLE,
                                                     parent,
                                                     config);
     if ( !dialog )
