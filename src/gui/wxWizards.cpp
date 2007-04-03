@@ -1003,7 +1003,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
                                           maxwidth,
                                           last,
                                           0,
-                                          wxPASSWORD));
+                                          wxTE_PASSWORD));
 
    CREATE_CTRL(Path,
                panel->CreateFileOrDirEntry(labels[Label_Mailbox],
