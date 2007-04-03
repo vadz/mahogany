@@ -130,7 +130,8 @@ extern "C"
    M_PY_WRAPPER_DECL(PyObject *, _PyInstance_Lookup, (PyObject *, PyObject *));
    M_PY_VAR_DECL(PyTypeObject *, PyInstance_Type);
 
-   // ints and longs
+   // integer types
+   M_PY_WRAPPER_DECL(PyObject *, PyBool_FromLong, (long));
    M_PY_WRAPPER_DECL(long, PyInt_AsLong, (PyObject *));
    M_PY_WRAPPER_DECL(PyObject*, PyInt_FromLong, (long));
    M_PY_WRAPPER_DECL(PyObject *, PyLong_FromUnsignedLong, (unsigned long));
@@ -277,7 +278,8 @@ extern "C"
 #define _PyInstance_Lookup M__PyInstance_Lookup
 #define PyInstance_Type (*M_PyInstance_Type)
 
-// ints and longs
+// integer types
+#define PyBool_FromLong M_PyBool_FromLong
 #define PyInt_AsLong M_PyInt_AsLong
 #define PyInt_FromLong M_PyInt_FromLong
 #define PyLong_FromUnsignedLong M_PyLong_FromUnsignedLong

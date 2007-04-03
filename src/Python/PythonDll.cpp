@@ -108,7 +108,8 @@ extern "C"
    M_PY_WRAPPER_DEF(_PyInstance_Lookup);
    M_PY_VAR_DEF(PyInstance_Type);
 
-   // ints and longs
+   // integer types
+   M_PY_WRAPPER_DEF(PyBool_FromLong);
    M_PY_WRAPPER_DEF(PyInt_AsLong);
    M_PY_WRAPPER_DEF(PyInt_FromLong);
    M_PY_WRAPPER_DEF(PyLong_FromUnsignedLong);
@@ -269,7 +270,8 @@ static struct PythonFunc
    PYTHON_SYMBOL(PyInstance_Type)
    PYTHON_SYMBOL(_PyInstance_Lookup)
 
-   // ints and longs
+   // integer types
+   PYTHON_SYMBOL(PyBool_FromLong)
    PYTHON_SYMBOL(PyInt_AsLong)
    PYTHON_SYMBOL(PyInt_FromLong)
    PYTHON_SYMBOL(PyLong_FromUnsignedLong)
