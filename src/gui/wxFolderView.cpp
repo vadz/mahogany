@@ -2159,10 +2159,10 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
       case WXK_NUMPAD_UP:
       case WXK_DOWN:
       case WXK_NUMPAD_DOWN:
-      case WXK_PRIOR:
-      case WXK_NUMPAD_PRIOR:
-      case WXK_NEXT:
-      case WXK_NUMPAD_NEXT:
+      case WXK_PAGEUP:
+      case WXK_NUMPAD_PAGEUP:
+      case WXK_PAGEDOWN:
+      case WXK_NUMPAD_PAGEDOWN:
       case WXK_HOME:
       case WXK_NUMPAD_HOME:
       case WXK_END:
@@ -4417,8 +4417,8 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          }
          return true;
 
-      case WXK_PRIOR:
-      case WXK_NEXT:
+      case WXK_PAGEUP:
+      case WXK_PAGEDOWN:
          // Shift-PageUp/Down have a predefined meaning in the wxListCtrl, so
          // let it have it
          if ( event.ShiftDown() )
@@ -4581,7 +4581,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          break;
 
 
-      case WXK_NEXT:
+      case WXK_PAGEDOWN:
          // scroll down the preview window
          if ( m_FolderCtrl->IsPreviewed(m_FolderCtrl->GetFocusedItem()) )
          {
@@ -4598,7 +4598,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          }
          break;
 
-      case WXK_PRIOR:
+      case WXK_PAGEUP:
       case WXK_BACK:
          // scroll up within the message viewer:
          if ( m_FolderCtrl->IsPreviewed(m_FolderCtrl->GetFocusedItem()) )

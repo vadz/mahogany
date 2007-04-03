@@ -702,7 +702,7 @@ LayoutViewer::PageDown()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_NEXT);
+   EmulateKeyPress(WXK_PAGEDOWN);
 
    return check.HasChanged();
 }
@@ -713,7 +713,7 @@ LayoutViewer::PageUp()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_PRIOR);
+   EmulateKeyPress(WXK_PAGEUP);
 
    return check.HasChanged();
 }

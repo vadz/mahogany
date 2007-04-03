@@ -602,10 +602,10 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    case WXK_DOWN:
       m_llist->MoveCursorVertically(1);
       break;
-   case WXK_PRIOR:
+   case WXK_PAGEUP:
       m_llist->MoveCursorVertically(-Y_SCROLL_PAGE);
       break;
-   case WXK_NEXT:
+   case WXK_PAGEDOWN:
       m_llist->MoveCursorVertically(Y_SCROLL_PAGE);
       break;
    case WXK_HOME:
@@ -1527,8 +1527,8 @@ static bool IsDirectionKey(long keyCode)
       case WXK_DOWN:
       case WXK_RIGHT:
       case WXK_LEFT:
-      case WXK_PRIOR:
-      case WXK_NEXT:
+      case WXK_PAGEUP:
+      case WXK_PAGEDOWN:
       case WXK_HOME:
       case WXK_END:
          return true;
