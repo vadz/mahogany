@@ -1076,7 +1076,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    m_login = CreateTextWithLabel(labels[Label_Login], widthMax, m_radio);
    m_password = CreateTextWithLabel(labels[Label_Password], widthMax, m_login,
-                                    0, wxPASSWORD);
+                                    0, wxTE_PASSWORD);
    m_server = CreateTextWithLabel(labels[Label_Server], widthMax, m_password);
    m_mailboxname = CreateTextWithLabel(labels[Label_Mailboxname], widthMax, m_server);
    m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_mailboxname);
