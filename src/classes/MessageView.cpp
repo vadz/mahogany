@@ -3553,7 +3553,7 @@ MessageView::CheckMessageOrPartSize(unsigned long size, bool part) const
                 "more than the current threshold of %d Kbytes.\n"
                 "\n"
                 "Do you still want to download it?"),
-              part ? _(" part") : wxString(), size, maxSize);
+              part ? _(" part") : "", size, maxSize);
 
    return MDialog_YesNoDialog(msg, GetParentFrame());
 }

@@ -2714,7 +2714,7 @@ void wxFolderListCtrl::SetSortOrder(Profile *profile,
 {
    wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
                GetColumnName(col).Lower().c_str(),
-               reverse ? _(" (reverse)") : wxString());
+               reverse ? _(" (reverse)") : "");
 
    profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
 
