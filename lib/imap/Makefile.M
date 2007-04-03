@@ -61,7 +61,7 @@ $(OSDEP):
 	@$(MAKE) -C c-client $(IMAP_OSTYPE) --no-print-directory \
 		MAKE="$(MAKE)" CC="$(CC)" \
 		SSLTYPE="$(IMAP_SSLTYPE)" \
-		EXTRACFLAGS="$(IMAP_CPPFLAGS)"
+		EXTRACFLAGS="$(IMAP_CFLAGS)"
 
 # subsequent make call, only call c-client's Makefile if it looks
 # like there's something to do

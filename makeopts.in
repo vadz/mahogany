@@ -9,7 +9,6 @@ top_builddir := @BUILDDIR@
 # the c-client (imap) library:
 IMAP_OSTYPE := @CCOSTYPE@
 IMAP_SSLTYPE := @IMAP_SSLTYPE@
-IMAP_CPPFLAGS := @IMAP_CPPFLAGS@
 IMAP_CFLAGS := @IMAP_CFLAGS@
 
 # the compface library:
