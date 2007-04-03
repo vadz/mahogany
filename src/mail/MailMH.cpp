@@ -214,7 +214,7 @@ MailFolder::InitializeMH()
 #endif // Unix/!Unix
 
          // const_cast is harmless
-         mail_parameters(NULL, SET_MHPATH, (char *)pathMH.c_str());
+         mail_parameters(NULL, SET_MHPATH, (char *)pathMH.mb_str());
       }
 
       // force cclient to init the MH driver
@@ -305,7 +305,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
    if ( root != InitializeMH() )
    {
       // const_cast is harmless
-      mail_parameters(NULL, SET_MHPATH, (char *)root.c_str());
+      mail_parameters(NULL, SET_MHPATH, (char *)root.mb_str());
    }
 
    // first create the root MH folder

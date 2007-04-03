@@ -630,7 +630,7 @@ bool MDialog_Message(wxChar const *message,
 
    return MDialog_Message(message, parent, title,
                           persMsg ? configPath.c_str()
-                                  : (wxChar *)NULL, flags);
+                                  : (const wxChar *)NULL, flags);
 }
 
 MDlgResult MDialog_YesNoCancel(wxChar const *message,

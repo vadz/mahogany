@@ -515,7 +515,7 @@ AdbExpandAllRecipients(const String& text,
    bool quoted = false;
    for ( size_t n = 0; n <= len; n++ )
    {
-      switch ( const wxChar ch = n == len ? '\0' : text[n] )
+      switch ( const wxChar ch = n == len ? wxChar('\0') : text[n] )
       {
          case '"':
             quoted = !quoted;

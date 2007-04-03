@@ -699,7 +699,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
    unsigned long len = 0;
 
    // NB: this pointer shouldn't be freed
-   char *cptr = (*fetchFunc)(stream, m_uid, (char *)sp.c_str(), &len, FT_UID);
+   char *cptr = (*fetchFunc)(stream, m_uid, (char *)sp.mb_str(), &len, FT_UID);
 
    m_folder->EndReading();
 

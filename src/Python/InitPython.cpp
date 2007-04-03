@@ -132,7 +132,7 @@ InitPython(void)
 
    // on some systems putenv() takes "char *", cast silents the warnings but
    // should be harmless otherwise
-   putenv((char *)pythonPathNew.c_str());
+   putenv((char *)pythonPathNew.mb_str());
 
    if ( !READ_APPCONFIG(MP_USEPYTHON) )
    {

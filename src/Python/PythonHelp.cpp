@@ -161,7 +161,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    }
 
    // load the module containing the function
-   *module = PyImport_ImportModule((char *)modname.c_str());
+   *module = PyImport_ImportModule((char *)modname.mb_str());
 
    if ( !*module )
    {
@@ -181,7 +181,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    }
    //else: if reloading failed, fall back to the original module
 
-   *function = PyObject_GetAttrString(*module, (char *)functionName.c_str());
+   *function = PyObject_GetAttrString(*module, (char *)functionName.mb_str());
    if ( !*function )
    {
       Py_XDECREF(*module);
@@ -260,20 +260,20 @@ PythonStringFunction(const String& func,
             break;
 
          case 1:
-            rc = PyObject_CallFunction(function, "s", arguments[0].c_str());
+            rc = PyObject_CallFunction(function, "s", arguments[0].mb_str());
             break;
 
          case 2:
             rc = PyObject_CallFunction(function, "ss",
-                                       arguments[0].c_str(),
-                                       arguments[1].c_str());
+                                       arguments[0].mb_str(),
+                                       arguments[1].mb_str());
             break;
 
          case 3:
             rc = PyObject_CallFunction(function, "sss",
-                                       arguments[0].c_str(),
-                                       arguments[1].c_str(),
-                                       arguments[2].c_str());
+                                       arguments[0].mb_str(),
+                                       arguments[1].mb_str(),
+                                       arguments[2].mb_str());
             break;
 
          default:
