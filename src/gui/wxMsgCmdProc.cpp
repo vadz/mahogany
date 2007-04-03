@@ -305,7 +305,7 @@ public:
    // use different message on success (default is initial message + done)
    void SetSuccessMsg(const wxChar *fmt, ...);
 
-   // give the appropariate message
+   // give the appropriate message
    ~AsyncStatusHandler();
 
 private:
@@ -1389,14 +1389,14 @@ MsgCmdProcImpl::SaveMessagesToFolder(const UIdArray& selections,
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, _("Saving %d message(s) to '%s'..."),
                              selections.GetCount(),
-                             folder->GetFullName().c_str());
+                             (const wxChar *)folder->GetFullName().c_str());
 
    Ticket t = m_asmf->
                   SaveMessagesToFolder(&selections, GetFrame(), folder, this);
 
    status->Monitor(t,
                    _("Failed to save messages to the folder '%s'."),
-                   folder->GetFullName().c_str());
+                   (const wxChar *)folder->GetFullName().c_str());
 
    folder->DecRef();
 

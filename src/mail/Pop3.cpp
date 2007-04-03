@@ -148,7 +148,8 @@ bool PopFlagsCacheFile::DoLoad(const wxTextFile& file, int /* version */)
    {
       int flags;
       bool ok = wxSscanf(file[n], _T("%s %d"),
-                       wxStringBuffer(uidl, file[n].length()), &flags) == 2;
+                         (wxChar *)wxStringBuffer(uidl, file[n].length()),
+                         &flags) == 2;
 
       if ( !ok )
       {

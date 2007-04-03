@@ -63,19 +63,23 @@ Rot13Filter::DoProcess(String& text,
                        MessageViewer *viewer,
                        MTextStyle& style)
 {
-   for ( char *pc = (char *)text.c_str(); *pc; pc++ )
+   for ( String::iterator i = text.begin(),
+                        end = text.end();
+         i != end;
+         ++i )
    {
       // don't use locale-dependent version isalpha() here
+      const wxChar ch = *i;
       char base;
-      if ( *pc >= 'a' && *pc <= 'z' )
+      if ( ch >= 'a' && ch <= 'z' )
          base = 'a';
-      else if ( *pc >= 'A' && *pc <= 'Z' )
+      else if ( ch >= 'A' && ch <= 'Z' )
          base = 'A';
       else
          continue;
 
       // apply ROT 13 algorithm: shift all letters by 13 positions mod 26
-      *pc = base + ((*pc - base) + 13) % 26;
+      *i = base + ((ch - base) + 13) % 26;
    }
 
    m_next->Process(text, viewer, style);

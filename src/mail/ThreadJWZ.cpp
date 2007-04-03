@@ -1115,7 +1115,7 @@ void Threader::add(HASHTAB *hTable, const String &str, ThreadContainer *containe
 
 ThreadContainer *Threader::lookUp(HASHTAB *hTable, const String &s) const
 {
-   void** data = hash_lookup(hTable, (char*) s.c_str());
+   void** data = hash_lookup(hTable, s.char_str());
    if (data != 0)
       return (ThreadContainer*)data[0];
    else

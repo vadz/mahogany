@@ -120,6 +120,17 @@ extern "C"
 // macros
 // ----------------------------------------------------------------------------
 
+// c-client wants unsinged char strings while we work with char pointers
+// everywhere, provide this macro-like helper function to cast the strings
+// to the correct type (this has the added benefit of forcing implicit
+// conversion of wxString::char_str() to "char *", i.e. we can write
+// UCHAR_CAST(s.char_str()) while (unsigned char *)s.char_str() wouldn't
+// compile)
+inline unsigned char *UCHAR_CAST(char *s)
+{
+   return reinterpret_cast<unsigned char *>(s);
+}
+
 /**
   @name checking folder macros
 
@@ -1678,27 +1689,28 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
          // now decode the text using cclient functions
          unsigned long len;
-         unsigned char *start = (unsigned char *)pEncTextStart; // for cclient
-         char *text;
+         unsigned char *start = (unsigned char *)pEncTextStart;
+         void *text;
          if ( enc2047 == Encoding_Base64 )
          {
-            text = (char *)rfc822_base64(start, lenEncWord, &len);
+            text = rfc822_base64(start, lenEncWord, &len);
          }
          else // QP
          {
             // cclient rfc822_qprint() behaves correctly and leaves '_' in the
             // QP encoded text because this is what RFC says, however many
             // broken clients replace spaces with underscores and so we undo it
-            // here - better user-friendly than standard conformant
+            // here -- in this case it's better to be user-friendly than
+            // standard-conforming
             String strWithoutUnderscores;
             if ( hasUnderscore )
             {
                strWithoutUnderscores = String(pEncTextStart, lenEncWord);
                strWithoutUnderscores.Replace(_T("_"), _T(" "));
-               start = (unsigned char *)strWithoutUnderscores.c_str();
+               start = (unsigned char *)(char *)strWithoutUnderscores.char_str();
             }
 
-            text = (char *)rfc822_qprint(start, lenEncWord, &len);
+            text = rfc822_qprint(start, lenEncWord, &len);
          }
 
          String textDecoded;
@@ -1710,8 +1722,8 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          }
          else // decoded ok
          {
-            textDecoded = String(wxConvertMB2WX(text), (size_t)len);
-            fs_give((void **)&text);
+            textDecoded.assign((const char *)len, len);
+            fs_give(&text);
          }
 
          // normally we leave the (8 bit) string as is and remember its
@@ -1952,7 +1964,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
                  imapspec.c_str());
 
       // stream may be NIL or not here
-      mail_create(stream, (char *)imapspec.c_str());
+      mail_create(stream, imapspec.char_str());
 
       // restore the auth info once again
       if ( !login.empty() )
@@ -2605,9 +2617,9 @@ MailFolderCC::ApplyTimeoutValues(void)
 
    // only set the paths if we do use rsh/ssh
    if ( m_TcpRshTimeout )
-      (void) mail_parameters(NIL, SET_RSHPATH, (char *)m_RshPath.c_str());
+      (void) mail_parameters(NIL, SET_RSHPATH, m_RshPath.char_str());
    if ( m_TcpSshTimeout )
-      (void) mail_parameters(NIL, SET_SSHPATH, (char *)m_SshPath.c_str());
+      (void) mail_parameters(NIL, SET_SSHPATH, m_SshPath.char_str());
 }
 
 
@@ -2923,7 +2935,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::CheckStatus() on %s."),
               spec.c_str());
 
-   mail_status(stream, (char *)spec.c_str(), STATUS_FLAGS);
+   mail_status(stream, spec.char_str(), STATUS_FLAGS);
 
    // keep the stream alive to be reused in the next call, if any
    if ( server )
@@ -3064,9 +3076,9 @@ MailFolderCC::AppendMessage(const String& msg)
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
-   INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
+   INIT(&str, mail_string, msg.char_str(), msg.Length());
 
-   if ( !mail_append(m_MailStream, (char *)m_ImapSpec.c_str(), &str) )
+   if ( !mail_append(m_MailStream, m_ImapSpec.char_str(), &str) )
    {
       wxLogError(_("Failed to save message to the folder '%s'"),
                  GetName().c_str());
@@ -3091,7 +3103,7 @@ MailFolderCC::AppendMessage(const Message& msg)
    char *dateptr = NULL;
    char datebuf[128];
    MESSAGECACHE mc;
-   if ( mail_parse_date(&mc, (unsigned char *) date.c_str()) )
+   if ( mail_parse_date(&mc, UCHAR_CAST(date.char_str())) )
    {
      mail_date(datebuf, &mc);
      dateptr = datebuf;
@@ -3108,14 +3120,15 @@ MailFolderCC::AppendMessage(const Message& msg)
 
    String flags = GetImapFlags(msg.GetStatus());
 
+   char *tmpstr = tmp.char_str();
    STRING str;
-   INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
+   INIT(&str, mail_string, tmpstr, strlen(tmpstr));
 
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    if ( !mail_append_full(m_MailStream,
-                          (char *)m_ImapSpec.c_str(),
-                          (char *)flags.c_str(),
+                          m_ImapSpec.char_str(),
+                          flags.char_str(),
                           dateptr,
                           &str) )
    {
@@ -3173,8 +3186,8 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
             String sequence = BuildSequence(*selections);
             String pathDst = GetPathFromImapSpec(specDst);
             if ( mail_copy_full(m_MailStream,
-                                (char *)sequence.c_str(),
-                                (char *)pathDst.c_str(),
+                                sequence.char_str(),
+                                pathDst.char_str(),
                                 CP_UID) )
             {
                didServerSideCopy = true;
@@ -3667,8 +3680,9 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit, int flags)
 
    *slistMatch = mail_newstringlist();
 
-   (*slistMatch)->text.data = (unsigned char *)strdup(wxConvertWX2MB(crit->m_Key));
-   (*slistMatch)->text.size = crit->m_Key.length();
+   char * const keystr = strdup(crit->m_Key.mb_str());
+   (*slistMatch)->text.data = (unsigned char *)keystr;
+   (*slistMatch)->text.size = strlen(keystr);
 
    if ( crit->m_Invert )
    {
@@ -3756,10 +3770,7 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
       wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SetFlags(%s) = %s"),
                  GetName().c_str(), sequence.c_str(), flags.c_str());
 
-      mail_flag(m_MailStream,
-                (char *)sequence.c_str(),
-                (char *)flags.c_str(),
-                opFlags);
+      mail_flag(m_MailStream, sequence.char_str(), flags.char_str(), opFlags);
    }
    //else: blocked by python callback
 
@@ -4178,7 +4189,7 @@ static void ThreadMessagesHelper(THREADNODE *thr,
    }
 }
 
-static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
+static bool MailStreamHasThreader(MAILSTREAM *stream, char *thrName)
 {
    CHECK( stream, false, _T("MailStreamHasThreader: folder is closed") );
 
@@ -4186,8 +4197,7 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 
    THREADER *thr;
    for ( thr = imapCap->threader;
-         thr && compare_cstring((unsigned char *)thr->name,
-                                (unsigned char *)thrName);
+         thr && compare_cstring(UCHAR_CAST(thr->name), UCHAR_CAST(thrName));
          thr = thr->next )
       ;
 
@@ -4220,7 +4230,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
    if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
         READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD) )
    {
-      const char *threadingAlgo = NULL;
+      /* const */ char *threadingAlgo = NULL;
 
       // it does, but maybe we want only threading by references (best) and it
       // only provides dumb threading by subject?
@@ -4266,7 +4276,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
          thrData->m_root = mail_thread
                            (
                             m_MailStream,
-                            (char *)threadingAlgo,
+                            threadingAlgo,
                             NULL,                // default charset
                             mail_newsearchpgm(), // thread all messages
                             SE_FREE
@@ -4439,7 +4449,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 
    // date
    MESSAGECACHE selt;
-   mail_parse_date(&selt, (unsigned char *)env->date);
+   mail_parse_date(&selt, env->date);
    entry.m_Date = (time_t) mail_longdate(&selt);
 
    // from and to
@@ -4987,7 +4997,7 @@ const String& MailFolder::InitializeNewsSpool()
       if ( !gs_NewsSpoolDir )
       {
          gs_NewsSpoolDir = READ_APPCONFIG_TEXT(MP_NEWS_SPOOL_DIR);
-         mail_parameters(NULL, SET_NEWSSPOOL, (char *)gs_NewsSpoolDir.c_str());
+         mail_parameters(NULL, SET_NEWSSPOOL, gs_NewsSpoolDir.char_str());
       }
    }
 
@@ -5358,8 +5368,8 @@ MailFolder::Subscribe(const String &host,
 
    String spec = MailFolder::GetImapSpec(folder);
 
-   return (subscribe ? mail_subscribe (NIL, (char *)spec.c_str())
-                     : mail_unsubscribe (NIL, (char *)spec.c_str())) != NIL;
+   return (subscribe ? mail_subscribe (NIL, spec.char_str())
+                     : mail_unsubscribe (NIL, spec.char_str())) != NIL;
 }
 
 inline
@@ -5436,9 +5446,8 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    (
       m_MailStream,
       NULL,
-      (char *)
       (spec + reference + (pattern.empty() ? String(_T("*"))
-                                           : pattern)).c_str()
+                                           : pattern)).char_str()
    );
 
    // send event telling about end of listing:
@@ -5494,7 +5503,7 @@ char MailFolderCC::GetFolderDelimiter() const
             spec += '}';
 
          gs_delimiter = '\0';
-         mail_list(m_MailStream, NULL, (char *)spec.c_str());
+         mail_list(m_MailStream, NULL, spec.char_str());
 
          // well, except that in practice some IMAP servers do *not* return
          // anything in reply to this command! try working around this bug
@@ -5503,7 +5512,7 @@ char MailFolderCC::GetFolderDelimiter() const
             CHECK( m_MailStream, _T('\0'), _T("folder closed in GetFolderDelimiter") );
 
             spec += '%';
-            mail_list(m_MailStream, NULL, (char *)spec.c_str());
+            mail_list(m_MailStream, NULL, spec.char_str());
          }
 
          // we must have got something!
@@ -5557,9 +5566,7 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
    }
 
    // do rename
-   if ( !mail_rename(NULL,
-                     (char *)spec.c_str(),
-                     (char *)specNew.c_str()) )
+   if ( !mail_rename(NULL, spec.char_str(), specNew.char_str()) )
    {
       wxLogError(_("Failed to rename the mailbox for folder '%s' "
                    "from '%s' to '%s'."),
@@ -5653,7 +5660,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       // now mark them all as deleted (we don't need notifications about the
       // status change so save a *lot* of bandwidth by using ST_SILENT)
-      mail_flag(stream, (char *)seq.c_str(), "\\DELETED", ST_SET | ST_SILENT);
+      mail_flag(stream, seq.char_str(), "\\DELETED", ST_SET | ST_SILENT);
 
       // and expunge
       if ( mf )
@@ -5709,7 +5716,7 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
    wxLogTrace(TRACE_MF_CALLS,
               _T("MailFolderCC::DeleteFolder(%s)"), mboxpath.c_str());
 
-   return mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
+   return mail_delete(NIL, mboxpath.char_str()) != NIL;
 }
 
 // ----------------------------------------------------------------------------
@@ -5761,7 +5768,7 @@ MailFolderCC::HasInferiors(const String& imapSpec,
    if ( stream != NIL )
    {
       MMListRedirector redirect(HasInferiorsMMList);
-      mail_list (stream, NULL, (char *) imapSpec.c_str());
+      mail_list (stream, NULL, imapSpec.char_str());
 
       /* This does happen for for folders where the server does not know
          if they have inferiors, i.e. if they don't exist yet.
@@ -6112,7 +6119,7 @@ static inline bool Folder2NETMBX(const MFolder *folder, NETMBX *netmbx)
 {
    const String spec = MailFolder::GetImapSpec(folder);
 
-   if ( !mail_valid_net_parse((char *)spec.c_str(), netmbx) )
+   if ( !mail_valid_net_parse(spec.char_str(), netmbx) )
    {
       FAIL_MSG( _T("invalid remote folder spec in ServerInfoEntryCC?") );
 

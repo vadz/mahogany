@@ -1477,7 +1477,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
    bdy = &(m_NextPart->body);
    bdy->type = type;
 
-   bdy->subtype = cpystr((char *)subtype.c_str());
+   bdy->subtype = cpystr(subtype.c_str());
 
    bdy->contents.text.data = data;
    bdy->contents.text.size = len;
@@ -1843,7 +1843,7 @@ SendMessageCC::Send(int flags)
 
    // prepare the hostlist for c-client: we use only one server
    char *hostlist[2];
-   hostlist[0] = (char *)server.c_str();
+   hostlist[0] = server.char_str();
    hostlist[1] = NIL;
 
    // preview message being sent if asked for it
