@@ -9,16 +9,25 @@
 # Licence:     M license
 ###############################################################################
 
+include ../../makeopts
+
 LIBDSPAM=src/.libs/libdspam.a
 DRIVER=src/.libs/libhash_drv.a
 MAKEFILE_DSPAM=Makefile
 
 all:	$(LIBDSPAM) $(DRIVER)
 
+# explanation of configure arguments:
+#   --with-delivery-agent is needed because dspam can't always detect delivery
+#       agent automatically, as we don't use it anyhow just choose a dummy one
+#
+#   --disable-shared is needed because we want to link everything statically
+#       into our DspamFilter.so module and SHARED_CFLAGS is needed because it
+#       contains -fPIC when building the modules dynamically and we have to
+#       build all code linked into a DSO with -fPIC
 $(MAKEFILE_DSPAM): .src/$(MAKEFILE_DSPAM).in
-	@# dspam can't always detect delivery agent automatically, as we don't
-	@# use it anyhow just choose a dummy one
-	.src/configure --disable-shared --with-delivery-agent=/bin/false -C
+	.src/configure CFLAGS=$(SHARED_CFLAGS) --disable-shared \
+	               --with-delivery-agent=/bin/false -C
 
 $(LIBDSPAM) $(DRIVER): $(MAKEFILE_DSPAM)
 
