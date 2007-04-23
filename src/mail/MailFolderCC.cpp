@@ -1722,7 +1722,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          }
          else // decoded ok
          {
-            textDecoded.assign((const char *)len, len);
+            textDecoded.assign((const char *)text, len);
             fs_give(&text);
          }
 
