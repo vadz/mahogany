@@ -731,7 +731,7 @@ ExpandOriginalText(const String& text,
                n = wrapMargin;
             }
 
-            value.append(lineCur, n);
+            value.append(lineCur, 0, n);
             value += '\n';
 
             // we don't need to start the new line with spaces so remove them
