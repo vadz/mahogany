@@ -553,14 +553,14 @@ void MyHashTable::Delete(const wxString& key)
 
 bool MyHashTable::Exist(const wxString& key) const
 {
-  wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
+  wxString* tmp = (wxString *)m_tbl.Get(key);
   return ( tmp != NULL );
 }
 
 bool MyHashTable::GetValue(const wxString& key, bool& value) const
 {
   value = FALSE;
-  wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
+  wxString* tmp = (wxString *)m_tbl.Get(key);
   if ( tmp )
    {
      value = (( *tmp == _T("true") ) || ( *tmp == _T("TRUE") ) || ( *tmp == _T("1")));
@@ -573,7 +573,7 @@ bool MyHashTable::GetValue(const wxString& key, bool& value) const
 bool MyHashTable::GetValue(const wxString& key, wxString& value ) const
 {
   value.Empty();
-  wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
+  wxString* tmp = (wxString *)m_tbl.Get(key);
   if ( tmp )
    {
      value = *tmp;
@@ -585,7 +585,7 @@ bool MyHashTable::GetValue(const wxString& key, wxString& value ) const
 
 bool MyHashTable::GetValue(const wxString& key, unsigned long& value ) const
 {
-  wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
+  wxString* tmp = (wxString *)m_tbl.Get(key);
 
   if ( tmp && tmp->ToULong(&value) )
    return TRUE;
