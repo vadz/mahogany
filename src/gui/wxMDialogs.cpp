@@ -1810,7 +1810,7 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
 
    // write test data encrypted with new password
    p->writeEntry(MP_CRYPTALGO, newUseCrypt);
-   if ( newPw )
+   if ( !newPw.empty() )
    {
       strutil_setpasswd(newPw);
    }

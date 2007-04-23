@@ -191,7 +191,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
    }
    entry.GetField(AdbField_Prefix, &val);
    entry.GetField(AdbField_Title, &tmp);
-   if(tmp.Length()) val << ' ' << tmp;
+   if(!tmp.empty()) val << ' ' << tmp;
    s << '"' << EscapeQuotes(val) << _T("\",");
    ADD(AdbField_Organization);
 
@@ -209,7 +209,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
       if(val.Length())
       {
          entry.GetField(AdbField_H_StreetNo, &tmp);
-         if(tmp) val << ' ' << tmp;
+         if(!tmp.empty()) val << ' ' << tmp;
          if(! val) entry.GetField(AdbField_H_POBox, &val);
          s << '"' << val << _T("\",");
       }
@@ -224,7 +224,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
       if(val.Length())
       {
          entry.GetField(AdbField_O_StreetNo, &tmp);
-         if(tmp) val << ' ' << tmp;
+         if(!tmp.empty()) val << ' ' << tmp;
          if(! val) entry.GetField(AdbField_O_POBox, &val);
          s << '"' << val << _T("\",");
       }

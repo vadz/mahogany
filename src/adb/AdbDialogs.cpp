@@ -626,10 +626,8 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
       return FALSE;
    }
 
-   if ( *nameOfNativeAdb )
-   {
+   if ( nameOfNativeAdb )
       *nameOfNativeAdb = adbname;
-   }
 
    // do import
    bool ok = AdbImport(filename, adbname, wxEmptyString, importer);

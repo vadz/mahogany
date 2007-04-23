@@ -696,7 +696,7 @@ class FunctionDefinition
 public:
    FunctionDefinition(const wxChar *name, FunctionPointer fptr)
       : m_Name(name), m_FunctionPtr(fptr)
-      { ASSERT(m_Name); ASSERT(m_FunctionPtr); }
+      { ASSERT(!m_Name.empty()); ASSERT(m_FunctionPtr); }
    const wxChar *GetName(void) const { return m_Name; }
    FunctionPointer GetFPtr(void) const { return m_FunctionPtr; }
 
