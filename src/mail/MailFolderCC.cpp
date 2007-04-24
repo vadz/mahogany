@@ -1707,7 +1707,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             {
                strWithoutUnderscores = String(pEncTextStart, lenEncWord);
                strWithoutUnderscores.Replace(_T("_"), _T(" "));
-               start = (unsigned char *)(char *)strWithoutUnderscores.char_str();
+               start = (unsigned char *)(const char *)strWithoutUnderscores;
             }
 
             text = rfc822_qprint(start, lenEncWord, &len);
