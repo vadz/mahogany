@@ -1,7 +1,12 @@
-$Id: CHANGELOG,v 1.459 2006/08/18 15:00:31 jonz Exp $
+$Id: CHANGELOG,v 1.462 2007/03/18 17:08:49 jonz Exp $
 
-Version NEXT
-------------
+Version 3.8.0
+-------------
+
+[20061210.1435] jonz: fixed message corruption problems with direct delivery
+
+when using direct delivery (e.g. DeliveryHost), certain servers require a
+linefeed after carriage return otherwise the message will become malformatted.
 
 [20060818.0700] jonz: added msg tagging support
 
@@ -137,9 +142,6 @@ added tokenizer variable to DSPAM_CTX and added following tokenizer flags:
 
 WARNING: This is an API change and constitutes a new major version. Third
          party applications may fail to compile/run against this.
-
-Version 3.6.6
--------------
 
 [20060414.1145] jonz: fix for segfault on log write err
 

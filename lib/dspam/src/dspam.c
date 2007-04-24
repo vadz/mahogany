@@ -762,7 +762,7 @@ process_message (
 
   /* Reassemble message from components */
 
-  copyback = _ds_assemble_message (CTX->message);
+  copyback = _ds_assemble_message (CTX->message, (USE_LMTP || USE_SMTP) ? "\r\n" : "\n");
   buffer_clear (message);
   buffer_cat (message, copyback);
   free (copyback);

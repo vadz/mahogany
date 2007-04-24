@@ -107,7 +107,7 @@ char *  _ds_decode_quoted       (const char *body);
 
 ds_message_t _ds_actualize_message (const char *message);
 
-char *  _ds_assemble_message (ds_message_t message);
+char *  _ds_assemble_message (ds_message_t message, const char *newline);
 char *  _ds_find_header (ds_message_t message, const char *heading, int flags);
 
 ds_message_part_t _ds_create_message_part (void);

@@ -1,6 +1,6 @@
-$Id: RELEASE.NOTES,v 1.67 2006/05/16 20:11:22 jonz Exp $
+$Id: RELEASE.NOTES,v 1.68 2007/03/18 16:53:23 jonz Exp $
 
 RELEASE 3.8.0-STABLE
 
-3.8.0 is a major version release
-
+3.8.0 is a major release. Please see UPGRADING and CHANGELOG for a detailed
+explanation of the differences from previous versions.

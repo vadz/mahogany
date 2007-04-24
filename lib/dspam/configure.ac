@@ -9,7 +9,7 @@ dnl    automake (GNU automake) 1.9.2
 dnl
 AC_PREREQ(2.59)
 AC_COPYRIGHT([Copyright (C) 2002-2006 Jonathan A. Zdziarski])
-AC_INIT([dspam],[CVS],[dspam-dev@nuclearelephant.com])
+AC_INIT([dspam],[3.8.0],[dspam-dev@nuclearelephant.com])
 CONFIGURE_ARGS=$@
 AC_CONFIG_SRCDIR(./src)
 

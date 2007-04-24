@@ -913,7 +913,7 @@ _ds_encode_base64 (const char *body)
  */
 
 char *
-_ds_assemble_message (ds_message_t message)
+_ds_assemble_message (ds_message_t message, const char *newline)
 {
   buffer *out = buffer_create (NULL);
   struct nt_node *node_nt, *node_header;
@@ -953,18 +953,18 @@ _ds_assemble_message (ds_message_t message)
         heading = malloc(
             ((current_header->heading) ? strlen(current_header->heading) : 0) 
           + ((data) ? strlen(data) : 0)
-          + 4);
+          + 3 + strlen(newline));
 
         if (current_header->heading != NULL &&
             (!strncmp (current_header->heading, "From ", 5) || 
              !strncmp (current_header->heading, "--", 2)))
-          sprintf (heading, "%s:%s\n", 
+          sprintf (heading, "%s:%s%s", 
             (current_header->heading) ? current_header->heading : "",
-            (data) ? data: "");
+            (data) ? data : "", newline);
         else
-          sprintf (heading, "%s: %s\n",
+          sprintf (heading, "%s: %s%s",
             (current_header->heading) ? current_header->heading : "",
-            (data) ? data : "");
+            (data) ? data : "", newline);
 
         buffer_cat (out, heading);
         free(heading);
@@ -972,7 +972,7 @@ _ds_assemble_message (ds_message_t message)
       }
     }
 
-    buffer_cat (out, "\n");
+    buffer_cat (out, newline);
 
     /* Assemble bodies */
 
@@ -991,7 +991,7 @@ _ds_assemble_message (ds_message_t message)
     i++;
 
     if (node_nt != NULL && node_nt->ptr != NULL)
-      buffer_cat (out, "\n");
+      buffer_cat (out, newline);
   }
 
   copyback = out->data;
