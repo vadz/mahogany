@@ -625,6 +625,19 @@ int wxMApp::FilterEvent(wxEvent& event)
       return false;
    }
 
+   if ( event.GetEventType() == wxEVT_TIMER )
+   {
+      // this one should also be ignored right now as we could call to c-client
+      // from its handler too, but there is an added complication: if it was a
+      // one shot timer event, we need to restart the timer to avoid losing the
+      // event entirely
+      wxTimer * const timer = wx_static_cast(wxTimer *, event.GetEventObject());
+      if ( timer && timer->IsOneShot() )
+         timer->Start(-1 /* same interval as last time */, true /* one shot */);
+
+      return false;
+   }
+
    // the other events should be safe to handle
    return -1;
 }
