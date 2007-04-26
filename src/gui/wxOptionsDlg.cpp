@@ -488,6 +488,8 @@ enum ConfigFields
    ConfigField_AutoCollectNameless,
    ConfigField_WhiteListHelp,
    ConfigField_WhiteList,
+   ConfigField_EquivAddressesHelp,
+   ConfigField_EquivAddresses,
 #ifdef USE_BBDB
    ConfigField_Bbdb_HelpText,
    ConfigField_Bbdb_IgnoreAnonymous,
@@ -496,7 +498,7 @@ enum ConfigFields
    ConfigField_Bbdb_SaveOnExit,
    ConfigField_AdbLast = ConfigField_Bbdb_SaveOnExit,
 #else // !USE_BBDB
-   ConfigField_AdbLast = ConfigField_WhiteList,
+   ConfigField_AdbLast = ConfigField_EquivAddresses,
 #endif // USE_BBDB/!USE_BBDB
 
    // helper programs
@@ -1669,6 +1671,15 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "through the built-in spam filter."),
                                                     Field_Message, -1 },
    { gettext_noop("Addresses in &white list"),      Field_List, -1 },
+
+   { gettext_noop("\nYou can add strings of the form \"<address1>=<address2>\" "
+                  "here to indicate that\n"
+                  "Mahogany should treat these addresses as being equivalent.\n"
+                  "For example, you can make a work address equivalent to the "
+                  "home one to\n"
+                  "avoid sending replies to both addresses at once."),           Field_Message | Field_AppWide, -1 },
+   { gettext_noop("E&quivalent addresses"),        Field_List | Field_AppWide, -1 },
+
 #ifdef USE_BBDB
    { gettext_noop("The following settings configure the support of the Big Brother\n"
                   "addressbook (BBDB) format. This is supported only for compatibility\n"
@@ -2186,6 +2197,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOCOLLECT_NAMED),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_WHITE_LIST),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_EQUIV_ADDRESSES),
 #ifdef USE_BBDB
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BBDB_IGNOREANONYMOUS),
@@ -4049,7 +4062,14 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
    lboxDataWhiteList->m_lboxDlgPers = _T("LastWhiteList");
    lboxDataWhiteList->m_next = lboxDataMLAddr;
 
-   m_lboxData = lboxDataWhiteList;
+   LboxData *lboxDataEquivList = new LboxData;
+   lboxDataEquivList->m_idListbox = ConfigField_EquivAddresses;
+   lboxDataEquivList->m_lboxDlgTitle = _("Equivalent addresses");
+   lboxDataEquivList->m_lboxDlgPrompt = _("Pair of equivalent addresses");
+   lboxDataEquivList->m_lboxDlgPers = _T("LastEquivList");
+   lboxDataEquivList->m_next = lboxDataWhiteList;
+
+   m_lboxData = lboxDataEquivList;
 }
 
 bool wxOptionsPageAdb::TransferDataToWindow()

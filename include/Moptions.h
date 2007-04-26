@@ -207,6 +207,7 @@ extern const MOption MP_COMPOSE_BCC;
 extern const MOption MP_COMPOSE_SHOW_FROM;
 extern const MOption MP_DEFAULT_REPLY_KIND;
 extern const MOption MP_LIST_ADDRESSES;
+extern const MOption MP_EQUIV_ADDRESSES;
 extern const MOption MP_REPLY_PREFIX;
 extern const MOption MP_FORWARD_PREFIX;
 extern const MOption MP_REPLY_COLLAPSE_PREFIX;
@@ -820,6 +821,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_DEFAULT_REPLY_KIND_NAME _T("ReplyDefault")
 /// the mailing list addresses
 #define   MP_LIST_ADDRESSES_NAME _T("MLAddresses")
+/// array of equivalent address pairs
+#define   MP_EQUIV_ADDRESSES_NAME _T("EquivAddresses")
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_NAME         _T("ReplyPrefix")
 /// prefix for subject in forwards
@@ -1670,6 +1673,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_DEFAULT_REPLY_KIND_DEFVAL 0l  // MailFolder::REPLY_SENDER
 /// the mailing list addresses
 #define   MP_LIST_ADDRESSES_DEFVAL wxEmptyString
+/// array of equivalent address pairs
+#define   MP_EQUIV_ADDRESSES_DEFVAL wxEmptyString
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_DEFVAL      _T("Re: ")
 /// prefix for subject in forwards

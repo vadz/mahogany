@@ -31,12 +31,19 @@
    #include "Mdefaults.h"
 #endif // USE_PCH
 
+#include <wx/hashmap.h>
+
 #include "Address.h"
+
+// hash type associates the list of the address equivalent to the given one
+// (used as the key)
+WX_DECLARE_STRING_HASH_MAP(wxArrayString, AddressHash);
 
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_EQUIV_ADDRESSES;
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_FROM_ADDRESS;
 extern const MOption MP_HOSTNAME;
@@ -45,6 +52,41 @@ extern const MOption MP_LIST_ADDRESSES;
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// handling of address equivalence hash table
+// ----------------------------------------------------------------------------
+
+static const AddressHash& GetAddressHash()
+{
+   static AddressHash s_hash;
+
+   static bool s_hashInitDone = false;
+   if ( !s_hashInitDone )
+   {
+      s_hashInitDone = true;
+
+      const wxArrayString
+         equivPairs = strutil_restore_array(READ_APPCONFIG(MP_EQUIV_ADDRESSES));
+
+      const size_t count = equivPairs.size();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         wxArrayString equiv = strutil_restore_array(equivPairs[n], '=');
+         if ( equiv.size() != 2 )
+         {
+            wxLogWarning(_("Invalid address equivalence option \"%s\""),
+                         equivPairs[n].c_str());
+            continue;
+         }
+
+         s_hash[equiv[0]].push_back(equiv[1]);
+         s_hash[equiv[1]].push_back(equiv[0]);
+      }
+   }
+
+   return s_hash;
+}
 
 // ----------------------------------------------------------------------------
 // Address
@@ -63,10 +105,37 @@ bool Address::operator==(const String& address) const
 /* static */
 bool Address::Compare(const String& address1, const String& address2)
 {
-   AddressList_obj addrList(address1);
-   Address *addr = addrList->GetFirst();
+   AddressList_obj addrList1(address1),
+                   addrList2(address2);
+   const Address * const addr1 = addrList1->GetFirst(),
+                 * const addr2 = addrList2->GetFirst();
 
-   return addr && !addrList->HasNext(addr) && *addr == address2;
+   if ( !addr1 || !addr2 )
+      return false;
+
+   // currently multiple addresses always compare differently because address2
+   // is always a single address
+   if ( addrList1->HasNext(addr1) || addrList2->HasNext(addr2) )
+      return false;
+
+   if ( *addr1 == *addr2 )
+      return true;
+
+   // check also for equivalent addresses
+   const AddressHash& hash = GetAddressHash();
+   AddressHash::const_iterator it = hash.find(addr2->GetEMail());
+   if ( it != hash.end() )
+   {
+      const wxArrayString& equivAddresses = it->second;
+      const size_t count = equivAddresses.size();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         if ( *addr1 == equivAddresses[n] )
+            return true;
+      }
+   }
+
+   return false;
 }
 
 Address::~Address()

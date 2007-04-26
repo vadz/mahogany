@@ -71,6 +71,9 @@ skip them unless you're updating from a very old version of Mahogany.
    \item A much faster DSPAM storage driver is used now.
    \item Added ``Remove attachments'' command which can be used to strip the
          unwanted attachments from a message in a local or IMAP folder.
+   \item Added the possibility to treat different addresses as equivalent,
+         this is useful to avoid sending duplicate replies to the different
+         addresses of the same person, for example.
 \end{itemize}
 
 \subsubsection{0.67 against 0.66}
@@ -2524,6 +2527,13 @@ address has no name, the first part of e-mail address (the one preceding
 the '@' symbol) will be used instead of the name.
 \item \textbf{Whitelist}\\
 Spam filter option "No match in whitelist" uses this address book.
+\item \textbf{Equivalent addresses}\\
+Adding a string of the form \texttt{jdoe@work.com=jdoe@home.net} here will make
+Mahogany treat these two addresses as equivalent. This for example means that
+only one of them will be left in the outgoing message so that if you have the
+first address set as the default one for the folder which the messages from
+John Doe are filtered to and you reply to the message sent from the second
+address, the two addresses won't be duplicated in the composer window.
 \end{itemize}
 
 In addition to its own built-in addressbook format, Mahogany also

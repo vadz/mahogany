@@ -72,6 +72,11 @@ public:
 
    /**
       Compares two address strings, returns true if they're equal.
+
+      This method takes into account the address equivalence as defined in the
+      program options. Both address1 and address2 should contain a single
+      address only, comparing multiple addresses is not supported and will
+      return false.
     */
    static bool Compare(const String& address1, const String& address2);
 
