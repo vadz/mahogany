@@ -554,6 +554,15 @@ private:
    {
    }
 
+#if defined(OS_WIN) && defined(USE_DIALUP)
+   // fill the choice control with the names of available dialup connections:
+   // this can take a relatively long time as it requires wxDialUpManager
+   // initialization, so we only do it when absolutely necessary
+   void FillDialupConnections();
+
+   // event handler to detect when the use of dialup manager is enabled
+   void OnDialUp(wxCommandEvent& event);
+#endif // USE_DIALUP
 
 #ifdef USE_OWN_CCLIENT
    wxString m_oldAuthsDisabled;

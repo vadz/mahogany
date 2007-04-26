@@ -3732,7 +3732,48 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
 {
 }
 
-// dynamicially fill the RAS connections combo box under Windows
+#if defined(OS_WIN) && defined(USE_DIALUP)
+
+void wxOptionsPageNetwork::FillDialupConnections()
+{
+   wxControl *control = GetControl(ConfigField_NetConnection);
+   wxChoice *choice = control ? wxStaticCast(control, wxChoice) : NULL;
+
+   // may be NULL if we don't use dial up manager at all
+   if ( !choice )
+      return;
+
+   // we may have already filled it
+   if ( !choice->IsEmpty() )
+      return;
+
+   // this could take a long time
+   wxBusyCursor bc;
+
+   wxDialUpManager *dial = wxDialUpManager::Create();
+
+   if ( !dial )
+      return;
+
+   wxArrayString aConnections;
+   dial->GetISPNames(aConnections);
+
+   choice->Append(aConnections);
+
+   delete dial;
+}
+
+void wxOptionsPageNetwork::OnDialUp(wxCommandEvent& event)
+{
+   if ( event.IsChecked() )
+      FillDialupConnections();
+
+   event.Skip();
+}
+
+#endif // USE_DIALUP
+
+// dynamically fill the RAS connections combo box under Windows
 bool wxOptionsPageNetwork::TransferDataToWindow()
 {
 #ifdef USE_OWN_CCLIENT
@@ -3756,32 +3797,19 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 #if defined(OS_WIN) && defined(USE_DIALUP)
    if ( bRc )
    {
-      wxControl *control = GetControl(ConfigField_NetConnection);
-      wxChoice *choice = control ? wxStaticCast(control, wxChoice) : NULL;
-
-      if ( choice )
+      wxCheckBox *chkDialUp =
+         wxStaticCast(GetControl(ConfigField_DialUpSupport), wxCheckBox);
+      if ( chkDialUp )
       {
-         // may be NULL if we don't use dial up manager at all
-         wxDialUpManager *dial = wxDialUpManager::Create();
+         if ( chkDialUp->GetValue() )
+            FillDialupConnections();
 
-         if ( dial )
-         {
-            // wxDialUpManager can fail to enumerate the connections but we
-            // don't want to present the user with an error each time he opens
-            // the preferences dialog just because of this
-            wxLogNull noLog;
-
-            wxArrayString aConnections;
-            dial->GetISPNames(aConnections);
-
-            size_t count = aConnections.GetCount();
-            for ( size_t n = 0; n < count; n++ )
-            {
-               choice->Append(aConnections[n]);
-            }
-
-            delete dial;
-         }
+         Connect
+         (
+            chkDialUp->GetId(),
+            wxEVT_COMMAND_CHECKBOX_CLICKED,
+            wxCommandEventHandler(wxOptionsPageNetwork::OnDialUp)
+         );
       }
    }
 #endif // USE_DIALUP
