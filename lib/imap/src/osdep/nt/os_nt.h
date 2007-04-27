@@ -40,7 +40,16 @@
 #undef ERROR
 #define ERROR (long) 2		/* must match mail.h */
 
+#if _MSC_VER >= 1400
 #define strtok_r strtok_s	/* for some reason they called it this */
+#else
+/*
+   strtok() is still MT-safe in MSVC CRT so we can use it
+
+   reference r to avoid "unused local variable" warnings
+ */
+#define strtok_r(t,d,r) strtok(((r), (t)), (d))
+#endif
 
 
 #include "env_nt.h"
