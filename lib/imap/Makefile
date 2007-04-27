@@ -21,7 +21,7 @@
 #		Internet: MRC@CAC.Washington.EDU
 #
 # Date:		7 December 1989
-# Last Edited:	15 September 2006
+# Last Edited:	29 March 2007
 
 
 # Normal command to build IMAP toolkit:
@@ -86,6 +86,7 @@
 #	 (see lnp, sl4, sl5, and slx)
 # lnp	Linux with Pluggable Authentication Modules (PAM)
 # lmd	Mandrake Linux
+# lr5	RedHat Enterprise 5 and later (same as lfd)
 # lrh	RedHat Linux 7.2 and later
 # lsu	SuSE Linux (same as lrh)
 # lyn	LynxOS
@@ -292,7 +293,7 @@ BUILD=$(MAKE) build EXTRACFLAGS='$(EXTRACFLAGS)'\
 
 # Make the IMAP Toolkit
 
-all:	SPECIALS c-client rebuild bundled
+all:	c-client SPECIALS rebuild bundled
 
 c-client:
 	@echo Not processed yet.  In a first-time build, you must specify
@@ -318,10 +319,14 @@ aos art asv aux bsd cvx dpx dyn isc pyr sv4 ult vul vu2: ua
 
 # Knotheads moved Kerberos and SSL locations on these platforms
 
-bsf bso:	an
+bsf:	an
 	$(BUILD) BUILDTYPE=$@ \
 	PASSWDTYPE=pam \
 	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl/certs SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock PAMLDFLAGS=-lpam"
+
+bso:	an
+	$(BUILD) BUILDTYPE=$@ \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
 
 cyg:	an
 	$(BUILD) BUILDTYPE=cyg \
@@ -335,7 +340,7 @@ ldb:	an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
 	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl/certs SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
 
-lfd:	an	# yes, Fedora is different than RHE (at least today it is)
+lfd lr5: an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
 	EXTRACFLAGS="$(EXTRACFLAGS) -I/usr/kerberos/include" \
 	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/pki/tls/certs SSLKEYS=/etc/pki/tls/private GSSDIR=/usr/kerberos LOCKPGM=/usr/sbin/mlock"
@@ -344,15 +349,35 @@ lmd:	an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
 	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/lib/ssl/certs SSLKEYS=/usr/lib/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
 
-lrh lsu:	an
+lrh:	lrhok an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
 	EXTRACFLAGS="$(EXTRACFLAGS) -I/usr/kerberos/include" \
 	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/share/ssl/certs SSLKEYS=/usr/share/ssl/private GSSDIR=/usr/kerberos LOCKPGM=/usr/sbin/mlock"
 
-osx:	an
-	$(TOUCH) ip6
-	$(BUILD) BUILDTYPE=$@ IP=$(IP6) EXTRAAUTHENTICATORS="$(EXTRAAUTHENTICATORS) gss" \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
+lrhok:
+	@$(SH) -c '(test ! -d /etc/pki/tls ) || make lrhwarn'
+	@$(TOUCH) lrhok
+
+lrhwarn:
+	@echo You are building for OLD versions of RedHat Linux.  This build
+	@echo is NOT suitable for RedHat Enterprise 5, which stores SSL/TLS
+	@echo certificates and keys in /etc/pki/tls rather than /usr/share/ssl.
+	@echo If you want to build for modern RedHat Linux, you should use
+	@echo make lr5 instead.
+	@echo Do you want to continue this build?  Type y or n please:
+	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) exit 1;; esac'
+	@echo OK, I will remember that you really want to build for old
+	@echo RedHat Linux.  You will not see this message again.
+	@echo If you realize that you really wanted to build for modern
+	@echo RedHat Linux, then do the following commands:
+	@echo % rm lrhok
+	@echo % make clean
+	@echo % make lr5
+
+lsu:	an
+	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
+	EXTRACFLAGS="$(EXTRACFLAGS) -I/usr/kerberos/include" \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/share/ssl/certs SSLKEYS=/usr/share/ssl/private GSSDIR=/usr/kerberos LOCKPGM=/usr/sbin/mlock"
 
 oxp:	an
 	$(TOUCH) ip6
@@ -360,6 +385,30 @@ oxp:	an
 	PASSWDTYPE=pam \
 	EXTRACFLAGS="$(EXTRACFLAGS) -DMAC_OSX_KLUDGE=1" \
 	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock PAMDLFLAGS=-lpam"
+
+osx:	osxok an
+	$(TOUCH) ip6
+	$(BUILD) BUILDTYPE=$@ IP=$(IP6) EXTRAAUTHENTICATORS="$(EXTRAAUTHENTICATORS) gss" \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
+
+osxok:
+	@$(SH) -c '(test ! -f /usr/include/pam/pam_appl.h ) || make osxwarn'
+	@$(TOUCH) osxok
+
+osxwarn:
+	@echo You are building for OLD versions of Mac OS X.  This build is
+	@echo NOT suitable for modern versions of Mac OS X, such as Tiger,
+	@echo which use PAM-based authentication.  If you want to build for
+	@echo modern Mac OS X, you should use make oxp instead.
+	@echo Do you want to continue this build?  Type y or n please:
+	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) exit 1;; esac'
+	@echo OK, I will remember that you really want to build for old
+	@echo Mac OS X.  You will not see this message again.
+	@echo If you realize that you really wanted to build for modern
+	@echo Mac OS X, then do the following commands:
+	@echo % rm osxok
+	@echo % make clean
+	@echo % make oxp
 
 
 # Linux shadow password support doesn't build on traditional systems, but most
@@ -373,8 +422,8 @@ lnxnul:
 
 lnxok:
 	@echo You are building for traditional Linux.  Most modern Linux
-	@echo systems require that you build using make slx.  Do you want
-	@echo to continue this build?  Type y or n please:
+	@echo systems require that you build using make slx.
+	@echo Do you want to continue this build?  Type y or n please:
 	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) exit 1;; esac'
 	@echo OK, I will remember that you really want to build for
 	@echo traditional Linux.  You will not see this message again.
@@ -487,7 +536,15 @@ sslunix sslsco:
 	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	@echo
 	@echo Do you want to continue this build anyway?  Type y or n please:
-	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) exit 1;; esac'
+	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) (make nounenc;exit 1);; esac'
+
+nounenc:
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	@echo + At your request, this build with unencrypted authentication has
+	@echo + been CANCELLED.
+	@echo + You must start over with a new make command.
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 sslnone:
 	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -502,12 +559,22 @@ sslnone:
 	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	@echo
 	@echo Do you want to continue this build anyway?  Type y or n please:
-	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) exit 1;; esac'
+	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) (make nonossl;exit 1);; esac'
+
+nonossl:
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	@echo + At your request, this build with no TLS/SSL support has been
+	@echo + CANCELLED.
+	@echo + You must start over with a new make command.
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 # IP build choices
 
 ip4:
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	@echo + Building with IPv4 support
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ip6:
 	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -519,20 +586,35 @@ ip6:
 	@echo + unnecessary and performance-sapping reverse DNS call.  This
 	@echo + problem does not affect the IPv4 gethostbyname call.
 	@echo +
-	@echo + getaddrinfo is known to work properly on Mac OS X and
-	@echo + Windows.  However, the problem has been observed on some
-	@echo + Linux systems.
+	@echo + getaddrinfo works properly on Mac OS X and Windows.  However,
+	@echo + the problem has been observed on some Linux systems.
 	@echo +
-	@echo + If you are not building for Mac OS X or Windows, you may
-	@echo + want to build with IP=4 unless you are certain that glibc
-	@echo + is fixed on your system.
+	@echo + If you answer n to the following question the build will be
+	@echo + cancelled and you must rebuild.  If you did not specify IPv6
+	@echo + yourself, try adding IP6=4 to the make command line.
 	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	@echo
 	@echo Do you want to build with IPv6 anyway?  Type y or n please:
-	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) (make clean;exit 1);; esac'
+	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) (make noip6;exit 1);; esac'
 	@echo OK, I will remember that you really want to build with IPv6.
 	@echo You will not see this message again.
 	@$(TOUCH) ip6
+
+noip6:
+	$(MAKE) clean
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	@echo + At your request, this build with IPv6 has been CANCELLED.
+	@echo + You must start over with a new make command.
+	@echo +
+	@echo + If you wish to rebuild without IPv6 support, do one of the
+	@echo + following:
+	@echo +
+	@echo + 1. If you specified IP=6 on the make command line, omit it.
+	@echo +
+	@echo + 2. Some of the Linux builds automatically select IPv6.  If
+	@echo + you choose one of those builds, add IP6=4 to the make command
+	@echo + line.  Note that this is IP6=4, not IP=4.
+	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # C compiler types
 
@@ -552,9 +634,10 @@ an ua:
 	$(TOOLS)/$@ "$(LN)" src/tmail tmail
 	$(LN) $(TOOLS)/$@ .
 
-build:	ip$(IP) OSTYPE rebuild rebuildclean bundled
+build:	OSTYPE rebuild rebuildclean bundled
 
 OSTYPE:
+	@$(MAKE) ip$(IP)
 	@echo Building c-client for $(BUILDTYPE)...
 	@$(TOUCH) SPECIALS
 	echo `$(CAT) SPECIALS` $(EXTRASPECIALS) > c-client/SPECIALS

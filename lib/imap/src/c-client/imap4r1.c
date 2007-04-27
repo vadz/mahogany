@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	15 June 1988
- * Last Edited:	9 September 2006
+ * Last Edited:	19 March 2007
  *
  * This original version of this file is
  * Copyright 1988 Stanford University
@@ -37,11 +37,8 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <time.h>
-#include "mail.h"
-#include "osdep.h"
+#include "c-client.h"
 #include "imap4r1.h"
-#include "rfc822.h"
-#include "misc.h"
 
 /* Parameters */
 
@@ -200,7 +197,7 @@ long imap_copy (MAILSTREAM *stream,char *sequence,char *mailbox,long options);
 long imap_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data);
 long imap_append_referral (char *mailbox,char *tmp,append_t af,void *data,
 			   char *flags,char *date,STRING *message,
-			   APPENDDATA *map);
+			   APPENDDATA *map,long options);
 IMAPPARSEDREPLY *imap_append_single (MAILSTREAM *stream,char *mailbox,
 				     char *flags,char *date,STRING *message);
 
@@ -744,7 +741,7 @@ long imap_status (MAILSTREAM *stream,char *mbx,long flags)
 	      mail_parameters (stream,GET_IMAPREFERRAL,NIL)) &&
 	     LOCAL->referral &&
 	     (mbx = (*ir) (stream,LOCAL->referral,REFSTATUS)))
-      ret = imap_status (NIL,mbx,flags);
+      ret = imap_status (NIL,mbx,flags | (stream->debug ? SA_DEBUG : NIL));
   }
 
 				/* IMAP2 way */
@@ -2448,7 +2445,7 @@ long imap_copy (MAILSTREAM *stream,char *sequence,char *mailbox,long flags)
 				/* failed, do referral action if any */
   else if (ir && pc && LOCAL->referral && mail_sequence (stream,sequence) &&
 	   (s = (*ir) (stream,LOCAL->referral,REFCOPY)))
-    ret = (*pc) (stream,sequence,s,flags);
+    ret = (*pc) (stream,sequence,s,flags | (stream->debug ? CP_DEBUG : NIL));
 				/* otherwise issue error message */
   else mm_log (reply->text,ERROR);
   return ret;
@@ -2469,6 +2466,7 @@ long imap_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
   IMAPPARSEDREPLY *reply = NIL;
   APPENDDATA map;
   char tmp[MAILTMPLEN];
+  long debug = stream ? stream->debug : NIL;
   long ret = NIL;
   imapreferral_t ir =
     (imapreferral_t) mail_parameters (stream,GET_IMAPREFERRAL,NIL);
@@ -2476,7 +2474,8 @@ long imap_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
   if (mail_valid_net (mailbox,&imapdriver,NIL,tmp)) {
 				/* create a stream if given one no good */
     if ((stream && LOCAL && LOCAL->netstream) ||
-	(stream =  mail_open (NIL,mailbox,OP_HALFOPEN|OP_SILENT))) {
+	(stream = mail_open (NIL,mailbox,OP_HALFOPEN|OP_SILENT |
+			     (debug ? OP_DEBUG : NIL)))) {
 				/* note mailbox in case APPENDUID */
       LOCAL->appendmailbox = mailbox;
 				/* use multi-append? */
@@ -2506,7 +2505,7 @@ long imap_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
       if (st != stream) stream = mail_close (stream);
       if (mailbox)		/* chase referral if any */
 	ret = imap_append_referral (mailbox,tmp,af,data,map.flags,map.date,
-				    map.message,&map);
+				    map.message,&map,debug);
     }
     else mm_log ("Can't access server for append",ERROR);
   }
@@ -2521,12 +2520,13 @@ long imap_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
  *	    flags from previous attempt
  *	    date from previous attempt
  *	    message stringstruct from previous attempt
+ *	    options (currently non-zero to set OP_DEBUG)
  * Returns: T if append successful, else NIL
  */
 
 long imap_append_referral (char *mailbox,char *tmp,append_t af,void *data,
 			   char *flags,char *date,STRING *message,
-			   APPENDDATA *map)
+			   APPENDDATA *map,long options)
 {
   MAILSTREAM *stream;
   IMAPARG *args[3],ambx,amap;
@@ -2536,7 +2536,8 @@ long imap_append_referral (char *mailbox,char *tmp,append_t af,void *data,
 				/* barf if bad mailbox */
   while (mailbox && mail_valid_net (mailbox,&imapdriver,NIL,tmp)) {
 				/* create a stream if given one no good */
-    if (!(stream = mail_open (NIL,mailbox,OP_HALFOPEN|OP_SILENT))) {
+    if (!(stream = mail_open (NIL,mailbox,OP_HALFOPEN|OP_SILENT |
+			      (options ? OP_DEBUG : NIL)))) {
       sprintf (tmp,"Can't access referral server: %.80s",mailbox);
       mm_log (tmp,ERROR);
       return NIL;
@@ -3559,6 +3560,7 @@ IMAPPARSEDREPLY *imap_reply (MAILSTREAM *stream,char *tag)
 
 IMAPPARSEDREPLY *imap_parse_reply (MAILSTREAM *stream,char *text)
 {
+  char *r;
   if (LOCAL->reply.line) fs_give ((void **) &LOCAL->reply.line);
 				/* init fields in case error */
   LOCAL->reply.key = LOCAL->reply.text = LOCAL->reply.tag = NIL;
@@ -3569,7 +3571,7 @@ IMAPPARSEDREPLY *imap_parse_reply (MAILSTREAM *stream,char *text)
     return NIL;
   }
   if (stream->debug) mm_dlog (LOCAL->reply.line);
-  if (!(LOCAL->reply.tag = (char *) strtok (LOCAL->reply.line," "))) {
+  if (!(LOCAL->reply.tag = strtok_r (LOCAL->reply.line," ",&r))) {
     mm_notify (stream,"IMAP server sent a blank line",WARN);
     stream->unhealthy = T;
     return NIL;
@@ -3577,7 +3579,7 @@ IMAPPARSEDREPLY *imap_parse_reply (MAILSTREAM *stream,char *text)
 				/* non-continuation replies */
   if (strcmp (LOCAL->reply.tag,"+")) {
 				/* parse key */
-    if (!(LOCAL->reply.key = (char *) strtok (NIL," "))) {
+    if (!(LOCAL->reply.key = strtok_r (NIL," ",&r))) {
 				/* determine what is missing */
       sprintf (LOCAL->tmp,"Missing IMAP reply key: %.80s",
 	       (char *) LOCAL->reply.tag);
@@ -3587,12 +3589,12 @@ IMAPPARSEDREPLY *imap_parse_reply (MAILSTREAM *stream,char *text)
     }
     ucase (LOCAL->reply.key);	/* canonicalize key to upper */
 				/* get text as well, allow empty text */
-    if (!(LOCAL->reply.text = (char *) strtok (NIL,"\n")))
+    if (!(LOCAL->reply.text = strtok_r (NIL,"\n",&r)))
       LOCAL->reply.text = LOCAL->reply.key + strlen (LOCAL->reply.key);
   }
   else {			/* special handling of continuation */
     LOCAL->reply.key = "BAD";	/* so it barfs if not expecting continuation */
-    if (!(LOCAL->reply.text = (char *) strtok (NIL,"\n")))
+    if (!(LOCAL->reply.text = strtok_r (NIL,"\n",&r)))
       LOCAL->reply.text = "";
   }
   return &LOCAL->reply;		/* return parsed reply */
@@ -3660,6 +3662,7 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
   unsigned long i = 0;
   unsigned long j,msgno;
   unsigned char *s,*t;
+  char *r;
 				/* see if key is a number */
   if (isdigit (*reply->key)) {
     msgno = strtoul (reply->key,(char **) &s,10);
@@ -3676,9 +3679,9 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
       return;
     }
 				/* get message data type, canonicalize upper */
-    s = ucase ((char *) strtok (reply->text," "));
+    s = ucase (strtok_r (reply->text," ",&r));
 				/* and locate the text after it */
-    t = (char *) strtok (NIL,"\n");
+    t = strtok_r (NIL,"\n",&r);
 				/* now take the action */
 				/* change in size of mailbox */
     if (!strcmp (s,"EXISTS")) mail_exists (stream,msgno);
@@ -3702,8 +3705,8 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
 	(imapenvelope_t) mail_parameters (stream,GET_IMAPENVELOPE,NIL);
       ++t;			/* skip past open parenthesis */
 				/* parse Lisp-form property list */
-      while (prop = ((char *) strtok (t," )"))) {
-	t = (char *) strtok (NIL,"\n");
+      while (prop = (strtok_r (t," )",&r))) {
+	t = strtok_r (NIL,"\n",&r);
 	INIT_GETS (md,stream,elt->msgno,NIL,0,0);
 	e = NIL;		/* not pointing at any envelope yet */
 				/* canonicalize property, parse it */
@@ -3864,7 +3867,8 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
   }
 
   else if (!strcmp (reply->key,"FLAGS") && reply->text &&
-	   (*reply->text == '(') && (s = (char *) strtok (reply->text+1," )")))
+	   (*reply->text == '(') &&
+	   (s = strtok_r (reply->text+1," )",&r)))
     do if (*s != '\\') {
       for (i = 0; (i < NUSERFLAGS) && stream->user_flags[i] &&
 	     compare_cstring (s,stream->user_flags[i]); i++);
@@ -3875,10 +3879,10 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
       }
       else if (!stream->user_flags[i]) stream->user_flags[i++] = cpystr (s);
     }
-    while (s = (char *) strtok (NIL," )"));
+    while (s = strtok_r (NIL," )",&r));
   else if (!strcmp (reply->key,"SEARCH")) {
 				/* only do something if have text */
-    if (reply->text && (t = (char *) strtok (reply->text," "))) do
+    if (reply->text && (t = strtok_r (reply->text," ",&r))) do
       if (i = strtoul (t,NIL,10)) {
 				/* UIDs always passed to main program */
 	if (LOCAL->uidsearch) mm_searched (stream,i);
@@ -3888,7 +3892,7 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
 	  mail_elt (stream,i)->searched = T;
 	  if (!stream->silent) mm_searched (stream,i);
 	}
-      } while (t = (char *) strtok (NIL," "));
+      } while (t = strtok_r (NIL," ",&r));
   }
   else if (!strcmp (reply->key,"SORT")) {
     sortresults_t sr = (sortresults_t)
@@ -3898,12 +3902,11 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
     LOCAL->sortdata = (unsigned long *)
       fs_get ((stream->nmsgs + 1) * sizeof (unsigned long));
 				/* only do something if have text */
-    if (reply->text && (t = (char *) strtok (reply->text," "))) {
+    if (reply->text && (t = strtok_r (reply->text," ",&r))) {
       do if ((i = atol (t)) && (LOCAL->filter ?
 				mail_elt (stream,i)->searched : T))
 	LOCAL->sortdata[LOCAL->sortsize++] = i;
-      while ((t = (char *) strtok (NIL," ")) &&
-	     (LOCAL->sortsize < stream->nmsgs));
+      while ((t = strtok_r (NIL," ",&r)) && (LOCAL->sortsize < stream->nmsgs));
     }
     LOCAL->sortdata[LOCAL->sortsize] = 0;
 				/* also return via callback if requested */
@@ -3977,7 +3980,7 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
     char delimiter = '\0';
     *s++ = '\0';		/* tie off attribute list */
 				/* parse attribute list */
-    if (t = (char *) strtok (reply->text+1," ")) do {
+    if (t = strtok_r (reply->text+1," ",&r)) do {
       if (!compare_cstring (t,"\\NoInferiors")) i |= LATT_NOINFERIORS;
       else if (!compare_cstring (t,"\\NoSelect")) i |= LATT_NOSELECT;
       else if (!compare_cstring (t,"\\Marked")) i |= LATT_MARKED;
@@ -3986,7 +3989,7 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
       else if (!compare_cstring (t,"\\HasNoChildren")) i |= LATT_HASNOCHILDREN;
 				/* ignore extension flags */
     }
-    while (t = (char *) strtok (NIL," "));
+    while (t = strtok_r (NIL," ",&r));
     switch (*++s) {		/* process delimiter */
     case 'N':			/* NIL */
     case 'n':
@@ -4224,7 +4227,7 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
 
 void imap_parse_response (MAILSTREAM *stream,char *text,long errflg,long ntfy)
 {
-  char *s,*t;
+  char *s,*t,*r;
   size_t i;
   unsigned long j;
   MESSAGECACHE *elt;
@@ -4255,7 +4258,7 @@ void imap_parse_response (MAILSTREAM *stream,char *text,long errflg,long ntfy)
 	stream->perm_seen = stream->perm_deleted = stream->perm_answered =
 	  stream->perm_draft = stream->kwd_create = NIL;
 	stream->perm_user_flags = NIL;
-	if (s = strtok (s+1," ")) do {
+	if (s = strtok_r (s+1," ",&r)) do {
 	  if (*s == '\\') {	/* system flags */
 	    if (!compare_cstring (s,"\\Seen")) stream->perm_seen = T;
 	    else if (!compare_cstring (s,"\\Deleted"))
@@ -4269,7 +4272,7 @@ void imap_parse_response (MAILSTREAM *stream,char *text,long errflg,long ntfy)
 	  }
 	  else stream->perm_user_flags |= imap_parse_user_flag (stream,s);
 	}
-	while (s = strtok (NIL," "));
+	while (s = strtok_r (NIL," ",&r));
       }
 
       else if (!compare_cstring (t,"CAPABILITY"))
@@ -4693,7 +4696,7 @@ ADDRESS *imap_parse_address (MAILSTREAM *stream,unsigned char **txtptr,
 	}
 	else ++ingroup;		/* in a group now */
       }
-      else {			/* good address */
+      if (adr) {		/* good address */
 	if (!ret) ret = adr;	/* if first time note first adr */
 				/* if previous link new block to it */
 	if (prev) prev->next = adr;
@@ -4876,7 +4879,7 @@ unsigned char *imap_parse_string (MAILSTREAM *stream,unsigned char **txtptr,
 	mm_notify (stream,"Unterminated quoted string",WARN);
 	stream->unhealthy = T;
 	if (len) *len = 0;	/* punt, since may be at end of string */
-	return string;
+	return NIL;
       }
     }
     ++*txtptr;			/* bump past delimiter */
@@ -4949,7 +4952,7 @@ unsigned char *imap_parse_string (MAILSTREAM *stream,unsigned char **txtptr,
     if (len) *len = 0;
     break;
   }
-  return string;
+  return (unsigned char *) string;
 }
 
 /* Register text in IMAP cache
@@ -5162,9 +5165,19 @@ void imap_parse_body_structure (MAILSTREAM *stream,BODY *body,
       body->size.bytes = strtoul (*txtptr,(char **) txtptr,10);
       switch (body->type) {	/* possible extra stuff */
       case TYPEMESSAGE:		/* message envelope and body */
+				/* non MESSAGE/RFC822 is basic type */
 	if (strcmp (body->subtype,"RFC822")) break;
-	body->nested.msg = mail_newmsg ();
-	imap_parse_envelope (stream,&body->nested.msg->env,txtptr,reply);
+	{			/* make certain server sends an envelope */
+	  ENVELOPE *env = NIL;
+	  imap_parse_envelope (stream,&env,txtptr,reply);
+	  if (!env) {
+	    mm_notify (stream,"Missing body message envelope",WARN);
+	    stream->unhealthy = T;
+	    body->subtype = cpystr ("RFC822_MISSING_ENVELOPE");
+	    break;
+	  }
+	  (body->nested.msg = mail_newmsg ())->env = env;
+	}
 	body->nested.msg->body = mail_newbody ();
 	imap_parse_body_structure (stream,body->nested.msg->body,txtptr,reply);
 				/* drop into text case */
@@ -5174,6 +5187,7 @@ void imap_parse_body_structure (MAILSTREAM *stream,BODY *body,
       default:			/* otherwise nothing special */
 	break;
       }
+
       if (**txtptr == ' ') {	/* extension data - md5 */
 	body->md5 = imap_parse_string (stream,txtptr,reply,NIL,NIL,LONGT);
 	if (LOCAL->cap.extlevel < BODYEXTMD5) LOCAL->cap.extlevel = BODYEXTMD5;
@@ -5430,7 +5444,7 @@ void imap_parse_extension (MAILSTREAM *stream,unsigned char **txtptr,
 
 void imap_parse_capabilities (MAILSTREAM *stream,char *t)
 {
-  char *s;
+  char *s,*r;
   unsigned long i;
   THREADER *thr,*th;
   if (!LOCAL->gotcapability) {	/* need to save previous capabilities? */
@@ -5444,7 +5458,7 @@ void imap_parse_capabilities (MAILSTREAM *stream,char *t)
     memset (&LOCAL->cap,0,sizeof (LOCAL->cap));
     LOCAL->gotcapability = T;	/* flag that capabilities arrived */
   }
-  for (t = (char *) strtok (t," "); t; t = (char *) strtok (NIL," ")) {
+  for (t = strtok_r (t," ",&r); t; t = strtok_r (NIL," ",&r)) {
     if (!compare_cstring (t,"IMAP4"))
       LOCAL->cap.imap4 = LOCAL->cap.imap2bis = LOCAL->cap.rfc1176 = T;
     else if (!compare_cstring (t,"IMAP4rev1"))

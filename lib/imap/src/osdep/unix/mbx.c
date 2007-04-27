@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	3 October 1995
- * Last Edited:	26 September 2006
+ * Last Edited:	29January 2007
  */
 
 
@@ -794,7 +794,7 @@ long mbx_ping (MAILSTREAM *stream)
     if (LOCAL->filetime && (LOCAL->filetime < sbuf.st_mtime))
       LOCAL->flagcheck = T;	/* upgrade to flag checking */
 				/* new mail or flagcheck handling needed? */
-    if (((i = (sbuf.st_size - LOCAL->filesize)) || LOCAL->flagcheck ||
+    if (((sbuf.st_size - LOCAL->filesize) || LOCAL->flagcheck ||
 	 !stream->nmsgs || snarf) &&
 	((ld = lockfd (LOCAL->fd,lock,LOCK_EX)) >= 0)) {
       if (LOCAL->flagcheck) {	/* sweep mailbox for changed message status */
@@ -805,7 +805,8 @@ long mbx_ping (MAILSTREAM *stream)
 	  LOCAL->flagcheck =NIL;/* got all the updates */
 	}
       }
-      else if (i) ret = mbx_parse (stream);
+				/* always reparse header at least */
+      else ret = mbx_parse (stream);
       if (ret && snarf) {	/* snarf new messages if still OK */
 	mbx_snarf (stream);
 				/* parse snarfed messages */
@@ -1077,7 +1078,7 @@ long mbx_copy (MAILSTREAM *stream,char *sequence,char *mailbox,long options)
 long mbx_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
 {
   struct stat sbuf;
-  int fd,ld,c;
+  int fd,ld;
   char *flags,*date,tmp[MAILTMPLEN],file[MAILTMPLEN],lock[MAILTMPLEN];
   time_t tp[2];
   FILE *df;
@@ -1149,10 +1150,11 @@ long mbx_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
       if (fprintf (df,"%s,%lu;%08lx%04lx-%08lx\015\012",tmp,i = SIZE (message),
 		   uf,(unsigned long) f,++dstream->uid_last) < 0) ret = NIL;
       else {			/* write message */
+	size_t j;
 	if (!message->cursize) SETPOS (message,GETPOS (message));
-	while (i && (fwrite (message->curpos,message->cursize,1,df) != EOF)) {
-	  i -= message->cursize;
-	  SETPOS (message,GETPOS (message) + message->cursize);
+	while (i && (j = fwrite (message->curpos,1,message->cursize,df))) {
+	  i -= j;
+	  SETPOS (message,GETPOS (message) + j);
 	}
 				/* get next message */
 	if (i || !MM_APPEND (af) (dstream,data,&flags,&date,&message))

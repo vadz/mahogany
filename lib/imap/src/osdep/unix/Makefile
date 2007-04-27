@@ -1,5 +1,5 @@
 # ========================================================================
-# Copyright 1988-2006 University of Washington
+# Copyright 1988-2007 University of Washington
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #		Internet: MRC@CAC.Washington.EDU
 #
 # Date:		11 May 1989
-# Last Edited:	23 October 2006
+# Last Edited:	1 March 2007
 
 
 # Command line build parameters
@@ -133,7 +133,13 @@ RANLIB=ranlib
 # Standard distribution build parameters
 
 DEFAULTAUTHENTICATORS=ext md5 pla log
-DEFAULTDRIVERS=imap nntp pop3 mx mix mbx tenex mtx mmdf unix news mh phile
+#
+# mh needs to be after any other directory format drivers (such as mx or mix)
+# since otherwise mh will seize any directory that is under the mh path.
+# However, mh needs to be before any sysinbox formats (such as mmdf or unix)
+# since otherwise INBOX won't work correctly when mh_allow_inbox is set.
+#
+DEFAULTDRIVERS=imap nntp pop3 mix mx mbx tenex mtx mh mmdf unix news phile
 CHUNKSIZE=65536
 
 # Normally no need to change any of these
@@ -473,7 +479,7 @@ isc:	# Interactive
 	 RANLIB=true
 
 lnp:	# Linux Pluggable Authentication modules
-	$(BUILD) `$(CAT) SPECIALS` OS=lnx \
+	$(BUILD) `$(CAT) SPECIALS` OS=slx \
 	 SIGTYPE=psx CHECKPW=pam CRXTYPE=nfs \
 	 SPOOLDIR=/var/spool \
 	 ACTIVEFILE=/var/lib/news/active \
@@ -870,7 +876,7 @@ smtp.o: mail.h misc.h osdep.h smtp.h rfc822.h
 rfc822.o: mail.h misc.h osdep.h rfc822.h
 tenex.o: mail.h misc.h osdep.h dummy.h
 unix.o: mail.h misc.h osdep.h unix.h pseudo.h dummy.h
-utf8.o: mail.h misc.h osdep.h utf8.h
+utf8.o: mail.h misc.h osdep.h utf8.h tmap.c widths.c
 utf8aux.o: mail.h misc.h osdep.h utf8.h
 
 
@@ -929,7 +935,7 @@ ip_unix.c:
 	@false
 
 os_sol.h:
-	sh -c '(strings /lib/libc.a | grep getpassphrase > /dev/null) && $(LN) os_soln.h os_sol.h || $(LN) os_solo.h os_sol.h'
+	sh -c 'if [ -f /lib/libc.a ]; then (strings /lib/libc.a | grep getpassphrase > /dev/null) && $(LN) os_soln.h os_sol.h || $(LN) os_solo.h os_sol.h ; else $(LN) os_soln.h os_sol.h ; fi'
 
 
 # Once-only environment setup

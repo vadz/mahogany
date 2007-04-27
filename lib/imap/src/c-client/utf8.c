@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,13 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	11 June 1997
- * Last Edited:	12 October 2006
+ * Last Edited:	16 March 2007
  */
 
 
 #include <stdio.h>
 #include <ctype.h>
-#include "mail.h"
-#include "osdep.h"
-#include "misc.h"
-#include "rfc822.h"
-#include "utf8.h"
+#include "c-client.h"
 
 /*	*** IMPORTANT ***
  *
@@ -243,6 +239,7 @@ static const CHARSET utf8_csvalid[] = {
   {"IBM874",CT_1BYTE,(void *) ibm_874tab,SC_THAI,"ISO-8859-11"},
 				/* deepest sigh */
   {"ANSI_X3.4-1968",CT_ASCII,NIL,NIL,"US-ASCII"},
+  {"UNICODE-1-1-UTF-7",CT_UTF7,NIL,SC_UNICODE,"UTF-8"},
 				/* these should never appear in email */
   {"UCS-2",CT_UCS2,NIL,SC_UNICODE,"UTF-8"},
   {"UCS-4",CT_UCS4,NIL,SC_UNICODE,"UTF-8"},
@@ -870,7 +867,7 @@ long ucs4_rmapbuf (unsigned char *t,unsigned long *ucs4,unsigned long len,
   return LONGT;
 }
 
-/* Return UCS-4 character from UTF-8 string
+/* Return UCS-4 Unicode character from UTF-8 string
  * Accepts: pointer to string
  *	    remaining octets in string
  * Returns: UCS-4 character with pointer and count updated
@@ -879,12 +876,37 @@ long ucs4_rmapbuf (unsigned char *t,unsigned long *ucs4,unsigned long len,
 
 unsigned long utf8_get (unsigned char **s,unsigned long *i)
 {
+  unsigned char *t = *s;
+  unsigned long j = *i;
+				/* decode raw UTF-8 string */
+  unsigned long ret = utf8_get_raw (&t,&j);
+  if (ret & U8G_ERROR);		/* invalid raw UTF-8 decoding? */
+				/* no, is it surrogate? */
+  else if ((ret >= UTF16_SURR) && (ret <= UTF16_MAXSURR)) ret = U8G_SURROGA;
+				/* or in non-Unicode ISO 10646 space? */
+  else if (ret > UCS4_MAXUNICODE) ret = U8G_NOTUNIC;
+  else {
+    *s = t;			/* all is well, update pointer */
+    *i = j;			/* and counter */
+  }
+  return ret;			/* return value */
+}
+
+/* Return raw (including non-Unicode) UCS-4 character from UTF-8 string
+ * Accepts: pointer to string
+ *	    remaining octets in string
+ * Returns: UCS-4 character with pointer and count updated
+ *	    or error code with pointer and count unchanged
+ */
+
+unsigned long utf8_get_raw (unsigned char **s,unsigned long *i)
+{
   unsigned char c;
   unsigned char *t = *s;
   unsigned long j = *i;
   unsigned long ret = U8G_NOTUTF8;
   int more = 0;
-  do {				/* make sure have soure octets available */
+  do {				/* make sure have source octets available */
     if (!j--) return more ? U8G_ENDSTRI : U8G_ENDSTRG;
 				/* UTF-8 continuation? */
     else if (((c = *t++) > 0x7f) && (c < 0xc0)) {
@@ -898,21 +920,25 @@ unsigned long utf8_get (unsigned char **s,unsigned long *i)
     else if (more) return U8G_INCMPLT;
     else {			/* start of sequence */
       if (c < 0x80) ret = c;	/* U+0000 - U+007f */
+				/* multi-octet, make sure more to come */
+      else if (!j) return U8G_ENDSTRI;
+      else if (c < 0xc2);	/* c0 and c1 never valid */
       else if (c < 0xe0) {	/* U+0080 - U+07ff */
-	if (c &= 0x1f) more = 1;/* first 5 bits of 12 */
+	if (c &= 0x1f) more = 1;
       }
-      else if (c < 0xf0) {	/* U+1000 - U+ffff */
-	if (c &= 0x0f) more = 2;/* first 4 bits of 16 */
+      else if (c < 0xf0) {	/* U+0800 - U+ffff */
+	if ((c &= 0x0f) || (*t >= 0xa0)) more = 2;
       }
       else if (c < 0xf8) {	/* U+10000 - U+10ffff (and 110000 - 1fffff) */
-	if (c &= 0x07) more = 3;/* first 3 bits of 20.5 (21) */
+	if ((c &= 0x07) || (*t >= 0x90)) more = 3;
       }
-      else if (c < 0xfc) {	/* ISO 10646 200000 - 3fffffff */
-	if (c &= 0x03) more = 4;/* first 2 bits of 26 */
+      else if (c < 0xfc) {	/* ISO 10646 200000 - 3ffffff */
+	if ((c &= 0x03) || (*t >= 0x88)) more = 4;
       }
-      else if (c < 0xfe) {	/* ISO 10646 4000000 - 7fffffff*/
-	if (c &= 0x01) more = 5;/* first bit of 31 */
+      else if (c < 0xfe) {	/* ISO 10646 4000000 - 7fffffff */
+	if ((c &= 0x01) || (*t >= 0x84)) more = 5;
       }
+				/* fe and ff never valid */
       if (more) ret = c;	/* continuation needed, save start bits */
     }
   } while (more);
@@ -1083,13 +1109,13 @@ unsigned long ucs4_cs_get (CHARSET *cs,unsigned char **s,unsigned long *i)
     else return U8G_ENDSTRI;	/* empty string */
     ret |= c;
 				/* surrogate? */
-    if ((ret >= 0xd800) && (ret <= 0xdfff)) {
+    if ((ret >= UTF16_SURR) && (ret <= UTF16_MAXSURR)) {
 				/* invalid first surrogate */
-      if ((ret > 0xdbff) || (j < 2)) return U8G_NOTUTF8;
+      if ((ret > UTF16_SURRHEND) || (j < 2)) return U8G_NOTUTF8;
       j -= 2;			/* count two octets */
       d = (*t++) << 8;		/* first octet of second surrogate */
       d |= *t++;		/* second octet of second surrogate */
-      if ((d < 0xdc00) || (d > 0xdfff)) return U8G_NOTUTF8;
+      if ((d < UTF16_SURRL) || (d > UTF16_SURRLEND)) return U8G_NOTUTF8;
       ret = 0x10000 + ((ret & 0x3ff) << 10) + (d & 0x3ff);
     }
     break;
@@ -1890,15 +1916,15 @@ void utf8_text_utf16 (SIZEDTEXT *text,SIZEDTEXT *ret,ucs4cn_t cv,ucs4de_t de)
     c = *t++ << 8;
     c |= *t++;
 				/* possible surrogate? */
-    if ((c >= 0xd800) && (c <= 0xdfff)) {
+    if ((c >= UTF16_SURR) && (c <= UTF16_MAXSURR)) {
 				/* invalid first surrogate */
-      if ((c > 0xdbff) || !i) c = UBOGON;
+      if ((c > UTF16_SURRHEND) || !i) c = UBOGON;
       else {			/* get second surrogate */
 	d = *t++ << 8;
 	d |= *t++;
 	--i;			/* swallowed another 16-bits */
 				/* invalid second surrogate */
-	if ((d < 0xdc00) || (d > 0xdfff)) c = UBOGON;
+	if ((d < UTF16_SURRL) || (d > UTF16_SURRLEND)) c = UBOGON;
 	else c = 0x10000 + ((c & 0x3ff) << 10) + (d & 0x3ff);
       }
     }
@@ -1909,15 +1935,15 @@ void utf8_text_utf16 (SIZEDTEXT *text,SIZEDTEXT *ret,ucs4cn_t cv,ucs4de_t de)
     c = *t++ << 8;
     c |= *t++;
 				/* possible surrogate? */
-    if ((c >= 0xd800) && (c <= 0xdfff)) {
+    if ((c >= UTF16_SURR) && (c <= UTF16_MAXSURR)) {
 				/* invalid first surrogate */
-      if ((c > 0xdbff) || !i) c = UBOGON;
+      if ((c > UTF16_SURRHEND) || !i) c = UBOGON;
       else {			/* get second surrogate */
 	d = *t++ << 8;
 	d |= *t++;
 	--i;			/* swallowed another 16-bits */
 				/* invalid second surrogate */
-	if ((d < 0xdc00) || (d > 0xdfff)) c = UBOGON;
+	if ((d < UTF16_SURRL) || (d > UTF16_SURRLEND)) c = UBOGON;
 	else c = 0x10000 + ((c & 0x3ff) << 10) + (d & 0x3ff);
       }
     }
@@ -2005,15 +2031,36 @@ unsigned long ucs4_titlecase (unsigned long c)
 long ucs4_width (unsigned long c)
 {
   long ret;
-  if (c >= UCS4_WIDLEN) {	/* not in BMP, SMP, or SIP */
-    if (c > UCS4_MAXUNICODE) return U4W_NOTUNCD;
-    if (c >= UCS4_PVTBASE) return U4W_PRIVATE;
-    if (c >= UCS4_SSPBASE) return U4W_SSPCHAR;
-    return U4W_UNASSGN;		/* unassigned space char */
+				/* out of range, not-a-char, or surrogates */
+  if ((c > UCS4_MAXUNICODE) || ((c & 0xfffe) == 0xfffe) ||
+      ((c >= UTF16_SURR) && (c <= UTF16_MAXSURR))) ret = U4W_NOTUNCD;
+				/* private-use */
+  else if (c >= UCS4_PVTBASE) ret = U4W_PRIVATE;
+				/* SSP are not printing characters */
+  else if (c >= UCS4_SSPBASE) ret = U4W_SSPCHAR;
+				/* unassigned planes */
+  else if (c >= UCS4_UNABASE) ret = U4W_UNASSGN;
+				/* SIP and reserved plane 3 are wide */
+  else if (c >= UCS4_SIPBASE) ret = 2;
+#if (UCS4_WIDLEN != UCS4_SIPBASE)
+#error "UCS4_WIDLEN != UCS4_SIPBASE"
+#endif
+				/* C0/C1 controls */
+  else if ((c <= UCS2_C0CONTROLEND) ||
+	   ((c >= UCS2_C1CONTROL) && (c <= UCS2_C1CONTROLEND)))
+    ret = U4W_CONTROL;
+				/* BMP and SMP get value from table */
+  else switch (ret = (ucs4_widthtab[(c >> 2)] >> ((3 - (c & 0x3)) << 1)) &0x3){
+  case 0:			/* zero-width */
+    if (c == 0x00ad) ret = 1;	/* force U+00ad (SOFT HYPHEN) to width 1 */
+  case 1:			/* single-width */
+  case 2:			/* double-width */
+    break;
+  case 3:			/* ambiguous width */
+    ret = (c >= 0x2100) ? 2 : 1;/* need to do something better than this */
+    break;
   }
-				/* get value from table (is this best way?) */
-  ret = (ucs4_widthtab[(c >> 2)] >> ((3 - (c & 0x3)) << 1)) & 0x3;
-  return (ret == 3) ? U4W_CTLSRGT : ret;
+  return ret;
 }
 
 /* Return screen width of UTF-8 string

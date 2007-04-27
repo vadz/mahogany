@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	1 August 1988
- * Last Edited:	16 September 2006
+ * Last Edited:	31 January 2007
  */
 
 #include "ip_unix.c"
@@ -250,8 +250,16 @@ int tcp_socket_open (int family,void *adr,size_t adrlen,unsigned short port,
     sprintf (tmp,"Unable to create TCP socket: %s",strerror (errno));
     (*bn) (BLOCK_NONSENSITIVE,data);
   }
-  else {
-				/* get current socket flags */
+  else if (sock >= FD_SETSIZE) {/* unselectable sockets are useless */
+    sprintf (tmp,"Unable to create selectable TCP socket (%d >= %d)",
+	     sock,FD_SETSIZE);
+    (*bn) (BLOCK_NONSENSITIVE,data);
+    close (sock);
+    sock = -1;
+    errno = EMFILE;
+  }
+
+  else {			/* get current socket flags */
     flgs = fcntl (sock,F_GETFL,0);
 				/* set non-blocking if want open timeout */
     if (ctr) fcntl (sock,F_SETFL,flgs | FNDELAY);
@@ -271,7 +279,6 @@ int tcp_socket_open (int family,void *adr,size_t adrlen,unsigned short port,
       close (sock);		/* flush socket */
       sock = -1;
     }
-
     if ((sock >= 0) && ctr) {	/* want open timeout? */
       now = time (0);		/* open timeout */
       ti = ttmo_open ? now + ttmo_open : 0;
@@ -320,22 +327,28 @@ TCPSTREAM *tcp_aopen (NETMBX *mb,char *service,char *usrbuf)
 {
   TCPSTREAM *stream = NIL;
   void *adr;
-  char host[MAILTMPLEN],tmp[MAILTMPLEN],*path,*argv[MAXARGV+1];
+  char host[MAILTMPLEN],tmp[MAILTMPLEN],*path,*argv[MAXARGV+1],*r;
   int i,ti,pipei[2],pipeo[2];
   size_t len;
   time_t now;
   struct timeval tmo;
   fd_set fds,efds;
   blocknotify_t bn = (blocknotify_t) mail_parameters (NIL,GET_BLOCKNOTIFY,NIL);
+#ifdef SSHPATH			/* ssh path defined yet? */
+  if (!sshpath) sshpath = cpystr (SSHPATH);
+#endif
+#ifdef RSHPATH			/* rsh path defined yet? */
+  if (!rshpath) rshpath = cpystr (RSHPATH);
+#endif
   if (*service == '*') {	/* want ssh? */
 				/* return immediately if ssh disabled */
     if (!(sshpath && (ti = sshtimeout))) return NIL;
 				/* ssh command prototype defined yet? */
     if (!sshcommand) sshcommand = cpystr ("%s %s -l %s exec /etc/r%sd");
   }
-  else if (ti = rshtimeout) {	/* set rsh timeout */
-				/* rsh path/command prototypes defined yet? */
-    if (!rshpath) rshpath = cpystr (RSHPATH);
+				/* want rsh? */
+  else if (rshpath && (ti = rshtimeout)) {
+				/* rsh command prototype defined yet? */
     if (!rshcommand) rshcommand = cpystr ("%s %s -l %s exec /etc/r%sd");
   }
   else return NIL;		/* rsh disabled */
@@ -364,32 +377,36 @@ TCPSTREAM *tcp_aopen (NETMBX *mb,char *service,char *usrbuf)
     mm_log (msg,TCPDEBUG);
   }
 				/* parse command into argv */
-  for (i = 1,path = argv[0] = strtok (tmp," ");
-       (i < MAXARGV) && (argv[i] = strtok (NIL," ")); i++);
+  for (i = 1,path = argv[0] = strtok_r (tmp," ",&r);
+       (i < MAXARGV) && (argv[i] = strtok_r (NIL," ",&r)); i++);
   argv[i] = NIL;		/* make sure argv tied off */
 				/* make command pipes */
   if (pipe (pipei) < 0) return NIL;
-  if (pipe (pipeo) < 0) {
+  if ((pipei[0] >= FD_SETSIZE) || (pipei[1] >= FD_SETSIZE) ||
+      (pipe (pipeo) < 0)) {
     close (pipei[0]); close (pipei[1]);
     return NIL;
   }
   (*bn) (BLOCK_TCPOPEN,NIL);	/* quell alarm up here for NeXT */
-  if ((i = fork ()) < 0) {	/* make inferior process */
+  if ((pipeo[0] >= FD_SETSIZE) || (pipeo[1] >= FD_SETSIZE) ||
+      ((i = fork ()) < 0)) {	/* make inferior process */
     close (pipei[0]); close (pipei[1]);
     close (pipeo[0]); close (pipeo[1]);
+    (*bn) (BLOCK_NONE,NIL);
     return NIL;
   }
   if (!i) {			/* if child */
     alarm (0);			/* never have alarms in children */
     if (!fork ()) {		/* make grandchild so it's inherited by init */
+      int cf;			/* don't alter parent vars in case vfork() */
       int maxfd = max (20,max (max(pipei[0],pipei[1]),max(pipeo[0],pipeo[1])));
       dup2 (pipei[1],1);	/* parent's input is my output */
       dup2 (pipei[1],2);	/* parent's input is my error output too */
       dup2 (pipeo[0],0);	/* parent's output is my input */
 				/* close all unnecessary descriptors */
-      for (i = 3; i <= maxfd; i++) close (i);
+      for (cf = 3; cf <= maxfd; cf++) close (cf);
       setpgrp (0,getpid ());	/* be our own process group */
-      execv (path,argv);	/* now run it */
+      _exit (execv (path,argv));/* now run it */
     }
     _exit (1);			/* child is done */
   }
@@ -951,7 +968,7 @@ char *tcp_name (struct sockaddr *sadr,long flag)
 }
 
 
-/* Validate name
+/* TCP/IP validate name
  * Accepts: domain name
  * Returns: name if valid, NIL otherwise
  */
@@ -968,5 +985,30 @@ char *tcp_name_valid (char *s)
 	    ((c >= '0') && (c <= '9')) || (c == '-') || (c == '.')));
     if (c) ret = NIL;
   }
+  return ret;
+}
+
+/* TCP/IP check if client is given host name
+ * Accepts: candidate host name
+ * Returns: T if match, NIL otherwise
+ */
+
+long tcp_isclienthost (char *host)
+{
+  int family;
+  size_t adrlen,sadrlen,len;
+  void *adr,*next;
+  struct sockaddr *sadr;
+  long ret = NIL;
+				/* make sure that myClientAddr is set */
+  if (tcp_clienthost () && myClientAddr)
+				/* get sockaddr of client */
+    for (adr = ip_nametoaddr (host,&adrlen,&family,NIL,&next); adr && !ret;
+	 adr = ip_nametoaddr (NIL,&adrlen,&family,NIL,&next)) {
+				/* build sockaddr of given address */
+      sadr = ip_sockaddr (family,adr,adrlen,1,&len);
+      if (!strcmp (myClientAddr,ip_sockaddrtostring (sadr))) ret = LONGT;
+      fs_give ((void **) &sadr);	/* done with client sockaddr */
+    }
   return ret;
 }

@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	11 June 1997
- * Last Edited:	21 September 2006
+ * Last Edited:	16 March 2007
  */
 
 /* UTF-8 size and conversion routines from UCS-2 values (thus in the BMP).
@@ -65,6 +65,8 @@
 #define U8G_NOTUTF8 U8G_ERROR+3	/* not a valid UTF-8 octet */
 #define U8G_ENDSTRG U8G_ERROR+4	/* end of string */
 #define U8G_ENDSTRI U8G_ERROR+5	/* end of string w/ incomplete UTF-8 char */
+#define U8G_SURROGA U8G_ERROR+6	/* surrogate codepoint */
+#define U8G_NOTUNIC U8G_ERROR+7	/* non-Unicode codepoint */
 
 
 /* ucs4_width() return values */
@@ -74,7 +76,8 @@
 #define U4W_PRIVATE U4W_ERROR+2	/* private-space plane */
 #define U4W_SSPCHAR U4W_ERROR+3	/* Supplementary Special-purpose Plane */
 #define U4W_UNASSGN U4W_ERROR+4	/* unassigned space plane */
-#define U4W_CTLSRGT U4W_ERROR+5	/* C0/C1 control or surrogate */
+#define U4W_CONTROL U4W_ERROR+5	/* C0/C1 control */
+#define U4W_CTLSRGT U4W_CONTROL	/* in case legacy code references this */
 
 /* ISO-2022 engine states */
 
@@ -333,6 +336,11 @@
 
 /* Unicode codepoints */
 
+#define UCS2_C0CONTROL 0x00	/* first C0 control */
+#define UCS2_C0CONTROLEND 0x1F	/* last C0 control */
+#define UCS2_C1CONTROL 0x80	/* first C1 control */
+#define UCS2_C1CONTROLEND 0x9F	/* last C1 control */
+
 				/* ISO 646 substituted Unicode codepoints */
 #define UCS2_POUNDSTERLING 0x00a3
 #define UCS2_YEN 0x00a5
@@ -346,9 +354,18 @@
 #define UCS4_BMPBASE 0x0000	/* Basic Multilingual Plane */
 #define UCS4_SMPBASE 0x10000	/* Supplementary Multilinugual Plane */
 #define UCS4_SIPBASE 0x20000	/* Supplementary Ideographic Plane */
+				/* EastAsianWidth says plane 3 is wide */
+#define UCS4_UNABASE 0x40000	/* unassigned space */
 #define UCS4_SSPBASE 0xe0000	/* Supplementary Special-purpose Plane */
 #define UCS4_PVTBASE 0xf0000	/* private-space (two planes) */
 #define UCS4_MAXUNICODE 0x10ffff/* highest Unicode codepoint */
+
+#define UTF16_SURR 0xd800	/* UTF-16 surrogate area */
+#define UTF16_SURRH 0xd800	/* UTF-16 first high surrogate */
+#define UTF16_SURRHEND 0xdbff	/* UTF-16 last high surrogate */
+#define UTF16_SURRL 0xdc00	/* UTF-16 first low surrogate */
+#define UTF16_SURRLEND 0xdfff	/* UTF-16 last low surrogate */
+#define UTF16_MAXSURR 0xdfff	/* end of UTF-16 surrogates */
 
 
 /*  UBOGON is used to represent a codepoint in a character set which does not
@@ -361,7 +378,7 @@
 #define UBOGON UCS2_BOGON
 #define NOCHAR 0xffff
 
-/* Non-Unicode codepoints */
+/* Codepoints in non-Unicode character sets */
 
 /* Codepoints in ISO 646 character sets */
 
@@ -515,6 +532,7 @@ long ucs4_rmaplen (unsigned long *ucs4,unsigned long len,unsigned short *rmap,
 long ucs4_rmapbuf (unsigned char *t,unsigned long *ucs4,unsigned long len,
 		   unsigned short *rmap,unsigned long errch);
 unsigned long utf8_get (unsigned char **s,unsigned long *i);
+unsigned long utf8_get_raw (unsigned char **s,unsigned long *i);
 unsigned long ucs4_cs_get (CHARSET *cs,unsigned char **s,unsigned long *i);
 const CHARSET *utf8_infercharset (SIZEDTEXT *src);
 long utf8_validate (unsigned char *s,unsigned long i);
@@ -543,10 +561,3 @@ long ucs4_width (unsigned long c);
 long utf8_strwidth (unsigned char *s);
 long utf8_textwidth (SIZEDTEXT *utf8);
 unsigned long ucs4_decompose (unsigned long c,void **more);
-void utf8_searchpgm (SEARCHPGM *pgm,char *charset);
-long utf8_mime2text (SIZEDTEXT *src,SIZEDTEXT *dst,long flags);
-unsigned char *mime2_token (unsigned char *s,unsigned char *se,
-			    unsigned char **t);
-unsigned char *mime2_text (unsigned char *s,unsigned char *se);
-long mime2_decode (unsigned char *e,unsigned char *t,unsigned char *te,
-		   SIZEDTEXT *txt);
