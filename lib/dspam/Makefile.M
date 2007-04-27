@@ -39,5 +39,6 @@ $(DRIVER):
 
 clean:
 	$(MAKE) -C src clean
+	@$(RM) src/libhash_drv.la
 
 .PHONY: all clean
