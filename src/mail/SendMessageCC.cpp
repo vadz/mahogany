@@ -1842,8 +1842,9 @@ SendMessageCC::Send(int flags)
 #endif // USE_SSL
 
    // prepare the hostlist for c-client: we use only one server
+   wxCharBuffer serverAsCharBuf(server.mb_str());
    char *hostlist[2];
-   hostlist[0] = server.char_str();
+   hostlist[0] = (char *)serverAsCharBuf.data();
    hostlist[1] = NIL;
 
    // preview message being sent if asked for it
