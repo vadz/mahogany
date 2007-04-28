@@ -276,6 +276,11 @@ _hash_drv_lock_get (
   struct _hash_drv_storage *s,
   const char *username)
 {
+  /* FIXME-WIN32: use a global mutex for locking */
+#ifdef WIN32
+  CTX; s; username;
+  return 0;
+#else
   char filename[MAX_FILENAME_LENGTH];
   int r;
 
@@ -293,6 +298,7 @@ _hash_drv_lock_get (
     LOG(LOG_ERR, ERR_IO_LOCK, filename, r, strerror(errno));
   }
   return r;
+#endif
 }
 
 int
@@ -300,6 +306,11 @@ _hash_drv_lock_free (
   struct _hash_drv_storage *s, 
   const char *username)
 {
+  /* FIXME-WIN32: use a global mutex for locking */
+#ifdef WIN32
+  s; username;
+  return 0;
+#else
   int r;
 
   if (username == NULL)
@@ -313,6 +324,7 @@ _hash_drv_lock_free (
   }
 
   return r;
+#endif
 }
 
 int _hash_drv_open(
