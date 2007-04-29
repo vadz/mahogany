@@ -30,6 +30,7 @@
 #include "config.h"
 #include "nodetree.h"
 #include "libdspam.h"
+#include "libdspam.h"
 
 #define HASH_REC_MAX	98317
 #define HASH_EXTENT_MAX 49157
@@ -59,7 +60,7 @@ typedef struct _hash_drv_map
 struct _hash_drv_storage
 {
   hash_drv_map_t map;
-  FILE *lock;
+  _ds_lock_t lock;
   int dbh_attached;
 
   unsigned long offset_nexttoken;

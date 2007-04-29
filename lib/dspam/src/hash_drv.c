@@ -276,29 +276,23 @@ _hash_drv_lock_get (
   struct _hash_drv_storage *s,
   const char *username)
 {
-  /* FIXME-WIN32: use a global mutex for locking */
-#ifdef WIN32
-  CTX; s; username;
-  return 0;
-#else
   char filename[MAX_FILENAME_LENGTH];
   int r;
 
   _ds_userdir_path(filename, CTX->home, username, "lock");
-  _ds_prepare_path_for(filename);
+  s->lock = _ds_open_lock(filename);
 
-  s->lock = fopen(filename, "a");
   if (s->lock == NULL) {
     LOG(LOG_ERR, ERR_IO_FILE_OPEN, filename, strerror(errno));
     return EFAILURE;
   }
-  r = _ds_get_fcntl_lock(fileno(s->lock));
+  r = _ds_acquire_lock(s->lock);
   if (r) {
-    fclose(s->lock);
+    _ds_close_lock(s->lock);
+    s->lock = NULL;
     LOG(LOG_ERR, ERR_IO_LOCK, filename, r, strerror(errno));
   }
   return r;
-#endif
 }
 
 int
@@ -306,25 +300,20 @@ _hash_drv_lock_free (
   struct _hash_drv_storage *s, 
   const char *username)
 {
-  /* FIXME-WIN32: use a global mutex for locking */
-#ifdef WIN32
-  s; username;
-  return 0;
-#else
   int r;
 
   if (username == NULL)
     return 0;
 
-  r = _ds_free_fcntl_lock(fileno(s->lock));
+  r = _ds_release_lock(s->lock);
   if (!r) {
-    fclose(s->lock);
+    _ds_close_lock(s->lock);
+    s->lock = NULL;
   } else {
     LOG(LOG_ERR, ERR_IO_LOCK_FREE, username, r, strerror(errno));
   }
 
   return r;
-#endif
 }
 
 int _hash_drv_open(

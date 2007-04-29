@@ -27,6 +27,7 @@
 #include <auto-config.h>
 #endif
 
+#include "config.h"
 #include <sys/types.h>
 
 #ifndef _WIN32
@@ -111,8 +112,31 @@ int	_ds_extract_address(
 
 double	_ds_gettime(void);
 
+/*
+ * Functions for working with locks.
+ *
+ * We use lock files under Unix and named mutexes under Win32. A lock must
+ * first be opened, then an attempt to acquire it can be made and, whether it
+ * succeeded or not, it must be closed, after releasing it if we did acquire
+ * it, later.
+ */
+
+/* Initializes the object used for locking, must call _ds_close_lock() later. */
+_ds_lock_t _ds_open_lock(const char *name);
+
+/* Try to acquire the lock opened by _ds_open_lock(). Return 0 on success. */
+int _ds_acquire_lock(_ds_lock_t lock);
+
+/* Release the lock acquired previously by _ds_acquire_lock() */
+int _ds_release_lock(_ds_lock_t lock);
+
+/* Close the lock object. Should release it before if we had locked it. */
+void _ds_close_lock(_ds_lock_t lock);
+
+#ifndef _WIN32
 int _ds_get_fcntl_lock  (int fd);
 int _ds_free_fcntl_lock (int fd);
+#endif
 
 unsigned long long _ds_getcrc64
   (const char *);

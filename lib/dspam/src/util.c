@@ -624,12 +624,74 @@ double chi2Q (double x, int v)
   return MIN(s, 1.0);
 }
 
-int _ds_get_fcntl_lock(int fd) {
 #ifdef _WIN32
-  UNUSED(fd);
 
+_ds_lock_t _ds_open_lock(const char *name)
+{
+  _ds_lock_t h;
+
+  /* the mutex name can't contain backslashes, so change them to slashes */
+  char *p,
+       *n = strdup(name);
+  for ( p = n; *p; p++ )
+  {
+    if ( *p == '\\' )
+      *p = '/';
+  } 
+
+  h = CreateMutex(NULL, FALSE, n);
+  free(n);
+
+  return h;
+}
+
+int _ds_acquire_lock(_ds_lock_t lock)
+{
+  UNUSED(lock);
+
+  /* we don't have to do anything to acquire it, we just need to check if we
+   * opened an existing mutex or created a new one */
+  return GetLastError() != ERROR_ALREADY_EXISTS;
+}
+
+int _ds_release_lock(_ds_lock_t lock)
+{
+  UNUSED(lock);
+
+  /* nothing to do */
   return 0;
-#else
+}
+
+void _ds_close_lock(_ds_lock_t lock)
+{
+  CloseHandle(lock);
+}
+
+#else /* !_WIN32 */
+
+_ds_lock_t _ds_open_lock(const char *name)
+{
+  _ds_prepare_path_for(name);
+
+  return fopen(name, "a");
+}
+
+int _ds_acquire_lock(_ds_lock_t lock)
+{
+  return _ds_get_fcntl_lock(fileno(lock));
+}
+
+int _ds_release_lock(_ds_lock_t lock)
+{
+  return _ds_free_fcntl_lock(fileno(lock));
+}
+
+void _ds_close_lock(_ds_lock_t lock)
+{
+  fclose(lock);
+}
+
+int _ds_get_fcntl_lock(int fd) {
   struct flock f;
 
   f.l_type = F_WRLCK;
@@ -638,15 +700,9 @@ int _ds_get_fcntl_lock(int fd) {
   f.l_len = 0;
 
   return fcntl(fd, F_SETLKW, &f);
-#endif
 }
 
 int _ds_free_fcntl_lock(int fd) {
-#ifdef _WIN32
-  UNUSED(fd);
-
-  return 0;
-#else
   struct flock f;
                                                                                 
   f.l_type = F_UNLCK;
@@ -655,8 +711,9 @@ int _ds_free_fcntl_lock(int fd) {
   f.l_len = 0;
 
   return fcntl(fd, F_SETLKW, &f);
-#endif
 } 
+
+#endif /* _WIN32/!_WIN32 */
 
 int _ds_pow2(int exp) {
   int j = 1, i;

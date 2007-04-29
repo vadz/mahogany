@@ -105,4 +105,10 @@ OLD DELIMITERS
 #define LLU_FMT_SPEC "llu"
 #endif
 
+#ifdef _WIN32
+typedef void *_ds_lock_t;
+#else
+typedef FILE *_ds_lock_t;
+#endif
+
 #endif
