@@ -651,7 +651,7 @@ int _ds_acquire_lock(_ds_lock_t lock)
 
   /* we don't have to do anything to acquire it, we just need to check if we
    * opened an existing mutex or created a new one */
-  return GetLastError() != ERROR_ALREADY_EXISTS;
+  return GetLastError() == ERROR_ALREADY_EXISTS ? ENOLCK : 0;
 }
 
 int _ds_release_lock(_ds_lock_t lock)

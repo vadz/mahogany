@@ -537,7 +537,7 @@ _ds_init_storage (DSPAM_CTX * CTX, void *dbh)
 
     lock_result = _hash_drv_lock_get (CTX, s, 
       (CTX->group) ? CTX->group : CTX->username);
-    if (lock_result < 0) 
+    if (lock_result) 
       goto BAIL;
 
     ret = _hash_drv_open(db, s->map, s->hash_rec_max, s->max_seek, 
