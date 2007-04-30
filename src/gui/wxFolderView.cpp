@@ -4457,13 +4457,13 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
                 View, Group reply (== followup), List reply, Next match
             */
             static const wxChar keycodes_en[] = gettext_noop("DUXCSMRFOPHGLN");
-            static const wxChar *keycodes = wxGetTranslation(keycodes_en);
+            static const wxString keycodes(wxGetTranslation(keycodes_en));
 
             long keyOrig = key;
             key = toupper(key);
 
             int idx = 0;
-            for ( ; keycodes[idx] && keycodes[idx] != key; idx++ )
+            for ( ; keycodes[idx] && keycodes[idx] != (char)key; idx++ )
                ;
 
             key = keycodes[idx] ? keycodes_en[idx] : 0;
