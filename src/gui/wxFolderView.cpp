@@ -1571,8 +1571,14 @@ void wxFolderListCtrl::OnFolderChange()
       InvalidateCache();
    }
 
+   // freezing the control under MSW actually results in more flicker, not
+   // less: Thaw() repaints it, but it's also repained when we give it the
+   // focus so it's painted at least twice, while without Freeze/Thaw() it's
+   // still painted correctly and only once
+#ifndef __WXMSW__
    // wait until we get the headers
    Freeze();
+#endif // __WXMSW__
 }
 
 void wxFolderListCtrl::UpdateColumnWidths()
@@ -2359,8 +2365,10 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
 
       m_FolderView->SelectInitialMessage();
 
+#ifndef __WXMSW__
       // we can redraw now
       Thaw();
+#endif // __WXMSW__
    }
 }
 
