@@ -551,7 +551,9 @@ _ds_init_storage (DSPAM_CTX * CTX, void *dbh)
   }
 
   CTX->storage = s;
+#ifndef _WIN32
   s->dir_handles = nt_create (NT_INDEX);
+#endif
 
   if (_hash_drv_get_spamtotals (CTX))
   {
@@ -593,8 +595,8 @@ _ds_shutdown_storage (DSPAM_CTX * CTX)
     closedir (dir);
     node_nt = c_nt_next (s->dir_handles, &c_nt);
   }
-#endif /* _WIN32 */
   nt_destroy (s->dir_handles);
+#endif /* _WIN32 */
 
   if (CTX->operating_mode != DSM_CLASSIFY)
     _hash_drv_set_spamtotals (CTX);
