@@ -48,6 +48,8 @@ extern "C"
 // wrappers around DSPAM_CTX
 // ----------------------------------------------------------------------------
 
+static const char *DSPAM_USER_NAME = "mahogany";
+
 // base class used by DspamProcess/ClassifyCtx
 class DspamCtx
 {
@@ -57,8 +59,8 @@ public:
    {
       m_ctx = dspam_create
               (
-                  "mahogany", // user
-                  NULL,       // no group
+                  DSPAM_USER_NAME,  // user name used as base file name
+                  NULL,             // no group
                   mApplication->GetLocalDir().fn_str(),
                   mode,
                   flags
@@ -75,10 +77,21 @@ public:
 
       // and now that the attributes are set we can attach the context to the
       // storage
-      if ( dspam_attach(m_ctx, NULL) != 0 )
+      if ( dspam_attach(m_ctx, ms_hashMap) != 0 )
       {
          dspam_destroy(m_ctx);
          m_ctx = NULL;
+      }
+      else if ( !ms_hashMap )
+      {
+         // this is the first context we create so it has just mapped the hash
+         // database into memory: tell it to not unmap it when we're done with
+         // it and keep the pointer to reuse for the subsequent contexts
+         _hash_drv_storage *storage = (_hash_drv_storage *)m_ctx->storage;
+         storage->dbh_attached = 1;
+
+         ms_hashMap = storage->map;
+         ms_hashLock = storage->lock;
       }
    }
 
@@ -92,11 +105,33 @@ public:
    operator DSPAM_CTX *() const { return m_ctx; }
    DSPAM_CTX *operator->() const { return m_ctx; }
 
+   // close the database connection 	 
+   static void CloseHashStorage() 	 
+   { 	 
+      if ( ms_hashMap ) 	 
+      { 	 
+         _hash_drv_close(ms_hashMap); 	 
+         free(ms_hashMap);
+         ms_hashMap = NULL; 	 
+
+         _hash_drv_lock_free(&ms_hashLock, DSPAM_USER_NAME);
+      } 	 
+   }
+
 private:
+   // the hash driver data reused by all contexts
+   static hash_drv_map_t ms_hashMap;
+   static _ds_lock_t ms_hashLock;
+
    DSPAM_CTX *m_ctx;
 
    DECLARE_NO_COPY_CLASS(DspamCtx);
 };
+
+hash_drv_map_t DspamCtx::ms_hashMap = NULL;
+_ds_lock_t DspamCtx::ms_hashLock = NULL;
+
+MMODULE_CLEANUP(DspamCtx::CloseHashStorage)
 
 // normal DSPAM context
 class DspamProcessCtx : public DspamCtx
