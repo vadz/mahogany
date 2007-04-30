@@ -297,7 +297,7 @@ _hash_drv_lock_get (
 
 int
 _hash_drv_lock_free (
-  struct _hash_drv_storage *s, 
+  _ds_lock_t *lock, 
   const char *username)
 {
   int r;
@@ -305,10 +305,10 @@ _hash_drv_lock_free (
   if (username == NULL)
     return 0;
 
-  r = _ds_release_lock(s->lock);
+  r = _ds_release_lock(*lock);
   if (!r) {
-    _ds_close_lock(s->lock);
-    s->lock = NULL;
+    _ds_close_lock(*lock);
+    *lock = NULL;
   } else {
     LOG(LOG_ERR, ERR_IO_LOCK_FREE, username, r, strerror(errno));
   }
@@ -607,7 +607,7 @@ _ds_shutdown_storage (DSPAM_CTX * CTX)
     _hash_drv_close(s->map);
     free(s->map);
     lock_result =
-      _hash_drv_lock_free (s, (CTX->group) ? CTX->group : CTX->username);
+      _hash_drv_lock_free (&s->lock, (CTX->group) ? CTX->group : CTX->username);
     if (lock_result < 0)
       return EUNKNOWN;
   }

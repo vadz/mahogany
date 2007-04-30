@@ -94,7 +94,7 @@ int _hash_drv_lock_get (
   const char *username);
 
 int _hash_drv_lock_free (
-  struct _hash_drv_storage *s,
+  _ds_lock_t *lock,
   const char *username);
 
 int _hash_drv_open(
