@@ -964,9 +964,9 @@ MailFolder::ReplyMessage(Message *msg,
             if ( wxStrncmp(pStart, replyPrefixStandard, matchLen) != 0 )
             {
                // finally the translation of the standard string
-               const wxChar * const replyPrefixTrans =
-                  wxGetTranslation(replyPrefixStandard);
-               matchLen = wxStrlen(replyPrefixTrans);
+               const wxString
+                  replyPrefixTrans(wxGetTranslation(replyPrefixStandard));
+               matchLen = replyPrefixTrans.length();
                if ( wxStrncmp(pStart, replyPrefixTrans, matchLen) != 0 )
                {
                   // failed to find any reply prefix
