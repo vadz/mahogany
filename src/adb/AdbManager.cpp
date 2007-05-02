@@ -411,42 +411,48 @@ AdbExpandSingleAddress(String *address,
       // this is a non-standard but custom extension: mailto URLs can have
       // extra parameters introduced by '?' and separated by '&'
       const size_t posQuestion  = newText.find('?');
-      for ( size_t posParamStart = posQuestion; posParamStart != String::npos; )
+      if ( posQuestion != String::npos )
       {
-         posParamStart++;
-         size_t posEq = newText.find('=', posParamStart);
-         if ( posEq != String::npos )
-         {
-            size_t posParamEnd = newText.find('&', posEq);
+        size_t posParamStart = posQuestion;
+        do
+        {
+           posParamStart++;
+           size_t posEq = newText.find('=', posParamStart);
+           if ( posEq != String::npos )
+           {
+              size_t posParamEnd = newText.find('&', posEq);
 
-            const String param(newText, posParamStart, posEq - posParamStart),
-                         value(newText, posEq + 1,
-                               posParamEnd == String::npos
-                                 ? posParamEnd
-                                 : posParamEnd - posEq - 1);
-;
-            if ( wxStricmp(param, "subject") == 0 )
-            {
-               *subject = value;
-            }
-            else
-            {
-               // at least cc, bcc and body are also possible
-               wxLogDebug("Ignoring unknown mailto: URL parameter %s=\"%s\"",
-                          param.c_str(), value.c_str());
-            }
+              const String param(newText, posParamStart, posEq - posParamStart),
+                           value(newText, posEq + 1,
+                                 posParamEnd == String::npos
+                                   ? posParamEnd
+                                   : posParamEnd - posEq - 1);
+  ;
+              if ( wxStricmp(param, "subject") == 0 )
+              {
+                 *subject = value;
+              }
+              else
+              {
+                 // at least cc, bcc and body are also possible but we don't
+                 // handle them now
+                 wxLogDebug("Ignoring unknown mailto: URL parameter %s=\"%s\"",
+                            param.c_str(), value.c_str());
+              }
 
-            posParamStart = posParamEnd;
-         }
-         else // unknown parameter
-         {
-            wxLogDebug("Ignoring unknown mailto: URL parameter without value");
+              posParamStart = posParamEnd;
+           }
+           else // unknown parameter
+           {
+              wxLogDebug("Ignoring unknown mailto: URL parameter without value");
 
-            posParamStart = newText.find('&', posParamStart);
-         }
+              posParamStart = newText.find('&', posParamStart);
+           }
+        }
+        while ( posParamStart != String::npos );
+
+        newText.erase(posQuestion, String::npos);
       }
-
-      newText.erase(posQuestion, String::npos);
    }
 
    *address = newText;
