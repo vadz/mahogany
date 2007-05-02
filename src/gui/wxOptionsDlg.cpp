@@ -3797,19 +3797,22 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 #if defined(OS_WIN) && defined(USE_DIALUP)
    if ( bRc )
    {
-      wxCheckBox *chkDialUp =
-         wxStaticCast(GetControl(ConfigField_DialUpSupport), wxCheckBox);
-      if ( chkDialUp )
+      wxControl * const control = GetControl(ConfigField_DialUpSupport);
+      if ( control )
       {
-         if ( chkDialUp->GetValue() )
-            FillDialupConnections();
+         wxCheckBox * const chkDialUp = wxStaticCast(control, wxCheckBox);
+         if ( chkDialUp )
+         {
+            if ( chkDialUp->GetValue() )
+               FillDialupConnections();
 
-         Connect
-         (
-            chkDialUp->GetId(),
-            wxEVT_COMMAND_CHECKBOX_CLICKED,
-            wxCommandEventHandler(wxOptionsPageNetwork::OnDialUp)
-         );
+            Connect
+            (
+               chkDialUp->GetId(),
+               wxEVT_COMMAND_CHECKBOX_CLICKED,
+               wxCommandEventHandler(wxOptionsPageNetwork::OnDialUp)
+            );
+         }
       }
    }
 #endif // USE_DIALUP
