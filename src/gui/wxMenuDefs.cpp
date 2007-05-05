@@ -662,12 +662,13 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
          const wxChar *p = wxStrchr(label, '&');
          if ( p == NULL ) {
             wxLogWarning(_T("Menu label '%s' doesn't have keyboard accelerator."),
-                         label);
+                         label.c_str());
          }
          else {
             char c = toupper(*++p);
             if ( strAccels.Find(c) != -1 ) {
-               wxLogWarning(_T("Duplicate accelerator %c (in '%s')"), c, label);
+               wxLogWarning(_T("Duplicate accelerator %c (in '%s')"),
+                            c, label.c_str());
             }
 
             strAccels += c;
