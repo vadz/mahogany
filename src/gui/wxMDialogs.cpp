@@ -394,7 +394,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   }
 
   // layout
-  long widthLabel, heightLabel;
+  wxCoord widthLabel, heightLabel;
   wxClientDC dc(this);
   dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   dc.GetTextExtent(strPrompt, &widthLabel, &heightLabel);

@@ -25,6 +25,7 @@
 #  include "MApplication.h"
 #  include "Mcclient.h"
 #  include "Mdefaults.h"
+#  include <wx/wxchar.h>               // for wxPrintf/Scanf
 #endif // USE_PCH
 
 #include "gui/wxMDialogs.h"

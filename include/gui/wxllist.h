@@ -306,7 +306,7 @@ public:
 private:
    wxString m_Text;
    /// size of the box containing text
-   long   m_Width, m_Height;
+   wxCoord  m_Width, m_Height;
    /// Height above baseline.
    long   m_Top;
    /// Height below baseline.

@@ -123,7 +123,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
 
    wxClientDC dc(this);
    dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-   long width, widthMax = 0;
+   wxCoord width, widthMax = 0;
 
    // see the comment near sortCriteria definition
    ASSERT_MSG( NUM_CRITERIA < 16, _T("too many sort criteria") );

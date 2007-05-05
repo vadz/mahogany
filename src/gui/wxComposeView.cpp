@@ -46,6 +46,7 @@
 #  include <wx/filedlg.h>
 #  include <wx/stattext.h>
 #  include <wx/dataobj.h>
+#  include <wx/wxchar.h>      // for wxPrintf/Scanf
 #endif // USE_PCH
 
 #ifdef __CYGWIN__

@@ -30,6 +30,7 @@
    #include "MApplication.h"
 
    #include <wx/log.h>           // for wxLogNull
+   #include <wx/wxchar.h>        // for wxPrintf/Scanf
 #endif // USE_PCH
 
 #include <wx/filefn.h>        // for wxMkdir

@@ -32,6 +32,7 @@
 #   include "strutil.h"
 #   include "Mdefaults.h"
 
+#   include <wx/wxchar.h>               // for wxPrintf/Scanf
 #   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 

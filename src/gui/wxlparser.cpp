@@ -20,6 +20,8 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+
+#  include <wx/wxchar.h>               // for wxPrintf/Scanf
 #endif // USE_PCH
 
 #include "gui/wxllist.h"

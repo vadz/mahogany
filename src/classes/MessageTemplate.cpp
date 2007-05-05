@@ -27,6 +27,7 @@
 
 #   include <wx/string.h>       // for wxString
 #   include <wx/log.h>          // for wxLogWarning
+#   include <wx/wxchar.h>       // for wxPrintf/Scanf
 #endif // USE_PCH
 
 #include <wx/textfile.h>        // for wxTextFileType_Unix

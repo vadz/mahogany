@@ -33,6 +33,7 @@
 #  include "gui/wxMFrame.h"
 #  include "gui/wxIconManager.h"
 
+#  include <wx/wxchar.h>         // for wxPrintf/Scanf
 #  include <wx/layout.h>
 #  include <wx/stattext.h>
 #  include <wx/statbox.h>
@@ -149,7 +150,7 @@ long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
 {
    wxClientDC dc(win);
    dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-   long width, widthMax = 0;
+   wxCoord width, widthMax = 0;
 
    size_t nCount = labels.Count();
    for ( size_t n = 0; n < nCount; n++ )

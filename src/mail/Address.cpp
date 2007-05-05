@@ -29,6 +29,7 @@
 
    #include "strutil.h"
    #include "Mdefaults.h"
+   #include "MApplication.h"
 #endif // USE_PCH
 
 #include <wx/hashmap.h>

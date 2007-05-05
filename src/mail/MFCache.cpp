@@ -26,6 +26,8 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+
+   #include <wx/wxchar.h>
 #endif // USE_PCH
 
 #include <wx/textfile.h>

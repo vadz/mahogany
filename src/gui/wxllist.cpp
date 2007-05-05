@@ -44,6 +44,7 @@
 #      include "Mcommon.h"
 #   endif
 
+#   include <wx/wxchar.h>        // for wxPrintf/Scanf
 #   include <wx/dc.h>
 #   include <wx/dcps.h>
 #   include <wx/print.h>
@@ -296,7 +297,7 @@ wxLayoutObjectText::Draw(wxDC &dc, wxPoint const &coords,
       CoordType
          xpos = coords.x,
          ypos = coords.y-m_Top;
-      long width, height, descent;
+      wxCoord width, height, descent;
 
       if(begin < 0) begin = 0;
       if( end > (signed)m_Text.Length() )
@@ -323,7 +324,7 @@ wxLayoutObjectText::GetOffsetScreen(wxDC &dc, CoordType xpos) const
    CoordType
       offs = 1,
       maxlen = m_Text.Length();
-   long
+   wxCoord
       width = 0,
       height, descent = 0l;
 
@@ -347,7 +348,7 @@ wxLayoutObjectText::GetOffsetScreen(wxDC &dc, CoordType xpos) const
 void
 wxLayoutObjectText::Layout(wxDC &dc, class wxLayoutList * /* llist */)
 {
-   long descent = 0l;
+   wxCoord descent = 0l;
 
    // now this is done in wxLayoutLine::Layout(), but this code might be
    // reenabled later - in principle, it's more efficient
@@ -1243,7 +1244,7 @@ wxLayoutLine::Layout(wxDC &dc,
             if(obj->GetType() == WXLO_TYPE_TEXT)
             {
                len = cx - count; // pos in object
-               CoordType width, height, descent;
+               wxCoord width, height, descent;
                dc.GetTextExtent((*(wxLayoutObjectText*)*i).GetText().substr(0,len),
                                 &width, &height, &descent);
                cursorPos->x += width;
@@ -1324,7 +1325,7 @@ wxLayoutLine::Layout(wxDC &dc,
 
    if(m_Height == 0)
    {
-      CoordType width, height, descent;
+      wxCoord width, height, descent;
       dc.GetTextExtent(WXLO_CURSORCHAR, &width, &height, &descent);
       m_Height = height;
       m_BaseLine = m_Height - descent;
@@ -1343,7 +1344,7 @@ wxLayoutLine::Layout(wxDC &dc,
       // line or on a command object:
       if(cursorSize->x < WXLO_MINIMUM_CURSOR_WIDTH)
       {
-         CoordType width, height, descent;
+         wxCoord width, height, descent;
          dc.GetTextExtent(WXLO_CURSORCHAR, &width, &height, &descent);
          cursorSize->x = width;
          cursorSize->y = height;
