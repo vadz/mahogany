@@ -67,6 +67,19 @@ ifdef USE_MAC
 	$(SETFILE) -a C $@
 endif
 
+ifdef USE_PCH
+MPCH=../include/Mpch.gch
+MPCH_DEP=../include/Mpch.d
+
+$(MOBJS): $(MPCH)
+
+$(MPCH): .src/../include/Mpch.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -MF $(MPCH_DEP) -o $@ $<
+
+-include ../include/Mpch.d
+
+endif
+
 ifdef USE_MAC
 
 include ../makeversion

@@ -375,6 +375,38 @@ case "$m_cv_cxx_opernames" in yes)
 	esac
 esac
 
+dnl PCH support is currently for gcc 3.4+ only
+MAKE_USE_PCH=
+if test "$GXX" = "yes"; then
+    AC_CACHE_CHECK(if ${CXX} supports precompiled headers,
+	m_cv_cxx_pch,
+	[
+	    AC_TRY_COMPILE([],
+		[
+		    #if !defined(__GNUC__) || !defined(__GNUC_MINOR__)
+			There is no PCH support
+		    #endif
+		    #if (__GNUC__ < 3)
+			There is no PCH support
+		    #endif
+		    #if (__GNUC__ == 3) && (__GNUC_MINOR__ < 4)
+			There is no PCH support
+		    #endif
+		],
+		m_cv_cxx_pch=yes,
+		m_cv_cxx_pch=no
+	    )
+	]
+    )
+
+    if test "$m_cv_cxx_pch" = "yes"; then
+	AC_DEFINE(USE_PCH)
+	MAKE_USE_PCH="USE_PCH=1"
+    fi
+fi
+
+AC_SUBST(MAKE_USE_PCH)
+
 AC_LANG_RESTORE
 
 dnl Various other commands needed
@@ -931,10 +963,17 @@ dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
-dnl check for wxWidgets installation¤
+dnl check for wxWidgets installation: traditionally, we could only use ANSI
+dnl build
 MIN_WX_VERSION=2.8.4
-AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],, [adv,base,core,html,net,qa],
+AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[adv,base,core,html,net,qa],
 		 [--unicode=no --debug=$debug_option])
+
+dnl but with wx3 we can also use Unicode build
+if test "$wxOK" != 1; then
+    AM_PATH_WXCONFIG(2.9.0, [wxOK=1],[wxOK=0],[adv,base,core,html,net,qa],
+		     [--debug=$debug_option])
+fi
 
 if test "$wxOK" != 1; then
     if test $debug_option = "yes"; then

@@ -19,6 +19,9 @@
 
 #endif /* !C++ */
 
+/** Define if build system supports precompiled headers */
+#undef USE_PCH
+
 /** Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
 
