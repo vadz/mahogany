@@ -714,7 +714,7 @@ private:
 //
 // See wxWindows docs and/or wx/filedlg.h for the meaning of all parameters
 // except the first and the last one. Also, "defname" (default value)
-// parameter is overriden by the last entry saved in the config, so it only
+// parameter is overridden by the last entry saved in the config, so it only
 // matters when the function is called for the very first time - unless the
 // flag wxFILEDLG_USE_FILENAME is given in flags in which case the name is used
 // if provided.
@@ -760,10 +760,11 @@ wxPSaveFileSelector(wxWindow *parent,
                     const wxChar *defname = NULL,
                     const wxChar *extension = NULL,
                     const wxChar *filter = NULL,
+                    int flags = 0,
                     wxConfigBase *config = NULL)
 {
     return wxPFileSelector(configPath, title, defpath, defname, extension,
-                           filter, wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
+                           filter, wxFD_SAVE | wxFD_OVERWRITE_PROMPT | flags,
                            parent, config);
 }
 

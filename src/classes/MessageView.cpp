@@ -3234,7 +3234,9 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
                      GetParentFrame(),
                      "MimeSave",
                      _("Save attachment as:"),
-                     NULL /* no default path */, name, ext
+                     NULL /* no default path */, name, ext,
+                     NULL /* default filters */,
+                     wxFILEDLG_USE_FILENAME
                  );
    }
    else
