@@ -180,7 +180,7 @@ public:
 
     // callbacks
         // when we're created, we restore our page
-    void OnCreate(wxWindowCreateEvent& event);
+    void OnSize(wxSizeEvent& event);
 
 protected:
     static const wxChar *ms_path;

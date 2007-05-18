@@ -73,7 +73,7 @@ END_EVENT_TABLE()
 #if wxUSE_LISTBOOK
 
 BEGIN_EVENT_TABLE(wxPListbook, wxListbook)
-    EVT_WINDOW_CREATE(wxPListbook::OnCreate)
+    EVT_SIZE(wxPListbook::OnSize)
 END_EVENT_TABLE()
 
 #endif // wxUSE_LISTBOOK
@@ -430,9 +430,13 @@ wxPListbook::~wxPListbook()
     delete m_persist;
 }
 
-void wxPListbook::OnCreate(wxWindowCreateEvent& event)
+void wxPListbook::OnSize(wxSizeEvent& event)
 {
-    if ( m_bFirstTime ) {
+    // the control gets a dummy resize event when the first page is added to
+    // it, as we usually have more than one page (and there is only one it
+    // doesn't matter if we restore selection or not anyhow), wait a bit more
+    // before restoring selection
+    if ( m_bFirstTime && GetPageCount() > 1 ) {
         RestorePage();
 
         m_bFirstTime = FALSE;
