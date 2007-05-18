@@ -4591,23 +4591,6 @@ MailFolderCC::HandleMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
          // because we're inside c-client now and it is not reentrant, so we
          // send an event to ourselves to do it slightly later
          MEventManager::Send(new MEventFolderOnNewMailData(this));
-
-         // the number of unread/marked/... messages may have changed (there
-         // could be some more of them among the new ones), so forget the
-         // old values
-         //
-         // NB: we can't assume that the status hasn't changed just because
-         //     all new mail was filtered away because we might have some
-         //     non new messages as well and the flags of the existing ones
-         //     could have been changed from the outside
-         //
-         // NB2: don't do it for the temp (nameless) folders as we don't
-         //      cache their status anyhow
-         const String name = GetName();
-         if ( !name.empty() )
-         {
-            MfStatusCache::Get()->InvalidateStatus(name);
-         }
       }
       else // empty folder
       {
@@ -4723,6 +4706,22 @@ void MailFolderCC::OnNewMail()
 
    wxLogTrace(TRACE_MF_EVENTS, _T("Got new mail notification for '%s'"),
               GetName().c_str());
+
+   // the number of unread/marked/... messages may have changed (there
+   // could be some more of them among the new ones), so forget the
+   // old values
+   //
+   // NB: we can't assume that all new messages are new (i.e. unread) and
+   //     update the status directly here, this would be wrong when old
+   //     messages are moved to the mailbox
+   //
+   // NB2: don't do it for the temp (nameless) folders as we don't
+   //      cache their status anyhow
+   const String name = GetName();
+   if ( !name.empty() )
+   {
+      MfStatusCache::Get()->InvalidateStatus(name);
+   }
 
    // should we notify the GUI about the new mail in the folder?
    //
