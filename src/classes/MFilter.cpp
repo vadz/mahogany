@@ -35,6 +35,7 @@
 
 #include "MFilter.h"
 #include "MFolder.h"
+#include "MAtExit.h"
 #include "modules/Filters.h"
 
 // ----------------------------------------------------------------------------
@@ -47,6 +48,30 @@
 #define MP_FILTER_NAME     _T("Name")
 #define MP_FILTER_RULE     _T("Rule")
 #define MP_FILTER_GUIDESC  _T("Settings")
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// free the folder filters cache defined below
+static void CleanupFilterCache();
+
+// invalidate the cached representation of the given filter
+static void InvalidateFilter(const MFilter *filter);
+
+// ----------------------------------------------------------------------------
+// globals
+// ----------------------------------------------------------------------------
+
+// filter rules are relatively expensive to construct, so we cache them once we
+// created them in this hash map (its keys are the folder names)
+#include "wx/hashmap.h"
+WX_DECLARE_STRING_HASH_MAP(FilterRule *, FolderFiltersMap);
+
+static FolderFiltersMap gs_folderFilters;
+
+// ensure that filter rules are deleted on exit
+static MRunFunctionAtExit gs_runFilterCacheCleanup(CleanupFilterCache);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -816,6 +841,8 @@ protected:
       {
          if ( m_dirty )
          {
+            InvalidateFilter(this);
+
             // write the values to the profile
             m_Profile->writeEntry(MP_FILTER_NAME, m_Name);
             if ( m_Settings )
@@ -956,6 +983,9 @@ MFilter::Copy(const String& nameSrc, const String& nameDst)
       return false;
    }
 
+   // invalidating just one filter isn't enough
+   CleanupFilterCache();
+
    return true;
 }
 
@@ -983,10 +1013,55 @@ MFilterFromProfile::DebugDump() const
 // global functions
 // ----------------------------------------------------------------------------
 
+static void
+CleanupFilterCache()
+{
+   for ( FolderFiltersMap::const_iterator i = gs_folderFilters.begin();
+         i != gs_folderFilters.end();
+         ++i )
+   {
+      FilterRule * const rule = i->second;
+      if ( rule )
+         rule->DecRef();
+   }
+
+   gs_folderFilters.clear();
+}
+
+// this is used by MFolderFromProfile::SetFilter(): when a folders filter is
+// changed, it only affects this folder
+extern void
+InvalidateFilterForFolder(const MFolder *folder)
+{
+   CHECK_RET( folder, _T("InvalidateFilter: NULL parameter") );
+
+   gs_folderFilters.erase(folder->GetFullName());
+}
+
+// this is used by the code in this file when modifying individual filters, as
+// we don't know which folders use them, we simply invalidate the entire cache
+static void
+InvalidateFilter(const MFilter * /* filter */)
+{
+   CleanupFilterCache();
+}
+
 extern FilterRule *
 GetFilterForFolder(const MFolder *folder)
 {
    CHECK( folder, NULL, _T("GetFilterForFolder: NULL parameter") );
+
+   // check if we already have it in the cache
+   const String folderName = folder->GetFullName();
+   const FolderFiltersMap::iterator i = gs_folderFilters.find(folderName);
+   if ( i != gs_folderFilters.end() )
+   {
+      FilterRule * const rule = i->second;
+      if ( rule )
+         rule->IncRef();
+
+      return rule;
+   }
 
    // build a single program from all filter rules:
    String filterString;
@@ -1003,6 +1078,8 @@ GetFilterForFolder(const MFolder *folder)
    if ( filterString.empty() )
    {
       // no, nothing to do
+      gs_folderFilters[folderName] = NULL;
+
       return NULL;
    }
 
@@ -1011,6 +1088,8 @@ GetFilterForFolder(const MFolder *folder)
    {
       wxLogWarning(_("Filter module couldn't be loaded."));
 
+      // don't cache this failure: maybe we'll be able to load the module the
+      // next time
       return NULL;
    }
 
@@ -1027,5 +1106,11 @@ GetFilterForFolder(const MFolder *folder)
                  filterString.c_str(), folder->GetFullName().c_str());
    }
 
+   // cache the newly created rule and make sure it doesn't go away
+   gs_folderFilters[folderName] = filterRule;
+   if ( filterRule )
+      filterRule->IncRef();
+
    return filterRule;
 }
+

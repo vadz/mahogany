@@ -951,6 +951,13 @@ wxArrayString MFolderFromProfile::GetFilters() const
 
 void MFolderFromProfile::SetFilters(const wxArrayString& filters)
 {
+   // this function is in MFilter.cpp but we only use it here so it's not in
+   // any header
+   extern void InvalidateFilterForFolder(const MFolder *);
+
+   // forget the cached filter representation
+   InvalidateFilterForFolder(this);
+
    m_profile->writeEntry(MP_FOLDER_FILTERS, strutil_flatten_array(filters));
 }
 
