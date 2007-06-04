@@ -18,16 +18,16 @@
 #     include <sys/types.h>
 #     include <sys/stat.h>               // needed by wxStructStat
 #     include <unistd.h>
-#     include <errno.h>
 #  endif // OS_UNIX
 #endif // USE_PCH
 
 #ifdef OS_UNIX
 #   include <unistd.h>
+#   include <errno.h>
 #   include <fcntl.h>
 #endif
 
-      
+
 bool sysutil_compare_filenames(String const &file1, String const
                               &file2)
 {
@@ -51,7 +51,7 @@ bool sysutil_compare_filenames(String const &file1, String const
       }
       else
             return strutil_compare_filenames(file1, file2);
-   
+
    rc = wxStat(file2, &statbuf2);
    if(rc != 0)
       if(rc == ENOENT)
