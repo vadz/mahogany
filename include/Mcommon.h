@@ -126,8 +126,9 @@ extern void CloseSplash();
   These macros do nothing and return the default returnvalue when
   Python is disabled.
 */
-//@{
 #ifdef   USE_PYTHON
+
+//@{
 /** This macro takes three arguments: the callback function name to
     look up in a profile, a default return value, and a profile
     pointer (can be NULL).
@@ -135,7 +136,9 @@ extern void CloseSplash();
     object needs to support the GetClasName() method to get the Python
     class name for the argument.
 */
-#   define   PY_CALLBACK(name,default,profile)        PythonCallback(name,default,this,this->GetClassName(),profile)
+#   define   PY_CALLBACK(name, def, profile) \
+   PythonCallback(name,def,this,this->GetClassName(),profile)
+
 /** This macro takes multiple arguments.
     The last argument is the default return value.
     The first argument is a list of arguments in brackets, it must
@@ -147,13 +150,14 @@ extern void CloseSplash();
     must follow the format string.
 
 */
-#   define   PY_CALLBACKVA(arg,default)            PythonCallback arg
-#else
-#   define   PY_CALLBACK(name, profile, default)   PythonCallback((int)default)
-    inline int PythonCallback(int def) { return def; }
-#   define   PY_CALLBACKVA(arg,default)      PythonCallback((int)default)
-#endif
+#   define   PY_CALLBACKVA(arg, def)            PythonCallback arg
 //@}
+
+#else // !USE_PYTHON
+#   define   PY_CALLBACK(name, def, profile)   (def)
+#   define   PY_CALLBACKVA(arg, def)      (def)
+#endif // USE_PYTHON/!USE_PYTHON
+
 
 // ----------------------------------------------------------------------------
 // misc types
