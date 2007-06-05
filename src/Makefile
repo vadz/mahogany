@@ -68,7 +68,7 @@ ifdef USE_MAC
 endif
 
 ifdef USE_PCH
-MPCH=../include/Mpch.gch
+MPCH=../include/Mpch.h.gch
 MPCH_DEP=../include/Mpch.d
 
 $(MOBJS): $(MPCH)
@@ -156,6 +156,9 @@ clean:
 	$(RM) core libM.so M $(CLEAN)
 	$(RM) $(MOBJS) $(MSOS)
 	$(RM) $(MOBJS:.o=.d) $(MSOS:.so=.d)
+ifdef USE_PCH
+	$(RM) $(MPCH) $(MPCH_DEP)
+endif
 
 install: $(M_BUNDLE)
 	$(INSTALL_PROGRAM) $(INSTALL_OPTIONS) M $(BINDIR)
