@@ -71,7 +71,7 @@ ifdef USE_PCH
 MPCH=../include/Mpch.h.gch
 MPCH_DEP=../include/Mpch.d
 
-$(MOBJS): $(MPCH)
+$(MOBJS) $(MSOS): $(MPCH)
 
 $(MPCH): .src/../include/Mpch.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -MF $(MPCH_DEP) -o $@ $<
