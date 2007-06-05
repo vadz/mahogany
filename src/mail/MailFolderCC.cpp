@@ -120,7 +120,7 @@ extern "C"
 // macros
 // ----------------------------------------------------------------------------
 
-// c-client wants unsinged char strings while we work with char pointers
+// c-client wants unsigned char strings while we work with char pointers
 // everywhere, provide this macro-like helper function to cast the strings
 // to the correct type (this has the added benefit of forcing implicit
 // conversion of wxString::char_str() to "char *", i.e. we can write
@@ -2487,7 +2487,7 @@ MailFolderCC::Open(OpenMode openmode)
       }
    }
 
-   PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
+   (void)PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
 
    return true;   // success
 }
