@@ -15,10 +15,6 @@
 #ifndef HEADERINFO_H
 #define HEADERINFO_H
 
-#ifdef __GNUG__
-#   pragma interface "HeaderInfo.h"
-#endif
-
 #include <wx/fontenc.h>         // for wxFontEncoding
 
 #include "MailFolder.h"    // for MailFolder::MessageStatus

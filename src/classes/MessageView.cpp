@@ -21,10 +21,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-#   pragma implementation "MessageView.h"
-#endif
-
 #include "Mpch.h"
 
 #ifndef USE_PCH

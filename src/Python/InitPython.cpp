@@ -130,9 +130,8 @@ InitPython(void)
       pythonPathNew << PATH_SEPARATOR << pythonPathOld;
    }
 
-   // on some systems putenv() takes "char *", cast silents the warnings but
-   // should be harmless otherwise
-   putenv((char *)pythonPathNew.mb_str());
+   // on some systems putenv() takes "char *" so give it non-const pointer
+   putenv(pythonPathNew.char_str());
 
    if ( !READ_APPCONFIG(MP_USEPYTHON) )
    {
@@ -161,7 +160,7 @@ InitPython(void)
 
    if ( !startScript.empty() )
    {
-      PyObject *moduleInit = PyImport_ImportModule((char *)startScript.mb_str());
+      PyObject *moduleInit = PyImport_ImportModule(startScript.char_str());
 
       if ( !CheckPyError() || !moduleInit )
       {

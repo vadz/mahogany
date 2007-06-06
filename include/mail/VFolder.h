@@ -14,10 +14,6 @@
 #ifndef _MAIL_VOLFDER_H_
 #define _MAIL_VOLFDER_H_
 
-#ifdef __GNUG__
-   #pragma interface "VFolder.h"
-#endif
-
 #include "MailFolderCmn.h"
 
 #ifndef USE_PCH

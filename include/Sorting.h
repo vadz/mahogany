@@ -13,10 +13,6 @@
 #ifndef _SORTING_H_
 #define _SORTING_H_
 
-#ifdef __GNUG__
-   #pragma interface "Sorting.h"
-#endif
-
 #ifndef  USE_PCH
 #  include <wx/dynarray.h>   // for wxArrayInt
 #endif // USE_PCH

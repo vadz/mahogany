@@ -9,10 +9,6 @@
 #ifndef WXMDIALOGS_H
 #define WXMDIALOGS_H
 
-#ifdef __GNUG__
-#pragma interface "wxMDialogs.h"
-#endif
-
 #ifndef     USE_PCH
 #   include "FolderType.h"
 #   include "MApplication.h"

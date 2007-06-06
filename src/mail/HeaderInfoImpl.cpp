@@ -19,18 +19,13 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-   #pragma implementation "HeaderInfoImpl.h"
-   #pragma implementation "HeaderInfo.h"
-#endif
-
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
    #include "Mcommon.h"
    #include "Mdefaults.h"
    #include "Mcclient.h"      // need THREADNODE
-   
+
    #include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
@@ -1383,7 +1378,7 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
          thrData->m_tableThread[threadedIndex++] = node->num;
          thrData->m_indents[node->num-1] = indent;
       }
-   
+
       size_t nbChildren = 0;
       if (node->next != 0)
       {
@@ -1396,7 +1391,7 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
          } else {
             // Indent if current node is not dummy
             indentForKid += (node->num == 0) ? 0 : 1;
-         }         
+         }
          nbChildren += FillThreadTables(node->next, thrData, threadedIndex,
                                         indentForKid, indentIfDummyNode);
       }

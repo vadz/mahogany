@@ -9,10 +9,6 @@
 #ifndef WXICONMANAGER_H
 #define WXICONMANAGER_H
 
-#ifdef __GNUG__
-#pragma interface "wxIconManager.h"
-#endif
-
 #ifndef USE_PCH
 #  include "kbList.h"
 

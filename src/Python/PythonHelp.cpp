@@ -45,6 +45,10 @@
 
 #include "Mdefaults.h"
 
+// macro to pass a string to Python: not sure if it should use the current
+// locale encoding (as now) or UTF-8 or maybe wchar_t?
+#define PYTHON_STR(s) ((const char *)(s).mb_str())
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -161,7 +165,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    }
 
    // load the module containing the function
-   *module = PyImport_ImportModule((char *)modname.mb_str());
+   *module = PyImport_ImportModule(modname.char_str());
 
    if ( !*module )
    {
@@ -181,7 +185,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    }
    //else: if reloading failed, fall back to the original module
 
-   *function = PyObject_GetAttrString(*module, (char *)functionName.mb_str());
+   *function = PyObject_GetAttrString(*module, functionName.char_str());
    if ( !*function )
    {
       Py_XDECREF(*module);
@@ -260,20 +264,20 @@ PythonStringFunction(const String& func,
             break;
 
          case 1:
-            rc = PyObject_CallFunction(function, "s", arguments[0].mb_str());
+            rc = PyObject_CallFunction(function, "s", PYTHON_STR(arguments[0]));
             break;
 
          case 2:
             rc = PyObject_CallFunction(function, "ss",
-                                       arguments[0].mb_str(),
-                                       arguments[1].mb_str());
+                                       PYTHON_STR(arguments[0]),
+                                       PYTHON_STR(arguments[1]));
             break;
 
          case 3:
             rc = PyObject_CallFunction(function, "sss",
-                                       arguments[0].mb_str(),
-                                       arguments[1].mb_str(),
-                                       arguments[2].mb_str());
+                                       PYTHON_STR(arguments[0]),
+                                       PYTHON_STR(arguments[1]),
+                                       PYTHON_STR(arguments[2]));
             break;
 
          default:
@@ -355,8 +359,7 @@ PythonRunScript(const char *filename)
       return false;
    }
 
-   M_PyObject rc = PyRun_String(const_cast<char *>(execCmd.mb_str()),
-                                Py_file_input, dict, dict);
+   M_PyObject rc = PyRun_String(PYTHON_STR(execCmd), Py_file_input, dict, dict);
    if ( !rc )
    {
       String err = PythonGetErrorMessage();

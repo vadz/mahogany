@@ -13,10 +13,6 @@
 #ifndef _ADDRESSCC_H_
 #define _ADDRESSCC_H_
 
-#ifdef __GNUG__
-   #pragma interface "AddressCC.h"
-#endif
-
 #include "Address.h"
 
 // cclient's ADDRESS is #defined as struct mail_address, but we don't have this

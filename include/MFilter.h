@@ -9,10 +9,6 @@
 #ifndef _MFILTER_H
 #define _MFILTER_H
 
-#ifdef __GNUG__
-#   pragma interface "MFilter.h"
-#endif
-
 #ifndef USE_PCH
 #   include "Profile.h"
 #endif // USE_PCH

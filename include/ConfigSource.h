@@ -34,10 +34,6 @@
 #ifndef _M_CONFIGSOURCE_H_
 #define _M_CONFIGSOURCE_H_
 
-#ifdef __GNUG__
-   #pragma interface "ConfigSource.h"
-#endif
-
 #include "MObject.h"            // for MObjectRC
 
 #include "MModule.h"

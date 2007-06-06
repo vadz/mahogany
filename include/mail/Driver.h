@@ -13,10 +13,6 @@
 #ifndef _MAIL_DRIVER_H_
 #define _MAIL_DRIVER_H_
 
-#ifdef __GNUG__
-   #pragma interface "MFDriver.h"
-#endif
-
 #include "MailFolder.h"
 
 // ----------------------------------------------------------------------------

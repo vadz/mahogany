@@ -11,10 +11,6 @@
 #ifndef PATHFINDER_H
 #define PATHFINDER_H
 
-#ifdef __GNUG__
-#   pragma interface "PathFinder.h"
-#endif
-
 #include "MObject.h"
 
 /**@name PathFinder class for finding files */

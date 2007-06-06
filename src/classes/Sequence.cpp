@@ -22,10 +22,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-   #pragma implementation "Sequence.h"
-#endif
-
 #include  "Mpch.h"
 
 #ifndef  USE_PCH

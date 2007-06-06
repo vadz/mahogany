@@ -13,10 +13,6 @@
 #ifndef _MIMEPARTCC_H_
 #define _MIMEPARTCC_H_
 
-#ifdef __GNUG__
-   #pragma interface "MimePartCC.h"
-#endif
-
 // base class
 #include "MimePartCCBase.h"
 

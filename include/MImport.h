@@ -17,10 +17,6 @@
 #ifndef _MIMPORT_H_
 #define _MIMPORT_H_
 
-#ifdef __GNUG__
-   #pragma interface "MImport.h"
-#endif
-
 #include "MModule.h"    // the base class
 
 class MFolder;

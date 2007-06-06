@@ -14,10 +14,6 @@
 #ifndef _ADBIMPORT_H
 #define _ADBIMPORT_H
 
-#ifdef __GNUG__
-   #pragma interface "AdbImport.h"
-#endif
-
 #include "adb/AdbModule.h"     // the base class
 
 // some forward declarations

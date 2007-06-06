@@ -14,10 +14,6 @@
 #ifndef _WXFILTERSDIALOG_H_
 #define _WXFILTERSDIALOG_H_
 
-#ifdef __GNUG__
-   #pragma interface "wxFiltersDialog.h"
-#endif
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------

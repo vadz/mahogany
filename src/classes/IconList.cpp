@@ -18,10 +18,6 @@
  *
  *******************************************************************/
 
-#ifdef __GNUG__
-#pragma implementation "PersistentList.h"
-#endif
-
 #include <PersistentList.h>
 
 #if wxUSE_IOSTREAMH

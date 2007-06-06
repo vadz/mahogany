@@ -14,10 +14,6 @@
 // declarations
 // ============================================================================
 
-#ifdef __GNUG__
-   #pragma implementation "MFDriver.h"
-#endif
-
 #include  "Mpch.h"
 
 #ifndef USE_PCH

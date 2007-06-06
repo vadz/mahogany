@@ -7,10 +7,6 @@
  *
  *******************************************************************/
 
-#ifdef __GNUG__
-#   pragma implementation "Filters.h"
-#endif
-
 #include   "Mpch.h"
 
 // VZ: Greg, testing is nice, but this breaks Windows compilation!

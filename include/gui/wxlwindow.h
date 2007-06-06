@@ -8,10 +8,6 @@
 #ifndef WXLWINDOW_H
 #define WXLWINDOW_H
 
-#ifdef __GNUG__
-#   pragma interface "wxlwindow.h"
-#endif
-
 #include "gui/wxllist.h"
 
 #include <wx/scrolwin.h>

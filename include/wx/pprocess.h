@@ -14,10 +14,6 @@
 #ifndef _WX_PPROCESSH__
 #define _WX_PPROCESSH__
 
-#ifdef __GNUG_
-   #pragma interface "pprocess.h"
-#endif
-
 #ifdef EXPERIMENTAL
 
 #ifndef  USE_PCH

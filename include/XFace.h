@@ -9,10 +9,6 @@
 #ifndef XFACE_H
 #define XFACE_H
 
-#ifdef __GNUG__
-#	pragma interface "XFace.h"
-#endif
-
 #ifndef XFACE_WITH_WXIMAGE
 #define    XFACE_WITH_WXIMAGE   1
 #endif

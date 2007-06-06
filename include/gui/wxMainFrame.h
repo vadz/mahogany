@@ -12,10 +12,6 @@
 #ifndef _GUI_MAINFRAME_H_
 #define _GUI_MAINFRAME_H_
 
-#ifdef __GNUG__
-#   pragma interface "wxMainFrame.h"
-#endif
-
 #ifndef USE_PCH
 #  include "gui/wxMFrame.h"
 #endif // USE_PCH

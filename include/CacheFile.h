@@ -13,10 +13,6 @@
 #ifndef _M_CACHEFILE_H_
 #define _M_CACHEFILE_H_
 
-#ifdef __GNUG__
-   #pragma interface "CacheFile.h"
-#endif
-
 class WXDLLEXPORT wxTempFile;
 class WXDLLEXPORT wxTextFile;
 

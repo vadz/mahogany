@@ -18,10 +18,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-   #pragma implementation "MimePartCC.h"
-#endif
-
 #include "Mpch.h"
 
 #ifndef USE_PCH

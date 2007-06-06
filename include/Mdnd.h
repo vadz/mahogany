@@ -13,10 +13,6 @@
 #ifndef _MDND_H_
 #define _MDND_H_
 
-#ifdef __GNUG__
-   #pragma interface "Mdnd.h"
-#endif
-
 #include "MailFolder.h"
 
 #include <wx/dnd.h>

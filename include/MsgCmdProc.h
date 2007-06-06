@@ -19,10 +19,6 @@
 #ifndef _MSGCMDPROC_H_
 #define _MSGCMDPROC_H_
 
-#ifdef __GNUG__
-   #pragma interface "MsgCmdProc.h"
-#endif
-
 class ASMailFolder;
 class MessageView;
 class MFolder;

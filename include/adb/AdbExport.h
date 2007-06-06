@@ -14,10 +14,6 @@
 #ifndef _ADBEXPORT_H
 #define _ADBEXPORT_H
 
-#ifdef __GNUG__
-#   pragma interface "AdbExport.h"
-#endif
-
 #include "AdbModule.h"    // the base class declaration
 
 class AdbEntry;

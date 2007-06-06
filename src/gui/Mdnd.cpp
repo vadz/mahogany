@@ -18,10 +18,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-   #pragma implementation "Mdnd.h"
-#endif
-
 #include "Mpch.h"
 
 #if wxUSE_DRAG_AND_DROP

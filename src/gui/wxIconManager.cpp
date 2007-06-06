@@ -14,10 +14,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-#   pragma implementation "wxIconManager.h"
-#endif
-
 #include "Mpch.h"
 
 #ifndef  USE_PCH

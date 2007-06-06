@@ -13,10 +13,6 @@
 #ifndef  _MFCACHE_H_
 #define  _MFCACHE_H_
 
-#ifdef __GNUG__
-#   pragma interface "MFCache.h"
-#endif
-
 #ifndef   USE_PCH
 #  include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
 #endif // USE_PCH

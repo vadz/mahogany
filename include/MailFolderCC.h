@@ -13,10 +13,6 @@
 #ifndef MAILFOLDERCC_H
 #define MAILFOLDERCC_H
 
-#ifdef __GNUG__
-#   pragma interface "MailFolderCC.h"
-#endif
-
 #ifndef   USE_PCH
 #  include "Mcclient.h"
 #endif // USE_PCH

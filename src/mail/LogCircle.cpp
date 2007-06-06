@@ -10,10 +10,6 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef __GNUG__
-   #pragma implementation "LogCircle.h"
-#endif
-
 #include "Mpch.h"
 
 #ifndef USE_PCH

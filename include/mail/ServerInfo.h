@@ -13,10 +13,6 @@
 #ifndef _MAIL_SERVERINFO_H
 #define _MAIL_SERVERINFO_H
 
-#ifdef __GNUG__
-   #pragma interface "ServerInfo.h"
-#endif
-
 #include "lists.h"
 
 #include "MFolder.h"

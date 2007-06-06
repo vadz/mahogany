@@ -13,10 +13,6 @@
 #ifndef _MAILFOLDER_H
 #define _MAILFOLDER_H
 
-#ifdef __GNUG__
-#   pragma interface "MailFolder.h"
-#endif
-
 #ifndef USE_PCH
 #  include "FolderType.h"
 #endif // USE_PCH

@@ -15,10 +15,6 @@
 #ifndef _MAIL_VMESSAGE_H_
 #define _MAIL_VMESSAGE_H_
 
-#ifdef __GNUG__
-   #pragma interface "VMessage.h"
-#endif
-
 #include "Message.h"
 
 // ----------------------------------------------------------------------------

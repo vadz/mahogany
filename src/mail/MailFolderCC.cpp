@@ -19,10 +19,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-#   pragma implementation "MailFolderCC.h"
-#endif
-
 #include  "Mpch.h"
 
 #ifdef USE_PYTHON

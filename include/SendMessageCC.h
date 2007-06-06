@@ -13,10 +13,6 @@
 #ifndef _SENDMESSAGECC_H
 #define _SENDMESSAGECC_H
 
-#ifdef   __GNUG__
-#   pragma interface "SendMessageCC.h"
-#endif
-
 #ifndef USE_PCH
 #  include "Mcclient.h"
 #endif  //USE_PCH

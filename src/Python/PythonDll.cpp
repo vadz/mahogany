@@ -224,14 +224,14 @@ extern "C"
     #define PYTHON_PROC void *
 #endif
 
-#define PYTHON_SYMBOL(func) { _T(#func), NULL, (PYTHON_PROC *)&M_ ## func },
-#define PYTHON_FUNC_ALT(func, alt) { _T(#func), _T(#alt), (PYTHON_PROC *)&M_ ## func },
+#define PYTHON_SYMBOL(func) { #func, NULL, (PYTHON_PROC *)&M_ ## func },
+#define PYTHON_FUNC_ALT(func, alt) { #func, #alt, (PYTHON_PROC *)&M_ ## func },
 
 static struct PythonFunc
 {
-    const wxChar *name;       // normal function name
-    const wxChar *nameAlt;    // alternative name for Debug build
-    PYTHON_PROC *ptr;         // function pointer
+    const char *name;       // normal function name
+    const char *nameAlt;    // alternative name for Debug build
+    PYTHON_PROC *ptr;       // function pointer
 } pythonFuncs[] =
 {
    // startup/shutdown

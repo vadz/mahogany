@@ -9,10 +9,6 @@
 #ifndef MFRAME_H
 #define MFRAME_H
 
-//#ifdef __GNUG__
-//#pragma interface "MFrame.h"
-//#endif
-
 /**
    MFrameBase virtual base class, defining the interface for a window.
    Every window should have a unique name associated with it for use

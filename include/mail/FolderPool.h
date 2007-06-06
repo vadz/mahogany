@@ -13,10 +13,6 @@
 #ifndef _MAIL_FOLDERPOOL_H_
 #define _MAIL_FOLDERPOOL_H_
 
-#ifdef __GNUG__
-   #pragma interface "MFPool.h"
-#endif
-
 class MailFolder;
 class MFolder;
 class MFDriver;

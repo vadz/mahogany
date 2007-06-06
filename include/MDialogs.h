@@ -11,10 +11,6 @@
 #ifndef MDIALOGS_H
 #define MDIALOGS_H
 
-#ifdef __GNUG__
-#pragma interface "MDialogs.h"
-#endif
-
 /// Generic title prefix for all top level windows
 #define M_TITLE_PREFIX _("Mahogany: ")
 

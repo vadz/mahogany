@@ -10,13 +10,8 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef HEADERINFOIMPL_H
 #define HEADERINFOIMPL_H
-
-#ifdef __GNUG__
-#   pragma interface "HeaderInfoImpl.h"
-#endif
 
 #ifndef  USE_PCH
    #include "Sorting.h"

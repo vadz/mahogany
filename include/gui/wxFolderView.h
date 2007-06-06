@@ -13,10 +13,6 @@
 #ifndef WXFOLDERVIEW_H
 #define WXFOLDERVIEW_H
 
-#ifdef __GNUG__
-   #pragma interface "wxFolderView.h"
-#endif
-
 #ifndef USE_PCH
 #  include "Mdefaults.h"
 #  include "gui/wxMFrame.h"

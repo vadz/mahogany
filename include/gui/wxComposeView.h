@@ -17,10 +17,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-#  pragma interface "wxComposeView.h"
-#endif
-
 #ifndef USE_PCH
 #  include "gui/wxMFrame.h"
 #  include "kbList.h"

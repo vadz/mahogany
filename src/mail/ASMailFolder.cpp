@@ -6,10 +6,6 @@
  * $Id$
  *******************************************************************/
 
-#ifdef __GNUG__
-#   pragma implementation "ASMailFolder.h"
-#endif
-
 #include  "Mpch.h"
 
 #ifndef USE_PCH

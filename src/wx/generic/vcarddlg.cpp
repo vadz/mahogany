@@ -17,11 +17,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-// this is done in common/vcard.cpp
-#if 0 //def __GNUG__
-    #pragma implementation "vcard.h"
-#endif
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 

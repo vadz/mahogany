@@ -8,13 +8,6 @@
 #ifndef MMODULE_H
 #define MMODULE_H
 
-/* we can't use this #pragma here as otherwise the vtbl is not linked into
-   the modules and they fail to load!
-#ifdef __GNUG__
-#   pragma interface "MModule.h"
-#endif
-*/
-
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------

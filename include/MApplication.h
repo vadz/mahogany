@@ -9,10 +9,6 @@
 #ifndef MAPPLICATION_H
 #define MAPPLICATION_H
 
-#ifdef __GNUG__
-#   pragma interface "MApplication.h"
-#endif
-
 #ifndef   USE_PCH
 #   include "Merror.h"
 #endif // USE_PCH

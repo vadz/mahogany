@@ -14,11 +14,6 @@
 #ifndef ASMAILFOLDER_H
 #define ASMAILFOLDER_H
 
-#ifdef __GNUG__
-#   pragma interface "ASMailFolder.h"
-#endif
-
-
 // forward declarations
 class FolderView;
 class Profile;

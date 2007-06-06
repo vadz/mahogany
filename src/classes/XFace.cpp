@@ -6,10 +6,6 @@
  * $Id$
  *******************************************************************/
 
-#ifdef __GNUG__
-#pragma implementation "XFace.h"
-#endif
-
 #include "Mpch.h"
 
 #ifndef USE_PCH

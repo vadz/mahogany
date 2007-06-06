@@ -15,10 +15,6 @@
 #ifndef MAILFOLDERCMN_H
 #define MAILFOLDERCMN_H
 
-#ifdef __GNUG__
-#   pragma interface "MailFolderCmn.h"
-#endif
-
 #include "MailFolder.h"         // for MailFolder
 
 #ifndef USE_PCH

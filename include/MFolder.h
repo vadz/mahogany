@@ -13,10 +13,6 @@
 #ifndef  _MFOLDER_H
 #define  _MFOLDER_H
 
-#ifdef __GNUG__
-#   pragma interface "MFolder.h"
-#endif
-
 #ifndef  USE_PCH
 #  include "FolderType.h"
 #  include "Profile.h"

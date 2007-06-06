@@ -12,10 +12,6 @@
          duplicate the code needlessly here!
 */
 
-#ifdef __GNUG__
-#   pragma implementation "PathFinder.h"
-#endif
-
 #include  "Mpch.h"
 
 #ifndef   USE_PCH

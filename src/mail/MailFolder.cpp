@@ -19,11 +19,6 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#ifdef __GNUG__
-   #pragma implementation "MailFolder.h"
-   #pragma implementation "ServerInfo.h"
-#endif
-
 #include  "Mpch.h"
 
 #ifndef USE_PCH

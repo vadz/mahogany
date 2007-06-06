@@ -13,10 +13,6 @@
 #ifndef _FOLDERMONITOR_H_
 #define _FOLDERMONITOR_H_
 
-#ifdef __GNUG__
-    #pragma interface "FolderMonitor.h"
-#endif
-
 class MFolder;
 
 /**

@@ -12,10 +12,6 @@
 #ifndef   _WX_PWINDOW_H_
 #define   _WX_PWINDOW_H_
 
-#ifdef    __GNUG__
-#   pragma interface "persctrl.h"
-#endif
-
 // forward declarations
 class wxConfigBase;
 class wxPHelper;

@@ -17,10 +17,6 @@
 #ifndef _SEQUENCE_H_
 #define _SEQUENCE_H_
 
-#ifdef __GNUG__
-   #pragma interface "Sequence.h"
-#endif
-
 class UIdArray;
 
 // ----------------------------------------------------------------------------

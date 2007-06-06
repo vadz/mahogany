@@ -8,10 +8,6 @@
 #ifndef WXLPARSER_H
 #   define   WXLPARSER_H
 
-#ifdef __GNUG__
-#   pragma interface "wxlparser.h"
-#endif
-
 #include <wx/fontenc.h> // enum wxFontEncoding declaration
 
 #include "gui/wxllist.h"

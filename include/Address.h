@@ -13,10 +13,6 @@
 #ifndef _ADDRESS_H_
 #define _ADDRESS_H_
 
-#ifdef __GNUG__
-   #pragma interface "Address.h"
-#endif
-
 #include "MObject.h"
 
 class Profile;

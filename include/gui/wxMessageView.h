@@ -14,10 +14,6 @@
 #ifndef WXMESSAGEVIEW_H
 #define WXMESSAGEVIEW_H
 
-#ifdef __GNUG__
-#   pragma interface "wxMessageView.h"
-#endif
-
 #ifndef USE_PCH
 #  include "gui/wxMFrame.h"
 #  include "FolderType.h"

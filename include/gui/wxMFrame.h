@@ -13,10 +13,6 @@
 #ifndef  WXMFRAME_H
 #define WXMFRAME_H
 
-#ifdef __GNUG__
-#   pragma interface "wxMFrame.h"
-#endif
-
 #ifndef  USE_PCH
 #   include  "MFrame.h"
 #   include  "guidef.h"

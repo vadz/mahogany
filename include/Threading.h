@@ -13,10 +13,6 @@
 #ifndef _THREADING_H_
 #define _THREADING_H_
 
-#ifdef __GNUG__
-   #pragma interface "Threading.h"
-#endif
-
 #ifndef  USE_PCH
 #endif // USE_PCH
 
