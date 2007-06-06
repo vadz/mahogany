@@ -965,7 +965,7 @@ dnl --------------------------------------------------------------------------
 
 dnl check for wxWidgets installation: traditionally, we could only use ANSI
 dnl build
-MIN_WX_VERSION=2.8.4
+MIN_WX_VERSION=2.8.5
 AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[adv,base,core,html,net,qa],
 		 [--unicode=no --debug=$debug_option])
 
