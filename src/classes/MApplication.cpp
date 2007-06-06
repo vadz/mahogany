@@ -307,26 +307,24 @@ MAppBase::ContinueStartup()
 
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
-      String foldersToReopen = READ_APPCONFIG(MP_OPENFOLDERS);
-      wxChar *folders = strutil_strdup(foldersToReopen);
-      kbStringList openFoldersList;
-      strutil_tokenise(folders, _T(";"), openFoldersList);
-      delete [] folders;
+      const wxArrayString foldersToReopen(
+            strutil_restore_array(READ_APPCONFIG(MP_OPENFOLDERS), ';'));
 
       bool ok = true;
 
-      kbStringList::iterator i;
-      for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
+      for ( wxArrayString::const_iterator i = foldersToReopen.begin();
+            i != foldersToReopen.end();
+            ++i )
       {
-         String *name = *i;
+         const String& name = *i;
 
-         if ( name->empty() )
+         if ( name.empty() )
          {
             FAIL_MSG( _T("empty folder name in the list of folders to open?") );
             continue;
          }
 
-         MFolder_obj folder(*name);
+         MFolder_obj folder(name);
          if ( folder.IsOk() )
          {
             if ( !OpenFolderViewFrame(folder, m_topLevelFrame) )
@@ -338,7 +336,7 @@ MAppBase::ContinueStartup()
          else
          {
             wxLogWarning(_("Failed to reopen folder '%s', it doesn't seem "
-                           "to exist any more."), name->c_str());
+                           "to exist any more."), name.c_str());
 
             ok = false;
          }
@@ -567,15 +565,15 @@ MAppBase::OnStartup()
       // show the error messages generated before first
       wxLog::FlushActive();
 
-      static const wxChar *msg =
-       _T("Detected a possible problem with your Python installation.\n"
-       "A properly installed Python system is required for using\n"
-       "M's scripting capabilities. Some minor functionality might\n"
-       "be missing without it, however the core functions will be\n"
-       "unaffected.\n"
-       "Would you like to disable Python support for now?\n"
-       "(You can re-enable it later from the options dialog)");
-      if ( MDialog_YesNoDialog(_(msg)) )
+      if ( MDialog_YesNoDialog(
+              _("Detected a possible problem with your Python installation.\n"
+                "A properly installed Python system is required for using\n"
+                "M's scripting capabilities. Some minor functionality might\n"
+                "be missing without it, however the core functions will be\n"
+                "unaffected.\n"
+                "Would you like to disable Python support for now?\n"
+                "(You can re-enable it later from the options dialog)")
+               ) )
       {
          // disable it
          m_profile->writeEntry(MP_USEPYTHON, FALSE);

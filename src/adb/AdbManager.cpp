@@ -427,8 +427,8 @@ AdbExpandSingleAddress(String *address,
                                  posParamEnd == String::npos
                                    ? posParamEnd
                                    : posParamEnd - posEq - 1);
-  ;
-              if ( wxStricmp(param, "subject") == 0 )
+
+              if ( wxStricmp(param, _T("subject")) == 0 )
               {
                  *subject = value;
               }

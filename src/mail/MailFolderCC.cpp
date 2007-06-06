@@ -2674,7 +2674,7 @@ MailFolderCC::LookupObject(const MAILSTREAM *stream)
    {
       mf->DecRef();
 
-      if ( wxConvertWX2MB(driverName) != CCLIENT_DRIVER_NAME )
+      if ( driverName != CCLIENT_DRIVER_NAME )
          continue;
 
       // the cast is valid because of the check above

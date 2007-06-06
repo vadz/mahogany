@@ -186,6 +186,18 @@ public:
    /// get the raw (un-decoded) contents of this part
    virtual const void *GetRawContent(unsigned long *len = NULL) const = 0;
 
+   /// get the raw (un-decoded) contents of this part as a string
+   String GetRawContentAsString() const
+   {
+      unsigned long len = 0;
+      const char *c = static_cast<const char *>(GetRawContent(&len));
+
+      // always interpret the string as ISO8859-1 to ensure that the conversion
+      // doesn't fail (as it could do with e.g. UTF-8): we don't really care
+      // about the encoding anyhow, we just need raw bytes here
+      return wxString::From8BitData(c, len);
+   }
+
    /**
        get the decoded contents of this part
 

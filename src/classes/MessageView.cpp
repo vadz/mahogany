@@ -2172,22 +2172,18 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
       return false;
    }
 
-   // the signature is applied to both the headers and the body of the
-   // message and it is done after encoding the latter so we need to get
-   // it in the raw form
-   String signedText = signedPart->GetHeaders();
-
-   unsigned long signedTextLength = 0;
-   const char *c = static_cast<const char *>(
-                     signedPart->GetRawContent(&signedTextLength));
-   signedText += String(wxConvertMB2WX(c), signedTextLength);
-
    MCryptoEngineFactory * const factory
       = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
    CHECK( factory, false, _T("failed to create PGPEngineFactory") );
 
    MCryptoEngine *pgpEngine = factory->Get();
    MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
+
+   // the signature is applied to both the headers and the body of the
+   // message and it is done after encoding the latter so we need to get
+   // it in the raw form
+   String signedText = signedPart->GetHeaders() +
+                           signedPart->GetRawContentAsString();
 
    MCryptoEngine::Status status = pgpEngine->VerifyDetachedSignature
                                              (
@@ -2250,9 +2246,7 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
       return false;
    }
 
-   unsigned long encryptedPartLength = 0;
-   const char* c = (const char *)encryptedPart->GetRawContent(&encryptedPartLength);
-   String encryptedData(wxConvertMB2WX(c), encryptedPartLength);
+   String encryptedData = encryptedPart->GetRawContentAsString();
 
    MCryptoEngineFactory * const factory
       = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
@@ -3041,23 +3035,20 @@ MessageView::MimeHandle(const MimePart *mimepart)
         (wxMimeTypesManager::IsOfType(mimetype, _T("IMAGE/TIFF"))
          || wxMimeTypesManager::IsOfType(mimetype, _T("APPLICATION/OCTET-STREAM"))))
    {
-      kbStringList faxdomains;
-      String faxListing = READ_CONFIG(profile, MP_INCFAX_DOMAINS);
-      wxChar *faxlisting = strutil_strdup(faxListing);
-      strutil_tokenise(faxlisting, _T(":;,"), faxdomains);
-      delete [] faxlisting;
+      const wxArrayString faxdomains(
+            strutil_restore_array(READ_CONFIG(profile, MP_INCFAX_DOMAINS)));
 
       bool isfax = false;
-      wxString domain;
       wxString fromline = m_mailMessage->From();
       strutil_tolower(fromline);
 
-      for(kbStringList::iterator i = faxdomains.begin();
-          i != faxdomains.end(); i++)
+      for( wxArrayString::const_iterator i = faxdomains.begin();
+           i != faxdomains.end();
+           ++i )
       {
-         domain = **i;
+         wxString domain = *i;
          strutil_tolower(domain);
-         if(fromline.Find(domain) != -1)
+         if ( fromline.Find(domain) != -1 )
             isfax = true;
       }
 

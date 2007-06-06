@@ -69,7 +69,7 @@ extern const MOption MP_PROFILE_TYPE;
 
 /** Name for the subgroup level used for suspended profiles. Must
     never appear as part of a profile path name. */
-extern const char SUSPEND_PATH[] = _T("__suspended__");
+extern const char SUSPEND_PATH[] = "__suspended__";
 
 /// flags for readEntry
 enum

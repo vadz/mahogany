@@ -140,7 +140,7 @@ protected:
    void ReadOptions(Options& options, Profile *profile);
 
    // get the quote level for the line (prev is for CountQuoteLevel() only)
-   size_t GetQuotedLevel(const char *line, QuoteData& quote) const;
+   size_t GetQuotedLevel(const wxChar *line, QuoteData& quote) const;
 
    // get the colour for the given quote level
    wxColour GetQuoteColour(size_t qlevel) const;
@@ -216,7 +216,7 @@ bool QuoteURLFilter::UpdateOptions(Profile *profile)
 // ----------------------------------------------------------------------------
 
 size_t
-QuoteURLFilter::GetQuotedLevel(const char *line, QuoteData& quoteData) const
+QuoteURLFilter::GetQuotedLevel(const wxChar *line, QuoteData& quoteData) const
 {
    size_t qlevel = CountQuoteLevel
                    (

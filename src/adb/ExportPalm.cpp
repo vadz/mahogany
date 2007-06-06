@@ -133,7 +133,7 @@ private:
 IMPLEMENT_ADB_EXPORTER(AdbPalmExporter,
                        gettext_noop("PalmOS format address book exporter"),
                        gettext_noop("PalmOS addressbook"),
-                       _T("Karsten Ballüder <ballueder@gmx.net>"));
+                       _T("Karsten Ballueder <ballueder@gmx.net>"));
 
 
 // ----------------------------------------------------------------------------

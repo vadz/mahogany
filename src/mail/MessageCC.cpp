@@ -196,7 +196,7 @@ String MessageCC::Date(void) const
 
    String date;
    if ( m_Envelope )
-      date = wxConvertMB2WX(m_Envelope->date);
+      date = m_Envelope->date;
    else
       FAIL_MSG( _T("should have envelop in Date()") );
 
@@ -305,7 +305,7 @@ String MessageCC::GetHeader(void) const
          const char *cptr = mail_fetchheader_full(m_folder->Stream(), m_uid,
                                                   NULL, &len, FT_UID);
          m_folder->UnLock();
-         str = String(wxConvertMB2WX(cptr), (size_t)len);
+         str = String::From8BitData(cptr, len);
       }
       else
       {
@@ -699,7 +699,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
    unsigned long len = 0;
 
    // NB: this pointer shouldn't be freed
-   char *cptr = (*fetchFunc)(stream, m_uid, (char *)sp.mb_str(), &len, FT_UID);
+   char *cptr = (*fetchFunc)(stream, m_uid, sp.char_str(), &len, FT_UID);
 
    m_folder->EndReading();
 
@@ -727,7 +727,7 @@ MessageCC::GetPartHeaders(const MimePart& mimepart)
    const char *cptr = DoGetPartAny(mimepart, &len, mail_fetch_mime);
    if ( cptr )
    {
-      s.assign(wxConvertMB2WX(cptr), len);
+      s = wxString::From8BitData(cptr, len);
    }
 
    return s;

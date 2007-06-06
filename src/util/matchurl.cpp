@@ -766,8 +766,8 @@ match:
       {
          // also check that we have at least one dot in the domain part for the
          // mail addresses
-         const char *
-            pDot = (char *)memchr(text + pos + 1, '.', p - text - pos - 1);
+         const wxChar *
+            pDot = (wxChar *)memchr(text + pos + 1, '.', p - text - pos - 1);
          if ( !pDot )
          {
             good = false;

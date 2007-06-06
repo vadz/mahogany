@@ -456,7 +456,7 @@ strutil_expandpath(const String &ipath)
          do
          {
             entry = getpwent();
-            if(entry && entry->pw_name == wxConvertWX2MB(user))
+            if(entry && entry->pw_name == user)
                break;
          } while(entry);
          if(entry)

@@ -1251,9 +1251,9 @@ MailFolder::SaveMessageAsMBOX(const String& filename,
       String fromLine = _T("From ");
 
       // find the from address
-      static const wxChar *FROM_HEADER = _T("From: ");
-      const wxChar *
-         p = wxStrstr(static_cast<const char *>(content), FROM_HEADER);
+      static const char *FROM_HEADER = "From: ";
+      const char *
+         p = strstr(static_cast<const char *>(content), FROM_HEADER);
       if ( !p )
       {
          // this shouldn't normally happen, but if it does just make it up
@@ -1264,8 +1264,8 @@ MailFolder::SaveMessageAsMBOX(const String& filename,
       else // take everything until the end of line
       {
          // extract just the address in angle brackets
-         p += wxStrlen(FROM_HEADER);
-         const wxChar *q = wxStrchr(p, '<');
+         p += strlen(FROM_HEADER);
+         const char *q = strchr(p, '<');
          if ( q )
             p = q + 1;
 

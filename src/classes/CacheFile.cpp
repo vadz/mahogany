@@ -75,7 +75,7 @@ int CacheFile::BuildVersion(int verMaj, int verMin)
 int CacheFile::CheckFormatVersion(const String& header, int *version) const
 {
    int verMaj, verMin;
-   if ( wxSscanf(header, GetFileHeader(), &verMaj, &verMin) == 2 )
+   if ( wxSscanf(header.mb_str(), GetFileHeader(), &verMaj, &verMin) == 2 )
    {
       int verMajCurrent, verMinCurrent;
       SplitVersion(GetFormatVersion(), verMajCurrent, verMinCurrent);

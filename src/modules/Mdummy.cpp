@@ -47,7 +47,7 @@ MMODULE_BEGIN_IMPLEMENT(DummyModule,
                                "it simply gets loaded, opens a dialog and "
                                "that's all. It's purpose is to serve as an "
                                "example and template for writing real modules."))
-   MMODULE_PROP(_T("author"), _T("Karsten Ballüder <karsten@phy.hw.ac.uk>"))
+   MMODULE_PROP(_T("author"), _T("Karsten Ballueder <karsten@phy.hw.ac.uk>"))
 MMODULE_END_IMPLEMENT(DummyModule)
 
 

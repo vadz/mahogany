@@ -20,7 +20,7 @@
 %{
 bool Message(const char *message)
 {
-   return MDialog_Message(message, NULL);
+   return MDialog_Message(wxString(message), NULL);
 }
 
 void Status(const char *message)

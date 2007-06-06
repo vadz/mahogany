@@ -51,7 +51,7 @@ public:
 
 
    // pointer to previous line we examined
-   const char *linePrev;
+   const wxChar *linePrev;
 
    // set to > 0 if the next line is wrapped tail of this one
    int levelWrapped;
@@ -74,7 +74,7 @@ private:
     @return number of quoting levels (0 for unquoted text)
   */
 int
-CountQuoteLevel(const char *string,
+CountQuoteLevel(const wxChar *string,
                 int max_white,
                 int max_alpha,
                 QuoteData& quoteData);

@@ -1851,6 +1851,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #define CONFIG_ENTRY(name)  ConfigValueDefault(name##_NAME, name##_DEFVAL)
 // worse: dummy entries for message fields
 #define CONFIG_NONE()  ConfigValueNone()
+// and another one: an entry for Python callback
+#define CONFIG_PYCALLBACK(name) ConfigValueDefault(_T(name), _T(""))
 
 // if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
 // there too
@@ -2059,11 +2061,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_PYTHONMODULE_TO_LOAD),
    CONFIG_NONE(),
-   ConfigValueDefault(MCB_FOLDEROPEN, ""),
-   ConfigValueDefault(MCB_FOLDERUPDATE, ""),
-   ConfigValueDefault(MCB_FOLDEREXPUNGE, ""),
-   ConfigValueDefault(MCB_FOLDERSETMSGFLAG, ""),
-   ConfigValueDefault(MCB_FOLDERCLEARMSGFLAG, ""),
+   CONFIG_PYCALLBACK(MCB_FOLDEROPEN),
+   CONFIG_PYCALLBACK(MCB_FOLDERUPDATE),
+   CONFIG_PYCALLBACK(MCB_FOLDEREXPUNGE),
+   CONFIG_PYCALLBACK(MCB_FOLDERSETMSGFLAG),
+   CONFIG_PYCALLBACK(MCB_FOLDERCLEARMSGFLAG),
 #endif // USE_PYTHON
 
    // message view

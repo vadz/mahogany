@@ -35,20 +35,11 @@
 extern const MOption MP_MVIEW_QUOTED_MAXWHITESPACE;
 extern const MOption MP_MVIEW_QUOTED_MAXALPHA;
 
-// ----------------------------------------------------------------------------
-// private functions prototypes
-// ----------------------------------------------------------------------------
-
-/**
-   Check if there is only whitespace until the end of line.
- */
-static bool IsBlankLine(const char *p);
-
 // ============================================================================
 // CountQuoteLevel() and helper functions implementation
 // ============================================================================
 
-static bool IsBlankLine(const char *p)
+static bool IsBlankLine(const wxChar *p)
 {
    for ( ;; )
    {
@@ -80,7 +71,7 @@ enum LineResult
 
 // advance the *pp pointer if it points to the same thing as c
 static void
-UpdateLineStatus(const char *c, const char **pp, LineResult *pSameAs)
+UpdateLineStatus(const wxChar *c, const wxChar **pp, LineResult *pSameAs)
 {
    if ( *pSameAs == Line_Unknown || *pSameAs == Line_Same )
    {
@@ -98,13 +89,13 @@ UpdateLineStatus(const char *c, const char **pp, LineResult *pSameAs)
 }
 
 int
-CountQuoteLevel(const char *string,
+CountQuoteLevel(const wxChar *string,
                 int max_white,
                 int max_alpha,
                 QuoteData& quoteData)
 {
    // update the previous line pointer for the next call
-   const char *prev = quoteData.linePrev;
+   const wxChar *prev = quoteData.linePrev;
    quoteData.linePrev = string;
 
    // check if this line had been already detected as a quoted tail of the
@@ -118,11 +109,11 @@ CountQuoteLevel(const char *string,
 
 
    // find the beginning of the and next line
-   const char *nextStart = strchr(string, '\n');
+   const wxChar *nextStart = wxStrchr(string, '\n');
 
    // it's simpler to pretend that the next line is the same as this one
    // instead of checking for it all the time below
-   const char *next = nextStart ? nextStart + 1 /* skip '\n' */ : string;
+   const wxChar *next = nextStart ? nextStart + 1 /* skip '\n' */ : string;
 
    if ( !prev )
    {
@@ -134,8 +125,8 @@ CountQuoteLevel(const char *string,
    // look at the beginning of this string and count (nested) quoting levels
    LineResult sameAsNext = Line_Unknown,
               sameAsPrev = Line_Unknown;
-   const char *lastQuote = string;
-   for ( const char *c = string; *c != 0 && *c != '\n'; c++, lastQuote = c )
+   const wxChar *lastQuote = string;
+   for ( const wxChar *c = string; *c != 0 && *c != '\n'; c++, lastQuote = c )
    {
       // skip leading white space
       for ( int num_white = 0; *c == '\t' || *c == ' '; c++ )
@@ -240,11 +231,11 @@ CountQuoteLevel(const char *string,
             if ( next - string > 50 )
             {
                // we also check "wrapped" line is short enough
-               const char *nextnext = strchr(nextStart + 1 /* skip \n */, '\n');
+               const wxChar *nextnext = wxStrchr(nextStart + 1 /* skip \n */, '\n');
                if ( !nextnext ||
                      (nextnext - next > 25) ||
                       (!IsBlankLine(nextnext + 1) &&
-                        strncmp(string, nextnext + 1, next - nextStart) != 0) )
+                        wxStrncmp(string, nextnext + 1, next - nextStart) != 0) )
                {
                   // the line after next doesn't start with the same prefix as
                   // this one so it's improbable that the next line was garbled
@@ -299,7 +290,7 @@ String GetUnquotedText(const String& text, Profile *profile)
    const int maxWhite = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
    const int maxAlpha = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXALPHA);
    QuoteData qd;
-   for ( const char *lineCur = text.c_str(); *lineCur; )
+   for ( const wxChar *lineCur = text.c_str(); *lineCur; )
    {
       // find the start of the next line
       const wxChar *lineNext = wxStrchr(lineCur, _T('\n'));

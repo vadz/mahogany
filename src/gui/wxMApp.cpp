@@ -477,7 +477,7 @@ END_EVENT_TABLE()
 class MDebugReport : public wxDebugReportCompress
 {
 public:
-   MDebugReport(const char *msg)
+   MDebugReport(const wxChar *msg)
    {
       AddAll(msg == NULL ? Context_Exception : Context_Current);
 
@@ -721,7 +721,7 @@ FatalMsgBox(const String& msg)
 }
 
 void
-wxMApp::OnAbnormalTermination(const char *msgOrig)
+wxMApp::OnAbnormalTermination(const wxChar *msgOrig)
 {
    static bool s_crashed = false;
 

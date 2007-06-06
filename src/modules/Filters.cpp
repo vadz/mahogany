@@ -3214,7 +3214,7 @@ MMODULE_BEGIN_IMPLEMENT(MModule_FiltersImpl,
                   "which allows one to apply different tests and operations "
                   "to messages, like sorting, replying or moving them "
                   "automatically."))
-   MMODULE_PROP(_T("author"), _T("Karsten Ballüder <karsten@phy.hw.ac.uk>"))
+   MMODULE_PROP(_T("author"), _T("Karsten Ballueder <karsten@phy.hw.ac.uk>"))
 MMODULE_END_IMPLEMENT(MModule_FiltersImpl)
 
 FilterRule *

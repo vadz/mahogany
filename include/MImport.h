@@ -103,7 +103,7 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 
 // this macro must be used inside the declaration of the importer class
 #define DECLARE_M_IMPORTER()                                                   \
-   virtual const wxChar *GetProgName() const;                                    \
+   virtual const wxChar *GetProgName() const;                                  \
    MMODULE_DEFINE();                                                           \
    DEFAULT_ENTRY_FUNC                                                          \
 
@@ -111,13 +111,14 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 // lines of the form MMODULE_PROP(name, value) between them to add other
 // properties such as description or whatever
 #define MIMPORTER_BEGIN_IMPLEMENT(cname, progname, desc)                       \
-   MMODULE_BEGIN_IMPLEMENT(cname, #cname, M_IMPORTER_INTERFACE, "", "1.00")    \
+   MMODULE_BEGIN_IMPLEMENT(cname, _T(#cname), M_IMPORTER_INTERFACE,            \
+                           _T(""), _T("1.00"))                                 \
       MMODULE_PROP(M_IMPORTER_PROG_NAME, progname)                             \
-      MMODULE_PROP(MMODULE_DESCRIPTION_PROP, _(desc))
+      MMODULE_PROP(MMODULE_DESCRIPTION_PROP, desc)
 
 #define MIMPORTER_END_IMPLEMENT(cname)                                         \
    MMODULE_END_IMPLEMENT(cname)                                                \
-   const wxChar *cname::GetProgName() const                                      \
+   const wxChar *cname::GetProgName() const                                    \
    {                                                                           \
       return GetMModuleProperty(ms_properties, M_IMPORTER_PROG_NAME);          \
    }                                                                           \

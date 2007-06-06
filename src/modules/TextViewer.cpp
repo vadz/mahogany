@@ -513,9 +513,12 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 // ctor
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_MESSAGE_VIEWER(TextViewer,
-                         _("Text only message viewer"),
-                         _T("(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>"));
+IMPLEMENT_MESSAGE_VIEWER
+(
+   TextViewer,
+   _("Text only message viewer"),
+   gettext_noop("(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>")
+);
 
 TextViewer::TextViewer()
 {
