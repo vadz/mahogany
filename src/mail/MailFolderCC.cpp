@@ -4363,18 +4363,16 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
 
    // do fill the listing
    size_t n;
-   for ( UIdType i = seq.GetFirst(n); i != UID_ILLEGAL; i = seq.GetNext(i, n) )
+   for ( UIdType i = seq.GetFirst(n);
+         i != UID_ILLEGAL && m_MailStream;
+         i = seq.GetNext(i, n) )
    {
       MESSAGECACHE *elt = mail_elt(m_MailStream, i);
       if ( !elt )
       {
-         if ( !m_MailStream )
-         {
-            // the stream is dead, abort
-            break;
-         }
-
-         FAIL_MSG( _T("failed to get sequence element?") );
+         // it's ok if we failed because we lost connection but otherwise this
+         // is unexpected
+         ASSERT_MSG( !m_MailStream, "failed to get sequence element?" );
 
          continue;
       }
@@ -4382,13 +4380,7 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
       ENVELOPE *env = mail_fetch_structure(m_MailStream, i, NIL, NIL);
       if ( !env )
       {
-         if ( !m_MailStream )
-         {
-            // connection was broken, don't try to get the others
-            break;
-         }
-
-         FAIL_MSG( _T("failed to get sequence element envelope?") );
+         ASSERT_MSG( !m_MailStream, "failed to get sequence element envelope?" );
 
          continue;
       }
