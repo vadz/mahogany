@@ -448,7 +448,7 @@ PGPEngine::DoExecCommand(const String& options,
             }
             else if ( code == _T("IMPORTED") )
             {
-               const wxChar * const pSpace = wxStrchr(pc, ' ');
+               const wxChar * const pSpace = wxStrchr(pc, _T(' '));
                if ( pSpace )
                {
                   log->SetPublicKey(String(pc, pSpace));

@@ -2845,7 +2845,7 @@ wxComposeView::DoInitText(Message *msgOrig)
          for ( const wxChar *pc = pcStart; ; )
          {
             // find and skip over the next macro occurence
-            pc = wxStrchr(pc, '$');
+            pc = wxStrchr(pc, _T('$'));
             if ( !pc++ )
                break;
 

@@ -174,7 +174,7 @@ PGPFilter::DoProcess(String& text,
       if ( !*p )
          break;
 
-      p = wxStrchr(start, '\n');
+      p = wxStrchr(start, _T('\n'));
       if ( !p )
          break; // no more text
 

@@ -109,7 +109,7 @@ CountQuoteLevel(const wxChar *string,
 
 
    // find the beginning of the and next line
-   const wxChar *nextStart = wxStrchr(string, '\n');
+   const wxChar *nextStart = wxStrchr(string, _T('\n'));
 
    // it's simpler to pretend that the next line is the same as this one
    // instead of checking for it all the time below
@@ -231,7 +231,8 @@ CountQuoteLevel(const wxChar *string,
             if ( next - string > 50 )
             {
                // we also check "wrapped" line is short enough
-               const wxChar *nextnext = wxStrchr(nextStart + 1 /* skip \n */, '\n');
+               const wxChar *nextnext = wxStrchr(nextStart + 1 /* skip \n */,
+                                                 _T('\n'));
                if ( !nextnext ||
                      (nextnext - next > 25) ||
                       (!IsBlankLine(nextnext + 1) &&

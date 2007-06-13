@@ -356,7 +356,7 @@ strutil_extract_formatspec(const wxChar *format)
 String
 strutil_getfilename(const String& path)
 {
-   const wxChar *pLast1 = wxStrrchr(path, '/');
+   const wxChar *pLast1 = wxStrrchr(path, _T('/'));
    size_t nPos1 = pLast1 ? pLast1 - path.c_str() : 0;
 
    // under Windows we understand both '/' and '\\' as path separators, but

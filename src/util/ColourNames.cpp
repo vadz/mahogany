@@ -38,7 +38,7 @@ bool ParseColourString(const String& name, wxColour* colour)
 
    // first check if it's a RGB specification
    int red, green, blue;
-   if ( wxSscanf(name, customColourString, &red, &green, &blue) == 3 )
+   if ( wxSscanf(name.wx_str(), customColourString, &red, &green, &blue) == 3 )
    {
       // it's a custom colour
       if ( colour )

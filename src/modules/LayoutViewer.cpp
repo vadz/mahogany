@@ -587,7 +587,7 @@ void LayoutViewer::InsertURL(const String& textOrig, const String& url)
    do
    {
       const wxChar *p0 = text;
-      const wxChar *p = wxStrchr(p0, '\n');
+      const wxChar *p = wxStrchr(p0, _T('\n'));
       if ( p )
       {
          textRest = text.substr(p - p0 + 1);

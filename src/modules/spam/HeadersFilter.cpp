@@ -553,15 +553,16 @@ static bool CheckSubjectForJunkAtEnd(const String& subject)
    // we look for at least that many consecutive spaces before starting looking
    // for a junk tail
    static const size_t NUM_SPACES = 6;
+   static const wxChar *SPACES = _T("      ");
 
    // and the tail should have at least that many symbols
    static const size_t LEN_TAIL = 4;
 
-   // and the sumb of both should be at least equal to this (very short tails
+   // and the sum of both should be at least equal to this (very short tails
    // without many preceding spaces could occur in a legal message)
    static const size_t LEN_SPACES_AND_TAIL = 15;
 
-   const wxChar *p = wxStrstr(subject, String(_T(' '), NUM_SPACES));
+   const wxChar *p = wxStrstr(subject, SPACES);
    if ( !p )
       return false;
 
@@ -748,8 +749,8 @@ static bool CheckXAuthWarning(const String& value)
    }
 
    // check if the domains match
-   const wxChar *domain1 = wxStrchr(pc, '.'),
-                *domain2 = wxStrchr(pc2, '.');
+   const wxChar *domain1 = wxStrchr(pc, _T('.')),
+                *domain2 = wxStrchr(pc2, _T('.'));
 
    if ( !domain1 || !domain2 )
    {

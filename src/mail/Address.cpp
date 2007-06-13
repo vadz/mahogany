@@ -295,7 +295,7 @@ String Address::BuildFullForm(const String& name, const String& email)
 
    // we need to quote the personal part if it's not an atext as defined by RFC
    // 2822 (TODO: reuse IsATextChar() from matchurl.cpp!)
-   bool doQuote = wxStrpbrk(name, _T(",;\"")) != (const wxChar *)NULL;
+   bool doQuote = wxStrpbrk(name, ",;\"") != NULL;
    if ( doQuote )
    {
       address = _T('"');

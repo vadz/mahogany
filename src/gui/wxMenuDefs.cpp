@@ -659,7 +659,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 #ifdef DEBUG
       const wxString label(wxGetTranslation(GetMenuItem(n).label));
       if ( !label.empty() ) {
-         const wxChar *p = wxStrchr(label, '&');
+         const wxChar *p = wxStrchr(label, _T('&'));
          if ( p == NULL ) {
             wxLogWarning(_T("Menu label '%s' doesn't have keyboard accelerator."),
                          label.c_str());
