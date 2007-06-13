@@ -4291,7 +4291,7 @@ case "$MSGFMT" in '')
 esac
 
 
-MIN_WX_VERSION=2.8.5
+MIN_WX_VERSION=2.8.4
 
     
     if test x${WX_CONFIG_NAME+set} != xset ; then
