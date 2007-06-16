@@ -177,11 +177,11 @@ public:
 
       We provide only methods for reading strings and longs, the caller must
       check the range if a bool/char/short/int and not long is needed. Reading
-      float/double directly is not supported, use strings instead if yuou
+      float/double directly is not supported, use strings instead if you
       really need this.
 
       Each method below returns true if the value was found and retrieved,
-      false if it wasn't found or an error occured (such errors would usually
+      false if it wasn't found or an error occurred (such errors would usually
       be ignored anyhow...).
     */
    //@{
@@ -208,7 +208,7 @@ public:
    /**
       @name Writing data.
 
-      As above, onlky strings and longs are directly supported.
+      As above, only strings and longs are directly supported.
 
       All Write() methods below return true if ok and false on error -- this
       should be checked for and handled!
@@ -238,9 +238,9 @@ public:
       @name Enumerating entries and groups.
 
       The enumeration methods work with an opaque cookie parameter which must
-      be first passed to GetrFirstXXX() and then to GetNextXXX(). All methods
+      be first passed to GetFirstXXX() and then to GetNextXXX(). All methods
       return true if the next group/entry was retrieved or false if there are
-      no more of them or an error occured.
+      no more of them or an error occurred.
     */
    //@{
 
@@ -322,7 +322,7 @@ public:
 
 
 protected:
-   /// Constrructor is protected, you can only create derived classes
+   /// Constructor is protected, you can only create derived classes
    ConfigSource(const String& name, const String& type)
       : m_name(name.empty() ? String(_("Local")) : name.AfterLast(_T('/'))),
         m_type(type)
