@@ -107,12 +107,12 @@ public:
     */
    //@{
 
-   /// Start anumerating the entries.
+   /// Start enumerating the entries.
    bool GetFirstGroup(const String& path,
                       String& group,
                       ProfileEnumDataImpl& data) const;
 
-   /// Start anumerating the subgroups.
+   /// Start enumerating the subgroups.
    bool GetFirstEntry(const String& path,
                       String& entry,
                       ProfileEnumDataImpl& data) const;
