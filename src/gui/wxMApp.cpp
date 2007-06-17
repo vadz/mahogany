@@ -625,21 +625,22 @@ int wxMApp::FilterEvent(wxEvent& event)
       return false;
    }
 
-   // GetTimer() is new
-#if wxCHECK_VERSION(2, 9, 0)
    if ( event.GetEventType() == wxEVT_TIMER )
    {
       // this one should also be ignored right now as we could call to c-client
       // from its handler too, but there is an added complication: if it was a
       // one shot timer event, we need to restart the timer to avoid losing the
-      // event entirely
+      // event entirely (and unfortunately we can't do this with earlier wx
+      // versions as they don't have wxTimerEvent::GetTimer() and so we can't
+      // recover the timer object from here)
+#if wxCHECK_VERSION(2, 9, 0)
       wxTimer& timer = wx_static_cast(wxTimerEvent&, event).GetTimer();
       if ( timer.IsOneShot() )
          timer.Start(-1 /* same interval as last time */, true /* one shot */);
+#endif // wx 2.9.0
 
       return false;
    }
-#endif // wx 2.9.0
 
    // the other events should be safe to handle
    return -1;
