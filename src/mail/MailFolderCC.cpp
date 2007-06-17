@@ -3408,7 +3408,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 
    status->unread = CountUnseenMessages();
 
-   if ( status->recent || status->unread )
+   if ( status->recent && status->unread )
    {
       status->newmsgs = CountNewMessages();
    }
