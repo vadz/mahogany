@@ -52,6 +52,9 @@
 
 #include "MFolder.h"
 
+#include "ConfigSource.h"
+#include "ConfigSourcesAll.h"
+
 #include <wx/tipdlg.h>
 #include <wx/numdlg.h>
 #include <wx/statline.h>
@@ -94,6 +97,12 @@ extern const MOption MP_WIDTH;
 
 extern const MPersMsgBox *M_MSGBOX_AUTOEXPUNGE;
 extern const MPersMsgBox *M_MSGBOX_REENABLE_HINT;
+
+// ----------------------------------------------------------------------------
+// other constants
+// ----------------------------------------------------------------------------
+
+#define MESSAGE_BOXES_ROOT _T("/") M_SETTINGS_CONFIG_SECTION _T("/MessageBox")
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -1877,8 +1886,10 @@ class ReenableDialog : public wxManuallyLaidOutDialog
 public:
    ReenableDialog(wxWindow *parent);
 
-   // adds all entries for the given folder to the listctrl
-   void AddAllEntries(wxConfigBase *config,
+   // adds all disabled message boxes for the given folder to the listctrl and
+   // remember their paths in entries parameter so that they could be deleted
+   // later
+   void AddAllEntries(const ConfigSource *config,
                       const String& folder,
                       wxArrayString& entries);
 
@@ -1945,19 +1956,26 @@ ReenableDialog::ReenableDialog(wxWindow *parent)
    SetDefaultSize(6*wBtn, 8*hBtn);
 }
 
-void ReenableDialog::AddAllEntries(wxConfigBase *config,
+void ReenableDialog::AddAllEntries(const ConfigSource *config,
                                    const String& folder,
                                    wxArrayString& entries)
 {
-   long dummy;
+   wxString key(MESSAGE_BOXES_ROOT);
+   if ( !folder.empty() )
+      key << '/' << folder;
+
+   ConfigSource::EnumData dummy;
    String name;
-   for ( bool cont = config->GetFirstEntry(name, dummy);
+   for ( bool cont = config->GetFirstEntry(key, name, dummy);
          cont;
          cont = config->GetNextEntry(name, dummy) )
    {
       // decode the remembered value
       String value;
-      long val = config->Read(name, 0l);
+      long val;
+      if ( !config->Read(name, &val) )
+         continue;
+
       switch ( val )
       {
          case wxYES:
@@ -2053,29 +2071,26 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
    //     change the current path in the global config...
    ReenableDialog dlg(parent);
 
-   // get all entries under Settings/MessageBox
-   wxConfigBase *config = wxConfigBase::Get();
-   CHECK( config, FALSE, _T("no app config?") );
-
-   wxString root;
-   root << '/' << M_SETTINGS_CONFIG_SECTION << _T("/MessageBox");
-   config->SetPath(root);
-
+   // get all entries under Settings/MessageBox in all config sources
    wxArrayString entries;
-   dlg.AddAllEntries(config, wxEmptyString, entries);
 
-   long dummy;
-   String name;
-   bool cont = config->GetFirstGroup(name, dummy);
-   while ( cont )
+   const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
+   for ( AllConfigSources::List::iterator config = sources.begin(),
+                                             end = sources.end();
+         config != end;
+         ++config )
    {
-      config->SetPath(name);
+      dlg.AddAllEntries(config.operator->(), wxEmptyString, entries);
 
-      dlg.AddAllEntries(config, name, entries);
+      ConfigSource::EnumData dummy;
+      String name;
+      bool cont = config->GetFirstGroup(MESSAGE_BOXES_ROOT, name, dummy);
+      while ( cont )
+      {
+         dlg.AddAllEntries(config.operator->(), name, entries);
 
-      config->SetPath(_T(".."));
-
-      cont = config->GetNextGroup(name, dummy);
+         cont = config->GetNextGroup(name, dummy);
+      }
    }
 
    if ( dlg.ShouldShow() )
@@ -2088,11 +2103,21 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
          size_t count = selections.GetCount();
          if ( count )
          {
-            config->SetPath(root);
-
             for ( size_t n = 0; n < count; n++ )
             {
-               config->DeleteEntry(entries[selections[n]]);
+               wxString key;
+               key << MESSAGE_BOXES_ROOT << '/' << entries[selections[n]];
+
+               // we don't know in which config source this message box was
+               // disabled but it doesn't matter: if we want to reenable it, we
+               // must do it in all of them anyhow
+               for ( AllConfigSources::List::iterator config = sources.begin(),
+                                                         end = sources.end();
+                     config != end;
+                     ++config )
+               {
+                  config->DeleteEntry(key);
+               }
             }
 
             wxLogStatus(GetFrame(parent),
