@@ -52,6 +52,10 @@
 
 class MOption;
 
+extern void CleanupFilterCache();
+
+MMODULE_CLEANUP(CleanupFilterCache)
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------

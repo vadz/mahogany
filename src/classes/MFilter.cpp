@@ -31,7 +31,6 @@
 
 #include "MFilter.h"
 #include "MFolder.h"
-#include "MAtExit.h"
 #include "modules/Filters.h"
 
 // ----------------------------------------------------------------------------
@@ -50,7 +49,9 @@
 // ----------------------------------------------------------------------------
 
 // free the folder filters cache defined below
-static void CleanupFilterCache();
+//
+// this is called by Filters module during unload, so it is not really private
+extern void CleanupFilterCache();
 
 // invalidate the cached representation of the given filter
 static void InvalidateFilter(const MFilter *filter);
@@ -65,9 +66,6 @@ static void InvalidateFilter(const MFilter *filter);
 WX_DECLARE_STRING_HASH_MAP(FilterRule *, FolderFiltersMap);
 
 static FolderFiltersMap gs_folderFilters;
-
-// ensure that filter rules are deleted on exit
-static MRunFunctionAtExit gs_runFilterCacheCleanup(CleanupFilterCache);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -1009,7 +1007,7 @@ MFilterFromProfile::DebugDump() const
 // global functions
 // ----------------------------------------------------------------------------
 
-static void
+void
 CleanupFilterCache()
 {
    for ( FolderFiltersMap::const_iterator i = gs_folderFilters.begin();
