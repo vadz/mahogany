@@ -29,6 +29,8 @@
 #   include <wx/dynarray.h>        // for WX_DECLARE_OBJARRAY
 #endif // USE_PCH
 
+#include <wx/recguard.h>
+
 #include "MFilter.h"
 #include "MFolder.h"
 #include "modules/Filters.h"
@@ -1010,6 +1012,16 @@ MFilterFromProfile::DebugDump() const
 void
 CleanupFilterCache()
 {
+   // it can happen that the filter module is unloaded when we delete the
+   // filter rules below, and as it calls us during its unload this results in
+   // fatal reentrancy problems, so prevent this from happening
+   static int s_inCleanUp = false;
+   wxRecursionGuard guard(s_inCleanUp);
+   if ( guard.IsInside() )
+      return;
+
+   s_inCleanUp = true;
+
    for ( FolderFiltersMap::const_iterator i = gs_folderFilters.begin();
          i != gs_folderFilters.end();
          ++i )
