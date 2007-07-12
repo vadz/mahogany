@@ -34,5 +34,7 @@
   #pragma warning(disable:4244)
 #endif
 
+#define UNUSED(param) param
+
 #endif /* !__auto_config_h */
 
