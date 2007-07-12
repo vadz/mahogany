@@ -641,7 +641,7 @@ wxIconManager::GetIconFromMimeType(const String& type, const String& ext)
    // use the system icons by default
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
    wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(type);
-   if ( !fileType )
+   if ( !fileType && !ext.empty() )
    {
       fileType = mimeManager.GetFileTypeFromExtension(ext);
    }
