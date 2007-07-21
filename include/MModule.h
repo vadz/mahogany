@@ -345,7 +345,7 @@ void MModule_AddStaticModule(const wxChar *Name,
      } \
     } gs_moduleInitializerFor##ClassName;
 
-#  define MMODULE_CLEANUP(func) MRunFunctionAtExit moduleCleanup(func);
+#  define MMODULE_CLEANUP(func) static MRunFunctionAtExit moduleCleanup(func);
 #else // !USE_MODULES_STATIC
 #  define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version)
 #  define MMODULE_CLEANUP(func) \
