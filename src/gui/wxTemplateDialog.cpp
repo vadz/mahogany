@@ -959,7 +959,7 @@ bool wxAllTemplatesDialog::TransferDataFromWindow()
    wxConfigBase *config = wxConfigBase::Get();
    if ( config )
    {
-      config->Write(GetEditKindPath(), GetTemplateKind());
+      config->Write(GetEditKindPath(), (int)GetTemplateKind());
    }
 
    return true;
