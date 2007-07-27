@@ -767,7 +767,7 @@ match:
          // also check that we have at least one dot in the domain part for the
          // mail addresses
          const wxChar *
-            pDot = (wxChar *)memchr(text + pos + 1, '.', p - text - pos - 1);
+            pDot = wxTmemchr(text + pos + 1, '.', p - text - pos - 1);
          if ( !pDot )
          {
             good = false;
@@ -777,8 +777,8 @@ match:
             // and has either two dots or at least a slash the other URLs,
             // otherwise it probably isn't an address/URL neither (stuff like
             // "... using ftp.If you ... " shouldn't be recognized as an URL)
-            good = memchr(pDot + 1, '.', p - pDot - 1) != NULL ||
-                     memchr(pDot + 1, '/', p - pDot - 1) != NULL;
+            good = wxTmemchr(pDot + 1, '.', p - pDot - 1) != NULL ||
+                     wxTmemchr(pDot + 1, '/', p - pDot - 1) != NULL;
          }
       }
 
