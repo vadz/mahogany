@@ -2156,9 +2156,9 @@ MailFolderCC::CheckForFileLock()
    {
       // get INBOX path name
       MCclientLocker lock;
-      file = (wxChar *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+      file = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
       if(file.empty()) // another c-client stupidity
-         file = (wxChar *) sysinbox();
+         file = (char *) sysinbox();
    }
 #endif // OS_UNIX
    else
@@ -4982,7 +4982,7 @@ const String& MailFolder::InitializeNewsSpool()
       // first, init cclient
       MailFolderCCInit();
 
-      gs_NewsSpoolDir = (wxChar *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
+      gs_NewsSpoolDir = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
       if ( !gs_NewsSpoolDir )
       {
          gs_NewsSpoolDir = READ_APPCONFIG_TEXT(MP_NEWS_SPOOL_DIR);

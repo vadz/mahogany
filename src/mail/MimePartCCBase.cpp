@@ -139,14 +139,14 @@ MimeType MimePartCCBase::GetType() const
 {
    // cast is ok as we use the same values in MimeType as c-client
    return MimeType(static_cast<MimeType::Primary>(m_body->type),
-                   wxConvertMB2WX(m_body->subtype));
+                   wxString::FromAscii(m_body->subtype));
 }
 
 String MimePartCCBase::GetDescription() const
 {
    // FIXME: we lose the encoding info here - but we don't have any way to
    //        return it from here currently
-   return MailFolder::DecodeHeader(wxConvertMB2WX(m_body->description));
+   return MailFolder::DecodeHeader(wxString::From8BitData(m_body->description));
 }
 
 MimeXferEncoding MimePartCCBase::GetTransferEncoding() const
@@ -185,7 +185,7 @@ String MimePartCCBase::GetFilename() const
 
 String MimePartCCBase::GetDisposition() const
 {
-   return wxConvertMB2WX(m_body->disposition.type);
+   return wxString::From8BitData(m_body->disposition.type);
 }
 
 /* static */
@@ -230,7 +230,7 @@ void MimePartCCBase::InitParamList(MimeParameterList *list, PARAMETER *par)
 {
    while ( par )
    {
-      list->push_back(new MimeParameter(wxConvertMB2WX(par->attribute), wxConvertMB2WX(par->value)));
+      list->push_back(new MimeParameter(par->attribute, par->value));
 
       par = par->next;
    }
@@ -452,11 +452,6 @@ String MimePartCCBase::GetTextContent() const
    if ( !p )
       return wxGetEmptyString();
 
-#if wxUSE_UNICODE
-   #warning "We need the original encoding here, TODO"
-   return wxConvertMB2WX(p);
-#else // ANSI
-   return wxString(p, len);
-#endif // Unicode/ANSI
+   return wxString::From8BitData(p);
 }
 
