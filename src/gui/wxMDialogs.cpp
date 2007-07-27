@@ -2602,7 +2602,11 @@ public:
       ms_allIdentCombos.Remove(this);
    }
 
-   virtual void Delete(int index)
+#if wxCHECK_VERSION(2, 9, 0)
+   virtual void DoDeleteOneItem(unsigned int index)
+#else
+   virtual void Delete(unsigned int index)
+#endif
    {
       // sync all other combos with this one
       size_t count = ms_allIdentCombos.GetCount();
@@ -2614,10 +2618,20 @@ public:
          }
       }
 
+#if wxCHECK_VERSION(2, 9, 0)
+      wxChoice::DoDeleteOneItem(index);
+#else
       wxChoice::Delete(index);
+#endif
    }
 
+#if wxCHECK_VERSION(2, 9, 0)
+   virtual int DoAppendItems(const wxArrayStringsAdapter& items,
+                             void **clientData,
+                             wxClientDataType type)
+#else
    virtual int DoAppend(const wxString& item)
+#endif
    {
       // sync all other comboboxes with the one on which Append() had been
       // called: be careful to avoid reentrancy which would result in the
@@ -2634,14 +2648,23 @@ public:
          {
             if ( ms_allIdentCombos[n] != this )
             {
-               ms_allIdentCombos[n]->Append(item);
+               ms_allIdentCombos[n]->
+#if wxCHECK_VERSION(2, 9, 0)
+               DoAppendItems(items, clientData, type);
+#else
+               Append(item);
+#endif
             }
          }
 
          ms_indexOfAppend = wxNOT_FOUND;
       }
 
+#if wxCHECK_VERSION(2, 9, 0)
+      return wxChoice::DoAppendItems(items, clientData, type);
+#else
       return wxChoice::DoAppend(item);
+#endif
    }
 
 private:
