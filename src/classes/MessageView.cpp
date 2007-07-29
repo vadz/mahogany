@@ -1980,7 +1980,8 @@ MessageView::ShowPart(const MimePart *mimepart)
       if ( CheckMessagePartSize(mimepart) )
       {
          unsigned long len;
-         const void *data = mimepart->GetContent(&len);
+         const char * const
+            data = static_cast<const char *>(mimepart->GetContent(&len));
 
          if ( !data )
          {
@@ -1988,9 +1989,7 @@ MessageView::ShowPart(const MimePart *mimepart)
          }
          else
          {
-            String s((const wxChar *)data, len);
-
-            m_viewer->InsertRawContents(s);
+            m_viewer->InsertRawContents(wxString::From8BitData(data, len));
          }
       }
       //else: skip this part
