@@ -1128,7 +1128,7 @@ wxMApp::OnInit()
    }
 #endif // USE_I18N
 
-#if defined(__WXGTK20__) && (!wxUSE_UNICODE || wxUSE_UTF8_LOCALE_ONLY)
+#if defined(__WXGTK20__) && !wxUSE_UNICODE
    // we need UTF-8 support to be able to work with messages in different
    // encodings
    if ( wxLocale::GetSystemEncoding() != wxFONTENCODING_UTF8 )
