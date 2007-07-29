@@ -449,9 +449,10 @@ String MimePartCCBase::GetTextContent() const
 {
    unsigned long len;
    const char *p = reinterpret_cast<const char *>(GetContent(&len));
-   if ( !p )
-      return wxGetEmptyString();
+   wxString s;
+   if ( p )
+      s = wxString::From8BitData(p, len);
 
-   return wxString::From8BitData(p);
+   return s;
 }
 
