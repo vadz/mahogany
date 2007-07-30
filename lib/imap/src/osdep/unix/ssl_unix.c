@@ -96,8 +96,8 @@ void ssl_onceonlyinit (void)
     struct stat sbuf;
 				/* if system doesn't have /dev/urandom */
     if (stat ("/dev/urandom",&sbuf)) {
-      while ((fd = open (tmpnam (tmp),O_WRONLY|O_CREAT|O_EXCL,0600)) < 0)
-	sleep (1);
+      strcpy(tmp, "ccXXXXXX");
+      fd = mkstemp(tmp);
       unlink (tmp);		/* don't need the file */
       fstat (fd,&sbuf);		/* get information about the file */
       close (fd);		/* flush descriptor */
