@@ -124,7 +124,7 @@ strutil_removeAllReplyPrefixes(const String& subject,
       stateOld = state;
       state = normalText;
 
-      const char c = subject[i];
+      const wxChar c = subject[i];
       switch ( stateOld )
       {
          case notInPrefix:
@@ -1107,9 +1107,7 @@ void Threader::add(HASHTAB *hTable, const String &str, ThreadContainer *containe
    // value.
    // XNOFIXME: Is it possible to 'lock' the string until the hash-table
    // is destroyed ?
-   char *s = new char[str.Len()+1];
-   strcpy(s, wxConvertWX2MB(str.c_str()));
-   hash_add(hTable, s, container, 0);
+   hash_add(hTable, strdup(str.utf8_str()), container, 0);
 }
 
 
@@ -1130,7 +1128,7 @@ void Threader::destroy(HASHTAB ** hTable) const
    size_t i;
    for (i = 0; i < (*hTable)->size; i++)
       for (ent = (*hTable)->table[i]; ent != 0; ent = ent->next)
-         delete [] ent->name;
+         free(ent->name);
    // and destroy the hash-table
    hash_destroy(hTable);
 }

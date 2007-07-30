@@ -20,6 +20,8 @@
 
 #include "MimePart.h"
 
+#include <wx/fontenc.h>
+
 /**
    MimePartCCBase uses c-client structures for storing the message.
  */
@@ -134,6 +136,10 @@ protected:
 
    /// Flag telling whether we should free m_content or not
    bool m_ownsContent;
+
+
+   /// cached default encoding: only use GetTextEncoding() to access it
+   mutable wxFontEncoding m_encoding;
 };
 
 #endif // _M_MIMEPARTCCBASE_H_

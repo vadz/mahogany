@@ -588,6 +588,9 @@
 					RelativePath=".\src\mail\MFui.cpp">
 				</File>
 				<File
+					RelativePath=".\src\mail\MimeDecode.cpp">
+				</File>
+				<File
 					RelativePath=".\src\mail\MimePartCC.cpp">
 				</File>
 				<File

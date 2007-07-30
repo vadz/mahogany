@@ -46,7 +46,7 @@ public:
    /** @name Headers access */
    //@{
 
-   virtual wxArrayString GetHeaderLines(const wxChar **headers,
+   virtual wxArrayString GetHeaderLines(const char **headers,
                                         wxArrayInt *encodings = NULL) const
       { return m_message->GetHeaderLines(headers, encodings); }
 

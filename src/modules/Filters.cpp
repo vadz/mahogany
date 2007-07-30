@@ -38,6 +38,7 @@
 #include "MInterface.h"
 #include "SpamFilter.h"
 
+#include "mail/MimeDecode.h"
 #include "UIdArray.h"
 #include "Message.h"
 
@@ -75,14 +76,14 @@ static String gs_spamTest;                // MT-FIXME
 // ----------------------------------------------------------------------------
 
 // all recipient headers, more can be added (but always NULL terminate!)
-static const wxChar *headersRecipients[] =
+static const char *headersRecipients[] =
 {
-   _T("To"),
-   _T("CC"),
-   _T("Bcc"),
-   _T("Resent-To"),
-   _T("Resent-Cc"),
-   _T("Resent-Bcc"),
+   "To",
+   "CC",
+   "Bcc",
+   "Resent-To",
+   "Resent-Cc",
+   "Resent-Bcc",
    NULL
 };
 
@@ -2887,7 +2888,7 @@ FilterRuleApply::Evaluate()
 
 void FilterRuleApply::GetSenderSubject(String& from, String& subject, bool full)
 {
-   subject = MailFolder::DecodeHeader(m_parent->m_MailMessage->Subject());
+   subject = MIME::DecodeHeader(m_parent->m_MailMessage->Subject());
 
    AddressList_obj addrList(m_parent->m_MailMessage->GetAddressList(MAT_FROM));
    Address *addr = addrList ? addrList->GetFirst() : NULL;

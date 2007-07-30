@@ -65,6 +65,7 @@
 #include "MFPrivate.h"
 #include "mail/Driver.h"
 #include "mail/FolderPool.h"
+#include "mail/MimeDecode.h"
 #include "mail/ServerInfo.h"
 
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
@@ -77,7 +78,6 @@ class MPersMsgBox;
 #if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__WINE__)
 #  undef   ERROR
 #endif
-#include <wx/fontmap.h>      // DecodeHeader() uses CharsetToEncoding()
 #if defined(__CYGWIN__) || defined(__MINGW32__) || defined(__WINE__)
 #  undef   ERROR
 #  define  ERROR (long) 2 // HACK - redefine again as in extra/src/c-client/mail.h
@@ -115,17 +115,6 @@ extern "C"
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
-
-// c-client wants unsigned char strings while we work with char pointers
-// everywhere, provide this macro-like helper function to cast the strings
-// to the correct type (this has the added benefit of forcing implicit
-// conversion of wxString::char_str() to "char *", i.e. we can write
-// UCHAR_CAST(s.char_str()) while (unsigned char *)s.char_str() wouldn't
-// compile)
-inline unsigned char *UCHAR_CAST(char *s)
-{
-   return reinterpret_cast<unsigned char *>(s);
-}
 
 /**
   @name checking folder macros
@@ -1539,261 +1528,6 @@ int GetMsgStatus(const MESSAGECACHE *elt)
    // TODO: what about custom/user flags?
 
    return status;
-}
-
-// ----------------------------------------------------------------------------
-// header decoding
-// ----------------------------------------------------------------------------
-
-/*
-   See RFC 2047 for the description of the encodings used in the mail headers.
-   Briefly, "encoded words" can be inserted which have the form of
-
-      encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
-
-   where charset and encoding can't contain space, control chars or "specials"
-   and encoded-text can't contain spaces nor "?".
-
-   NB: don't be confused by 2 meanings of encoding here: it is both the
-       charset encoding for us and also QP/Base64 encoding for RFC 2047
- */
-static
-String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
-{
-   // we don't enforce the sanity checks on charset and encoding - should we?
-   // const char *specials = "()<>@,;:\\\"[].?=";
-
-   wxFontEncoding encoding = wxFONTENCODING_SYSTEM;
-
-   // if the header starts with an encoded word, preceding whitespace must be
-   // ignored, so the flag must be set to true initially
-   bool maybeBetweenEncodedWords = true;
-
-   String out,
-          space;
-   out.reserve(in.length());
-   for ( const wxChar *p = in.c_str(); *p; p++ )
-   {
-      if ( *p == '=' && *(p + 1) == '?' )
-      {
-         // found encoded word
-
-         // save the start of it
-         const wxChar *pEncWordStart = p++;
-
-         // get the charset
-         String csName;
-         for ( p++; *p && *p != '?'; p++ ) // initial "++" to skip '?'
-         {
-            csName += *p;
-         }
-
-         if ( !*p )
-         {
-            wxLogDebug(_T("Invalid encoded word syntax in '%s': missing charset."),
-                       pEncWordStart);
-            out += pEncWordStart;
-
-            break;
-         }
-
-         wxFontEncoding encTmp = wxFontMapper::Get()->CharsetToEncoding(csName);
-
-#ifdef DEBUG
-         if ( encoding != wxFONTENCODING_SYSTEM && encoding != encTmp )
-         {
-            // this is a bug (well, missing feature) in Mahogany but so far
-            // I've never seen this happen -- in principle, it is, of course,
-            // possible
-            wxLogDebug(_T("This header contains encoded words with different ")
-                       _T("encodings and won't be rendered correctly."));
-         }
-#endif // DEBUG
-
-         encoding = encTmp;
-
-         // get the encoding in RFC 2047 sense
-         enum
-         {
-            Encoding_Unknown,
-            Encoding_Base64,
-            Encoding_QuotedPrintable
-         } enc2047 = Encoding_Unknown;
-
-         p++; // skip '?'
-         if ( *(p + 1) == '?' )
-         {
-            if ( *p == 'B' || *p == 'b' )
-               enc2047 = Encoding_Base64;
-            else if ( *p == 'Q' || *p == 'q' )
-               enc2047 = Encoding_QuotedPrintable;
-         }
-         //else: multi letter encoding unrecognized
-
-         if ( enc2047 == Encoding_Unknown )
-         {
-            wxLogDebug(_T("Unrecognized header encoding in '%s'."),
-                       pEncWordStart);
-
-            // scan until the end of the encoded word
-            const wxChar *pEncWordEnd = wxStrstr(p, _T("?="));
-            if ( !pEncWordEnd )
-            {
-               wxLogDebug(_T("Missing encoded word end marker in '%s'."),
-                          pEncWordStart);
-               out += pEncWordStart;
-
-               break;
-            }
-            else
-            {
-               out += String(pEncWordStart, pEncWordEnd);
-
-               p = pEncWordEnd;
-
-               continue;
-            }
-         }
-
-         p += 2; // skip "Q?" or "B?"
-
-         // get the encoded text
-         bool hasUnderscore = false;
-         const wxChar *pEncTextStart = p;
-         while ( *p && (p[0] != '?' || p[1] != '=') )
-         {
-            // this is needed for QP hack below
-            if ( *p == '_' )
-               hasUnderscore = true;
-
-            p++;
-         }
-
-         unsigned long lenEncWord = p - pEncTextStart;
-
-         if ( !*p )
-         {
-            wxLogDebug(_T("Missing encoded word end marker in '%s'."),
-                       pEncWordStart);
-            out += pEncWordStart;
-
-            break;
-         }
-
-         // skip '=' following '?'
-         p++;
-
-         // now decode the text using cclient functions
-         unsigned long len;
-         unsigned char *start = (unsigned char *)pEncTextStart;
-         void *text;
-         if ( enc2047 == Encoding_Base64 )
-         {
-            text = rfc822_base64(start, lenEncWord, &len);
-         }
-         else // QP
-         {
-            // cclient rfc822_qprint() behaves correctly and leaves '_' in the
-            // QP encoded text because this is what RFC says, however many
-            // broken clients replace spaces with underscores and so we undo it
-            // here -- in this case it's better to be user-friendly than
-            // standard-conforming
-            String strWithoutUnderscores;
-            if ( hasUnderscore )
-            {
-               strWithoutUnderscores = String(pEncTextStart, lenEncWord);
-               strWithoutUnderscores.Replace(_T("_"), _T(" "));
-               start = (unsigned char *)(const char *)strWithoutUnderscores;
-            }
-
-            text = rfc822_qprint(start, lenEncWord, &len);
-         }
-
-         String textDecoded;
-         if ( !text )
-         {
-            // if QP decoding failed it is probably better to show undecoded
-            // text than nothing at all
-            textDecoded = String(pEncTextStart, p + 1);
-         }
-         else // decoded ok
-         {
-            textDecoded.assign((const char *)text, len);
-            fs_give(&text);
-         }
-
-         // normally we leave the (8 bit) string as is and remember its
-         // encoding so that we may choose the font for displaying it
-         // correctly, but in case of UTF-7/8 we really need to transform it
-         // here as we don't have any UTF-7/8 fonts, so we should display a
-         // different string
-#if !wxUSE_UNICODE
-         if ( encoding == wxFONTENCODING_UTF7 ||
-                  encoding == wxFONTENCODING_UTF8 )
-         {
-            encoding = ConvertUTFToMB(&textDecoded, encoding);
-         }
-#endif // !wxUSE_UNICODE
-
-         out += textDecoded;
-
-         // forget the space before this encoded word, it must be ignored
-         space.clear();
-         maybeBetweenEncodedWords = true;
-      }
-      else if ( maybeBetweenEncodedWords &&
-                  (*p == _T(' ') || *p == _T('\r') || *p == _T('\n')) )
-      {
-         // spaces separating the encoded words must be ignored according
-         // to section 6.2 of the RFC 2047, so we don't output them immediately
-         // but delay until we know that what follows is not an encoded word
-         space += *p;
-      }
-      else // just another normal char
-      {
-         // if we got any delayed whitespace (see above), flush it now
-         if ( !space.empty() )
-         {
-            out += space;
-            space.clear();
-         }
-
-         out += *p;
-
-         maybeBetweenEncodedWords = false;
-      }
-   }
-
-   if ( pEncoding )
-      *pEncoding = encoding;
-
-   return out;
-}
-
-/* static */
-String MailFolder::DecodeHeader(const String& in, wxFontEncoding *pEncoding)
-{
-   if ( pEncoding )
-      *pEncoding = wxFONTENCODING_SYSTEM;
-
-   // some brain dead mailer encode the already encoded headers so to obtain
-   // the real header we keep decoding it until it stabilizes
-   String header,
-          headerOrig = in;
-   for ( ;; )
-   {
-      wxFontEncoding encoding;
-      header = DecodeHeaderOnce(headerOrig, &encoding);
-      if ( header == headerOrig )
-         break;
-
-      if ( pEncoding )
-         *pEncoding = encoding;
-
-      headerOrig = header;
-   }
-
-   return header;
 }
 
 // ----------------------------------------------------------------------------
@@ -4459,7 +4193,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    wxFontEncoding encoding;
    if ( !entry.m_To.empty() )
    {
-      entry.m_To = DecodeHeader(entry.m_To, &encoding);
+      entry.m_To = MIME::DecodeHeader(entry.m_To, &encoding);
    }
    else
    {
@@ -4468,37 +4202,22 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 
    wxFontEncoding encodingMsg = encoding;
 
-   entry.m_From = DecodeHeader(entry.m_From, &encoding);
+   entry.m_From = MIME::DecodeHeader(entry.m_From, &encoding);
    if ( (encoding != wxFONTENCODING_SYSTEM) &&
         (encoding != encodingMsg) )
    {
-      if ( encodingMsg != wxFONTENCODING_SYSTEM )
-      {
-         // VZ: I just want to know if this happens, we can't do anything
-         //     smart about this so far anyhow as we can't display the
-         //     different fields in different encodings
-         wxLogDebug(_T("Different encodings for From and To fields, From may be displayed incorrectly."));
-      }
-      else
-      {
+      if ( encodingMsg == wxFONTENCODING_SYSTEM )
          encodingMsg = encoding;
-      }
    }
 
    // subject
 
-   entry.m_Subject = DecodeHeader(wxConvertMB2WX(env->subject), &encoding);
+   entry.m_Subject = MIME::DecodeHeader(wxConvertMB2WX(env->subject), &encoding);
    if ( (encoding != wxFONTENCODING_SYSTEM) &&
         (encoding != encodingMsg) )
    {
-      if ( encodingMsg != wxFONTENCODING_SYSTEM )
-      {
-         wxLogDebug(_T("Different encodings for From and Subject fields, subject may be displayed incorrectly."));
-      }
-      else
-      {
+      if ( encodingMsg == wxFONTENCODING_SYSTEM )
          encodingMsg = encoding;
-      }
    }
 
    // all the other fields

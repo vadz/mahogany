@@ -522,11 +522,11 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
    {
       case Prot_SMTP:
          {
-            static const wxChar *headers[] =
+            static const char *headers[] =
             {
-               _T("To"),
-               _T("Cc"),
-               _T("Bcc"),
+               "To",
+               "Cc",
+               "Bcc",
                NULL
             };
             wxArrayString recipients = message->GetHeaderLines(headers);
@@ -858,8 +858,7 @@ SendMessageCC::EncodeHeaderString(const String& header)
       }
 
       // put into string as we might want to do some more replacements...
-      String encword((wxChar*)textEnc, (size_t)lenEnc);
-      //String encword = strutil_strdup(wxConvertMB2WX(textEnc));
+      String encword(wxString::FromAscii(CHAR_CAST(textEnc), lenEnc));
 
       // hack: rfc822_8bit() doesn't encode spaces normally but we must
       // do it inside the headers

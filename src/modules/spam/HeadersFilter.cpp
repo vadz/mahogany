@@ -32,6 +32,7 @@
    #include <wx/filefn.h>     // for wxSplitPath
 #endif //USE_PCH
 
+#include "mail/MimeDecode.h"
 #include "MailFolder.h"
 #include "Message.h"
 
@@ -496,7 +497,7 @@ static bool CheckSubjectFor8Bit(const String& subject)
 {
    // consider that the message is a spam if its subject contains more
    // than half of non alpha numeric chars but isn't properly encoded
-   if ( subject != MailFolder::DecodeHeader(subject) )
+   if ( subject != MIME::DecodeHeader(subject) )
    {
       // an encoded subject can have 8 bit chars
       return false;

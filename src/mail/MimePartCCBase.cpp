@@ -28,6 +28,7 @@
 
 #include <wx/fontmap.h>
 
+#include "mail/MimeDecode.h"
 #include "MimePartCCBase.h"
 #include "MailFolder.h"         // for DecodeHeader()
 
@@ -54,6 +55,7 @@ void MimePartCCBase::Init()
    m_lenContent = 0;
    m_ownsContent = false;
 
+   m_encoding = wxFONTENCODING_SYSTEM;
 }
 
 void
@@ -146,7 +148,7 @@ String MimePartCCBase::GetDescription() const
 {
    // FIXME: we lose the encoding info here - but we don't have any way to
    //        return it from here currently
-   return MailFolder::DecodeHeader(wxString::From8BitData(m_body->description));
+   return MIME::DecodeHeader(wxString::From8BitData(m_body->description));
 }
 
 MimeXferEncoding MimePartCCBase::GetTransferEncoding() const
@@ -206,9 +208,7 @@ MimePartCCBase::FindParam(const MimeParameterList& list, const String& name)
       }
    }
 
-   // FIXME: we lose the encoding info here - but we don't have any way to
-   //        return it from here currently
-   return MailFolder::DecodeHeader(value);
+   return MIME::DecodeHeader(value);
 }
 
 String MimePartCCBase::GetParam(const String& name) const
@@ -269,10 +269,22 @@ size_t MimePartCCBase::GetNumberOfLines() const
 
 wxFontEncoding MimePartCCBase::GetTextEncoding() const
 {
-   String charset = GetParam(_T("charset"));
+   if ( m_encoding == wxFONTENCODING_SYSTEM )
+   {
+      String charset = GetParam(_T("charset"));
 
-   return charset.empty() ? wxFONTENCODING_SYSTEM
-                          : wxFontMapper::Get()->CharsetToEncoding(charset);
+      if ( !charset.empty() )
+         m_encoding = wxFontMapper::Get()->CharsetToEncoding(charset);
+
+      // CharsetToEncoding() returns this for US-ASCII, treat it as Latin1 here
+      // as it's a strict subset; and if we don't have any charset information
+      // it's still the right choice
+      if ( m_encoding == wxFONTENCODING_SYSTEM ||
+            m_encoding == wxFONTENCODING_DEFAULT )
+         m_encoding = wxFONTENCODING_ISO8859_1;
+   }
+
+   return m_encoding;
 }
 
 // ----------------------------------------------------------------------------
@@ -451,7 +463,9 @@ String MimePartCCBase::GetTextContent() const
    const char *p = reinterpret_cast<const char *>(GetContent(&len));
    wxString s;
    if ( p )
-      s = wxString::From8BitData(p, len);
+   {
+      s = wxString(p, wxCSConv(GetTextEncoding()), len);
+   }
 
    return s;
 }

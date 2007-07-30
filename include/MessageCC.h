@@ -30,7 +30,7 @@ class MessageCC : public Message
 {
 public:
    // get specfied header lines
-   virtual wxArrayString GetHeaderLines(const wxChar **headers,
+   virtual wxArrayString GetHeaderLines(const char **headers,
                                         wxArrayInt *encodings = NULL) const;
 
    virtual String GetHeader(void) const;

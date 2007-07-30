@@ -41,6 +41,7 @@
 #include "MFPrivate.h"
 #include "mail/Driver.h"
 #include "mail/FolderPool.h"
+#include "mail/MimeDecode.h"
 #include "mail/ServerInfo.h"
 
 #include "Composer.h"
@@ -571,7 +572,7 @@ InitRecipients(Composer *cv,
    // is this a follow-up to newsgroup?
    if ( replyKind == MailFolder::FOLLOWUP_TO_NEWSGROUP )
    {
-      cv->AddNewsgroup( MailFolder::DecodeHeader(msg->GetNewsgroups()) );
+      cv->AddNewsgroup(MIME::DecodeHeader(msg->GetNewsgroups()));
       return;
    }
 
@@ -616,11 +617,11 @@ InitRecipients(Composer *cv,
          // try from address
          //
          // FIXME: original encoding is lost here
-         rcptMain = MailFolder::DecodeHeader(msg->From());
+         rcptMain = MIME::DecodeHeader(msg->From());
       }
       else // have Reply-To
       {
-         rcptMain = MailFolder::DecodeHeader(replyToAddresses[0]);
+         rcptMain = MIME::DecodeHeader(replyToAddresses[0]);
       }
 
       // an additional complication: when replying to a message written by
@@ -647,7 +648,7 @@ InitRecipients(Composer *cv,
          for ( n = 1; n < countReplyTo; n++ )
          {
             // FIXME: same as above
-            rcptAddresses.Add(MailFolder::DecodeHeader(replyToAddresses[n]));
+            rcptAddresses.Add(MIME::DecodeHeader(replyToAddresses[n]));
             rcptTypes.Add(Recipient_To);
          }
       }
@@ -719,7 +720,7 @@ InitRecipients(Composer *cv,
    for ( n = 0; n < count; n++ )
    {
       // FIXME: as above, we lose the original encoding here
-      otherAddresses[n] = MailFolder::DecodeHeader(otherAddresses[n]);
+      otherAddresses[n] = MIME::DecodeHeader(otherAddresses[n]);
    }
 
    // remove duplicates
@@ -912,8 +913,7 @@ MailFolder::ReplyMessage(Message *msg,
    String newSubject;
    String replyPrefix = READ_CONFIG(profile, MP_REPLY_PREFIX);
 
-   // FIXME: original subject encoding is lost here
-   String subject = DecodeHeader(msg->Subject());
+   String subject = MIME::DecodeHeader(msg->Subject());
 
    // we may collapse "Re:"s in the subject if asked for it
    enum CRP // this is an abbreviation of "collapse reply prefix"
@@ -1038,10 +1038,10 @@ MailFolder::ReplyMessage(Message *msg,
    cv->SetSubject(newSubject);
 
    // other headers
-   static const wxChar *headers[] =
+   static const char *headers[] =
    {
-      _T("Message-Id"),
-      _T("References"),
+      "Message-Id",
+      "References",
       NULL
    };
 
@@ -1119,11 +1119,8 @@ MailFolder::ForwardMessage(Message *msg,
       CHECK( cv, NULL, _T("failed to create composer") );
    }
 
-   // FIXME: we shouldn't assume that all headers have the same encoding
-   //        so we should set the subject text and tell the composer its
-   //        encoding as well
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) +
-                     DecodeHeader(msg->Subject()));
+                     MIME::DecodeHeader(msg->Subject()));
    cv->InitText(msg, params.msgview);
 
    return cv;

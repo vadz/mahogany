@@ -32,6 +32,7 @@
 #  include <wx/frame.h>
 #endif // USE_PCH
 
+#include "mail/MimeDecode.h"
 #include "TemplateDialog.h"
 
 #include "Composer.h"
@@ -576,7 +577,7 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
          name = GetNameForAddress(msg, MAT_REPLYTO);
       }
 
-      name = MailFolder::DecodeHeader(name);
+      name = MIME::DecodeHeader(name);
 
       // it's (quite) common to have quotes around the personal
       // part of the address, remove them if so
@@ -1408,7 +1409,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
          //
          // FIXME: of course, this means that we lose the additional encoding
          //        info
-         *value = MailFolder::DecodeHeader(*value);
+         *value = MIME::DecodeHeader(*value);
       }
    }
 

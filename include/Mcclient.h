@@ -79,6 +79,33 @@ CclientParseMessage(const char *msgText,
                     BODY **ppBody,
                     size_t *pHdrLen = NULL);
 
+
+/**
+   Cast a signed char string to unsigned char.
+
+   c-client wants unsigned char strings while we work with char pointers
+   everywhere, provide this macro-like helper function to cast the strings
+   to the correct type (this has the added benefit of forcing implicit
+   conversion of wxString::char_str() to "char *", i.e. we can write
+   UCHAR_CAST(s.char_str()) while (unsigned char *)s.char_str() wouldn't
+   compile)
+ */
+inline unsigned char *UCHAR_CAST(char *s)
+{
+   return reinterpret_cast<unsigned char *>(s);
+}
+
+/**
+   Cast an unsigned char string to a char one.
+
+   This is the reverse of UCHAR_CAST() and is useful for the strings returned
+   from c-client.
+ */
+inline char *CHAR_CAST(unsigned char *us)
+{
+   return reinterpret_cast<char *>(us);
+}
+
 //@}
 
 #endif  //MCCLIENT_H

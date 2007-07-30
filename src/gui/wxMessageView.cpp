@@ -41,6 +41,8 @@
 #include "MessageTemplate.h"
 #include "Message.h"
 
+#include "mail/MimeDecode.h"
+
 #include "gui/wxMessageView.h"
 
 // ----------------------------------------------------------------------------
@@ -85,7 +87,7 @@ public:
       else
          return false;
 
-      *value = MailFolder::DecodeHeader(*value);
+      *value = MIME::DecodeHeader(*value);
 
       return true;
    }

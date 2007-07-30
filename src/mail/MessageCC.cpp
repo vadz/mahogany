@@ -28,6 +28,7 @@
 #  include "MApplication.h"
 #endif // USE_PCH
 
+#include "mail/MimeDecode.h"
 #include "AddressCC.h"
 #include "MailFolderCC.h"
 #include "MessageCC.h"
@@ -135,8 +136,7 @@ MessageCC::MessageCC(const char *text, UIdType uid, Profile *profile)
 
    m_Profile->IncRef();
 
-   // move \n --> \r\n convention
-   m_msgText = strutil_strdup(wxConvertWX2MB(strutil_enforceCRLF(wxConvertMB2WX(text))));
+   m_msgText = strutil_strdup(text);
 
    if ( !CclientParseMessage(m_msgText, &m_Envelope, &m_Body) )
    {
@@ -164,20 +164,16 @@ MessageCC::~MessageCC()
 }
 
 // ----------------------------------------------------------------------------
-// MessageCC: envelop (i.e. fast) headers access
+// MessageCC: envelope (i.e. fast) headers access
 // ----------------------------------------------------------------------------
 
 String MessageCC::Subject(void) const
 {
    CheckEnvelope();
 
-   String subject;
-   if ( m_Envelope )
-      subject = wxConvertMB2WX(m_Envelope->subject);
-   else
-      FAIL_MSG( _T("should have envelop in Subject()") );
+   CHECK( m_Envelope, String(), _T("should have envelope in Subject()") );
 
-   return subject;
+   return MIME::DecodeHeader(wxString::From8BitData(m_Envelope->subject));
 }
 
 time_t
@@ -190,13 +186,9 @@ String MessageCC::Date(void) const
 {
    CheckEnvelope();
 
-   String date;
-   if ( m_Envelope )
-      date = m_Envelope->date;
-   else
-      FAIL_MSG( _T("should have envelop in Date()") );
+   CHECK( m_Envelope, String(), _T("should have envelope in Date()") );
 
-   return date;
+   return wxString::FromAscii((char *)m_Envelope->date);
 }
 
 String MessageCC::From(void) const
@@ -209,18 +201,9 @@ MessageCC::GetId(void) const
 {
    CheckEnvelope();
 
-   String id;
+   CHECK( m_Envelope, String(), _T("should have envelope in GetId()") );
 
-   if ( !m_Envelope )
-   {
-      FAIL_MSG( _T("no envelope in GetId") );
-   }
-   else
-   {
-      id = wxConvertMB2WX(m_Envelope->message_id);
-   }
-
-   return id;
+   return wxString::FromAscii(m_Envelope->message_id);
 }
 
 String
@@ -228,21 +211,9 @@ MessageCC::GetNewsgroups(void) const
 {
    CheckEnvelope();
 
-   String newsgroups;
+   CHECK( m_Envelope, String(), _T("should have envelope in GetNewsgroups()") );
 
-   if ( !m_Envelope )
-   {
-      FAIL_MSG( _T("no envelope in GetNewsgroups") );
-   }
-   else
-   {
-      if ( !m_Envelope->newsgroups )
-      {
-         newsgroups = wxConvertMB2WX(m_Envelope->newsgroups);
-      }
-   }
-
-   return newsgroups;
+   return wxString::FromAscii(m_Envelope->newsgroups);
 }
 
 String
@@ -250,18 +221,9 @@ MessageCC::GetReferences(void) const
 {
    CheckEnvelope();
 
-   String ref;
+   CHECK( m_Envelope, String(), _T("should have envelope in GetReferences()") );
 
-   if ( !m_Envelope )
-   {
-      FAIL_MSG( _T("no envelope in GetReferences") );
-   }
-   else
-   {
-      ref = wxConvertMB2WX(m_Envelope->references);
-   }
-
-   return ref;
+   return wxString::FromAscii(m_Envelope->references);
 }
 
 String
@@ -269,18 +231,9 @@ MessageCC::GetInReplyTo(void) const
 {
    CheckEnvelope();
 
-   String inreplyto;
+   CHECK( m_Envelope, String(), _T("should have envelope in GetInReplyTo()") );
 
-   if ( !m_Envelope )
-   {
-      FAIL_MSG( _T("no envelope in GetReferences") );
-   }
-   else
-   {
-      inreplyto = wxConvertMB2WX(m_Envelope->references);
-   }
-
-   return inreplyto;
+   return wxString::FromAscii(m_Envelope->in_reply_to);
 }
 
 // ----------------------------------------------------------------------------
@@ -317,11 +270,11 @@ String MessageCC::GetHeader(void) const
 }
 
 wxArrayString
-MessageCC::GetHeaderLines(const wxChar **headersOrig,
+MessageCC::GetHeaderLines(const char **headersOrig,
                           wxArrayInt *encodings) const
 {
    // loop variable for iterating over headersOrig
-   const wxChar **headers;
+   const char **headers;
 
    // we should always return the arrays of correct size, this makes the
    // calling code simpler as it doesn't have to check for the number of
@@ -350,8 +303,8 @@ MessageCC::GetHeaderLines(const wxChar **headersOrig,
    STRINGLIST *scur = slist;
    for ( headers = headersOrig; ; )
    {
-      scur->text.size = strlen(wxConvertWX2MB(*headers));
-      scur->text.data = (unsigned char *)cpystr(wxConvertWX2MB(*headers));
+      scur->text.size = strlen(*headers);
+      scur->text.data = (unsigned char *)cpystr(*headers);
       if ( !*++headers )
       {
          // terminating NULL
@@ -380,7 +333,7 @@ MessageCC::GetHeaderLines(const wxChar **headersOrig,
                     valuesInDisorder;
 
       // extract the headers values
-      HeaderIterator hdrIter(wxConvertMB2WX(rc));
+      HeaderIterator hdrIter(wxString::From8BitData(rc));
       hdrIter.GetAll(&names, &valuesInDisorder);
 
       // and then copy the headers in order into the dst array
@@ -392,11 +345,7 @@ MessageCC::GetHeaderLines(const wxChar **headersOrig,
          int n = names.Index(*headers, FALSE /* not case sensitive */);
          if ( n != wxNOT_FOUND )
          {
-            value = MailFolderCC::DecodeHeader
-                    (
-                     valuesInDisorder[(size_t)n],
-                     &encoding
-                    );
+            value = MIME::DecodeHeader(valuesInDisorder[(size_t)n], &encoding);
          }
          else // no such header
          {
@@ -431,7 +380,7 @@ ADDRESS *
 MessageCC::GetAddressStruct(MessageAddressType type) const
 {
    CheckEnvelope();
-   CHECK( m_Envelope, NULL, _T("no envelop in GetAddressStruct()") );
+   CHECK( m_Envelope, NULL, _T("no envelope in GetAddressStruct()") );
 
    ADDRESS *addr;
 
@@ -493,6 +442,7 @@ AddressList *MessageCC::GetAddressList(MessageAddressType type) const
 String
 MessageCC::FetchText(void) const
 {
+   char *text;
    if ( m_folder )
    {
       if ( !m_mailFullText )
@@ -538,12 +488,14 @@ MessageCC::FetchText(void) const
       }
       //else: already have it, reuse as msg text doesn't change
 
-      return wxConvertMB2WX(m_mailFullText);
+      text = m_mailFullText;
    }
    else // from a text
    {
-      return wxConvertMB2WX(m_msgText);
+      text = m_msgText;
    }
+
+   return wxString::From8BitData(text);
 }
 
 // ----------------------------------------------------------------------------
@@ -896,7 +848,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
             ASSERT_MSG(strlen(header) == len,
                        _T("DEBUG: Mailfolder corruption detected"));
 
-            str = wxConvertMB2WX(header);
+            str = wxString::From8BitData(header, len);
          }
       }
       else // folder-less message doesn't have headers (why?)!

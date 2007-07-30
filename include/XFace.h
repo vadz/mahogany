@@ -60,7 +60,7 @@ class XFace
        @param filename obvious
        @return true on success
    */
-   bool CreateFromFile(const wxChar *filename);
+   bool CreateFromFile(const String& filename);
 
    static class wxImage GetXFaceImg(const String &filename,
                                     bool *hasimg = NULL,

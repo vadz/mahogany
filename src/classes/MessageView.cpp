@@ -51,6 +51,7 @@
 #include "MessageViewer.h"
 #include "ViewFilter.h"
 
+#include "mail/MimeDecode.h"
 #include "MailFolderCC.h" // needed to properly include MessageCC.h
 #include "MessageCC.h"
 #include "MimePartCC.h"
@@ -1444,7 +1445,7 @@ MessageView::ShowHeaders()
       wxArrayString headerNonEnvValues;
       if ( countNonEnvHeaders )
       {
-         const wxChar **headerPtrs = new const wxChar *[countNonEnvHeaders + 1];
+         const char **headerPtrs = new const char *[countNonEnvHeaders + 1];
 
          // have to copy the headers into a temp buffer unfortunately
          for ( nNonEnv = 0, n = 0; n < countHeaders; n++ )
@@ -1540,7 +1541,7 @@ MessageView::ShowHeaders()
 
             // extract encoding info from it
             wxFontEncoding enc;
-            headerValues.Add(MailFolder::DecodeHeader(value, &enc));
+            headerValues.Add(MIME::DecodeHeader(value, &enc));
             headerEncodings.Add(enc);
          }
          else // non env header
@@ -1559,24 +1560,30 @@ MessageView::ShowHeaders()
       // ... instead we show an icon for it
       if ( m_ProfileValues.showFaces )
       {
-         wxString xfaceString = headerValues[n++];
+         const wxString& xfaceString = headerValues[n++];
          if ( xfaceString.length() > 20 )
          // FIXME it was > 2, i.e. \r\n. Although if(uncompface(data) < 0) in
          // XFace.cpp should catch illegal data, it is not the case. For example,
          // for "X-Face: nope" some nonsense was displayed. So we use 20 for now.
          {
-            XFace *xface = new XFace;
-            xface->CreateFromXFace(wxConvertWX2MB(xfaceString));
-
-            char **xfaceXpm;
-            if ( xface->CreateXpm(&xfaceXpm) )
+            // valid X-Faces are always ASCII, so don't bother if conversion
+            // fails
+            const wxCharBuffer xfaceBuf(xfaceString.ToAscii());
+            if ( xfaceBuf )
             {
-               m_viewer->ShowXFace(wxBitmap(xfaceXpm));
+               XFace *xface = new XFace;
+               xface->CreateFromXFace(xfaceBuf);
 
-               wxIconManager::FreeImage(xfaceXpm);
+               char **xfaceXpm;
+               if ( xface->CreateXpm(&xfaceXpm) )
+               {
+                  m_viewer->ShowXFace(wxBitmap(xfaceXpm));
+
+                  wxIconManager::FreeImage(xfaceXpm);
+               }
+
+               delete xface;
             }
-
-            delete xface;
          }
       }
 

@@ -61,7 +61,7 @@ XFace::CreateFromData(const char *idata)
    if(xface) delete [] xface;
 
    xface = new char[2500];
-   strcpy(xface, data);
+   strncpy(xface, data, 2500);
    if(compface(xface) < 0)
    {
       delete [] xface;
@@ -70,9 +70,9 @@ XFace::CreateFromData(const char *idata)
       return false;
    }
    //convert it:
-   String out = strutil_enforceCRLF(wxConvertMB2WX(xface));
+   String out = strutil_enforceCRLF(wxString::FromAscii(xface));
    delete [] xface;
-   xface = strutil_strdup(wxConvertWX2MB(out));
+   xface = strutil_strdup(out.ToAscii());
    initialised = true;
    return true;
 #endif
@@ -157,7 +157,7 @@ XFace::CreateFromXpm(const char *xpmdata)
       }
    }
    delete [] buf;
-   return CreateFromData(wxConvertWX2MB(dataString));
+   return CreateFromData(dataString.ToAscii());
 #endif
 }
 
@@ -250,11 +250,11 @@ XFace::ConvertImgToXFaceData(wxImage &img)
 
 
 bool
-XFace::CreateFromFile(const wxChar *filename)
+XFace::CreateFromFile(const String& filename)
 {
-   wxImage img = GetXFaceImg(filename );
+   wxImage img = GetXFaceImg(filename);
    String datastring = ConvertImgToXFaceData(img);
-   return CreateFromData(wxConvertWX2MB(datastring));
+   return CreateFromData(datastring.ToAscii());
 }
 
 
@@ -331,9 +331,9 @@ XFace::CreateFromXFace(const char *xfacedata)
       data = xface = NULL;
       return false;
    }
-   String out = strutil_enforceCRLF(wxConvertMB2WX(xface));
+   String out = strutil_enforceCRLF(wxString::FromAscii(xface));
    delete [] xface;
-   xface = strutil_strdup(wxConvertWX2MB(out));
+   xface = strutil_strdup(out.ToAscii());
    initialised = true;
    return true;
 #endif
@@ -503,7 +503,7 @@ XFace::CreateXpm(char ***xpm)
 
          }
       }
-      (*xpm)[line++] = strutil_strdup(wxConvertWX2MB(tmp));
+      (*xpm)[line++] = strutil_strdup(tmp.ToAscii());
    }
    delete [] buf;
    (*xpm)[line++] = NULL;

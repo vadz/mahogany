@@ -1908,9 +1908,7 @@ wxLayoutList::Clear(const wxFont& font,
                     wxColour *fg,
                     wxColour *bg)
 {
-   wxCHECK_RET( font.Ok(), _T("invalid font in Clear()") );
-
-   DoClear(wxLayoutStyleInfo(font, fg, bg));
+   DoClear(wxLayoutStyleInfo(font.IsOk() ? font : *wxNORMAL_FONT, fg, bg));
 }
 
 void

@@ -366,7 +366,7 @@ wxIconManager::LoadXpm(String filename)
          {
             str = str.substr(1,str.length()-1);
             str = strutil_before(str,'"');
-            cpptr[line++] = strutil_strdup(wxConvertWX2MB(str));
+            cpptr[line++] = strutil_strdup(str.ToAscii());
          }
       }while(! in.fail());
       cpptr[line++] = NULL;

@@ -84,6 +84,8 @@
 
 #include "adb/AdbManager.h"
 
+#include "mail/MimeDecode.h"
+
 #include "TemplateDialog.h"
 #include "AttachDialog.h"
 #include "MFolder.h"
@@ -1619,7 +1621,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
    while ( hdrIter.GetNext(&nameWithCase, &value) )
    {
       wxString name = nameWithCase.Upper();
-      value = MailFolder::DecodeHeader(value);
+      value = MIME::DecodeHeader(value);
 
       // test for some standard headers which need special treatment
       if ( name == _T("SUBJECT") )

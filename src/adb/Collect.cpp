@@ -33,8 +33,9 @@
 #include "Address.h"
 #include "Collect.h"
 #include "Message.h"
-#include "MailFolder.h"
 #include "pointers.h"
+
+#include "mail/MimeDecode.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"
@@ -115,8 +116,7 @@ void AutoCollectAddress(const String& email,
                         const String& groupName,
                         wxFrame *frame)
 {
-   String name = nameOrig;
-   name = MailFolder::DecodeHeader(name, 0);
+   String name = MIME::DecodeHeader(nameOrig);
 
    // we need an address and a name
    bool hasEmailAndName = true;
@@ -145,10 +145,10 @@ void AutoCollectAddress(const String& email,
       CHECK_RET( manager, _T("can't get AdbManager") );
 
       String providerName;
-      
+
       AdbBook *autocollectbook = manager->CreateBook(
          bookName, NULL, &providerName );
-         
+
       RefCounter<AdbDataProvider> bookProvider(
          AdbDataProvider::GetProviderByName(providerName));
 
