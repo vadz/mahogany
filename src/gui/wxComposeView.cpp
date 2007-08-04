@@ -3326,7 +3326,7 @@ wxComposeView::OnMenuCommand(int id)
       case WXMENU_COMPOSE_PREVIEW:
          if(m_editor->FinishWork())
          {
-            SendMessage *msg = BuildMessage();
+            SendMessage_obj msg(BuildMessage());
             if ( !msg )
             {
                wxLogError(_("Failed to create the message to preview."));
@@ -3334,8 +3334,6 @@ wxComposeView::OnMenuCommand(int id)
             else
             {
                msg->Preview();
-
-               delete msg;
             }
          }
          break;
@@ -4272,7 +4270,7 @@ wxComposeView::BuildMessage(int flags) const
    }
 
    // Create the message to be composed
-   SendMessage *msg = SendMessage::Create(m_Profile, proto, ::GetFrame(this));
+   SendMessage_obj msg(SendMessage::Create(m_Profile, proto, ::GetFrame(this)));
    if ( !msg )
    {
       // can't do anything more
@@ -4543,7 +4541,8 @@ wxComposeView::BuildMessage(int flags) const
       msg->AddHeaderEntry(headerNames[nHeader], headerValues[nHeader]);
    }
 
-   return msg;
+   // the caller is responsible for deleting the object
+   return msg.Detach();
 }
 
 bool
@@ -4558,7 +4557,7 @@ wxComposeView::Send(SendMode mode)
                                          : _("Sending message..."));
    Disable();
 
-   SendMessage *msg = BuildMessage();
+   SendMessage_obj msg(BuildMessage());
    if ( !msg )
    {
       wxLogError(_("Failed to create the message to send."));
@@ -4574,7 +4573,7 @@ wxComposeView::Send(SendMode mode)
          (MModule_Calendar *) MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
       if(calmod)
       {
-         success = calmod->ScheduleMessage(msg);
+         success = calmod->ScheduleMessage(msg.Get());
          calmod->DecRef();
       }
       else
@@ -4593,8 +4592,6 @@ wxComposeView::Send(SendMode mode)
 
       success = msg->SendOrQueue(flags);
    }
-
-   delete msg;
 
    if ( success )
    {
@@ -4624,32 +4621,32 @@ wxComposeView::Send(SendMode mode)
       mApplication->UpdateOutboxStatus();
 
       // show the recipients of the message
-      String msg;
+      String s;
       if ( m_mode == Mode_News )
       {
-         msg.Printf(_("Message has been posted to %s"),
-                    GetRecipients(Recipient_Newsgroup).c_str());
+         s.Printf(_("Message has been posted to %s"),
+                  GetRecipients(Recipient_Newsgroup).c_str());
       }
       else // email message
       {
          // NB: don't show BCC as the message might be saved in the log file
-         msg.Printf(_("Message has been sent to %s"),
-                    GetRecipients(Recipient_To).c_str());
+         s.Printf(_("Message has been sent to %s"),
+                  GetRecipients(Recipient_To).c_str());
 
          String rcptCC = GetRecipients(Recipient_Cc);
          if ( !rcptCC.empty() )
          {
-            msg += String::Format(_(" (with courtesy copy sent to %s)"),
-                                  rcptCC.c_str());
+            s += String::Format(_(" (with courtesy copy sent to %s)"),
+                                rcptCC.c_str());
          }
          else // no CC
          {
-            msg += '.';
+            s += '.';
          }
       }
 
-      // avoid crashes if the msg has any stray '%'s
-      wxLogStatus(this, _T("%s"), msg.c_str());
+      // avoid crashes if the message has any stray '%'s
+      wxLogStatus(this, _T("%s"), s.c_str());
    }
    else // message not sent
    {
@@ -5002,7 +4999,7 @@ bool wxComposeView::DeleteDraft()
 
 SendMessage *wxComposeView::BuildDraftMessage(int flags) const
 {
-   SendMessage *msg = BuildMessage(flags);
+   SendMessage_obj msg(BuildMessage(flags));
    if ( !msg )
    {
       if ( flags & Interactive )
@@ -5039,7 +5036,7 @@ SendMessage *wxComposeView::BuildDraftMessage(int flags) const
    // also save the Fcc header contents because it's not a "real" header
    msg->AddHeaderEntry(_T("FCC"), GetRecipients(Recipient_Fcc));
 
-   return msg;
+   return msg.Detach();
 }
 
 // from upgrade.cpp, this forward decl will disappear once we move it somewhere
