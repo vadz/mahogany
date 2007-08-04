@@ -400,7 +400,6 @@ public:
    // implement base class pure virtuals (some of them don't make sense to us)
    virtual MFolderType GetType() const { return MF_ROOT; }
    virtual bool NeedsNetwork(void) const { return false; }
-   virtual SSLSupport GetSSL(SSLCert *) const { return SSLSupport_None; }
    virtual void SetSSL(SSLSupport, SSLCert) { }
 
    virtual bool ShouldTryToCreate() const
