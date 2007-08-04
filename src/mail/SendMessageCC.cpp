@@ -858,7 +858,11 @@ SendMessageCC::EncodeHeaderString(const String& header)
       }
 
       // put into string as we might want to do some more replacements...
-      String encword(wxString::FromAscii(CHAR_CAST(textEnc), lenEnc));
+      String encword(wxString::FromAscii(CHAR_CAST(textEnc)
+#if wxCHECK_VERSION(2, 9, 0)
+                                         , lenEnc
+#endif
+                                        ));
 
       // hack: rfc822_8bit() doesn't encode spaces normally but we must
       // do it inside the headers
