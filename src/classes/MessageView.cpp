@@ -95,7 +95,7 @@ M_LIST_OWN(VirtualMimePartsList, MimePart);
 // options we use here
 // ----------------------------------------------------------------------------
 
-extern const MOption MP_AUTOCOLLECT;
+extern const MOption MP_AUTOCOLLECT_INCOMING;
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_SENDER;
 extern const MOption MP_AUTOCOLLECT_NAMED;
@@ -1170,7 +1170,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
       settings->showExtImages = READ_CONFIG_BOOL(profile, MP_INLINE_GFX_EXTERNAL);
    }
 
-   settings->autocollect = (MAction)(long)READ_CONFIG(profile, MP_AUTOCOLLECT);
+   settings->autocollect = (MAction)(long)READ_CONFIG(profile, MP_AUTOCOLLECT_INCOMING);
    settings->autocollectSenderOnly =  READ_CONFIG(profile, MP_AUTOCOLLECT_SENDER);
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG_TEXT(profile, MP_AUTOCOLLECT_ADB);

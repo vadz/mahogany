@@ -371,7 +371,7 @@ extern const MOption MP_COLLECT_INBOX;
 extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_SHOWHEADERS;
-extern const MOption MP_AUTOCOLLECT;
+extern const MOption MP_AUTOCOLLECT_INCOMING;
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_NAMED;
 extern const MOption MP_AUTOCOLLECT_SENDER;
@@ -1142,7 +1142,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// Show all message headers?
 #define   MP_SHOWHEADERS_NAME         _T("ShowHeaders")
 /// Autocollect email addresses? 0=no 1=ask 2=always
-#define   MP_AUTOCOLLECT_NAME         _T("AutoCollect")
+#define   MP_AUTOCOLLECT_INCOMING_NAME         _T("AutoCollect")
 /// Name of the address books for autocollected addresses
 #define   MP_AUTOCOLLECT_ADB_NAME     _T("AutoCollectAdb")
 /// Autocollect email addresses from sender only ?
@@ -2137,7 +2137,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// Show all message headers?
 #define   MP_SHOWHEADERS_DEFVAL         0l
 /// Autocollect email addresses?
-#define   MP_AUTOCOLLECT_DEFVAL     (long)M_ACTION_ALWAYS
+#define   MP_AUTOCOLLECT_INCOMING_DEFVAL     (long)M_ACTION_ALWAYS
 /// Name of the address books for autocollected addresses
 #define   MP_AUTOCOLLECT_ADB_DEFVAL    _T("autocollect.adb")
 /// Autocollect email addresses from sender only ?

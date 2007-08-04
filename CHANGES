@@ -6,9 +6,10 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.68 '' September xx, 2006
+Release 0.68 '' September xx, 2007
 ---------------------------------------
 
+2007-08-04 VZ: Allow autocollecting addresses in outgoing messages only
 2007-04-26 VZ: Add the possibility to treat different addresses as equivalent
 2007-01-10 VZ: Show the message subject in the composer window title bar
 2007-01-08 VZ: Added support for "subject" parameter of mailto: URLs

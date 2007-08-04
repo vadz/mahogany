@@ -109,7 +109,7 @@
 
 extern const MOption MP_ADB_SUBSTRINGEXPANSION;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
-extern const MOption MP_AUTOCOLLECT;
+extern const MOption MP_AUTOCOLLECT_INCOMING;
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_NAMED;
 extern const MOption MP_AUTOCOLLECT_OUTGOING;
@@ -4621,7 +4621,7 @@ wxComposeView::Send(SendMode mode)
          // remember the addresses we sent mail to
          SaveRecipientsAddresses
          (
-            (MAction)(long)READ_CONFIG(m_Profile, MP_AUTOCOLLECT),
+            M_ACTION_ALWAYS,
             READ_CONFIG_TEXT(m_Profile, MP_AUTOCOLLECT_ADB),
             _("Previous Recipients")
          );
