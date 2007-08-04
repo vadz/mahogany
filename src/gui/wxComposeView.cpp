@@ -4282,6 +4282,13 @@ wxComposeView::BuildMessage(int flags) const
 
    wxFontEncoding encodingMsg = m_encoding;
 
+   // if we find a part which we can't process (probably because it's an
+   // attachment and the corresponding file doesn't exist or can't be read) we
+   // still continue with building the message as we want to give the user the
+   // errors about all such problematic parts instead of giving the error about
+   // the first one, then, after he retries after correcting the problem, about
+   // the second one and so forth
+   bool allPartsOk = true;
    for ( EditorContentPart *part = m_editor->GetFirstPart();
          part;
          part = m_editor->GetNextPart() )
@@ -4380,6 +4387,8 @@ wxComposeView::BuildMessage(int flags) const
 
          case EditorContentPart::Type_File:
             {
+               bool partOk = false;
+
                String filename = part->GetFileName();
                wxFile file;
                if ( file.Open(filename) )
@@ -4427,6 +4436,8 @@ wxComposeView::BuildMessage(int flags) const
                             &dlist,
                             &plist
                           );
+
+                     partOk = true;
                   }
                   else if ( flags & Interactive )
                   {
@@ -4441,6 +4452,9 @@ wxComposeView::BuildMessage(int flags) const
                   wxLogError(_("Cannot open file '%s' included in "
                                "this message!"), filename.c_str());
                }
+
+               if ( !partOk )
+                  allPartsOk = false;
             }
             break;
 
@@ -4487,6 +4501,13 @@ wxComposeView::BuildMessage(int flags) const
 
       part->DecRef();
    }
+
+   if ( !allPartsOk )
+   {
+      // we shouldn't send the message without some attachments, abort
+      return NULL;
+   }
+
 
    // setup the headers
    // -----------------
