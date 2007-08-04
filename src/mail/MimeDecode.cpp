@@ -243,10 +243,10 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          // here as we don't have any UTF-7/8 fonts, so we should display a
          // different string
 #if !wxUSE_UNICODE
-         if ( encoding == wxFONTENCODING_UTF7 ||
-                  encoding == wxFONTENCODING_UTF8 )
+         if ( encodingHeader == wxFONTENCODING_UTF7 ||
+                  encodingHeader == wxFONTENCODING_UTF8 )
          {
-            encoding = ConvertUTFToMB(&textDecoded, encoding);
+            encodingHeader = ConvertUTFToMB(&textDecoded, encodingHeader);
          }
 #endif // !wxUSE_UNICODE
 
