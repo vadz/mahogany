@@ -57,6 +57,7 @@ bool ParseColourString(const String& name, wxColour* colour)
    return true;
 }
 
+// TODO: use wxTo/FromString(wxColour) now that we have it
 String GetColourName(const wxColour& colour)
 {
    wxString colName(wxTheColourDatabase->FindName(colour));
@@ -64,7 +65,9 @@ String GetColourName(const wxColour& colour)
    {
       // no name for this colour
       colName.Printf(wxGetTranslation(rgbSpecificationString),
-                     colour.Red(), colour.Green(), colour.Blue());
+                     (int)colour.Red(),
+                     (int)colour.Green(),
+                     (int)colour.Blue());
    }
    else
    {
