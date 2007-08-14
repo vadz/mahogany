@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.28.
+# This file was created automatically by SWIG 1.3.29.
 # Don't modify this file, modify the SWIG interface instead.
 # This file is compatible with both classic and new-style classes.
 
@@ -27,6 +27,11 @@ def _swig_getattr(self,class_type,name):
     if method: return method(self)
     raise AttributeError,name
 
+def _swig_repr(self):
+    try: strthis = "proxy of " + self.this.__repr__()
+    except: strthis = ""
+    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
+
 import types
 try:
     _object = types.ObjectType
@@ -37,9 +42,7 @@ except AttributeError:
 del types
 
 
-
 Message = _MDialogs.Message
-
 Status = _MDialogs.Status
 
 

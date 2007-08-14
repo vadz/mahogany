@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.28.
+# This file was created automatically by SWIG 1.3.29.
 # Don't modify this file, modify the SWIG interface instead.
 # This file is compatible with both classic and new-style classes.
 
@@ -27,6 +27,11 @@ def _swig_getattr(self,class_type,name):
     if method: return method(self)
     raise AttributeError,name
 
+def _swig_repr(self):
+    try: strthis = "proxy of " + self.this.__repr__()
+    except: strthis = ""
+    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
+
 import types
 try:
     _object = types.ObjectType
@@ -43,10 +48,7 @@ class SendMessage(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, SendMessage, name)
     def __init__(self): raise AttributeError, "No constructor defined"
-    def __repr__(self):
-        try: strthis = "at 0x%x" %( self.this, ) 
-        except: strthis = "" 
-        return "<%s.%s; proxy of C++ SendMessage instance %s>" % (self.__class__.__module__, self.__class__.__name__, strthis,)
+    __repr__ = _swig_repr
     NeverQueue = _SendMessage.SendMessage_NeverQueue
     Silent = _SendMessage.SendMessage_Silent
     __swig_getmethods__["Create"] = lambda x: _SendMessage.SendMessage_Create
@@ -73,12 +75,10 @@ class SendMessage(_object):
     def Preview(*args): return _SendMessage.SendMessage_Preview(*args)
     __swig_destroy__ = _SendMessage.delete_SendMessage
     __del__ = lambda self : None;
-_SendMessage.SendMessage_swigregister(SendMessage)
-
+SendMessage_swigregister = _SendMessage.SendMessage_swigregister
+SendMessage_swigregister(SendMessage)
 SendMessage_Create = _SendMessage.SendMessage_Create
-
 SendMessage_CreateResent = _SendMessage.SendMessage_CreateResent
-
 SendMessage_CreateFromMsg = _SendMessage.SendMessage_CreateFromMsg
 
 

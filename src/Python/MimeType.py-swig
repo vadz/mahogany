@@ -1,4 +1,4 @@
-# This file was created automatically by SWIG 1.3.28.
+# This file was created automatically by SWIG 1.3.29.
 # Don't modify this file, modify the SWIG interface instead.
 # This file is compatible with both classic and new-style classes.
 
@@ -27,6 +27,11 @@ def _swig_getattr(self,class_type,name):
     if method: return method(self)
     raise AttributeError,name
 
+def _swig_repr(self):
+    try: strthis = "proxy of " + self.this.__repr__()
+    except: strthis = ""
+    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
+
 import types
 try:
     _object = types.ObjectType
@@ -42,10 +47,7 @@ class MimeType(_object):
     __setattr__ = lambda self, name, value: _swig_setattr(self, MimeType, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, MimeType, name)
-    def __repr__(self):
-        try: strthis = "at 0x%x" %( self.this, ) 
-        except: strthis = "" 
-        return "<%s.%s; proxy of C++ MimeType instance %s>" % (self.__class__.__module__, self.__class__.__name__, strthis,)
+    __repr__ = _swig_repr
     TEXT = _MimeType.MimeType_TEXT
     MULTIPART = _MimeType.MimeType_MULTIPART
     MESSAGE = _MimeType.MimeType_MESSAGE
@@ -62,7 +64,7 @@ class MimeType(_object):
     CUSTOM5 = _MimeType.MimeType_CUSTOM5
     CUSTOM6 = _MimeType.MimeType_CUSTOM6
     INVALID = _MimeType.MimeType_INVALID
-    def __init__(self, *args):
+    def __init__(self, *args): 
         this = _MimeType.new_MimeType(*args)
         try: self.this.append(this)
         except: self.this = this
@@ -80,7 +82,8 @@ class MimeType(_object):
     def __eq__(*args): return _MimeType.MimeType___eq__(*args)
     __swig_destroy__ = _MimeType.delete_MimeType
     __del__ = lambda self : None;
-_MimeType.MimeType_swigregister(MimeType)
+MimeType_swigregister = _MimeType.MimeType_swigregister
+MimeType_swigregister(MimeType)
 
 
 
