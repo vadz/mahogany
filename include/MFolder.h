@@ -244,7 +244,8 @@ public:
       { return MayHaveLogin() && !(GetFlags() & MF_FLAGS_ANON); }
 
       /// does this folder need net connection to be accessed?
-   virtual bool NeedsNetwork(void) const = 0;
+   virtual bool NeedsNetwork() const
+      { return FolderNeedsNetwork(GetType(), GetFlags()); }
 
       /// SSL mode for this folder (this is a NOP for temp folders)
    virtual SSLSupport GetSSL(SSLCert *acceptUnsigned = NULL) const = 0;

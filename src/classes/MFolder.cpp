@@ -166,7 +166,6 @@ public:
    virtual MFolderType GetType() const { return m_type; }
    virtual String GetClass() const { return GetClassForType(m_type); }
 
-   virtual bool NeedsNetwork(void) const { return true; }
    virtual SSLSupport GetSSL(SSLCert *cert) const
    {
       if ( cert )
@@ -296,7 +295,6 @@ public:
 
    virtual MFolderType GetType() const;
    virtual String GetClass() const;
-   virtual bool NeedsNetwork() const;
    virtual SSLSupport GetSSL(SSLCert *acceptUnsigned) const;
    virtual void SetSSL(SSLSupport ssl, SSLCert cert);
 
@@ -831,11 +829,6 @@ MFolderType MFolderFromProfile::GetType() const
 String MFolderFromProfile::GetClass() const
 {
    return GetClassForType(GetType());
-}
-
-bool MFolderFromProfile::NeedsNetwork() const
-{
-   return FolderNeedsNetwork(GetType(), GetFlags());
 }
 
 SSLSupport MFolderFromProfile::GetSSL(SSLCert *acceptUnsigned) const
