@@ -4691,7 +4691,7 @@ String
 MailFolderCC::GetNewsSpool(void)
 {
    CClientInit();
-   return (const wxChar *)mail_parameters (NIL,GET_NEWSSPOOL,NULL);
+   return (const char *)mail_parameters (NIL,GET_NEWSSPOOL,NULL);
 }
 
 const String& MailFolder::InitializeNewsSpool()
