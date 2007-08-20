@@ -875,18 +875,40 @@ AttachmentMenu::OnCommandEvent(wxCommandEvent &event)
          {
             const String& filename = m_part->GetFileName();
             wxFile file(filename);
-            if ( !file.IsOpened() )
+            wxString content;
+
+            bool ok = file.IsOpened();
+            if ( ok )
             {
-               wxLogError(_("Failed to open attachment."));
-               break;
+               const wxFileOffset len = file.Length();
+               if ( len == 0 )
+               {
+                  wxLogWarning(_("Attached file \"%s\" is empty"),
+                               filename.c_str());
+                  break;
+               }
+
+               if ( len != wxInvalidOffset )
+               {
+                  wxCharBuffer buf(len);
+                  ok = file.Read(buf.data(), len) != wxInvalidOffset;
+
+                  if ( ok )
+                  {
+                     buf.data()[len] = '\0';
+                     content = wxString::From8BitData(buf, len);
+                  }
+               }
+               else // len == wxInvalidOffset
+               {
+                  ok = false;
+               }
             }
 
-            wxString content;
-            const wxFileOffset len = file.Length();
-            if ( len == wxInvalidOffset ||
-                  file.Read(wxStringBuffer(content, len + 1), len) != len )
+            if ( !ok )
             {
-               wxLogError(_("Failed to read attachment data."));
+               wxLogError(_("Failed to get data of attached file \"%s\"."),
+                          filename.c_str());
                break;
             }
 
@@ -3882,13 +3904,12 @@ wxComposeView::InsertFileAsText(const String& filename,
 {
    // read the text from the file
    wxString text;
-   off_t lenFile = 0;      // suppress warning
    wxFile file(filename);
 
    bool ok = file.IsOpened();
    if ( ok )
    {
-      lenFile = file.Length();
+      const wxFileOffset lenFile = file.Length();
       if ( lenFile == 0 )
       {
          if ( insMode != MessageEditor::Insert_Replace )
@@ -3899,12 +3920,30 @@ wxComposeView::InsertFileAsText(const String& filename,
          }
          //else: replace old text with new (empty) one
       }
-      else // non empty file
+      else if ( lenFile != wxInvalidOffset ) // non empty file
       {
-         wxStringBuffer buf(text, lenFile + 1);
-         buf[lenFile] = '\0';
+         wxCharBuffer buf(lenFile);
+         ok = file.Read(buf.data(), lenFile) != wxInvalidOffset;
 
-         ok = file.Read(buf, lenFile) != wxInvalidOffset;
+         if ( ok )
+         {
+            buf.data()[lenFile] = '\0';
+#if wxUSE_UNICODE
+            // try to interpret the file contents as Unicode
+            text = wxString(buf, wxConvAuto());
+            if ( text.empty() )
+#endif // wxUSE_UNICODE
+            {
+               // this works whether m_encoding == wxFONTENCODING_SYSTEM (we
+               // use the current locale encoding then) or not (in which case
+               // we use the specified encoding)
+               text = wxString(buf, wxCSConv(m_encoding));
+            }
+         }
+      }
+      else // lenFile == wxInvalidOffset
+      {
+         ok = false;
       }
    }
 

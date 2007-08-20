@@ -1443,7 +1443,36 @@ String VarExpander::GetSignature() const
             wxFileName fn(strSignFile);
             fn.MakeAbsolute(mApplication->GetLocalDir());
 
-            hasSign = fileSig.Open(fn.GetFullPath());
+            const wxString path = fn.GetFullPath();
+
+            // interpret the file as Unicode by default in Unicode build
+#if wxUSE_UNICODE
+            {
+               wxLogNull noLog;
+               hasSign = fileSig.Open(path);
+            }
+
+            if ( !hasSign )
+#endif // wxUSE_UNICODE
+            {
+               // but if it fails, use the current locale encoding
+               wxLogNull noLog;
+               hasSign = fileSig.Open(path, wxCSConv(wxFONTENCODING_SYSTEM));
+            }
+
+            if ( !hasSign )
+            {
+               // and if it still fails, try to interpret it as latin1 as
+               // otherwise we'd never be able to read non-UTF-8 files in UTF-8
+               // locale
+               hasSign = fileSig.Open(path, wxConvISO8859_1);
+            }
+
+            if ( !hasSign )
+            {
+               wxLogError(_("Failed to read signature file \"%s\""),
+                          path.c_str());
+            }
          }
 
          if ( !hasSign )
@@ -1457,7 +1486,7 @@ String VarExpander::GetSignature() const
             }
             else
             {
-               // to show message from wxTextFile::Open()
+               // to show error message from wxTextFile::Open()
                wxLog *log = wxLog::GetActiveTarget();
                if ( log )
                   log->Flush();
