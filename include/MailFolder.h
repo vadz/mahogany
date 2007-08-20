@@ -467,8 +467,7 @@ public:
    virtual bool IsInCriticalSection(void) const = 0;
 
    /// return class name
-   const wxChar *GetClassName(void) const
-      { return _T("MailFolder"); }
+   const char *GetClassName(void) const { return "MailFolder"; }
 
    /**
      Create the server info entry for the given folder -- this is a backdoor
