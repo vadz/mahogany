@@ -176,7 +176,7 @@ public:
       //else: ignore
    }
 
-   // base class pure virtual - return the profile we're working with
+   // base class pure virtual: return the profile we're working with (IncRef'd)
    virtual Profile *GetProfile() const
    {
       if ( m_newFolder && !m_profile )
@@ -941,15 +941,13 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
    CHECK( m_newFolder, FALSE, _T("no folder in folder properties dialog") );
 
    wxString folderName = m_newFolder->GetFullName();
-   Profile *profile = GetProfile();
+   Profile_obj profile(GetProfile());
 
    // use SetFolderPath() so the page will read its data from the profile
    // section corresponding to our folder
    GET_FOLDER_PAGE(m_notebook)->SetFolderPath(folderName);
 
    SetPagesProfile(profile);
-
-   profile->DecRef();
 
    return wxFolderBaseDialog::TransferDataToWindow();
 }
@@ -1186,6 +1184,8 @@ wxFolderPropertiesPage::OnChange(wxCommandEvent& event)
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
 
    CHECK_RET( dlg, _T("folder page should be in folder dialog!") );
+
+   event.Skip();
 
    wxObject *objEvent = event.GetEventObject();
 

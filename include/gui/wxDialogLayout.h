@@ -284,7 +284,7 @@ protected:
    // changes were accepted
    bool DoApply();
 
-   // get the profile for event sending
+   // get the profile for event sending: the caller will DecRef() it
    virtual Profile *GetProfile() const = 0;
 
 

@@ -1422,10 +1422,7 @@ bool wxOptionsEditDialog::TransferDataToWindow()
    // suspend the profile before anything is written to it
    m_profileForButtons = GetProfile();
    if ( m_profileForButtons )
-   {
-      m_profileForButtons->IncRef();
       m_profileForButtons->Suspend();
-   }
 
    return TRUE;
 }

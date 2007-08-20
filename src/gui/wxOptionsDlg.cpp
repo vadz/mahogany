@@ -626,7 +626,12 @@ public:
    wxOptionsNotebook(wxWindow *parent);
 
    // the profile we use: just the global one here
-   Profile *GetProfile() const { return mApplication->GetProfile(); }
+   Profile *GetProfile() const
+   {
+      Profile *profile = mApplication->GetProfile();
+      profile->IncRef();
+      return profile;
+   }
 
 private:
    Profile *m_profile;
@@ -752,7 +757,11 @@ public:
    }
 
 protected:
-   Profile *GetProfile() const { return m_profile; }
+   Profile *GetProfile() const
+   {
+      SafeIncRef(m_profile);
+      return m_profile;
+   }
 
 private:
    // the number and descriptions of the pages we show
@@ -4694,7 +4703,7 @@ wxCOMPILE_TIME_ASSERT(
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
                  : wxNotebookWithImages(_T("OptionsNotebook"), parent, ms_aszImages)
 {
-   Profile *profile = GetProfile();
+   Profile_obj profile(GetProfile());
 
    // create and add the pages
    new wxOptionsPageIdent(this, profile);
