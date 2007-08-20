@@ -52,6 +52,18 @@ enum Adr2StringWhich
 // private functions
 // ----------------------------------------------------------------------------
 
+// convert a field of ADDRESS struct to a string
+static inline String AdrField2String(const char *s)
+{
+   // normally the input string should be in 7 bit ASCII (possibly containing
+   // Base64 or QP-encoded words) but in practice broken software often
+   // generates 8 bit headers too -- as we don't have any encoding information
+   // here we can only interpret them as latin1, but maybe later we could
+   // examine e.g. Content-Type header of the main message to try to find the
+   // more appropriate encoding
+   return wxString::From8BitData(s);
+}
+
 // return string containing all addresses or just the first one from this list
 static String Adr2String(ADDRESS *adr,
                          Adr2StringWhich which = Adr2String_All,
@@ -96,7 +108,7 @@ String AddressCC::GetName() const
    String personal;
    CHECK( m_adr, personal, _T("invalid address") );
 
-   personal = wxConvertMB2WX(m_adr->personal);
+   personal = AdrField2String(m_adr->personal);
 
    return personal;
 }
@@ -106,7 +118,7 @@ String AddressCC::GetMailbox() const
    String mailbox;
    CHECK( m_adr, mailbox, _T("invalid address") );
 
-   mailbox = wxConvertMB2WX(m_adr->mailbox);
+   mailbox = AdrField2String(m_adr->mailbox);
 
    return mailbox;
 }
@@ -116,7 +128,7 @@ String AddressCC::GetDomain() const
    String host;
    CHECK( m_adr, host, _T("invalid address") );
 
-   host = wxConvertMB2WX(m_adr->host);
+   host = AdrField2String(m_adr->host);
 
    return host;
 }
@@ -131,7 +143,7 @@ String AddressCC::GetEMail() const
 // ----------------------------------------------------------------------------
 
 // case insensitive string compare of strings which may be NULL
-static inline bool SafeCompare(const wxChar *s1, const wxChar *s2)
+static inline bool SafeCompare(const char *s1, const char *s2)
 {
    if ( !s1 || !s2 )
       return !s1 == !s2;
@@ -150,8 +162,8 @@ bool AddressCC::IsSameAs(const Address& addr) const
    //
    // we also ignore adl field - IMHO the addresses differing only by source
    // route should be considered identical, shouldn't they?
-   return SafeCompare(wxConvertMB2WX(m_adr->mailbox), wxConvertMB2WX(addrCC.m_adr->mailbox)) &&
-          SafeCompare(wxConvertMB2WX(m_adr->host), wxConvertMB2WX(addrCC.m_adr->host));
+   return SafeCompare(m_adr->mailbox, addrCC.m_adr->mailbox) &&
+          SafeCompare(m_adr->host, addrCC.m_adr->host);
 }
 
 // ============================================================================
@@ -389,16 +401,16 @@ String AddressListCC::DebugDump() const
 // reproducible buffer overflows and MRC refuses to fix it! <sigh>
 
 // wspecials and rspecials string from c-client
-static const wxChar *WORD_SPECIALS = _T(" ()<>@,;:\\\"[]");
-const wxChar *ALL_SPECIALS =  _T("()<>@,;:\\\"[].");
+static const char *WORD_SPECIALS = " ()<>@,;:\\\"[]";
+static const char *ALL_SPECIALS =  "()<>@,;:\\\"[].";
 
 // this one is the replacement for rfc822_cat()
-static String Rfc822Quote(const wxChar *src, const wxChar *specials)
+static String Rfc822Quote(const char *src, const char *specials)
 {
    String dest;
 
    // do we have any specials at all?
-   if ( wxStrpbrk(src, specials) )
+   if ( strpbrk(src, specials) )
    {
       // need to quote
       dest = _T('"');
@@ -414,7 +426,8 @@ static String Rfc822Quote(const wxChar *src, const wxChar *specials)
                break;
          }
 
-         dest += *src++;
+         // cast to wxChar ensures the input is treated as latin1
+         dest += (wxChar)(unsigned char)*src++;
       }
 
       // closing quote
@@ -422,7 +435,7 @@ static String Rfc822Quote(const wxChar *src, const wxChar *specials)
    }
    else // no specials at all, easy case
    {
-      dest = src;
+      dest = AdrField2String(src);
    }
 
    return dest;
@@ -441,16 +454,16 @@ static String Adr2Email(ADDRESS *adr)
       // deal with the A-D-L
       if ( adr->adl )
       {
-         email << wxConvertMB2WX(adr->adl) << ':';
+         email << AdrField2String(adr->adl) << ':';
       }
 
       // and now the mailbox name: we quote all characters forbidden in a word
-      email << Rfc822Quote(wxConvertMB2WX(adr->mailbox), WORD_SPECIALS);
+      email << Rfc822Quote(adr->mailbox, WORD_SPECIALS);
 
       // passing the NULL host suppresses printing the full address
       if ( *adr->host != '@' )
       {
-         email << '@' << wxConvertMB2WX(adr->host);
+         email << '@' << AdrField2String(adr->host);
       }
    }
 
@@ -516,7 +529,7 @@ static String Adr2String(ADDRESS *adr, Adr2StringWhich which, bool *error)
          else // no, must use phrase <route-addr> form
          {
             if ( adr->personal )
-               address << Rfc822Quote(wxConvertMB2WX(adr->personal), ALL_SPECIALS);
+               address << Rfc822Quote(adr->personal, ALL_SPECIALS);
 
             address << _T(" <") << Adr2Email(adr) << _T('>');
          }
@@ -524,7 +537,7 @@ static String Adr2String(ADDRESS *adr, Adr2StringWhich which, bool *error)
       else if ( adr->mailbox ) // start of group?
       {
          // yes, write group name
-         address << Rfc822Quote(wxConvertMB2WX(adr->mailbox), ALL_SPECIALS) << _T(": ");
+         address << Rfc822Quote(adr->mailbox, ALL_SPECIALS) << _T(": ");
 
          // in a group
          groupDepth++;
