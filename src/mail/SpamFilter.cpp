@@ -82,7 +82,11 @@ public:
    }
 
 protected:
-   virtual Profile *GetProfile() const { return m_profile; }
+   virtual Profile *GetProfile() const
+   {
+      SafeIncRef(m_profile);
+      return m_profile;
+   }
 
 private:
    Profile *m_profile;
