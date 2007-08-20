@@ -1207,8 +1207,11 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
       // and drop any characters it can't convert)
       SetFontEncoding(encPart);
    }
+#elif defined(__WXGTK20__) && wxUSE_UNICODE
+   // all GUI elements are always in UTF-8 under GTK+ 2
+   static const wxFontEncoding encPart = wxFONTENCODING_UTF8;
 #else
-   wxFontEncoding encPart = m_encoding;
+   const wxFontEncoding encPart = m_encoding;
 #endif // wxUSE_WCHAR_T
 
    wxString text = m_textControl->GetValue();
