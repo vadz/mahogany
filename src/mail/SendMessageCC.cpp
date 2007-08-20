@@ -759,7 +759,7 @@ SendMessageCC::EncodeHeaderString(const String& header)
 
    // get the encoding in RFC 2047 sense: choose the most reasonable one
    wxFontEncoding enc = m_encHeaders == wxFONTENCODING_SYSTEM
-                           ? wxFONTENCODING_ISO8859_1
+                           ? wxLocale::GetSystemEncoding()
                            : m_encHeaders;
 
    MimeEncoding enc2047 = GetMimeEncodingForFontEncoding(enc);
@@ -786,7 +786,11 @@ SendMessageCC::EncodeHeaderString(const String& header)
 
    // encode the header splitting it in the chunks such that they will be no
    // longer than 75 characters each
-   const wxChar *s = header.c_str();
+   //
+   // FIXME-Unicode: we shouldn't use a global encoding for headers any more,
+   //                we could mix different encoding inside the same header
+   const wxCharBuffer buf(header.mb_str(wxCSConv(enc)));
+   const char *s = buf;
    while ( *s )
    {
       // if this is not the first line, insert a line break
