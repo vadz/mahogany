@@ -4300,31 +4300,28 @@ wxComposeView::BuildMessage(int flags) const
                // the part may be written either in the same encoding as chosen
                // in the "Language" menu or in a different -- but hopefully
                // compatible -- one, in which case we need to translate it
-               wxString textConv;
-               const wxString *text = &part->GetText();
+               wxCharBuffer textBuf;
+
+               const wxString& text = part->GetText();
 
                wxFontEncoding encodingPart = part->GetEncoding();
-               if ( encodingMsg == wxFONTENCODING_SYSTEM )
-               {
-                  // use the encoding of this part for all the other ones
-                  encodingMsg = encodingPart;
-               }
+               if ( encodingPart == wxFONTENCODING_SYSTEM )
+                  encodingPart = wxLocale::GetSystemEncoding();
 
-               if ( encodingPart != encodingMsg )
+               if ( encodingMsg != wxFONTENCODING_SYSTEM &&
+                      encodingPart != encodingMsg )
                {
                   // try converting this part to the message encoding
                   wxCSConv convPart(encodingPart);
-                  wxWCharBuffer wtext(convPart.cMB2WC(*text));
+                  wxWCharBuffer wtext(convPart.cMB2WC(text));
 
                   bool ok = wtext.data() != NULL;
 
                   if ( ok )
                   {
                      wxCSConv convMsg(encodingMsg);
-                     wxCharBuffer mbtext(convMsg.cWC2MB(wtext));
-                     ok = mbtext.data() != NULL;
-                     if ( ok )
-                        textConv = mbtext;
+                     textBuf = wxCharBuffer(convMsg.cWC2MB(wtext));
+                     ok = textBuf.data() != NULL;
                   }
 
                   if ( !ok )
@@ -4356,31 +4353,59 @@ wxComposeView::BuildMessage(int flags) const
                         m_okToConvertOnSend = true;
                      }
                      //else: don't ask, convert by default
-
-                     // FIXME: this doesn't work if we have 2 text parts in
-                     //        different encodings, we should use UTF8 in this
-                     //        case but for this we must do a preliminary
-                     //        iteration over all text parts and it's worthless
-                     //        to do it now as we only can have a single text
-                     //        part with the text composer anyhow
-                     encodingMsg = encodingPart;
                   }
-                  else
+                  else // successfully converted to encodingMsg
                   {
-                     text = &textConv;
+                     encodingPart = encodingMsg;
                   }
                }
-               //else: use the encoding as is
+
+               if ( !textBuf )
+               {
+                  textBuf = text.mb_str(wxCSConv(encodingPart));
+                  if ( !textBuf )
+                  {
+                     if ( flags & Interactive )
+                     {
+                        if ( !MDialog_YesNoDialog
+                              (
+                                 wxString::Format
+                                 (
+                                    _("Text of this message can't be converted "
+                                      "to the encoding \"%s\", would you like "
+                                      "to send it in UTF-8 instead?"),
+                                    wxFontMapper::
+                                       GetEncodingName(encodingPart).c_str()
+                                 ),
+                                 this,
+                                 MDIALOG_YESNOTITLE,
+                                 M_DLG_YES_DEFAULT,
+                                 M_MSGBOX_SEND_DIFF_ENCODING
+                              ) )
+                        {
+                           // send aborted
+                           part->DecRef();
+                           return NULL;
+                        }
+                     }
+
+                     encodingPart = wxFONTENCODING_UTF8;
+                     textBuf = text.utf8_str();
+
+                     // everything is convertible to UTF-8
+                     ASSERT_MSG( textBuf, "conversion to UTF-8 shouldn't fail" );
+                  }
+               }
 
                msg->AddPart(
                               MimeType::TEXT,
-                              *text,
-                              text->length(),
+                              textBuf,
+                              text.length(),
                               _T("PLAIN"),
                               _T("INLINE"),  // disposition
                               NULL,          // disposition parameters
                               NULL,          // other parameters
-                              encodingMsg
+                              encodingPart
                            );
             }
             break;
