@@ -97,8 +97,11 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             break;
          }
 
+         // pass false to prevent asking the user from here: we can be called
+         // during non-interactive operations and popping up a dialog for an
+         // unknown charset can be inappropriate
          const wxFontEncoding
-            encodingWord = wxFontMapper::Get()->CharsetToEncoding(csName);
+            encodingWord = wxFontMapper::Get()->CharsetToEncoding(csName, false);
 
          if ( encodingWord == wxFONTENCODING_SYSTEM )
          {
