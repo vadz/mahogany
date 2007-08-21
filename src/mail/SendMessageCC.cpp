@@ -1499,7 +1499,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       case TYPETEXT:
          // if the actual message text is in 7 bit, avoid encoding it even if
          // some charset which we would have normally encoded was used
-         if ( enc == wxFONTENCODING_SYSTEM && !NeedsToBeEncoded(data) )
+         if ( !NeedsToBeEncoded(data) )
          {
             bdy->encoding = ENC7BIT;
          }
