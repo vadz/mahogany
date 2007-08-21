@@ -4182,7 +4182,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    MFolderType folderType = GetType();
    if ( folderType == MF_NNTP || folderType == MF_NEWS )
    {
-      entry.m_NewsGroups = wxConvertMB2WX(env->newsgroups);
+      entry.m_NewsGroups = env->newsgroups;
    }
    else
    {
@@ -4211,21 +4211,27 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    }
 
    // subject
-
-   entry.m_Subject = MIME::DecodeHeader(wxConvertMB2WX(env->subject), &encoding);
-   if ( (encoding != wxFONTENCODING_SYSTEM) &&
-        (encoding != encodingMsg) )
+   entry.m_Subject = MIME::DecodeHeader(wxString::From8BitData(env->subject),
+                                        &encoding);
+   if ( (encoding != wxFONTENCODING_SYSTEM) && (encoding != encodingMsg) )
    {
       if ( encodingMsg == wxFONTENCODING_SYSTEM )
          encodingMsg = encoding;
+#if !wxUSE_UNICODE
+      else
+      {
+         wxLogDebug("Different encodings used for the headers of the same "
+                    "message, some headers don't be displayed correctly");
+      }
+#endif // !wxUSE_UNICODE
    }
 
    // all the other fields
    entry.m_Size = elt->rfc822_size;
    entry.m_Lines = 0;   // TODO: calculate them?
-   entry.m_Id = wxConvertMB2WX(env->message_id);
-   entry.m_References = wxConvertMB2WX(env->references);
-   entry.m_InReplyTo = wxConvertMB2WX(env->in_reply_to);
+   entry.m_Id = env->message_id;
+   entry.m_References = env->references;
+   entry.m_InReplyTo = env->in_reply_to;
    entry.m_UId = mail_uid(m_MailStream, elt->msgno);
 
    // set the font encoding to be used for displaying this entry
