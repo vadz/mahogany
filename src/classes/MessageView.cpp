@@ -1996,7 +1996,18 @@ MessageView::ShowPart(const MimePart *mimepart)
          }
          else
          {
-            m_viewer->InsertRawContents(wxString::From8BitData(data, len));
+            wxString s;
+#if wxUSE_UNICODE
+            if ( mimepart->GetType().IsText() )
+            {
+               s = wxCSConv(mimepart->GetTextEncoding()).cMB2WC(data, len, NULL);
+            }
+
+            if ( s.empty() )
+#endif // wxUSE_UNICODE
+               s = wxString::From8BitData(data, len);
+
+            m_viewer->InsertRawContents(s);
          }
       }
       //else: skip this part
