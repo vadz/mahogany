@@ -286,6 +286,9 @@ private:
 class EncodingChanger : private AttributeChanger
 {
 public:
+   // change the encoding to the given one during this object lifetime
+   //
+   // does nothing if enc == wxFONTENCODING_SYSTEM
    EncodingChanger(wxFontEncoding enc, String& str)
       : AttributeChanger(str)
    {
@@ -299,7 +302,17 @@ public:
          // could change it either to our own custom tag or to something
          // completely different, but for now leave it as is...
          DoChange(GetMetaString(wxFontMapper::GetEncodingName(enc)),
-                  GetMetaString(_T("iso-8859-1")));
+                  GetDefaultMeta());
+      }
+   }
+
+   // another version using the charset name, does nothing if it's empty
+   EncodingChanger(const String& charset, String& str)
+      : AttributeChanger(str)
+   {
+      if ( !charset.empty() )
+      {
+         DoChange(GetMetaString(charset), GetDefaultMeta());
       }
    }
 
@@ -311,6 +324,8 @@ private:
         << charset << _T("\">");
       return s;
    }
+
+   static String GetDefaultMeta() { return GetMetaString(_T("iso-8859-1")); }
 
    DECLARE_NO_COPY_CLASS(EncodingChanger)
 };
@@ -1053,60 +1068,55 @@ void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 
 void HtmlViewer::InsertRawContents(const String& data)
 {
-   // collect all meta tags in the HTML document in this string
-   String metaTags;
-
    // we're already inside body so we can't insert the entire HTML document
-   // here, instead we're going to try to insert our existing contents in the
-   // beginning of the given document
-   const wxChar *pHtml = data.c_str();
-   const wxChar *pBody = pHtml;
-   while ( pBody )
+   // here, so extract just its body and also take its charset
+   EncodingChanger
+      encChanger(wxHtmlParser::ExtractCharsetInformation(data), m_htmlText);
+
+   // tag handler used to extract the <body> tag contents
+   class BodyTagHandler : public wxHtmlTagHandler
    {
-      pBody = wxStrchr(pBody, _T('<'));
-      if ( pBody )
+   public:
+      BodyTagHandler()
       {
-         // we also check for "<meta charset>" tag or, as it's simpler, for any
-         // "<meta>" tags at all, as otherwise we could have a wrong charset
-         if ( (pBody[1] == _T('m') || pBody[1] == _T('M')) &&
-              (pBody[2] == _T('e') || pBody[2] == _T('E')) &&
-              (pBody[3] == _T('t') || pBody[3] == _T('T')) &&
-              (pBody[4] == _T('a') || pBody[4] == _T('A')) )
-         {
-            const wxChar *pEnd = wxStrchr(pBody + 4, _T('>'));
-            if ( pEnd )
-            {
-               metaTags += String(pBody, pEnd + 1);
-            }
-         }
-
-         if ( (pBody[1] == _T('b') || pBody[1] == _T('B')) &&
-              (pBody[2] == _T('o') || pBody[2] == _T('O')) &&
-              (pBody[3] == _T('d') || pBody[3] == _T('D')) &&
-              (pBody[4] == _T('y') || pBody[4] == _T('Y')) )
-         {
-            pBody = wxStrchr(pBody + 4, _T('>'));
-            if ( pBody )
-            {
-               // skip '>'
-               pBody++;
-            }
-
-            break;
-         }
-
-         pBody++;
+         // by default, take all
+         m_begin = 0;
+         m_end = String::npos;
       }
-   }
 
-   if ( pBody )
+      virtual wxString GetSupportedTags() { return "BODY"; }
+      virtual bool HandleTag(const wxHtmlTag& tag)
+      {
+         m_begin = tag.GetBeginPos();
+         m_end = tag.GetEndPos1(); // position just before the closing tag
+
+         return false;
+      }
+
+      size_t GetBegin() const { return m_begin; }
+      size_t GetEnd() const { return m_end; }
+
+   private:
+      size_t m_begin,
+             m_end;
+   };
+
+   class BodyParser : public wxHtmlParser
    {
-      m_htmlText = String(pHtml, pBody) + m_htmlText + metaTags + pBody;
-   }
-   else // HTML fragment only?
-   {
-      m_htmlText += pHtml;
-   }
+   public:
+      BodyParser() { }
+
+      // provide stubs for base class pure virtual methods which we don't use
+      virtual wxObject* GetProduct() { return NULL; }
+      virtual void AddText(const wxString& WXUNUSED(txt)) { }
+   };
+
+   BodyTagHandler *handler = new BodyTagHandler;
+   BodyParser parser;
+   parser.AddTagHandler(handler);
+   parser.Parse(data);
+
+   m_htmlText += data.substr(handler->GetBegin(), handler->GetEnd());
 
    // set the flag for EndBody
    m_hasHtmlContents = true;
