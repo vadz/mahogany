@@ -1270,31 +1270,31 @@ strutil_freeRegEx(class strutil_RegEx *regex)
 wxArrayString strutil_restore_array(const String& str, wxChar chSep)
 {
    wxArrayString array;
+
    if ( !str.empty() )
    {
       String s;
-      for ( const wxChar *p = str.c_str(); ; p++ )
+      for ( String::const_iterator p = str.begin(), end = str.end(); ; ++p )
       {
-         if ( *p == _T('\\') )
-         {
-            // skip the backslash and treat the next character literally,
-            // whatever it is -- but take care to not overrun the string end
-            const char ch = *++p;
-            if ( !ch )
-               break;
-
-            s += ch;
-         }
-         else if ( *p == chSep || *p == _T('\0') )
+         if ( p == end || *p == chSep )
          {
             array.Add(s);
 
-            if ( *p == _T('\0') )
+            if ( p == end )
                break;
 
             s.clear();
          }
-         else
+         else if ( *p == _T('\\') )
+         {
+            // skip the backslash and treat the next character literally,
+            // whatever it is -- but take care to not overrun the string end
+            if ( ++p == str.end() )
+               break;
+
+            s += *p;
+         }
+         else // normal character
          {
             s += *p;
          }
@@ -1315,10 +1315,12 @@ String strutil_flatten_array(const wxArrayString& array, wxChar chSep)
       if ( n > 0 )
          s += chSep;
 
-      const wxChar *p = array[n].c_str();
-      while ( *p )
+      for ( String::const_iterator p = array[n].begin(),
+                                 end = array[n].end();
+            p != end;
+            ++p )
       {
-         const char ch = *p++;
+         const wxChar ch = *p;
 
          // escape the separator characters
          if ( ch == chSep || ch == '\\' )
