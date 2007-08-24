@@ -51,7 +51,6 @@ class MOption;
 // options we use here
 // ----------------------------------------------------------------------------
 
-extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_TBARIMAGES;
 
 // ----------------------------------------------------------------------------
@@ -968,7 +967,10 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
          // fall through
 
       case WXMENU_LANG_DEFAULT:
-         encoding = READ_APPCONFIG(MP_MSGVIEW_DEFAULT_ENCODING);
+         // do not use MP_MSGVIEW_DEFAULT_ENCODING here, selecting "Default"
+         // language from the menu means that we should detect the encoding 
+         // automatically and this is done when we return wxFONTENCODING_DEFAULT
+         encoding = wxFONTENCODING_DEFAULT;
          break;
 
       case WXMENU_LANG_ISO8859_1:
