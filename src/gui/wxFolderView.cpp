@@ -2549,6 +2549,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
             //else: hmm, can it happen at all?
          }
 
+#if !wxUSE_UNICODE
          // check that we have the fonts to display the encodings of the
          // messages: we won't be able to do this when displaying them because
          // EnsureAvailableTextEncoding() uses wxFontMapper which may pop up a
@@ -2579,6 +2580,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
             //else: do *not* change the encoding in HeaderInfo as we will
             //      have to translate text as well
          }
+#endif // !wxUSE_UNICODE
 
          // now the header info should be in cache, so GetHeaderInfo() will
          // return it
@@ -3102,6 +3104,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          wxFAIL_MSG( _T("unknown column") );
    }
 
+#if !wxUSE_UNICODE
    if ( field == WXFLC_FROM || field == WXFLC_SUBJECT )
    {
       wxFontEncoding encoding = hi->GetEncoding();
@@ -3120,6 +3123,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          EnsureAvailableTextEncoding(&encoding, &text);
       }
    }
+#endif // !wxUSE_UNICODE
 
    return text;
 }
@@ -3192,6 +3196,7 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    // reset the colour to default
    m_attr->SetTextColour(GetEntryColour(hi));
 
+#if !wxUSE_UNICODE
    // cache the last used encoding as creating new font is an expensive
    // operation
    wxFontEncoding enc = hi->GetEncoding();
@@ -3224,6 +3229,7 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
          m_attr->SetFont(wxNullFont);
       }
    }
+#endif // !wxUSE_UNICODE
 
    return m_attr;
 }

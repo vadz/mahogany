@@ -335,6 +335,8 @@ extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);
  */
 extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz);
 
+#if !wxUSE_UNICODE
+
 /**
   Try to convert text in UTF-8 or 7 to a multibyte encoding.
 
@@ -352,6 +354,8 @@ extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz);
   @return the encoding of the returned string
  */
 extern wxFontEncoding ConvertUTFToMB(wxString *str, wxFontEncoding utfEnc);
+
+#endif // !wxUSE_UNICODE
 
 // return the length of the line terminator if we're at the end of line or 0
 // otherwise

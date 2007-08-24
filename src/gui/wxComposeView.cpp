@@ -3092,8 +3092,10 @@ wxComposeView::SetEncoding(wxFontEncoding encoding, wxFontEncoding encConv)
    if ( encConv == wxFONTENCODING_SYSTEM )
    {
       encConv = encoding;
+#if !wxUSE_UNICODE
       if ( !EnsureAvailableTextEncoding(&encConv) )
          encConv = wxFONTENCODING_SYSTEM;
+#endif // !wxUSE_UNICODE
    }
 
    m_editor->SetEncoding(encConv == wxFONTENCODING_SYSTEM ? encoding : encConv);
@@ -3118,12 +3120,14 @@ bool wxComposeView::SetEncodingToSameAs(const MimePart *part)
             // Unicode parts are converted by the message viewer (from which we
             // get our text) to another encoding, get it
             wxFontEncoding encConv;
+#if !wxUSE_UNICODE
             if ( enc == wxFONTENCODING_UTF7 || enc == wxFONTENCODING_UTF8 )
             {
                String textPart(part->GetTextContent());
                encConv = ConvertUTFToMB(&textPart, enc);
             }
             else // not Unicode
+#endif // !wxUSE_UNICODE
             {
                encConv = wxFONTENCODING_SYSTEM;
             }

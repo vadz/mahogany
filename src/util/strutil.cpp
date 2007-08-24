@@ -1516,6 +1516,8 @@ static wxFontEncoding ConvertToMB(wxString *strUtf, const wxMBConv& conv)
 
 #endif // __WXGTK20__
 
+#if !wxUSE_UNICODE
+
 // convert a string in UTF-8 or 7 into the string in some multibyte encoding:
 // of course, this doesn't work in general as Unicode is not representable as
 // an 8 bit charset but it works in some common cases and is better than no
@@ -1560,6 +1562,9 @@ wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
 
    return encConv;
 }
+
+#endif // !wxUSE_UNICODE
+
 
 // return the length of the line terminator if we're at the end of line or 0
 // otherwise

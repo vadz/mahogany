@@ -1137,6 +1137,7 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
    String text(strutil_enforceLF(textOrig));
 
 
+#if !wxUSE_UNICODE
    // we may have to translate the text in another encoding if exactly this one
    // is not available (but equivalent one is)
    if ( EnsureAvailableTextEncoding(&m_encoding, &text, true /* may ask */) )
@@ -1144,6 +1145,7 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
       SetFontEncoding(m_encoding);
    }
    //else: don't change the font, encoding is not supported anyhow
+#endif // !wxUSE_UNICODE
 
 
    switch ( insMode )

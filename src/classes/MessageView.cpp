@@ -1204,12 +1204,13 @@ MessageView::ShowHeader(const String& name,
    m_viewer->ShowHeaderName(name);
 
    String value(valueOrig);
-   wxFontEncoding encReal = encHeader;
+#if !wxUSE_UNICODE
    if ( encHeader != wxFONTENCODING_SYSTEM )
    {
       // convert the string to an encoding we can show, if needed
-      EnsureAvailableTextEncoding(&encReal, &value);
+      EnsureAvailableTextEncoding(&encHeader, &value);
    }
+#endif // !wxUSE_UNICODE
 
    // don't highlight URLs in headers which contain message IDs or other things
    // which look just like the URLs but, in fact, are not ones
@@ -1290,9 +1291,9 @@ MessageView::ShowHeader(const String& name,
 
       // do this even if "before" is empty if we have to change the
       // encoding (it will affect the URL following it)
-      if ( !before.empty() || encReal != wxFONTENCODING_SYSTEM )
+      if ( !before.empty() || encHeader != wxFONTENCODING_SYSTEM )
       {
-         m_viewer->ShowHeaderValue(before, encReal);
+         m_viewer->ShowHeaderValue(before, encHeader);
       }
 
       if ( !url.empty() )
@@ -1315,14 +1316,18 @@ MessageView::ShowHeaders()
    {
       HeaderIterator headers(m_mailMessage->GetHeader());
 
+      const wxFontEncoding encHeaders = m_encodingUser == wxFONTENCODING_DEFAULT
+                                          ? wxFONTENCODING_SYSTEM
+                                          : m_encodingUser;
+
       String name,
              value;
       while ( headers.GetNext(&name, &value, HeaderIterator::MultiLineOk) )
       {
-         ShowHeader(name, value, wxFONTENCODING_SYSTEM);
+         ShowHeader(name, value, encHeaders);
       }
    }
-   else
+   else // show just a few standard headers
    {
       // retrieve all headers at once instead of calling Message::GetHeaderLine()
       // many times: this is incomparably faster with remote servers (one round
@@ -1624,20 +1629,21 @@ MessageView::ShowHeaders()
             {
                encHeader = m_encodingAuto;
             }
+
+#if wxUSE_UNICODE
+            if ( encHeader != wxFONTENCODING_SYSTEM )
+               value = wxString(value.To8BitData(), wxCSConv(encHeader));
+#endif // wxUSE_UNICODE
          }
 
-#if 0
-         // does not work - EnsureAvailableTextEncoding for UTF-8 always succeeds
-         if ( !EnsureAvailableTextEncoding(&encHeader, &value) )
-#endif
+#if !wxUSE_UNICODE
+         // special handling for the UTF-7|8 if it's not supported natively
+         if ( encHeader == wxFONTENCODING_UTF8 ||
+               encHeader == wxFONTENCODING_UTF7 )
          {
-            // special handling for the UTF-7|8 if it's not supported natively
-            if ( encHeader == wxFONTENCODING_UTF8 ||
-                  encHeader == wxFONTENCODING_UTF7 )
-            {
-               encHeader = ConvertUTFToMB(&value, encHeader);
-            }
+            encHeader = ConvertUTFToMB(&value, encHeader);
          }
+#endif // !wxUSE_UNICODE
 
          // show the header and mark the URLs in it
          const String& name = headerNames[n];
@@ -1698,11 +1704,12 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
 
       if ( encPart == wxFONTENCODING_UTF8 || encPart == wxFONTENCODING_UTF7 )
       {
-         // show UTF-8|7, not env. encoding in Language menu
          m_encodingAuto = encPart;
 
+#if !wxUSE_UNICODE
          // convert from UTF-8|7 to environment's default encoding
          encPart = ConvertUTFToMB(&textPart, encPart);
+#endif // wxUSE_UNICODE
       }
       else if ( encPart == wxFONTENCODING_SYSTEM ||
                 encPart == wxFONTENCODING_DEFAULT )
@@ -1728,8 +1735,9 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
    }
 
    // init the style we're going to use
-   bool fontSet = false;
    MTextStyle style;
+#if !wxUSE_UNICODE
+   bool fontSet = false;
    if ( encPart != wxFONTENCODING_SYSTEM )
    {
       if ( EnsureAvailableTextEncoding(&encPart, &textPart) )
@@ -1746,6 +1754,7 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
    // we need to reset the font and the colour because they may have been
    // changed by the headers
    if ( !fontSet )
+#endif // !wxUSE_UNICODE
       style.SetFont(m_ProfileValues.GetFont());
 
    style.SetTextColour(m_ProfileValues.FgCol);

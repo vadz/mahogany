@@ -696,10 +696,12 @@ private:
    /// reset the encoding to the default value
    void ResetUserEncoding();
 
-   /// the encoding specified by the user or wxFONTENCODING_SYSTEM if none
+   /// the encoding specified by the user or wxFONTENCODING_DEFAULT if none
+   /// (this one is never equal to wxFONTENCODING_SYSTEM)
    wxFontEncoding m_encodingUser;
 
-   /// the auto detected encoding for the current message so far
+   /// the auto detected encoding for the current message so far or
+   /// wxFONTENCODING_SYSTEM if we don't know yet
    wxFontEncoding m_encodingAuto;
 
    //@}

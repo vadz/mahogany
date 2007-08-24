@@ -31,6 +31,8 @@
 // implementation
 // ============================================================================
 
+#if wxUSE_UNICODE
+
 bool
 EnsureAvailableTextEncoding(wxFontEncoding *enc, wxString *text, bool mayAskUser)
 {
@@ -97,6 +99,8 @@ EnsureAvailableTextEncoding(wxFontEncoding *enc, wxString *text, bool mayAskUser
    // we have either the requested encoding or an equivalent one
    return true;
 }
+
+#endif // !wxUSE_UNICODE
 
 wxFont
 CreateFontFromDesc(const String& fontDesc, int fontSize, int fontFamily)

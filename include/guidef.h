@@ -60,6 +60,8 @@ inline wxFrame *GetFrame(const wxWindow *win)
    return  GET_PARENT_OF_CLASS(win, wxFrame);
 }
 
+#if !wxUSE_UNICODE
+
 /**
   Check if the given font encoding is available on this system. If not, try to
   find a replacement encoding - if this succeeds, the text is translated into
@@ -72,6 +74,8 @@ inline wxFrame *GetFrame(const wxWindow *win)
 extern bool EnsureAvailableTextEncoding(wxFontEncoding *encoding,
                                         wxString *text = NULL,
                                         bool mayAskUser = false);
+
+#endif // !wxUSE_UNICODE
 
 /**
    Create a font from the given native font description or font family and
