@@ -155,6 +155,30 @@ static String NormalizeString(const String& s)
    return norm;
 }
 
+// recode the contents of a string in the specified destination encoding,
+// assuming that the current contents was obtained from the source encoding
+#if wxUSE_UNICODE
+
+static void
+RecodeText(String *text, wxFontEncoding encSrc, wxFontEncoding encDst)
+{
+   // recode the text to the user-specified encoding
+   const wxCharBuffer textMB(text->mb_str(wxCSConv(encSrc)));
+   CHECK_RET( textMB, "string not in source encoding?" );
+
+   *text = String(textMB, wxCSConv(encDst));
+}
+
+#else // !wxUSE_UNICODE
+
+static inline void RecodeText(String *, wxFontEncoding, wxFontEncoding)
+{
+   // do nothing in ANSI build: the string always contains the same bytes,
+   // independently of the encoding being used
+}
+
+#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -1316,15 +1340,19 @@ MessageView::ShowHeaders()
    {
       HeaderIterator headers(m_mailMessage->GetHeader());
 
-      const wxFontEncoding encHeaders = m_encodingUser == wxFONTENCODING_DEFAULT
-                                          ? wxFONTENCODING_SYSTEM
-                                          : m_encodingUser;
-
       String name,
              value;
       while ( headers.GetNext(&name, &value, HeaderIterator::MultiLineOk) )
       {
-         ShowHeader(name, value, encHeaders);
+         wxFontEncoding encHeader = wxFONTENCODING_SYSTEM;
+         if ( m_encodingUser != wxFONTENCODING_DEFAULT )
+         {
+            RecodeText(&value, wxFONTENCODING_ISO8859_1, m_encodingUser);
+
+            encHeader = m_encodingUser;
+         }
+
+         ShowHeader(name, value, encHeader);
       }
    }
    else // show just a few standard headers
@@ -1624,16 +1652,13 @@ MessageView::ShowHeaders()
                // use the user specified encoding if none specified in the header
                // itself
                encHeader = m_encodingUser;
+
+               RecodeText(&value, wxFONTENCODING_ISO8859_1, m_encodingUser);
             }
             else if ( m_encodingAuto != wxFONTENCODING_SYSTEM )
             {
                encHeader = m_encodingAuto;
             }
-
-#if wxUSE_UNICODE
-            if ( encHeader != wxFONTENCODING_SYSTEM )
-               value = wxString(value.To8BitData(), wxCSConv(encHeader));
-#endif // wxUSE_UNICODE
          }
 
 #if !wxUSE_UNICODE
@@ -1693,26 +1718,29 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
 {
    // get the encoding of the text
    wxFontEncoding encPart;
-   if( m_encodingUser != wxFONTENCODING_DEFAULT )
+   if ( m_encodingUser != wxFONTENCODING_DEFAULT )
    {
       // user-specified encoding overrides everything
       encPart = m_encodingUser;
+
+      RecodeText(&textPart, textEnc, m_encodingUser);
    }
    else // determine the encoding ourselves
    {
       encPart = textEnc;
 
+#if !wxUSE_UNICODE
       if ( encPart == wxFONTENCODING_UTF8 || encPart == wxFONTENCODING_UTF7 )
       {
          m_encodingAuto = encPart;
 
-#if !wxUSE_UNICODE
          // convert from UTF-8|7 to environment's default encoding
          encPart = ConvertUTFToMB(&textPart, encPart);
-#endif // wxUSE_UNICODE
       }
-      else if ( encPart == wxFONTENCODING_SYSTEM ||
-                encPart == wxFONTENCODING_DEFAULT )
+      else
+#endif // wxUSE_UNICODE
+      if ( encPart == wxFONTENCODING_SYSTEM ||
+            encPart == wxFONTENCODING_DEFAULT )
       {
          // use the encoding of the last part which had it
          encPart = m_encodingAuto;
@@ -1727,11 +1755,8 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
    if ( encPart == wxFONTENCODING_SYSTEM )
    {
       // autodetecting encoding didn't work, use the fall back encoding, if any
-      if ( m_encodingUser != wxFONTENCODING_DEFAULT )
-      {
-         encPart = (wxFontEncoding)(long)
-                     READ_CONFIG(GetProfile(), MP_MSGVIEW_DEFAULT_ENCODING);
-      }
+      encPart = (wxFontEncoding)(long)
+                  READ_CONFIG(GetProfile(), MP_MSGVIEW_DEFAULT_ENCODING);
    }
 
    // init the style we're going to use
@@ -2009,7 +2034,10 @@ MessageView::ShowPart(const MimePart *mimepart)
 #if wxUSE_UNICODE
             if ( mimepart->GetType().IsText() )
             {
-               s = wxCSConv(mimepart->GetTextEncoding()).cMB2WC(data, len, NULL);
+               wxFontEncoding enc = m_encodingUser == wxFONTENCODING_DEFAULT
+                                       ? mimepart->GetTextEncoding()
+                                       : m_encodingUser;
+               s = wxCSConv(enc).cMB2WC(data, len, NULL);
             }
 
             if ( s.empty() )
