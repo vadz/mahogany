@@ -106,7 +106,8 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                if ( m_str.empty() )
                {
                   // suspicious...
-                  wxLogDebug(_T("Empty header value?"));
+                  wxLogDebug(_T("Empty line in \"%s\" header value?"),
+                             name->c_str());
                }
 
                // this header may continue on the next line if it begins
@@ -145,20 +146,43 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
             {
                *name = m_str;
 
-               if ( *++m_pcCurrent != ' ' )
+               switch ( *++m_pcCurrent )
                {
-                  // oops... skip back
-                  m_pcCurrent--;
+                  case '\r':
+                     if ( *++m_pcCurrent != '\n' )
+                     {
+                        wxLogDebug(_T("Bare '\\r' in header ignored"));
+                        m_pcCurrent -= 2; // skip back before '\r'
+                        break;
+                     }
 
-                  // although this is allowed by the RFC 822 (but not
-                  // 822bis), it is quite uncommon and so may indicate a
-                  // problem -- log it
-                  wxLogDebug(_T("Header without space after colon?"));
+                     m_pcCurrent++; // skip '\n' too
+
+                     // fall through
+
+                  case '\0':
+                     // empty header, uncommon but valid
+                     if ( value )
+                        value->clear();
+                     return true;
+
+                  case ' ':
+                     // this is the expected case, nothing to do
+                     break;
+
+                  default:
+                     // oops... skip back
+                     m_pcCurrent--;
+
+                     // although this is allowed by the RFC 822 (but not
+                     // 822bis), it is quite uncommon and so may indicate a
+                     // problem -- log it
+                     wxLogDebug(_T("Header without space after colon?"));
                }
 
-               m_str.clear();
-
                inName = false;
+
+               m_str.clear();
 
                break;
             }
