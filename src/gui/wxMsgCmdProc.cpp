@@ -286,11 +286,13 @@ private:
 class AsyncStatusHandler
 {
 public:
-   AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc, const wxChar *fmt, ...);
+   // create the handler for a new async operation and show the given message
+   // to the user
+   AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc, const wxString& msgInitial);
 
    // monitor the given ticket, give error message if the corresponding
    // operation terminates with an error
-   bool Monitor(Ticket ticket, const wxChar *fmt, ...);
+   bool Monitor(Ticket ticket, const wxString& msgError);
 
    // used by OnASFolderResultEvent() to find the matching progress indicator
    Ticket GetTicket() const { return m_ticket; }
@@ -299,7 +301,7 @@ public:
    void Fail() { m_ticket = ILLEGAL_TICKET; }
 
    // use different message on success (default is initial message + done)
-   void SetSuccessMsg(const wxChar *fmt, ...);
+   void SetSuccessMsg(const wxString& msgOk);
 
    // give the appropriate message
    ~AsyncStatusHandler();
@@ -329,15 +331,11 @@ private:
 // ----------------------------------------------------------------------------
 
 AsyncStatusHandler::AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc,
-                                       const wxChar *fmt, ...)
+                                       const wxString& msgInitial)
+                  : m_msgInitial(msgInitial)
 {
    m_msgCmdProc = msgCmdProc;
    m_ticket = ILLEGAL_TICKET;
-
-   va_list argptr;
-   va_start(argptr, fmt);
-   m_msgInitial.PrintfV(fmt, argptr);
-   va_end(argptr);
 
    m_msgCmdProc->AddAsyncStatus(this);
 
@@ -345,12 +343,9 @@ AsyncStatusHandler::AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc,
    MBeginBusyCursor();
 }
 
-bool AsyncStatusHandler::Monitor(Ticket ticket, const wxChar *fmt, ...)
+bool AsyncStatusHandler::Monitor(Ticket ticket, const wxString& msgError)
 {
-   va_list argptr;
-   va_start(argptr, fmt);
-   m_msgError.PrintfV(fmt, argptr);
-   va_end(argptr);
+   m_msgError = msgError;
 
    m_ticket = ticket;
 
@@ -370,12 +365,9 @@ bool AsyncStatusHandler::Monitor(Ticket ticket, const wxChar *fmt, ...)
    return TRUE;
 }
 
-void AsyncStatusHandler::SetSuccessMsg(const wxChar *fmt, ...)
+void AsyncStatusHandler::SetSuccessMsg(const wxString& msgOk)
 {
-   va_list argptr;
-   va_start(argptr, fmt);
-   m_msgOk.PrintfV(fmt, argptr);
-   va_end(argptr);
+   m_msgOk = msgOk;
 }
 
 AsyncStatusHandler::~AsyncStatusHandler()
@@ -1352,8 +1344,11 @@ MsgCmdProcImpl::MarkRead(const UIdArray& selections, bool read)
    size_t count = selections.GetCount();
 
    AsyncStatusHandler *status =
-      new AsyncStatusHandler(this, _("Marking %d message(s) as %s..."),
-                             count, (read ? "read" : "unread"));
+      new AsyncStatusHandler(this, wxString::Format
+                                   (
+                                       _("Marking %d message(s) as %s..."),
+                                       count, (read ? "read" : "unread")
+                                   ));
 
    Ticket t = m_asmf->MarkRead(&selections, this, read);
 
@@ -1383,16 +1378,21 @@ MsgCmdProcImpl::SaveMessagesToFolder(const UIdArray& selections,
    }
 
    AsyncStatusHandler *status =
-      new AsyncStatusHandler(this, _("Saving %d message(s) to '%s'..."),
-                             selections.GetCount(),
-                             (const wxChar *)folder->GetFullName().c_str());
+      new AsyncStatusHandler(this, wxString::Format
+                                   (
+                                       _("Saving %d message(s) to '%s'..."),
+                                       selections.GetCount(),
+                                       folder->GetFullName().c_str()
+                                   ));
 
    Ticket t = m_asmf->
                   SaveMessagesToFolder(&selections, GetFrame(), folder, this);
 
-   status->Monitor(t,
-                   _("Failed to save messages to the folder '%s'."),
-                   (const wxChar *)folder->GetFullName().c_str());
+   status->Monitor(t, wxString::Format
+                      (
+                         _("Failed to save messages to the folder '%s'."),
+                         folder->GetFullName().c_str()
+                      ));
 
    folder->DecRef();
 
@@ -1416,8 +1416,11 @@ Ticket
 MsgCmdProcImpl::SaveMessagesToFile(const UIdArray& selections)
 {
    AsyncStatusHandler *status =
-      new AsyncStatusHandler(this, _("Saving %d message(s) to file..."),
-                             selections.GetCount());
+      new AsyncStatusHandler(this, wxString::Format
+                                   (
+                                       _("Saving %d message(s) to file..."),
+                                       selections.GetCount()
+                                   ));
 
    Ticket t = m_asmf->SaveMessagesToFile(&selections, GetFrame(), this);
    status->Monitor(t, _("Saving messages to file failed."));
@@ -1633,15 +1636,21 @@ MsgCmdProcImpl::ApplyFilters(const UIdArray& selections)
    size_t count = selections.GetCount();
 
    AsyncStatusHandler *status =
-      new AsyncStatusHandler(this,
-                             _("Applying filter rules to %u "
-                               "message(s)..."), count);
+      new AsyncStatusHandler(this, wxString::Format
+                                   (
+                                      _("Applying filter rules to %u message(s)..."),
+                                      count
+                                   ));
+
    Ticket t = m_asmf->ApplyFilterRules(&selections, this);
    if ( status->Monitor(t, _("Failed to apply filter rules.")) )
    {
-      status->SetSuccessMsg(_("Applied filters to %u message(s), "
+      status->SetSuccessMsg(wxString::Format
+                            (
+                              _("Applied filters to %u message(s), "
                               "see log window for details."),
-                            count);
+                              count
+                            ));
    }
 }
 
