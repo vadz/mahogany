@@ -2888,9 +2888,11 @@ FilterRuleApply::Evaluate()
 
 void FilterRuleApply::GetSenderSubject(String& from, String& subject, bool full)
 {
-   subject = MIME::DecodeHeader(m_parent->m_MailMessage->Subject());
+   Message * const msg = m_parent->m_MailMessage;
 
-   AddressList_obj addrList(m_parent->m_MailMessage->GetAddressList(MAT_FROM));
+   subject = MIME::DecodeHeader(msg->Subject());
+
+   AddressList_obj addrList(msg->GetAddressList(MAT_FROM));
    Address *addr = addrList ? addrList->GetFirst() : NULL;
    if ( addr )
    {
@@ -2904,6 +2906,15 @@ void FilterRuleApply::GetSenderSubject(String& from, String& subject, bool full)
          from = addr->GetName();
          if ( from.empty() )
             from << _T('<') << addr->GetEMail() << _T('>');
+      }
+
+      from = MIME::DecodeHeader(from);
+
+      if ( addrList->HasNext(addr) )
+      {
+         // indicate that there is more than one message sender (untypical but
+         // apparently possible)
+         from += _(", ...");
       }
    }
    else // no valid sender address
