@@ -402,7 +402,7 @@ public:
 
   // accessors
     // return the file name (NB: not really always a file name...)
-  const wxChar *GetName() const { return m_pBook->GetName(); }
+  wxString GetName() const { return m_pBook->GetName(); }
 
   size_t GetNumberOfEntries() const { return m_pBook->GetNumberOfEntries(); }
 
