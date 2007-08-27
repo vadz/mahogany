@@ -336,8 +336,8 @@ KBLIST_DEFINE(ModulesList, MModuleEntry);
 // a list of modules loaded at startup:
 static ModulesList gs_GlobalModulesList;
 
-// the mutex we lock to block any background processing temporarily
-static MMutex gs_mutexBlockBg;
+// if this is > 0 then background processing is temporarily blocked
+static int gs_mutexBlockBg = 0;
 
 // ============================================================================
 // implementation
@@ -618,7 +618,8 @@ int wxMApp::FilterEvent(wxEvent& event)
    if ( AllowBgProcessing() )
       return -1;
 
-   if ( event.IsCommandEvent() || event.GetEventType() == wxEVT_CHAR )
+   if ( event.GetEventType() == wxEVT_COMMAND_MENU_SELECTED ||
+         event.GetEventType() == wxEVT_CHAR )
    {
       // these events are dangerous to handle now as they can result in another
       // call to c-client being made so just ignore them
@@ -649,19 +650,23 @@ int wxMApp::FilterEvent(wxEvent& event)
 bool
 wxMApp::AllowBgProcessing() const
 {
-   return !gs_mutexBlockBg.IsLocked();
+   return gs_mutexBlockBg == 0;
 }
 
 void
 wxMApp::EnterCritical()
 {
-   gs_mutexBlockBg.Lock();
+   ASSERT( gs_mutexBlockBg >= 0 );
+
+   gs_mutexBlockBg++;
 }
 
 void
 wxMApp::LeaveCritical()
 {
-   gs_mutexBlockBg.Unlock();
+   ASSERT( gs_mutexBlockBg > 0 );
+
+   gs_mutexBlockBg--;
 }
 
 #ifdef __WXDEBUG__
@@ -670,19 +675,10 @@ void
 wxMApp::OnAssert(const wxChar *file, int line,
                  const wxChar *cond, const wxChar *msg)
 {
-   // don't provoke an assert from inside the assert (which would happen if we
-   // tried to lock an already locked mutex below)
-   if ( gs_mutexBlockBg.IsLocked() )
-   {
-      wxTrap();
-
-      return;
-   }
-
    // don't allow any calls to c-client while we're in the assert dialog
    // because we might be called from a c-client callback and another call to
    // it will result in a fatal error
-   MLocker lock(gs_mutexBlockBg);
+   MAppCriticalSection cs;
 
    wxApp::OnAssert(file, line, cond, msg);
 }
@@ -692,17 +688,10 @@ wxMApp::OnAssert(const wxChar *file, int line,
 bool
 wxMApp::Yield(bool onlyIfNeeded)
 {
-   if ( gs_mutexBlockBg.IsLocked() )
-   {
-      // background processing already disabled, hopefully it's ok to yield
-      // now...
-      return wxApp::Yield(onlyIfNeeded);
-   }
-
    // don't allow any calls to c-client from inside wxYield() neither as it is
    // implicitly (!) called by wxProgressDialog which is shown from inside some
    // c-client handlers and so calling c-client now would result in a crash
-   MLocker lock(gs_mutexBlockBg);
+   MAppCriticalSection cs;
 
    return wxApp::Yield(onlyIfNeeded);
 }
@@ -728,10 +717,11 @@ wxMApp::OnAbnormalTermination(const wxChar *msgOrig)
 
    if ( s_crashed )
       return;
+
    s_crashed = true;
 
    // no background processing in this function
-   MLocker lock(gs_mutexBlockBg);
+   MAppCriticalSection cs;
 
 
    MAppBase::OnAbnormalTermination();

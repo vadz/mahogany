@@ -226,8 +226,8 @@ public:
       Start critical section inside which background processing should be
       disallowed.
 
-      EnterCritical() is not reentrant, it is an error to call it if
-      AllowBgProcessing() already returns false.
+      EnterCritical() is reentrant and calls to it may be nested but
+      LeaveCritical() must be called exactly the same number of times.
 
       Consider using MAppCriticalSection instead of manually calling
       EnterCritical() and LeaveCritical().
