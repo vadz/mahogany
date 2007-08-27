@@ -84,8 +84,9 @@ private:
    String m_addressHeader;
 
    // these methods use our private ctor
-   friend AddressList *AddressList::Create(const String&, const String&);
-   friend AddressList *AddressList::CreateFromAddress(Profile *profile);
+   friend AddressList *AddressList::Create(const String& address,
+                                           const String& defHost,
+                                           wxFontEncoding enc);
 
    MOBJECT_DEBUG(AddressListCC)
    DECLARE_NO_COPY_CLASS(AddressListCC)
@@ -93,7 +94,9 @@ private:
 
 // wrapper around rfc822_parse_adrlist() c-client function
 extern
-mail_address *ParseAddressList(const String& address, const String& defhost);
+mail_address *ParseAddressList(const String& address,
+                               const String& defhost,
+                               wxFontEncoding enc);
 
 #endif // _ADDRESSCC_H_
 

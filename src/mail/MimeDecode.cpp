@@ -25,6 +25,7 @@
 #include "mail/MimeDecode.h"
 
 #include <wx/fontmap.h>
+#include <wx/tokenzr.h>
 
 // ----------------------------------------------------------------------------
 // local helper functions
@@ -39,6 +40,75 @@ inline unsigned char *UCHAR_CCAST(const char *s)
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// font encoding <-> MIME functions
+// ----------------------------------------------------------------------------
+
+String MIME::GetCharsetForFontEncoding(wxFontEncoding enc)
+{
+   // translate encoding to the charset
+   wxString cs;
+   if ( enc != wxFONTENCODING_SYSTEM && enc != wxFONTENCODING_DEFAULT )
+   {
+      cs = wxFontMapper::GetEncodingName(enc).Upper();
+   }
+
+   return cs;
+}
+
+MIME::Encoding MIME::GetEncodingForFontEncoding(wxFontEncoding enc)
+{
+   // QP should be used for the encodings which mostly overlap with US_ASCII,
+   // Base64 for the others - choose the encoding method
+   switch ( enc )
+   {
+      case wxFONTENCODING_ISO8859_1:
+      case wxFONTENCODING_ISO8859_2:
+      case wxFONTENCODING_ISO8859_3:
+      case wxFONTENCODING_ISO8859_4:
+      case wxFONTENCODING_ISO8859_9:
+      case wxFONTENCODING_ISO8859_10:
+      case wxFONTENCODING_ISO8859_13:
+      case wxFONTENCODING_ISO8859_14:
+      case wxFONTENCODING_ISO8859_15:
+
+      case wxFONTENCODING_CP1250:
+      case wxFONTENCODING_CP1252:
+      case wxFONTENCODING_CP1254:
+      case wxFONTENCODING_CP1257:
+
+      case wxFONTENCODING_UTF7:
+      case wxFONTENCODING_UTF8:
+         return Encoding_QuotedPrintable;
+
+
+      case wxFONTENCODING_ISO8859_5:
+      case wxFONTENCODING_ISO8859_6:
+      case wxFONTENCODING_ISO8859_7:
+      case wxFONTENCODING_ISO8859_8:
+      case wxFONTENCODING_ISO8859_11:
+      case wxFONTENCODING_ISO8859_12:
+
+      case wxFONTENCODING_CP1251:
+      case wxFONTENCODING_CP1253:
+      case wxFONTENCODING_CP1255:
+      case wxFONTENCODING_CP1256:
+
+      case wxFONTENCODING_KOI8:
+         return Encoding_Base64;
+
+      default:
+         FAIL_MSG( _T("unknown encoding") );
+
+      case wxFONTENCODING_SYSTEM:
+         return Encoding_Unknown;
+   }
+}
+
+// ----------------------------------------------------------------------------
+// decoding
+// ----------------------------------------------------------------------------
 
 /*
    See RFC 2047 for the description of the encodings used in the mail headers.
@@ -100,8 +170,8 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          // pass false to prevent asking the user from here: we can be called
          // during non-interactive operations and popping up a dialog for an
          // unknown charset can be inappropriate
-         const wxFontEncoding
-            encodingWord = wxFontMapper::Get()->CharsetToEncoding(csName, false);
+         const wxFontEncoding encodingWord = wxFontMapperBase::Get()->
+                                               CharsetToEncoding(csName, false);
 
          if ( encodingWord == wxFONTENCODING_SYSTEM )
          {
@@ -313,3 +383,250 @@ String MIME::DecodeHeader(const String& in, wxFontEncoding *pEncoding)
    return header;
 }
 
+// ----------------------------------------------------------------------------
+// encoding
+// ----------------------------------------------------------------------------
+
+// returns true if the character must be encoded in a MIME header
+//
+// NB: we suppose that any special characters had been already escaped
+static inline bool NeedsEncodingInHeader(wxUChar c)
+{
+   return iscntrl(c) || c >= 127;
+}
+
+// return true if the string contains any characters which must be encoded
+static bool NeedsEncoding(const String& in)
+{
+   // if input contains "=?", encode it anyhow to avoid generating invalid
+   // encoded words
+   if ( in.find(_T("=?")) == wxString::npos )
+   {
+      // only encode the strings which contain the characters unallowed in RFC
+      // 822 headers
+      wxString::const_iterator p;
+      const wxString::const_iterator end = in.end();
+      for ( p = in.begin(); p != end; ++p )
+      {
+         if ( NeedsEncodingInHeader(*p) )
+            break;
+      }
+
+      if ( p == end )
+      {
+         // string has only valid chars, don't encode
+         return false;
+      }
+   }
+
+   return true;
+}
+
+static String
+EncodeWord(const String& in,
+           wxFontEncoding enc,
+           MIME::Encoding enc2047,
+           const String& csName)
+{
+   if ( !NeedsEncoding(in) )
+      return in;
+
+
+   // encode the word splitting it in the chunks such that they will be no
+   // longer than 75 characters each
+   wxCharBuffer buf(in.mb_str(wxCSConv(enc)));
+   if ( !buf )
+   {
+      // if the header can't be encoded using the given encoding, use UTF-8
+      // which always works
+      buf = in.utf8_str();
+   }
+
+   String out;
+   out.reserve(csName.length() + strlen(buf) + 7 /* for =?...?X?...?= */);
+
+   const char *s = buf;
+   while ( *s )
+   {
+      // if we wrapped, insert a line break
+      if ( !out.empty() )
+         out += "\r\n  ";
+
+      static const size_t RFC2047_MAXWORD_LEN = 75;
+
+      // how many characters may we put in this encoded word?
+      size_t len = 0;
+
+      // take into account the length of "=?charset?...?="
+      int lenRemaining = RFC2047_MAXWORD_LEN - (5 + csName.length());
+
+      // for QP we need to examine all characters
+      if ( enc2047 == MIME::Encoding_QuotedPrintable )
+      {
+         for ( ; s[len]; len++ )
+         {
+            const char c = s[len];
+
+            // normal characters stand for themselves in QP, the encoded ones
+            // take 3 positions (=XX)
+            lenRemaining -= (NeedsEncodingInHeader(c) || strchr(" \t=?", c))
+                              ? 3 : 1;
+
+            if ( lenRemaining <= 0 )
+            {
+               // can't put any more chars into this word
+               break;
+            }
+         }
+      }
+      else // Base64
+      {
+         // we can calculate how many characters we may put into lenRemaining
+         // directly
+         len = (lenRemaining / 4) * 3 - 2;
+
+         // but not more than what we have
+         size_t lenMax = wxStrlen(s);
+         if ( len > lenMax )
+         {
+            len = lenMax;
+         }
+      }
+
+      // do encode this word
+      unsigned char *text = (unsigned char *)s; // cast for cclient
+
+      // length of the encoded text and the text itself
+      unsigned long lenEnc;
+      unsigned char *textEnc;
+
+      if ( enc2047 == MIME::Encoding_QuotedPrintable )
+      {
+            textEnc = rfc822_8bit(text, len, &lenEnc);
+      }
+      else // Encoding_Base64
+      {
+            textEnc = rfc822_binary(text, len, &lenEnc);
+            while ( textEnc[lenEnc - 2] == '\r' && textEnc[lenEnc - 1] == '\n' )
+            {
+               // discard eol which we don't need in the header
+               lenEnc -= 2;
+            }
+      }
+
+      // put into string as we might want to do some more replacements...
+      String encword(wxString::FromAscii(CHAR_CAST(textEnc)
+#if wxCHECK_VERSION(2, 9, 0)
+                                         , lenEnc
+#endif
+                                        ));
+
+      // hack: rfc822_8bit() doesn't encode spaces normally but we must
+      // do it inside the headers
+      //
+      // we also have to encode '?'s in the headers which are not encoded by it
+      if ( enc2047 == MIME::Encoding_QuotedPrintable )
+      {
+         String encword2;
+         encword2.reserve(encword.length());
+
+         bool replaced = false;
+         for ( const wxChar *p = encword.c_str(); *p; p++ )
+         {
+            switch ( *p )
+            {
+               case ' ':
+                  encword2 += _T("=20");
+                  break;
+
+               case '\t':
+                  encword2 += _T("=09");
+                  break;
+
+               case '?':
+                  encword2 += _T("=3F");
+                  break;
+
+               default:
+                  encword2 += *p;
+
+                  // skip assignment to replaced below
+                  continue;
+            }
+
+            replaced = true;
+         }
+
+         if ( replaced )
+         {
+            encword = encword2;
+         }
+      }
+
+      // append this word to the header
+      out << _T("=?") << csName << _T('?') << (char)enc2047 << _T('?')
+          << encword
+          << _T("?=");
+
+      fs_give((void **)&textEnc);
+
+      // skip the already encoded part
+      s += len;
+   }
+
+   return out;
+}
+
+wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
+{
+   if ( !NeedsEncoding(in) )
+      return in.ToAscii();
+
+   // get the encoding in RFC 2047 sense: choose the most reasonable one
+   if ( enc == wxFONTENCODING_SYSTEM )
+      enc = wxLocale::GetSystemEncoding();
+
+   MIME::Encoding enc2047 = MIME::GetEncodingForFontEncoding(enc);
+
+   if ( enc2047 == MIME::Encoding_Unknown )
+   {
+      FAIL_MSG( _T("should have valid MIME encoding") );
+
+      enc2047 = MIME::Encoding_QuotedPrintable;
+   }
+
+   // get the name of the charset to use
+   String csName = MIME::GetCharsetForFontEncoding(enc);
+   if ( csName.empty() )
+   {
+      FAIL_MSG( _T("should have a valid charset name!") );
+
+      csName = _T("UNKNOWN");
+   }
+
+
+   String headerEnc;
+   headerEnc.reserve(2*in.length());
+
+   // for QP we encode each header word separately so that the header remains
+   // readable, but for Base64 it's useless to do this as it's unreadable
+   // anyhow so we just encode everything at once
+   if ( enc2047 == MIME::Encoding_QuotedPrintable )
+   {
+      // encode each word of the header
+      const wxArrayString words(wxStringTokenize(in));
+      const size_t count = words.size();
+      for ( size_t n = 0; n < count; ++n )
+      {
+         headerEnc += EncodeWord(words[n], enc, enc2047, csName);
+         if ( n + 1 < count )
+            headerEnc += ' ';
+      }
+   }
+   else // MIME::Encoding_Base64
+   {
+      headerEnc = EncodeWord(in, enc, enc2047, csName);
+   }
+
+   return headerEnc.ToAscii();
+}

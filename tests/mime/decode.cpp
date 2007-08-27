@@ -50,6 +50,54 @@ unsigned char hex2byte (unsigned char c1,unsigned char c2)
   return ((c1 -= (isdigit (c1) ? '0' : ((c1 <= 'Z') ? 'A' : 'a') - 10)) << 4) +
     (c2 - (isdigit (c2) ? '0' : ((c2 <= 'Z') ? 'A' : 'a') - 10));
 }
+
+/* Convert binary contents to BASE64
+ * Accepts: source
+ *	    length of source
+ *	    pointer to return destination length
+ * Returns: destination as BASE64
+ */
+
+unsigned char *rfc822_binary (void *src,unsigned long srcl,unsigned long *len)
+{
+  unsigned char *ret,*d;
+  unsigned char *s = (unsigned char *) src;
+  char *v = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  unsigned long i = ((srcl + 2) / 3) * 4;
+  *len = i += 2 * ((i / 60) + 1);
+  d = ret = (unsigned char *) fs_get ((size_t) ++i);
+				/* process tuplets */
+  for (i = 0; srcl >= 3; s += 3, srcl -= 3) {
+    *d++ = v[s[0] >> 2];	/* byte 1: high 6 bits (1) */
+				/* byte 2: low 2 bits (1), high 4 bits (2) */
+    *d++ = v[((s[0] << 4) + (s[1] >> 4)) & 0x3f];
+				/* byte 3: low 4 bits (2), high 2 bits (3) */
+    *d++ = v[((s[1] << 2) + (s[2] >> 6)) & 0x3f];
+    *d++ = v[s[2] & 0x3f];	/* byte 4: low 6 bits (3) */
+    if ((++i) == 15) {		/* output 60 characters? */
+      i = 0;			/* restart line break count, insert CRLF */
+      *d++ = '\015'; *d++ = '\012';
+    }
+  }
+  if (srcl) {
+    *d++ = v[s[0] >> 2];	/* byte 1: high 6 bits (1) */
+				/* byte 2: low 2 bits (1), high 4 bits (2) */
+    *d++ = v[((s[0] << 4) + (--srcl ? (s[1] >> 4) : 0)) & 0x3f];
+				/* byte 3: low 4 bits (2), high 2 bits (3) */
+    *d++ = srcl ? v[((s[1] << 2) + (--srcl ? (s[2] >> 6) : 0)) & 0x3f] : '=';
+				/* byte 4: low 6 bits (3) */
+    *d++ = srcl ? v[s[2] & 0x3f] : '=';
+    if (srcl) srcl--;		/* count third character if processed */
+    if ((++i) == 15) {		/* output 60 characters? */
+      i = 0;			/* restart line break count, insert CRLF */
+      *d++ = '\015'; *d++ = '\012';
+    }
+  }
+  *d++ = '\015'; *d++ = '\012';	/* insert final CRLF */
+  *d = '\0';			/* tie off string */
+  if (((unsigned long) (d - ret)) != *len) fatal ("rfc822_binary logic flaw");
+  return ret;			/* return the resulting string */
+}
 /* Convert QUOTED-PRINTABLE contents to 8BIT
  * Accepts: source
  *	    length of source
@@ -223,19 +271,120 @@ void *rfc822_base64 (unsigned char *src,unsigned long srcl,unsigned long *len)
   *d = '\0';			/* NUL terminate just in case */
   return ret;			/* return the string */
 }
+
+/* Convert 8BIT contents to QUOTED-PRINTABLE
+ * Accepts: source
+ *	    length of source
+ * 	    pointer to return destination length
+ * Returns: destination as quoted-printable text
+ */
+
+#define MAXL (size_t) 75	/* 76th position only used by continuation = */
+
+unsigned char *rfc822_8bit (unsigned char *src,unsigned long srcl,
+			    unsigned long *len)
+{
+  unsigned long lp = 0;
+  unsigned char *ret = (unsigned char *)
+    fs_get ((size_t) (3*srcl + 3*(((3*srcl)/MAXL) + 1)));
+  unsigned char *d = ret;
+  char *hex = "0123456789ABCDEF";
+  unsigned char c;
+  while (srcl--) {		/* for each character */
+				/* true line break? */
+    if (((c = *src++) == '\015') && (*src == '\012') && srcl) {
+      *d++ = '\015'; *d++ = *src++; srcl--;
+      lp = 0;			/* reset line count */
+    }
+    else {			/* not a line break */
+				/* quoting required? */
+      if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') ||
+	  ((c == ' ') && (*src == '\015'))) {
+	if ((lp += 3) > MAXL) {	/* yes, would line overflow? */
+	  *d++ = '='; *d++ = '\015'; *d++ = '\012';
+	  lp = 3;		/* set line count */
+	}
+	*d++ = '=';		/* quote character */
+	*d++ = hex[c >> 4];	/* high order 4 bits */
+	*d++ = hex[c & 0xf];	/* low order 4 bits */
+      }
+      else {			/* ordinary character */
+	if ((++lp) > MAXL) {	/* would line overflow? */
+	  *d++ = '='; *d++ = '\015'; *d++ = '\012';
+	  lp = 1;		/* set line count */
+	}
+	*d++ = c;		/* ordinary character */
+      }
+    }
+  }
+  *d = '\0';			/* tie off destination */
+  *len = d - ret;		/* calculate true size */
+				/* try to give some space back */
+  fs_resize ((void **) &ret,(size_t) *len + 1);
+  return ret;
+}
 }
 
 int main()
 {
     wxInitializer init;
 
-    String s;
+    static const struct MimeTestData
+    {
+        const char *encoded;
+        const char *utf8;
+        wxFontEncoding enc;
+    } data[] =
+    {
+        {
+            "=?KOI8-R?B?79TXxdTZIM7BINfP0NLP09k=?=", 
+            "\xd0\x9e\xd1\x82\xd0\xb2\xd0\xb5\xd1\x82\xd1\x8b\x20"
+            "\xd0\xbd\xd0\xb0\x20\xd0\xb2\xd0\xbe\xd0\xbf\xd1\x80"
+            "\xd0\xbe\xd1\x81\xd1\x8b",
+            wxFONTENCODING_KOI8
+        },
+        {
+            "=?KOI8-R?B?99jA1sHOyc4g68/O09TBztTJziBcKENvbnN0YW50a"
+            "W5lIFZ5dXpoYW5pblwp?=",
+            "\xd0\x92\xd1\x8c\xd1\x8e\xd0\xb6\xd0\xb0\xd0\xbd"
+            "\xd0\xb8\xd0\xbd\x20\xd0\x9a\xd0\xbe\xd0\xbd\xd1\x81"
+            "\xd1\x82\xd0\xb0\xd0\xbd\xd1\x82\xd0\xb8\xd0\xbd\x20"
+            "\x5c\x28\x43\x6f\x6e\x73\x74\x61\x6e\x74\x69\x6e\x65"
+            "\x20\x56\x79\x75\x7a\x68\x61\x6e\x69\x6e\x5c\x29",
+            wxFONTENCODING_KOI8
+        },
+        {
+            "Ludovic =?ISO-8859-1?Q?P=E9net?= <ludovic@xxx.com>",
+            "Ludovic P\303\251net <ludovic@xxx.com>",
+            wxFONTENCODING_ISO8859_1
+        },
+        {
+            "Ludovic =?UTF-8?Q?P=C3=A9net?= <ludovic@xxx.com>",
+            "Ludovic P\303\251net <ludovic@xxx.com>",
+            wxFONTENCODING_UTF8
+        },
+    };
 
-    s = MIME::DecodeHeader("=?koi8-r?B?79TXxdTZIM7BINfP0NLP09k=?=");
-    s = MIME::DecodeHeader("=?koi8-r?B?99jA1sHOyc4g68/O09TBztTJziBcKENvbnN0YW50aW5lIFZ5dXpoYW5pblwp?= <vycon@udmnet.ru>");
-    s = MIME::DecodeHeader("Ludovic =?ISO-8859-1?Q?P=E9net?= <ludovic@penet.org>");
-    printf(s.utf8_str());
+    int rc = EXIT_SUCCESS;
+    for ( unsigned n = 0; n < WXSIZEOF(data); ++n )
+    {
+        const MimeTestData& d = data[n];
+        const wxString s = MIME::DecodeHeader(d.encoded);
+        if ( s != wxString::FromUTF8(d.utf8) )
+        {
+            printf("ERROR: decoding #%u: expected \"%s\", got \"%s\"\n",
+                   n, d.utf8, (const char *)s.utf8_str());
+            rc = EXIT_FAILURE;
+        }
 
-    return 0;
+        const wxCharBuffer buf = MIME::EncodeHeader(s, d.enc);
+        if ( strcmp(buf, d.encoded) != 0 )
+        {
+            printf("ERROR: encoding #%u: expected \"%s\", got \"%s\"\n",
+                   n, d.encoded, (const char *)buf);
+        }
+    }
+
+    return rc;
 }
 

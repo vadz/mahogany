@@ -27,15 +27,7 @@
 #endif // USE_PCH
 
 #include "AddressCC.h"
-
-// ----------------------------------------------------------------------------
-// options we use here
-// ----------------------------------------------------------------------------
-
-extern const MOption MP_ADD_DEFAULT_HOSTNAME;
-extern const MOption MP_FROM_ADDRESS;
-extern const MOption MP_HOSTNAME;
-extern const MOption MP_PERSONALNAME;
+#include "mail/MimeDecode.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -249,56 +241,16 @@ AddressList *AddressListCC::Create(const mail_address *adr)
 }
 
 /* static */
-AddressList *AddressList::CreateFromAddress(Profile *profile)
-{
-   // it is a bit difficult for From because we have 2 entries in config to
-   // specify it (for historic reasons mainly, I don't think this is actually
-   // useful) and so we must combine them together
-
-   // set personal name
-   ADDRESS *adr = mail_newaddr();
-   adr->personal = cpystr(wxConvertWX2MB(READ_CONFIG_TEXT(profile, MP_PERSONALNAME)));
-
-   // set mailbox/host
-   String email = READ_CONFIG(profile, MP_FROM_ADDRESS);
-   size_t pos = email.find('@');
-   if ( pos != String::npos )
-   {
-      adr->mailbox = cpystr(email.substr(0, pos).c_str());
-      adr->host = cpystr(email.c_str() + pos + 1);
-   }
-   else // no '@'?
-   {
-      adr->mailbox = cpystr(wxConvertWX2MB(email));
-
-      String host;
-      if ( READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME) )
-      {
-         host = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
-      }
-
-      if ( host.empty() )
-      {
-         // trick c-client into accepting addresses without host names
-         // instead of using a stupid MISSING.WHATEVER instead of the host
-         // part
-         host = _T('@');
-      }
-
-      adr->host = cpystr(wxConvertWX2MB(host));
-   }
-
-   return new AddressListCC(adr);
-}
-
-/* static */
-AddressList *AddressList::Create(const String& address, const String& defhost)
+AddressList *
+AddressList::Create(const String& address,
+                    const String& defhost,
+                    wxFontEncoding enc)
 {
    ADDRESS *adr = NULL;
 
    if ( !address.empty() )
    {
-      adr = ParseAddressList(address, defhost);
+      adr = ParseAddressList(address, defhost, enc);
 
       if ( !adr || adr->error )
       {
@@ -598,20 +550,37 @@ static String RemoveEmptyListParts(const String &original)
    return result;
 }
 
-extern ADDRESS *ParseAddressList(const String& address, const String& defhost)
+extern ADDRESS *
+ParseAddressList(const String& address,
+                 const String& defhost,
+                 wxFontEncoding enc)
 {
    // NB: rfc822_parse_adrlist() modifies the string passed in, copy them!
 
-   char *addressCopy = strdup(wxConvertWX2MB(RemoveEmptyListParts(address)));
+   // encode the header in UTF-8 as this never fails
+   wxCharBuffer addressBuf(RemoveEmptyListParts(address).utf8_str());
 
    // use '@' to trick c-client into accepting addresses without host names
-   char *defhostCopy = strdup(defhost.empty() ? "@" : wxConvertWX2MB(defhost.c_str()));
+   wxCharBuffer defhostBuf;
+   if ( defhost.empty() )
+      defhostBuf = wxCharBuffer("@");
+   else
+      defhostBuf = defhost.ToAscii();
 
    ADDRESS *adr = NULL;
-   rfc822_parse_adrlist(&adr, addressCopy, defhostCopy);
+   rfc822_parse_adrlist(&adr, addressBuf.data(), defhostBuf.data());
 
-   free(defhostCopy);
-   free(addressCopy);
+   // encode the personal part of the header as it can contain non-ASCII
+   // characters
+   for ( ADDRESS *adr2 = adr; adr2; adr2 = adr2->next )
+   {
+      if ( adr2->personal )
+      {
+         String personal = wxString::FromUTF8(adr2->personal);
+         fs_give((void **)&adr2->personal);
+         adr2->personal = cpystr(MIME::EncodeHeader(personal, enc));
+      }
+   }
 
    return adr;
 }

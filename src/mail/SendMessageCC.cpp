@@ -32,6 +32,7 @@
 
 #include "Mversion.h"
 #include "MailFolderCC.h"
+#include "mail/MimeDecode.h"
 
 #include "LogCircle.h"
 
@@ -112,17 +113,6 @@ extern const MPersMsgBox *M_MSGBOX_SEND_OFFLINE;
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
-
-// the encodings defined by RFC 2047
-//
-// NB: don't change the values of the enum elements, EncodeHeaderString()
-//     relies on them being what they are!
-enum MimeEncoding
-{
-   MimeEncoding_Unknown,
-   MimeEncoding_Base64 = 'B',
-   MimeEncoding_QuotedPrintable = 'Q'
-};
 
 // trace mask for message sending/queuing operations
 #define TRACE_SEND   _T("send")
@@ -342,12 +332,7 @@ SendMessageCC::SendMessageCC(Profile *profile,
 
    // set up default value for From (Reply-To is set in InitNew() as it isn't
    // needed for the resent messages)
-   AddressList_obj addrList(AddressList::CreateFromAddress(m_profile));
-   Address *addrFrom = addrList->GetFirst();
-   if ( addrFrom )
-   {
-      m_From = addrFrom->GetAddress();
-   }
+   m_From = Address::GetSenderAddress(m_profile);
 
    // remember the default hostname to use for addresses without host part
    m_DefaultHost = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
@@ -636,55 +621,6 @@ SendMessageCC::GetPassword(String& password) const
 // SendMessageCC encodings
 // ----------------------------------------------------------------------------
 
-static MimeEncoding GetMimeEncodingForFontEncoding(wxFontEncoding enc)
-{
-   // QP should be used for the encodings which mostly overlap with US_ASCII,
-   // Base64 for the others - choose the encoding method
-   switch ( enc )
-   {
-      case wxFONTENCODING_ISO8859_1:
-      case wxFONTENCODING_ISO8859_2:
-      case wxFONTENCODING_ISO8859_3:
-      case wxFONTENCODING_ISO8859_4:
-      case wxFONTENCODING_ISO8859_9:
-      case wxFONTENCODING_ISO8859_10:
-      case wxFONTENCODING_ISO8859_13:
-      case wxFONTENCODING_ISO8859_14:
-      case wxFONTENCODING_ISO8859_15:
-
-      case wxFONTENCODING_CP1250:
-      case wxFONTENCODING_CP1252:
-      case wxFONTENCODING_CP1254:
-      case wxFONTENCODING_CP1257:
-
-      case wxFONTENCODING_UTF7:
-      case wxFONTENCODING_UTF8:
-
-         return MimeEncoding_QuotedPrintable;
-
-      case wxFONTENCODING_ISO8859_5:
-      case wxFONTENCODING_ISO8859_6:
-      case wxFONTENCODING_ISO8859_7:
-      case wxFONTENCODING_ISO8859_8:
-      case wxFONTENCODING_ISO8859_11:
-      case wxFONTENCODING_ISO8859_12:
-
-      case wxFONTENCODING_CP1251:
-      case wxFONTENCODING_CP1253:
-      case wxFONTENCODING_CP1255:
-      case wxFONTENCODING_CP1256:
-
-      case wxFONTENCODING_KOI8:
-         return MimeEncoding_Base64;
-
-      default:
-         FAIL_MSG( _T("unknown encoding") );
-
-      case wxFONTENCODING_SYSTEM:
-         return MimeEncoding_Unknown;
-   }
-}
-
 // Check if text can be sent without encoding it (using QP or Base64): for
 // this it must not contain 8bit chars and must not have too long lines
 static bool NeedsToBeEncoded(const unsigned char *text)
@@ -724,239 +660,17 @@ SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
    m_encHeaders = enc;
 }
 
-// returns true if the character must be encoded in an SMTP [address] header
-static inline bool NeedsEncodingInHeader(unsigned char c)
-{
-   return iscntrl(c) || c >= 127;
-}
-
-String
-SendMessageCC::EncodeHeaderString(const String& header)
-{
-   // if headers are already encoded, don't do anything
-   if ( !m_encodeHeaders )
-      return header;
-
-   // if a header contains "=?", encode it anyhow to avoid generating invalid
-   // encoded words
-   if ( !wxStrstr(header, _T("=?")) )
-   {
-      // only encode the strings which contain the characters unallowed in RFC
-      // 822 headers
-      const unsigned char *p;
-      for ( p = (const unsigned char *)header.c_str(); *p; p++ )
-      {
-         if ( NeedsEncodingInHeader(*p) )
-            break;
-      }
-
-      if ( !*p )
-      {
-         // string has only valid chars, don't encode
-         return header;
-      }
-   }
-
-   // get the encoding in RFC 2047 sense: choose the most reasonable one
-   wxFontEncoding enc = m_encHeaders == wxFONTENCODING_SYSTEM
-                           ? wxLocale::GetSystemEncoding()
-                           : m_encHeaders;
-
-   MimeEncoding enc2047 = GetMimeEncodingForFontEncoding(enc);
-
-   if ( enc2047 == MimeEncoding_Unknown )
-   {
-      FAIL_MSG( _T("should have valid MIME encoding") );
-
-      enc2047 = MimeEncoding_QuotedPrintable;
-   }
-
-   // get the name of the charset to use
-   String csName = EncodingToCharset(enc);
-   if ( csName.empty() )
-   {
-      FAIL_MSG( _T("should have a valid charset name!") );
-
-      csName = _T("UNKNOWN");
-   }
-
-   // the entire encoded header
-   String headerEnc;
-   headerEnc.reserve(csName.length() + 2*header.length() + 16);
-
-   // encode the header splitting it in the chunks such that they will be no
-   // longer than 75 characters each
-   //
-   // FIXME-Unicode: we shouldn't use a global encoding for headers any more,
-   //                we could mix different encoding inside the same header
-   const wxCharBuffer buf(header.mb_str(wxCSConv(enc)));
-   const char *s = buf;
-   while ( *s )
-   {
-      // if this is not the first line, insert a line break
-      if ( !headerEnc.empty() )
-      {
-         headerEnc << _T("\r\n ");
-      }
-
-      static const size_t RFC2047_MAXWORD_LEN = 75;
-
-      // how many characters may we put in this encoded word?
-      size_t len = 0;
-
-      // take into account the length of "=?charset?...?="
-      int lenRemaining = RFC2047_MAXWORD_LEN - (5 + csName.length());
-
-      // for QP we need to examine all characters
-      if ( enc2047 == MimeEncoding_QuotedPrintable )
-      {
-         for ( ; s[len]; len++ )
-         {
-            const char c = s[len];
-
-            // normal characters stand for themselves in QP, the encoded ones
-            // take 3 positions (=XX)
-            lenRemaining -= (NeedsEncodingInHeader(c) || strchr(" \t=?", c))
-                              ? 3 : 1;
-
-            if ( lenRemaining <= 0 )
-            {
-               // can't put any more chars into this word
-               break;
-            }
-         }
-      }
-      else // Base64
-      {
-         // we can calculate how many characters we may put into lenRemaining
-         // directly
-         len = (lenRemaining / 4) * 3 - 2;
-
-         // but not more than what we have
-         size_t lenMax = wxStrlen(s);
-         if ( len > lenMax )
-         {
-            len = lenMax;
-         }
-      }
-
-      // do encode this word
-      unsigned char *text = (unsigned char *)s; // cast for cclient
-
-      // length of the encoded text and the text itself
-      unsigned long lenEnc;
-      unsigned char *textEnc;
-
-      if ( enc2047 == MimeEncoding_QuotedPrintable )
-      {
-            textEnc = rfc822_8bit(text, len, &lenEnc);
-      }
-      else // MimeEncoding_Base64
-      {
-            textEnc = rfc822_binary(text, len, &lenEnc);
-            while ( textEnc[lenEnc - 2] == '\r' && textEnc[lenEnc - 1] == '\n' )
-            {
-               // discard eol which we don't need in the header
-               lenEnc -= 2;
-            }
-      }
-
-      // put into string as we might want to do some more replacements...
-      String encword(wxString::FromAscii(CHAR_CAST(textEnc)
-#if wxCHECK_VERSION(2, 9, 0)
-                                         , lenEnc
-#endif
-                                        ));
-
-      // hack: rfc822_8bit() doesn't encode spaces normally but we must
-      // do it inside the headers
-      //
-      // we also have to encode '?'s in the headers which are not encoded by it
-      if ( enc2047 == MimeEncoding_QuotedPrintable )
-      {
-         String encword2;
-         encword2.reserve(encword.length());
-
-         bool replaced = false;
-         for ( const wxChar *p = encword.c_str(); *p; p++ )
-         {
-            switch ( *p )
-            {
-               case ' ':
-                  encword2 += _T("=20");
-                  break;
-
-               case '\t':
-                  encword2 += _T("=09");
-                  break;
-
-               case '?':
-                  encword2 += _T("=3F");
-                  break;
-
-               default:
-                  encword2 += *p;
-
-                  // skip assignment to replaced below
-                  continue;
-            }
-
-            replaced = true;
-         }
-
-         if ( replaced )
-         {
-            encword = encword2;
-         }
-      }
-
-      // append this word to the header
-      headerEnc << _T("=?") << csName << _T('?') << (char)enc2047 << _T('?')
-                << encword
-                << _T("?=");
-
-      fs_give((void **)&textEnc);
-
-      // skip the already encoded part
-      s += len;
-   }
-
-   return headerEnc;
-}
-
-// unlike EncodeHeaderString(), we should only encode the personal name part of the
-// address headers
 void
-SendMessageCC::EncodeAddress(struct mail_address *adr)
-{
-   if ( adr->personal )
-   {
-      char *tmp = adr->personal;
-      adr->personal = cpystr(wxConvertWX2MB(EncodeHeaderString(wxConvertMB2WX(tmp))));
-
-      fs_give((void **)&tmp);
-   }
-}
-
-void
-SendMessageCC::EncodeAddressList(struct mail_address *adr)
-{
-   while ( adr )
-   {
-      EncodeAddress(adr);
-
-      adr = adr->next;
-   }
-}
-
-void
-SendMessageCC::SetSubject(const String &subject)
+SendMessageCC::SetSubject(const String& subject)
 {
    if(m_Envelope->subject)
       fs_give((void **)&m_Envelope->subject);
 
-   String subj = EncodeHeaderString(subject);
-   m_Envelope->subject = cpystr(wxConvertWX2MB(subj.c_str()));
+   // if headers are already encoded, don't do anything, they must be already
+   // in ASCII
+   wxCharBuffer buf(m_encodeHeaders ? MIME::EncodeHeader(subject, m_encHeaders)
+                                    : subject.ToAscii());
+   m_Envelope->subject = cpystr(buf);
 }
 
 void
@@ -1013,7 +727,7 @@ SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
    }
 
    // parse into ADDRESS struct
-   *pAdr = ParseAddressList(address, m_DefaultHost);
+   *pAdr = ParseAddressList(address, m_DefaultHost, m_encHeaders);
 
    // finally filter out any invalid addressees
    CheckAddressFieldForErrors(*pAdr);
@@ -1042,8 +756,6 @@ void SendMessageCC::CheckAddressFieldForErrors(ADDRESS *adrStart)
 
       adr = adrNext;
    }
-
-   EncodeAddressList(adrStart);
 }
 
 void
@@ -1119,19 +831,6 @@ SendMessageCC::SetFcc(const String& fcc)
    }
 
    return true;
-}
-
-String
-SendMessageCC::EncodingToCharset(wxFontEncoding enc)
-{
-   // translate encoding to the charset
-   wxString cs;
-   if ( enc != wxFONTENCODING_SYSTEM && enc != wxFONTENCODING_DEFAULT )
-   {
-      cs = wxFontMapper::GetEncodingName(enc).Upper();
-   }
-
-   return cs;
 }
 
 // ----------------------------------------------------------------------------
@@ -1507,12 +1206,12 @@ SendMessageCC::AddPart(MimeType::Primary type,
          {
             // some encodings should be encoded in QP as they typically contain
             // only a small number of non printable characters while others
-            // should be incoded in Base64 as almost all characters used in them
+            // should be encoded in Base64 as almost all characters used in them
             // are outside basic Ascii set
-            switch ( GetMimeEncodingForFontEncoding(enc) )
+            switch ( MIME::GetEncodingForFontEncoding(enc) )
             {
-               case MimeEncoding_Unknown:
-               case MimeEncoding_QuotedPrintable:
+               case MIME::Encoding_Unknown:
+               case MIME::Encoding_QuotedPrintable:
                   // automatically translated to QP by c-client
                   bdy->encoding = ENC8BIT;
                   break;
@@ -1521,7 +1220,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
                   FAIL_MSG( _T("unknown MIME encoding") );
                   // fall through
 
-               case MimeEncoding_Base64:
+               case MIME::Encoding_Base64:
                   if ( m_Protocol == Prot_SMTP &&
                         READ_CONFIG_BOOL(m_profile, MP_SMTP_USE_8BIT) )
                   {
@@ -1594,7 +1293,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       }
       else // 8bit message
       {
-         cs = EncodingToCharset(enc);
+         cs = MIME::GetCharsetForFontEncoding(enc);
          if ( cs.empty() )
          {
             cs = m_CharSet;

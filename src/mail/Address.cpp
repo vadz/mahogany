@@ -40,11 +40,13 @@ WX_DECLARE_STRING_HASH_MAP(wxArrayString, AddressHash);
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_ADD_DEFAULT_HOSTNAME;
 extern const MOption MP_EQUIV_ADDRESSES;
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_FROM_ADDRESS;
 extern const MOption MP_HOSTNAME;
 extern const MOption MP_LIST_ADDRESSES;
+extern const MOption MP_PERSONALNAME;
 
 // ============================================================================
 // implementation
@@ -383,6 +385,29 @@ Address::IsInList(const wxArrayString& addresses,
    }
 
    return false;
+}
+
+/* static */
+String Address::GetSenderAddress(Profile *profile)
+{
+   String email(READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS));
+
+   // check that the email address has the domain part
+   if ( email.find('@') == String::npos )
+   {
+      String host;
+      if ( READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME) )
+      {
+         host = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
+      }
+
+      // append '@' even if host is empty: this tricks c-client into accepting
+      // addresses without host names instead of using a stupid
+      // MISSING.WHATEVER instead of the host part
+      email << '@' << host;
+   }
+
+   return BuildFullForm(READ_CONFIG(profile, MP_PERSONALNAME), email);
 }
 
 // ----------------------------------------------------------------------------

@@ -148,15 +148,6 @@ protected:
    /// translate the (wxWin) encoding to (MIME) charset
    String EncodingToCharset(wxFontEncoding enc);
 
-   /// encode the string using m_encHeaders encoding
-   String EncodeHeaderString(const String& header);
-
-   /// encode the address field using m_encHeaders
-   void EncodeAddress(struct mail_address *adr);
-
-   /// encode all entries in the list of addresses
-   void EncodeAddressList(struct mail_address *adr);
-
    /// write the message using the specified writer function
    bool WriteMessage(soutr_t writer, void *where);
 

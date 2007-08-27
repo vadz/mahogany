@@ -4932,19 +4932,13 @@ wxComposeView::SetFrom(const String& from)
       m_txtFrom->SetValue(from);
 }
 
-/// sets From field using the current profile
+/// sets From field using the default value for it from the current profile
 void
 wxComposeView::SetDefaultFrom()
 {
    if ( m_txtFrom )
    {
-      AddressList_obj addrList(AddressList::CreateFromAddress(m_Profile));
-
-      Address *addr = addrList->GetFirst();
-      if ( addr )
-      {
-         SetFrom(addr->GetAddress());
-      }
+      SetFrom(Address::GetSenderAddress(m_Profile));
    }
 }
 

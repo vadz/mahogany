@@ -63,6 +63,7 @@ extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_IMAPHOST;
 extern const MOption MP_LIST_ADDRESSES;
 extern const MOption MP_NNTPHOST;
+extern const MOption MP_PERSONALNAME;
 extern const MOption MP_POPHOST;
 extern const MOption MP_REPLY_COLLAPSE_PREFIX;
 extern const MOption MP_REPLY_PREFIX;
@@ -1082,12 +1083,11 @@ MailFolder::ReplyMessage(Message *msg,
             if ( READ_CONFIG(profile, MP_SET_REPLY_STD_NAME) )
             {
                // use the standard personal name
-               AddressList_obj addrOwn(AddressList::CreateFromAddress(profile));
-               addr = addrOwn->GetFirst();
-               if ( addr )
-               {
-                  from = Address::BuildFullForm(addr->GetName(), from);
-               }
+               from = Address::BuildFullForm
+                      (
+                        READ_CONFIG(profile, MP_PERSONALNAME),
+                        addr->GetEMail()
+                      );
             }
          }
 

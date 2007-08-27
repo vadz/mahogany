@@ -15,6 +15,8 @@
 
 #include "MObject.h"
 
+#include <wx/fontenc.h>
+
 class Profile;
 
 // see near definition of this symbol in src/modules/PalmOS.cpp
@@ -94,6 +96,14 @@ public:
    static String BuildFullForm(const String& personal, const String& address);
 
    /**
+      Returns the sender address from the given profile.
+
+      The address is constructed using the personal name, host name and default
+      domain (if necessary) options.
+    */
+   static String GetSenderAddress(Profile *profile);
+
+   /**
       Returns true if the address matches any of the entries in the array.
 
       Array entries may contain wildcards (? and *).
@@ -136,12 +146,17 @@ private:
 class AddressList : public MObjectRC
 {
 public:
-   /// create the address list from string (may be empty)
-   static AddressList *Create(const String& address,
-                              const String& defhost = wxEmptyString);
+   /**
+      Create the address list from string.
 
-   /// create the "From" address using settings in this profile
-   static AddressList *CreateFromAddress(Profile *profile);
+      @param address the string with the address
+      @param defhost the default host name to use for unqualified addresses
+      @param enc the encoding to use for non-ASCII characters if possible (if
+                 not, UTF-8 is used, as with MIME::EncodeHeader())
+    */
+   static AddressList *Create(const String& address,
+                              const String& defhost = wxEmptyString,
+                              wxFontEncoding enc = wxFONTENCODING_SYSTEM);
 
    /// get the first address in the list, return NULL if list is empty
    virtual Address *GetFirst() const = 0;
