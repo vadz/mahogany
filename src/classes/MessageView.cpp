@@ -52,8 +52,6 @@
 #include "ViewFilter.h"
 
 #include "mail/MimeDecode.h"
-#include "MailFolderCC.h" // needed to properly include MessageCC.h
-#include "MessageCC.h"
 #include "MimePartCC.h"
 #include "MimePartVirtual.h"
 #include "FolderView.h"
