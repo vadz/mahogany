@@ -2800,7 +2800,9 @@ FilterRuleApply::CreateProgressDialog()
                      m_msgs.GetCount(),
                      m_parent->m_MailFolder->GetName().c_str()
                   ),
-                  _T("\n\n\n"),  // must be tall enough for 4 lines
+                  // make the message wide enough to show filtering messages
+                  // and tall enough for 4 lines that we use for them
+                  "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n\n\n",
                   2*m_msgs.GetCount(),
                   frame
                );
