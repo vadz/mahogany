@@ -176,9 +176,16 @@ private:
    /// get the envelope information only (faster than GetBody!)
    void GetEnvelope();
 
-   /// get the envelope information only if necessary
-   void CheckEnvelope() const
-      { if ( !m_Envelope ) ((MessageCC *)this)->GetEnvelope(); }
+   /// get the envelope information and return true if ok, false if we failed
+   /// (this can happen, notably in case of network problems)
+   bool CheckEnvelope() const
+   {
+      if ( m_Envelope )
+         return true;
+
+      const_cast<MessageCC*>(this)->GetEnvelope();
+      return m_Envelope != NULL;
+   }
 
    /// get the cache element for this message
    MESSAGECACHE *GetCacheElement() const;

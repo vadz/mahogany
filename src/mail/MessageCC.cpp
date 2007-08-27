@@ -169,9 +169,8 @@ MessageCC::~MessageCC()
 
 String MessageCC::Subject(void) const
 {
-   CheckEnvelope();
-
-   CHECK( m_Envelope, String(), _T("should have envelope in Subject()") );
+   if ( !CheckEnvelope() )
+      return String();
 
    return MIME::DecodeHeader(wxString::From8BitData(m_Envelope->subject));
 }
@@ -184,9 +183,8 @@ MessageCC::GetDate() const
 
 String MessageCC::Date(void) const
 {
-   CheckEnvelope();
-
-   CHECK( m_Envelope, String(), _T("should have envelope in Date()") );
+   if ( !CheckEnvelope() )
+      return String();
 
    return wxString::FromAscii((char *)m_Envelope->date);
 }
@@ -199,9 +197,8 @@ String MessageCC::From(void) const
 String
 MessageCC::GetId(void) const
 {
-   CheckEnvelope();
-
-   CHECK( m_Envelope, String(), _T("should have envelope in GetId()") );
+   if ( !CheckEnvelope() )
+      return String();
 
    return wxString::FromAscii(m_Envelope->message_id);
 }
@@ -209,7 +206,8 @@ MessageCC::GetId(void) const
 String
 MessageCC::GetNewsgroups(void) const
 {
-   CheckEnvelope();
+   if ( !CheckEnvelope() )
+      return String();
 
    CHECK( m_Envelope, String(), _T("should have envelope in GetNewsgroups()") );
 
@@ -219,9 +217,8 @@ MessageCC::GetNewsgroups(void) const
 String
 MessageCC::GetReferences(void) const
 {
-   CheckEnvelope();
-
-   CHECK( m_Envelope, String(), _T("should have envelope in GetReferences()") );
+   if ( !CheckEnvelope() )
+      return String();
 
    return wxString::FromAscii(m_Envelope->references);
 }
@@ -229,9 +226,8 @@ MessageCC::GetReferences(void) const
 String
 MessageCC::GetInReplyTo(void) const
 {
-   CheckEnvelope();
-
-   CHECK( m_Envelope, String(), _T("should have envelope in GetInReplyTo()") );
+   if ( !CheckEnvelope() )
+      return String();
 
    return wxString::FromAscii(m_Envelope->in_reply_to);
 }
@@ -379,8 +375,8 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 ADDRESS *
 MessageCC::GetAddressStruct(MessageAddressType type) const
 {
-   CheckEnvelope();
-   CHECK( m_Envelope, NULL, _T("no envelope in GetAddressStruct()") );
+   if ( !CheckEnvelope() )
+      return NULL;
 
    ADDRESS *addr;
 
