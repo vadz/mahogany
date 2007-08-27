@@ -5809,6 +5809,9 @@ void *mahogany_block_notify(int reason, void *data)
 
 void mahogany_read_progress(GETS_DATA * /* md */, unsigned long count)
 {
+   // forbid any other calls to c-client while we're inside it
+   MAppCriticalSection cs;
+
    if ( gs_readProgressInfo )
       gs_readProgressInfo->OnProgress(count);
 }
