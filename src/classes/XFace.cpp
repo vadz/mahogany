@@ -111,7 +111,7 @@ XFace::CreateFromXpm(const char *xpmdata)
       if(zero == 0 || one == 0)
       {
          strncpy(buffer,token+4,8);
-         tstr = wxConvertMB2WX(buffer);
+         tstr = wxString::FromAscii(buffer);
          strutil_tolower(tstr);
 
          if(tstr == _T("#000000") || tstr == _T("gray0"))
@@ -145,7 +145,7 @@ XFace::CreateFromXpm(const char *xpmdata)
          }
          value = value ^ 0xffff;
          sprintf(buffer,"0x%04lX", value);
-         dataString += wxConvertMB2WX(buffer);
+         dataString += wxString::FromAscii(buffer);
          dataString += _T(',');
       }
       dataString += _T('\n');
@@ -515,7 +515,7 @@ String
 XFace::GetHeaderLine(void) const
 {
    if(xface)
-      return wxConvertMB2WX(xface);
+      return wxString::FromAscii(xface);
    else
       return wxEmptyString;
 }

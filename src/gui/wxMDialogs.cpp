@@ -559,7 +559,7 @@ MDialog_SystemErrorMessage(const wxChar *message,
       msg;
 
    msg = String(message) + _("\nSystem error: ")
-      + wxConvertMB2WX(strerror(errno));
+      + wxSafeConvertMB2WX(strerror(errno));
 
    MDialog_ErrorMessage(msg.c_str(), parent, wxString(M_TITLE_PREFIX)+title, modal);
 }

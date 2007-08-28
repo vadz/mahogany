@@ -93,12 +93,12 @@ extern "C" {
    SSL_DEF2(void, name, args, params, (void))
 
 #define SSL_LOOKUP(name) \
-      stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(wxConvertMB2WX(#name)); \
+      stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(#name); \
       if ( !stub_##name ) \
          goto error
 
 #define CRYPTO_LOOKUP(name) \
-      stub_##name = (name##_TYPE) gs_dllCrypto.GetSymbol(wxConvertMB2WX(#name)); \
+      stub_##name = (name##_TYPE) gs_dllCrypto.GetSymbol(#name); \
       if ( !stub_##name ) \
          goto error
 

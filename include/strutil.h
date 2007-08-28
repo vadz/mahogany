@@ -128,16 +128,6 @@ String strutil_ultoa(unsigned long i);
 */
 char * strutil_strdup(const char *in);
 
-/**
-   This takes the string and splits it into tokens delimited by the
-   given delimiters, by using the strsep() function. The tokens are
-   returned as an STL list.
-   @param string     pointer to the character array holding the string
-   @param delim          character array holding the delimiters
-   @param tlist          reference to an STL String list to append the tokens to
-  */
-void strutil_tokenise(wxChar *string, const wxChar *delim, kbStringList &tlist);
-
 /** Find a next URL in the string.
 
     Note: this is implemented in matchurl.cpp, not strutil.cpp

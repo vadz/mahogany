@@ -458,7 +458,7 @@ void SendMessageCC::InitResent(const Message *message)
       hdr += *p;
    }
 
-   m_Envelope->remail = cpystr(wxConvertWX2MB(hdr.c_str()));
+   m_Envelope->remail = cpystr(hdr.ToAscii());
 
    // now copy the body: note that we have to use ENC7BIT here to prevent
    // c-client from (re)encoding the body
@@ -468,7 +468,7 @@ void SendMessageCC::InitResent(const Message *message)
 
    // FIXME: we potentially copy a lot of data here!
    String text = message->FetchText();
-   m_Body->contents.text.data = (unsigned char *)cpystr(wxConvertWX2MB(text.c_str()));
+   m_Body->contents.text.data = (unsigned char *)cpystr(text.To8BitData());
    m_Body->contents.text.size = text.length();
 }
 
@@ -785,10 +785,10 @@ SendMessageCC::SetNewsgroups(const String &groups)
    //            it separately if necessary
    ASSERT_MSG( m_Protocol == Prot_NNTP, _T("can't post and send message") );
 
-   if(groups.Length())
+   if ( !groups.empty() )
    {
       ASSERT(m_Envelope->newsgroups == NIL);
-      m_Envelope->newsgroups = strdup(wxConvertWX2MB(groups));
+      m_Envelope->newsgroups = cpystr(groups.ToAscii());
    }
 
 }
@@ -992,7 +992,8 @@ SendMessageCC::Build(bool forStorage)
    // is not a FQDN so don't do it in this case
    if ( m_DefaultHost.find('.') != String::npos )
    {
-      m_Envelope->message_id = cpystr(wxConvertWX2MB(BuildMessageId(wxConvertWX2MB(m_DefaultHost))));
+      m_Envelope->message_id = cpystr(
+            BuildMessageId(m_DefaultHost.ToAscii()).ToAscii());
    }
 
    // don't add any more headers to the message being resent
@@ -1058,13 +1059,14 @@ SendMessageCC::Build(bool forStorage)
          i != m_extraHeaders.end();
          ++i, ++h )
    {
-      m_headerNames[h] = strutil_strdup(wxConvertWX2MB(i->m_name));
-      if ( wxStricmp(wxConvertMB2WX(m_headerNames[h]), _T("Reply-To")) == 0 )
+      const wxWX2MBbuf name(i->m_name.ToAscii());
+      if ( wxStricmp(name, _T("Reply-To")) == 0 )
          replyToSet = true;
-      else if ( wxStricmp(wxConvertMB2WX(m_headerNames[h]), _T("X-Mailer")) == 0 )
+      else if ( wxStricmp(name, _T("X-Mailer")) == 0 )
          xmailerSet = true;
 
-      m_headerValues[h] = strutil_strdup(wxConvertWX2MB(i->m_value));
+      m_headerNames[h] = strutil_strdup(name);
+      m_headerValues[h] = strutil_strdup(i->m_value.To8BitData());
    }
 
    // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
@@ -1084,7 +1086,7 @@ SendMessageCC::Build(bool forStorage)
 #else // Windows
       version << _T(", running under ") << wxGetOsDescription();
 #endif // Unix/Windows
-      m_headerValues[h++] = strutil_strdup(wxConvertWX2MB(version));
+      m_headerValues[h++] = strutil_strdup(version.To8BitData());
    }
 
    // set Reply-To if it hadn't been set by the user as a custom header
@@ -1095,7 +1097,7 @@ SendMessageCC::Build(bool forStorage)
       if ( !m_ReplyTo.empty() )
       {
          m_headerNames[h] = strutil_strdup("Reply-To");
-         m_headerValues[h++] = strutil_strdup(wxConvertWX2MB(m_ReplyTo));
+         m_headerValues[h++] = strutil_strdup(m_ReplyTo.To8BitData());
       }
    }
 
@@ -1107,7 +1109,7 @@ SendMessageCC::Build(bool forStorage)
       if ( xface.CreateFromFile(m_XFaceFile) )
       {
          m_headerNames[h] = strutil_strdup("X-Face");
-         m_headerValues[h] = strutil_strdup(wxConvertWX2MB(xface.GetHeaderLine()));
+         m_headerValues[h] = strutil_strdup(xface.GetHeaderLine().ToAscii());
          if(strlen(m_headerValues[h]))  // paranoid, I know.
          {
             ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', _T("String should have been DOSified") );
@@ -1274,8 +1276,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
             hasCharset = true;
          }
 
-         par->attribute = strdup(wxConvertWX2MB(name));
-         par->value     = strdup(wxConvertWX2MB(i->value));
+         par->attribute = strdup(name.To8BitData());
+         par->value     = strdup(i->value.To8BitData());
          par->next      = lastpar;
          lastpar = par;
       }
@@ -1309,14 +1311,14 @@ SendMessageCC::AddPart(MimeType::Primary type,
       {
          par = mail_newbody_parameter();
          par->attribute = strdup("CHARSET");
-         par->value     = strdup(wxConvertWX2MB(cs));
+         par->value     = strdup(cs.ToAscii());
          par->next      = lastpar;
          lastpar = par;
       }
    }
 
    bdy->parameter = lastpar;
-   bdy->disposition.type = strdup(wxConvertWX2MB(disposition));
+   bdy->disposition.type = strdup(disposition.ToAscii());
    if ( dlist )
    {
       PARAMETER *lastpar = NULL,
@@ -1326,8 +1328,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
       for ( i = dlist->begin(); i != dlist->end(); i++ )
       {
          par = mail_newbody_parameter();
-         par->attribute = strdup(wxConvertWX2MB(i->name));
-         par->value     = strdup(wxConvertWX2MB(i->value));
+         par->attribute = strdup(i->name.To8BitData());
+         par->value     = strdup(i->value.To8BitData());
          par->next      = NULL;
          if(lastpar)
             lastpar->next = par;
@@ -1706,13 +1708,13 @@ SendMessageCC::Send(int flags)
       {
          case Prot_SMTP:
             success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
-            reply = wxConvertMB2WX(stream->reply);
+            reply = wxString::From8BitData(stream->reply);
             smtp_close (stream);
             break;
 
          case Prot_NNTP:
             success = nntp_mail (stream,m_Envelope,m_Body) != 0;
-            reply = wxConvertMB2WX(stream->reply);
+            reply = wxString::From8BitData(stream->reply);
             nntp_close (stream);
             break;
 
@@ -1886,7 +1888,7 @@ static long write_stream_output(void *stream, char *string)
 static long write_str_output(void *stream, char *string)
 {
    String *o = (String *)stream;
-   *o << wxConvertMB2WX(string);
+   *o << string;
    return 1;
 }
 

@@ -228,7 +228,7 @@ MFPool::Add(MFDriver *driver,
 {
    CHECK_RET( driver, _T("MFPool::Add(): NULL driver") );
 
-   const String driverName = wxConvertMB2WX(driver->GetName());
+   const String driverName = driver->GetName();
 
    MFClassPool *pool = MFClassPool::Find(driverName);
    if ( !pool )
@@ -257,7 +257,7 @@ MFPool::Find(MFDriver *driver,
 {
    CHECK( driver, NULL, _T("MFPool::Find(): NULL driver") );
 
-   MFClassPool *pool = MFClassPool::Find(wxConvertMB2WX(driver->GetName()));
+   MFClassPool *pool = MFClassPool::Find(driver->GetName());
    if ( !pool )
    {
       // no cached folders of this class at all

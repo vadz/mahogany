@@ -43,12 +43,12 @@ MimeType::MimeType(Primary primary, const String& subtype)
 
 MimeType& MimeType::Assign(const String& mimetype)
 {
-   String type = mimetype.BeforeFirst('/').Upper();
+   const wxCharBuffer type(mimetype.BeforeFirst('/').Upper().ToAscii());
 
    m_primary = INVALID;
    for ( size_t n = 0; body_types[n]; n++ )
    {
-      if ( type == wxConvertMB2WX(body_types[n]) )
+      if ( strcmp(type, body_types[n]) == 0 )
       {
          m_primary = (MimeType::Primary)n;
 
@@ -70,7 +70,7 @@ String MimeType::GetType() const
    ASSERT_MSG( IsOk(), _T("using uninitialized MimeType") );
 
    // body_types is defined in c-client/rfc822.c
-   return wxConvertMB2WX(body_types[m_primary]);
+   return wxString::FromAscii(body_types[m_primary]);
 }
 
 // ----------------------------------------------------------------------------

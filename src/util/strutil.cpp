@@ -241,20 +241,6 @@ strutil_strsep(char **stringp, const char *delim)
 #endif // HAVE_STRSEP/!HAVE_STRSEP
 }
 
-void
-strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
-{
-   char *found;
-
-   for(;;)
-   {
-      found = strutil_strsep(&string, delim);
-      if(! found || ! *found)
-         break;
-      tlist.push_back(new String(wxConvertMB2WX(found)));
-   }
-}
-
 String
 strutil_extract_formatspec(const wxChar *format)
 {
@@ -460,7 +446,7 @@ strutil_expandpath(const String &ipath)
                break;
          } while(entry);
          if(entry)
-            path << wxConvertMB2WX(entry->pw_dir);
+            path << wxSafeConvertMB2WX(entry->pw_dir);
          else
             path << DIR_SEPARATOR << _T("home") << DIR_SEPARATOR << user; // improvise!
          path << DIR_SEPARATOR
@@ -784,9 +770,9 @@ strutil_encrypt_tf(const String &original)
 {
    if ( setup_twofish() )
    {
-      CryptData input(wxConvertWX2MB(original));
+      CryptData input(original.utf8_str());
       CryptData output;
-      int rc = TwoFishCrypt(1, 128, wxConvertWX2MB(gs_GlobalPassword), &input ,&output);
+      int rc = TwoFishCrypt(1, 128, gs_GlobalPassword.utf8_str(), &input ,&output);
       if(rc)
       {
          String tmp = output.ToHex();
@@ -819,7 +805,7 @@ strutil_decrypt_tf(const String &original)
    CryptData input;
    input.FromHex(original.c_str()+1); // skip initial '-'
    CryptData output;
-   int rc = TwoFishCrypt(0, 128, wxConvertWX2MB(gs_GlobalPassword), &input,&output);
+   int rc = TwoFishCrypt(0, 128, gs_GlobalPassword.utf8_str(), &input,&output);
    if(rc)
    {
       return output.data;

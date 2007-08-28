@@ -987,7 +987,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
    domain.Printf(_T("%d.%d.%d.%d.%s"), d, c, b, a, rblDomain.c_str() );
 
    res_init();
-   len = res_query( wxConvertWX2MB(domain.c_str()), C_IN, T_A,
+   len = res_query( domain.ToAscii(), C_IN, T_A,
                     (unsigned char *)answerBuffer, PACKETSZ );
 
    if ( len != -1 )
@@ -997,7 +997,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
          delete [] answerBuffer;
          answerBuffer = new char [ len ];
          // and again:
-         len = res_query( wxConvertWX2MB(domain.c_str()), C_IN, T_A,
+         len = res_query( domain.ToAscii(), C_IN, T_A,
                           (unsigned char *) answerBuffer, len );
       }
    }

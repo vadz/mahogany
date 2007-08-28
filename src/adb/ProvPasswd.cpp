@@ -317,12 +317,12 @@ void PasswdEntryGroup::ReadPasswdDb()
    struct passwd *pwd;
    while ( (pwd = getpwent()) != NULL )
    {
-      size_t index = m_names.Add(wxConvertMB2WX(pwd->pw_name));
+      size_t index = m_names.Add(wxSafeConvertMB2WX(pwd->pw_name));
 
       // at least under Linux gecos fields of the password database often have
       // trailing commas to indicate missing fields but we don't want to use
       // them as part of "real name"
-      wxString gecos(wxConvertMB2WX(pwd->pw_gecos));
+      wxString gecos(wxSafeConvertMB2WX(pwd->pw_gecos));
       gecos.EndsWith(",,,", &gecos);
 
       m_gecos.Insert(gecos, index);

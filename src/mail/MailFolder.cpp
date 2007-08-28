@@ -147,7 +147,7 @@ static MFDriver *GetFolderDriver(const MFolder *folder)
    const String kind = folder->GetClass();
 
    // find the creation function for this kind of folders
-   MFDriver *driver = MFDriver::Get(wxConvertWX2MB(kind));
+   MFDriver *driver = MFDriver::Get(kind.ToAscii());
    if ( !driver )
    {
       ERRORMESSAGE((_("Unknown folder kind '%s'"), kind.c_str()));
@@ -1275,7 +1275,7 @@ MailFolder::SaveMessageAsMBOX(const String& filename,
       // time stamp
       time_t t;
       time(&t);
-      fromLine += wxConvertMB2WX(ctime(&t));
+      fromLine += ctime(&t);
 
       ok = out.Write(fromLine);
 

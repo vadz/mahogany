@@ -280,23 +280,31 @@ extern "C"
 #endif
 };
 
-/// trivial wrappers around mail_open() which wants a non const "char *" (ugh)
+// trivial wrappers around mail_open() and mail_create() which want non
+// const "char *" (ugh)
+
+// this function accepts either "const char *" (in ANSI build) or wxCharBuffer
+// (in Unicode) allowing us to at least avoid having to write horrors like
+// "(char *)(const char *)s.ToAscii()"
+static inline char *CONST_CCAST(const char *p)
+{
+   return const_cast<char *>(p);
+}
+
 static inline
-MAILSTREAM *MailOpen(MAILSTREAM *stream, const char *mailbox, long options = 0)
+MAILSTREAM *
+MailOpen(MAILSTREAM *stream, const String& mailbox, long options = 0)
 {
    if ( mm_show_debug )
       options |= OP_DEBUG;
 
-   return mail_open(stream, (char *)mailbox, options);
+   return mail_open(stream, CONST_CCAST(mailbox.ToAscii()), options);
 }
 
-// we want to specify the stream as the first argument as c-client does so we
-// can't use just one function with default NIL parameter for the stream but
-// instead we have this second version for the most common case
 static inline
-MAILSTREAM *MailOpen(const char *mailbox, long options = 0)
+long MailCreate(MAILSTREAM *stream, const String& mailbox)
 {
-   return MailOpen(NIL, mailbox, options);
+   return mail_create(stream, CONST_CCAST(mailbox.ToAscii()));
 }
 
 // ============================================================================
@@ -895,7 +903,7 @@ public:
 class MMStatusRedirector
 {
 public:
-   MMStatusRedirector(const String& mailbox, MAILSTATUS *mailstatus)
+   MMStatusRedirector(const char *mailbox, MAILSTATUS *mailstatus)
    {
       ms_mailstatus = mailstatus;
       memset(ms_mailstatus, 0, sizeof(*ms_mailstatus));
@@ -929,7 +937,7 @@ private:
    // which can be compared with another NETMBX later
    //
    // returns false if we failed to parse the mailbox spec
-   static bool CanonicalizeMailbox(const wxChar *mailbox,
+   static bool CanonicalizeMailbox(const char *mailbox,
                                    NETMBX *mbx,
                                    String *filename)
    {
@@ -963,7 +971,7 @@ private:
       //     name already is
       String filename;
       NETMBX mbx;
-      if ( !CanonicalizeMailbox(wxConvertMB2WX(name), &mbx, &filename) )
+      if ( !CanonicalizeMailbox(wxString::FromAscii(name), &mbx, &filename) )
       {
          FAIL_MSG( _T("c-client failed to parse its own spec?") );
       }
@@ -1674,7 +1682,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
                  imapspec.c_str());
 
       CCErrorDisabler noErrs;
-      stream = MailOpen(wxConvertWX2MB(imapspec));
+      stream = MailOpen(NULL, imapspec);
    }
 
    // login data was reset by mm_login() called from mail_open(), set it once
@@ -1694,7 +1702,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
                  imapspec.c_str());
 
       // stream may be NIL or not here
-      mail_create(stream, imapspec.char_str());
+      MailCreate(stream, imapspec);
 
       // restore the auth info once again
       if ( !login.empty() )
@@ -1706,7 +1714,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s' after creating it."),
                  imapspec.c_str());
 
-      stream = MailOpen(stream, wxConvertWX2MB(imapspec));
+      stream = MailOpen(stream, imapspec);
    }
 
    if ( stream )
@@ -1802,8 +1810,6 @@ void MailFolderCC::CreateFileFolder()
    // if the file folder doesn't exist, we should create it first
    if ( !exists )
    {
-      // This little hack makes it root (uid 0) safe and allows us
-      // to choose the file format, too:
       String tmp;
       if ( folderType == MF_FILE )
       {
@@ -1841,7 +1847,7 @@ void MailFolderCC::CreateFileFolder()
       }
 
       tmp += m_ImapSpec;
-      mail_create(NIL, strutil_strdup(wxConvertWX2MB(tmp))); // const_cast for c-client
+      MailCreate(NIL, tmp);
    }
 
    // we either already tried to create it once or it had existed even before
@@ -2098,7 +2104,7 @@ MailFolderCC::Open(OpenMode openmode)
          wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s'."),
                     m_ImapSpec.c_str());
 
-         m_MailStream = MailOpen(stream, wxConvertWX2MB(m_ImapSpec), ccOptions);
+         m_MailStream = MailOpen(stream, m_ImapSpec, ccOptions);
       }
    } // end of cclient lock block
 
@@ -2126,8 +2132,7 @@ MailFolderCC::Open(OpenMode openmode)
 
       // redirect all notifications to us again
       CCDefaultFolder def(this);
-      MAILSTREAM *
-         msHalfOpened = MailOpen(m_MailStream, wxConvertWX2MB(m_ImapSpec), OP_HALFOPEN);
+      MAILSTREAM *msHalfOpened = MailOpen(m_MailStream, m_ImapSpec, OP_HALFOPEN);
       if ( msHalfOpened )
       {
          mail_close(msHalfOpened);
@@ -2478,9 +2483,10 @@ MailFolderCC::Checkpoint(void)
    // immediately afterwards, so don't try to access it from here
    if ( GetType() == MF_FILE )
    {
-      if ( !wxFile::Exists(wxConvertMB2WX(m_MailStream->mailbox)) )
+      if ( !wxFile::Exists(wxString::FromAscii(m_MailStream->mailbox)) )
       {
-         DBGMESSAGE((_T("MBOX folder '%s' already deleted."), m_MailStream->mailbox));
+         DBGMESSAGE((_T("MBOX folder '%s' already deleted."),
+                    m_MailStream->mailbox));
          return;
       }
    }
@@ -2651,7 +2657,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
       // we're not interested in mm_exists() and what not
       CCCallbackDisabler noCallbacks;
 
-      stream = MailOpen(wxConvertWX2MB(spec), OP_HALFOPEN | OP_READONLY);
+      stream = MailOpen(NULL, spec, OP_HALFOPEN | OP_READONLY);
       if ( !stream )
       {
          // if we failed to open it, checking its status won't work neither
@@ -4978,8 +4984,8 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
    // normally this shouldn't happen
    ASSERT_MSG( !MF_user.empty(), _T("no username in mm_login()?") );
 
-   strcpy(user, wxConvertWX2MB(MF_user.c_str()));
-   strcpy(pwd, wxConvertWX2MB(MF_pwd.c_str()));
+   strcpy(user, wxSafeConvertWX2MB(MF_user));
+   strcpy(pwd, wxSafeConvertWX2MB(MF_pwd));
 
    // they are used once only, don't keep them or they could be reused for
    // another folder somehow
@@ -5006,7 +5012,7 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
 {
    if ( stream )
    {
-      ms_LastCriticalFolder = wxConvertMB2WX(stream->mailbox);
+      ms_LastCriticalFolder = wxString::FromAscii(stream->mailbox);
       MailFolderCC *mf = LookupObject(stream);
       if(mf)
       {
@@ -5056,13 +5062,16 @@ MailFolderCC::mm_diskerror(MAILSTREAM * /* stream */,
 void
 MailFolderCC::mm_fatal(char *str)
 {
-   GetLogCircle().Add(wxConvertMB2WX(str));
+   GetLogCircle().Add(wxSafeConvertMB2WX(str));
    wxLogError(_("Fatal error: %s"), str);
 
-   String msg2 = wxConvertMB2WX(str);
+   String msg2 = wxSafeConvertMB2WX(str);
    if(ms_LastCriticalFolder.length())
+   {
       msg2 << _("\nLast folder in a critical section was: ")
            << ms_LastCriticalFolder;
+   }
+
    FatalError(msg2);
 }
 
@@ -5343,7 +5352,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       // open the folder: although we don't need to do it to get its status, we
       // have to do it anyhow below, so better do it right now
-      stream = MailOpen(stream, wxConvertWX2MB(mboxpath));
+      stream = MailOpen(stream, mboxpath);
 
       if ( !stream )
       {
@@ -5356,7 +5365,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       // get the number of messages (only)
       MAILSTATUS mailstatus;
-      MMStatusRedirector statusRedir(wxConvertMB2WX(stream->mailbox), &mailstatus);
+      MMStatusRedirector statusRedir(stream->mailbox, &mailstatus);
       mail_status(stream, stream->mailbox, SA_MESSAGES);
       nmsgs = mailstatus.messages;
    }
@@ -5649,7 +5658,7 @@ mm_notify(MAILSTREAM *stream, char *str, long errflg)
 
    if ( !mm_disable_callbacks )
    {
-      MailFolderCC::mm_notify(stream, wxConvertMB2WX(str), errflg);
+      MailFolderCC::mm_notify(stream, wxString::FromAscii(str), errflg);
    }
 }
 
@@ -5658,7 +5667,7 @@ mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
    TRACE_CALLBACK3(mm_list, "%d, `%s', %ld", delim, name, attrib);
 
-   MailFolderCC::mm_list(stream, delim, wxConvertMB2WX(name), attrib);
+   MailFolderCC::mm_list(stream, delim, wxString::FromAscii(name), attrib);
 }
 
 void
@@ -5666,7 +5675,7 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
    TRACE_CALLBACK3(mm_lsub, "%d, `%s', %ld", delim, name, attrib);
 
-   MailFolderCC::mm_lsub(stream, delim, wxConvertMB2WX(name), attrib);
+   MailFolderCC::mm_lsub(stream, delim, wxString::FromAscii(name), attrib);
 }
 
 void
@@ -5692,7 +5701,7 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
    }
    else if ( !mm_disable_callbacks )
    {
-      MailFolderCC::mm_status(stream, wxConvertMB2WX(mailbox), status);
+      MailFolderCC::mm_status(stream, wxString::FromAscii(mailbox), status);
    }
 }
 
@@ -5704,7 +5713,7 @@ mm_log(char *str, long errflg)
    if ( mm_disable_callbacks || mm_ignore_errors )
       return;
 
-   String msg = wxConvertMB2WX(str);
+   String msg = wxString::FromAscii(str);
 
    // TODO: what's going on here?
    if(errflg >= 4) // fatal imap error, reopen-mailbox
@@ -5726,7 +5735,7 @@ mm_dlog(char *str)
 
    // if ( !mm_disable_callbacks )
    {
-      MailFolderCC::mm_dlog(wxConvertMB2WX(str));
+      MailFolderCC::mm_dlog(wxString::FromAscii(str));
    }
 }
 
