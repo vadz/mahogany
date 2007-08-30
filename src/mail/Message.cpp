@@ -28,6 +28,7 @@
 #include "Message.h"
 
 #include "Address.h"
+#include "mail/MimeDecode.h"
 
 // ============================================================================
 // implementation of Message methods for working with addresses
@@ -112,6 +113,16 @@ bool Message::GetHeaderLine(const String& line,
    }
 
    return !value.empty();
+}
+
+bool Message::GetDecodedHeaderLine(const String& line, String& value) const
+{
+   if ( !GetHeaderLine(line, value) )
+      return false;
+
+   value = MIME::DecodeHeader(value);
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

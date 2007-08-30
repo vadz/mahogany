@@ -1070,7 +1070,7 @@ MailFolder::ReplyMessage(Message *msg,
    if ( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
    {
       String to;
-      msg->GetHeaderLine(_T("To"), to);
+      msg->GetDecodedHeaderLine(_T("To"), to);
 
       String from;
       if ( ContainsOwnAddress(to, profile, OwnAddress_From, &from) )

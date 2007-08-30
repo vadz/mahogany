@@ -2078,7 +2078,7 @@ static Value func_to(ArgList *args, FilterRuleImpl *p)
       return Value(wxEmptyString);
 
    String tostr;
-   msg->GetHeaderLine(_T("To"), tostr);
+   msg->GetDecodedHeaderLine(_T("To"), tostr);
    return Value(tostr);
 }
 

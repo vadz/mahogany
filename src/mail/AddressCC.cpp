@@ -502,7 +502,7 @@ static String Adr2String(ADDRESS *adr, Adr2StringWhich which, bool *error)
       }
    }
 
-   return address;
+   return MIME::DecodeHeader(address);
 }
 
 static String RemoveEmptyListParts(const String &original)

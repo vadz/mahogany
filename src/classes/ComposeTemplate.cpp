@@ -560,7 +560,7 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
    // X-Attribution header value overrides everything else if it exists
    if ( msg && READ_CONFIG_BOOL(profile, MP_REPLY_MSGPREFIX_FROM_XATTR) )
    {
-      msg->GetHeaderLine(_T("X-Attribution"), prefix);
+      msg->GetDecodedHeaderLine(_T("X-Attribution"), prefix);
    }
 
    // prepend the senders initials to the reply prefix (this

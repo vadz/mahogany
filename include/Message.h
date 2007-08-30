@@ -143,7 +143,13 @@ public:
     */
    //@{
 
-   /** get any header line
+   /**
+       Get any header line
+
+       This returns the raw header line content, for the header lines which may
+       contain encoded MIME words, such as subject or any of the headers
+       containing addresses, use GetDecodedHeaderLine() if raw form is not
+       needed.
 
        USE GetHeaderLines() INSTEAD OF MULTIPLE CALLS To GetHeaderLine(),
        IT IS MUCH MORE EFFICIENT AS IT INVOLVES ONLY ONE TRIP TO SERVER!
@@ -155,6 +161,15 @@ public:
    bool GetHeaderLine(const String &line,
                       String &value,
                       wxFontEncoding *encoding = NULL) const;
+
+   /**
+      Get the header line after decoding any MIME-encoded words in it.
+
+      @param line name of header line
+      @param value string where result will be stored, or empty string
+      @return true if header was found in the headers
+    */
+   bool GetDecodedHeaderLine(const String& line, String& value) const;
 
    /** Get the values of the specified headers.
 

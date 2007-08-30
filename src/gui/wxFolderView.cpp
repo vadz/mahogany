@@ -5219,7 +5219,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   MFolder_obj folder(m_folderName);
 
                   String to;
-                  (void)msg->GetHeaderLine(_T("To"), to);
+                  (void)msg->GetDecodedHeaderLine(_T("To"), to);
 
                   if ( CreateQuickFilter(folder,
                                          msg->From(), msg->Subject(), to,

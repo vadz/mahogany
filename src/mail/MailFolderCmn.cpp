@@ -995,7 +995,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
                break;
 
             case SearchCriterium::SC_CC:
-               msg->GetHeaderLine(_T("CC"), what);
+               msg->GetDecodedHeaderLine(_T("CC"), what);
                break;
 
             default:
