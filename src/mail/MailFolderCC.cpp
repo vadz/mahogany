@@ -5713,7 +5713,7 @@ mm_log(char *str, long errflg)
    if ( mm_disable_callbacks || mm_ignore_errors )
       return;
 
-   String msg = wxString::FromAscii(str);
+   String msg = wxString::From8BitData(str);
 
    // TODO: what's going on here?
    if(errflg >= 4) // fatal imap error, reopen-mailbox
@@ -5735,7 +5735,7 @@ mm_dlog(char *str)
 
    // if ( !mm_disable_callbacks )
    {
-      MailFolderCC::mm_dlog(wxString::FromAscii(str));
+      MailFolderCC::mm_dlog(wxString::From8BitData(str));
    }
 }
 
