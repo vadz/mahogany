@@ -363,6 +363,26 @@ int main()
             "Ludovic P\303\251net <ludovic@xxx.com>",
             wxFONTENCODING_UTF8
         },
+
+        {
+            "=?UTF-8?Q?=D0=92=D0=B0=D0=B4=D0=B8=D0=BC_"
+            "=D0=A6=D0=B5=D0=B9=D1=82=D0=BB=D0=B8=D0=BD?=",
+            "\xD0\x92\xD0\xB0\xD0\xB4\xD0\xB8\xD0\xBC "
+            "\xD0\xA6\xD0\xB5\xD0\xB9\xD1\x82\xD0\xBB\xD0\xB8\xD0\xBD",
+            wxFONTENCODING_UTF8
+        },
+
+        {
+            "2006 =?UTF-8?Q?=D0=92_=D0=A6?= 2007",
+            "2006 \xD0\x92 \xD0\xA6 2007",
+            wxFONTENCODING_UTF8
+        },
+
+        {
+            "=?UTF-8?Q?=D0=92_=D0=A6?= 2007",
+            "\xD0\x92 \xD0\xA6 2007",
+            wxFONTENCODING_UTF8
+        }
     };
 
     int rc = EXIT_SUCCESS;
