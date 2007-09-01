@@ -382,7 +382,13 @@ int main()
             "=?UTF-8?Q?=D0=92_=D0=A6?= 2007",
             "\xD0\x92 \xD0\xA6 2007",
             wxFONTENCODING_UTF8
-        }
+        },
+
+        {
+            "=?us-ascii?Q?Foo=20bar?=",
+            "Foo bar",
+            wxFONTENCODING_DEFAULT
+        },
     };
 
     int rc = EXIT_SUCCESS;
@@ -396,6 +402,11 @@ int main()
                    n, d.utf8, (const char *)s.utf8_str());
             rc = EXIT_FAILURE;
         }
+
+        // wxFONTENCODING_DEFAULT is used in the test data to indicate that we
+        // don't want to test the encoding
+        if ( d.enc == wxFONTENCODING_DEFAULT )
+            continue;
 
         const wxCharBuffer buf = MIME::EncodeHeader(s, d.enc);
         if ( strcmp(buf, d.encoded) != 0 )
