@@ -226,8 +226,9 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
                break;
             }
 
-            // +2 to skip "?="
-            p += posEncWordEnd - posEncWordStart + 2;
+            // +1 to skip '?' of "?=" (don't skip '=', this will be accounted
+            // for by p increment in the loop statement)
+            p += posEncWordEnd - posEncWordStart + 1;
 
             // leave this word undecoded
             out += wxString(encWordStart, p + 1);
