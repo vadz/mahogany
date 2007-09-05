@@ -31,7 +31,7 @@
 // implementation
 // ============================================================================
 
-#if wxUSE_UNICODE
+#if !wxUSE_UNICODE
 
 bool
 EnsureAvailableTextEncoding(wxFontEncoding *enc, wxString *text, bool mayAskUser)
