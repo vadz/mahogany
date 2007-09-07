@@ -52,6 +52,12 @@
    #include <wx/fontmap.h>
 #endif // wxUSE_WCHAR_T
 
+// this hack allows us to get Unicode text from a richtext Windows control even
+// in ANSI build
+#if !wxUSE_UNICODE && wxUSE_WCHAR_T && defined(OS_WIN) && !defined(__WINE__)
+   #define USE_UNICODE_TEXT_HACK
+#endif
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -244,10 +250,10 @@ class wxBareBonesTextControl : public wxTextCtrl
 public:
    wxBareBonesTextControl(BareBonesEditor *editor,wxWindow *parent);
 
-#if wxUSE_WCHAR_T && defined(OS_WIN)
+#ifdef USE_UNICODE_TEXT_HACK
    // get the text as a Unicode string
    wxWCharBuffer GetUnicodeText() const;
-#endif // wxUSE_WCHAR_T
+#endif
 
 protected:
    // event handlers
@@ -840,7 +846,8 @@ void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 }
 
 
-#if wxUSE_WCHAR_T && defined(OS_WIN) && !defined(__WINE__)
+#ifdef USE_UNICODE_TEXT_HACK
+
 wxWCharBuffer
 wxBareBonesTextControl::GetUnicodeText() const
 {
@@ -848,7 +855,7 @@ wxBareBonesTextControl::GetUnicodeText() const
    return s.wc_str(wxConvUTF8);
 }
 
-#endif // wxUSE_WCHAR_T
+#endif // USE_UNICODE_TEXT_HACK
 
 // ----------------------------------------------------------------------------
 // BareBonesEditor ctor/dtor
@@ -1175,7 +1182,7 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
 
-#if wxUSE_WCHAR_T && defined(OS_WIN) && !defined(__WINE__)
+#ifdef USE_UNICODE_TEXT_HACK
    wxFontEncoding encPart = wxFONTENCODING_SYSTEM;
    wxWCharBuffer wbuf = m_textControl->GetUnicodeText();
 
