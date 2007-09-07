@@ -1074,31 +1074,55 @@ void HtmlViewer::InsertRawContents(const String& data)
       encChanger(wxHtmlParser::ExtractCharsetInformation(data), m_htmlText);
 
    // tag handler used to extract the <body> tag contents
+   //
+   // note that we have to use string indices with wx 2.8 but string iterators
+   // with 2.9 to avoid deprecation warnings (as index versions are much less
+   // efficient with wx 2.9)
    class BodyTagHandler : public wxHtmlTagHandler
    {
    public:
-      BodyTagHandler()
+      BodyTagHandler(const String& text)
       {
          // by default, take all
+#if wxCHECK_VERSION(2, 9, 0)
+         m_begin = text.begin();
+         m_end = text.end();
+#else // wx <= 2.8
          m_begin = 0;
          m_end = String::npos;
+
+         wxUnusedVar(text);
+#endif // wx 2.9+/2.8-
       }
 
       virtual wxString GetSupportedTags() { return "BODY"; }
       virtual bool HandleTag(const wxHtmlTag& tag)
       {
+         // "end 1" is the position just before the closing tag while "end 2"
+         // is after the tag, as we don't need the tag itself, use the former
+#if wxCHECK_VERSION(2, 9, 0)
+         m_begin = tag.GetBeginIter();
+         m_end = tag.GetEndIter1();
+#else // wx <= 2.8
          m_begin = tag.GetBeginPos();
-         m_end = tag.GetEndPos1(); // position just before the closing tag
+         m_end = tag.GetEndPos1();
+#endif // wx 2.9+/2.8-
 
          return false;
       }
 
-      size_t GetBegin() const { return m_begin; }
-      size_t GetEnd() const { return m_end; }
+#if wxCHECK_VERSION(2, 9, 0)
+      typedef wxString::const_iterator IndexType;
+#else // wx <= 2.8
+      typedef size_t IndexType;
+#endif // wx 2.9+/2.8-
+
+      IndexType GetBegin() const { return m_begin; }
+      IndexType GetEnd() const { return m_end; }
 
    private:
-      size_t m_begin,
-             m_end;
+      IndexType m_begin,
+                m_end;
    };
 
    class BodyParser : public wxHtmlParser
@@ -1111,12 +1135,16 @@ void HtmlViewer::InsertRawContents(const String& data)
       virtual void AddText(const wxString& WXUNUSED(txt)) { }
    };
 
-   BodyTagHandler *handler = new BodyTagHandler;
+   BodyTagHandler *handler = new BodyTagHandler(data);
    BodyParser parser;
    parser.AddTagHandler(handler);
    parser.Parse(data);
 
+#if wxCHECK_VERSION(2, 9, 0)
+   m_htmlText += wxString(handler->GetBegin(), handler->GetEnd());
+#else // wx <= 2.8
    m_htmlText += data.substr(handler->GetBegin(), handler->GetEnd());
+#endif // wx 2.9+/2.8-
 
    // set the flag for EndBody
    m_hasHtmlContents = true;
