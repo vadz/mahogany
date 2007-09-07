@@ -451,7 +451,8 @@ MimePartCCBase::DecodeRawContent(const void *cptr, unsigned long *lenptr)
          m_content = rfc822_base64(text, size, lenptr);
          if ( !m_content )
          {
-            wxLogDebug(_T("rfc822_base64() failed"));
+            wxLogWarning(_("Failed to decode binary message part, "
+                           "message could be corrupted."));
 
             // use original text: this is better than nothing and can be
             // exactly what we need in case of messages generated with base64
