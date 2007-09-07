@@ -51,7 +51,7 @@ typedef void (*MimeErrorHandler)(char *);
 extern DLLEXPORT(void) registerMimeErrorHandler(MimeErrorHandler);
 
 extern DLLEXPORT(VObject*) Parse_MIME(const char *input, unsigned long len);
-extern DLLEXPORT(VObject*) Parse_MIME_FromFileName(char* fname);
+extern DLLEXPORT(VObject*) Parse_MIME_FromFileName(const char* fname);
 
 
 /* NOTE regarding Parse_MIME_FromFile

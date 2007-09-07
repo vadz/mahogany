@@ -565,7 +565,7 @@ void printVObject(FILE *fp,VObject *o)
     printVObject_(fp,o,0);
 }
 
-DLLEXPORT(void) printVObjectToFile(char *fname,VObject *o)
+DLLEXPORT(void) printVObjectToFile(const char *fname,VObject *o)
 {
     FILE *fp = fopen(fname,"w");
     if (fp) {
@@ -574,7 +574,7 @@ DLLEXPORT(void) printVObjectToFile(char *fname,VObject *o)
 	}
 }
 
-DLLEXPORT(void) printVObjectsToFile(char *fname,VObject *list)
+DLLEXPORT(void) printVObjectsToFile(const char *fname,VObject *list)
 {
     FILE *fp = fopen(fname,"w");
     if (fp) {
@@ -1350,7 +1350,7 @@ void writeVObject(FILE *fp, VObject *o)
     writeVObject_(&ofp,o);
 }
 
-DLLEXPORT(void) writeVObjectToFile(char *fname, VObject *o)
+DLLEXPORT(void) writeVObjectToFile(const char *fname, VObject *o)
 {
     FILE *fp = fopen(fname,"w");
     if (fp) {
@@ -1359,7 +1359,7 @@ DLLEXPORT(void) writeVObjectToFile(char *fname, VObject *o)
 	}
 }
 
-DLLEXPORT(void) writeVObjectsToFile(char *fname, VObject *list)
+DLLEXPORT(void) writeVObjectsToFile(const char *fname, VObject *list)
 {
     FILE *fp = fopen(fname,"w");
     if (fp) {

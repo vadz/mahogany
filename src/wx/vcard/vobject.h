@@ -314,10 +314,10 @@ extern DLLEXPORT(wchar_t*) fakeUnicode(const char *ps, int *bytes);
 extern DLLEXPORT(int) uStrLen(const wchar_t *u);
 extern DLLEXPORT(char*) fakeCString(const wchar_t *u);
 
-extern DLLEXPORT(void) printVObjectToFile(char *fname,VObject *o);
-extern DLLEXPORT(void) printVObjectsToFile(char *fname,VObject *list);
-extern DLLEXPORT(void) writeVObjectToFile(char *fname, VObject *o);
-extern DLLEXPORT(void) writeVObjectsToFile(char *fname, VObject *list);
+extern DLLEXPORT(void) printVObjectToFile(const char *fname,VObject *o);
+extern DLLEXPORT(void) printVObjectsToFile(const char *fname,VObject *list);
+extern DLLEXPORT(void) writeVObjectToFile(const char *fname, VObject *o);
+extern DLLEXPORT(void) writeVObjectsToFile(const char *fname, VObject *list);
 
 extern DLLEXPORT(int) vObjectValueType(VObject *o);
 

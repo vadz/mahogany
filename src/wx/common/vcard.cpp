@@ -116,10 +116,7 @@ wxVCard::~wxVCard()
 /* static */ wxArrayCards wxVCard::CreateFromFile(const wxString& filename)
 {
     wxArrayCards vcards;
-    char *filename1 = new char[strlen(filename.fn_str())+1];
-    strcpy(filename1, filename.fn_str());
-
-    VObject *vObj = Parse_MIME_FromFileName(filename1);
+    VObject *vObj = Parse_MIME_FromFileName(filename);
     if ( !vObj )
     {
         wxLogError(_("The file '%s' doesn't contain any vCard objects."),
@@ -138,7 +135,7 @@ wxVCard::~wxVCard()
             vObj = nextVObjectInList(vObj);
         }
     }
-    delete [] filename1;
+
     return vcards;
 }
 
@@ -691,24 +688,16 @@ wxString wxVCardObject::Write() const
 // Write() to a file
 bool wxVCardObject::Write(const wxString& filename) const
 {
-    char *filename1 = new char[strlen(filename.fn_str())+1];
-    strcpy(filename1, filename.fn_str());
+    writeVObjectToFile(filename, m_vObj);
 
-    writeVObjectToFile(filename1, m_vObj);
-
-    delete [] filename1;
     return TRUE; // writeVObjectToFile() is void @#$@#$@!!
 }
 
 // write out the internal representation
 void wxVCardObject::Dump(const wxString& filename)
 {
-    char *filename1 = new char[strlen(filename.fn_str())+1];
-    strcpy(filename1, filename.fn_str());
-
     // it is ok for m_vObj to be NULL
-    printVObjectToFile(filename1, m_vObj);
-    delete [] filename1;
+    printVObjectToFile(filename, m_vObj);
 }
 
 // ============================================================================
