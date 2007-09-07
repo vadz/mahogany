@@ -230,6 +230,9 @@
 				RelativePath="src\buffer.h">
 			</File>
 			<File
+				RelativePath=".\src\config.h">
+			</File>
+			<File
 				RelativePath="src\decode.h">
 			</File>
 			<File
@@ -258,7 +261,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Creating auto-config.h"
-					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h"
+					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h
+"
 					Outputs="$(InputDir)\auto-config.h"/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -266,7 +270,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Creating auto-config.h"
-					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h"
+					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h
+"
 					Outputs="$(InputDir)\auto-config.h"/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -274,7 +279,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Creating auto-config.h"
-					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h"
+					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h
+"
 					Outputs="$(InputDir)\auto-config.h"/>
 			</FileConfiguration>
 		</File>
