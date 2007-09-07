@@ -129,7 +129,7 @@ CountQuoteLevel(const wxChar *string,
    for ( const wxChar *c = string; *c != 0 && *c != '\n'; c++, lastQuote = c )
    {
       // skip leading white space
-      for ( int num_white = 0; *c == '\t' || *c == ' '; c++ )
+      for ( int num_white = 0; *c == '\r' || *c == '\t' || *c == ' '; c++ )
       {
          if ( ++num_white > max_white )
          {
@@ -142,7 +142,7 @@ CountQuoteLevel(const wxChar *string,
       }
 
       // skip optional alphanumeric prefix
-      for ( int num_alpha = 0; isalpha((unsigned char)*c); c++ )
+      for ( int num_alpha = 0; wxIsalpha(*c); c++ )
       {
          if ( ++num_alpha > max_alpha )
          {
