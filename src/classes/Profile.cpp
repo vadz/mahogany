@@ -617,7 +617,7 @@ String Profile::ExpandEnvVarsIfNeeded(const String& val) const
 
 String
 Profile::readEntry(const String& key,
-                   const wxChar *defaultvalue,
+                   const char *defaultvalue,
                    ReadResult *found) const
 {
    PCHECK();

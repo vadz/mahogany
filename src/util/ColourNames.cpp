@@ -27,7 +27,7 @@
 // colour to string and vice versa conversions
 // ---------------------------------------------------------------------------
 
-static const wxChar *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");
+static const char *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");
 
 bool ParseColourString(const String& name, wxColour* colour)
 {

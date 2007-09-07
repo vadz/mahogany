@@ -16,7 +16,7 @@ class MailFolder;
 class UIdArray;
 
 /// The name of the interface provided.
-#define MMODULE_INTERFACE_FILTERS   _T("Filters")
+#define MMODULE_INTERFACE_FILTERS   "Filters"
 
 /** Filtering Module class. */
 class MModule_Filters : public MModule

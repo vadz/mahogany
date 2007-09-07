@@ -220,7 +220,7 @@ public:
 };
 
 /// the interface implemented by crypto modules
-#define CRYPTO_ENGINE_INTERFACE _T("CryptoEngine")
+#define CRYPTO_ENGINE_INTERFACE "CryptoEngine"
 
 /**
    This macro must be used inside the declaration of MCryptoEngine-derived
@@ -252,9 +252,9 @@ public:
       MMODULE_DEFINE();                                                       \
       DEFAULT_ENTRY_FUNC;                                                     \
    };                                                                         \
-   MMODULE_BEGIN_IMPLEMENT(cname ## Factory, _T(#cname),                      \
-                           CRYPTO_ENGINE_INTERFACE, desc, _T("1.00"))         \
-      MMODULE_PROP(_T("author"), cpyright)                                    \
+   MMODULE_BEGIN_IMPLEMENT(cname ## Factory, #cname,                          \
+                           CRYPTO_ENGINE_INTERFACE, desc, "1.00")             \
+      MMODULE_PROP("author", cpyright)                                        \
    MMODULE_END_IMPLEMENT(cname ## Factory)                                    \
    MModule *cname ## Factory::Init(int /* version_major */,                   \
                                    int /* version_minor */,                   \

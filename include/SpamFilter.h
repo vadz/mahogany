@@ -257,7 +257,7 @@ protected:
 
       This method is implemented by DECLARE_SPAM_FILTER() macro below.
     */
-   virtual const wxChar *GetName() const = 0;
+   virtual const char *GetName() const = 0;
 
    /**
       Return the computational/speed cost of using this filter.
@@ -303,7 +303,7 @@ public:
 };
 
 // the spam filter module interface name
-#define SPAM_FILTER_INTERFACE _T("SpamFilter")
+#define SPAM_FILTER_INTERFACE "SpamFilter"
 
 /**
   This macro must be used in SpamFilter-derived class declaration.
@@ -320,7 +320,7 @@ public:
 #define DECLARE_SPAM_FILTER(name, lname, cost)                                \
    public:                                                                    \
       virtual unsigned int GetCost() const { return cost; }                   \
-      virtual const wxChar *GetName() const { return _T(name); }              \
+      virtual const char *GetName() const { return name; }                    \
       virtual String GetLongName() const { return lname; }
 
 /**
@@ -340,9 +340,9 @@ public:
       MMODULE_DEFINE();                                                       \
       DEFAULT_ENTRY_FUNC                                                      \
    };                                                                         \
-   MMODULE_BEGIN_IMPLEMENT(cname##Factory, _T(#cname),                        \
-                           SPAM_FILTER_INTERFACE, desc, _T("1.00"))           \
-      MMODULE_PROP(_T("author"), cpyright)                                    \
+   MMODULE_BEGIN_IMPLEMENT(cname##Factory, #cname,                            \
+                           SPAM_FILTER_INTERFACE, desc, "1.00")               \
+      MMODULE_PROP("author", cpyright)                                        \
    MMODULE_END_IMPLEMENT(cname##Factory)                                      \
    MModule *cname##Factory::Init(int /* version_major */,                     \
                                  int /* version_minor */,                     \

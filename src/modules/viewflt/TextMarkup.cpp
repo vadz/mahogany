@@ -60,7 +60,7 @@ IMPLEMENT_VIEWER_FILTER(TextMarkupFilter,
                         ViewFilter::Priority_Low + 10,
                         true,      // enabled by default
                         gettext_noop("Trivial Markup"),
-                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
+                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 /*
    render all the words surrounded by asterisks/underscores in bold/italic font

@@ -138,7 +138,7 @@ IMPLEMENT_VIEWER_FILTER(SignatureFilter,
                         ViewFilter::Priority_Default + 10,
                         true,      // initially enabled
                         gettext_noop("Signature"),
-                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
+                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 void
 SignatureFilter::DoProcess(String& text,

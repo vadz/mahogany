@@ -184,7 +184,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_panel->SetConstraints(c);
 
-   static const wxChar *fieldLabels[Field_Max] =
+   static const char *fieldLabels[Field_Max] =
    {
       gettext_noop("Thread messages on &server"),
       gettext_noop("Thread messages by &references only"),

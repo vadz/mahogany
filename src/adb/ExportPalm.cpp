@@ -133,7 +133,7 @@ private:
 IMPLEMENT_ADB_EXPORTER(AdbPalmExporter,
                        gettext_noop("PalmOS format address book exporter"),
                        gettext_noop("PalmOS addressbook"),
-                       _T("Karsten Ballueder <ballueder@gmx.net>"));
+                       "Karsten Ballueder <ballueder@gmx.net>");
 
 
 // ----------------------------------------------------------------------------
@@ -413,16 +413,14 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
    if ( !filename )
    {
       Profile *appProfile = mApplication->GetProfile();
-      filename = appProfile->readEntry(ms_profilePathLastFile, _T("mahogany.txt"));
+      filename = appProfile->readEntry(ms_profilePathLastFile, "mahogany.txt");
    }
 
    m_textFileName->SetValue(
-      mApplication->GetProfile()->readEntry(ms_profilePathLastFile,
-                                            wxEmptyString));
+      mApplication->GetProfile()->readEntry(ms_profilePathLastFile, ""));
 
    m_textCategoryName->SetValue(
-      mApplication->GetProfile()->readEntry(ms_profilePathLastCategory,
-                                            _T("Unfiled")));
+      mApplication->GetProfile()->readEntry(ms_profilePathLastCategory, "Unfiled"));
    m_checkIncludeEmpty->SetValue(
       mApplication->GetProfile()->readEntry(ms_profileIncludeEmpty, 0) != 0);
    m_checkIncludeComments->SetValue(

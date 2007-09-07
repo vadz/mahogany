@@ -28,7 +28,7 @@ class MTextStyle;
 #include <wx/gdicmn.h>        // for wxNullColour
 
 // the message viewer module interface name
-#define MESSAGE_VIEWER_INTERFACE _T("MessageViewer")
+#define MESSAGE_VIEWER_INTERFACE "MessageViewer"
 
 // ----------------------------------------------------------------------------
 // MessageViewer: interface for GUI viewers
@@ -260,8 +260,8 @@ public:
       MMODULE_DEFINE();                                                    \
       DEFAULT_ENTRY_FUNC;                                                  \
    };                                                                      \
-   MMODULE_BEGIN_IMPLEMENT(cname##Factory, _T(#cname),                     \
-                           MESSAGE_VIEWER_INTERFACE, desc, _T("1.00"))     \
+   MMODULE_BEGIN_IMPLEMENT(cname##Factory, #cname,                         \
+                           MESSAGE_VIEWER_INTERFACE, desc, "1.00")         \
       MMODULE_PROP(MMODULE_AUTHOR_PROP, cpyright)                          \
    MMODULE_END_IMPLEMENT(cname##Factory)                                   \
    MModule *cname##Factory::Init(int /* version_major */,                  \

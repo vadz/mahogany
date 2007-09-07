@@ -95,7 +95,7 @@ extern const MPersMsgBox *M_MSGBOX_GO_OFFLINE_SEND_FIRST;
 inline MOptionValue GetOptionValue(wxConfigBase *config, const MOption opt)
 {
    MOptionValue value;
-   const wxChar *name = GetOptionName(opt);
+   const char *name = GetOptionName(opt);
    if ( IsNumeric(opt) )
       value.Set(config->Read(name, GetNumericDefault(opt)));
    else

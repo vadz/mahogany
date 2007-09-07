@@ -33,10 +33,10 @@
 // ----------------------------------------------------------------------------
 AdbDataProvider::AdbProviderInfo *AdbDataProvider::ms_listProviders = NULL;
 
-AdbDataProvider::AdbProviderInfo::AdbProviderInfo(const wxChar *name,
+AdbDataProvider::AdbProviderInfo::AdbProviderInfo(const char *name,
                                                   Constructor ctor,
                                                   bool canCreate,
-                                                  const wxChar *formatName,
+                                                  const char *formatName,
                                                   AdbNameFormat adbFormat)
 {
   bSupportsCreation = canCreate;

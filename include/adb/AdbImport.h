@@ -21,7 +21,7 @@ class wxArrayString;
 class AdbEntry;
 
 // the interface we implement
-#define ADB_IMPORTER_INTERFACE _T("AdbImporter")
+#define ADB_IMPORTER_INTERFACE "AdbImporter"
 
 // ----------------------------------------------------------------------------
 // AdbImporter - this class imports data from ADBs in foreign formats.

@@ -298,7 +298,7 @@ public:
   DECLARE_ADB_PROVIDER(FCDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(FCDataProvider, TRUE, _T("Native format"), Name_File);
+IMPLEMENT_ADB_PROVIDER(FCDataProvider, TRUE, "Native format", Name_File);
 
 // ============================================================================
 // implementation
@@ -722,27 +722,27 @@ String FCBook::GetFileName() const
 
 void FCBook::SetDescription(const String& strAdb)
 {
-  m_pConfig->Write(_T("/") ADB_HEADER _T("/") ADB_HEADER_DESC, strAdb);
+  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_DESC, strAdb);
 }
 
 String FCBook::GetDescription() const
 {
-  return m_pConfig->Read(_T("/") ADB_HEADER _T("/") ADB_HEADER_DESC, m_strFileName);
+  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_DESC, m_strFileName);
 }
 
 void FCBook::SetName(const String& strDesc)
 {
-  m_pConfig->Write(_T("/") ADB_HEADER _T("/") ADB_HEADER_NAME, strDesc);
+  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_NAME, strDesc);
 }
 
 String FCBook::GetName() const
 {
-  return m_pConfig->Read(_T("/") ADB_HEADER _T("/") ADB_HEADER_NAME, m_strFile);
+  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_NAME, m_strFile);
 }
 
 size_t FCBook::GetNumberOfEntries() const
 {
-  m_pConfig->SetPath(_T("/") ADB_ENTRIES);
+  m_pConfig->SetPath("/" ADB_ENTRIES);
   return m_pConfig->GetNumberOfEntries(TRUE);
 }
 

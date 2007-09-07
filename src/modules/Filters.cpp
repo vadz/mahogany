@@ -3217,18 +3217,18 @@ protected:
 };
 
 MMODULE_BEGIN_IMPLEMENT(MModule_FiltersImpl,
-                        _T("Filters"),
+                        "Filters",
                         MMODULE_INTERFACE_FILTERS,
                         _("Filtering capabilities plugin"),
-                        _T("0.00"))
-   MMODULE_PROP(_T("description"),
+                        "1.00")
+   MMODULE_PROP("description",
                 _("This plug-in provides a filtering language for Mahogany.\n"
                   "\n"
                   "It is an interpreter for a simplified algebraic language "
                   "which allows one to apply different tests and operations "
                   "to messages, like sorting, replying or moving them "
                   "automatically."))
-   MMODULE_PROP(_T("author"), _T("Karsten Ballueder <karsten@phy.hw.ac.uk>"))
+   MMODULE_PROP("author", "Karsten Ballueder <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(MModule_FiltersImpl)
 
 FilterRule *

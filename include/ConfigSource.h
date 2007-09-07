@@ -443,7 +443,7 @@ public:
 
       @return string uniquely identifying this factory.
     */
-   virtual const wxChar *GetType() const = 0;
+   virtual const char *GetType() const = 0;
 
    /**
       Creates the config source object.

@@ -244,10 +244,10 @@ MModule *FindModule(const String & name)
 
 #ifdef USE_MODULES_STATIC
 extern
-void MModule_AddStaticModule(const wxChar *Name,
-                             const wxChar *Interface,
-                             const wxChar *Description,
-                             const wxChar *Version,
+void MModule_AddStaticModule(const char *Name,
+                             const char *Interface,
+                             const char *Description,
+                             const char *Version,
                             MModule_InitModuleFuncType initFunc)
 {
    MModuleListEntry *me = new MModuleListEntry;
@@ -835,8 +835,8 @@ static wxArrayString BuildListOfModulesDirs()
 // working with module properties
 // ----------------------------------------------------------------------------
 
-const wxChar *
-GetMModuleProperty(const ModuleProperty *table, const wxChar *name)
+const char *
+GetMModuleProperty(const ModuleProperty *table, const char *name)
 {
    while ( table->name )
    {
@@ -846,7 +846,7 @@ GetMModuleProperty(const ModuleProperty *table, const wxChar *name)
       table++;
    }
 
-   return wxEmptyString;
+   return "";
 }
 
 MModuleCommon::~MModuleCommon()

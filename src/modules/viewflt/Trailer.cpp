@@ -59,7 +59,7 @@ IMPLEMENT_VIEWER_FILTER(TrailerFilter,
                         ViewFilter::Priority_High + 20,
                         true,      // initially enabled
                         gettext_noop("Trailer"),
-                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
+                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 void
 TrailerFilter::DoProcess(String& text,

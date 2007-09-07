@@ -51,7 +51,7 @@ extern const MPersMsgBox *M_MSGBOX_SAVE_TEMPLATE;
 // constants
 // ----------------------------------------------------------------------------
 
-static const wxChar *gs_templateNames[MessageTemplate_Max] =
+static const char *gs_templateNames[MessageTemplate_Max] =
 {
    gettext_noop("New message"),
    gettext_noop("New article"),

@@ -405,11 +405,11 @@ bool MfStatusCache::DoSave(wxTempFile& file)
       // recent messages because they won't be recent the next time we run
       // anyhow nor the number of messages matching the search criteria as
       // this is hardly ever useful
-      str.Printf("%s" CACHE_DELIMITER
-                 "%lu" CACHE_DELIMITER
-                 "%lu" CACHE_DELIMITER
-                 "%lu" CACHE_DELIMITER
-                 "%lu\n",
+      str.Printf(_T("%s") CACHE_DELIMITER
+                 _T("%lu") CACHE_DELIMITER
+                 _T("%lu") CACHE_DELIMITER
+                 _T("%lu") CACHE_DELIMITER
+                 _T("%lu\n"),
                  name.c_str(),
                  status->total,
                  status->newmsgs,

@@ -97,7 +97,7 @@ IMPLEMENT_VIEWER_FILTER(PGPFilter,
                         ViewFilter::Priority_High + 10,
                         false,      // initially disabled
                         gettext_noop("PGP"),
-                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
+                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // PGPFilter ctor

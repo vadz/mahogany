@@ -442,7 +442,7 @@ void ClickableURL::OpenInBrowser(int options) const
       else // easy case: open in the same window
       {
 #if !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__WINE__) // FIXME ShellExecute() is defined in <w32api/shellapi.h>, how to include it?
-         bOk = (int)ShellExecute(NULL, "open", m_url,
+         bOk = (int)ShellExecute(NULL, _T("open"), m_url,
                                  NULL, NULL, SW_SHOWNORMAL ) > 32;
 #endif
       }

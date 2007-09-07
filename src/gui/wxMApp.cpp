@@ -699,7 +699,7 @@ wxMApp::Yield(bool onlyIfNeeded)
 static void
 FatalMsgBox(const String& msg)
 {
-   static const wxChar *title = gettext_noop("Fatal application error");
+   static const char *title = gettext_noop("Fatal application error");
 
    // using a plain message box is safer in this situation, but under Unix we
    // have no such choice
@@ -957,8 +957,8 @@ wxMApp::OnInit()
    {
       // this message is in English because translations were not loaded yet as
       // the locale hadn't been set
-      wxLogWarning(_T("Mahogany will not be able to detect if any other "
-                   "program instances are running."));
+      wxLogWarning("Mahogany will not be able to detect if any other "
+                   "program instances are running.");
    }
 
    // parse our command line options inside OnInit()
@@ -1182,14 +1182,14 @@ wxMApp::OnInit()
          wxString msg;
          if ( failedToSetLocale )
          {
-            msg.Printf(_T("Locale '%s' couldn't be set, do you want to "
-                       "retry setting it the next time?"),
+            msg.Printf("Locale '%s' couldn't be set, do you want to "
+                       "retry setting it the next time?",
                        locale.c_str());
          }
          else // failedToLoadMsgs
          {
-            msg.Printf(_T("Impossible to load message catalog(s) for the "
-                       "locale '%s', do you want to retry next time?"),
+            msg.Printf("Impossible to load message catalog(s) for the "
+                       "locale '%s', do you want to retry next time?",
                        locale.c_str());
          }
 
@@ -2306,19 +2306,19 @@ void wxMApp::ShowLog(bool doShow)
 // ----------------------------------------------------------------------------
 
 // the names of cmd line options
-#define OPTION_BCC         _T("bcc")
-#define OPTION_BODY        _T("body")
-#define OPTION_CC          _T("cc")
-#define OPTION_USERDIR     _T("userdir")
-#define OPTION_CONFIG      _T("config")
-#define OPTION_IMPORT      _T("import")
-#define OPTION_DEBUGMAIL   _T("debug")
-#define OPTION_FOLDER      _T("folder")
-#define OPTION_LANG        _T("lang")
-#define OPTION_NEWSGROUP   _T("newsgroup")
-#define OPTION_NOPYTHON    _T("nopython")
-#define OPTION_SAFE        _T("safe")
-#define OPTION_SUBJECT     _T("subject")
+#define OPTION_BCC         "bcc"
+#define OPTION_BODY        "body"
+#define OPTION_CC          "cc"
+#define OPTION_USERDIR     "userdir"
+#define OPTION_CONFIG      "config"
+#define OPTION_IMPORT      "import"
+#define OPTION_DEBUGMAIL   "debug"
+#define OPTION_FOLDER      "folder"
+#define OPTION_LANG        "lang"
+#define OPTION_NEWSGROUP   "newsgroup"
+#define OPTION_NOPYTHON    "nopython"
+#define OPTION_SAFE        "safe"
+#define OPTION_SUBJECT     "subject"
 
 void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
@@ -2330,7 +2330,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // -b or --bcc to specify the BCC headers
       {
          wxCMD_LINE_OPTION,
-         _T("b"),
+         "b",
          OPTION_BCC,
          gettext_noop("specify the blind carbon-copy (BCC) recipients"),
       },
@@ -2346,7 +2346,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // -c or --cc to specify the CC headers
       {
          wxCMD_LINE_OPTION,
-         _T("c"),
+         "c",
          OPTION_CC,
          gettext_noop("specify the carbon-copy (CC) recipients"),
       },
@@ -2378,7 +2378,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // -f or --folder to specify the folder to open in the main frame
       {
          wxCMD_LINE_OPTION,
-         _T("f"),
+         "f",
          OPTION_FOLDER,
          gettext_noop("specify the folder to open in the main window"),
       },
@@ -2428,7 +2428,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // -s or --subject to specify the subject
       {
          wxCMD_LINE_OPTION,
-         _T("s"),
+         "s",
          OPTION_SUBJECT,
          gettext_noop("specify the subject"),
       },
@@ -2438,7 +2438,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          wxCMD_LINE_PARAM,
          NULL,
          NULL,
-         _T("address(es) to start composing the message to"),
+         gettext_noop("address(es to start composing the message to"),
          wxCMD_LINE_VAL_STRING,
          wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE
       },

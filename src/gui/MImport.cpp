@@ -259,7 +259,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
       wxLog *logOld = wxLog::GetActiveTarget();
       wxLog::SetActiveTarget(new wxImportDialogLog(this, logOld));
 
-      const wxChar *progname = m_importer.GetProgName();
+      const char *progname = m_importer.GetProgName();
 
       #define DO_IMPORT(what, desc) \
          if ( m_check##what->GetValue() ) \

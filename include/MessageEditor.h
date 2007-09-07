@@ -31,7 +31,7 @@ struct ComposerOptions;
 #include "MModule.h"
 
 // the message editor module interface name
-#define MESSAGE_EDITOR_INTERFACE _T("MessageEditor")
+#define MESSAGE_EDITOR_INTERFACE "MessageEditor"
 
 // ----------------------------------------------------------------------------
 // MessageEditor: interface for an editor used by the composer
@@ -384,9 +384,9 @@ public:
       MMODULE_DEFINE();                                                    \
       DEFAULT_ENTRY_FUNC;                                                  \
    };                                                                      \
-   MMODULE_BEGIN_IMPLEMENT(cname##Factory, _T(#cname),                     \
-                           MESSAGE_EDITOR_INTERFACE, desc, _T("1.00"))     \
-      MMODULE_PROP(_T("author"), cpyright)                                 \
+   MMODULE_BEGIN_IMPLEMENT(cname##Factory, #cname,                         \
+                           MESSAGE_EDITOR_INTERFACE, desc, "1.00")         \
+      MMODULE_PROP("author", cpyright)                                     \
    MMODULE_END_IMPLEMENT(cname##Factory)                                   \
    MModule *cname##Factory::Init(int /* version_major */,                  \
                                  int /* version_minor */,                  \

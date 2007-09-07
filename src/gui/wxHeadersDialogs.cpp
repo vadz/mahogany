@@ -140,10 +140,10 @@ private:
    };
 
    // headers names
-   static const wxChar *ms_headerNames[Header_Max];
+   static const char *ms_headerNames[Header_Max];
 
    // profile key names
-   static const wxChar *ms_profileNamesDefault[Header_Max];
+   static const char *ms_profileNamesDefault[Header_Max];
 
    // the dialog controls
    wxTextCtrl *m_textvalues[Header_Max];
@@ -323,14 +323,14 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 // static data
-const wxChar *wxComposeHeadersDialog::ms_headerNames[] =
+const char *wxComposeHeadersDialog::ms_headerNames[] =
 {
    gettext_noop("&To"),
    gettext_noop("&Cc"),
    gettext_noop("&Bcc")
 };
 
-const wxChar *wxComposeHeadersDialog::ms_profileNamesDefault[Header_Max];
+const char *wxComposeHeadersDialog::ms_profileNamesDefault[Header_Max];
 
 void wxComposeHeadersDialog::InitStaticArrays()
 {
@@ -451,7 +451,7 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
 
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      def = m_profile->readEntry(ms_profileNamesDefault[header], wxEmptyString);
+      def = m_profile->readEntry(ms_profileNamesDefault[header], "");
 
       m_textvalues[header]->SetValue(def);
       m_textvalues[header]->DiscardEdits();
@@ -661,7 +661,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    int extraHeight;
    if ( letUserChooseType )
    {
-      static const wxChar *radioItems[CustomHeader_Max] =
+      static const char *radioItems[CustomHeader_Max] =
       {
          gettext_noop("news postings"),
          gettext_noop("mail messages"),
@@ -1052,7 +1052,7 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
    {
       const String name = pathBase + gs_customHeaderSubgroups[type];
       const String value = strutil_flatten_array(headersFor[type]);
-      if ( m_profile->readEntry(name, wxEmptyString) != value )
+      if ( m_profile->readEntry(name, "") != value )
          m_profile->writeEntry(name, value);
    }
 
@@ -1185,7 +1185,7 @@ bool ConfigureCustomHeader(Profile *profile,
       path.clear();
       path << CUSTOM_HEADERS_PREFIX << gs_customHeaderSubgroups[type];
       wxArrayString
-         headerNames = strutil_restore_array(profile->readEntry(path, wxEmptyString));
+         headerNames = strutil_restore_array(profile->readEntry(path, ""));
       if ( headerNames.Index(*headerName) == wxNOT_FOUND )
       {
          headerNames.Add(*headerName);
@@ -1235,7 +1235,7 @@ size_t GetCustomHeaders(Profile *profile,
 
       // get the names of custom headers for this type
       String hdrs
-          = profile->readEntry(pathBase + gs_customHeaderSubgroups[type], wxEmptyString);
+          = profile->readEntry(pathBase + gs_customHeaderSubgroups[type], "");
 
       // if we have any ...
       if ( !hdrs.empty() )
@@ -1252,7 +1252,7 @@ size_t GetCustomHeaders(Profile *profile,
                  << ':' << gs_customHeaderSubgroups[type];
 
             names->Add(name);
-            values->Add(profile->readEntry(path, wxEmptyString));
+            values->Add(profile->readEntry(path, ""));
             if ( types )
                types->Add(type);
          }

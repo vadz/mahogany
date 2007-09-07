@@ -376,7 +376,7 @@ String GetFileNameForMIME(Message *message, int partNo)
 
 // common part of GetAllAvailableViewers() and GetAllAvailableFilters()
 static
-size_t GetAllAvailablePlugins(const wxChar *iface,
+size_t GetAllAvailablePlugins(const char *iface,
                               wxArrayString *names,
                               wxArrayString *descs,
                               wxArrayInt *states = NULL)
@@ -2189,7 +2189,7 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
       return false;
    }
 
-   static const wxChar *
+   static const char *
       sigIgnoredMsg = gettext_noop("\n\nSignature will be ignored");
 
    MimePart * const signedPart = mimepart->GetNested();

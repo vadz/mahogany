@@ -134,7 +134,7 @@ protected:
 IMPLEMENT_ADB_IMPORTER(AdbPineImporter,
                        gettext_noop("PINE address book import module"),
                        gettext_noop("PINE address book"),
-                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 
 // ----------------------------------------------------------------------------

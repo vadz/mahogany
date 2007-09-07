@@ -338,7 +338,7 @@ wxIconManager::LoadXpm(String filename)
    ASSERT(cpptr);
    bool found_xpm = false;
 
-   ifstream in(filename.fn_str());
+   ifstream in(filename.mb_str());
    if(in)
    {
       String str;

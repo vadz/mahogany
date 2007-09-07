@@ -665,7 +665,7 @@ public:
    // terminated array of the icon names (image size should be 32x32)
    wxNotebookWithImages(const wxString& configPath,
                         wxWindow *parent,
-                        const wxChar *aszImages[]);
+                        const char *aszImages[]);
 
    virtual ~wxNotebookWithImages();
 

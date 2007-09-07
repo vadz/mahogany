@@ -181,14 +181,14 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
    ConnectMouseAndKeyEvents(bottom);
 
    // prepare the images used in HTML
-   wxMemoryFSHandler::AddFile(_T("wxlogo") MEMORY_FS_FILE_EXT, wxBITMAP(wxlogo), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile("wxlogo" MEMORY_FS_FILE_EXT, wxBITMAP(wxlogo), MEMORY_FS_FILE_FMT);
 
 #ifdef USE_SSL
-   wxMemoryFSHandler::AddFile(_T("ssllogo") MEMORY_FS_FILE_EXT, wxBITMAP(ssllogo), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile("ssllogo" MEMORY_FS_FILE_EXT, wxBITMAP(ssllogo), MEMORY_FS_FILE_FMT);
 #endif // USE_SSL
 
 #ifdef USE_PYTHON
-   wxMemoryFSHandler::AddFile(_T("pythonpowered") MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
+   wxMemoryFSHandler::AddFile("pythonpowered" MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
 #endif // USE_PYTHON
 
 #define HTML_IMAGE(name) \
@@ -201,7 +201,7 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
 
 #ifdef USE_I18N
    // make special provision for the translators name
-   static const wxChar *TRANSLATOR_NAME =
+   static const char *TRANSLATOR_NAME =
       gettext_noop("Translate this into your name (for About dialog)");
    wxString translator = wxGetTranslation(TRANSLATOR_NAME);
    if ( translator == TRANSLATOR_NAME )
@@ -219,16 +219,16 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
 
    wxString pageHtmlText;
 
-   pageHtmlText << _T("<body text=#000000 bgcolor=#ffffff>"
+   pageHtmlText << "<body text=#000000 bgcolor=#ffffff>"
                    "<meta http-equiv=\"Content-Type\" "
                          "content=\"text/html;charset=ISO-8859-13\">"
                    "<font face=\"Times New Roman,times\">"
 
-                   "<h4>") << _("Mahogany information") << _T("</h4>")
+                   "<h4>" << _("Mahogany information") << "</h4>"
                 << _("Version ") << M_VERSION_STRING
-                << _("  built with ") << wxVERSION_STRING << _T("<br>")
+                << _("  built with ") << wxVERSION_STRING << "<br>"
 #ifdef DEBUG
-                   HTML_WARNING << _("This is a debug build") << _T("<br>")
+                   HTML_WARNING << _("This is a debug build") << "<br>"
 #else
                 << _("Release build ")
 #endif
@@ -238,21 +238,21 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
                 << _("(compiled at ") << __DATE__ ", " __TIME__ ")<br>"
 
 #if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
-                   _T("<h4>") << _("Extra features:") << _T("</h4>")
+                   "<h4>" << _("Extra features:") << "</h4>"
 #ifdef USE_SSL
-                << _("SSL support") << _T("<br>")
+                << _("SSL support") << "<br>"
 #endif
 #ifdef USE_THREADS
-                << _("Threads") << _T("<br>")
+                << _("Threads") << "<br>"
 #endif
 #ifdef USE_PYTHON
-                << _("Embedded Python interpreter") << _T("<br>")
+                << _("Embedded Python interpreter") << "<br>"
 #endif
 #ifdef USE_DIALUP
-                << _("Dial-up support") << _T("<br>")
+                << _("Dial-up support") << "<br>"
 #endif
 #ifdef USE_I18N
-                << _("Internationalization") << translator << _T("<br>")
+                << _("Internationalization") << translator << "<br>"
 #endif
 #endif // USE_XXX
 
@@ -262,14 +262,14 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
 #endif
 
                 << "<p>"
-                   _T("<h4>") << _("List of contributors:") << _T("</h4>")
+                   "<h4>" << _("List of contributors:") << "</h4>"
                    "<p>"
                    "Karsten Ball\374der, Vadim Zeitlin, Greg Noel,<br>"
                    "Nerijus Bali\373nas, Xavier Nodet, Vaclav Slavik,<br>"
                    "Daniel Seifert, Michele Ravani, Michael A Chase,<br>"
                    "Robert Vazan " << _("and many others") << "<br>"
                    "<br>"
-                   _T("<i>") << _("The Mahogany team") << _T("</i><br>")
+                   "<i>" << _("The Mahogany team") << "</i><br>"
                    "<font size=2>"
                    "(<tt>mahogany-developers@lists.sourceforge.net</tt>)"
                    "</font>"
@@ -277,12 +277,12 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
                    HTML_IMAGE(wxlogo)
                 << _("Mahogany is built on the cross-platform C++ framework "
                      "wxWidgets (http://www.wxwidgets.org/).")
-                << _T("<p>")
+                << "<p>"
                 << _("This product includes software developed and copyright "
                      "by the University of Washington written by Mark Crispin.")
                 <<
 #ifdef USE_SSL
-                   _T("<p>")
+                   "<p>"
                    HTML_IMAGE(ssllogo)
                 << _("This product includes software developed by the OpenSSL Project "
                      "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
@@ -292,14 +292,14 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
 #endif // USE_SSL
 
 #ifdef USE_PYTHON
-                   _T("<p>")
+                   "<p>"
                    HTML_IMAGE(pythonpowered)
                 << _("This program contains an embedded Python interpreter.")
                 <<
 #endif // USE_PYTHON
-                   _T("<hr>")
+                   "<hr>"
                 << _("Special thanks to Daniel Lord for hardware donations.")
-                << _T("<p>")
+                << "<p>"
                 << _("The Mahogany Team would also like to acknowledge "
                      "the support of ")
                 << _("Anthemion Software, "
@@ -317,12 +317,12 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
 
    bottom->SetPage(pageHtmlText);
 
-   wxMemoryFSHandler::RemoveFile(_T("wxlogo") MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile("wxlogo" MEMORY_FS_FILE_EXT);
 #ifdef USE_SSL
-   wxMemoryFSHandler::RemoveFile(_T("ssllogo") MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile("ssllogo" MEMORY_FS_FILE_EXT);
 #endif // USE_SSL
 #ifdef USE_PYTHON
-   wxMemoryFSHandler::RemoveFile(_T("pythonpowered") MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile("pythonpowered" MEMORY_FS_FILE_EXT);
 #endif
 
    bottom->SetFocus();

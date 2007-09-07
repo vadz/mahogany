@@ -72,7 +72,7 @@ IMPLEMENT_VIEWER_FILTER(UUDecodeFilter,
                         ViewFilter::Priority_High - 5,
                         true,      // initially enabled
                         gettext_noop("UUdecode"),
-                        _T("(c) 2004 Xavier Nodet <xavier.nodet@free.fr>"));
+                        "(c) 2004 Xavier Nodet <xavier.nodet@free.fr>");
 
 // ----------------------------------------------------------------------------
 // UUDecodeFilter ctor

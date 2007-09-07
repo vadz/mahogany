@@ -2188,7 +2188,7 @@ MailFolderCmn::SendMsgStatusChangeEvent()
             if ( (!isDeleted && msgStatusNew.what) && \
                  (wasDeleted || !msgStatusOld.what) ) \
             { \
-               wxLogTrace(M_TRACE_MFSTATUS, _T("%s: " #what "++ (now %lu)"), \
+               wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "++ (now %lu)", \
                           GetName().c_str(), status.what + 1); \
                status.what++; \
             } \
@@ -2196,7 +2196,7 @@ MailFolderCmn::SendMsgStatusChangeEvent()
                       (isDeleted || !msgStatusNew.what) ) \
                if ( status.what > 0 ) \
                { \
-                  wxLogTrace(M_TRACE_MFSTATUS, _T("%s: " #what "-- (now %lu)"), \
+                  wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "-- (now %lu)", \
                              GetName().c_str(), status.what - 1); \
                   status.what--; \
                } \

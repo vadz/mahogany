@@ -430,18 +430,18 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
 // highlight the options according to their origin in the options dialog
 extern const MOption MP_OPTION_SHOW_ORIGIN;
-#define MP_OPTION_SHOW_ORIGIN_NAME _T("ShowOptionOrigin")
+#define MP_OPTION_SHOW_ORIGIN_NAME "ShowOptionOrigin"
 #define MP_OPTION_SHOW_ORIGIN_DEFVAL 1l
 
 // the colour for the options set at this folder level
 extern const MOption MP_OPTION_ORIGIN_HERE;
-#define MP_OPTION_ORIGIN_HERE_NAME _T("OptionSetHereCol")
-#define MP_OPTION_ORIGIN_HERE_DEFVAL _T("blue")
+#define MP_OPTION_ORIGIN_HERE_NAME "OptionSetHereCol"
+#define MP_OPTION_ORIGIN_HERE_DEFVAL "blue"
 
 // the colour for the options inherited from parent (but non default)
 extern const MOption MP_OPTION_ORIGIN_INHERITED;
-#define MP_OPTION_ORIGIN_INHERITED_NAME _T("OptionInheritedCol")
-#define MP_OPTION_ORIGIN_INHERITED_DEFVAL _T("RGB(0, 0, 127)")
+#define MP_OPTION_ORIGIN_INHERITED_NAME "OptionInheritedCol"
+#define MP_OPTION_ORIGIN_INHERITED_DEFVAL "RGB(0, 0, 127)"
 
 // ----------------------------------------------------------------------------
 // the option names
@@ -450,833 +450,833 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /** @name names of configuration entries */
 //@{
 /// our version
-#define   MP_VERSION_NAME          _T("Version")
+#define   MP_VERSION_NAME          "Version"
 /// are we running for the first time?
-#define   MP_FIRSTRUN_NAME         _T("FirstRun")
+#define   MP_FIRSTRUN_NAME         "FirstRun"
 /// shall we record default values in configuration files
-#define   MP_RECORDDEFAULTS_NAME      _T("RecordDefaults")
+#define   MP_RECORDDEFAULTS_NAME      "RecordDefaults"
 /// expand env vars in entries read from config?
-#define   MP_EXPAND_ENV_VARS_NAME  _T("ExpandEnvVars")
+#define   MP_EXPAND_ENV_VARS_NAME  "ExpandEnvVars"
 /// default position x
-#define   MP_XPOS_NAME            _T("XPos")
+#define   MP_XPOS_NAME            "XPos"
 /// default position y
-#define   MP_YPOS_NAME            _T("YPos")
+#define   MP_YPOS_NAME            "YPos"
 /// window width
-#define   MP_WIDTH_NAME         _T("Width")
+#define   MP_WIDTH_NAME         "Width"
 /// window height
-#define   MP_HEIGHT_NAME         _T("Height")
+#define   MP_HEIGHT_NAME         "Height"
 /// window iconisation status
-#define   MP_ICONISED_NAME         _T("Iconised")
+#define   MP_ICONISED_NAME         "Iconised"
 /// window maximized?
-#define   MP_MAXIMISED_NAME         _T("Maximised")
+#define   MP_MAXIMISED_NAME         "Maximised"
 
 /// show log window?
-#define   MP_SHOWLOG_NAME          _T("ShowLog")
+#define   MP_SHOWLOG_NAME          "ShowLog"
 /// the file to save log messages to (if not empty)
-#define   MP_LOGFILE_NAME          _T("LogFile")
+#define   MP_LOGFILE_NAME          "LogFile"
 /// debug protocols and folder access?
-#define   MP_DEBUG_CCLIENT_NAME   _T("MailDebug")
+#define   MP_DEBUG_CCLIENT_NAME   "MailDebug"
 
 /// open ADB editor on startup?
-#define   MP_SHOWADBEDITOR_NAME    _T("ShowAdb")
+#define   MP_SHOWADBEDITOR_NAME    "ShowAdb"
 
 /// show tips at startup?
-#define MP_SHOWTIPS_NAME _T("ShowTips")
+#define MP_SHOWTIPS_NAME "ShowTips"
 /// the index of the last tip which was shown
-#define MP_LASTTIP_NAME _T("LastTip")
+#define MP_LASTTIP_NAME "LastTip"
 
 /// expand folder tree control?
-#define   MP_EXPAND_TREECTRL_NAME   _T("ExpandTreeControl")
+#define   MP_EXPAND_TREECTRL_NAME   "ExpandTreeControl"
 /// focus follows mouse?
-#define MP_FOCUS_FOLLOWSMOUSE_NAME  _T("FocusFollowsMouse")
+#define MP_FOCUS_FOLLOWSMOUSE_NAME  "FocusFollowsMouse"
 /// dockable menu bars?
-#define   MP_DOCKABLE_MENUBARS_NAME _T("MenuBarsDockable")
+#define   MP_DOCKABLE_MENUBARS_NAME "MenuBarsDockable"
 /// dockable tool bars?
-#define   MP_DOCKABLE_TOOLBARS_NAME   _T("ToolBarsDockable")
+#define   MP_DOCKABLE_TOOLBARS_NAME   "ToolBarsDockable"
 /// flat tool bars?
-#define   MP_FLAT_TOOLBARS_NAME   _T("ToolBarsFlat")
+#define   MP_FLAT_TOOLBARS_NAME   "ToolBarsFlat"
 
 /// help browser kind
-#define   MP_HELPBROWSER_KIND_NAME   _T("HelpBrowserKind")
+#define   MP_HELPBROWSER_KIND_NAME   "HelpBrowserKind"
 /// help browser name
-#define   MP_HELPBROWSER_NAME   _T("HelpBrowser")
+#define   MP_HELPBROWSER_NAME   "HelpBrowser"
 /// is help browser of netscape type?
-#define   MP_HELPBROWSER_ISNS_NAME   _T("HelpBrowserIsNetscape")
+#define   MP_HELPBROWSER_ISNS_NAME   "HelpBrowserIsNetscape"
 /// width of help frame
-#define MP_HELPFRAME_WIDTH_NAME   _T("HelpFrameWidth")
+#define MP_HELPFRAME_WIDTH_NAME   "HelpFrameWidth"
 /// height of help frame
-#define MP_HELPFRAME_HEIGHT_NAME  _T("HelpFrameHeight")
+#define MP_HELPFRAME_HEIGHT_NAME  "HelpFrameHeight"
 /// xpos of help frame
-#define MP_HELPFRAME_XPOS_NAME   _T("HelpFrameXpos")
+#define MP_HELPFRAME_XPOS_NAME   "HelpFrameXpos"
 /// ypos of help frame
-#define MP_HELPFRAME_YPOS_NAME   _T("HelpFrameYpos")
+#define MP_HELPFRAME_YPOS_NAME   "HelpFrameYpos"
 /// the directory for mbox folders
-#define   MP_MBOXDIR_NAME         _T("FolderDir")
+#define   MP_MBOXDIR_NAME         "FolderDir"
 /// the news spool directory
-#define MP_NEWS_SPOOL_DIR_NAME _T("NewsSpool")
+#define MP_NEWS_SPOOL_DIR_NAME "NewsSpool"
 /// command to convert tiff faxes to postscript
-#define   MP_TIFF2PS_NAME         _T("FaxToPS")
+#define   MP_TIFF2PS_NAME         "FaxToPS"
 /// preferred intermediary image format in conversions (0=xpm,1=png,2=bmp,3=jpg)
-#define MP_TMPGFXFORMAT_NAME      _T("ConvertGfxFormat")
+#define MP_TMPGFXFORMAT_NAME      "ConvertGfxFormat"
 /// the user's M directory
-#   define   MP_USERDIR_NAME         _T("UserDirectory")
+#   define   MP_USERDIR_NAME         "UserDirectory"
 /// the acceptance status of the license
-#define MP_LICENSE_ACCEPTED_NAME   _T("LicenseAccepted")
+#define MP_LICENSE_ACCEPTED_NAME   "LicenseAccepted"
 
 /// the complete path to the global M directory
-#define MP_GLOBALDIR_NAME      _T("GlobalDir")
+#define MP_GLOBALDIR_NAME      "GlobalDir"
 
 /// run onl one copy of the program at once?
-#define MP_RUNONEONLY_NAME _T("RunOneOnly")
+#define MP_RUNONEONLY_NAME "RunOneOnly"
 
 /// show images in the toolbar
-#define MP_TBARIMAGES_NAME _T("ShowTbarImages")
+#define MP_TBARIMAGES_NAME "ShowTbarImages"
 
 /// the directory containing the help files
-#define MP_HELPDIR_NAME _T("HelpDir")
+#define MP_HELPDIR_NAME "HelpDir"
 
 // Unix-only entries
 #ifdef OS_UNIX
 /// the path where to find .afm files
-#   define   MP_AFMPATH_NAME         _T("AfmPath")
+#   define   MP_AFMPATH_NAME         "AfmPath"
 #endif //Unix
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
-#define MP_CRYPTALGO_NAME    _T("CryptAlgo")
+#define MP_CRYPTALGO_NAME    "CryptAlgo"
 /// DoesTwoFish work? (-1 unknown, 0 no, 1 yes)
-#define MP_CRYPT_TWOFISH_OK_NAME _T("TwoFishOk")
+#define MP_CRYPT_TWOFISH_OK_NAME "TwoFishOk"
 /// some test data
-#define MP_CRYPT_TESTDATA_NAME _T("CryptData")
+#define MP_CRYPT_TESTDATA_NAME "CryptData"
 /// the locale for translation to national languages
-#define   MP_LOCALE_NAME               _T("Locale")
+#define   MP_LOCALE_NAME               "Locale"
 /// the default character set
-#define MP_CHARSET_NAME      _T("CharSet")
+#define MP_CHARSET_NAME      "CharSet"
 /// the default icon for frames
-#define   MP_ICON_MFRAME_NAME         _T("MFrameIcon")
+#define   MP_ICON_MFRAME_NAME         "MFrameIcon"
 /// the icon for the main frame
-#define   MP_ICON_MAINFRAME_NAME      _T("MainFrameIcon")
+#define   MP_ICON_MAINFRAME_NAME      "MainFrameIcon"
 /// the icon directory
-#define   MP_ICONPATH_NAME         _T("IconDirectory")
+#define   MP_ICONPATH_NAME         "IconDirectory"
 /// the path for finding profiles
-#define   MP_PROFILE_PATH_NAME         _T("ProfilePath")
+#define   MP_PROFILE_PATH_NAME         "ProfilePath"
 /// the extension to use for profile files
-#define   MP_PROFILE_EXTENSION_NAME      _T("ProfileExtension")
+#define   MP_PROFILE_EXTENSION_NAME      "ProfileExtension"
 /// the key for identity redirection
-#define MP_PROFILE_IDENTITY_NAME _T("ProfileId")
+#define MP_PROFILE_IDENTITY_NAME "ProfileId"
 /// the name of the mailcap file
-#define   MP_MAILCAP_NAME         _T("MailCap")
+#define   MP_MAILCAP_NAME         "MailCap"
 /// the name of the mime types file
-#define   MP_MIMETYPES_NAME         _T("MimeTypes")
+#define   MP_MIMETYPES_NAME         "MimeTypes"
 /// the strftime() format for dates
-#define   MP_DATE_FMT_NAME         _T("DateFormat")
+#define   MP_DATE_FMT_NAME         "DateFormat"
 /// display all dates as GMT?
-#define   MP_DATE_GMT_NAME         _T("GMTDate")
+#define   MP_DATE_GMT_NAME         "GMTDate"
 /// show console window
-#define   MP_SHOWCONSOLE_NAME      _T("ShowConsole")
+#define   MP_SHOWCONSOLE_NAME      "ShowConsole"
 /// name of address database
-#define   MP_ADBFILE_NAME         _T("AddressBook")
+#define   MP_ADBFILE_NAME         "AddressBook"
 /// open any folders at all on startup?
-#define   MP_DONTOPENSTARTUP_NAME   _T("DontOpenAtStartup")
+#define   MP_DONTOPENSTARTUP_NAME   "DontOpenAtStartup"
 /// names of folders to open at startup (semicolon separated list)
-#define   MP_OPENFOLDERS_NAME         _T("OpenFolders")
+#define   MP_OPENFOLDERS_NAME         "OpenFolders"
 /// reopen the last opened folder in the main frame
-#define   MP_REOPENLASTFOLDER_NAME _T("ReopenLastFolder")
+#define   MP_REOPENLASTFOLDER_NAME "ReopenLastFolder"
 /// name of folder to open in mainframe
-#define   MP_MAINFOLDER_NAME          _T("MainFolder")
+#define   MP_MAINFOLDER_NAME          "MainFolder"
 /// path for Python
-#define   MP_PYTHONPATH_NAME        _T("PythonPath")
+#define   MP_PYTHONPATH_NAME        "PythonPath"
 /// Python DLL
-#define   MP_PYTHONDLL_NAME        _T("PythonDLL")
+#define   MP_PYTHONDLL_NAME        "PythonDLL"
 /// is Python enabled (this is a run-time option)?
-#define   MP_USEPYTHON_NAME         _T("UsePython")
+#define   MP_USEPYTHON_NAME         "UsePython"
 /// start-up script to run
-#define   MP_PYTHONMODULE_TO_LOAD_NAME     _T("StartupScript")
+#define   MP_PYTHONMODULE_TO_LOAD_NAME     "StartupScript"
 /// show splash screen on startup?
-#define   MP_SHOWSPLASH_NAME        _T("ShowSplash")
+#define   MP_SHOWSPLASH_NAME        "ShowSplash"
 /// how long should splash screen stay (0 disables timeout)?
-#define   MP_SPLASHDELAY_NAME       _T("SplashDelay")
+#define   MP_SPLASHDELAY_NAME       "SplashDelay"
 /// how often should we autosave the profile settings (0 to disable)?
-#define   MP_AUTOSAVEDELAY_NAME       _T("AutoSaveDelay")
+#define   MP_AUTOSAVEDELAY_NAME       "AutoSaveDelay"
 /// how often should we check for incoming mail (secs, 0 to disable)?
-#define   MP_POLLINCOMINGDELAY_NAME       _T("PollIncomingDelay")
+#define   MP_POLLINCOMINGDELAY_NAME       "PollIncomingDelay"
 /// poll folder only if it is opened
-#define   MP_POLL_OPENED_ONLY_NAME _T("PollOpenedOnly")
+#define   MP_POLL_OPENED_ONLY_NAME "PollOpenedOnly"
 /// collect all new mail at startup?
-#define   MP_COLLECTATSTARTUP_NAME _T("CollectAtStartup")
+#define   MP_COLLECTATSTARTUP_NAME "CollectAtStartup"
 /// ask user if he really wants to exit?
-#define   MP_CONFIRMEXIT_NAME       _T("ConfirmExit")
+#define   MP_CONFIRMEXIT_NAME       "ConfirmExit"
 /// open folders when they're clicked (otherwise - double clicked)
-#define   MP_OPEN_ON_CLICK_NAME     _T("ClickToOpen")
+#define   MP_OPEN_ON_CLICK_NAME     "ClickToOpen"
 /// show all folders (even hidden ones) in the folder tree?
-#define   MP_SHOW_HIDDEN_FOLDERS_NAME _T("ShowHiddenFolders")
+#define   MP_SHOW_HIDDEN_FOLDERS_NAME "ShowHiddenFolders"
 /// create .profile files?
-#define   MP_CREATE_PROFILES_NAME   _T("CreateProfileFiles")
+#define   MP_CREATE_PROFILES_NAME   "CreateProfileFiles"
 /// umask setting for normal files
-#define   MP_UMASK_NAME               _T("Umask")
+#define   MP_UMASK_NAME               "Umask"
 /// the last selected message in the folder view (or -1)
-#define   MP_LASTSELECTED_MESSAGE_NAME _T("FViewLastSel")
+#define   MP_LASTSELECTED_MESSAGE_NAME "FViewLastSel"
 /// automatically show th last selected message in folderview?
-#define   MP_AUTOSHOW_LASTSELECTED_NAME _T("AutoShowLastSel")
+#define   MP_AUTOSHOW_LASTSELECTED_NAME "AutoShowLastSel"
 /// automatically show first message in folderview?
-#define   MP_AUTOSHOW_FIRSTMESSAGE_NAME _T("AutoShowFirstMessage")
+#define   MP_AUTOSHOW_FIRSTMESSAGE_NAME "AutoShowFirstMessage"
 /// automatically show first unread message in folderview?
-#define   MP_AUTOSHOW_FIRSTUNREADMESSAGE_NAME _T("AutoShowFirstUnread")
+#define   MP_AUTOSHOW_FIRSTUNREADMESSAGE_NAME "AutoShowFirstUnread"
 /// open messages when they're clicked (otherwise - double clicked)
-#define   MP_PREVIEW_ON_SELECT_NAME     _T("PreviewOnSelect")
+#define   MP_PREVIEW_ON_SELECT_NAME     "PreviewOnSelect"
 /// select the initially focused message
-#define   MP_AUTOSHOW_SELECT_NAME _T("AutoShowSelect")
+#define   MP_AUTOSHOW_SELECT_NAME "AutoShowSelect"
 /// program used to convert image files?
-#define   MP_CONVERTPROGRAM_NAME      _T("ImageConverter")
+#define   MP_CONVERTPROGRAM_NAME      "ImageConverter"
 /// list of modules to load at startup
-#define MP_MODULES_NAME               _T("Modules")
+#define MP_MODULES_NAME               "Modules"
 /// list of modules to not load
-#define MP_MODULES_DONT_LOAD_NAME               _T("ModulesIgnore")
+#define MP_MODULES_DONT_LOAD_NAME               "ModulesIgnore"
 /// the user path for template files used for message composition
-#define MP_COMPOSETEMPLATEPATH_USER_NAME   _T("CompooseTemplatePathUser")
+#define MP_COMPOSETEMPLATEPATH_USER_NAME   "CompooseTemplatePathUser"
 /// the global path for template files used for message composition
-#define MP_COMPOSETEMPLATEPATH_GLOBAL_NAME   _T("CompooseTemplatePath")
+#define MP_COMPOSETEMPLATEPATH_GLOBAL_NAME   "CompooseTemplatePath"
 
 /// the format string for the folder tree display
-#define MP_FOLDERSTATUS_TREE_NAME _T("TreeViewFmt")
+#define MP_FOLDERSTATUS_TREE_NAME "TreeViewFmt"
 /// the format string for status bar folder status display
-#define MP_FOLDERSTATUS_STATBAR_NAME _T("StatusBarFmt")
+#define MP_FOLDERSTATUS_STATBAR_NAME "StatusBarFmt"
 /// the format string for title bar folder status display
-#define MP_FOLDERSTATUS_TITLEBAR_NAME _T("TitleBarFmt")
+#define MP_FOLDERSTATUS_TITLEBAR_NAME "TitleBarFmt"
 
 /**@name Printer settings */
 //@{
 /// Command
-#define MP_PRINT_COMMAND_NAME   _T("PrintCommand")
+#define MP_PRINT_COMMAND_NAME   "PrintCommand"
 /// Options
-#define MP_PRINT_OPTIONS_NAME   _T("PrintOptions")
+#define MP_PRINT_OPTIONS_NAME   "PrintOptions"
 /// Orientation
-#define MP_PRINT_ORIENTATION_NAME _T("PrintOrientation")
+#define MP_PRINT_ORIENTATION_NAME "PrintOrientation"
 /// print mode
-#define MP_PRINT_MODE_NAME      _T("PrintMode")
+#define MP_PRINT_MODE_NAME      "PrintMode"
 /// paper name
-#define MP_PRINT_PAPER_NAME   _T("PrintPaperType")
+#define MP_PRINT_PAPER_NAME   "PrintPaperType"
 /// paper name
-#define MP_PRINT_FILE_NAME   _T("PrintFilenname")
+#define MP_PRINT_FILE_NAME   "PrintFilenname"
 /// print in colour?
-#define MP_PRINT_COLOUR_NAME _T("PrintUseColour")
+#define MP_PRINT_COLOUR_NAME "PrintUseColour"
 /// top margin
-#define MP_PRINT_TOPMARGIN_X_NAME    _T("PrintMarginLeft")
+#define MP_PRINT_TOPMARGIN_X_NAME    "PrintMarginLeft"
 /// left margin
-#define MP_PRINT_TOPMARGIN_Y_NAME   _T("PrintMarginTop")
+#define MP_PRINT_TOPMARGIN_Y_NAME   "PrintMarginTop"
 /// bottom margin
-#define MP_PRINT_BOTTOMMARGIN_X_NAME    _T("PrintMarginRight")
+#define MP_PRINT_BOTTOMMARGIN_X_NAME    "PrintMarginRight"
 /// right margin
-#define MP_PRINT_BOTTOMMARGIN_Y_NAME   _T("PrintMarginBottom")
+#define MP_PRINT_BOTTOMMARGIN_Y_NAME   "PrintMarginBottom"
 /// zoom level in print preview
-#define MP_PRINT_PREVIEWZOOM_NAME   _T("PrintPreviewZoom")
+#define MP_PRINT_PREVIEWZOOM_NAME   "PrintPreviewZoom"
 //@}
 /**@name for BBDB address book support */
 //@{
 /// generate unique names
-#define   MP_BBDB_GENERATEUNIQUENAMES_NAME   _T("BbdbGenerateUniqueNames")
+#define   MP_BBDB_GENERATEUNIQUENAMES_NAME   "BbdbGenerateUniqueNames"
 /// ignore entries without names
-#define   MP_BBDB_IGNOREANONYMOUS_NAME      _T("BbdbIgnoreAnonymous")
+#define   MP_BBDB_IGNOREANONYMOUS_NAME      "BbdbIgnoreAnonymous"
 /// name for anonymous entries, when neither first nor family name are set
-#define   MP_BBDB_ANONYMOUS_NAME         _T("BbdbAnonymousName")
+#define   MP_BBDB_ANONYMOUS_NAME         "BbdbAnonymousName"
 /// save on exit, 0=no, 1=ask, 2=always
-#define   MP_BBDB_SAVEONEXIT_NAME  _T("BbdbSaveOnExit")
+#define   MP_BBDB_SAVEONEXIT_NAME  "BbdbSaveOnExit"
 //@}
 /**@name For Profiles: */
 //@{
 /// The Profile Type. [OBSOLETE]
-#define   MP_PROFILE_TYPE_NAME      _T("ProfileType")
+#define   MP_PROFILE_TYPE_NAME      "ProfileType"
 /// The type of the config source
-#define   MP_CONFIG_SOURCE_TYPE_NAME _T("Type")
+#define   MP_CONFIG_SOURCE_TYPE_NAME "Type"
 /// The priority of the config source
-#define   MP_CONFIG_SOURCE_PRIO_NAME _T("Priority")
+#define   MP_CONFIG_SOURCE_PRIO_NAME "Priority"
 /// the current user identity
-#define   MP_CURRENT_IDENTITY_NAME  _T("Identity")
+#define   MP_CURRENT_IDENTITY_NAME  "Identity"
 /// the user's full name
-#define   MP_PERSONALNAME_NAME     _T("PersonalName")
+#define   MP_PERSONALNAME_NAME     "PersonalName"
 /// organization (the "Organization:" header name value)
-#define   MP_ORGANIZATION_NAME     _T("Organization")
+#define   MP_ORGANIZATION_NAME     "Organization"
 /// the user's qualification
-#define   MP_USERLEVEL_NAME        _T("Userlevel")
+#define   MP_USERLEVEL_NAME        "Userlevel"
 /// the username/login
-#define   MP_USERNAME_NAME         _T("UserName")
+#define   MP_USERNAME_NAME         "UserName"
 /// the user's hostname
-#define   MP_HOSTNAME_NAME         _T("HostName")
+#define   MP_HOSTNAME_NAME         "HostName"
 /// Add this hostname for addresses without hostname?
-#define   MP_ADD_DEFAULT_HOSTNAME_NAME   _T("AddDefaultHostName")
+#define   MP_ADD_DEFAULT_HOSTNAME_NAME   "AddDefaultHostName"
 /// (the username for returned mail) E-mail address
-#define   MP_FROM_ADDRESS_NAME      _T("ReturnAddress")
+#define   MP_FROM_ADDRESS_NAME      "ReturnAddress"
 /// Reply address
-#define   MP_REPLY_ADDRESS_NAME      _T("ReplyAddress")
+#define   MP_REPLY_ADDRESS_NAME      "ReplyAddress"
 /// the default POP3 host
-#define   MP_POPHOST_NAME          _T("Pop3Host")
+#define   MP_POPHOST_NAME          "Pop3Host"
 /// don't use AUTH with POP3
-#define   MP_POP_NO_AUTH_NAME       _T("Pop3NoAuth")
+#define   MP_POP_NO_AUTH_NAME       "Pop3NoAuth"
 /// the default IMAP4 host
-#define   MP_IMAPHOST_NAME          _T("Imap4Host")
+#define   MP_IMAPHOST_NAME          "Imap4Host"
 /// use SSL for POP/IMAP?
-#define   MP_USE_SSL_NAME           _T("UseSSL")
+#define   MP_USE_SSL_NAME           "UseSSL"
 /// accept unsigned SSL certificates?
-#define   MP_USE_SSL_UNSIGNED_NAME  _T("SSLUnsigned")
+#define   MP_USE_SSL_UNSIGNED_NAME  "SSLUnsigned"
 /// the mail host
-#define   MP_SMTPHOST_NAME         _T("MailHost")
+#define   MP_SMTPHOST_NAME         "MailHost"
 /// use the specified sender value or guess it automatically?
-#define   MP_GUESS_SENDER_NAME       _T("GuessSender")
+#define   MP_GUESS_SENDER_NAME       "GuessSender"
 /// the smtp sender value
-#define   MP_SENDER_NAME           _T("Sender")
+#define   MP_SENDER_NAME           "Sender"
 /// the smtp host user-id
-#define   MP_SMTPHOST_LOGIN_NAME   _T("MailHostLogin")
+#define   MP_SMTPHOST_LOGIN_NAME   "MailHostLogin"
 /// the smtp host password
-#define   MP_SMTPHOST_PASSWORD_NAME  _T("MailHostPw")
+#define   MP_SMTPHOST_PASSWORD_NAME  "MailHostPw"
 /// the news server
-#define   MP_NNTPHOST_NAME         _T("NewsHost")
+#define   MP_NNTPHOST_NAME         "NewsHost"
 /// the news host user-id
-#define   MP_NNTPHOST_LOGIN_NAME   _T("NewsHostLogin")
+#define   MP_NNTPHOST_LOGIN_NAME   "NewsHostLogin"
 /// the news host password
-#define   MP_NNTPHOST_PASSWORD_NAME  _T("NewsHostPw")
+#define   MP_NNTPHOST_PASSWORD_NAME  "NewsHostPw"
 /// use SSL?
-#define   MP_SMTPHOST_USE_SSL_NAME         _T("MailHostSSL")
+#define   MP_SMTPHOST_USE_SSL_NAME         "MailHostSSL"
 /// check ssl-certs for SMTP connections?
-#define   MP_SMTPHOST_USE_SSL_UNSIGNED_NAME   _T("MailHostSSLUnsigned")
+#define   MP_SMTPHOST_USE_SSL_UNSIGNED_NAME   "MailHostSSLUnsigned"
 /// use ESMTP 8BITMIME extension if available
-#define   MP_SMTP_USE_8BIT_NAME         _T("Mail8Bit")
+#define   MP_SMTP_USE_8BIT_NAME         "Mail8Bit"
 /// disabled SMTP authentificators
-#define   MP_SMTP_DISABLED_AUTHS_NAME     _T("SmtpDisabledAuths")
+#define   MP_SMTP_DISABLED_AUTHS_NAME     "SmtpDisabledAuths"
 /// sendmail command
-#define MP_SENDMAILCMD_NAME _T("SendmailCmd")
+#define MP_SENDMAILCMD_NAME "SendmailCmd"
 /// use sendmail?
-#define MP_USE_SENDMAIL_NAME _T("UseSendmail")
+#define MP_USE_SENDMAIL_NAME "UseSendmail"
 /// use SSL?
-#define   MP_NNTPHOST_USE_SSL_NAME         _T("NewsHostSSL")
+#define   MP_NNTPHOST_USE_SSL_NAME         "NewsHostSSL"
 /// check ssl-certs for NNTP connections?
-#define   MP_NNTPHOST_USE_SSL_UNSIGNED_NAME   _T("NewsHostSSLUnsigned")
+#define   MP_NNTPHOST_USE_SSL_UNSIGNED_NAME   "NewsHostSSLUnsigned"
 /// the beacon host to test for net connection
-#define   MP_BEACONHOST_NAME      _T("BeaconHost")
+#define   MP_BEACONHOST_NAME      "BeaconHost"
 #ifdef USE_DIALUP
 /// does Mahogany control dial-up networking?
-#define MP_DIALUP_SUPPORT_NAME   _T("DialUpNetSupport")
+#define MP_DIALUP_SUPPORT_NAME   "DialUpNetSupport"
 #endif // USE_DIALUP
 
 /// set reply string from To: field?
-#define MP_SET_REPLY_FROM_TO_NAME   _T("ReplyEqualsTo")
+#define MP_SET_REPLY_FROM_TO_NAME   "ReplyEqualsTo"
 /// set reply address only?
-#define MP_SET_REPLY_STD_NAME_NAME  _T("ReplyUseStdName")
+#define MP_SET_REPLY_STD_NAME_NAME  "ReplyUseStdName"
 /// should we attach vCard to outgoing messages?
-#define MP_USEVCARD_NAME _T("UseVCard")
+#define MP_USEVCARD_NAME "UseVCard"
 /// the vCard to use
-#define MP_VCARD_NAME _T("VCard")
+#define MP_VCARD_NAME "VCard"
 
 /// use the folder create wizard (or the dialog directly)?
-#define MP_USE_FOLDER_CREATE_WIZARD_NAME _T("FolderCreateWizard")
+#define MP_USE_FOLDER_CREATE_WIZARD_NAME "FolderCreateWizard"
 
 #if defined(OS_WIN)
 /// the RAS connection to use
-#define MP_NET_CONNECTION_NAME _T("RasConnection")
+#define MP_NET_CONNECTION_NAME "RasConnection"
 #elif defined(OS_UNIX)
 /// the command to go online
-#define MP_NET_ON_COMMAND_NAME   _T("NetOnCommand")
+#define MP_NET_ON_COMMAND_NAME   "NetOnCommand"
 /// the command to go offline
-#define MP_NET_OFF_COMMAND_NAME   _T("NetOffCommand")
+#define MP_NET_OFF_COMMAND_NAME   "NetOffCommand"
 #endif // platform
 
 /// login for mailbox
-#define   MP_FOLDER_LOGIN_NAME      _T("Login")
+#define   MP_FOLDER_LOGIN_NAME      "Login"
 /// password for mailbox
-#define   MP_FOLDER_PASSWORD_NAME      _T("Password")
+#define   MP_FOLDER_PASSWORD_NAME      "Password"
 /// log level
-#define   MP_LOGLEVEL_NAME      _T("LogLevel")
+#define   MP_LOGLEVEL_NAME      "LogLevel"
 /// show busy info while sorting/threading?
-#define   MP_SHOWBUSY_DURING_SORT_NAME _T("BusyDuringSort")
+#define   MP_SHOWBUSY_DURING_SORT_NAME "BusyDuringSort"
 /// threshold for displaying mailfolder progress dialog
-#define   MP_FOLDERPROGRESS_THRESHOLD_NAME   _T("FolderProgressThreshold")
+#define   MP_FOLDERPROGRESS_THRESHOLD_NAME   "FolderProgressThreshold"
 /// size threshold for displaying message retrieval progress dialog
-#define   MP_MESSAGEPROGRESS_THRESHOLD_SIZE_NAME   _T("MsgProgressMinSize")
+#define   MP_MESSAGEPROGRESS_THRESHOLD_SIZE_NAME   "MsgProgressMinSize"
 /// time threshold for displaying message retrieval progress dialog
-#define   MP_MESSAGEPROGRESS_THRESHOLD_TIME_NAME   _T("MsgProgressDelay")
+#define   MP_MESSAGEPROGRESS_THRESHOLD_TIME_NAME   "MsgProgressDelay"
 /// the default path for saving files
-#define   MP_DEFAULT_SAVE_PATH_NAME      _T("SavePath")
+#define   MP_DEFAULT_SAVE_PATH_NAME      "SavePath"
 /// the default filename for saving files
-#define   MP_DEFAULT_SAVE_FILENAME_NAME   _T("SaveFileName")
+#define   MP_DEFAULT_SAVE_FILENAME_NAME   "SaveFileName"
 /// the default extension for saving files
-#define   MP_DEFAULT_SAVE_EXTENSION_NAME   _T("SaveExtension")
+#define   MP_DEFAULT_SAVE_EXTENSION_NAME   "SaveExtension"
 /// the wildcard for save dialog
-#define   MP_DEFAULT_SAVE_WILDCARD_NAME   _T("SaveWildcard")
+#define   MP_DEFAULT_SAVE_WILDCARD_NAME   "SaveWildcard"
 /// the default path for saving files
-#define   MP_DEFAULT_LOAD_PATH_NAME      _T("LoadPath")
+#define   MP_DEFAULT_LOAD_PATH_NAME      "LoadPath"
 /// the default filename for saving files
-#define   MP_DEFAULT_LOAD_FILENAME_NAME   _T("LoadFileName")
+#define   MP_DEFAULT_LOAD_FILENAME_NAME   "LoadFileName"
 /// the default extension for saving files
-#define   MP_DEFAULT_LOAD_EXTENSION_NAME   _T("LoadExtension")
+#define   MP_DEFAULT_LOAD_EXTENSION_NAME   "LoadExtension"
 /// the wildcard for save dialog
-#define   MP_DEFAULT_LOAD_WILDCARD_NAME   _T("LoadWildcard")
+#define   MP_DEFAULT_LOAD_WILDCARD_NAME   "LoadWildcard"
 /// default value for To: field in composition
-#define   MP_COMPOSE_TO_NAME         _T("ComposeToDefault")
+#define   MP_COMPOSE_TO_NAME         "ComposeToDefault"
 /// default value for Cc: field in composition
-#define   MP_COMPOSE_CC_NAME         _T("ComposeCcDefault")
+#define   MP_COMPOSE_CC_NAME         "ComposeCcDefault"
 /// default value for Bcc: field in composition
-#define   MP_COMPOSE_BCC_NAME         _T("ComposeBccDefault")
+#define   MP_COMPOSE_BCC_NAME         "ComposeBccDefault"
 /// show "From:" field in composer?
-#define   MP_COMPOSE_SHOW_FROM_NAME _T("ComposeShowFrom")
+#define   MP_COMPOSE_SHOW_FROM_NAME "ComposeShowFrom"
 
 /// default reply kind
-#define   MP_DEFAULT_REPLY_KIND_NAME _T("ReplyDefault")
+#define   MP_DEFAULT_REPLY_KIND_NAME "ReplyDefault"
 /// the mailing list addresses
-#define   MP_LIST_ADDRESSES_NAME _T("MLAddresses")
+#define   MP_LIST_ADDRESSES_NAME "MLAddresses"
 /// array of equivalent address pairs
-#define   MP_EQUIV_ADDRESSES_NAME _T("EquivAddresses")
+#define   MP_EQUIV_ADDRESSES_NAME "EquivAddresses"
 /// prefix for subject in replies
-#define   MP_REPLY_PREFIX_NAME         _T("ReplyPrefix")
+#define   MP_REPLY_PREFIX_NAME         "ReplyPrefix"
 /// prefix for subject in forwards
-#define   MP_FORWARD_PREFIX_NAME         _T("ForwardPrefix")
+#define   MP_FORWARD_PREFIX_NAME         "ForwardPrefix"
 /// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
-#define   MP_REPLY_COLLAPSE_PREFIX_NAME _T("CollapseReplyPrefix")
+#define   MP_REPLY_COLLAPSE_PREFIX_NAME "CollapseReplyPrefix"
 /// include the original message in the reply [no,ask,yes]
-#define MP_REPLY_QUOTE_ORIG_NAME _T("ReplyQuoteInsert" )
+#define MP_REPLY_QUOTE_ORIG_NAME "ReplyQuoteInsert" 
 /// include only the selected text (if any) in the reply?
-#define MP_REPLY_QUOTE_SELECTION_NAME _T("ReplyQuoteSelection")
+#define MP_REPLY_QUOTE_SELECTION_NAME "ReplyQuoteSelection"
 /// prefix for text in replies
-#define   MP_REPLY_MSGPREFIX_NAME      _T("ReplyQuote")
+#define   MP_REPLY_MSGPREFIX_NAME      "ReplyQuote"
 /// use the value of X-Attribution header as the prefix
-#define   MP_REPLY_MSGPREFIX_FROM_XATTR_NAME _T("ReplyQuoteXAttr")
+#define   MP_REPLY_MSGPREFIX_FROM_XATTR_NAME "ReplyQuoteXAttr"
 /// prepend the initials of the sender to the reply prefix?
-#define   MP_REPLY_MSGPREFIX_FROM_SENDER_NAME _T("ReplyQuoteUseSender")
+#define   MP_REPLY_MSGPREFIX_FROM_SENDER_NAME "ReplyQuoteUseSender"
 /// quote the empty lines when replying?
-#define   MP_REPLY_QUOTE_EMPTY_NAME      _T("ReplyQuoteEmpty")
+#define   MP_REPLY_QUOTE_EMPTY_NAME      "ReplyQuoteEmpty"
 /// use signature in composition?
-#define   MP_COMPOSE_USE_SIGNATURE_NAME   _T("ComposeInsertSignature")
+#define   MP_COMPOSE_USE_SIGNATURE_NAME   "ComposeInsertSignature"
 /// filename of signature file
-#define   MP_COMPOSE_SIGNATURE_NAME      _T("SignatureFile")
+#define   MP_COMPOSE_SIGNATURE_NAME      "SignatureFile"
 /// use "-- " to separate signature in composition?
-#define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_NAME   _T("ComposeSeparateSignature")
+#define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_NAME   "ComposeSeparateSignature"
 
 /// use XFace in composition?
-#define   MP_COMPOSE_USE_XFACE_NAME   _T("UseXFaces")
+#define   MP_COMPOSE_USE_XFACE_NAME   "UseXFaces"
 /// Name from where to read XFace
-#define   MP_COMPOSE_XFACE_FILE_NAME   _T("XFace")
+#define   MP_COMPOSE_XFACE_FILE_NAME   "XFace"
 /// the folder type for a mailbox (see enum in MFolder class)
-#define   MP_FOLDER_TYPE_NAME         _T("Type")
+#define   MP_FOLDER_TYPE_NAME         "Type"
 /// should we try to create the folder before opening it?
-#define   MP_FOLDER_TRY_CREATE_NAME _T("TryCreate")
+#define   MP_FOLDER_TRY_CREATE_NAME "TryCreate"
 /// the folder icon for a mailbox (see icon functions in FolderType.h)
-#define   MP_FOLDER_ICON_NAME         _T("Icon")
+#define   MP_FOLDER_ICON_NAME         "Icon"
 /// the position of the folder in the tree
-#define MP_FOLDER_TREEINDEX_NAME _T("Index")
+#define MP_FOLDER_TREEINDEX_NAME "Index"
 /// Move new mail to the NewMail folder (if not, only copy)?
-#define MP_MOVE_NEWMAIL_NAME      _T("MoveNewMail")
+#define MP_MOVE_NEWMAIL_NAME      "MoveNewMail"
 /// Where to store all new mail (obsolete)
-#define MP_NEWMAIL_FOLDER_NAME      _T("NewMailFolder")
+#define MP_NEWMAIL_FOLDER_NAME      "NewMailFolder"
 /// Where to store outgoing mail
-#define MP_OUTBOX_NAME_NAME       _T("OutBoxName")
+#define MP_OUTBOX_NAME_NAME       "OutBoxName"
 /// Use outbox?
-#define MP_USE_OUTBOX_NAME          _T("UseOutBox")
+#define MP_USE_OUTBOX_NAME          "UseOutBox"
 /// Name of Trash folder?
-#define MP_TRASH_FOLDER_NAME      _T("TrashFolder")
+#define MP_TRASH_FOLDER_NAME      "TrashFolder"
 /// Use a trash folder?
-#define MP_USE_TRASH_FOLDER_NAME   _T("UseTrash")
+#define MP_USE_TRASH_FOLDER_NAME   "UseTrash"
 /// Name of the Drafts folder
-#define MP_DRAFTS_FOLDER_NAME _T("DraftsFolder")
+#define MP_DRAFTS_FOLDER_NAME "DraftsFolder"
 /// Delete the drafts automatically after the message was sent?
-#define MP_DRAFTS_AUTODELETE_NAME _T("DraftsDelete")
+#define MP_DRAFTS_AUTODELETE_NAME "DraftsDelete"
 /// the filename for a mailbox
-#define   MP_FOLDER_PATH_NAME         _T("Path")
+#define   MP_FOLDER_PATH_NAME         "Path"
 /// comment
-#define   MP_FOLDER_COMMENT_NAME      _T("Comment")
+#define   MP_FOLDER_COMMENT_NAME      "Comment"
 /// update interval for folders in seconds
-#define   MP_UPDATEINTERVAL_NAME      _T("UpdateInterval")
+#define   MP_UPDATEINTERVAL_NAME      "UpdateInterval"
 /// close of folders delayed by
-#define MP_FOLDER_CLOSE_DELAY_NAME   _T("FolderCloseDelay")
+#define MP_FOLDER_CLOSE_DELAY_NAME   "FolderCloseDelay"
 /// close of network connection delayed by
-#define MP_CONN_CLOSE_DELAY_NAME   _T("ConnCloseDelay")
+#define MP_CONN_CLOSE_DELAY_NAME   "ConnCloseDelay"
 /// do automatic word wrap?
-#define MP_AUTOMATIC_WORDWRAP_NAME   _T("AutoWrap")
+#define MP_AUTOMATIC_WORDWRAP_NAME   "AutoWrap"
 /// Wrap quoted lines?
-#define MP_WRAP_QUOTED_NAME _T("WrapQuoted")
+#define MP_WRAP_QUOTED_NAME "WrapQuoted"
 /// wrapmargin for composition (set to -1 to disable it)
-#define   MP_WRAPMARGIN_NAME      _T("WrapMargin")
+#define   MP_WRAPMARGIN_NAME      "WrapMargin"
 /// do automatic word wrap in message view?
-#define MP_VIEW_AUTOMATIC_WORDWRAP_NAME   _T("ViewAutoWrap")
+#define MP_VIEW_AUTOMATIC_WORDWRAP_NAME   "ViewAutoWrap"
 /// wrapmargin for message view (set to -1 to disable it)
-#define   MP_VIEW_WRAPMARGIN_NAME      _T("ViewWrapMargin")
+#define   MP_VIEW_WRAPMARGIN_NAME      "ViewWrapMargin"
 /// show TEXT/PLAIN as inlined text?
-#define   MP_PLAIN_IS_TEXT_NAME      _T("PlainIsText")
+#define   MP_PLAIN_IS_TEXT_NAME      "PlainIsText"
 /// show MESSAGE/RFC822 as inlined text?
-#define   MP_RFC822_IS_TEXT_NAME      _T("Rfc822IsText")
+#define   MP_RFC822_IS_TEXT_NAME      "Rfc822IsText"
 /// show XFaces?
-#define   MP_SHOW_XFACES_NAME         _T("ShowXFaces")
+#define   MP_SHOW_XFACES_NAME         "ShowXFaces"
 /// show graphics inline
-#define   MP_INLINE_GFX_NAME         _T("InlineGraphics")
+#define   MP_INLINE_GFX_NAME         "InlineGraphics"
 /// show the external images (for HTML viewer only) too?
-#define   MP_INLINE_GFX_EXTERNAL_NAME _T("InlineExtGraphics")
+#define   MP_INLINE_GFX_EXTERNAL_NAME "InlineExtGraphics"
 /// limit size for inline graphics
-#define   MP_INLINE_GFX_SIZE_NAME     _T("InlineGraphicsSize")
+#define   MP_INLINE_GFX_SIZE_NAME     "InlineGraphicsSize"
 /// show viewer bar in the message view?
-#define MP_MSGVIEW_SHOWBAR_NAME _T("ShowViewerBar")
+#define MP_MSGVIEW_SHOWBAR_NAME "ShowViewerBar"
 /// which viewer to use in the message view?
-#define MP_MSGVIEW_VIEWER_NAME _T("MsgViewer")
+#define MP_MSGVIEW_VIEWER_NAME "MsgViewer"
 /// select the "best" viewer automatically?
-#define MP_MSGVIEW_AUTO_VIEWER_NAME _T("AutoViewer")
+#define MP_MSGVIEW_AUTO_VIEWER_NAME "AutoViewer"
 /// use HTML viewer whenever there is HTML content?
-#define MP_MSGVIEW_PREFER_HTML_NAME _T("PreferHTML")
+#define MP_MSGVIEW_PREFER_HTML_NAME "PreferHTML"
 /// allow HTML viewer when there is only HTML content?
-#define MP_MSGVIEW_ALLOW_HTML_NAME _T("AllowHTML")
+#define MP_MSGVIEW_ALLOW_HTML_NAME "AllowHTML"
 /// allow image-capable viewer when there are inline images?
-#define MP_MSGVIEW_ALLOW_IMAGES_NAME _T("AllowImages")
+#define MP_MSGVIEW_ALLOW_IMAGES_NAME "AllowImages"
 /// which headers to show in the message view?
-#define   MP_MSGVIEW_HEADERS_NAME     _T("MsgViewHeaders")
+#define   MP_MSGVIEW_HEADERS_NAME     "MsgViewHeaders"
 /// all headers we know about
-#define   MP_MSGVIEW_ALL_HEADERS_NAME     _T("MsgViewAllHeaders")
+#define   MP_MSGVIEW_ALL_HEADERS_NAME     "MsgViewAllHeaders"
 /// the default encoding for the viewer/composer
-#define  MP_MSGVIEW_DEFAULT_ENCODING_NAME   _T("DefEncoding")
+#define  MP_MSGVIEW_DEFAULT_ENCODING_NAME   "DefEncoding"
 /// the type of the last created folder
-#define   MP_LAST_CREATED_FOLDER_TYPE_NAME  _T("LastFolderType")
+#define   MP_LAST_CREATED_FOLDER_TYPE_NAME  "LastFolderType"
 /// the filter program to apply (OBSOLETE)
-#define MP_FILTER_RULE_NAME   _T("Filter")
+#define MP_FILTER_RULE_NAME   "Filter"
 /// the filters to use for this folder
-#define MP_FOLDER_FILTERS_NAME   _T("Filters")
+#define MP_FOLDER_FILTERS_NAME   "Filters"
 /// the default folder file format
-#define MP_FOLDER_FILE_DRIVER_NAME   _T("MailboxFileFormat")
+#define MP_FOLDER_FILE_DRIVER_NAME   "MailboxFileFormat"
 /**@name  Font settings for message view */
 //@{
 /// message view title
-#define   MP_MVIEW_TITLE_FMT_NAME   _T("MViewTitleFmt")
+#define   MP_MVIEW_TITLE_FMT_NAME   "MViewTitleFmt"
 /// which font to use
-#define   MP_MVIEW_FONT_NAME         _T("MViewFont")
+#define   MP_MVIEW_FONT_NAME         "MViewFont"
 /// which font size
-#define   MP_MVIEW_FONT_SIZE_NAME         _T("MViewFontSize")
+#define   MP_MVIEW_FONT_SIZE_NAME         "MViewFontSize"
 /// the full font desc (replaces the 2 settings above)
-#define   MP_MVIEW_FONT_DESC_NAME   _T("MViewFontDesc")
+#define   MP_MVIEW_FONT_DESC_NAME   "MViewFontDesc"
 /// which foreground colour for the font
-#define   MP_MVIEW_FGCOLOUR_NAME      _T("MViewFgColour")
+#define   MP_MVIEW_FGCOLOUR_NAME      "MViewFgColour"
 /// which background colour for the font
-#define   MP_MVIEW_BGCOLOUR_NAME      _T("MViewBgColour")
+#define   MP_MVIEW_BGCOLOUR_NAME      "MViewBgColour"
 /// which colour for signature
-#define   MP_MVIEW_SIGCOLOUR_NAME      _T("MViewSigColour")
+#define   MP_MVIEW_SIGCOLOUR_NAME      "MViewSigColour"
 /// which colour for URLS
-#define   MP_MVIEW_URLCOLOUR_NAME      _T("MViewUrlColour")
+#define   MP_MVIEW_URLCOLOUR_NAME      "MViewUrlColour"
 /// colour for attachment labels
-#define   MP_MVIEW_ATTCOLOUR_NAME      _T("MViewAttColour")
+#define   MP_MVIEW_ATTCOLOUR_NAME      "MViewAttColour"
 /// perform quoted text colourization?
-#define   MP_MVIEW_QUOTED_COLOURIZE_NAME   _T("MViewQuotedColourized")
+#define   MP_MVIEW_QUOTED_COLOURIZE_NAME   "MViewQuotedColourized"
 /// cycle colours?
-#define   MP_MVIEW_QUOTED_CYCLE_COLOURS_NAME   _T("MViewQuotedCycleColours")
+#define   MP_MVIEW_QUOTED_CYCLE_COLOURS_NAME   "MViewQuotedCycleColours"
 /// which colour for quoted text
-#define   MP_MVIEW_QUOTED_COLOUR1_NAME      _T("MViewQuotedColour1")
+#define   MP_MVIEW_QUOTED_COLOUR1_NAME      "MViewQuotedColour1"
 /// which colour for quoted text, second level
-#define   MP_MVIEW_QUOTED_COLOUR2_NAME      _T("MViewQuotedColour2")
+#define   MP_MVIEW_QUOTED_COLOUR2_NAME      "MViewQuotedColour2"
 /// which colour for quoted text, third level
-#define   MP_MVIEW_QUOTED_COLOUR3_NAME      _T("MViewQuotedColour3")
+#define   MP_MVIEW_QUOTED_COLOUR3_NAME      "MViewQuotedColour3"
 /// the maximum number of whitespaces prepending >
-#define   MP_MVIEW_QUOTED_MAXWHITESPACE_NAME    _T("MViewQuotedMaxWhitespace")
+#define   MP_MVIEW_QUOTED_MAXWHITESPACE_NAME    "MViewQuotedMaxWhitespace"
 /// the maximum number of A-Z prepending >
-#define   MP_MVIEW_QUOTED_MAXALPHA_NAME    _T("MViewQuotedMaxAlpha")
+#define   MP_MVIEW_QUOTED_MAXALPHA_NAME    "MViewQuotedMaxAlpha"
 /// the colour for header names in the message view
-#define   MP_MVIEW_HEADER_NAMES_COLOUR_NAME  _T("MViewHeaderNamesColour")
+#define   MP_MVIEW_HEADER_NAMES_COLOUR_NAME  "MViewHeaderNamesColour"
 /// the colour for header values in the message view
-#define   MP_MVIEW_HEADER_VALUES_COLOUR_NAME  _T("MViewHeaderValuesColour")
+#define   MP_MVIEW_HEADER_VALUES_COLOUR_NAME  "MViewHeaderValuesColour"
 //@}
 /**@name  Font settings for folder view */
 //@{
 /// which font to use
-#define   MP_FVIEW_FONT_NAME         _T("FViewFont")
+#define   MP_FVIEW_FONT_NAME         "FViewFont"
 /// which font size
-#define   MP_FVIEW_FONT_SIZE_NAME         _T("FViewFontSize")
+#define   MP_FVIEW_FONT_SIZE_NAME         "FViewFontSize"
 /// the full font desc (replaces the 2 settings above)
-#define   MP_FVIEW_FONT_DESC_NAME         _T("FViewFontDesc")
+#define   MP_FVIEW_FONT_DESC_NAME         "FViewFontDesc"
 /// don't show full e-mail, only sender's name
-#define   MP_FVIEW_NAMES_ONLY_NAME         _T("FViewNamesOnly")
+#define   MP_FVIEW_NAMES_ONLY_NAME         "FViewNamesOnly"
 /// which foreground colour for the font
-#define   MP_FVIEW_FGCOLOUR_NAME      _T("FViewFgColour")
+#define   MP_FVIEW_FGCOLOUR_NAME      "FViewFgColour"
 /// which background colour for the font
-#define   MP_FVIEW_BGCOLOUR_NAME      _T("FViewBgColour")
+#define   MP_FVIEW_BGCOLOUR_NAME      "FViewBgColour"
 /// colour for deleted messages
-#define   MP_FVIEW_DELETEDCOLOUR_NAME      _T("FViewDeletedColour")
+#define   MP_FVIEW_DELETEDCOLOUR_NAME      "FViewDeletedColour"
 /// colour for new messages
-#define   MP_FVIEW_NEWCOLOUR_NAME      _T("FViewNewColour")
+#define   MP_FVIEW_NEWCOLOUR_NAME      "FViewNewColour"
 /// colour for recent messages
-#define   MP_FVIEW_RECENTCOLOUR_NAME      _T("FViewRecentColour")
+#define   MP_FVIEW_RECENTCOLOUR_NAME      "FViewRecentColour"
 /// colour for unread messages
-#define   MP_FVIEW_UNREADCOLOUR_NAME      _T("FViewUnreadColour")
+#define   MP_FVIEW_UNREADCOLOUR_NAME      "FViewUnreadColour"
 /// colour for flagged messages
-#define   MP_FVIEW_FLAGGEDCOLOUR_NAME      _T("FViewFlaggedColour")
+#define   MP_FVIEW_FLAGGEDCOLOUR_NAME      "FViewFlaggedColour"
 /// automatically select next unread message after finishing the current one
-#define MP_FVIEW_AUTONEXT_UNREAD_MSG_NAME _T("FViewAutoNextMsg")
+#define MP_FVIEW_AUTONEXT_UNREAD_MSG_NAME "FViewAutoNextMsg"
 /// automatically select next unread folder after finishing the current one
-#define MP_FVIEW_AUTONEXT_UNREAD_FOLDER_NAME _T("FViewAutoNextFolder")
+#define MP_FVIEW_AUTONEXT_UNREAD_FOLDER_NAME "FViewAutoNextFolder"
 /// how to show the size (MessageSizeShow enum value)
-#define MP_FVIEW_SIZE_FORMAT_NAME   _T("SizeFormat")
+#define MP_FVIEW_SIZE_FORMAT_NAME   "SizeFormat"
 /// update the folder view status bar to show the msg info?
-#define   MP_FVIEW_STATUS_UPDATE_NAME _T("FViewStatUpdate")
+#define   MP_FVIEW_STATUS_UPDATE_NAME "FViewStatUpdate"
 /// folder view status bar string
-#define   MP_FVIEW_STATUS_FMT_NAME  _T("FViewStatFmt")
+#define   MP_FVIEW_STATUS_FMT_NAME  "FViewStatFmt"
 /// delay before previewing the selected item in the folder view (0 to disable)
-#define MP_FVIEW_PREVIEW_DELAY_NAME _T("FViewPreviewDelay")
+#define MP_FVIEW_PREVIEW_DELAY_NAME "FViewPreviewDelay"
 /// split folder view vertically (or horizontally)?
-#define MP_FVIEW_VERTICAL_SPLIT_NAME _T("FViewVertSplit")
+#define MP_FVIEW_VERTICAL_SPLIT_NAME "FViewVertSplit"
 /// put folder view on top and msg view on bottom or vice versa?
-#define MP_FVIEW_FVIEW_TOP_NAME _T("FViewOnTop")
+#define MP_FVIEW_FVIEW_TOP_NAME "FViewOnTop"
 /// replace "From" address with "To" in messages from oneself?
-#define MP_FVIEW_FROM_REPLACE_NAME _T("ReplaceFrom")
+#define MP_FVIEW_FROM_REPLACE_NAME "ReplaceFrom"
 /// the ':' separated list of addresses which are "from oneself"
-#define MP_FROM_REPLACE_ADDRESSES_NAME _T("ReplaceFromAdr")
+#define MP_FROM_REPLACE_ADDRESSES_NAME "ReplaceFromAdr"
 /// Automatically focus next message after copy, mark (un)read, etc.
-#define MP_FVIEW_AUTONEXT_ON_COMMAND_NAME _T("FViewAutoNextOnCommand")
+#define MP_FVIEW_AUTONEXT_ON_COMMAND_NAME "FViewAutoNextOnCommand"
 //@}
 /**@name  Font settings for folder tree */
 //@{
 /// is the folder tree on the left of folder view or on the right?
-#define MP_FTREE_LEFT_NAME _T("FTreeLeft")
+#define MP_FTREE_LEFT_NAME "FTreeLeft"
 /// the foreground colour for the folder tree
-#define MP_FTREE_FGCOLOUR_NAME _T("FTreeFgColour")
+#define MP_FTREE_FGCOLOUR_NAME "FTreeFgColour"
 /// the background colour for the folder tree
-#define MP_FTREE_BGCOLOUR_NAME _T("FTreeBgColour")
+#define MP_FTREE_BGCOLOUR_NAME "FTreeBgColour"
 /// show the currently opened folder specially?
-#define MP_FTREE_SHOWOPENED_NAME _T("FTreeShowOpened")
+#define MP_FTREE_SHOWOPENED_NAME "FTreeShowOpened"
 /// format for the folder tree entries
-#define MP_FTREE_FORMAT_NAME _T("FTreeFormat")
+#define MP_FTREE_FORMAT_NAME "FTreeFormat"
 /// reflect the folder status in its parent
-#define MP_FTREE_PROPAGATE_NAME _T("FTreePropagate")
+#define MP_FTREE_PROPAGATE_NAME "FTreePropagate"
 /// skip this folder when looking for next unread one in the tree
-#define MP_FTREE_NEVER_UNREAD_NAME _T("FTreeNeverUnread")
+#define MP_FTREE_NEVER_UNREAD_NAME "FTreeNeverUnread"
 /// go to this folder when Ctrl-Home is pressed
-#define MP_FTREE_HOME_NAME _T("FTreeHome")
+#define MP_FTREE_HOME_NAME "FTreeHome"
 //@}
 /**@name Font and colour settings for composer */
 //@{
 /// which font to use
-#define   MP_CVIEW_FONT_NAME         _T("CViewFont")
+#define   MP_CVIEW_FONT_NAME         "CViewFont"
 /// which font size
-#define   MP_CVIEW_FONT_SIZE_NAME         _T("CViewFontSize")
+#define   MP_CVIEW_FONT_SIZE_NAME         "CViewFontSize"
 /// the full font desc (replaces the 2 settings above)
-#define   MP_CVIEW_FONT_DESC_NAME         _T("CViewFontDesc")
+#define   MP_CVIEW_FONT_DESC_NAME         "CViewFontDesc"
 /// which foreground colour for the font
-#define   MP_CVIEW_FGCOLOUR_NAME      _T("CViewFGColour")
+#define   MP_CVIEW_FGCOLOUR_NAME      "CViewFGColour"
 /// which background colour for the font
-#define   MP_CVIEW_BGCOLOUR_NAME      _T("CViewBGColout") // typo but do *NOT* fix
+#define   MP_CVIEW_BGCOLOUR_NAME      "CViewBGColout" // typo but do *NOT* fix
 /// use the colours and font for the headers as well?
-#define   MP_CVIEW_COLOUR_HEADERS_NAME _T("CViewColourHeaders")
+#define   MP_CVIEW_COLOUR_HEADERS_NAME "CViewColourHeaders"
 /// check for forgotten attachments?
-#define   MP_CHECK_FORGOTTEN_ATTACHMENTS_NAME _T("CheckForgottenAttachments")
+#define   MP_CHECK_FORGOTTEN_ATTACHMENTS_NAME "CheckForgottenAttachments"
 /// regex to use for the attachments check
-#define   MP_CHECK_ATTACHMENTS_REGEX_NAME _T("AttachmentsCheckRegex")
+#define   MP_CHECK_ATTACHMENTS_REGEX_NAME "AttachmentsCheckRegex"
 //@}
 /// highlight signature?
-#define   MP_HIGHLIGHT_SIGNATURE_NAME      _T("HighlightSig")
+#define   MP_HIGHLIGHT_SIGNATURE_NAME      "HighlightSig"
 /// highlight URLS?
-#define   MP_HIGHLIGHT_URLS_NAME      _T("HighlightURL")
+#define   MP_HIGHLIGHT_URLS_NAME      "HighlightURL"
 
 /// do we want to use server side sort?
-#define MP_MSGS_SERVER_SORT_NAME    _T("SortOnServer")
+#define MP_MSGS_SERVER_SORT_NAME    "SortOnServer"
 /// sort criterium for folder listing
-#define MP_MSGS_SORTBY_NAME         _T("SortMessagesBy")
+#define MP_MSGS_SORTBY_NAME         "SortMessagesBy"
 /// re-sort messages on status change?
-#define MP_MSGS_RESORT_ON_CHANGE_NAME         _T("ReSortMessagesOnChange")
+#define MP_MSGS_RESORT_ON_CHANGE_NAME         "ReSortMessagesOnChange"
 /// use threading
-#define MP_MSGS_USE_THREADING_NAME  _T("ThreadMessages")
+#define MP_MSGS_USE_THREADING_NAME  "ThreadMessages"
 /// use server side threading?
-#define MP_MSGS_SERVER_THREAD_NAME _T("ThreadOnServer")
+#define MP_MSGS_SERVER_THREAD_NAME "ThreadOnServer"
 /// only use server side threading by references (best threading method)?
-#define MP_MSGS_SERVER_THREAD_REF_ONLY_NAME _T("ThreadByRefOnly")
+#define MP_MSGS_SERVER_THREAD_REF_ONLY_NAME "ThreadByRefOnly"
 
 /// Gather messages with same subject in one thread
-#define MP_MSGS_GATHER_SUBJECTS_NAME _T("GatherSubjectsWhenThreading")
+#define MP_MSGS_GATHER_SUBJECTS_NAME "GatherSubjectsWhenThreading"
 /// break thread when subject changes
-#define MP_MSGS_BREAK_THREAD_NAME _T("BreakThreadIfSubjectChanges")
+#define MP_MSGS_BREAK_THREAD_NAME "BreakThreadIfSubjectChanges"
 /// Indent messages when common ancestor is missing
-#define MP_MSGS_INDENT_IF_DUMMY_NAME _T("IndentIfDummy")
+#define MP_MSGS_INDENT_IF_DUMMY_NAME "IndentIfDummy"
 
 #if wxUSE_REGEX
-#   define MP_MSGS_SIMPLIFYING_REGEX_NAME _T("SimplifyingRegex")
-#   define MP_MSGS_REPLACEMENT_STRING_NAME _T("ReplacementString")
+#   define MP_MSGS_SIMPLIFYING_REGEX_NAME "SimplifyingRegex"
+#   define MP_MSGS_REPLACEMENT_STRING_NAME "ReplacementString"
 #else // !wxUSE_REGEX
     /// Remove list prefix when comparing message's subject to gather them
-#   define MP_MSGS_REMOVE_LIST_PREFIX_GATHERING_NAME _T("RemoveListPrefixWhenGathering")
+#   define MP_MSGS_REMOVE_LIST_PREFIX_GATHERING_NAME "RemoveListPrefixWhenGathering"
     /// Remove list prefix when comparing message's subject to break threads
-#   define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING_NAME _T("RemoveListPrefixWhenBreaking")
+#   define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING_NAME "RemoveListPrefixWhenBreaking"
 #endif // wxUSE_REGEX
 
 /// search criterium for searching in folders
-#define MP_MSGS_SEARCH_CRIT_NAME   _T("SearchCriterium")
+#define MP_MSGS_SEARCH_CRIT_NAME   "SearchCriterium"
 /// search argument
-#define MP_MSGS_SEARCH_ARG_NAME    _T("SearchArgument")
+#define MP_MSGS_SEARCH_ARG_NAME    "SearchArgument"
 /// open URLs with
-#define   MP_BROWSER_NAME         _T("Browser")
+#define   MP_BROWSER_NAME         "Browser"
 /// Browser is netscape variant
-#define   MP_BROWSER_ISNS_NAME    _T("BrowserIsNetscape")
+#define   MP_BROWSER_ISNS_NAME    "BrowserIsNetscape"
 /// Open netscape in new window
-#define   MP_BROWSER_INNW_NAME    _T("BrowserInNewWindow")
+#define   MP_BROWSER_INNW_NAME    "BrowserInNewWindow"
 /// external editor to use for message composition (use %s for filename)
-#define MP_EXTERNALEDITOR_NAME    _T("ExternalEditor")
+#define MP_EXTERNALEDITOR_NAME    "ExternalEditor"
 /// start external editor automatically?
-#define MP_ALWAYS_USE_EXTERNALEDITOR_NAME    _T("AlwaysUseExtEditor")
+#define MP_ALWAYS_USE_EXTERNALEDITOR_NAME    "AlwaysUseExtEditor"
 /// PGP/GPG application
-#define MP_PGP_COMMAND_NAME    _T("PGPCommand")
+#define MP_PGP_COMMAND_NAME    "PGPCommand"
 /// PGP/GPG key server for public keys
-#define MP_PGP_KEYSERVER_NAME  _T("PGPKeyServer")
+#define MP_PGP_KEYSERVER_NAME  "PGPKeyServer"
 /// get PGP key from server?
-#define MP_PGP_GET_PUBKEY_NAME  _T("PGPGetPubKey")
+#define MP_PGP_GET_PUBKEY_NAME  "PGPGetPubKey"
 /// execute a command when new mail arrives?
-#define   MP_USE_NEWMAILCOMMAND_NAME      _T("CommandOnNewMail")
+#define   MP_USE_NEWMAILCOMMAND_NAME      "CommandOnNewMail"
 /// command to execute when new mail arrives
-#define   MP_NEWMAILCOMMAND_NAME      _T("OnNewMail")
+#define   MP_NEWMAILCOMMAND_NAME      "OnNewMail"
 
 /// play a sound on new mail?
-#define MP_NEWMAIL_PLAY_SOUND_NAME _T("NewMailPlaySound")
+#define MP_NEWMAIL_PLAY_SOUND_NAME "NewMailPlaySound"
 /// which sound to play?
-#define MP_NEWMAIL_SOUND_FILE_NAME _T("NewMailSound")
+#define MP_NEWMAIL_SOUND_FILE_NAME "NewMailSound"
 #if defined(OS_UNIX) || defined(__CYGWIN__)
 /// the program to use to play this sound
-#define MP_NEWMAIL_SOUND_PROGRAM_NAME _T("NewMailSoundProg")
+#define MP_NEWMAIL_SOUND_PROGRAM_NAME "NewMailSoundProg"
 #endif // OS_UNIX
 
 /// show new mail messages?
-#define   MP_SHOW_NEWMAILMSG_NAME      _T("ShowNewMail")
+#define   MP_SHOW_NEWMAILMSG_NAME      "ShowNewMail"
 /// show detailed info about how many new mail messages?
-#define   MP_SHOW_NEWMAILINFO_NAME      _T("ShowNewMailInfo")
+#define   MP_SHOW_NEWMAILINFO_NAME      "ShowNewMailInfo"
 /// consider only unseen messages as new?
-#define   MP_NEWMAIL_UNSEEN_NAME _T("NewUnseenOnly")
+#define   MP_NEWMAIL_UNSEEN_NAME "NewUnseenOnly"
 /// collect mail from INBOX?
-#define   MP_COLLECT_INBOX_NAME _T("CollectInbox")
+#define   MP_COLLECT_INBOX_NAME "CollectInbox"
 /// keep copies of outgoing mail?
-#define   MP_USEOUTGOINGFOLDER_NAME   _T("KeepCopies")
+#define   MP_USEOUTGOINGFOLDER_NAME   "KeepCopies"
 /// write outgoing mail to folder:
-#define   MP_OUTGOINGFOLDER_NAME      _T("SentMailFolder")
+#define   MP_OUTGOINGFOLDER_NAME      "SentMailFolder"
 /// Show all message headers?
-#define   MP_SHOWHEADERS_NAME         _T("ShowHeaders")
+#define   MP_SHOWHEADERS_NAME         "ShowHeaders"
 /// Autocollect email addresses? 0=no 1=ask 2=always
-#define   MP_AUTOCOLLECT_INCOMING_NAME         _T("AutoCollect")
+#define   MP_AUTOCOLLECT_INCOMING_NAME         "AutoCollect"
 /// Name of the address books for autocollected addresses
-#define   MP_AUTOCOLLECT_ADB_NAME     _T("AutoCollectAdb")
+#define   MP_AUTOCOLLECT_ADB_NAME     "AutoCollectAdb"
 /// Autocollect email addresses from sender only ?
-#define   MP_AUTOCOLLECT_SENDER_NAME     _T("AutoCollectSender")
+#define   MP_AUTOCOLLECT_SENDER_NAME     "AutoCollectSender"
 /// Autocollect addresses in mail sent by user?
-#define   MP_AUTOCOLLECT_OUTGOING_NAME     _T("AutoCollectOutgoing")
+#define   MP_AUTOCOLLECT_OUTGOING_NAME     "AutoCollectOutgoing"
 /// Autocollect entries with names only?
-#define   MP_AUTOCOLLECT_NAMED_NAME _T("AutoCollectNamed")
+#define   MP_AUTOCOLLECT_NAMED_NAME "AutoCollectNamed"
 /// support efax style incoming faxes
-#define MP_INCFAX_SUPPORT_NAME      _T("IncomingFaxSupport")
+#define MP_INCFAX_SUPPORT_NAME      "IncomingFaxSupport"
 /// domains from which to support faxes, semicolon delimited
-#define MP_INCFAX_DOMAINS_NAME      _T("IncomingFaxDomains")
+#define MP_INCFAX_DOMAINS_NAME      "IncomingFaxDomains"
 /// Default name for the SSL library
-#define MP_SSL_DLL_SSL_NAME      _T("SSLDll")
+#define MP_SSL_DLL_SSL_NAME      "SSLDll"
 /// Default name for the SSL/crypto library
-#define MP_SSL_DLL_CRYPTO_NAME _T("CryptoDll")
+#define MP_SSL_DLL_CRYPTO_NAME "CryptoDll"
 
 /// Use substrings in address expansion?
-#define   MP_ADB_SUBSTRINGEXPANSION_NAME   _T("ExpandWithSubstring")
+#define   MP_ADB_SUBSTRINGEXPANSION_NAME   "ExpandWithSubstring"
 
 /** @name maximal amounts of data to retrieve from remote servers */
 //@{
 /// ask confirmation before retrieveing messages bigger than this (in Kb)
-#define MP_MAX_MESSAGE_SIZE_NAME   _T("MaxMsgSize")
+#define MP_MAX_MESSAGE_SIZE_NAME   "MaxMsgSize"
 /// ask confirmation before retrieveing more headers than this
-#define MP_MAX_HEADERS_NUM_NAME    _T("MaxHeadersNum")
+#define MP_MAX_HEADERS_NUM_NAME    "MaxHeadersNum"
 /// never download more than that many messages
-#define MP_MAX_HEADERS_NUM_HARD_NAME _T("HardHeadersLimit")
+#define MP_MAX_HEADERS_NUM_HARD_NAME "HardHeadersLimit"
 //@}
 
 /// setting this prevents the filters from expuning the msgs automatically
-#define MP_SAFE_FILTERS_NAME _T("SafeFilters")
+#define MP_SAFE_FILTERS_NAME "SafeFilters"
 
 /** @name timeout values for c-client mail library */
 //@{
 /// IMAP lookahead value
-#define MP_IMAP_LOOKAHEAD_NAME _T("IMAPlookahead")
+#define MP_IMAP_LOOKAHEAD_NAME "IMAPlookahead"
 /// TCP/IP open timeout in seconds.
-#define MP_TCP_OPENTIMEOUT_NAME _T("TCPOpenTimeout")
+#define MP_TCP_OPENTIMEOUT_NAME "TCPOpenTimeout"
 /// TCP/IP read timeout in seconds.
-#define MP_TCP_READTIMEOUT_NAME _T("TCPReadTimeout")
+#define MP_TCP_READTIMEOUT_NAME "TCPReadTimeout"
 /// TCP/IP write timeout in seconds.
-#define  MP_TCP_WRITETIMEOUT_NAME _T("TCPWriteTimeout")
+#define  MP_TCP_WRITETIMEOUT_NAME "TCPWriteTimeout"
 /// TCP/IP close timeout in seconds.
-#define  MP_TCP_CLOSETIMEOUT_NAME _T("TCPCloseTimeout")
+#define  MP_TCP_CLOSETIMEOUT_NAME "TCPCloseTimeout"
 /// rsh connection timeout in seconds.
-#define MP_TCP_RSHTIMEOUT_NAME _T("TCPRshTimeout")
+#define MP_TCP_RSHTIMEOUT_NAME "TCPRshTimeout"
 /// ssh connection timeout in seconds.
-#define MP_TCP_SSHTIMEOUT_NAME _T("TCPSshTimeout")
+#define MP_TCP_SSHTIMEOUT_NAME "TCPSshTimeout"
 /// the path to rsh
-#define MP_RSH_PATH_NAME _T("RshPath")
+#define MP_RSH_PATH_NAME "RshPath"
 /// the path to ssh
-#define MP_SSH_PATH_NAME _T("SshPath")
+#define MP_SSH_PATH_NAME "SshPath"
 //@}
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
 /// status
-#define   MP_FLC_STATUSWIDTH_NAME   _T("ColumnWidthStatus")
+#define   MP_FLC_STATUSWIDTH_NAME   "ColumnWidthStatus"
 /// subject
-#define   MP_FLC_SUBJECTWIDTH_NAME   _T("ColumnWidthSubject")
+#define   MP_FLC_SUBJECTWIDTH_NAME   "ColumnWidthSubject"
 /// from
-#define   MP_FLC_FROMWIDTH_NAME   _T("ColumnWidthFrom")
+#define   MP_FLC_FROMWIDTH_NAME   "ColumnWidthFrom"
 /// date
-#define   MP_FLC_DATEWIDTH_NAME   _T("ColumnWidthDate")
+#define   MP_FLC_DATEWIDTH_NAME   "ColumnWidthDate"
 /// size
-#define   MP_FLC_SIZEWIDTH_NAME   _T("ColumnWidthSize")
+#define   MP_FLC_SIZEWIDTH_NAME   "ColumnWidthSize"
 //@}
 /** @name for folder list ctrls: column numbers */
 //@{
 /// status
-#define   MP_FLC_STATUSCOL_NAME   _T("ColumnStatus")
+#define   MP_FLC_STATUSCOL_NAME   "ColumnStatus"
 /// subject
-#define   MP_FLC_SUBJECTCOL_NAME   _T("ColumnSubject")
+#define   MP_FLC_SUBJECTCOL_NAME   "ColumnSubject"
 /// from
-#define   MP_FLC_FROMCOL_NAME   _T("ColumnFrom")
+#define   MP_FLC_FROMCOL_NAME   "ColumnFrom"
 /// date
-#define   MP_FLC_DATECOL_NAME   _T("ColumnDate")
+#define   MP_FLC_DATECOL_NAME   "ColumnDate"
 /// size
-#define   MP_FLC_SIZECOL_NAME   _T("ColumnSize")
+#define   MP_FLC_SIZECOL_NAME   "ColumnSize"
 /// msgno
-#define   MP_FLC_MSGNOCOL_NAME   _T("ColumnNum")
+#define   MP_FLC_MSGNOCOL_NAME   "ColumnNum"
 //@}
 //@}
 /// an entry used for testing
-#define MP_TESTENTRY_NAME      _T("TestEntry")
+#define MP_TESTENTRY_NAME      "TestEntry"
 /// Do we remote synchronise configuration settings?
-#define MP_SYNC_REMOTE_NAME   _T("SyncRemote")
+#define MP_SYNC_REMOTE_NAME   "SyncRemote"
 /// IMAP folder to sync to
-#define MP_SYNC_FOLDER_NAME   _T("SyncFolder")
+#define MP_SYNC_FOLDER_NAME   "SyncFolder"
 /// our last sync date
-#define MP_SYNC_DATE_NAME      _T("SyncDate")
+#define MP_SYNC_DATE_NAME      "SyncDate"
 /// sync filters?
-#define MP_SYNC_FILTERS_NAME   _T("SyncFilters")
+#define MP_SYNC_FILTERS_NAME   "SyncFilters"
 /// sync filters?
-#define MP_SYNC_IDS_NAME   _T("SyncIds")
+#define MP_SYNC_IDS_NAME   "SyncIds"
 /// sync folders?
-#define MP_SYNC_FOLDERS_NAME   _T("SyncFolders")
+#define MP_SYNC_FOLDERS_NAME   "SyncFolders"
 /// sync folder tree
-#define MP_SYNC_FOLDERGROUP_NAME   _T("SyncFolderGroup")
+#define MP_SYNC_FOLDERGROUP_NAME   "SyncFolderGroup"
 
 /** @name sending */
 //@{
 /// confirm sending the message?
-#define MP_CONFIRM_SEND_NAME _T("ConfirmSend")
+#define MP_CONFIRM_SEND_NAME "ConfirmSend"
 /// preview the message being sent?
-#define MP_PREVIEW_SEND_NAME _T("PreviewSend")
+#define MP_PREVIEW_SEND_NAME "PreviewSend"
 //@}
 
 /** @name away mode */
 //@{
 /// automatically enter the away mode after that many minutes (0 to disable)
-#define MP_AWAY_AUTO_ENTER_NAME _T("AutoAway")
+#define MP_AWAY_AUTO_ENTER_NAME "AutoAway"
 /// automaticlly exit from the away mode when the user chooses menu command
-#define MP_AWAY_AUTO_EXIT_NAME _T("AutoExitAway")
+#define MP_AWAY_AUTO_EXIT_NAME "AutoExitAway"
 /// keep the value of away mode for the next run (otherwise always reset it)
-#define MP_AWAY_REMEMBER_NAME _T("RememberAway")
+#define MP_AWAY_REMEMBER_NAME "RememberAway"
 /// the saved value of away status (only written if MP_AWAY_REMEMBER_NAME is set)
-#define MP_AWAY_STATUS_NAME _T("AwayStatus")
+#define MP_AWAY_STATUS_NAME "AwayStatus"
 //@}
 
 /** @name names of obsolete configuration entries, for upgrade routines */
 //@{
-#define MP_OLD_FOLDER_HOST_NAME _T("HostName")
+#define MP_OLD_FOLDER_HOST_NAME "HostName"
 //@}
 
 /// stop "folder internal data" message
-#define MP_CREATE_INTERNAL_MESSAGE_NAME   _T("CreateInternalMessage")
+#define MP_CREATE_INTERNAL_MESSAGE_NAME   "CreateInternalMessage"
 
 /// name of addressbook to use in whitelist spam filter
-#define MP_WHITE_LIST_NAME _T("WhiteList")
+#define MP_WHITE_LIST_NAME "WhiteList"
 
 /// treat mail in this folder as junk mail
-#define MP_TREAT_AS_JUNK_MAIL_FOLDER_NAME _T("TreatAsJunkMailFolder")
+#define MP_TREAT_AS_JUNK_MAIL_FOLDER_NAME "TreatAsJunkMailFolder"
 
 //@}
 
@@ -1289,11 +1289,11 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// The Profile Type. [OBSOLETE]
 #define   MP_PROFILE_TYPE_DEFVAL      0l
 /// The type of the config source
-#define   MP_CONFIG_SOURCE_TYPE_DEFVAL wxEmptyString
+#define   MP_CONFIG_SOURCE_TYPE_DEFVAL ""
 /// The priority of the config source
 #define   MP_CONFIG_SOURCE_PRIO_DEFVAL 0l
 /// our version
-#define   MP_VERSION_DEFVAL          M_EMPTYSTRING
+#define   MP_VERSION_DEFVAL          ""
 /// are we running for the first time?
 #define   MP_FIRSTRUN_DEFVAL         1
 /// shall we record default values in configuration files
@@ -1319,7 +1319,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// show log window?
 #define   MP_SHOWLOG_DEFVAL  1
 /// the file to save log messages to (if not empty)
-#define   MP_LOGFILE_DEFVAL wxEmptyString
+#define   MP_LOGFILE_DEFVAL ""
 /// debug protocols and folder access?
 #define   MP_DEBUG_CCLIENT_DEFVAL   0l
 /// open ADB editor on startup?
@@ -1331,7 +1331,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// help browser kind
 #define   MP_HELPBROWSER_KIND_DEFVAL 0l // internal
 /// help browser name
-#define   MP_HELPBROWSER_DEFVAL   _T("netscape")
+#define   MP_HELPBROWSER_DEFVAL   "netscape"
 /// is help browser of netscape type?
 #define   MP_HELPBROWSER_ISNS_DEFVAL   1
 /// width of help frame
@@ -1343,11 +1343,11 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// ypos of help frame
 #define MP_HELPFRAME_YPOS_DEFVAL  40l
 /// the directory for mbox folders
-#define   MP_MBOXDIR_DEFVAL         M_EMPTYSTRING
+#define   MP_MBOXDIR_DEFVAL         ""
 /// the news spool directory
-#define MP_NEWS_SPOOL_DIR_DEFVAL M_EMPTYSTRING
+#define MP_NEWS_SPOOL_DIR_DEFVAL ""
 /// command to convert tiff faxes to postscript
-#define   MP_TIFF2PS_DEFVAL         _T("convert %s %s")
+#define   MP_TIFF2PS_DEFVAL         "convert %s %s"
 /// preferred intermediary image format in conversions
 #define MP_TMPGFXFORMAT_DEFVAL      2
 /// expand folder tree control?
@@ -1362,7 +1362,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_FLAT_TOOLBARS_DEFVAL      1l
 
 /// the user's M directory
-#define   MP_USERDIR_DEFVAL         M_EMPTYSTRING
+#define   MP_USERDIR_DEFVAL         ""
 
 /// the acceptance status of the license
 #define MP_LICENSE_ACCEPTED_DEFVAL   0l
@@ -1378,43 +1378,43 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the complete path to the global M directory
 #  define   MP_GLOBALDIR_DEFVAL      M_PREFIX
 /// the path where to find .afm files
-#  define   MP_AFMPATH_DEFVAL M_BASEDIR _T("/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript")
+#  define   MP_AFMPATH_DEFVAL M_BASEDIR "/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
 #else // !Unix
 /// the complete path to the global M directory
-#  define   MP_GLOBALDIR_DEFVAL  wxEmptyString
+#  define   MP_GLOBALDIR_DEFVAL  ""
 #endif // Unix/!Unix
 
 /// the directory containing the help files
-#define MP_HELPDIR_DEFVAL wxEmptyString
+#define MP_HELPDIR_DEFVAL ""
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
 #define MP_CRYPTALGO_DEFVAL   0L
 /// DoesTwoFish work? (-1 unknown, 0 no, 1 yes)
 #define MP_CRYPT_TWOFISH_OK_DEFVAL -1
 /// some test data
-#define MP_CRYPT_TESTDATA_DEFVAL wxEmptyString
+#define MP_CRYPT_TESTDATA_DEFVAL ""
 /// the locale for translation to national languages
-#define   MP_LOCALE_DEFVAL               M_EMPTYSTRING
+#define   MP_LOCALE_DEFVAL               ""
 /// the default character set
-#define MP_CHARSET_DEFVAL               _T("ISO-8859-1")
+#define MP_CHARSET_DEFVAL               "ISO-8859-1"
 /// the default icon for frames
-#define   MP_ICON_MFRAME_DEFVAL      _T("mframe.xpm")
+#define   MP_ICON_MFRAME_DEFVAL      "mframe.xpm"
 /// the icon for the main frame
-#define   MP_ICON_MAINFRAME_DEFVAL      _T("mainframe.xpm")
+#define   MP_ICON_MAINFRAME_DEFVAL      "mainframe.xpm"
 /// the icon directoy
-#define   MP_ICONPATH_DEFVAL         _T("icons")
+#define   MP_ICONPATH_DEFVAL         "icons"
 /// the profile path
-#define   MP_PROFILE_PATH_DEFVAL      _T(".")
+#define   MP_PROFILE_PATH_DEFVAL      "."
 /// the extension to use for profile files
-#define   MP_PROFILE_EXTENSION_DEFVAL      _T(".profile")
+#define   MP_PROFILE_EXTENSION_DEFVAL      ".profile"
 /// the key for identity redirection
-#define MP_PROFILE_IDENTITY_DEFVAL  wxEmptyString
+#define MP_PROFILE_IDENTITY_DEFVAL  ""
 /// the name of the mailcap file
-#define   MP_MAILCAP_DEFVAL         _T("mailcap")
+#define   MP_MAILCAP_DEFVAL         "mailcap"
 /// the name of the mime types file
-#define   MP_MIMETYPES_DEFVAL         _T("mime.types")
+#define   MP_MIMETYPES_DEFVAL         "mime.types"
 /// the strftime() format for dates
-#define   MP_DATE_FMT_DEFVAL         _T("%c")
+#define   MP_DATE_FMT_DEFVAL         "%c"
 /// display all dates as GMT?
 #define   MP_DATE_GMT_DEFVAL         0l
 /// show console window
@@ -1422,15 +1422,15 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// open any folders at all on startup?
 #define   MP_DONTOPENSTARTUP_DEFVAL   0l
 /// names of folders to open at startup
-#define   MP_OPENFOLDERS_DEFVAL      M_EMPTYSTRING
+#define   MP_OPENFOLDERS_DEFVAL      ""
 /// reopen the last opened folder in the main frame
 #define   MP_REOPENLASTFOLDER_DEFVAL 1
 /// name of folder to open in mainframe
-#define   MP_MAINFOLDER_DEFVAL        wxEmptyString
+#define   MP_MAINFOLDER_DEFVAL        ""
 /// path for Python
-#define   MP_PYTHONPATH_DEFVAL         M_EMPTYSTRING
+#define   MP_PYTHONPATH_DEFVAL         ""
 /// Python DLL
-#define   MP_PYTHONDLL_DEFVAL         M_EMPTYSTRING
+#define   MP_PYTHONDLL_DEFVAL         ""
 #ifdef OS_WIN
 // under Windows, the setup program will create the appropriate registry key
 #define   MP_USEPYTHON_DEFVAL         0l
@@ -1439,7 +1439,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_USEPYTHON_DEFVAL         1
 #endif
 /// start-up script to run
-#define     MP_PYTHONMODULE_TO_LOAD_DEFVAL   _T("Minit")
+#define     MP_PYTHONMODULE_TO_LOAD_DEFVAL   "Minit"
 /// show splash screen on startup?
 #define     MP_SHOWSPLASH_DEFVAL      1
 /// how long should splash screen stay (0 disables timeout)?
@@ -1475,15 +1475,15 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// select the initially focused message
 #define   MP_AUTOSHOW_SELECT_DEFVAL 0l
 /// program used to convert image files?
-#define   MP_CONVERTPROGRAM_DEFVAL      _T("convert %s -compress None %s")
+#define   MP_CONVERTPROGRAM_DEFVAL      "convert %s -compress None %s"
 /// list of modules to load at startup
-#define MP_MODULES_DEFVAL   _T("Filters:Migrate")
+#define MP_MODULES_DEFVAL   "Filters:Migrate"
 /// list of modules to not load
-#define MP_MODULES_DONT_LOAD_DEFVAL wxEmptyString
+#define MP_MODULES_DONT_LOAD_DEFVAL ""
 /// the user path for template files used for message composition
-#define MP_COMPOSETEMPLATEPATH_USER_DEFVAL   wxEmptyString
+#define MP_COMPOSETEMPLATEPATH_USER_DEFVAL   ""
 /// the global path for template files used for message composition
-#define MP_COMPOSETEMPLATEPATH_GLOBAL_DEFVAL   wxEmptyString
+#define MP_COMPOSETEMPLATEPATH_GLOBAL_DEFVAL   ""
 
 /// the format string for the folder tree display
 #define MP_FOLDERSTATUS_TREE_DEFVAL _("%f (%t, %u)")
@@ -1495,9 +1495,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /**@name Printer settings */
 //@{
 /// Command
-#define MP_PRINT_COMMAND_DEFVAL _T("lpr")
+#define MP_PRINT_COMMAND_DEFVAL "lpr"
 /// Options
-#define MP_PRINT_OPTIONS_DEFVAL   wxEmptyString
+#define MP_PRINT_OPTIONS_DEFVAL   ""
 /// Orientation
 #define MP_PRINT_ORIENTATION_DEFVAL 1  /* wxPORTRAIT */
 /// print mode
@@ -1505,7 +1505,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// paper name
 #define MP_PRINT_PAPER_DEFVAL 0L
 /// paper name
-#define MP_PRINT_FILE_DEFVAL _T("mahogany.ps")
+#define MP_PRINT_FILE_DEFVAL "mahogany.ps"
 /// print in colour?
 #define MP_PRINT_COLOUR_DEFVAL 1
 /// top margin
@@ -1526,7 +1526,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// ignore entries without names
 #define   MP_BBDB_IGNOREANONYMOUS_DEFVAL      0L
 /// name for anonymous entries, when neither first nor family name are set
-#define   MP_BBDB_ANONYMOUS_DEFVAL   _T("anonymous")
+#define   MP_BBDB_ANONYMOUS_DEFVAL   "anonymous"
 /// save on exit, 0=no, 1=ask, 2=always
 #define   MP_BBDB_SAVEONEXIT_DEFVAL  (long)M_ACTION_PROMPT
 //@}
@@ -1534,43 +1534,43 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 //@{
 //@}
 /// the user's full name
-#define   MP_PERSONALNAME_DEFVAL      M_EMPTYSTRING
+#define   MP_PERSONALNAME_DEFVAL      ""
 /// organization (the "Organization:" header name value)
-#define   MP_ORGANIZATION_DEFVAL     M_EMPTYSTRING
+#define   MP_ORGANIZATION_DEFVAL     ""
 /// the current user identity
-#define   MP_CURRENT_IDENTITY_DEFVAL M_EMPTYSTRING
+#define   MP_CURRENT_IDENTITY_DEFVAL ""
 /// the user's qualification (see M_USERLEVEL_XXX)
 #define   MP_USERLEVEL_DEFVAL        (long)M_USERLEVEL_NOVICE
 /// the username/login
-#define   MP_USERNAME_DEFVAL         M_EMPTYSTRING
+#define   MP_USERNAME_DEFVAL         ""
 /// the user's hostname
-#define   MP_HOSTNAME_DEFVAL         M_EMPTYSTRING
+#define   MP_HOSTNAME_DEFVAL         ""
 /// Add this hostname for addresses without hostname?
 #define   MP_ADD_DEFAULT_HOSTNAME_DEFVAL 1L
 /// (the username for returned mail) E-mail address
-#define   MP_FROM_ADDRESS_DEFVAL      M_EMPTYSTRING
+#define   MP_FROM_ADDRESS_DEFVAL      ""
 /// Reply address
-#define   MP_REPLY_ADDRESS_DEFVAL      M_EMPTYSTRING
+#define   MP_REPLY_ADDRESS_DEFVAL      ""
 /// the default POP3 host
-#define   MP_POPHOST_DEFVAL          _T("pop")
+#define   MP_POPHOST_DEFVAL          "pop"
 /// don't use AUTH with POP3
 #define   MP_POP_NO_AUTH_DEFVAL     0l
 /// the default IMAP4 host
-#define   MP_IMAPHOST_DEFVAL          _T("imap")
+#define   MP_IMAPHOST_DEFVAL          "imap"
 /// use SSL for POP/IMAP?
 #define   MP_USE_SSL_DEFVAL       1l // SSLSupport_TLSIfAvailable
 /// accept unsigned SSL certificates?
 #define   MP_USE_SSL_UNSIGNED_DEFVAL 0l
 /// the mail host
-#define   MP_SMTPHOST_DEFVAL         _T("mail")
+#define   MP_SMTPHOST_DEFVAL         "mail"
 /// use the specified sender value or guess it automatically?
 #define   MP_GUESS_SENDER_DEFVAL  1l
 /// the smtp sender value
-#define   MP_SENDER_DEFVAL           wxEmptyString
+#define   MP_SENDER_DEFVAL           ""
 /// the mail host user-id
-#define   MP_SMTPHOST_LOGIN_DEFVAL   wxEmptyString
+#define   MP_SMTPHOST_LOGIN_DEFVAL   ""
 /// the mail host password
-#define   MP_SMTPHOST_PASSWORD_DEFVAL   wxEmptyString
+#define   MP_SMTPHOST_PASSWORD_DEFVAL   ""
 /// use SSL?
 #define   MP_SMTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
 /// check ssl-certs for SMTP connections?
@@ -1578,12 +1578,12 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// use ESMTP 8BITMIME extension if available
 #define   MP_SMTP_USE_8BIT_DEFVAL 1l
 /// disabled SMTP authentificators
-#define   MP_SMTP_DISABLED_AUTHS_DEFVAL wxEmptyString
+#define   MP_SMTP_DISABLED_AUTHS_DEFVAL ""
 /// sendmail command  FIXME - should be detected by configure
 #ifdef OS_LINUX
-#  define MP_SENDMAILCMD_DEFVAL _T("/usr/sbin/sendmail -t")
+#  define MP_SENDMAILCMD_DEFVAL "/usr/sbin/sendmail -t"
 #else
-#  define MP_SENDMAILCMD_DEFVAL _T("/usr/lib/sendmail -t")
+#  define MP_SENDMAILCMD_DEFVAL "/usr/lib/sendmail -t"
 #endif
 /// use sendmail?
 #ifdef OS_UNIX
@@ -1592,17 +1592,17 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #  define MP_USE_SENDMAIL_DEFVAL 0l
 #endif
 /// the news server
-#define   MP_NNTPHOST_DEFVAL      _T("news")
+#define   MP_NNTPHOST_DEFVAL      "news"
 /// the news server user-id
-#define   MP_NNTPHOST_LOGIN_DEFVAL      wxEmptyString
+#define   MP_NNTPHOST_LOGIN_DEFVAL      ""
 /// the news server password
-#define   MP_NNTPHOST_PASSWORD_DEFVAL      wxEmptyString
+#define   MP_NNTPHOST_PASSWORD_DEFVAL      ""
 /// use SSL?
 #define   MP_NNTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
 /// check ssl-certs for NNTP connections?
 #define   MP_NNTPHOST_USE_SSL_UNSIGNED_DEFVAL   0l
 /// the beacon host to test for net connection
-#define   MP_BEACONHOST_DEFVAL      wxEmptyString
+#define   MP_BEACONHOST_DEFVAL      ""
 #ifdef USE_DIALUP
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT_DEFVAL   0L
@@ -1615,7 +1615,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// should we attach vCard to outgoing messages?
 #define MP_USEVCARD_DEFVAL 0l
 /// the vCard to use
-#define MP_VCARD_DEFVAL _T("vcard.vcf")
+#define MP_VCARD_DEFVAL "vcard.vcf"
 
 /// use the folder create wizard (or the dialog directly)?
 #define MP_USE_FOLDER_CREATE_WIZARD_DEFVAL 1l
@@ -1624,20 +1624,20 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 #if defined(OS_WIN)
 /// the RAS connection to use
-#define MP_NET_CONNECTION_DEFVAL wxEmptyString
+#define MP_NET_CONNECTION_DEFVAL ""
 #elif defined(OS_UNIX)
 /// the command to go online
-#define MP_NET_ON_COMMAND_DEFVAL   _T("wvdial")
+#define MP_NET_ON_COMMAND_DEFVAL   "wvdial"
 /// the command to go offline
-#define MP_NET_OFF_COMMAND_DEFVAL   _T("killall pppd")
+#define MP_NET_OFF_COMMAND_DEFVAL   "killall pppd"
 #endif // platform
 
 #endif // USE_DIALUP
 
 /// login for mailbox
-#define   MP_FOLDER_LOGIN_DEFVAL      M_EMPTYSTRING
+#define   MP_FOLDER_LOGIN_DEFVAL      ""
 /// passwor for mailbox
-#define   MP_FOLDER_PASSWORD_DEFVAL      M_EMPTYSTRING
+#define   MP_FOLDER_PASSWORD_DEFVAL      ""
 /// log level
 #define   MP_LOGLEVEL_DEFVAL         0l
 /// show busy info while sorting/threading?
@@ -1649,34 +1649,34 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// threshold for displaying message retrieval progress dialog (seconds)
 #define   MP_MESSAGEPROGRESS_THRESHOLD_TIME_DEFVAL  1l
 /// the default path for saving files
-#define   MP_DEFAULT_SAVE_PATH_DEFVAL      M_EMPTYSTRING
+#define   MP_DEFAULT_SAVE_PATH_DEFVAL      ""
 /// the default filename for saving files
-#define   MP_DEFAULT_SAVE_FILENAME_DEFVAL   _T("*")
+#define   MP_DEFAULT_SAVE_FILENAME_DEFVAL   "*"
 /// the default extension for saving files
-#define   MP_DEFAULT_SAVE_EXTENSION_DEFVAL   M_EMPTYSTRING
+#define   MP_DEFAULT_SAVE_EXTENSION_DEFVAL   ""
 /// the default path for saving files
-#define   MP_DEFAULT_LOAD_PATH_DEFVAL      M_EMPTYSTRING
+#define   MP_DEFAULT_LOAD_PATH_DEFVAL      ""
 /// the default filename for saving files
-#define   MP_DEFAULT_LOAD_FILENAME_DEFVAL   _T("*")
+#define   MP_DEFAULT_LOAD_FILENAME_DEFVAL   "*"
 /// the default extension for saving files
-#define   MP_DEFAULT_LOAD_EXTENSION_DEFVAL   M_EMPTYSTRING
+#define   MP_DEFAULT_LOAD_EXTENSION_DEFVAL   ""
 /// default value for To: field in composition
-#define   MP_COMPOSE_TO_DEFVAL         M_EMPTYSTRING
+#define   MP_COMPOSE_TO_DEFVAL         ""
 /// default value for Cc: field in composition
-#define   MP_COMPOSE_CC_DEFVAL         M_EMPTYSTRING
+#define   MP_COMPOSE_CC_DEFVAL         ""
 /// default value for Bcc: field in composition
-#define   MP_COMPOSE_BCC_DEFVAL      M_EMPTYSTRING
+#define   MP_COMPOSE_BCC_DEFVAL      ""
 /// show "From:" field in composer?
 #define   MP_COMPOSE_SHOW_FROM_DEFVAL 0l
 
 /// default reply kind
 #define   MP_DEFAULT_REPLY_KIND_DEFVAL 0l  // MailFolder::REPLY_SENDER
 /// the mailing list addresses
-#define   MP_LIST_ADDRESSES_DEFVAL wxEmptyString
+#define   MP_LIST_ADDRESSES_DEFVAL ""
 /// array of equivalent address pairs
-#define   MP_EQUIV_ADDRESSES_DEFVAL wxEmptyString
+#define   MP_EQUIV_ADDRESSES_DEFVAL ""
 /// prefix for subject in replies
-#define   MP_REPLY_PREFIX_DEFVAL      _T("Re: ")
+#define   MP_REPLY_PREFIX_DEFVAL      "Re: "
 /// prefix for subject in forwards
 #define   MP_FORWARD_PREFIX_DEFVAL      _("Forwarded message: ")
 /// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
@@ -1686,7 +1686,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// include only the selected text (if any) in the reply?
 #define MP_REPLY_QUOTE_SELECTION_DEFVAL true
 /// prefix for text in replies
-#define   MP_REPLY_MSGPREFIX_DEFVAL      _T("> ")
+#define   MP_REPLY_MSGPREFIX_DEFVAL      "> "
 /// use the value of X-Attribution header as the prefix
 #define   MP_REPLY_MSGPREFIX_FROM_XATTR_DEFVAL 1l
 /// prepend the initials of the sender to the reply prefix?
@@ -1697,9 +1697,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_COMPOSE_USE_SIGNATURE_DEFVAL   1
 /// filename of signature file
 #ifdef OS_WIN
-#  define   MP_COMPOSE_SIGNATURE_DEFVAL      M_EMPTYSTRING
+#  define   MP_COMPOSE_SIGNATURE_DEFVAL      ""
 #else
-#  define   MP_COMPOSE_SIGNATURE_DEFVAL      _T("$HOME/.signature")
+#  define   MP_COMPOSE_SIGNATURE_DEFVAL      "$HOME/.signature"
 #endif
 /// use "-- " to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_DEFVAL   1
@@ -1707,7 +1707,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE_DEFVAL   1
 /// Name from where to read XFace
-#define   MP_COMPOSE_XFACE_FILE_DEFVAL   _T("$HOME/.xface")
+#define   MP_COMPOSE_XFACE_FILE_DEFVAL   "$HOME/.xface"
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_DEFVAL         (long)(0x00ff)  // MF_ILLEGAL
 /// should we try to create the folder before opening it?
@@ -1719,23 +1719,23 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// Move new mail to the NewMail folder (if not, only copy)?
 #define MP_MOVE_NEWMAIL_DEFVAL      1l
 /// Where to store all new mail
-#define MP_NEWMAIL_FOLDER_DEFVAL      wxEmptyString // obsolete
+#define MP_NEWMAIL_FOLDER_DEFVAL      "" // obsolete
 /// Which folder to use as Outbox
-#define MP_OUTBOX_NAME_DEFVAL         wxEmptyString
+#define MP_OUTBOX_NAME_DEFVAL         ""
 /// Use Outbox?
 #define MP_USE_OUTBOX_DEFVAL            0l
 /// Name of Trash folder?
-#define MP_TRASH_FOLDER_DEFVAL      wxEmptyString
+#define MP_TRASH_FOLDER_DEFVAL      ""
 /// Use a trash folder?
 #define MP_USE_TRASH_FOLDER_DEFVAL   1l
 /// Name of the Drafts folder
-#define MP_DRAFTS_FOLDER_DEFVAL wxEmptyString
+#define MP_DRAFTS_FOLDER_DEFVAL ""
 /// Delete the drafts automatically after the message was sent?
 #define MP_DRAFTS_AUTODELETE_DEFVAL  1l
 /// the filename for a mailbox
-#define   MP_FOLDER_PATH_DEFVAL      ((const wxChar *)NULL) // don't change this!
+#define   MP_FOLDER_PATH_DEFVAL      ((const char *)NULL) // don't change this!
 /// comment
-#define   MP_FOLDER_COMMENT_DEFVAL      M_EMPTYSTRING
+#define   MP_FOLDER_COMMENT_DEFVAL      ""
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_DEFVAL      60
 /// close of folders delayed by
@@ -1767,7 +1767,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// show viewer bar in the message view?
 #define MP_MSGVIEW_SHOWBAR_DEFVAL 1
 /// which viewer to use in the message view?
-#define MP_MSGVIEW_VIEWER_DEFVAL _T("LayoutViewer")
+#define MP_MSGVIEW_VIEWER_DEFVAL "LayoutViewer"
 /// select the "best" viewer automatically?
 #define MP_MSGVIEW_AUTO_VIEWER_DEFVAL 1l
 /// use HTML viewer whenever there is HTML content?
@@ -1778,18 +1778,18 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGVIEW_ALLOW_IMAGES_DEFVAL 1l
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_DEFVAL     \
-          _T("Date:" \
+          "Date:" \
           "From:" \
           "Subject:" \
           "Newsgroups:" \
           "To:" \
           "Cc:" \
           "Bcc:" \
-          "Reply-To:")
+          "Reply-To:"
 /// all headers we know about
 #define   MP_MSGVIEW_ALL_HEADERS_DEFVAL \
           MP_MSGVIEW_HEADERS_DEFVAL \
-          _T("Approved:" \
+          "Approved:" \
           "Arrival-Date:" \
           "Auto-Submitted:" \
           "Bounces-to:" \
@@ -1896,15 +1896,15 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
           "X-UID:" \
           "X-UIDL:" \
           "X-URL:" \
-          "X-WM-Posted-At:")
+          "X-WM-Posted-At:"
 /// the default encoding for the viewer/composer
 #define  MP_MSGVIEW_DEFAULT_ENCODING_DEFVAL (long)wxFONTENCODING_DEFAULT
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE_DEFVAL  (long)MF_FILE
 /// the filter program to apply (OBSOLETE)
-#define MP_FILTER_RULE_DEFVAL   wxEmptyString
+#define MP_FILTER_RULE_DEFVAL   ""
 /// the filters to use for this folder
-#define MP_FOLDER_FILTERS_DEFVAL   wxEmptyString
+#define MP_FOLDER_FILTERS_DEFVAL   ""
 /// the default folder file format
 #define MP_FOLDER_FILE_DRIVER_DEFVAL 0L
 /* format: mbx:unix:mmdf:tenex defined in MailFolderCC.cpp */
@@ -1917,36 +1917,36 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// which font size
 #define   MP_MVIEW_FONT_SIZE_DEFVAL         -1
 /// the full font desc (replaces the 2 settings above)
-#define   MP_MVIEW_FONT_DESC_DEFVAL   wxEmptyString
+#define   MP_MVIEW_FONT_DESC_DEFVAL   ""
 /// which foreground colour for the font
-#define   MP_MVIEW_FGCOLOUR_DEFVAL      _T("black")
+#define   MP_MVIEW_FGCOLOUR_DEFVAL      "black"
 /// which background colour for the font
-#define   MP_MVIEW_BGCOLOUR_DEFVAL      _T("white")
+#define   MP_MVIEW_BGCOLOUR_DEFVAL      "white"
 /// which colour for signature
-#define   MP_MVIEW_SIGCOLOUR_DEFVAL     _T("thistle")
+#define   MP_MVIEW_SIGCOLOUR_DEFVAL     "thistle"
 /// which colour for URLS
-#define   MP_MVIEW_URLCOLOUR_DEFVAL     _T("blue")
+#define   MP_MVIEW_URLCOLOUR_DEFVAL     "blue"
 /// colour for attachment labels
-#define   MP_MVIEW_ATTCOLOUR_DEFVAL     _T("dark olive green")
+#define   MP_MVIEW_ATTCOLOUR_DEFVAL     "dark olive green"
 
 /// colorize quoted text?
 #define   MP_MVIEW_QUOTED_COLOURIZE_DEFVAL 1L
 /// cycle colours?
 #define   MP_MVIEW_QUOTED_CYCLE_COLOURS_DEFVAL  0L
 /// which colour for quoted text
-#define   MP_MVIEW_QUOTED_COLOUR1_DEFVAL     _T("gray")
+#define   MP_MVIEW_QUOTED_COLOUR1_DEFVAL     "gray"
 /// which colour for quoted text, seconds level
-#define   MP_MVIEW_QUOTED_COLOUR2_DEFVAL     _T("brown")
+#define   MP_MVIEW_QUOTED_COLOUR2_DEFVAL     "brown"
 /// which colour for quoted text, seconds level
-#define   MP_MVIEW_QUOTED_COLOUR3_DEFVAL     _T("purple")
+#define   MP_MVIEW_QUOTED_COLOUR3_DEFVAL     "purple"
 /// the maximum number of whitespaces prepending >
 #define   MP_MVIEW_QUOTED_MAXWHITESPACE_DEFVAL  2L
 /// the maximum number of A-Z prepending >
 #define   MP_MVIEW_QUOTED_MAXALPHA_DEFVAL    3L
 /// the colour for header names in the message view
-#define   MP_MVIEW_HEADER_NAMES_COLOUR_DEFVAL  _T("RGB(128,64,64)")
+#define   MP_MVIEW_HEADER_NAMES_COLOUR_DEFVAL  "RGB(128,64,64)"
 /// the colour for header values in the message view
-#define   MP_MVIEW_HEADER_VALUES_COLOUR_DEFVAL _T("black")
+#define   MP_MVIEW_HEADER_VALUES_COLOUR_DEFVAL "black"
 //@}
 /**@name  Font settings for message view */
 //@{
@@ -1955,23 +1955,23 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// which font size
 #define   MP_FVIEW_FONT_SIZE_DEFVAL         -1
 /// the full font desc (replaces the 2 settings above)
-#define   MP_FVIEW_FONT_DESC_DEFVAL   wxEmptyString
+#define   MP_FVIEW_FONT_DESC_DEFVAL   ""
 /// don't show full e-mail, only sender's name
 #define   MP_FVIEW_NAMES_ONLY_DEFVAL         0L
 /// which foreground colour for the font
-#define   MP_FVIEW_FGCOLOUR_DEFVAL      _T("black")
+#define   MP_FVIEW_FGCOLOUR_DEFVAL      "black"
 /// which background colour for the font
-#define   MP_FVIEW_BGCOLOUR_DEFVAL      _T("white")
+#define   MP_FVIEW_BGCOLOUR_DEFVAL      "white"
 /// colour for deleted messages
-#define   MP_FVIEW_DELETEDCOLOUR_DEFVAL      _T("grey")
+#define   MP_FVIEW_DELETEDCOLOUR_DEFVAL      "grey"
 /// colour for new messages
-#define   MP_FVIEW_NEWCOLOUR_DEFVAL      _T("orange")
+#define   MP_FVIEW_NEWCOLOUR_DEFVAL      "orange"
 /// colour for recent messages
-#define   MP_FVIEW_RECENTCOLOUR_DEFVAL      _T("gold")
+#define   MP_FVIEW_RECENTCOLOUR_DEFVAL      "gold"
 /// colour for unread messages
-#define   MP_FVIEW_UNREADCOLOUR_DEFVAL      _T("blue")
+#define   MP_FVIEW_UNREADCOLOUR_DEFVAL      "blue"
 /// colour for flagged messages
-#define   MP_FVIEW_FLAGGEDCOLOUR_DEFVAL      _T("purple")
+#define   MP_FVIEW_FLAGGEDCOLOUR_DEFVAL      "purple"
 /// automatically select next unread message after finishing the current one
 #define MP_FVIEW_AUTONEXT_UNREAD_MSG_DEFVAL 1L
 /// automatically select next unread folder after finishing the current one
@@ -1997,19 +1997,19 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// is the folder tree on the left of folder view or on the right?
 #define MP_FTREE_LEFT_DEFVAL 1L
 /// the foreground colour for the folder tree
-#define MP_FTREE_FGCOLOUR_DEFVAL wxEmptyString
+#define MP_FTREE_FGCOLOUR_DEFVAL ""
 /// the background colour for the folder tree
-#define MP_FTREE_BGCOLOUR_DEFVAL wxEmptyString
+#define MP_FTREE_BGCOLOUR_DEFVAL ""
 /// show the currently opened folder specially?
 #define MP_FTREE_SHOWOPENED_DEFVAL 1L
 /// format for the folder tree entries
-#define MP_FTREE_FORMAT_DEFVAL _T(" (%t, %u)")
+#define MP_FTREE_FORMAT_DEFVAL " (%t, %u)"
 /// reflect the folder status in its parent?
 #define MP_FTREE_PROPAGATE_DEFVAL 1L
 /// skip this folder when looking for next unread one in the tree
 #define MP_FTREE_NEVER_UNREAD_DEFVAL 0L
 /// go to this folder when Ctrl-Home is pressed
-#define MP_FTREE_HOME_DEFVAL wxEmptyString
+#define MP_FTREE_HOME_DEFVAL ""
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -2018,17 +2018,17 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// which font size
 #define   MP_CVIEW_FONT_SIZE_DEFVAL    -1
 /// the full font desc (replaces the 2 settings above)
-#define   MP_CVIEW_FONT_DESC_DEFVAL   wxEmptyString
+#define   MP_CVIEW_FONT_DESC_DEFVAL   ""
 /// which foreground colour for the font
-#define   MP_CVIEW_FGCOLOUR_DEFVAL      _T("black")
+#define   MP_CVIEW_FGCOLOUR_DEFVAL      "black"
 /// which background colour for the font
-#define   MP_CVIEW_BGCOLOUR_DEFVAL      _T("white")
+#define   MP_CVIEW_BGCOLOUR_DEFVAL      "white"
 /// use the colours and font for the headers as well?
 #define   MP_CVIEW_COLOUR_HEADERS_DEFVAL 0L
 /// check for forgotten attachments?
 #define   MP_CHECK_FORGOTTEN_ATTACHMENTS_DEFVAL 1L
 /// regex to use for the attachments check
-#define   MP_CHECK_ATTACHMENTS_REGEX_DEFVAL _T("\\<(attach|enclose)")
+#define   MP_CHECK_ATTACHMENTS_REGEX_DEFVAL "\\<(attach|enclose)"
 //@}
 /// highlight signature?
 #define   MP_HIGHLIGHT_SIGNATURE_DEFVAL      1
@@ -2055,8 +2055,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGS_INDENT_IF_DUMMY_DEFVAL 0l
 
 #if wxUSE_REGEX
-#  define MP_MSGS_SIMPLIFYING_REGEX_DEFVAL _T("^ *(R[Ee](\\[[0-9]+\\])?: +)*(\\[[^][]+\\]+)?(R[Ee](\\[[0-9]+\\])?: +)*")
-#  define MP_MSGS_REPLACEMENT_STRING_DEFVAL _T("\\3")
+#  define MP_MSGS_SIMPLIFYING_REGEX_DEFVAL "^ *(R[Ee](\\[[0-9]+\\])?: +)*(\\[[^][]+\\]+)?(R[Ee](\\[[0-9]+\\])?: +)*"
+#  define MP_MSGS_REPLACEMENT_STRING_DEFVAL "\\3"
 #else // wxUSE_REGEX
    /// Remove list prefix when comparing message's subject to gather them
 #  define MP_MSGS_REMOVE_LIST_PREFIX_GATHERING_DEFVAL 1l
@@ -2067,23 +2067,23 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT_DEFVAL   0l
 /// search argument
-#define MP_MSGS_SEARCH_ARG_DEFVAL   wxEmptyString
+#define MP_MSGS_SEARCH_ARG_DEFVAL   ""
 /// open URLs with
 #ifdef  OS_UNIX
-#  define   MP_BROWSER_DEFVAL         _T("netscape")
+#  define   MP_BROWSER_DEFVAL         "netscape"
 #  define   MP_BROWSER_ISNS_DEFVAL    1
 #  define   MP_BROWSER_INNW_DEFVAL    1
 #else  // under Windows, we know better...
-#  define   MP_BROWSER_DEFVAL         M_EMPTYSTRING
+#  define   MP_BROWSER_DEFVAL         ""
 #  define   MP_BROWSER_ISNS_DEFVAL    0l
 #  define   MP_BROWSER_INNW_DEFVAL    1l
 #endif // Unix/Win
 
 /// external editor to use for message composition (use %s for filename)
 #ifdef OS_UNIX
-#  define   MP_EXTERNALEDITOR_DEFVAL  _T("gvim %s")
+#  define   MP_EXTERNALEDITOR_DEFVAL  "gvim %s"
 #else
-#  define   MP_EXTERNALEDITOR_DEFVAL  _T("notepad %s")
+#  define   MP_EXTERNALEDITOR_DEFVAL  "notepad %s"
 #endif // Unix/Win
 
 /// start external editor automatically?
@@ -2091,19 +2091,19 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// PGP/GPG application
 #ifdef OS_UNIX
-#  define   MP_PGP_COMMAND_DEFVAL  _T("gpg")
+#  define   MP_PGP_COMMAND_DEFVAL  "gpg"
 #else
-#  define   MP_PGP_COMMAND_DEFVAL  _T("gpg.exe")
+#  define   MP_PGP_COMMAND_DEFVAL  "gpg.exe"
 #endif // Unix/Win
 
 /// PGP/GPG key server for public keys
-#define MP_PGP_KEYSERVER_DEFVAL _T("wwwkeys.eu.pgp.net")
+#define MP_PGP_KEYSERVER_DEFVAL "wwwkeys.eu.pgp.net"
 /// get PGP key from server?
 #define MP_PGP_GET_PUBKEY_DEFVAL 1l
 
 /// command to execute when new mail arrives
 #define   MP_USE_NEWMAILCOMMAND_DEFVAL   0l
-#define   MP_NEWMAILCOMMAND_DEFVAL   M_EMPTYSTRING
+#define   MP_NEWMAILCOMMAND_DEFVAL   ""
 
 /// play a sound on new mail?
 #ifdef __CYGWIN__
@@ -2114,12 +2114,12 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 #if defined(OS_UNIX) || defined(__CYGWIN__)
 /// which sound to play?
-#define MP_NEWMAIL_SOUND_FILE_DEFVAL M_BASEDIR _T("/newmail.wav")
+#define MP_NEWMAIL_SOUND_FILE_DEFVAL M_BASEDIR "/newmail.wav"
 /// the program to use to play this sound
-#define MP_NEWMAIL_SOUND_PROGRAM_DEFVAL _T("/usr/bin/play %s")
+#define MP_NEWMAIL_SOUND_PROGRAM_DEFVAL "/usr/bin/play %s"
 #else // !OS_UNIX
 /// which sound to play?
-#define MP_NEWMAIL_SOUND_FILE_DEFVAL wxEmptyString
+#define MP_NEWMAIL_SOUND_FILE_DEFVAL ""
 #endif // OS_UNIX/!OS_UNIX
 
 /// show new mail messages?
@@ -2133,13 +2133,13 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// keep copies of outgoing mail?
 #define   MP_USEOUTGOINGFOLDER_DEFVAL  1
 /// write outgoing mail to folder:
-#define   MP_OUTGOINGFOLDER_DEFVAL  wxEmptyString // obsolete
+#define   MP_OUTGOINGFOLDER_DEFVAL  "" // obsolete
 /// Show all message headers?
 #define   MP_SHOWHEADERS_DEFVAL         0l
 /// Autocollect email addresses?
 #define   MP_AUTOCOLLECT_INCOMING_DEFVAL     (long)M_ACTION_ALWAYS
 /// Name of the address books for autocollected addresses
-#define   MP_AUTOCOLLECT_ADB_DEFVAL    _T("autocollect.adb")
+#define   MP_AUTOCOLLECT_ADB_DEFVAL    "autocollect.adb"
 /// Autocollect email addresses from sender only ?
 #define   MP_AUTOCOLLECT_SENDER_DEFVAL     1l
 /// Autocollect addresses in mail sent by user?
@@ -2149,19 +2149,19 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// Default names for the SSL and crypto libraries
 #ifdef OS_UNIX
-   #define MP_SSL_DLL_SSL_DEFVAL   _T("libssl.so")
-   #define MP_SSL_DLL_CRYPTO_DEFVAL _T("libcrypto.so")
+   #define MP_SSL_DLL_SSL_DEFVAL   "libssl.so"
+   #define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so"
 #elif defined(OS_WIN)
    #if defined(__CYGWIN__)
-      #define MP_SSL_DLL_SSL_DEFVAL   _T("cygssl.dll")
-      #define MP_SSL_DLL_CRYPTO_DEFVAL _T("cygcrypto.dll")
+      #define MP_SSL_DLL_SSL_DEFVAL   "cygssl.dll"
+      #define MP_SSL_DLL_CRYPTO_DEFVAL "cygcrypto.dll"
    #else // !cygwin
-      #define MP_SSL_DLL_SSL_DEFVAL   _T("ssleay32.dll")
-      #define MP_SSL_DLL_CRYPTO_DEFVAL _T("libeay32.dll")
+      #define MP_SSL_DLL_SSL_DEFVAL   "ssleay32.dll"
+      #define MP_SSL_DLL_CRYPTO_DEFVAL "libeay32.dll"
    #endif
 #else // !Unix, !Win
-   #define MP_SSL_DLL_SSL_DEFVAL   wxEmptyString
-   #define MP_SSL_DLL_CRYPTO_DEFVAL wxEmptyString
+   #define MP_SSL_DLL_SSL_DEFVAL   ""
+   #define MP_SSL_DLL_CRYPTO_DEFVAL ""
 #endif
 
 /**@name message view settings */
@@ -2169,7 +2169,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// support efax style incoming faxes
 #define MP_INCFAX_SUPPORT_DEFVAL      1L
 /// domains from which to support faxes, semicolon delimited
-#define MP_INCFAX_DOMAINS_DEFVAL      _T("efax.com")
+#define MP_INCFAX_DOMAINS_DEFVAL      "efax.com"
 //@}
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION_DEFVAL 0l
@@ -2177,7 +2177,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// replace "From" address with "To" in messages from oneself?
 #define MP_FVIEW_FROM_REPLACE_DEFVAL 0L
 /// the ':' separated list of addresses which are "from oneself"
-#define MP_FROM_REPLACE_ADDRESSES_DEFVAL wxEmptyString
+#define MP_FROM_REPLACE_ADDRESSES_DEFVAL ""
 
 /** @name maximal amounts of data to retrieve from remote servers */
 //@{
@@ -2207,9 +2207,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// ssh connection timeout in seconds.
 #define MP_TCP_SSHTIMEOUT_DEFVAL 0l
 /// the path to rsh
-#define MP_RSH_PATH_DEFVAL _T("rsh")
+#define MP_RSH_PATH_DEFVAL "rsh"
 /// the path to ssh
-#define MP_SSH_PATH_DEFVAL _T("ssh")
+#define MP_SSH_PATH_DEFVAL "ssh"
 //@}
 
 /** @name for folder list ctrls: ratios of the width to use for
@@ -2244,18 +2244,18 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// the wildcard for save dialog
 #ifdef OS_UNIX
-#  define   MP_DEFAULT_SAVE_WILDCARD_DEFVAL   _T("*")
-#  define   MP_DEFAULT_LOAD_WILDCARD_DEFVAL   _T("*")
+#  define   MP_DEFAULT_SAVE_WILDCARD_DEFVAL   "*"
+#  define   MP_DEFAULT_LOAD_WILDCARD_DEFVAL   "*"
 #else
-#  define   MP_DEFAULT_SAVE_WILDCARD_DEFVAL   _T("*.*")
-#  define   MP_DEFAULT_LOAD_WILDCARD_DEFVAL   _T("*.*")
+#  define   MP_DEFAULT_SAVE_WILDCARD_DEFVAL   "*.*"
+#  define   MP_DEFAULT_LOAD_WILDCARD_DEFVAL   "*.*"
 #endif
 /// an entry used for testing
 #define MP_TESTENTRY_DEFVAL      0L
 /// Do we remote synchronise configuration settings?
 #define MP_SYNC_REMOTE_DEFVAL   0L
 /// IMAP folder to sync to
-#define MP_SYNC_FOLDER_DEFVAL   _T("MahoganySharedConfig")
+#define MP_SYNC_FOLDER_DEFVAL   "MahoganySharedConfig"
 /// our last sync date
 #define MP_SYNC_DATE_DEFVAL      0L
 /// sync filters?
@@ -2265,7 +2265,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// sync folders?
 #define MP_SYNC_FOLDERS_DEFVAL   0L
 /// sync folder tree
-#define MP_SYNC_FOLDERGROUP_DEFVAL   wxEmptyString
+#define MP_SYNC_FOLDERGROUP_DEFVAL   ""
 
 /** @name sending */
 //@{
@@ -2291,7 +2291,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_CREATE_INTERNAL_MESSAGE_DEFVAL   1
 
 /// name of addressbook to use in whitelist spam filter
-#define MP_WHITE_LIST_DEFVAL wxEmptyString
+#define MP_WHITE_LIST_DEFVAL ""
 
 /// treat mail in this folder as junk mail
 #define MP_TREAT_AS_JUNK_MAIL_FOLDER_DEFVAL 0L

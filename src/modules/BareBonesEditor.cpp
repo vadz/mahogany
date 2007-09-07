@@ -331,7 +331,7 @@ bool DoesSignatureStartHere(const wxChar *cptr)
 
 IMPLEMENT_MESSAGE_EDITOR(BareBonesEditor,
                          _("Minimal message editor"),
-                         _T("(c) 2003 Mahogany Team"));
+                         "(c) 2003 Mahogany Team");
 
 // ----------------------------------------------------------------------------
 // FormattedParagraph

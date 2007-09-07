@@ -1529,8 +1529,8 @@ void wxPTreeCtrl::RestoreExpandedBranches(const wxTreeItemId& itemRoot,
 
             if ( !idChild.IsOk() )
             {
-                wxLogDebug(_T("Number of items in wxPTreeCtrl changed "
-                              "unexpectedly."));
+                wxLogDebug("Number of items in wxPTreeCtrl changed "
+                           "unexpectedly.");
                 break;
             }
         }

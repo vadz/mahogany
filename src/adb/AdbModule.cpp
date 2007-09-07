@@ -44,7 +44,7 @@
 // static AdbImporter functions
 // ----------------------------------------------------------------------------
 
-size_t AdbModule::EnumModules(const wxChar *kind,
+size_t AdbModule::EnumModules(const char *kind,
                               wxArrayString& names, wxArrayString& descs)
 {
    names.Empty();
@@ -76,7 +76,7 @@ size_t AdbModule::EnumModules(const wxChar *kind,
    return names.GetCount();
 }
 
-AdbModule *AdbModule::GetModuleByName(const wxChar *kind, const String& name)
+AdbModule *AdbModule::GetModuleByName(const char *kind, const String& name)
 {
    AdbModule *importer = NULL;
    AdbModule::AdbModuleInfo *info = AdbModule::GetAdbModuleInfo(kind);
@@ -110,7 +110,7 @@ AdbModule *AdbModule::GetModuleByName(const wxChar *kind, const String& name)
 // AdbModule functions for working with AdbModuleInfo
 // ----------------------------------------------------------------------------
 
-AdbModule::AdbModuleInfo *AdbModule::GetAdbModuleInfo(const wxChar *kind)
+AdbModule::AdbModuleInfo *AdbModule::GetAdbModuleInfo(const char *kind)
 {
 #ifdef USE_ADB_MODULES
    ASSERT_MSG( !ms_listModules, _T("forgot to call FreeAdbModuleInfo()!") );
@@ -158,11 +158,11 @@ void AdbModule::FreeAdbModuleInfo(AdbModule::AdbModuleInfo *info)
 
 AdbModule::AdbModuleInfo *AdbModule::ms_listModules = NULL;
 
-AdbModule::AdbModuleInfo::AdbModuleInfo(const wxChar *name_,
+AdbModule::AdbModuleInfo::AdbModuleInfo(const char *name_,
 #ifndef USE_ADB_MODULES
                                         Constructor ctor,
 #endif // !USE_ADB_MODULES
-                                        const wxChar *desc_)
+                                        const char *desc_)
 {
    // init member vars
    name = name_;

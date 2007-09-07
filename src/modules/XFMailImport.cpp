@@ -83,7 +83,7 @@ private:
 // generic
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_M_IMPORTER(MXFMailImporter, _T("XFMail"),
+IMPLEMENT_M_IMPORTER(MXFMailImporter, "XFMail",
                      gettext_noop("Import settings from XFMail"))
 
 int MXFMailImporter::GetFeatures() const

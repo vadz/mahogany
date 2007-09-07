@@ -60,16 +60,16 @@ class ConfigSourceLocalFactory : public ConfigSourceFactory
 {
 public:
    // the type of the local config source
-   static const wxChar *Type() { return gettext_noop("file"); }
+   static const char *Type() { return gettext_noop("file"); }
 
-   virtual const wxChar *GetType() const { return Type(); }
+   virtual const char *GetType() const { return Type(); }
    virtual ConfigSource *Create(const ConfigSource& config, const String& name);
    virtual bool
        Save(ConfigSource& config, const String& name, const String& spec);
 
 private:
    // the path used for storing the file name in config
-   static const wxChar *FileNamePath() { return _T("/FileName"); }
+   static const char *FileNamePath() { return "/FileName"; }
 };
 
 // ----------------------------------------------------------------------------

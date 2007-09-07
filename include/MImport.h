@@ -27,10 +27,10 @@ class WXDLLEXPORT wxWindow;
 // ----------------------------------------------------------------------------
 
 // the importer interface name
-#define M_IMPORTER_INTERFACE _T("Importer")
+#define M_IMPORTER_INTERFACE "Importer"
 
 // the name of the property containing the name of the program we work with
-#define M_IMPORTER_PROG_NAME _T("progname")
+#define M_IMPORTER_PROG_NAME "progname"
 
 // ----------------------------------------------------------------------------
 // MImporter: class for importing everything
@@ -79,7 +79,7 @@ public:
 
    // return the name of the program we work with (generated during
    // DECLARE_M_IMPORTER and IMPLEMENT_M_IMPORTER macro expansion)
-   virtual const wxChar *GetProgName() const = 0;
+   virtual const char *GetProgName() const = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 
 // this macro must be used inside the declaration of the importer class
 #define DECLARE_M_IMPORTER()                                                   \
-   virtual const wxChar *GetProgName() const;                                  \
+   virtual const char *GetProgName() const;                                    \
    MMODULE_DEFINE();                                                           \
    DEFAULT_ENTRY_FUNC                                                          \
 
@@ -107,14 +107,13 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 // lines of the form MMODULE_PROP(name, value) between them to add other
 // properties such as description or whatever
 #define MIMPORTER_BEGIN_IMPLEMENT(cname, progname, desc)                       \
-   MMODULE_BEGIN_IMPLEMENT(cname, _T(#cname), M_IMPORTER_INTERFACE,            \
-                           _T(""), _T("1.00"))                                 \
+   MMODULE_BEGIN_IMPLEMENT(cname, #cname, M_IMPORTER_INTERFACE, "", "1.00")    \
       MMODULE_PROP(M_IMPORTER_PROG_NAME, progname)                             \
       MMODULE_PROP(MMODULE_DESCRIPTION_PROP, desc)
 
 #define MIMPORTER_END_IMPLEMENT(cname)                                         \
    MMODULE_END_IMPLEMENT(cname)                                                \
-   const wxChar *cname::GetProgName() const                                    \
+   const char *cname::GetProgName() const                                      \
    {                                                                           \
       return GetMModuleProperty(ms_properties, M_IMPORTER_PROG_NAME);          \
    }                                                                           \

@@ -48,7 +48,7 @@ extern const MOption MP_MSGS_SEARCH_CRIT;
 // constants
 // ----------------------------------------------------------------------------
 
-static const wxChar *searchCriteria[] =
+static const char *searchCriteria[] =
 {
    gettext_noop("Full Message"),
    gettext_noop("Message Content"),

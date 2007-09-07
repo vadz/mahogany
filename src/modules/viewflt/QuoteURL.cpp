@@ -167,7 +167,7 @@ IMPLEMENT_VIEWER_FILTER(QuoteURLFilter,
                         ViewFilter::Priority_Default,
                         true,      // enabled by default
                         gettext_noop("Quotes and URLs"),
-                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
+                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // QuoteURLFilter options

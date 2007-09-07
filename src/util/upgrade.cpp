@@ -2170,7 +2170,7 @@ public:
          Profile_obj profile(folderName);
 
          Profile::ReadResult found;
-         String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, wxEmptyString, &found);
+         String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, "", &found);
          if ( found == Profile::Read_FromHere )
          {
             // delete the old entry, create the new one
@@ -2252,7 +2252,7 @@ public:
             String entry = group + templateKinds[n];
             if ( profile->HasEntry(entry) )
             {
-               String templateValue = profile->readEntry(entry, wxEmptyString);
+               String templateValue = profile->readEntry(entry, "");
 
                String entryNew;
                entryNew << M_TEMPLATES_SECTION << '/'
@@ -2261,9 +2261,9 @@ public:
                Profile *profileApp = mApplication->GetProfile();
                if ( profileApp->HasEntry(entryNew) )
                {
-                  wxLogWarning(_T("A profile entry '%s' already exists, "
-                               "impossible to upgrade the existing template "
-                               "in '%s/%s/%s'"),
+                  wxLogWarning(_("A profile entry '%s' already exists, "
+                                 "impossible to upgrade the existing template "
+                                 "in '%s/%s/%s'"),
                                entryNew.c_str(),
                                folderName.c_str(),
                                group.c_str(),
@@ -2692,7 +2692,7 @@ public:
          // also check SMTP/NNTP server flags: need to replace bools with
          // SSLSupport_XXX values
 
-         const wxChar *key = GetOptionName(MP_SMTPHOST_USE_SSL);
+         const char *key = GetOptionName(MP_SMTPHOST_USE_SSL);
          Profile::ReadResult readFrom;
          bool wasUsingSSL = profile->readEntry(key, false, &readFrom);
 
@@ -3940,7 +3940,7 @@ CheckConfiguration(void)
    }
 
    // do we need to upgrade something?
-   String version = profile->readEntry(MP_VERSION, wxEmptyString);
+   String version = profile->readEntry(MP_VERSION, "");
    if ( version != M_VERSION )
    {
       CloseSplash();

@@ -158,7 +158,7 @@ public:
                             ReadResult *found = NULL) const = 0;
    /// Read a character entry.
    String readEntry(const String &  key,
-                    const wxChar *defaultvalue = NULL,
+                    const char *defaultvalue = NULL,
                     ReadResult *found = NULL) const;
    /// Read an integer value.
    virtual long readEntry(const String & key,

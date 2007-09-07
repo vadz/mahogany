@@ -170,7 +170,7 @@ private:
 
 IMPLEMENT_MESSAGE_EDITOR(LayoutEditor,
                          _("Default message editor"),
-                         _T("(c) 1997-2001 Mahogany Team"));
+                         "(c) 1997-2001 Mahogany Team");
 
 // ----------------------------------------------------------------------------
 // wxComposerLayoutWindow

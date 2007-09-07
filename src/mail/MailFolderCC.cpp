@@ -5574,32 +5574,32 @@ void MailFolderCC::EndReading()
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK1(name, fmt, parm) \
-      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(%s, " fmt ")%s"), \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
                  #name, GetStreamMailbox(stream), parm, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK2(name, fmt, parm1, parm2) \
-      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(%s, " fmt ")%s"), \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
                  #name, GetStreamMailbox(stream), parm1, parm2, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK3(name, fmt, parm1, parm2, parm3) \
-      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(%s, " fmt ")%s"), \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
                  #name, GetStreamMailbox(stream), parm1, parm2, parm3, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_1(name, fmt, parm1) \
-      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(" fmt ")%s"), \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
                  #name, parm1, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_2(name, fmt, parm1, parm2) \
-      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(" fmt ")%s"), \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
                  #name, parm1, parm2, \
                  mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_5(name, fmt, parm1, parm2, parm3, parm4, parm5) \
-      wxLogTrace(TRACE_MF_CALLBACK, _T("%s(" fmt ")%s"), \
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
                  #name, parm1, parm2, parm3, parm4, parm5, \
                  mm_disable_callbacks ? " [disabled]" : "")
 #else // !EXPERIMENTAL_log_callbacks

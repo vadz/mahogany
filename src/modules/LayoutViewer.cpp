@@ -275,7 +275,7 @@ void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
 
 IMPLEMENT_MESSAGE_VIEWER(LayoutViewer,
                          _("Rich text message viewer"),
-                         _T("(c) 1997-2001 Mahogany Team"));
+                         "(c) 1997-2001 Mahogany Team");
 
 LayoutViewer::LayoutViewer()
 {

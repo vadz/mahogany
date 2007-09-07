@@ -35,15 +35,15 @@ public:
       {
          String debugInfo;
          if(me->node == NULL)
-            debugInfo.Printf(_T("iterator::Debug(): %p  Node: NULL"), me);
+            debugInfo.Printf("iterator::Debug(): %p  Node: NULL", me);
          else
-            debugInfo.Printf(_T("iterator::Debug(): %p  Node: %p  "
-                                "Node.next: %p  Node.prev: %p  "
-                                "Node.element: %p"),
-                              me, me->node,
-                              me->node->next,
-                              me->node->prev,
-                              me->node->element);
+            debugInfo.Printf("iterator::Debug(): %p  Node: %p  "
+                             "Node.next: %p  Node.prev: %p  "
+                             "Node.element: %p",
+                             me, me->node,
+                             me->node->next,
+                             me->node->prev,
+                             me->node->element);
 
          return debugInfo;
       }

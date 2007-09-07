@@ -159,7 +159,7 @@ private:
 
 IMPLEMENT_CRYPTO_ENGINE(PGPEngine,
                         _("PGP/GPG crypto engine"),
-                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
+                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // PGPEngine: running the external tool

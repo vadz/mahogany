@@ -950,7 +950,7 @@ MailFolder::ReplyMessage(Message *msg,
          // for the translation of the standard string (notice that the
          // standard string should be in lower case because we transform
          // everything to lower case)
-         static const wxChar *replyPrefixStandard = gettext_noop("re");
+         static const char *replyPrefixStandard = gettext_noop("re");
 
          // first configured string
          size_t matchLen = replyPrefixLower.length();

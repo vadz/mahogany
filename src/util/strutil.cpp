@@ -348,7 +348,7 @@ strutil_getfilename(const String& path)
    // under Windows we understand both '/' and '\\' as path separators, but
    // '\\' doesn't count as path separator under Unix
 #ifdef OS_WIN
-   const wxChar *pLast2 = wxStrrchr(path, '\\');
+   const char *pLast2 = wxStrrchr(path, '\\');
    size_t nPos2 = pLast2 ? pLast2 - path.c_str() : 0;
    if ( nPos2 > nPos1 )
       nPos1 = nPos2;
@@ -1447,6 +1447,8 @@ wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
    return enc;
 }
 
+#if !wxUSE_UNICODE
+
 #ifndef __WXGTK20__
 
 static wxFontEncoding ConvertToMB(wxString *strUtf, const wxMBConv& conv)
@@ -1503,8 +1505,6 @@ static wxFontEncoding ConvertToMB(wxString *strUtf, const wxMBConv& conv)
 }
 
 #endif // __WXGTK20__
-
-#if !wxUSE_UNICODE
 
 // convert a string in UTF-8 or 7 into the string in some multibyte encoding:
 // of course, this doesn't work in general as Unicode is not representable as

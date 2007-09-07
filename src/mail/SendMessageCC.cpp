@@ -403,7 +403,7 @@ void SendMessageCC::InitNew()
    }
 
    if ( READ_CONFIG_BOOL(m_profile, MP_COMPOSE_USE_XFACE) )
-      m_XFaceFile = m_profile->readEntry(MP_COMPOSE_XFACE_FILE, wxEmptyString);
+      m_XFaceFile = m_profile->readEntry(MP_COMPOSE_XFACE_FILE, "");
 
    m_CharSet = READ_CONFIG_TEXT(m_profile,MP_CHARSET);
 }
@@ -1815,7 +1815,7 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
 {
    // note that we have to repeat ios::out and binary below, otherwise gcc 3.0
    // refuses to compile it as it converts everything to int and then fails
-   ofstream ostr(filename.fn_str(),
+   ofstream ostr(filename.mb_str(),
                  append ? ios::out | ios::binary
                         : ios::out | ios::binary | ios::trunc);
 

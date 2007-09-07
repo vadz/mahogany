@@ -39,7 +39,7 @@
 // ----------------------------------------------------------------------------
 
 // the name of the standard template - i.e. the one which is used by default
-#define STANDARD_TEMPLATE_NAME _T("Standard")
+#define STANDARD_TEMPLATE_NAME "Standard"
 
 // ----------------------------------------------------------------------------
 // private functions

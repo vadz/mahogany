@@ -1548,7 +1548,7 @@ public:
 
    virtual bool OnVisitFolder(const wxString& folderName)
       {
-         static const wxChar * keys[] =
+         static const char * keys[] =
          {
             MP_FOLDER_PASSWORD,
             MP_SMTPHOST_PASSWORD,
@@ -1561,7 +1561,7 @@ public:
             Profile_obj profile(folderName);
             if(profile->HasEntry(keys[idx])) // don't work on inherited ones
             {
-               wxString val = profile->readEntry(keys[idx], wxEmptyString);
+               wxString val = profile->readEntry(keys[idx], "");
                if(val != wxEmptyString)
                {
                   p->writeEntry(MP_CRYPTALGO, m_OldUC);

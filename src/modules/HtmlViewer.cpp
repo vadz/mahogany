@@ -573,7 +573,7 @@ HtmlViewerWindow::OnOpeningURL(wxHtmlURLType type,
 
 IMPLEMENT_MESSAGE_VIEWER(HtmlViewer,
                          _("HTML message viewer"),
-                         _T("(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>"));
+                         "(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>");
 
 HtmlViewer::HtmlViewer()
 {
@@ -948,8 +948,8 @@ void HtmlViewer::ShowHeaderName(const String& name)
    }
 
    // create the first column: header names (width=1 means minimal width)
-   m_htmlText += _T("<tr>"
-                 "<td align=\"right\" valign=\"top\" width=\"1\">");
+   m_htmlText += _T("<tr>")
+                 _T("<td align=\"right\" valign=\"top\" width=\"1\">");
 
    FontColourChanger colChanger(GetOptions().HeaderNameCol, m_htmlText);
 
@@ -1001,9 +1001,9 @@ void HtmlViewer::EndHeaders()
       wxString filename = CreateImageInMemoryFS(m_bmpXFace.ConvertToImage());
       m_htmlText << _T("</td><td width=")
                  << wxString::Format(_T("%d"), m_bmpXFace.GetWidth()) << _T(">")
-                    _T("<img src=\"memory:") << EscapeQuotes(filename) << _T("\">"
-                    "</td>"
-                    "</table>");
+                    _T("<img src=\"memory:") << EscapeQuotes(filename) << _T("\">")
+                    _T("</td>")
+                    _T("</table>");
    }
 
    // skip a line before the body
@@ -1040,8 +1040,8 @@ void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    wxString url;
    url << _T("memory:") << CreateImageInMemoryFS(icon.ConvertToImage());
 
-   m_htmlText << _T("<a href=\"") << url << _T("\">"
-                 "<img alt=\"") << EscapeQuotes(ci->GetLabel())
+   m_htmlText << _T("<a href=\"") << url << _T("\">")
+                 _T("<img alt=\"") << EscapeQuotes(ci->GetLabel())
               << _T("\" src=\"") << url << _T("\"></a>");
 
    m_window->StoreClickable(ci, url);
@@ -1059,8 +1059,8 @@ void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
    wxString url;
    url << _T("memory:") << CreateImageInMemoryFS(wxImage(image));
 
-   m_htmlText << _T("<a href=\"") << url << _T("\">"
-                 "<p><img alt=\"") << EscapeQuotes(ci->GetLabel())
+   m_htmlText << _T("<a href=\"") << url << _T("\">")
+                 _T("<p><img alt=\"") << EscapeQuotes(ci->GetLabel())
               << _T("\" src=\"") << url << _T("\"></a>");
 
    m_window->StoreClickable(ci, url);

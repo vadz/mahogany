@@ -117,16 +117,16 @@ enum
   ConfigName_FindOptions
 };
 
-static const wxChar *aszConfigNames[] =
+static const char *aszConfigNames[] =
 {
-  _T("LastNewEntry"),
-  _T("LastNewWasGroup"),
-  _T("AddressBooks"),
-  _T("Providers"),
-  _T("ExpandedBranches"),
-  _T("TreeSelection"),
-  _T("FindWhere"),
-  _T("FindOptions")
+  "LastNewEntry",
+  "LastNewWasGroup",
+  "AddressBooks",
+  "Providers",
+  "ExpandedBranches",
+  "TreeSelection",
+  "FindWhere",
+  "FindOptions"
 };
 
 // ----------------------------------------------------------------------------
@@ -460,7 +460,7 @@ public:
   // a structure describing a field
   struct FieldInfo
   {
-    const wxChar *label;  // or the caption
+    const char *label;    // or the caption
     FieldType     type;   // and the type from the enum FieldType abvoe
   };
 
@@ -751,7 +751,7 @@ public:
   // the specified (or any for the default NULL value) provider
   bool OpenAdb(const wxString& strPath,
                AdbDataProvider *pProvider = NULL,
-               const wxChar *szProvName = NULL);
+               const char *szProvName = NULL);
   // ask the user for filename and create or open the address book
   bool CreateOrOpenAdb(bool bDoCreate);
 
@@ -954,7 +954,7 @@ WX_DEFINE_ARRAY(bool *, ArrayBoolPtr);
 class wxAdbPage : public wxPanel
 {
 public:
-  wxAdbPage(wxNotebook *notebook, const wxChar *title, int idImage,
+  wxAdbPage(wxNotebook *notebook, const wxString& title, int idImage,
             size_t nFirstField, size_t nLastField);
 
   // notify the notebook that we became dirty
@@ -984,10 +984,10 @@ protected:
   void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
 
   // all the functions should be given translated label!
-  wxTextCtrl *CreateMultiLineText(const wxChar *label, wxControl *last);
-  wxListBox  *CreateListBox(const wxChar *label, wxControl *last);
-  wxCheckBox *CreateCheckBox(const wxChar *label, wxControl *last);
-  wxTextCtrl *CreateTextWithLabel(const wxChar *label, long w, wxControl *last);
+  wxTextCtrl *CreateMultiLineText(const wxString& label, wxControl *last);
+  wxListBox  *CreateListBox(const wxString& label, wxControl *last);
+  wxCheckBox *CreateCheckBox(const wxString& label, wxControl *last);
+  wxTextCtrl *CreateTextWithLabel(const wxString& label, long w, wxControl *last);
 
   ArrayControls  m_aEntries;
   ArrayBoolPtr m_checkBoxOldValue;
@@ -1046,7 +1046,7 @@ private:
 class wxAdbAddrPage : public wxAdbPage
 {
 public:
-  wxAdbAddrPage(wxNotebook *notebook, const wxChar *title,
+  wxAdbAddrPage(wxNotebook *notebook, const wxString& title,
                 int idImage, bool bOffice);
 
 private:
@@ -1604,7 +1604,7 @@ void wxAdbEditFrame::LayoutButtons(wxPanel *panel,
 
 bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
                              AdbDataProvider *pProvider,
-                             const wxChar *szProvName)
+                             const char *szProvName)
 {
   // check that we don't already have it
   if ( IsAdbOpened(strPath) ) {
@@ -2773,7 +2773,7 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   // determine dialog size
   // ---------------------
 
-  const wxChar *label = _("Find &what:");
+  const wxString label = _("Find &what:");
   wxCoord widthLabel, heightLabel;
   wxClientDC dc(this);
   dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
@@ -2923,7 +2923,7 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
    : wxDialog(parent, -1, _("Create a new entry/group")),
      m_strName(strName), m_bGroup(bGroup)
 {
-  const wxChar *label = _("&New entry/group name:");
+  const wxString label = _("&New entry/group name:");
 
   // layout
   wxCoord widthLabel, heightLabel;
@@ -3018,7 +3018,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // layout
   // ------
 
-  static const wxChar *labels[] = {
+  static const wxString labels[] = {
     _("&Name:"),
     _("File name:"),
     _("File size:"),
@@ -3027,7 +3027,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   };
 
   // translated lables
-  const wxChar *labelsT[WXSIZEOF(labels)];
+  wxString labelsT[WXSIZEOF(labels)];
 
   size_t n, x, y, dy;
 
@@ -3164,16 +3164,16 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
   m_menu = NULL;
 
   // add images to our image list
-  static const wxChar *aszImages[] =
+  static const char *aszImages[] =
   {
     // should be in sync with the corresponding enum in wxAdbTree
-    _T("adb_library"),
-    _T("adb_book"),
-    _T("adb_address"),
-    _T("adb_opened"),
-    _T("adb_closed"),
-    _T("adb_palmos"),
-    _T("adb_bbdb")
+    "adb_library",
+    "adb_book",
+    "adb_address",
+    "adb_opened",
+    "adb_closed",
+    "adb_palmos",
+    "adb_bbdb"
   };
 
   wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
@@ -3278,10 +3278,10 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   m_bReadOnly = FALSE;
 
   // add images to our image list
-  static const wxChar *aszImages[] =
+  static const char *aszImages[] =
   {
     // should be in sync with the corresponding enum
-    _T("general"), _T("email"), _T("home"), _T("work")
+    "general", "email", "home", "work"
   };
 
   wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
@@ -3376,7 +3376,8 @@ wxAdbNotebook::~wxAdbNotebook()
 // -----------------------------------------------------------------------------
 // base notebook page
 // -----------------------------------------------------------------------------
-wxAdbPage::wxAdbPage(wxNotebook *notebook, const wxChar *title, int idImage,
+
+wxAdbPage::wxAdbPage(wxNotebook *notebook, const wxString& title, int idImage,
                      size_t nFirstField, size_t nLastField)
          : wxPanel(notebook, -1)
 {
@@ -3487,7 +3488,7 @@ void wxAdbPage::SetTopConstraint(wxLayoutConstraints *c, wxControl *last)
 }
 
 // create a single-line text control with a label
-wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxChar *label,
+wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxString& label,
                                            long widthMax,
                                            wxControl *last)
 {
@@ -3517,7 +3518,7 @@ wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxChar *label,
 }
 
 // create a multi-line text control with a label
-wxTextCtrl *wxAdbPage::CreateMultiLineText(const wxChar *label, wxControl *last)
+wxTextCtrl *wxAdbPage::CreateMultiLineText(const wxString& label, wxControl *last)
 {
   wxStaticText *pLabel = new wxStaticText(this, -1, label);
   wxTextCtrl *textComments = new wxTextCtrl(this, -1, wxEmptyString,
@@ -3531,7 +3532,7 @@ wxTextCtrl *wxAdbPage::CreateMultiLineText(const wxChar *label, wxControl *last)
 // create a listbox and the buttons to work with it
 // NB: we consider that there is only one listbox (at most) per page, so
 //     the button ids are always the same
-wxListBox *wxAdbPage::CreateListBox(const wxChar *label, wxControl *last)
+wxListBox *wxAdbPage::CreateListBox(const wxString& label, wxControl *last)
 {
   // a box around all this stuff
   wxStaticBox *box = new wxStaticBox(this, -1, label);
@@ -3546,13 +3547,13 @@ wxListBox *wxAdbPage::CreateListBox(const wxChar *label, wxControl *last)
 
   // the buttons vertically on the right of listbox
   wxButton *button = NULL;
-  static const wxChar *aszLabels[] =
+  static const wxString aszLabels[] =
   {
     _("&Add"),
     _("&Modify"),
     _("&Delete"),
   };
-  const wxChar *aszLabelsT[WXSIZEOF(aszLabels)];  // translated labels
+  wxString aszLabelsT[WXSIZEOF(aszLabels)];  // translated labels
 
   // should be in sync with enum!
   wxASSERT(
@@ -3598,7 +3599,7 @@ wxListBox *wxAdbPage::CreateListBox(const wxChar *label, wxControl *last)
 }
 
 // create a checkbox
-wxCheckBox *wxAdbPage::CreateCheckBox(const wxChar *label, wxControl *last)
+wxCheckBox *wxAdbPage::CreateCheckBox(const wxString& label, wxControl *last)
 {
   wxCheckBox *checkbox = new wxCheckBox(this, -1, label);
 
@@ -3788,7 +3789,7 @@ void wxAdbEMailPage::OnDeleteEMail(wxCommandEvent&)
   m_bListboxModified = TRUE;
 }
 
-wxAdbAddrPage::wxAdbAddrPage(wxNotebook *notebook, const wxChar *title,
+wxAdbAddrPage::wxAdbAddrPage(wxNotebook *notebook, const wxString& title,
                              int idImage, bool bOffice)
              : wxAdbPage(notebook, title, idImage,
                          bOffice ? AdbField_O_AddrPageFirst

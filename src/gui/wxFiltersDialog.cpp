@@ -87,7 +87,7 @@ extern const MPersMsgBox *M_MSGBOX_FILTER_REPLACE;
 static \
 T T##_fromSelect ( size_t value ) \
 { \
-   CHECK(value < count, default, _T(#T " out of range for choice")); \
+   CHECK(value < count, default, #T " out of range for choice"); \
    return arrayS[value]; \
 }
 
@@ -102,7 +102,7 @@ int T##_toSelect ( T value ) \
       if ( arrayS[i] == value ) \
          return i; \
    } \
-   CHECK(false, default, _T("choice not implemented in " #T)); \
+   CHECK(false, default, "choice not implemented in " #T); \
 }
 
 // ----------------------------------------------------------------------------
@@ -2388,7 +2388,7 @@ void wxQuickFilterDialog::AddTest(MFDialogSettings **settings,
                                   FilterControl which)
 {
    // the part of the name of the filter for the specified criterium
-   static const wxChar *names[Filter_Max] =
+   static const char *names[Filter_Max] =
    {
       gettext_noop("from"),
       gettext_noop("subject"),

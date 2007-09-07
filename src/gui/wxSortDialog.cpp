@@ -51,7 +51,7 @@ extern const MOption MP_MSGS_SORTBY;
 /* These must not be more than 16, as they are stored in a 4-bit
    value! They must be in sync with the enum in MailFolder.h.
 */
-static const wxChar *sortCriteria[] =
+static const char *sortCriteria[] =
 {
    gettext_noop("Arrival order"),
    gettext_noop("Date"),

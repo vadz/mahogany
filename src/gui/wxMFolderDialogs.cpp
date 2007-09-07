@@ -533,8 +533,8 @@ class wxFolderCreateNotebook : public wxNotebookWithImages
 {
 public:
    // icon names
-   static const wxChar *s_aszImages[];
-   static const wxChar *s_aszImagesAdvanced[];
+   static const char *s_aszImages[];
+   static const char *s_aszImagesAdvanced[];
 
    wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = NULL);
 
@@ -1038,7 +1038,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    // the remaining unused accel letters (remove one if you add new label):
    //    ADGJQVXZ
-   static const wxChar *szLabels[Label_Max] =
+   static const char *szLabels[Label_Max] =
    {
       gettext_noop("&User name"),
       gettext_noop("&Password"),
@@ -1902,7 +1902,7 @@ void
 wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
                                             const wxString& value)
 {
-   static const wxChar *profileKeys[MaxProperty] =
+   static const char *profileKeys[MaxProperty] =
    {
       MP_FOLDER_LOGIN,
       MP_FOLDER_PASSWORD,
@@ -1941,7 +1941,7 @@ void
 wxFolderPropertiesPage::WriteEntryIfChanged(FolderIntProperty property,
                                             int value)
 {
-   static const wxChar *profileKeys[MaxIntProperty] =
+   static const char *profileKeys[MaxIntProperty] =
    {
       MP_USE_SSL,
       MP_USE_SSL_UNSIGNED,
@@ -2641,21 +2641,21 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 // ----------------------------------------------------------------------------
 
 // should be in sync with the enum FolderCreatePage!
-const wxChar *wxFolderCreateNotebook::s_aszImages[] =
+const char *wxFolderCreateNotebook::s_aszImages[] =
 {
-   _T("access"),
-   _T("ident"),
-   _T("network"),
-   _T("newmail"),
-   _T("compose"),
-   _T("folders"),
-   _T("msgview"),
-   _T("folderview"),
-   _T("foldertree"),
-   _T("adrbook"),
-   _T("helpers"),
+   "access",
+   "ident",
+   "network",
+   "newmail",
+   "compose",
+   "folders",
+   "msgview",
+   "folderview",
+   "foldertree",
+   "adrbook",
+   "helpers",
 #ifdef USE_PYTHON
-   _T("python"),
+   "python",
 #endif // USE_PYTHON
    NULL
 };

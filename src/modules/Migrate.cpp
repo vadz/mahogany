@@ -66,7 +66,7 @@
 
 // the suffix we add to the folder containing the messages if we can't have a
 // folder which has both subfolders and messages
-#define MESSAGES_SUFFIX _T(".messages")
+#define MESSAGES_SUFFIX ".messages"
 
 // ----------------------------------------------------------------------------
 // MigrateImapServer: IMAP server parameters
@@ -616,14 +616,14 @@ private:
 // ============================================================================
 
 MMODULE_BEGIN_IMPLEMENT(MigrateModule,
-                        _T("Migrate"),
+                        "Migrate",
                         STARTUP_INTERFACE,
-                        _T("Migration tool"),
-                        _T("1.00"))
-   MMODULE_PROP(_T("description"),
+                        "Migration tool",
+                        "1.00")
+   MMODULE_PROP("description",
                 _("Allows to migrate entire IMAP server mail hierarchy to "
                   "another IMAP server or local storage."))
-   MMODULE_PROP(_T("author"), _T("Vadim Zeitlin <vadim@wxwindows.org>"))
+   MMODULE_PROP("author", "Vadim Zeitlin <vadim@wxwindows.org>")
 MMODULE_END_IMPLEMENT(MigrateModule)
 
 /* static */
@@ -993,7 +993,7 @@ bool LocalPanel::TransferDataFromWindow()
 const wxChar *LocalPanel::GetFormatName(FileMailboxFormat format)
 {
    // this array must be in sync with FileMailboxFormat
-   static const wxChar *formatNames[] =
+   static const char *formatNames[] =
    {
       gettext_noop("MBX (UW-IMAPd)"),
       gettext_noop("MBOX (traditional Unix)"),

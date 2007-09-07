@@ -48,29 +48,29 @@ enum
 // now)
 struct ConfigValueDefault
 {
-   ConfigValueDefault(const wxChar *name_, long value)
+   ConfigValueDefault(const char *name_, long value)
       { bNumeric = TRUE; name = name_; lValue = value; }
 
-   ConfigValueDefault(const wxChar *name_, const wxChar *value)
+   ConfigValueDefault(const char *name_, const char *value)
       { bNumeric = FALSE; name = name_; szValue = value; }
 
    long GetLong() const { wxASSERT( bNumeric ); return lValue; }
-   const wxChar *GetString() const { wxASSERT( !bNumeric ); return szValue; }
+   const char *GetString() const { wxASSERT( !bNumeric ); return szValue; }
 
    bool IsNumeric() const { return bNumeric; }
 
-   const wxChar *name;
+   const char *name;
    union
    {
       long        lValue;
-      const wxChar *szValue;
+      const char *szValue;
    };
    bool bNumeric;
 };
 
 struct ConfigValueNone : public ConfigValueDefault
 {
-   ConfigValueNone() : ConfigValueDefault(wxEmptyString,0L) { }
+   ConfigValueNone() : ConfigValueDefault("", 0L) { }
 };
 
 typedef const ConfigValueDefault *ConfigValuesArray;
@@ -121,7 +121,7 @@ public:
 
    struct FieldInfo
    {
-      const wxChar *label;   // which is shown in the dialog
+      const char   *label;   // which is shown in the dialog
       int           flags;   // containts the type and the flags (see above)
       int           enable;  // disable this field if "enable" field is unchecked
    };
@@ -147,7 +147,7 @@ public:
                size_t nFirst,
                size_t nLast,
                wxNotebook *notebook,
-               const wxChar *title,
+               const wxString& title,
                Profile *profile,
                int helpId = -1,
                int image = -1);
@@ -157,7 +157,7 @@ public:
                  ConfigValuesArray aDefaults,
                  size_t nFirst, size_t nLast,
                  wxNotebook *parent,
-                 const wxChar *title,
+                 const wxString& title,
                  Profile *profile,
                  int helpID = -1,
                  int image = -1);
@@ -324,7 +324,7 @@ public:
    // ctor will create the controls corresponding to the fields from nFirst to
    // nLast in ms_aFields
    wxOptionsPageStandard(wxNotebook *parent,
-                         const wxChar *title,
+                         const wxString& title,
                          Profile *profile,
                          int nFirst,
                          size_t nLast,
@@ -346,7 +346,7 @@ public:
 protected:
    // ctor for pages created via static New()
    wxOptionsPageStandard(wxNotebook *parent,
-                         const wxChar *title,
+                         const wxString& title,
                          Profile *profile,
                          FieldInfoArray aFields,
                          ConfigValuesArray aDefaults,
@@ -372,7 +372,7 @@ public:
 
    // the aFields array contains the controls descriptions
    bool Create(wxNotebook *parent,
-               const wxChar *title,
+               const wxString& title,
                Profile *profile,
                FieldInfoArray aFields,
                ConfigValuesArray aDefaults,
@@ -383,7 +383,7 @@ public:
 
    // ctor doing all at once
    wxOptionsPageDynamic(wxNotebook *parent,
-                        const wxChar *title,
+                        const wxString& title,
                         Profile *profile,
                         FieldInfoArray aFields,
                         ConfigValuesArray aDefaults,
@@ -394,7 +394,7 @@ public:
 
    // for wxOptionsPageDesc usage
    static wxOptionsPage *New(wxNotebook *parent,
-                             const wxChar *title,
+                             const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
                              ConfigValuesArray aDefaults,
@@ -426,7 +426,7 @@ public:
    typedef wxOptionsPage *(*NewFunc_t)
                            (
                               wxNotebook *parent,
-                              const wxChar *title,
+                              const wxString& title,
                               Profile *profile,
                               wxOptionsPage::FieldInfoArray aFields,
                               ConfigValuesArray aDefaults,
@@ -442,8 +442,8 @@ public:
    {
    }
 
-   wxOptionsPageDesc(const wxChar *title,
-                     const wxChar *image,
+   wxOptionsPageDesc(const wxString& title,
+                     const wxString& image,
                      int helpId,
                      const wxOptionsPage::FieldInfo *aFields,
                      ConfigValuesArray aDefaults,
@@ -523,7 +523,7 @@ public:
 
    // for wxOptionsPageDesc
    static wxOptionsPage *New(wxNotebook *parent,
-                             const wxChar *title,
+                             const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
                              ConfigValuesArray aDefaults,
@@ -540,7 +540,7 @@ public:
 private:
    // ctor for New()
    wxOptionsPageNetwork(wxNotebook *parent,
-                        const wxChar *title,
+                        const wxString& title,
                         Profile *profile,
                         FieldInfoArray aFields,
                         ConfigValuesArray aDefaults,
@@ -611,7 +611,7 @@ public:
 
    // for wxOptionsPageDesc
    static wxOptionsPage *New(wxNotebook *parent,
-                             const wxChar *title,
+                             const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
                              ConfigValuesArray aDefaults,
@@ -628,7 +628,7 @@ public:
 private:
    // ctor for New()
    wxOptionsPageCompose(wxNotebook *parent,
-                        const wxChar *title,
+                        const wxString& title,
                         Profile *profile,
                         FieldInfoArray aFields,
                         ConfigValuesArray aDefaults,

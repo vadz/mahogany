@@ -103,7 +103,7 @@ private:
 IMPLEMENT_ADB_IMPORTER(AdbTextImporter,
                        gettext_noop("Comma/TAB separated text format address book import module"),
                        gettext_noop("Comma/TAB separated values"),
-                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbTextImporter

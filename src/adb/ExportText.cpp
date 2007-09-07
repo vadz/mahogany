@@ -138,7 +138,7 @@ END_EVENT_TABLE()
 IMPLEMENT_ADB_EXPORTER(AdbTextExporter,
                        gettext_noop("Text format address book exporter"),
                        gettext_noop("Simple text format"),
-                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbTextExporter
@@ -380,7 +380,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
    if ( !filename )
    {
       Profile *appProfile = mApplication->GetProfile();
-      filename = appProfile->readEntry(ms_profilePathLastFile, _T("mahogany.csv"));
+      filename = appProfile->readEntry(ms_profilePathLastFile, "mahogany.csv");
    }
 
    m_textFileName->SetValue(filename);

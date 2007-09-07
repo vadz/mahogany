@@ -353,15 +353,14 @@ XFace::CreateXpm(String &xpm)
    buf = strutil_strdup(data);
    ptr = buf;
 
-   xpm = wxEmptyString;
-   xpm +=
-      _T("/* XPM */\n"
+   xpm =
+      "/* XPM */\n"
       "static char *xface[] = {\n"
       "/* width height num_colors chars_per_pixel */\n"
       "\"    48    48        2            1\",\n"
       "/* colors */\n"
       "\"# c #000000\",\n"
-      "\". c #ffffff\",\n");
+      "\". c #ffffff\",\n";
    for(l = 0; l < 48; l++)
    {
       xpm += '"';

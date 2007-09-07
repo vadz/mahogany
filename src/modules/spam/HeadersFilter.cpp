@@ -83,13 +83,13 @@ enum SpamTest
 struct SpamTestDesc
 {
    // the token for this test in the "is_spam()" filter function argument
-   const wxChar *token;
+   const char *token;
 
    // the name of the key in the profile
-   const wxChar *name;
+   const char *name;
 
    // the label for this test in the dialog box
-   const wxChar *label;
+   const char *label;
 
    // on/off by default?
    bool isOnByDefault;
@@ -99,80 +99,80 @@ static const SpamTestDesc spamTestDescs[] =
 {
    /// X-Spam-Status: Yes header?
    {
-      _T("spamassassin"),
-      _T("SpamAssassin"),
+      "spamassassin",
+      "SpamAssassin",
       gettext_noop("Been tagged as spam by Spam&Assassin"),
       true
    },
 
    /// does the subject contain too many (unencoded) 8 bit chars?
    {
-      _T("subj8bit"),
-      _T("Spam8BitSubject"),
+      "subj8bit",
+      "Spam8BitSubject",
       gettext_noop("Too many &8 bit characters in subject"),
       true
    },
 
    /// does the subject contain too many capital letters?
    {
-      _T("subjcaps"),
-      _T("SpamCapsSubject"),
+      "subjcaps",
+      "SpamCapsSubject",
       gettext_noop("Only &capitals in subject"),
       true
    },
 
    /// is the subject of the "...            xyz-12-foo" form?
    {
-      _T("subjendjunk"),
-      _T("SpamJunkEndSubject"),
+      "subjendjunk",
+      "SpamJunkEndSubject",
       gettext_noop("&Junk at end of subject"),
       true
    },
 
    /// korean charset?
    {
-      _T("korean"),
-      _T("SpamKoreanCharset"),
+      "korean",
+      "SpamKoreanCharset",
       gettext_noop("&Korean charset"),
       false
    },
 
    /// suspicious X-Authentication-Warning header?
    {
-      _T("xauthwarn"),
-      _T("SpamXAuthWarning"),
+      "xauthwarn",
+      "SpamXAuthWarning",
       gettext_noop("X-Authentication-&Warning header"),
       false
    },
 
    /// suspicious Received: headers?
    {
-      _T("received"),
-      _T("SpamReceived"),
+      "received",
+      "SpamReceived",
       gettext_noop("Suspicious \"&Received\" headers"),
       false
    },
 
    /// HTML contents at top level?
    {
-      _T("html"),
-      _T("SpamHtml"),
+      "html",
+      "SpamHtml",
       gettext_noop("Only &HTML content"),
       false
    },
 
    /// suspicious MIME structure?
    {
-      _T("badmime"),
-      _T("SpamMime"),
+      "badmime",
+      "SpamMime",
       gettext_noop("Unusual &MIME structure"),
       false
    },
 
    /// executable attachment?
    {
-      _T("exeattach"),
-      _T("SpamExeAttachment"),
+      "exeattach",
+      "SpamExeAttachment",
       gettext_noop("E&xecutable attachment"),
       false
    },
@@ -180,8 +180,8 @@ static const SpamTestDesc spamTestDescs[] =
 #ifdef USE_RBL
    /// blacklisted by the RBL?
    {
-      _T("rbl"),
-      _T("SpamIsInRBL"),
+      "rbl",
+      "SpamIsInRBL",
       gettext_noop("Been &blacklisted by RBL"),
       false
    },
@@ -189,8 +189,8 @@ static const SpamTestDesc spamTestDescs[] =
 
    /// no address in whitelist?
    {
-      _T("whitelist"),
-      _T("SpamWhiteList"),
+      "whitelist",
+      "SpamWhiteList",
       gettext_noop("... and not &whitelisted"),
       true
    },
@@ -221,7 +221,7 @@ protected:
 
 IMPLEMENT_SPAM_FILTER(HeadersFilter,
                       gettext_noop("Simple Heuristic Headers Analyzer"),
-                      _T("(c) 2002-2004 Vadim Zeitlin <vadim@wxwindows.org>"));
+                      "(c) 2002-2004 Vadim Zeitlin <vadim@wxwindows.org>");
 
 
 // ----------------------------------------------------------------------------
@@ -247,19 +247,19 @@ public:
    }
 
    /// The token used in spam filter string for this option
-   virtual const wxChar *Token() const
+   virtual const char *Token() const
    {
       return spamTestDescs[m_test].token;
    }
 
    /// The name of the profile entry used to pass the value to config dialog
-   virtual const wxChar *GetProfileName() const
+   virtual const char *GetProfileName() const
    {
       return spamTestDescs[m_test].name;
    }
 
    /// The label of the correponding checkbox in the dialog
-   virtual const wxChar *DialogLabel() const
+   virtual const char *DialogLabel() const
    {
       return spamTestDescs[m_test].label;
    }

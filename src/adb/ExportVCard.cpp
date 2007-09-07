@@ -70,7 +70,7 @@ protected:
 IMPLEMENT_ADB_EXPORTER(AdbVCardExporter,
                        gettext_noop("vCard format address book exporter"),
                        gettext_noop("vCard (.vcf) file"),
-                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbVCardExporter helpers

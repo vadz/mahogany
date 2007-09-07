@@ -61,7 +61,7 @@ public:
               (
                   DSPAM_USER_NAME,  // user name used as base file name
                   NULL,             // no group
-                  mApplication->GetLocalDir().fn_str(),
+                  mApplication->GetLocalDir(),
                   mode,
                   flags
               );
@@ -239,7 +239,7 @@ private:
 
 IMPLEMENT_SPAM_FILTER(DspamFilter,
                       gettext_noop("DSPAM Statistical Spam Filter"),
-                      _T("(c) 2004 Vadim Zeitlin <vadim@wxwindows.org>"));
+                      "(c) 2004 Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // DspamOptionsPage
@@ -250,7 +250,7 @@ class DspamOptionsPage : public SpamOptionsPage
 public:
    DspamOptionsPage(DspamFilter *filter,
                     wxNotebook *parent,
-                    const wxChar *title,
+                    const wxString& title,
                     Profile *profile,
                     FieldInfoArray aFields,
                     ConfigValuesArray aDefaults,

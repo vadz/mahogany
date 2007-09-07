@@ -84,7 +84,7 @@ private:
 // generic
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_M_IMPORTER(MPineImporter, _T("Pine"),
+IMPLEMENT_M_IMPORTER(MPineImporter, "Pine",
                      gettext_noop("Import settings from PINE"));
 
 int MPineImporter::GetFeatures() const

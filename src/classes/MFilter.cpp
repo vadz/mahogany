@@ -805,11 +805,11 @@ protected:
    MFilterFromProfile(Profile *p)
       {
          m_Profile = p;
-         m_Name = p->readEntry(MP_FILTER_NAME, wxEmptyString);
+         m_Name = p->readEntry(MP_FILTER_NAME, "");
          m_Settings = NULL;
 
          // use the filter program if we have it
-         m_Rule = p->readEntry(MP_FILTER_RULE, wxEmptyString);
+         m_Rule = p->readEntry(MP_FILTER_RULE, "");
          if( !m_Rule.empty() )
          {
             // try to parse the rule
@@ -827,7 +827,7 @@ protected:
          if ( m_Rule.empty() )
          {
             // use the GUI settings if no rule
-            m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, wxEmptyString);
+            m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, "");
          }
 
          m_dirty = false;
@@ -933,7 +933,7 @@ static bool CopyFilterEntry(Profile *profileSrc,
                             Profile *profileDst,
                             const String& entry)
 {
-   String value = profileSrc->readEntry(entry, wxEmptyString);
+   String value = profileSrc->readEntry(entry, "");
    if ( !value.empty() )
    {
       if ( !profileDst->writeEntry(entry, value) )

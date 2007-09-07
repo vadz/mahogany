@@ -663,10 +663,8 @@ MNetscapeImporter::MNetscapeImporter()
 // generic
 // ----------------------------------------------------------------------------
 
-// TODO: mention with which Netscape versions it works (i.e. should it be
-//       "Import settings from Netscape 4.x"? "6.x"?)
-IMPLEMENT_M_IMPORTER(MNetscapeImporter, _T("Netscape"),
-                     gettext_noop("Import settings from Netscape"));
+IMPLEMENT_M_IMPORTER(MNetscapeImporter, "Netscape",
+                     gettext_noop("Import settings from Netscape 4.x"));
 
 int MNetscapeImporter::GetFeatures() const
 {

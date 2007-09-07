@@ -436,7 +436,7 @@ private:
    // the back pointer to the entire group of controls
    wxRcptControl *m_rcptControl;
 
-   static const wxChar *ms_addrTypes[Recipient_Max];
+   static const char *ms_addrTypes[Recipient_Max];
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxRcptTypeChoice)
@@ -1312,7 +1312,7 @@ wxRcptExtraControl::~wxRcptExtraControl()
 // wxRcptTypeChoice
 // ----------------------------------------------------------------------------
 
-const wxChar *wxRcptTypeChoice::ms_addrTypes[] =
+const char *wxRcptTypeChoice::ms_addrTypes[] =
 {
    gettext_noop("To"),
    gettext_noop("Cc"),

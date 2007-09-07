@@ -1228,7 +1228,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
             FAIL_MSG(_T("This folder has no server setting!"));
       }
 
-      m_Server->SetValue(p->readEntry(serverKey, wxEmptyString));
+      m_Server->SetValue(p->readEntry(serverKey, ""));
    }
 
    if ( m_UserId && m_UserId->GetValue().empty() )

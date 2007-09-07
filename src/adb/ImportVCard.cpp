@@ -82,7 +82,7 @@ private:
 IMPLEMENT_ADB_IMPORTER(AdbVCardImporter,
                        gettext_noop("vCard address book import module"),
                        gettext_noop("vCard (.vcf) files"),
-                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbVCardImporter

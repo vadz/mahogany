@@ -226,7 +226,7 @@ enum
    WXMENU_FVIEW_POPUP_END
 };
 
-static const wxChar *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
+static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 {
    gettext_noop("Status"),
    gettext_noop("Date"),
@@ -255,7 +255,7 @@ static const wxChar *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 // note that the order here is the same as the order of WXFLC_XXX constants,
 // and not the appearance order, i.e. the default width of the subject field is
 // 300, not 80 (even if it appears second by default)
-static const wxChar *FOLDER_LISTCTRL_WIDTHS_D = _T("60:80:80:200:300:40");
+static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:80:80:200:300:40";
 
 
 // the trace mask for selection/focus handling
@@ -2540,8 +2540,8 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
                m_uidFocus = GetUIdFromIndex(m_itemFocus);
 
                wxLogTrace(M_TRACE_FV_SELECTION,
-                          _T("Updated focused UID from OnIdle(), now %08lx "
-                          "(index = %ld)"),
+                          "Updated focused UID from OnIdle(), now %08lx "
+                          "(index = %ld)",
                           (unsigned long)m_uidFocus, m_itemFocus);
 
                m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
@@ -4466,7 +4466,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
                 Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
                 View, Group reply (== followup), List reply, Next match
             */
-            static const wxChar keycodes_en[] = gettext_noop("DUXCSMRFOPHGLN");
+            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHGLN");
             static const wxString keycodes(wxGetTranslation(keycodes_en));
 
             long keyOrig = key;

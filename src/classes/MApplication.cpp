@@ -414,7 +414,7 @@ MAppBase::OnStartup()
 #ifdef DEBUG
    // enable tracing of the specified kinds of messages
    wxArrayString
-      masks = strutil_restore_array(m_profile->readEntry(_T("DebugTrace"), wxEmptyString));
+      masks = strutil_restore_array(m_profile->readEntry("DebugTrace", ""));
    size_t nMasks = masks.GetCount();
    for ( size_t nMask = 0; nMask < nMasks; nMask++ )
    {

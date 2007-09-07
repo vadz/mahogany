@@ -620,7 +620,7 @@ class wxOptionsNotebook : public wxNotebookWithImages
 {
 public:
    // icon names
-   static const wxChar *ms_aszImages[];
+   static const char *ms_aszImages[];
 
    // ctor
    wxOptionsNotebook(wxWindow *parent);
@@ -653,10 +653,10 @@ public:
 
 private:
    // this method creates and fills m_aImages and returns it
-   const wxChar **GetImagesArray(size_t nPages, const wxOptionsPageDesc *pageDesc);
+   const char **GetImagesArray(size_t nPages, const wxOptionsPageDesc *pageDesc);
 
    // the images names and NULL
-   const wxChar **m_aImages;
+   const char **m_aImages;
 
    DECLARE_NO_COPY_CLASS(wxCustomOptionsNotebook)
 };
@@ -1338,7 +1338,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,
                                                   -ConfigField_ComposePreview },
 
-   { wxEmptyString,                                Field_Message, -1},
+   { "",                                           Field_Message, -1},
    { gettext_noop("Show \"&From\" field"),         Field_Bool |
                                                    Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
@@ -1412,9 +1412,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
 #ifdef USE_PYTHON
    // python
-   { gettext_noop("Python is the built-in scripting language which can be\n")
-     gettext_noop("used to extend Mahogany's functionality. It is not essential\n")
-     gettext_noop("for the program's normal operation."),
+   { gettext_noop("Python is the built-in scripting language which can be\n"
+                  "used to extend Mahogany's functionality. It is not essential\n"
+                  "for the program's normal operation."),
                                                    Field_Message |
                                                    Field_AppWide, -1 },
    { gettext_noop("&Enable Python"),               Field_Bool |
@@ -1467,7 +1467,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prefer &HTML to plain text"),   Field_Bool, ConfigField_MessageViewAutoViewer },
    { gettext_noop("Sho&w HTML if no text"),        Field_Bool, ConfigField_MessageViewAutoViewer },
    { gettext_noop("Ensure &images are shown"),     Field_Bool, ConfigField_MessageViewAutoViewer },
-   { wxEmptyString,                                Field_Message, -1},
+   { "",                                           Field_Message, -1},
 
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font,    -1 },
@@ -1861,7 +1861,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 // worse: dummy entries for message fields
 #define CONFIG_NONE()  ConfigValueNone()
 // and another one: an entry for Python callback
-#define CONFIG_PYCALLBACK(name) ConfigValueDefault(_T(name), _T(""))
+#define CONFIG_PYCALLBACK(name) ConfigValueDefault(name, "")
 
 // if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
 // there too
@@ -2339,7 +2339,7 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
                              size_t nFirst,
                              size_t nLast,
                              wxNotebook *notebook,
-                             const wxChar *title,
+                             const wxString& title,
                              Profile *profile,
                              int helpId,
                              int image)
@@ -2355,7 +2355,7 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
                            size_t nFirst,
                            size_t nLast,
                            wxNotebook *notebook,
-                           const wxChar *title,
+                           const wxString& title,
                            Profile *profile,
                            int helpId,
                            int image)
@@ -2517,7 +2517,7 @@ void wxOptionsPage::CreateControls()
             break;
 
          case Field_Radio:
-            if ( wxStrchr(m_aFields[n].label, _T(':')) )
+            if ( wxStrchr(m_aFields[n].label, ':') )
                last = CreateRadioBox(wxGetTranslation(m_aFields[n].label), widthMax, last);
             else
                last = CreateActionChoice(wxGetTranslation(m_aFields[n].label), widthMax, last);
@@ -3274,7 +3274,7 @@ void wxOptionsPage::SetProfile(Profile *profile)
 // ----------------------------------------------------------------------------
 
 wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
-                                           const wxChar *title,
+                                           const wxString& title,
                                            Profile *profile,
                                            FieldInfoArray aFields,
                                            ConfigValuesArray aDefaults,
@@ -3291,7 +3291,7 @@ wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
 
 bool
 wxOptionsPageDynamic::Create(wxNotebook *parent,
-                             const wxChar *title,
+                             const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
                              ConfigValuesArray aDefaults,
@@ -3319,7 +3319,7 @@ wxOptionsPageDynamic::Create(wxNotebook *parent,
 // ----------------------------------------------------------------------------
 
 wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
-                                             const wxChar *title,
+                                             const wxString& title,
                                              Profile *profile,
                                              int nFirst,
                                              size_t nLast,
@@ -3336,7 +3336,7 @@ wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
 }
 
 wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *parent,
-                                             const wxChar *title,
+                                             const wxString& title,
                                              Profile *profile,
                                              FieldInfoArray aFields,
                                              ConfigValuesArray aDefaults,
@@ -4648,11 +4648,11 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
 }
 
 // return the array which should be passed to wxNotebookWithImages ctor
-const wxChar **
+const char **
 wxCustomOptionsNotebook::GetImagesArray(size_t nPages,
                                         const wxOptionsPageDesc *pageDesc)
 {
-   m_aImages = new const wxChar *[nPages + 1];
+   m_aImages = new const char *[nPages + 1];
 
    for ( size_t n = 0; n < nPages; n++ )
    {
@@ -4669,26 +4669,26 @@ wxCustomOptionsNotebook::GetImagesArray(size_t nPages,
 // ----------------------------------------------------------------------------
 
 // should be in sync with the enum OptionsPage in wxOptionsDlg.h!
-const wxChar *wxOptionsNotebook::ms_aszImages[] =
+const char *wxOptionsNotebook::ms_aszImages[] =
 {
-   _T("ident"),
-   _T("network"),
-   _T("newmail"),
-   _T("compose"),
-   _T("folders"),
-   _T("msgview"),
-   _T("folderview"),
-   _T("foldertree"),
-   _T("adrbook"),
-   _T("helpers"),
-   _T("sync"),
+   "ident",
+   "network",
+   "newmail",
+   "compose",
+   "folders",
+   "msgview",
+   "folderview",
+   "foldertree",
+   "adrbook",
+   "helpers",
+   "sync",
 #ifdef USE_PYTHON
-   _T("python"),
+   "python",
 #endif
 #ifdef USE_TEST_PAGE
-   _T("unknown"),
+   "unknown",
 #endif // USE_TEST_PAGE
-   _T("miscopt"),
+   "miscopt",
    NULL
 };
 
@@ -4937,7 +4937,7 @@ wxConfigSourcesDialog::wxConfigSourcesDialog(wxFrame *parent)
    m_sources = new wxGrid(this, -1);
    m_sources->CreateGrid(0, Col_Max, wxGrid::wxGridSelectRows);
 
-   static const wxChar *columnNames[] =
+   static const char *columnNames[] =
    {
       gettext_noop("Name"),
       gettext_noop("Type"),

@@ -220,8 +220,8 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
       MEventReceiverInfo *info = gs_receivers[n];
       if ( info->id == eventId && &(info->receiver) == &who )
       {
-         FAIL_MSG( _T("Registering the same handler twice in "
-                   "MEventManager::Register()") );
+         FAIL_MSG( "Registering the same handler twice in "
+                   "MEventManager::Register()" );
       }
    }
 #endif

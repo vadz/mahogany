@@ -565,7 +565,7 @@ bool wxNotebookWithImages::ShouldShowIcons()
 
 wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
                                            wxWindow *parent,
-                                           const wxChar *aszImages[])
+                                           const char *aszImages[])
                     : wxPNotebook(configPath, parent, -1)
 {
    if ( ShouldShowIcons() )
@@ -948,7 +948,7 @@ wxListBox *wxEnhancedPanel::CreateListbox(const wxChar *label, wxControl *last)
 
    // the buttons vertically on the right of listbox (note that the labels
    // correspond to the order of wxOptionsPage_BtnXXX enum)
-   static const wxChar *aszLabels[] =
+   static const char *aszLabels[] =
    {
       gettext_noop("&Add..."),
       gettext_noop("&Modify..."),
