@@ -418,7 +418,7 @@ String MIME::DecodeHeader(const String& in, wxFontEncoding *pEncoding)
 // NB: we suppose that any special characters had been already escaped
 static inline bool NeedsEncodingInHeader(wxUChar c)
 {
-   return iscntrl(c) || c >= 127;
+   return  c >= 127 || iscntrl(c);
 }
 
 // return true if the string contains any characters which must be encoded
