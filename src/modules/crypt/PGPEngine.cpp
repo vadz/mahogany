@@ -252,10 +252,11 @@ PGPEngine::DoExecCommand(const String& options,
           pass;
 
    messageOut.clear();
-   wxChar buf[4096];
+   char bufOut[4096];
 
-   size_t lenIn = messageIn.length();
-   const wxChar *ptrIn = messageIn.c_str();
+   wxCharBuffer bufIn(messageIn.To8BitData());
+   size_t lenIn = strlen(bufIn);
+   const char *ptrIn = bufIn;
 
    bool outEof = false,
         errEof = false;
@@ -274,9 +275,9 @@ PGPEngine::DoExecCommand(const String& options,
          while ( out->CanRead() )
          {
             // leave space for terminating NUL
-            buf[out->Read(buf, WXSIZEOF(buf) - 1).LastRead()] = '\0';
+            bufOut[out->Read(bufOut, WXSIZEOF(bufOut) - 1).LastRead()] = '\0';
 
-            messageOut += buf;
+            messageOut += wxString::From8BitData(bufOut);
          }
       }
 
