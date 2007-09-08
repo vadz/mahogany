@@ -2338,7 +2338,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --body to specify the message body
       {
          wxCMD_LINE_OPTION,
-         NULL,
+         "",
          OPTION_BODY,
          gettext_noop("specify the body of the message"),
       },
@@ -2354,7 +2354,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --userdir=dir to specify an alternative home directory to use
       {
          wxCMD_LINE_OPTION,
-         NULL,
+         "",
          OPTION_USERDIR,
          gettext_noop("specify a non default directory for user files"),
       },
@@ -2362,7 +2362,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --config=file to specify an alternative config file to use
       {
          wxCMD_LINE_OPTION,
-         NULL,
+         "",
          OPTION_CONFIG,
          gettext_noop("specify the alternative configuration file to use"),
       },
@@ -2370,7 +2370,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --debug to force mail debugging on
       {
          wxCMD_LINE_SWITCH,
-         NULL,
+         "",
          OPTION_DEBUGMAIL,
          gettext_noop("enable mail subsystem debug message logging"),
       },
@@ -2386,7 +2386,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --import=spec to get the settings from file or remove server
       {
          wxCMD_LINE_OPTION,
-         NULL,
+         "",
          OPTION_IMPORT,
          gettext_noop("file or remote server containing Mahogany options"),
       },
@@ -2394,7 +2394,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --lang option to specify the language to use
       {
          wxCMD_LINE_OPTION,
-         NULL,
+         "",
          OPTION_LANG,
          gettext_noop("the language to use for the program messages"),
       },
@@ -2404,7 +2404,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // this case it simply does nothing)
       {
          wxCMD_LINE_SWITCH,
-         NULL,
+         "",
          OPTION_NOPYTHON,
          gettext_noop("don't load Python interpreter even if configured to do so"),
       },
@@ -2412,7 +2412,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --newsgroup to specify the newsgroup to post the message to
       {
          wxCMD_LINE_OPTION,
-         NULL,
+         "",
          OPTION_NEWSGROUP,
          gettext_noop("the newsgroup to post the message to"),
       },
@@ -2420,7 +2420,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // --safe option to prevent crashes at startup
       {
          wxCMD_LINE_SWITCH,
-         NULL,
+         "",
          OPTION_SAFE,
          gettext_noop("don't perform any operations on startup"),
       },
@@ -2436,8 +2436,8 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
       // <address> to write to
       {
          wxCMD_LINE_PARAM,
-         NULL,
-         NULL,
+         "",
+         "",
          gettext_noop("address(es to start composing the message to"),
          wxCMD_LINE_VAL_STRING,
          wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE
