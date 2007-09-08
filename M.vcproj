@@ -21,7 +21,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_UNICODE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -41,7 +41,6 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/M.pdb"
 				SubSystem="2"
 				StackReserveSize="10000000"
 				TargetMachine="1"/>
@@ -76,7 +75,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_UNICODE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="Mpch.h"
@@ -93,7 +92,8 @@
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
-				GenerateDebugInformation="FALSE"
+				GenerateDebugInformation="TRUE"
+				GenerateMapFile="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -121,18 +121,13 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Release With Debug Info|Win32"
-			OutputDirectory="ReleaseDebug"
-			IntermediateDirectory="ReleaseDebug"
+			Name="Unicode Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="0"
-			WholeProgramOptimization="TRUE">
+			CharacterSet="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
-				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_UNICODE"
 				RuntimeLibrary="2"
@@ -153,7 +148,6 @@
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
 				GenerateDebugInformation="TRUE"
 				GenerateMapFile="TRUE"
-				MapLines="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -181,9 +175,9 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Debug Purify|Win32"
-			OutputDirectory="DebugPurify"
-			IntermediateDirectory="DebugPurify"
+			Name="Unicode Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
@@ -191,8 +185,8 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_UNICODE"
-				MinimalRebuild="FALSE"
-				BasicRuntimeChecks="0"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="Mpch.h"
@@ -207,14 +201,12 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
 				OutputFile="$(OutDir)/M.exe"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/M.pdb"
 				SubSystem="2"
 				StackReserveSize="10000000"
-				TargetMachine="1"
-				FixedBaseAddress="1"/>
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -308,13 +300,13 @@
 							UsePrecompiledHeader="1"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32">
+						Name="Unicode Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="1"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32">
+						Name="Unicode Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="1"/>
@@ -356,13 +348,13 @@
 							PreprocessorDefinitions="SYSV32"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32">
+						Name="Unicode Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							PreprocessorDefinitions="SYSV32"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32">
+						Name="Unicode Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							PreprocessorDefinitions="SYSV32"/>
@@ -518,13 +510,13 @@
 								UsePrecompiledHeader="0"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32">
+							Name="Unicode Release|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32">
+							Name="Unicode Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="3"
@@ -675,13 +667,13 @@
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32"
+							Name="Unicode Release|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32"
+							Name="Unicode Debug|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
@@ -708,13 +700,13 @@
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32"
+							Name="Unicode Release|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32"
+							Name="Unicode Debug|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
@@ -735,13 +727,13 @@
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32"
+							Name="Unicode Release|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32"
+							Name="Unicode Debug|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
@@ -762,13 +754,13 @@
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32"
+							Name="Unicode Release|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32"
+							Name="Unicode Debug|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
@@ -805,13 +797,13 @@
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32"
+							Name="Unicode Release|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32"
+							Name="Unicode Debug|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
@@ -841,13 +833,13 @@
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32"
+							Name="Unicode Release|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32"
+							Name="Unicode Debug|Win32"
 							ExcludedFromBuild="TRUE">
 							<Tool
 								Name="VCCLCompilerTool"/>
@@ -881,7 +873,7 @@
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32">
+						Name="Unicode Release|Win32">
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
@@ -891,7 +883,7 @@
 							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32">
+						Name="Unicode Debug|Win32">
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
@@ -935,7 +927,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -943,7 +935,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -970,7 +962,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -978,7 +970,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1005,7 +997,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1013,7 +1005,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1040,7 +1032,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1048,7 +1040,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1075,7 +1067,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1083,7 +1075,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1110,7 +1102,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1118,7 +1110,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1145,7 +1137,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1153,7 +1145,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
@@ -1180,7 +1172,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
@@ -1188,7 +1180,7 @@
 									WarningLevel="1"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
@@ -1221,7 +1213,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1230,7 +1222,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1260,7 +1252,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1269,7 +1261,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1299,7 +1291,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1308,7 +1300,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1338,7 +1330,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1347,7 +1339,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1377,7 +1369,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1386,7 +1378,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1416,7 +1408,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1425,7 +1417,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1455,7 +1447,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1464,7 +1456,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1494,7 +1486,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release With Debug Info|Win32">
+								Name="Unicode Release|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1503,7 +1495,7 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Debug Purify|Win32">
+								Name="Unicode Debug|Win32">
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
@@ -1573,13 +1565,13 @@
 							AdditionalIncludeDirectories="lib/imap/src"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32">
+						Name="Unicode Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							AdditionalIncludeDirectories="lib/imap/src"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32">
+						Name="Unicode Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							AdditionalIncludeDirectories="lib/imap/src"/>
@@ -1605,14 +1597,14 @@
 							WarningLevel="0"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32">
+						Name="Unicode Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
 							WarningLevel="0"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32">
+						Name="Unicode Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
@@ -1641,13 +1633,13 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32"
+						Name="Unicode Release|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32"
+						Name="Unicode Debug|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1671,13 +1663,13 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32"
+						Name="Unicode Release|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32"
+						Name="Unicode Debug|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1701,13 +1693,13 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32"
+						Name="Unicode Release|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32"
+						Name="Unicode Debug|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1801,14 +1793,14 @@
 								PreprocessorDefinitions="HAVE_CONFIG_H"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release With Debug Info|Win32">
+							Name="Unicode Release|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								AdditionalIncludeDirectories="lib/dspam/src"
 								PreprocessorDefinitions="HAVE_CONFIG_H"/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Debug Purify|Win32">
+							Name="Unicode Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								AdditionalIncludeDirectories="lib/dspam/src"
@@ -1838,13 +1830,13 @@
 							PrecompiledHeaderThrough="wx/wxprec.h"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32">
+						Name="Unicode Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="wx/wxprec.h"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32">
+						Name="Unicode Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="wx/wxprec.h"/>
@@ -1865,13 +1857,13 @@
 							PrecompiledHeaderThrough="wx/wxprec.h"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release With Debug Info|Win32">
+						Name="Unicode Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="wx/wxprec.h"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug Purify|Win32">
+						Name="Unicode Debug|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							PrecompiledHeaderThrough="wx/wxprec.h"/>
@@ -2221,13 +2213,13 @@
 						AdditionalIncludeDirectories=""/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release With Debug Info|Win32">
+					Name="Unicode Release|Win32">
 					<Tool
 						Name="VCResourceCompilerTool"
 						AdditionalIncludeDirectories=""/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Purify|Win32">
+					Name="Unicode Debug|Win32">
 					<Tool
 						Name="VCResourceCompilerTool"
 						AdditionalIncludeDirectories=""/>
