@@ -329,7 +329,7 @@ bool DspamFilter::DoProcess(const Message& msg, ContextHandler& handler)
 
    handler.OnInit(ctx);
 
-   if ( dspam_process(ctx, str) != 0 )
+   if ( dspam_process(ctx, str.To8BitData()) != 0 )
    {
       ERRORMESSAGE((_("DSPAM: processing message failed.")));
 
