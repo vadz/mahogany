@@ -102,7 +102,7 @@
 /** This define contains the installation prefix where Mahogany
     is installed.
 */
-#define M_PREFIX _T("/usr/local")
+#define M_PREFIX "/usr/local"
 
 /** This define contains the full canonical string that specifies
     the machine/system/OS/compiler

@@ -1268,7 +1268,7 @@ cat >> confdefs.h <<EOF
 EOF
 
 cat >> confdefs.h <<EOF
-#define M_PREFIX _T("$prefix")
+#define M_PREFIX "$prefix"
 EOF
 
 

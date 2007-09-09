@@ -39,15 +39,15 @@ private:
 
 
 MMODULE_BEGIN_IMPLEMENT(DummyModule,
-                        _T("Mdummy"),
-                        _T("none"),
-                        _T("Dummy module for Mahogany"),
-                        _T("0.00"))
-   MMODULE_PROP(_T("description"), _T("This module does not do anything, "
+                        "Mdummy",
+                        "none",
+                        "Dummy module for Mahogany",
+                        "0.00")
+   MMODULE_PROP("description", "This module does not do anything, "
                                "it simply gets loaded, opens a dialog and "
                                "that's all. It's purpose is to serve as an "
-                               "example and template for writing real modules."))
-   MMODULE_PROP(_T("author"), _T("Karsten Ballueder <karsten@phy.hw.ac.uk>"))
+                               "example and template for writing real modules.")
+   MMODULE_PROP("author", "Karsten Ballueder <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(DummyModule)
 
 

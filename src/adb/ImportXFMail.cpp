@@ -75,7 +75,7 @@ protected:
 IMPLEMENT_ADB_IMPORTER(AdbXFMailImporter,
                        gettext_noop("XFMail address book import module"),
                        gettext_noop("XFMail address book"),
-                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbXFMailImporter

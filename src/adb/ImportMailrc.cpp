@@ -94,7 +94,7 @@ protected:
 IMPLEMENT_ADB_IMPORTER(AdbMailrcImporter,
                        gettext_noop("Unix .mailrc file import module"),
                        gettext_noop("Unix .mailrc file"),
-                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 
 // ----------------------------------------------------------------------------
