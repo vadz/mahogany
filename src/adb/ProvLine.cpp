@@ -217,7 +217,7 @@ public:
 };
 
 IMPLEMENT_ADB_PROVIDER(LineDataProvider, true,
-   _T("One Address per Line"), Name_File);
+   "One Address per Line", Name_File);
 
 // ============================================================================
 // implementation

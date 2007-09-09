@@ -288,7 +288,7 @@ public:
    DECLARE_ADB_PROVIDER(BbdbDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, _T("BBDB version 2"), Name_File);
+IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, "BBDB version 2", Name_File);
 
 // ============================================================================
 // implementation

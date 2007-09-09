@@ -221,7 +221,7 @@ public:
    DECLARE_ADB_PROVIDER(PasswdDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(PasswdDataProvider, true, _T("Unix /etc/passwd"), Name_No);
+IMPLEMENT_ADB_PROVIDER(PasswdDataProvider, true, "Unix /etc/passwd", Name_No);
 
 // ============================================================================
 // implementation
