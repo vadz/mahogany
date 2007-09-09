@@ -505,11 +505,9 @@ static bool CheckSubjectFor8Bit(const String& subject)
 
    size_t num8bit = 0,
           max8bit = subject.length() / 2;
-   for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
-         *pc;
-         pc++ )
+   for ( String::const_iterator i = subject.begin(); i != subject.end(); ++i )
    {
-      if ( *pc > 127 || *pc == '?' || *pc == '!' )
+      if ( (unsigned)*i > 127 )
       {
          if ( num8bit++ == max8bit )
          {
@@ -525,17 +523,17 @@ static bool CheckSubjectFor8Bit(const String& subject)
 static bool CheckSubjectForCapitals(const String& subject)
 {
    bool hasSpace = false;
-   for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
-         *pc;
-         pc++ )
+   for ( String::const_iterator i = subject.begin(); i != subject.end(); ++i )
    {
-      if ( (*pc > 127) || islower(*pc) )
+      const wxUChar ch = *i;
+
+      if ( (ch > 127) || islower(ch) )
       {
          // not only caps
          return false;
       }
 
-      if ( isspace(*pc) )
+      if ( isspace(ch) )
       {
          // remember that we have more than one word
          hasSpace = true;
