@@ -496,7 +496,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // language
 
    // the available accelerators for this menu:
-   // JKMQVWXZ
+   // KMQVWXZ
    { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), "", wxITEM_RADIO },
@@ -522,6 +522,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_CP1256, gettext_noop("Windows Arabic (CP 125&6)"), "", wxITEM_RADIO },
    { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 125&7)"), "", wxITEM_RADIO },
    { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), "", wxITEM_RADIO },
+   { WXMENU_LANG_ISO2022JP, gettext_noop("&Japanese (ISO-2022-JP)"), "", wxITEM_RADIO },
    { WXMENU_LANG_UTF7, gettext_noop("Uni&code (UTF-7)"), "", wxITEM_RADIO },
    { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), "", wxITEM_RADIO },
    { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
@@ -898,6 +899,10 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          id = WXMENU_LANG_KOI8;
          break;
 
+      case wxFONTENCODING_ISO2022_JP:
+         id = WXMENU_LANG_ISO2022JP;
+         break;
+
       case wxFONTENCODING_UTF7:
          id = WXMENU_LANG_UTF7;
          break;
@@ -944,6 +949,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       WXMENU_LANG_CP1256,
       WXMENU_LANG_CP1257,
       WXMENU_LANG_KOI8,
+      WXMENU_LANG_ISO2022JP,
       WXMENU_LANG_UTF7,
       WXMENU_LANG_UTF8,
    };
@@ -1004,6 +1010,10 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
 
       case WXMENU_LANG_KOI8:
          encoding = wxFONTENCODING_KOI8;
+         break;
+
+      case WXMENU_LANG_ISO2022JP:
+         encoding = wxFONTENCODING_ISO2022_JP;
          break;
 
       case WXMENU_LANG_UTF7:
