@@ -166,10 +166,10 @@ CountQuoteLevel(const wxChar *string,
          // the message
 
          // TODO: make the string of "quoting characters" configurable
-         static const char *QUOTE_CHARS = ">|})*";
+         static const wxChar *QUOTE_CHARS = _T(">|})*");
 
          // strchr would find NUL in the string so test for it separately
-         if ( *c == '\0' || !strchr(QUOTE_CHARS, *c) )
+         if ( *c == '\0' || !wxStrchr(QUOTE_CHARS, *c) )
             break;
 
          // '*' and '}' are too often used for other purposes, check that we
