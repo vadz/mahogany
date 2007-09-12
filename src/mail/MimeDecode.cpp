@@ -603,10 +603,20 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
    if ( !NeedsEncoding(in) )
       return in.ToAscii();
 
-   // get the encoding in RFC 2047 sense: choose the most reasonable one
+   // decide about the encoding to use if none specified
    if ( enc == wxFONTENCODING_SYSTEM )
+   {
+      // try to use the user current encoding first
       enc = wxLocale::GetSystemEncoding();
+   }
 
+   if ( wxCSConv(enc).FromWChar(NULL, 0, in.wc_str()) == wxCONV_FAILED )
+   {
+      // but if we can't encode with it, fall back to UTF-8 as it never fails
+      enc = wxFONTENCODING_UTF8;
+   }
+
+   // get the encoding in RFC 2047 sense
    MIME::Encoding enc2047 = MIME::GetEncodingForFontEncoding(enc);
 
    if ( enc2047 == MIME::Encoding_Unknown )
