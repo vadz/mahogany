@@ -38,8 +38,16 @@ class Profile;
 // ----------------------------------------------------------------------------
 
 /**
-  Address class represents a single RFC 822 address. The RFC 822 groups are not
-  (well) supported for the moment, i.e. the group information is lost.
+  Address class represents a single RFC 822 address.
+  
+  Notice that the GetAddress() and GetName() methods of this class return
+  decoded addresses/names, i.e. they return Unicode strings and not 7 bit ASCII
+  MIME-encoded words. Thus, their return value is suitable for being displayed
+  in the UI but must be MIME-encoded if it needs to be included in a mail
+  message.
+
+  The RFC 822 groups are not (well) supported for the moment, i.e. the group
+  information is lost.
  */
 class Address
 {

@@ -102,7 +102,7 @@ String AddressCC::GetName() const
 
    personal = AdrField2String(m_adr->personal);
 
-   return personal;
+   return MIME::DecodeHeader(personal);
 }
 
 String AddressCC::GetMailbox() const
