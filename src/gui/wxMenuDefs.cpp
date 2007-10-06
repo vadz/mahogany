@@ -496,7 +496,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // language
 
    // the available accelerators for this menu:
-   // KMQVWXZ
+   // 9QVXZ
    { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), "", wxITEM_RADIO },
@@ -506,7 +506,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_ISO8859_6, gettext_noop("&Arabic (ISO-8859-6)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_7, gettext_noop("&Greek (ISO-8859-7)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_8, gettext_noop("Heb&rew (ISO-8859-8)"), "", wxITEM_RADIO },
-   { WXMENU_LANG_ISO8859_9, gettext_noop("&Turkish (ISO-8859-9)"), "", wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_9, gettext_noop("Tur&kish (ISO-8859-9)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_10, gettext_noop("Nor&dic (ISO-8859-10)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_11, gettext_noop("T&hai (ISO-8859-11)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_12, gettext_noop("&Indian (ISO-8859-12)"), "", wxITEM_RADIO },
@@ -523,6 +523,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 125&7)"), "", wxITEM_RADIO },
    { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO2022JP, gettext_noop("&Japanese (ISO-2022-JP)"), "", wxITEM_RADIO },
+   { WXMENU_LANG_SJIS, gettext_noop("Japanese (Shift&-JIS)"), "", wxITEM_RADIO },
+   { WXMENU_LANG_GB2312, gettext_noop("Chinese Si&mplified (GB2312)"), "", wxITEM_RADIO },
+   { WXMENU_LANG_BIG5, gettext_noop("Chinese &Traditional (Big5)"), "", wxITEM_RADIO },
    { WXMENU_LANG_UTF7, gettext_noop("Uni&code (UTF-7)"), "", wxITEM_RADIO },
    { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), "", wxITEM_RADIO },
    { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
@@ -903,6 +906,18 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          id = WXMENU_LANG_ISO2022JP;
          break;
 
+      case wxFONTENCODING_SHIFT_JIS:
+         id = WXMENU_LANG_SJIS;
+         break;
+
+      case wxFONTENCODING_GB2312:
+         id = WXMENU_LANG_GB2312;
+         break;
+
+      case wxFONTENCODING_BIG5:
+         id = WXMENU_LANG_BIG5;
+         break;
+
       case wxFONTENCODING_UTF7:
          id = WXMENU_LANG_UTF7;
          break;
@@ -950,6 +965,9 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       WXMENU_LANG_CP1257,
       WXMENU_LANG_KOI8,
       WXMENU_LANG_ISO2022JP,
+      WXMENU_LANG_SJIS,
+      WXMENU_LANG_GB2312,
+      WXMENU_LANG_BIG5,
       WXMENU_LANG_UTF7,
       WXMENU_LANG_UTF8,
    };
@@ -1014,6 +1032,18 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
 
       case WXMENU_LANG_ISO2022JP:
          encoding = wxFONTENCODING_ISO2022_JP;
+         break;
+
+      case WXMENU_LANG_SJIS:
+         encoding = wxFONTENCODING_SHIFT_JIS;
+         break;
+
+      case WXMENU_LANG_GB2312:
+         encoding = wxFONTENCODING_GB2312;
+         break;
+
+      case WXMENU_LANG_BIG5:
+         encoding = wxFONTENCODING_BIG5;
          break;
 
       case WXMENU_LANG_UTF7:
