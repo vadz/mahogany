@@ -45,9 +45,9 @@
 
 #include "Mdefaults.h"
 
-// macro to pass a string to Python: not sure if it should use the current
-// locale encoding (as now) or UTF-8 or maybe wchar_t?
-#define PYTHON_STR(s) ((const char *)(s).mb_str())
+// macro to pass a string to Python (we could also use "u" format and pass
+// Unicode data directly but UTF-8 should work without problems too)
+#define PYTHON_STR(s) ((const char *)(s).utf8_str())
 
 // ----------------------------------------------------------------------------
 // options we use here
