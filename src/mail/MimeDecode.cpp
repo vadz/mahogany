@@ -110,6 +110,10 @@ MIME::Encoding MIME::GetEncodingForFontEncoding(wxFontEncoding enc)
       case wxFONTENCODING_CP1256:
 
       case wxFONTENCODING_KOI8:
+      case wxFONTENCODING_ISO2022_JP:
+      case wxFONTENCODING_SHIFT_JIS:
+      case wxFONTENCODING_GB2312:
+      case wxFONTENCODING_BIG5:
          return Encoding_Base64;
 
       default:
