@@ -598,7 +598,7 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
          wxStringTokenizer tk(name, _T(" '-"));
          while ( tk.HasMoreTokens() )
          {
-            unsigned char chInitial = tk.GetNextToken()[0u];
+            wxChar chInitial = tk.GetNextToken()[0u];
 
             if ( chInitial == '<' )
             {
@@ -608,7 +608,7 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
             }
 
             // only take letters as initials
-            if ( isalpha(chInitial) )
+            if ( wxIsalpha(chInitial) )
             {
                prefix += chInitial;
             }
