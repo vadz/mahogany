@@ -19,6 +19,10 @@
 #   include <wx/textctrl.h>
 #endif // USE_PCH
 
+#if wxCHECK_VERSION(2, 9, 0)
+   #define wxHAS_TEXT_ENTRY
+#endif
+
 // forward declaration
 class MFolder;
 class WXDLLEXPORT wxStaticBitmap;
@@ -80,15 +84,37 @@ public:
    wxTextBrowseButton(wxTextCtrl *text,
                       wxWindow *parent,
                       const wxString& tooltip)
-      : wxBrowseButton(parent, tooltip) { m_text = text; }
+      : wxBrowseButton(parent, tooltip)
+   {
+      m_text = text;
+#ifdef wxHAS_TEXT_ENTRY
+      m_textWin = text;
+#endif // wxHAS_TEXT_ENTRY
+   }
+
+#ifdef wxHAS_TEXT_ENTRY
+   wxTextBrowseButton(wxComboBox *text,
+                      wxWindow *parent,
+                      const wxString& tooltip)
+      : wxBrowseButton(parent, tooltip)
+   {
+      m_text = text;
+      m_textWin = text;
+   }
+#endif // wxHAS_TEXT_ENTRY
 
    // enable/disable associated text control with us
    virtual bool Enable(bool enable)
    {
       if ( !wxButton::Enable(enable) )
-         return FALSE;
+         return false;
 
+#ifdef wxHAS_TEXT_ENTRY
+      m_textWin->Enable(enable);
+#else // !wxHAS_TEXT_ENTRY
       m_text->Enable(enable);
+#endif // wxHAS_TEXT_ENTRY/!wxHAS_TEXT_ENTRY
+
       return wxButton::Enable(enable);
    }
 
@@ -96,11 +122,23 @@ public:
    wxString GetText() const { return m_text->GetValue(); }
    void SetText(const wxString& text) { m_text->SetValue(text); }
 
-   // text control we're associated with
-   wxTextCtrl *GetTextCtrl() const { return m_text; }
+   // get the associated control
+   wxWindow *GetWindow() const
+   {
+#ifdef wxHAS_TEXT_ENTRY
+      return m_textWin;
+#else // !wxHAS_TEXT_ENTRY
+      return m_text;
+#endif // wxHAS_TEXT_ENTRY/!wxHAS_TEXT_ENTRY
+   }
 
 private:
+#ifdef wxHAS_TEXT_ENTRY
+   wxTextEntry *m_text;
+   wxWindow *m_textWin;
+#else // !wxHAS_TEXT_ENTRY
    wxTextCtrl *m_text;
+#endif // wxHAS_TEXT_ENTRY/!wxHAS_TEXT_ENTRY
 
    DECLARE_NO_COPY_CLASS(wxTextBrowseButton)
 };
@@ -123,12 +161,22 @@ public:
    // existing one - this is achieved by setting existingOnly param to FALSE
    // (only for "open" buttons, it doesn't make sense for "save" ones)
    wxFileBrowseButton(wxTextCtrl *text, wxWindow *parent,
-                      bool open = TRUE, bool existingOnly = TRUE)
+                      bool open = true, bool existingOnly = true)
       : wxTextBrowseButton(text, parent, _("Browse for the file"))
    {
       m_open = open;
       m_existingOnly = existingOnly;
    }
+
+#ifdef wxHAS_TEXT_ENTRY
+   wxFileBrowseButton(wxComboBox *combo, wxWindow *parent,
+                      bool open = true, bool existingOnly = true)
+      : wxTextBrowseButton(combo, parent, _("Browse for the file"))
+   {
+      m_open = open;
+      m_existingOnly = existingOnly;
+   }
+#endif // wxHAS_TEXT_ENTRY
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file
@@ -250,7 +298,7 @@ public:
    // get/set the text value: must use these functions instead of wxTextCtrl
    // methods to update the button colour as well!
    void SetValue(const wxString& text);
-   wxString GetValue() const { return GetTextCtrl()->GetValue(); }
+   wxString GetValue() const { return GetText(); }
 
 private:
    // update the button colour on screen to match m_color

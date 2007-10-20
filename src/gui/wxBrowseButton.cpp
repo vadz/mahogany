@@ -268,7 +268,7 @@ wxColorBrowseButton::wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
    m_hasText = TRUE;
 
    m_evtHandlerText = new wxColorTextEvtHandler(this);
-   GetTextCtrl()->PushEventHandler(m_evtHandlerText);
+   GetWindow()->PushEventHandler(m_evtHandlerText);
 }
 
 wxColorBrowseButton::~wxColorBrowseButton()
@@ -276,8 +276,8 @@ wxColorBrowseButton::~wxColorBrowseButton()
    // the order of control deletion is undetermined, so handle both cases
    if ( m_hasText )
    {
-      // we're deleted before the text control
-      GetTextCtrl()->PopEventHandler(TRUE /* delete it */);
+      // we're deleted before the associated control
+      GetWindow()->PopEventHandler(TRUE /* delete it */);
    }
    else
    {

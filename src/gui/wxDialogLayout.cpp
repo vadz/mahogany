@@ -439,14 +439,11 @@ CreateFileEntry(wxWindow *parent,
                                 btn, (wxTextBrowseButton **)ppButton);
 }
 
-void EnableTextWithLabel(wxWindow *parent, wxTextCtrl *control, bool bEnable)
+// this function enables or disables the window label, i.e. the static text
+// control which is supposed to precede it
+static
+void EnableWindowLabel(wxWindow *parent, wxWindow *control, bool bEnable)
 {
-   // not only enable/disable it, but also make (un)editable because it gives
-   // visual feedback
-   control->SetEditable(bEnable);
-
-   // disable the label too: this will grey it out
-
    // NB: we assume that the control ids are consecutive
    long id = wxWindow::PrevControlId(control->GetId());
    wxWindow *win = parent->FindWindow(id);
@@ -460,6 +457,15 @@ void EnableTextWithLabel(wxWindow *parent, wxTextCtrl *control, bool bEnable)
 
       win->Enable(bEnable);
    }
+}
+
+void EnableTextWithLabel(wxWindow *parent, wxTextCtrl *control, bool bEnable)
+{
+   // not only enable/disable it, but also make (un)editable because it gives
+   // visual feedback
+   control->SetEditable(bEnable);
+
+   EnableWindowLabel(parent, control, bEnable);
 }
 
 void EnableTextWithButton(wxWindow *parent, wxTextCtrl *control, bool bEnable)
@@ -1037,7 +1043,10 @@ void wxEnhancedPanel::EnableColourBrowseButton(wxColorBrowseButton *btn,
 {
    btn->Enable(bEnable);
 
-   EnableTextWithLabel(btn->GetTextCtrl(), bEnable);
+   wxWindow * const win = btn->GetWindow();
+   win->Enable(bEnable);
+
+   EnableWindowLabel(GetCanvas(), win, bEnable);
 }
 
 // enable/disable the text control with label and button
