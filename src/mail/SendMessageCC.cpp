@@ -143,6 +143,21 @@ bool HeaderCanBeSetByUser(const String& name)
           name != _T("MESSAGE-ID");
 }
 
+// check if the header name is valid (as defined in 2.2 of RFC 2822)
+static bool IsValidHeaderName(const char *name)
+{
+   if ( !name )
+      return false;
+
+   for ( ; *name; name++ )
+   {
+      if ( *name >= 127 || iscntrl(*name) )
+         return false;
+   }
+
+   return true;
+}
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -956,16 +971,14 @@ String BuildMessageId(const char *hostname)
                          hostname);
 }
 
-void
+bool
 SendMessageCC::Build(bool forStorage)
 {
    if ( m_wasBuilt )
    {
       // message was already build
-      return;
+      return true;
    }
-
-   m_wasBuilt = true;
 
    // the headers needed for all messages
    // -----------------------------------
@@ -999,7 +1012,7 @@ SendMessageCC::Build(bool forStorage)
    // don't add any more headers to the message being resent
    if ( m_Envelope->remail )
    {
-      return;
+      return true;
    }
 
    // the headers needed only for new (and not resent) messages
@@ -1057,16 +1070,36 @@ SendMessageCC::Build(bool forStorage)
    // add the additional header lines added by the user
    for ( MessageHeadersList::iterator i = m_extraHeaders.begin();
          i != m_extraHeaders.end();
-         ++i, ++h )
+         ++i )
    {
-      const wxWX2MBbuf name(i->m_name.ToAscii());
+      const wxWX2MBbuf name(i->m_name.To8BitData());
+      if ( !IsValidHeaderName(name) )
+      {
+         wxLogError(_("Custom header name \"%s\" is invalid, please use only "
+                      "printable ASCII characters in the header names."),
+                    i->m_name.c_str());
+         return false;
+      }
+
+      const wxCharBuffer value(MIME::EncodeHeader(i->m_value));
+      if ( !value )
+      {
+         wxLogError(_("Invalid value \"%s\" for the custom header \"%s\""),
+                    i->m_value.c_str(), i->m_name.c_str());
+
+         return false;
+      }
+
       if ( wxStricmp(name, _T("Reply-To")) == 0 )
          replyToSet = true;
       else if ( wxStricmp(name, _T("X-Mailer")) == 0 )
          xmailerSet = true;
 
+
       m_headerNames[h] = strutil_strdup(name);
-      m_headerValues[h] = strutil_strdup(i->m_value.To8BitData());
+      m_headerValues[h] = strutil_strdup(value);
+
+      h++;
    }
 
    // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
@@ -1086,7 +1119,7 @@ SendMessageCC::Build(bool forStorage)
 #else // Windows
       version << _T(", running under ") << wxGetOsDescription();
 #endif // Unix/Windows
-      m_headerValues[h++] = strutil_strdup(version.To8BitData());
+      m_headerValues[h++] = strutil_strdup(version.ToAscii());
    }
 
    // set Reply-To if it hadn't been set by the user as a custom header
@@ -1097,7 +1130,7 @@ SendMessageCC::Build(bool forStorage)
       if ( !m_ReplyTo.empty() )
       {
          m_headerNames[h] = strutil_strdup("Reply-To");
-         m_headerValues[h++] = strutil_strdup(m_ReplyTo.To8BitData());
+         m_headerValues[h++] = strutil_strdup(m_ReplyTo.ToAscii());
       }
    }
 
@@ -1137,6 +1170,10 @@ SendMessageCC::Build(bool forStorage)
       oldbody->nested.part = NULL;
       mail_free_body(&oldbody);
    }
+
+   m_wasBuilt = true;
+
+   return true;
 }
 
 void
@@ -1276,8 +1313,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
             hasCharset = true;
          }
 
-         par->attribute = strdup(name.To8BitData());
-         par->value     = strdup(i->value.To8BitData());
+         par->attribute = strdup(name.ToAscii());
+         par->value     = strdup(MIME::EncodeHeader(i->value));
          par->next      = lastpar;
          lastpar = par;
       }
@@ -1328,8 +1365,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
       for ( i = dlist->begin(); i != dlist->end(); i++ )
       {
          par = mail_newbody_parameter();
-         par->attribute = strdup(i->name.To8BitData());
-         par->value     = strdup(i->value.To8BitData());
+         par->attribute = strdup(i->name.ToAscii());
+         par->value     = strdup(MIME::EncodeHeader(i->value));
          par->next      = NULL;
          if(lastpar)
             lastpar->next = par;
@@ -1381,7 +1418,8 @@ SendMessageCC::SendOrQueue(int flags)
 #endif // USE_DIALUP
 
    // prepare the message for sending or queuing
-   Build(!send);
+   if ( !Build(!send) )
+      return false;
 
    // then either send or queue it
    bool success;
@@ -1778,7 +1816,8 @@ SendMessageCC::Send(int flags)
 
 bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
 {
-   Build();
+   if ( !Build() )
+      return false;
 
    // this buffer is only for the message headers, so normally 16Kb should be
    // enough - but ideally we'd like to have some way to be sure it doesn't
