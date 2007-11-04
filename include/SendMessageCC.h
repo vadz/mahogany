@@ -143,7 +143,7 @@ protected:
    /** Builds the message, i.e. prepare to send it.
     @param forStorage if this is TRUE, store some extra information
     that is not supposed to be send, like BCC header. */
-   void Build(bool forStorage = FALSE);
+   bool Build(bool forStorage = FALSE);
 
    /// translate the (wxWin) encoding to (MIME) charset
    String EncodingToCharset(wxFontEncoding enc);
