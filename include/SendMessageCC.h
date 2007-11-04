@@ -140,9 +140,13 @@ protected:
    /// set sender address fields
    void SetupFromAddresses(void);
 
-   /** Builds the message, i.e. prepare to send it.
-    @param forStorage if this is TRUE, store some extra information
-    that is not supposed to be send, like BCC header. */
+   /**
+      Builds the message prior to sending or saving it.
+
+      @param forStorage if this is TRUE, store some extra information that is
+                        not supposed to be sent, like BCC header.
+      @return true if ok or false if we failed to build the message
+    */
    bool Build(bool forStorage = FALSE);
 
    /// translate the (wxWin) encoding to (MIME) charset
