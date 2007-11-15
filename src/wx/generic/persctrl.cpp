@@ -1988,13 +1988,17 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
             defaultPath = config->Read(configValuePath, defpath);
     }
 
+    wxString filterStr;
+    if ( filter )
+        filterStr = filter;
+    else
+        filterStr = wxFileSelectorDefaultWildcardStr;
+
     wxFileDialog *dialog = new wxFileDialog(parent,
                                             title,
                                             defaultPath,
                                             defaultName,
-                                            filter
-                                            ? filter
-                                            : wxFileSelectorDefaultWildcardStr,
+                                            filterStr,
                                             flags);
     if ( dialog->ShowModal() != wxID_OK ) {
         // cancelled
