@@ -280,6 +280,12 @@ protected:
       m_btnApply->Enable(FALSE);
    }
 
+   // call this after creating a new profile (as is done by the folder creation
+   // dialog which only creates the profile when the folder itself is being
+   // created) to ensure that changes to it are written to the config source
+   // selected by the user
+   void ApplyConfigSourceSelectedByUser(Profile& profile);
+
    // the helper for the handlers of Apply/Ok buttons, returns TRUE if the
    // changes were accepted
    bool DoApply();

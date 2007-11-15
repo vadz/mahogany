@@ -1499,6 +1499,17 @@ void wxOptionsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
       return;
    }
 
+   Profile_obj profile(GetProfile());
+   if ( profile )
+   {
+      ApplyConfigSourceSelectedByUser(*profile);
+   }
+   //else: this can happen when we're creating a new folder, its profile isn't
+   //      created before the folder itself is
+}
+
+void wxOptionsEditDialog::ApplyConfigSourceSelectedByUser(Profile& profile)
+{
    const int sel = m_chcSources->GetSelection();
    ConfigSource *config = NULL;
    if ( sel != -1 )
@@ -1511,10 +1522,7 @@ void wxOptionsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
       config = i.operator->();
    }
 
-   Profile_obj profile(GetProfile());
-   wxCHECK_RET( profile, _T("no profile in wxOptionsEditDialog?") );
-
-   ConfigSource *configOld = profile->SetConfigSourceForWriting(config);
+   ConfigSource *configOld = profile.SetConfigSourceForWriting(config);
 
    // remember the original config source if this is the first time we change
    // it

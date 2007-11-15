@@ -782,7 +782,9 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolderType folderType)
       // tell the other pages that we now have a folder (and hence a profile)
       String folderName = m_newFolder->GetFullName();
       m_profile = Profile::CreateProfile(folderName);
+      CHECK( m_profile, NULL, "failed to create profile for new folder" );
 
+      ApplyConfigSourceSelectedByUser(*m_profile);
       SetPagesProfile(m_profile);
    }
 
