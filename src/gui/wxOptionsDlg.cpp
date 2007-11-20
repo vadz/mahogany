@@ -2625,7 +2625,11 @@ void wxOptionsPage::OnTextChange(wxCommandEvent& event)
    wxControl *control = wxStaticCast(event.GetEventObject(), wxControl);
    CHECK_RET( control, _T("text event from nowhere?") );
 
+#if wxCHECK_VERSION(2, 9, 0)
+   wxWindow *win = control->GetNextSibling();
+#else
    wxWindow *win = FindWindow(NextControlId(control->GetId()));
+#endif
    wxColorBrowseButton *btn = wxDynamicCast(win, wxColorBrowseButton);
    if ( btn )
    {
