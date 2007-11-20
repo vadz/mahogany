@@ -542,7 +542,7 @@ public:
       CHECK( (size_t)item < GetHeadersCount(), UID_ILLEGAL,
              _T("invalid listctrl index") );
 
-      MLocker lock(((wxFolderListCtrl *)this)->m_mutexHeaders);
+      MLocker lock(m_mutexHeaders);
 
       HeaderInfo *hi = m_headers->GetItem((size_t)item);
       return hi ? hi->GetUId() : UID_ILLEGAL;
@@ -692,8 +692,8 @@ protected:
    /// the listing to use
    HeaderInfoList *m_headers;
 
-   /// are we inside a call to some HeaderInfoList method?
-   MMutex m_mutexHeaders;
+   /// lock this before calling an m_headers method and unlock on return
+   mutable MMutex m_mutexHeaders;
 
    /// cached header info (used by OnGetItemXXX())
    HeaderInfo *m_hiCached;
@@ -1845,13 +1845,16 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 
       if ( uid == UID_ILLEGAL )
       {
-         MLocker lock(m_mutexHeaders);
-
-         if ( !m_headers->ReallyGet(m_itemFocus) )
          {
-            // we failed to get it, what can we do?
-            return;
-         }
+            MLocker lock(m_mutexHeaders);
+
+            if ( !m_headers->ReallyGet(m_itemFocus) )
+            {
+               // we failed to get it, what can we do?
+               return;
+            }
+         } // unlock m_mutexHeaders before calling GetUIdFromIndex() which
+           // locks it internally
 
          uid = GetUIdFromIndex(m_itemFocus);
 
