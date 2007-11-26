@@ -3381,7 +3381,8 @@ wxLayoutPrintout::wxLayoutPrintout(wxLayoutList *llist,
    // force a full layout of the list:
    m_llist->ForceTotalLayout();
    // layout  is called in ScaleDC() when we have a DC
-#if defined(__UNIX__)
+#if 0 //defined(__UNIX__)
+   //FIXME Use wxGtkPrinterDC
    wxPostScriptDC::SetResolution(72);
 #endif
 }
