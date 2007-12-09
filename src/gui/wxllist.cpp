@@ -3481,11 +3481,7 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    /* We allocate a temporary wxDC for printing, so that we can
       determine the correct paper size and scaling. We don't actually
       print anything on it. */
-#ifdef __WXMSW__
-   wxPrinterDC *psdc = new wxPrinterDC("","",WXLLIST_TEMPFILE,false);
-#else
-   wxPostScriptDC *psdc = new wxPostScriptDC();//WXLLIST_TEMPFILE,false);
-#endif
+   wxPrinterDC *psdc = new wxPrinterDC();
 
    psdc->StartDoc(m_title);
 
