@@ -4571,7 +4571,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
                      _("Search for messages"),
                      _("String to search for:"),
                      m_Frame,
-                     _T("MsgSearch"),
+                     "MsgSearch",
                      m_searchData.str
                   ) )
             {

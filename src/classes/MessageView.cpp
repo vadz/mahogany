@@ -2241,6 +2241,7 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
                                              );
    ClickablePGPInfo *pgpInfo = ClickablePGPInfo::CreateFromSigStatusCode
                                (
+                                 pgpEngine,
                                  status,
                                  this,
                                  log
@@ -3382,7 +3383,7 @@ MessageView::DoMenuCommand(int id)
                            _("Find text"),
                            _("   Find:"),
                            GetParentFrame(),
-                           _T("MsgViewFindString")) )
+                           "MsgViewFindString") )
             {
                if ( !m_viewer->Find(text) )
                {

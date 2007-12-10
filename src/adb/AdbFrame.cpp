@@ -2036,7 +2036,7 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       {
         wxString strGoto;
         if ( MInputBox(&strGoto, _("Go to entry/group"),
-                       _("Full entry &name:"), this, _T("GoTo")) ) {
+                       _("Full entry &name:"), this, "GoTo") ) {
           MoveSelection(strGoto);
         }
       }
@@ -2196,7 +2196,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
     case AdbDataProvider::Name_String:
       {
         wxString strMsg = _("Enter the address book name");
-        if ( !MInputBox(&strAdbName, strTitle, strMsg, this, _T("LastAdbName")) )
+        if ( !MInputBox(&strAdbName, strTitle, strMsg, this, "LastAdbName") )
           return FALSE;
       }
       break;

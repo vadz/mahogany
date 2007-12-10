@@ -503,8 +503,8 @@ bool MInputBox(wxString *pstr,
                const wxString& strCaption,
                const wxString& strPrompt,
                const wxWindow *parent,
-               const wxChar *szKey,
-               const wxChar *def,
+               const char *szKey,
+               const wxString& def,
                bool passwordflag)
 {
   wxString strConfigPath;
@@ -514,7 +514,7 @@ bool MInputBox(wxString *pstr,
                        strCaption, strPrompt, strConfigPath, def, passwordflag);
 
   // do not allow attempts to store the password:
-  wxASSERT_MSG( !passwordflag || (szKey==NULL && def == NULL),
+  wxASSERT_MSG( !passwordflag || (!szKey && def.empty()),
                 _T("passwords can't be stored!") );
 
   if ( dlg.ShowModal() != wxID_OK )

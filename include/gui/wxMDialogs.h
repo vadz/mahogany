@@ -303,8 +303,8 @@ bool MInputBox(wxString *pstr,
                const wxString& caption,
                const wxString& prompt,
                const wxWindow *parent = NULL,
-               const wxChar *key = NULL,
-               const wxChar *def = NULL,
+               const char *key = NULL,
+               const wxString& def = wxEmptyString,
                bool passwordflag = false);
 
 /**

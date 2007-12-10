@@ -769,7 +769,7 @@ wxMFrame::OnMenuCommand(int id)
                            _("Mahogany: Create new identity"),
                            _("Enter the identity name:"),
                            this,
-                           _T("NewIdentity")) )
+                           "NewIdentity") )
             {
                ShowIdentityDialog(ident, this);
 

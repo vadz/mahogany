@@ -361,7 +361,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
          {
             // get some text from user (FIXME the prompts are really stupid)
             if ( !MInputBox(&value, _("Value for template variable"),
-                            _T("Value"), this, _T("TemplateText")) )
+                            _T("Value"), this, "TemplateText") )
             {
                // user cancelled
                return;
@@ -1019,7 +1019,7 @@ void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& /* event */)
                    _("Create new template"),
                    _("Name for the new template:"),
                    this,
-                   _T("AddTemplate")
+                   "AddTemplate"
                   ) )
    {
       // cancelled

@@ -722,7 +722,10 @@ setup_twofish(void)
       MInputBox(&gs_GlobalPassword,
                 _("Global Password:"),
                 _("Please enter the global password:"),
-                NULL,NULL,NULL,TRUE);
+                NULL,
+                NULL,
+                "",
+                true /* password */);
 
       if ( gs_GlobalPassword.empty() )
       {

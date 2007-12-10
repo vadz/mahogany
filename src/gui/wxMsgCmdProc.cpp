@@ -1069,7 +1069,7 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
                    _("Please enter the address"),
                    _("Bounce the message to:"),
                    GetFrame(),
-                   _T("BounceAddress")) )
+                   "BounceAddress") )
    {
       // cancelled by user
       return;
