@@ -2802,7 +2802,7 @@ FilterRuleApply::CreateProgressDialog()
                   ),
                   // make the message wide enough to show filtering messages
                   // and tall enough for 4 lines that we use for them
-                  "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\n\n\n",
+                  _("Preparing to filter the messages, please wait ...\n\n\n"),
                   2*m_msgs.GetCount(),
                   frame
                );
