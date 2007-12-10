@@ -533,9 +533,8 @@ enum ConfigFields
    ConfigField_PGPHelp,
    ConfigField_PGPCommand,
    ConfigField_PGPKeyServer,
-   ConfigField_PGPGetPubKey,
 
-   ConfigField_HelpersLast = ConfigField_PGPGetPubKey,
+   ConfigField_HelpersLast = ConfigField_PGPKeyServer,
 
 #ifdef USE_TEST_PAGE
    ConfigField_TestFirst = ConfigField_HelpersLast,
@@ -1748,10 +1747,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("\n"
                   "GNU Privacy Guard or a compatible program may be used\n"
                   "to verify the cryptographic signatures of the messages\n"
-                  "you receive and decrypt them."), Field_Message, -1 },
+                  "you receive and decrypt them. The public key server is\n"
+                  "used to retrieve the keys of the senders."), Field_Message, -1 },
    { gettext_noop("&GPG command"),                Field_File,    -1                      },
-   { gettext_noop("GPG &key server"),             Field_Text,    -1                      },
-   { gettext_noop("Get GPG key &from server"),    Field_Bool,    -1                      },
+   { gettext_noop("GPG public &key server"),      Field_Text,    -1                      },
 
    // test page
 #ifdef USE_TEST_PAGE
@@ -2249,7 +2248,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // PGP help
    CONFIG_ENTRY(MP_PGP_COMMAND),
    CONFIG_ENTRY(MP_PGP_KEYSERVER),
-   CONFIG_ENTRY(MP_PGP_GET_PUBKEY),
 
 #ifdef USE_TEST_PAGE
    CONFIG_NONE(),

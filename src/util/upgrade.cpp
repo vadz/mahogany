@@ -213,7 +213,8 @@ enum MVersion
    Version_065,      // SSL flag is not boolean any more and not a flag at all
    Version_066,      // "/M/Profiles" -> "/Profiles"
    Version_067 = Version_066,     // no changes
-   Version_Last = Version_067,    // last existing version
+   Version_068,
+   Version_Last = Version_068,    // last existing version
    Version_Unknown   // some unrecognized version
 };
 
@@ -2796,6 +2797,20 @@ UpgradeFrom065()
 }
 
 // ----------------------------------------------------------------------------
+// 0.66 -> 0.68
+// ----------------------------------------------------------------------------
+
+static bool
+UpgradeFrom066()
+{
+   // just purge the unnecessary MP_PGP_GET_PUBKEY and M_MSGBOX_GET_PGP_PUBKEY
+   mApplication->GetProfile()->DeleteEntry("PGPGetPubKey");
+   wxPMessageBoxEnable("GetPGPPubKey");
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
 
@@ -2817,30 +2832,32 @@ Upgrade(const String& fromVersion)
          version.Truncate(version.Len() - 1);
 
       // trailing ".0" is not significant neither
-      if ( version.Right(2) == _T(".0") )
+      if ( version.Right(2) == ".0" )
          version.Truncate(version.Len() - 2);
 
-      if ( version == _T("0.01") )
+      if ( version == "0.01" )
          oldVersion = Version_Alpha001;
-      else if ( version == _T("0.02") || version == _T("0.10"))
+      else if ( version == "0.02" || version == "0.10")
          oldVersion = Version_Alpha010;
-      else if ( version == _T("0.20") )
+      else if ( version == "0.20" )
          oldVersion = Version_Alpha020;
-      else if ( version == _T("0.21") || version == _T("0.22") ||
-                version == _T("0.23") || version == _T("0.50") )
+      else if ( version == "0.21" || version == "0.22" ||
+                version == "0.23" || version == "0.50" )
          oldVersion = Version_050;
-      else if ( version == _T("0.60") )
+      else if ( version == "0.60" )
          oldVersion = Version_060;
-      else if ( version == _T("0.61") || version == _T("0.62") || version == _T("0.63") )
+      else if ( version == "0.61" || version == "0.62" || version == "0.63" )
          oldVersion = Version_061;
-      else if ( version == _T("0.64") )
+      else if ( version == "0.64" )
          oldVersion = Version_064;
-      else if ( version == _T("0.64.1") || version == _T("0.64.2") )
+      else if ( version == "0.64.1" || version == "0.64.2" )
          oldVersion = Version_064_1;
-      else if ( version == _T("0.65") )
+      else if ( version == "0.65" )
          oldVersion = Version_065;
-      else if ( version == _T("0.66") || version == _T("0.67") )
+      else if ( version == "0.66" || version == "0.67" )
          oldVersion = Version_066;
+      else if ( version == "0.68" )
+         oldVersion = Version_068;
       else
          oldVersion = Version_Unknown;
    }
@@ -2893,7 +2910,12 @@ Upgrade(const String& fromVersion)
          // fall through
 
       case Version_065:
-         if ( success && UpgradeFrom065() )
+         if ( success )
+            success = UpgradeFrom065();
+         // fall through
+
+      case Version_066:
+         if ( success && UpgradeFrom066() )
             wxLogMessage(_("Configuration information and program files were "
                            "successfully upgraded from the version '%s'."),
                          fromVersion.c_str());
@@ -2905,7 +2927,7 @@ Upgrade(const String& fromVersion)
                          "It is recommended that you uninstall and reinstall "
                          "the program before using it."),
                        fromVersion.c_str());
-         break;
+         // fall through
 
       case Version_Last:
          // nothing to do, it's the latest one

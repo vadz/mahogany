@@ -158,7 +158,6 @@ static const struct
    { "ConfirmZap",               gettext_noop("confirm permanently deleting messages") },
    { "ZapSpam",                  gettext_noop("permanently delete message after marking them as spam") },
    { "RememberPGPPassphrase",    gettext_noop("remember PGP/GPG passphrase in memory") },
-   { "GetPGPPubKey",             gettext_noop("retrieve PGP/GPG public keys from key server") },
    { "SearchAgainIfNoMatch",     gettext_noop("propose to search again if no matches were found") },
    { "UseCreateFolderWizard",    gettext_noop("use wizard when creating a new folder") },
    { "FormatParagraphBeforeExit",gettext_noop("format all paragraphs in composer before exit") },

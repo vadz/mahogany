@@ -33,9 +33,10 @@ public:
 
    /// create the object corresponding to the given signature check status code
    static ClickablePGPInfo *
-   CreateFromSigStatusCode(MCryptoEngine::Status code,
+   CreateFromSigStatusCode(MCryptoEngine *pgpEngine,
+                           MCryptoEngine::Status code,
                            MessageView *msgView,
-                           const MCryptoEngineOutputLog *log);
+                           MCryptoEngineOutputLog *log);
 
 
    // implement the base class pure virtuals
@@ -169,14 +170,31 @@ private:
 class PGPInfoKeyNotFoundSig : public PGPSignatureInfo
 {
 public:
-   PGPInfoKeyNotFoundSig(MessageView *msgView, const String& from)
+   PGPInfoKeyNotFoundSig(MessageView *msgView,
+                         const String& from,
+                         MCryptoEngine *engine,
+                         MCryptoEngineOutputLog *log)
       : PGPSignatureInfo(msgView,
-                         wxString::Format(_("PGP public key not found%s"),
-                                          GetFromString(from).c_str()),
+                         wxString::Format
+                         (
+                           _("PGP public key not found%s, click here to "
+                             "try to retrieve it."),
+                           GetFromString(from).c_str()
+                         ),
                          _T("pgpsig_bad"),
-                         wxColour(145, 145, 145)) { }
+                         wxColour(145, 145, 145)),
+        m_engine(engine),
+        m_log(log)
+   {
+   }
+
+   // override this to get the missing key from server
+   virtual void OnLeftClick(const wxPoint&) const;
 
 private:
+   MCryptoEngine * const m_engine;
+   MCryptoEngineOutputLog * const m_log;
+
    DECLARE_NO_COPY_CLASS(PGPInfoKeyNotFoundSig)
 };
 

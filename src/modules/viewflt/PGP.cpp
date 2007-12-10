@@ -296,7 +296,7 @@ PGPFilter::DoProcess(String& text,
             const MCryptoEngine::Status
                rc = m_engine->VerifySignature(in, out, log);
             pgpInfo = ClickablePGPInfo::
-                        CreateFromSigStatusCode(rc, m_msgView, log);
+                        CreateFromSigStatusCode(m_engine, rc, m_msgView, log);
 
             // if we failed to check the signature, we need to remove the
             // BEGIN/END lines from output ourselves (otherwise it would have

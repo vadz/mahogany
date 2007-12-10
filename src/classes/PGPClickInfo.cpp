@@ -36,6 +36,8 @@
 
 #include "PGPClickInfo.h"
 
+extern const MOption MP_PGP_KEYSERVER;
+
 // ----------------------------------------------------------------------------
 // PGPMenu: used by ClickablePGPInfo
 // ----------------------------------------------------------------------------
@@ -124,9 +126,10 @@ ClickablePGPInfo::~ClickablePGPInfo()
 
 /* static */
 ClickablePGPInfo *
-ClickablePGPInfo::CreateFromSigStatusCode(MCryptoEngine::Status code,
+ClickablePGPInfo::CreateFromSigStatusCode(MCryptoEngine *engine,
+                                          MCryptoEngine::Status code,
                                           MessageView *msgView,
-                                          const MCryptoEngineOutputLog *log)
+                                          MCryptoEngineOutputLog *log)
 {
    ClickablePGPInfo *pgpInfo;
    const String& user = log->GetUserID();
@@ -157,7 +160,7 @@ ClickablePGPInfo::CreateFromSigStatusCode(MCryptoEngine::Status code,
          break;
 
       case MCryptoEngine::NONEXISTING_KEY_ERROR:
-         pgpInfo = new PGPInfoKeyNotFoundSig(msgView, user);
+         pgpInfo = new PGPInfoKeyNotFoundSig(msgView, user, engine, log);
          break;
 
       default:
@@ -254,4 +257,40 @@ ClickablePGPInfo::ShowRawText() const
                     _T("PGPRawText"));
 }
 
+// ----------------------------------------------------------------------------
+// PGPInfoKeyNotFoundSig
+// ----------------------------------------------------------------------------
+
+void PGPInfoKeyNotFoundSig::OnLeftClick(const wxPoint&) const
+{
+   MessageView * const mview = GetMessageView();
+   CHECK_RET( mview, "should have the associated message view" );
+
+   String keyserver = READ_APPCONFIG_TEXT(MP_PGP_KEYSERVER);
+   if ( keyserver.empty() )
+   {
+      if ( !MInputBox
+            (
+               &keyserver,
+               _("Public key server"),
+               _("Please enter GPG public ket server:"),
+               mview->GetWindow(),
+               "PGPKeyServer"
+            ) )
+      {
+         // cancelled by user
+         return;
+      }
+   }
+
+   if ( m_engine->GetPublicKey(m_log->GetPublicKey(), keyserver, m_log) ==
+            MCryptoEngine::OK )
+   {
+      // force the message view to refresh this message: we can now decrypt it
+      // or verify its signature
+      const UIdType uidOld = mview->GetUId();
+      mview->ShowMessage(UID_ILLEGAL);
+      mview->ShowMessage(uidOld);
+   }
+}
 

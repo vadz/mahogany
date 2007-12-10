@@ -145,17 +145,31 @@ public:
                               const String& signature,
                               MCryptoEngineOutputLog *log = NULL) = 0;
 
+   //@}
+
+   /// @name Key management.
+   //@{
+
+   /**
+      Attempt to retrieve the specified public key from a public key server.
+
+      @param pk the public key to retrieve
+      @param server the server to get it from
+    */
+   virtual Status GetPublicKey(const String& pk,
+                               const String& server,
+                               MCryptoEngineOutputLog *log) const = 0;
+
+   //@}
+
+   // TODO
 #if 0
+   /** @name Other */
+   //@{
+
    virtual Status CheckRecipient(const String & recipient) const = 0;
 
    virtual Status GetFingerprint(String & fp) const = 0;
-
-   virtual Status GetPublicKey(String & pk) const = 0;
-#endif // 0
-   //@}
-
-   /** @name Other */
-   //@{
 
    /**
       Shows the engine configuration dialog.
@@ -165,6 +179,7 @@ public:
    //virtual void Configure(wxWindow *parent) = 0;
 
    //@}
+#endif // 0
 
 protected:
    /// virtual dtor

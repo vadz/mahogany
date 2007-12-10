@@ -356,7 +356,6 @@ extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
 extern const MOption MP_PGP_COMMAND;
 extern const MOption MP_PGP_KEYSERVER;
-extern const MOption MP_PGP_GET_PUBKEY;
 extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_PLAY_SOUND;
@@ -1111,8 +1110,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_PGP_COMMAND_NAME    "PGPCommand"
 /// PGP/GPG key server for public keys
 #define MP_PGP_KEYSERVER_NAME  "PGPKeyServer"
-/// get PGP key from server?
-#define MP_PGP_GET_PUBKEY_NAME  "PGPGetPubKey"
 /// execute a command when new mail arrives?
 #define   MP_USE_NEWMAILCOMMAND_NAME      "CommandOnNewMail"
 /// command to execute when new mail arrives
@@ -2098,8 +2095,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// PGP/GPG key server for public keys
 #define MP_PGP_KEYSERVER_DEFVAL "wwwkeys.eu.pgp.net"
-/// get PGP key from server?
-#define MP_PGP_GET_PUBKEY_DEFVAL 1l
 
 /// command to execute when new mail arrives
 #define   MP_USE_NEWMAILCOMMAND_DEFVAL   0l

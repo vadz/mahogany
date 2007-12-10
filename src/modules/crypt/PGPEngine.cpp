@@ -44,14 +44,12 @@
 
 extern const MOption MP_PGP_COMMAND;
 extern const MOption MP_PGP_KEYSERVER;
-extern const MOption MP_PGP_GET_PUBKEY;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_REMEMBER_PGP_PASSPHRASE;
-extern const MPersMsgBox *M_MSGBOX_GET_PGP_PUBKEY;
 
 // ----------------------------------------------------------------------------
 // PassphraseManager: this class can be used to remember the passphrases
@@ -123,6 +121,10 @@ public:
    virtual Status VerifyDetachedSignature(const String& message,
                                           const String& signature,
                                           MCryptoEngineOutputLog *log);
+
+   virtual Status GetPublicKey(const String& pk,
+                               const String& server,
+                               MCryptoEngineOutputLog *log) const;
 
 protected:
    /**
@@ -552,70 +554,7 @@ PGPEngine::ExecCommand(const String& options,
                        String& messageOut,
                        MCryptoEngineOutputLog *log)
 {
-   Status status = DoExecCommand(options, messageIn, messageOut, log);
-   if ( status == NONEXISTING_KEY_ERROR && READ_APPCONFIG_BOOL(MP_PGP_GET_PUBKEY) ) //FIXME use Profile
-   {
-      // propose to the user to retrieve the key from a keyserver
-      if ( MDialog_Message
-           (
-               wxString::Format(
-                 _("This message was prepared using a public key which you "
-                   "don't have in the local keyring.\n"
-                   "\n"
-                   "Would you like to try to retrieve this public key "
-                   "(\"%s\") from the keyserver?"),
-                 log->GetPublicKey().c_str()
-               ),
-               log->GetParent(),
-               M_MSGBOX_GET_PGP_PUBKEY,
-               M_DLG_ALLOW_CANCEL
-           ) )
-      {
-         // try to get it
-
-         const String keyserver = READ_APPCONFIG_TEXT(MP_PGP_KEYSERVER);
-         status = DoExecCommand
-                  (
-                     wxString::Format
-                     (
-                        _T("--keyserver %s --recv-keys %s"),
-                        keyserver.c_str(),
-                        log->GetPublicKey().c_str()
-                     ),
-                     wxEmptyString,
-                     messageOut,
-                     log
-                  );
-
-         switch ( status )
-         {
-            default:
-               wxLogWarning(_("Importing public key failed for unknown "
-                              "reason."));
-               status = NONEXISTING_KEY_ERROR;
-               messageOut = messageIn;
-               break;
-
-            case NO_DATA_ERROR:
-               wxLogWarning(_("Public key not found on the key server \"%s\"."),
-                            keyserver.c_str());
-               status = NONEXISTING_KEY_ERROR;
-               messageOut = messageIn;
-               break;
-
-            case OK:
-               wxLogMessage(_("Successfully imported public key for \"%s\"."),
-                            log->GetUserID().c_str());
-
-               // try redoing the original command again
-               status = DoExecCommand(options, messageIn, messageOut, log);
-               break;
-         }
-      }
-      //else: key import cancelled by user
-   }
-
-   return status;
+   return DoExecCommand(options, messageIn, messageOut, log);
 }
 
 // ----------------------------------------------------------------------------
@@ -720,6 +659,49 @@ PGPEngine::VerifyDetachedSignature(const String& message,
    return ExecCommand(_T("--verify ") + tmpfileSig.GetName() +
                       _T(" ") + tmpfileText.GetName(),
                       wxEmptyString, messageOut, log);
+}
+
+// ----------------------------------------------------------------------------
+// PGPEngine key management
+// ----------------------------------------------------------------------------
+
+PGPEngine::Status
+PGPEngine::GetPublicKey(const String& pk,
+                        const String& keyserver,
+                        MCryptoEngineOutputLog *log) const
+{
+   String dummyOut;
+   Status status = const_cast<PGPEngine *>(this)->DoExecCommand
+                   (
+                     wxString::Format
+                     (
+                        _T("--keyserver %s --recv-keys %s"),
+                        keyserver.c_str(),
+                        pk.c_str()
+                     ),
+                     wxEmptyString,
+                     dummyOut,
+                     log
+                   );
+   switch ( status )
+   {
+      default:
+         wxLogWarning(_("Importing public key failed for unknown "
+                        "reason."));
+         break;
+
+      case NO_DATA_ERROR:
+         wxLogWarning(_("Public key not found on the key server \"%s\"."),
+                      keyserver.c_str());
+         break;
+
+      case OK:
+         wxLogMessage(_("Successfully imported public key \"%s\"."),
+                      pk.c_str());
+         break;
+   }
+
+   return status;
 }
 
 // ============================================================================
