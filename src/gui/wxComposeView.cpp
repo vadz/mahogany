@@ -199,8 +199,10 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
 
    wxString strMimeType;
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-   wxFileType *fileType = mimeManager.GetFileTypeFromExtension(strExt);
-   if ( (fileType == NULL) || !fileType->GetMimeType(&strMimeType) )
+   wxFileType *fileType = strExt.empty()
+                           ? NULL
+                           : mimeManager.GetFileTypeFromExtension(strExt);
+   if ( !fileType || !fileType->GetMimeType(&strMimeType) )
    {
       // can't find MIME type from file extension, set some default one: use
       // TEXT/PLAIN for text files and APPLICATION/OCTET-STREAM for binary ones
