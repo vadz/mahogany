@@ -980,6 +980,8 @@ SendMessageCC::Build(bool forStorage)
       return true;
    }
 
+   m_wasBuilt = true;
+
    // the headers needed for all messages
    // -----------------------------------
 
@@ -1170,8 +1172,6 @@ SendMessageCC::Build(bool forStorage)
       oldbody->nested.part = NULL;
       mail_free_body(&oldbody);
    }
-
-   m_wasBuilt = true;
 
    return true;
 }
