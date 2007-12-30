@@ -1102,18 +1102,14 @@ HASHTAB *Threader::create(size_t size) const
 
 void Threader::add(HASHTAB *hTable, const String &str, ThreadContainer *container) const
 {
-   // As I do not want to ensure that the String instance given
-   // as key will last at least as long as the table, I copy its
-   // value.
-   // XNOFIXME: Is it possible to 'lock' the string until the hash-table
-   // is destroyed ?
    hash_add(hTable, strdup(str.utf8_str()), container, 0);
 }
 
 
 ThreadContainer *Threader::lookUp(HASHTAB *hTable, const String &s) const
 {
-   void** data = hash_lookup(hTable, s.char_str());
+   void** data = hash_lookup(hTable,
+                              const_cast<char *>((const char *)s.utf8_str()));
    if (data != 0)
       return (ThreadContainer*)data[0];
    else
