@@ -1826,6 +1826,13 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    if ( m_enableOnSelect )
    {
+      // at least under MSW we can somehow get here from inside our own
+      // UpdateListing() which calls wxYield internally and in this case
+      // m_mutexHeaders is already locked and there is nothing we can do --
+      // postpone update until idle time (not ideal but better than crashing)
+      if ( m_mutexHeaders.IsLocked() || !mApplication->AllowBgProcessing() )
+         return;
+
       // update it as it is normally only updated in OnIdle() which wasn't
       // called yet
       m_itemFocus = GetFocusedItem();
