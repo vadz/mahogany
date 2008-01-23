@@ -2522,11 +2522,10 @@ void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent&)
 
 void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent&)
 {
-  // these events are never received this early under MSW
-#ifdef __WXGTK__
+  // we receive the events during find text field creation which happens before
+  // we're fully initialized -- just ignore them
   if ( !m_textKey )
     return;
-#endif // GTK
 
   GetToolBar()->EnableTool(WXMENU_ADBFIND_NEXT, !m_textKey->GetValue().IsEmpty());
 }
