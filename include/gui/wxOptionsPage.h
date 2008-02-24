@@ -165,9 +165,13 @@ public:
    virtual ~wxOptionsPage();
 
 
-   // transfer data to/from the controls
+   // transfer data to/from the controls: derived classes should implement
+   // DoTransferOptionsTo/FromWindow() instead of overriding those
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
+
+   // create controls when the page is shown in the notebook for the first time
+   virtual bool Show(bool show = true);
 
    // to change the profile associated with the page:
    void SetProfile(Profile *profile);
@@ -192,6 +196,10 @@ public:
    int HelpId(void) const { return m_HelpId; }
 
 protected:
+   // these methods are called from TransferDataTo/FromWindow()
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
+
    /// get the name of the folder we're editing the options of
    String GetFolderName() const;
 
@@ -518,9 +526,6 @@ class wxOptionsPageNetwork : public wxOptionsPageStandard
 public:
    wxOptionsPageNetwork(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
-
    // for wxOptionsPageDesc
    static wxOptionsPage *New(wxNotebook *parent,
                              const wxString& title,
@@ -536,6 +541,10 @@ public:
                                       aFields, aDefaults, nFields, nOffset,
                                       helpID, image);
    }
+
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
 private:
    // ctor for New()
@@ -580,8 +589,9 @@ public:
 
    void OnButton(wxCommandEvent&);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
 private:
    // create m_folder for our m_Profile
@@ -654,8 +664,9 @@ public:
 
    void OnButton(wxCommandEvent&);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
 private:
    // the names of all available viewers
@@ -674,10 +685,10 @@ class wxOptionsPageFolderView : public wxOptionsPageStandard
 public:
    wxOptionsPageFolderView(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
-
 protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
+
    void OnButton(wxCommandEvent&);
 
 private:
@@ -691,8 +702,9 @@ class wxOptionsPageFolderTree : public wxOptionsPageStandard
 public:
    wxOptionsPageFolderTree(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
 private:
    bool m_isHomeOrig;
@@ -707,8 +719,9 @@ class wxOptionsPageFolders : public wxOptionsPageStandard
 public:
    wxOptionsPageFolders(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
    void OnUpdateUIBtns(wxUpdateUIEvent&);
 
@@ -727,7 +740,7 @@ class wxOptionsPagePython : public wxOptionsPageStandard
 public:
    wxOptionsPagePython(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataFromWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPagePython)
@@ -741,8 +754,9 @@ class wxOptionsPageAdb : public wxOptionsPageStandard
 public:
    wxOptionsPageAdb(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageAdb)
@@ -765,12 +779,13 @@ class wxOptionsPageSync : public wxOptionsPageStandard
 public:
    wxOptionsPageSync(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
    void OnButton(wxCommandEvent& event);
 
-protected:
+
    // do we want to use settings synchronization?
    // (may be true, false or -1 if unknown)
    int m_activateSync;
@@ -791,12 +806,13 @@ class wxOptionsPageOthers : public wxOptionsPageStandard
 public:
    wxOptionsPageOthers(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+protected:
+   virtual bool DoTransferOptionsToWindow();
+   virtual bool DoTransferOptionsFromWindow();
 
    void OnButton(wxCommandEvent&);
 
-protected:
+
    // the old auto save timer interval
    long m_nAutosaveDelay;
 

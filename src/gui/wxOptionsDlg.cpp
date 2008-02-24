@@ -76,6 +76,13 @@
 
 #include "ColourNames.h"
 
+// uncomment this to output some timings about options dialog creation
+#define PROFILE_OPTIONS_DLG
+
+#ifdef PROFILE_OPTIONS_DLG
+   #include <wx/stopwatch.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
@@ -2369,8 +2376,6 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
       image = -1;
    }
 
-   notebook->AddPage(this, title, FALSE /* don't select */, image);
-
    m_Profile = profile;
    m_Profile->IncRef();
 
@@ -2379,7 +2384,10 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
    m_nFirst = nFirst;
    m_nLast = nLast;
 
-   CreateControls();
+   notebook->AddPage(this, title, FALSE /* don't select */, image);
+
+   // don't create controls yet, this will be done in Show() when we become the
+   // notebook current page
 
    return true;
 }
@@ -2395,6 +2403,33 @@ wxOptionsPage::~wxOptionsPage()
    }
 
    SafeDecRef(m_Profile);
+}
+
+bool wxOptionsPage::Show(bool show)
+{
+   if ( !wxNotebookPageBase::Show(show) )
+      return false;
+
+   if ( show && m_aControls.IsEmpty() )
+   {
+#ifdef PROFILE_OPTIONS_DLG
+      wxStopWatch sw;
+#endif
+
+      CreateControls();
+
+      Layout();
+
+      TransferDataToWindow();
+
+      UpdateUI();
+
+#ifdef PROFILE_OPTIONS_DLG
+      wxLogStatus(_T("Options page created in %ldms"), sw.Time());
+#endif
+   }
+
+   return true;
 }
 
 String wxOptionsPage::GetFolderName() const
@@ -2655,6 +2690,9 @@ void wxOptionsPage::OnControlChange(wxCommandEvent& event)
 
 void wxOptionsPage::UpdateUI()
 {
+   if ( m_aControls.IsEmpty() )
+      return;
+
    for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
       int nCheckField = m_aFields[n].enable;
       if ( nCheckField != -1 ) {
@@ -2783,6 +2821,17 @@ void wxOptionsPage::UpdateUI()
 
 // read the data from config
 bool wxOptionsPage::TransferDataToWindow()
+{
+   if ( m_aControls.IsEmpty() )
+   {
+      // we're not created yet, will do this later
+      return true;
+   }
+
+   return DoTransferOptionsToWindow();
+}
+
+bool wxOptionsPage::DoTransferOptionsToWindow()
 {
    // disable environment variable expansion here because we want the user to
    // edit the real value stored in the config
@@ -2974,11 +3023,22 @@ bool wxOptionsPage::TransferDataToWindow()
       ClearDirty(n);
    }
 
-   return TRUE;
+   return true;
 }
 
 // write the data to config
 bool wxOptionsPage::TransferDataFromWindow()
+{
+   if ( m_aControls.IsEmpty() )
+   {
+      // we must have been never shown so no data could have been modified
+      return true;
+   }
+
+   return DoTransferOptionsFromWindow();
+}
+
+bool wxOptionsPage::DoTransferOptionsFromWindow()
 {
    String strValue;
    long lValue = 0;
@@ -3451,9 +3511,9 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
    }
 }
 
-bool wxOptionsPageMessageView::TransferDataToWindow()
+bool wxOptionsPageMessageView::DoTransferOptionsToWindow()
 {
-   bool bRc = wxOptionsPage::TransferDataToWindow();
+   bool bRc = wxOptionsPage::DoTransferOptionsToWindow();
    if ( bRc )
    {
       wxArrayString descViewers;
@@ -3489,9 +3549,9 @@ bool wxOptionsPageMessageView::TransferDataToWindow()
    return bRc;
 }
 
-bool wxOptionsPageMessageView::TransferDataFromWindow()
+bool wxOptionsPageMessageView::DoTransferOptionsFromWindow()
 {
-   bool bRc = wxOptionsPage::TransferDataFromWindow();
+   bool bRc = wxOptionsPage::DoTransferOptionsFromWindow();
    if ( bRc )
    {
       wxWindow *win = GetControl(ConfigField_MsgViewer);
@@ -3541,9 +3601,9 @@ wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
 {
 }
 
-bool wxOptionsPageFolderView::TransferDataToWindow()
+bool wxOptionsPageFolderView::DoTransferOptionsToWindow()
 {
-   if ( !wxOptionsPageStandard::TransferDataToWindow() )
+   if ( !wxOptionsPageStandard::DoTransferOptionsToWindow() )
       return false;
 
    wxRadioBox *radio =
@@ -3568,9 +3628,9 @@ bool wxOptionsPageFolderView::TransferDataToWindow()
    return true;
 }
 
-bool wxOptionsPageFolderView::TransferDataFromWindow()
+bool wxOptionsPageFolderView::DoTransferOptionsFromWindow()
 {
-   if ( !wxOptionsPageStandard::TransferDataFromWindow() )
+   if ( !wxOptionsPageStandard::DoTransferOptionsFromWindow() )
       return false;
 
    wxRadioBox *radio =
@@ -3643,9 +3703,9 @@ wxOptionsPageFolderTree::wxOptionsPageFolderTree(wxNotebook *parent,
 {
 }
 
-bool wxOptionsPageFolderTree::TransferDataToWindow()
+bool wxOptionsPageFolderTree::DoTransferOptionsToWindow()
 {
-   if ( !wxOptionsPageStandard::TransferDataToWindow() )
+   if ( !wxOptionsPageStandard::DoTransferOptionsToWindow() )
       return false;
 
    wxControl *control = GetControl(ConfigField_FolderTreeIsHome);
@@ -3668,9 +3728,9 @@ bool wxOptionsPageFolderTree::TransferDataToWindow()
    return true;
 }
 
-bool wxOptionsPageFolderTree::TransferDataFromWindow()
+bool wxOptionsPageFolderTree::DoTransferOptionsFromWindow()
 {
-   if ( !wxOptionsPageStandard::TransferDataFromWindow() )
+   if ( !wxOptionsPageStandard::DoTransferOptionsFromWindow() )
       return false;
 
    wxControl *control = GetControl(ConfigField_FolderTreeIsHome);
@@ -3787,7 +3847,7 @@ void wxOptionsPageNetwork::OnDialUp(wxCommandEvent& event)
 #endif // USE_DIALUP
 
 // dynamically fill the RAS connections combo box under Windows
-bool wxOptionsPageNetwork::TransferDataToWindow()
+bool wxOptionsPageNetwork::DoTransferOptionsToWindow()
 {
 #ifdef USE_OWN_CCLIENT
    m_oldAuthsDisabled = READ_CONFIG_TEXT(m_Profile, MP_SMTP_DISABLED_AUTHS);
@@ -3805,7 +3865,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
    }
 #endif // USE_OWN_CCLIENT
 
-   bool bRc = wxOptionsPage::TransferDataToWindow();
+   bool bRc = wxOptionsPage::DoTransferOptionsToWindow();
 
 #if defined(OS_WIN) && defined(USE_DIALUP)
    if ( bRc )
@@ -3833,7 +3893,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
    return bRc;
 }
 
-bool wxOptionsPageNetwork::TransferDataFromWindow()
+bool wxOptionsPageNetwork::DoTransferOptionsFromWindow()
 {
 #ifdef USE_OWN_CCLIENT
    // we need to massage the disabled authentificators string a bit to fit it
@@ -3858,7 +3918,7 @@ bool wxOptionsPageNetwork::TransferDataFromWindow()
    }
 #endif // USE_OWN_CCLIENT
 
-   return wxOptionsPage::TransferDataFromWindow();
+   return wxOptionsPage::DoTransferOptionsFromWindow();
 }
 
 // ----------------------------------------------------------------------------
@@ -3895,7 +3955,7 @@ bool wxOptionsPageNewMail::GetFolderFromProfile()
    return m_folder != NULL;
 }
 
-bool wxOptionsPageNewMail::TransferDataToWindow()
+bool wxOptionsPageNewMail::DoTransferOptionsToWindow()
 {
    // the "collect new mail" checkbox corresponds to the value of
    // MF_FLAGS_INCOMING flag
@@ -3934,12 +3994,12 @@ bool wxOptionsPageNewMail::TransferDataToWindow()
    m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
    m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
 
-   return wxOptionsPage::TransferDataToWindow();
+   return wxOptionsPage::DoTransferOptionsToWindow();
 }
 
-bool wxOptionsPageNewMail::TransferDataFromWindow()
+bool wxOptionsPageNewMail::DoTransferOptionsFromWindow()
 {
-   bool rc = wxOptionsPage::TransferDataFromWindow();
+   bool rc = wxOptionsPage::DoTransferOptionsFromWindow();
 
    if ( rc )
    {
@@ -4049,11 +4109,11 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
 {
 }
 
-bool wxOptionsPagePython::TransferDataFromWindow()
+bool wxOptionsPagePython::DoTransferOptionsFromWindow()
 {
    // currently we still have the old value for "Enable Python" in config
    const bool usePythonOld = READ_CONFIG_BOOL(m_Profile, MP_USEPYTHON);
-   if ( !wxOptionsPageStandard::TransferDataFromWindow() )
+   if ( !wxOptionsPageStandard::DoTransferOptionsFromWindow() )
    {
       return false;
    }
@@ -4116,9 +4176,9 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
    m_lboxData = lboxDataEquivList;
 }
 
-bool wxOptionsPageAdb::TransferDataToWindow()
+bool wxOptionsPageAdb::DoTransferOptionsToWindow()
 {
-   bool bRc = wxOptionsPage::TransferDataToWindow();
+   bool bRc = wxOptionsPage::DoTransferOptionsToWindow();
 
    if ( bRc )
    {
@@ -4134,7 +4194,7 @@ bool wxOptionsPageAdb::TransferDataToWindow()
    return bRc;
 }
 
-bool wxOptionsPageAdb::TransferDataFromWindow()
+bool wxOptionsPageAdb::DoTransferOptionsFromWindow()
 {
    // if the listbox contains just the return address, empty it: it is the
    // default anyhow and this avoids remembering it in config
@@ -4146,7 +4206,7 @@ bool wxOptionsPageAdb::TransferDataFromWindow()
       listbox->Clear();
    }
 
-   return wxOptionsPage::TransferDataFromWindow();
+   return wxOptionsPage::DoTransferOptionsFromWindow();
 }
 
 // ----------------------------------------------------------------------------
@@ -4168,9 +4228,9 @@ wxOptionsPageSync::wxOptionsPageSync(wxNotebook *parent,
    m_activateSync = -1;
 }
 
-bool wxOptionsPageSync::TransferDataToWindow()
+bool wxOptionsPageSync::DoTransferOptionsToWindow()
 {
-   bool rc = wxOptionsPage::TransferDataToWindow();
+   bool rc = wxOptionsPage::DoTransferOptionsToWindow();
    if ( rc )
    {
       m_activateSync = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
@@ -4189,9 +4249,9 @@ bool wxOptionsPageSync::TransferDataToWindow()
    return rc;
 }
 
-bool wxOptionsPageSync::TransferDataFromWindow()
+bool wxOptionsPageSync::DoTransferOptionsFromWindow()
 {
-   bool rc = wxOptionsPage::TransferDataFromWindow();
+   bool rc = wxOptionsPage::DoTransferOptionsFromWindow();
    if ( rc )
    {
       bool syncRemote = READ_CONFIG_BOOL(m_Profile, MP_SYNC_REMOTE);
@@ -4387,7 +4447,7 @@ void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
    }
 }
 
-bool wxOptionsPageOthers::TransferDataToWindow()
+bool wxOptionsPageOthers::DoTransferOptionsToWindow()
 {
    // if the user checked "don't ask me again" checkbox in the message box
    // these setting might be out of date - synchronize
@@ -4396,7 +4456,7 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    m_Profile->writeEntry(GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT),
                          !wxPMessageBoxIsDisabled(MP_CONFIRMEXIT));
 
-   bool rc = wxOptionsPage::TransferDataToWindow();
+   bool rc = wxOptionsPage::DoTransferOptionsToWindow();
    if ( rc )
    {
       m_nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
@@ -4406,13 +4466,13 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    return rc;
 }
 
-bool wxOptionsPageOthers::TransferDataFromWindow()
+bool wxOptionsPageOthers::DoTransferOptionsFromWindow()
 {
-   // read the old value before calling the base class TransferDataFromWindow()
-   // whieh may change it
+   // read the old value before calling the base class
+   // DoTransferOptionsFromWindow() whieh may change it
    wxString logfileOld = READ_CONFIG(m_Profile, MP_LOGFILE);
 
-   bool rc = wxOptionsPage::TransferDataFromWindow();
+   bool rc = wxOptionsPage::DoTransferOptionsFromWindow();
    if ( rc )
    {
       // now if the user checked "confirm exit" checkbox we must reenable
@@ -4498,9 +4558,9 @@ wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
    m_lboxData->m_lboxDlgPers = _T("LastStartupFolder");
 }
 
-bool wxOptionsPageFolders::TransferDataToWindow()
+bool wxOptionsPageFolders::DoTransferOptionsToWindow()
 {
-   bool bRc = wxOptionsPage::TransferDataToWindow();
+   bool bRc = wxOptionsPage::DoTransferOptionsToWindow();
 
    if ( bRc )
    {
@@ -4523,10 +4583,10 @@ bool wxOptionsPageFolders::TransferDataToWindow()
    return bRc;
 }
 
-bool wxOptionsPageFolders::TransferDataFromWindow()
+bool wxOptionsPageFolders::DoTransferOptionsFromWindow()
 {
-   // undo what we did in TransferDataToWindow: remove the main folder from
-   // the list of folders to be opened on startup
+   // undo what we did in DoTransferOptionsToWindow: remove the main folder
+   // from the list of folders to be opened on startup
    wxControl *control = GetControl(ConfigField_OpenFolders);
    if ( control )
    {
@@ -4539,7 +4599,7 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
       }
    }
 
-   bool rc = wxOptionsPage::TransferDataFromWindow();
+   bool rc = wxOptionsPage::DoTransferOptionsFromWindow();
 
    if ( rc )
    {
@@ -5155,10 +5215,19 @@ void wxConfigSourcesDialog::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
 
 void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
 {
+#ifdef PROFILE_OPTIONS_DLG
+   wxStopWatch sw;
+#endif
+
    wxGlobalOptionsDialog dlg(parent);
    dlg.CreateAllControls();
    dlg.SetNotebookPage(page);
    dlg.Layout();
+
+#ifdef PROFILE_OPTIONS_DLG
+   wxLogStatus(_T("Options dialog created in %ldms"), sw.Time());
+#endif
+
    (void)dlg.ShowModal();
 }
 
