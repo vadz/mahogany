@@ -255,8 +255,6 @@ AddressList::Create(const String& address,
       if ( !adr || adr->error )
       {
          DBGMESSAGE((_T("Invalid RFC822 address '%s'."), address.c_str()));
-
-         return NULL;
       }
    }
 
