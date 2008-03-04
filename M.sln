@@ -20,31 +20,31 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "M", "M.vcproj", "{1515C8EB-
 		{461C65F9-FD63-4262-8AAB-578E9E0EC485} = {461C65F9-FD63-4262-8AAB-578E9E0EC485}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "L:\wx\HEAD\build\msw\wx_base.vcproj", "{03CC77E1-56F2-4536-9578-1DC4D858DC16}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "L:\wx\HEAD\build\msw\wx_vc7_base.vcproj", "{03CC77E1-56F2-4536-9578-1DC4D858DC16}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "adv", "L:\wx\HEAD\build\msw\wx_adv.vcproj", "{390CE24E-8BF0-4606-B218-BE13AF7C0160}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "adv", "L:\wx\HEAD\build\msw\wx_vc7_adv.vcproj", "{390CE24E-8BF0-4606-B218-BE13AF7C0160}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "html", "L:\wx\HEAD\build\msw\wx_html.vcproj", "{458FA00B-681B-46F2-9C32-FB717D4D4609}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "html", "L:\wx\HEAD\build\msw\wx_vc7_html.vcproj", "{458FA00B-681B-46F2-9C32-FB717D4D4609}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxjpeg", "L:\wx\HEAD\build\msw\wx_wxjpeg.vcproj", "{9F67E589-0373-4100-81E4-AC7D3328BAAF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxjpeg", "L:\wx\HEAD\build\msw\wx_vc7_wxjpeg.vcproj", "{9F67E589-0373-4100-81E4-AC7D3328BAAF}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxregex", "L:\wx\HEAD\build\msw\wx_wxregex.vcproj", "{F41FC06D-BF41-4A39-A4B6-9FCD6B4FFAFE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxregex", "L:\wx\HEAD\build\msw\wx_vc7_wxregex.vcproj", "{F41FC06D-BF41-4A39-A4B6-9FCD6B4FFAFE}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxtiff", "L:\wx\HEAD\build\msw\wx_wxtiff.vcproj", "{C1814137-3DDE-4ADC-876B-EAA86E2900AC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxtiff", "L:\wx\HEAD\build\msw\wx_vc7_wxtiff.vcproj", "{C1814137-3DDE-4ADC-876B-EAA86E2900AC}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxzlib", "L:\wx\HEAD\build\msw\wx_wxzlib.vcproj", "{18A0EF1F-2476-46F9-936F-A6B46274FA7A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxzlib", "L:\wx\HEAD\build\msw\wx_vc7_wxzlib.vcproj", "{18A0EF1F-2476-46F9-936F-A6B46274FA7A}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -53,7 +53,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imap", "lib\imap\imap.vcpro
 		{86C1D2C7-C961-4017-88E8-63D0BCCBD0D5} = {86C1D2C7-C961-4017-88E8-63D0BCCBD0D5}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxpng", "L:\wx\HEAD\build\msw\wx_wxpng.vcproj", "{62C959C3-EC09-4323-9FB8-DC39A4428CAE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxpng", "L:\wx\HEAD\build\msw\wx_vc7_wxpng.vcproj", "{62C959C3-EC09-4323-9FB8-DC39A4428CAE}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -65,19 +65,19 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dspam", "lib\dspam\dspam.vc
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "L:\wx\HEAD\build\msw\wx_core.vcproj", "{8C0797F8-5B9F-4B33-957B-01552CD9F2DE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "L:\wx\HEAD\build\msw\wx_vc7_core.vcproj", "{8C0797F8-5B9F-4B33-957B-01552CD9F2DE}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "net", "L:\wx\HEAD\build\msw\wx_net.vcproj", "{461C65F9-FD63-4262-8AAB-578E9E0EC485}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "net", "L:\wx\HEAD\build\msw\wx_vc7_net.vcproj", "{461C65F9-FD63-4262-8AAB-578E9E0EC485}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qa", "L:\wx\HEAD\build\msw\wx_qa.vcproj", "{0B20B2A1-6D5F-4366-9154-6995152A07EC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qa", "L:\wx\HEAD\build\msw\wx_vc7_qa.vcproj", "{0B20B2A1-6D5F-4366-9154-6995152A07EC}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xml", "L:\wx\HEAD\build\msw\wx_xml.vcproj", "{4D31FA55-B643-4CB3-A8F5-5AA5179317F3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xml", "L:\wx\HEAD\build\msw\wx_vc7_xml.vcproj", "{4D31FA55-B643-4CB3-A8F5-5AA5179317F3}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject

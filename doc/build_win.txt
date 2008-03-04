@@ -3,8 +3,8 @@ Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
 Modified by:	Nerijus Baliunas <nerijus@users.sf.net> (cygwin part)
-Last modified:	2004-07-14
-Version:	the information in this file applies to the cvs sources
+Last modified:	2008-03-04
+Version:	the information in this file applies to the svn sources
 
 0. Requirements
 ---------------
@@ -13,19 +13,20 @@ a) a compiler: currently, the supported compilers for building Mahogany are
    MS Visual C++ 7.1 and cygwin. Previous versions of Visual C++ (5/6/7.0)
    could probably be used as well but the project files haven't been updated
    for them since quite some time and so this definitely won't work out of
-   the box but require some effort from your part.
+   the box but require some effort from your part. Later versions of VC++ (VC8,
+   a.k.a. 2005, and VC9 a.k.a. 2008) should work as well but you need to import
+   the projects which are only available in VC7 versions currently.
 
    If you are interested in building using another compiler (mingw32, BC++)
    please contact us and we will try to help you.
 
-b) cvs client: you need to have daily access to Mahogany (and sometimes
-   wxWidgets) source tree, and the cvs is the only way to keep up to date. The
-   precompiled cvs binaries for Win32 can be found at http://www.cyclic.com/
+b) svn client: you need to have daily access to Mahogany (and sometimes
+   wxWidgets) source tree, and the svn is the only way to keep up to date.
 
 c) GNU m4 from cygwin tools: this is not an absolute requirement, however you
    will not be able to compile *.mid (Mahogany Interface Description) files if
    you don't have it and so you will have to use the versions already in the
-   cvs. If you do have m4, set the environment variable M4 to contain its full
+   svn. If you do have m4, set the environment variable M4 to contain its full
    path (or just m4 if it is in your PATH), otherwise it won't be used.
 
 
@@ -38,46 +39,22 @@ a) wxWidgets
    Mahogany depends on wxWidgets and prior to compiling Mahogany you need to
 build the wxMSW library.
 
-   You may use either wxMSW 2.5.3 release (latest 2.5 release as of the time
-of this writing, if a newer one is available, do use it) or the latest
-wxWidgets sources from cvs HEAD which usually provide more functionality. Note
-that you may use M_STABLE tag to check out the wxWidgets version which is known
-to work well with Mahogany.
+   Currently Mahogany requires wxWidgets sources from svn (it is possible to
+build against wx 2.8 but the project files have been modified to be used with
+svn wx version so you'd need to use an older version of them to build with 2.8,
+please contact me if you really need to do this). When wx 2.9.0 is release it
+will be possible to use it too.
 
    Before building Mahogany you will need to build wxWidgets. To do it, you
-should open build/msw/wx.dsw in wxWidgets directory and build all projects in
-it. You may use extra\scripts\wxmsw_setup.h file instead of the standard
+should open build/msw/wx_vc7.sln in wxWidgets directory and build all projects
+in it. You may use extra\scripts\wxmsw_setup.h file instead of the standard
 setup.h when building if you want to disable all the features not needed by
 Mahogany but doing this is optional and you should revert to the standard
 wx/setup.h if using wxmsw_setup.h results in errors (it is not always up to
 date...).
 
-   Also before opening M.sln for the first time, open it in any text editor
-and replace all occurences of "L:\wxWidgets" with the path where your version
-of wxWidgets is installed.
 
-
-b) DSPAM
---------
-
-   Building Mahogany with DSPAM requires SQlite library: http://www.sqlite.org/
-Note that you need SQlite version 2 (currently the latest version is 2.8.17)
-and not version 3 as they're incompatible and dspam driver only works with
-SQlite 2. You should download its sources and build it using lib\sqlite.vcproj
-project file (you will need to copy it to the directory where you unpacked
-SQlite sources) and add the directory containing sqlite.h to the list of global
-include paths in VC++ IDE. You should also add the library directory containing
-sqlite[d].lib (the debug version should have "d" in its name) to the list of
-library paths.
-
-   If you don't want to install SQlite, you will have to skip building dspam
-project and DspamFilter.cpp file located in modules/spam subfolder of the
-source files of M project in the IDE (simply set "Excluded from build" to true
-in its properties). You will also need to remove dspam.lib from the linker
-inputs in the linker options of M project.
-
-
-c) Python
+b) Python
 ---------
 
    If you want to build Mahogany with an embedded Python interpreter, you need
@@ -93,7 +70,7 @@ exclude files in "interfaces\python" subfolder of "Source file" in M project
 from build.
 
 
-d) Build process
+c) Build process
 ----------------
 
    Before loading M.sln file, you will need to open it in your favourite text
@@ -118,13 +95,6 @@ directory (or elsewhere in your PATH).
    If you encounter any problems with Mahogany (e.g. crashes...), please build
 the debug configuration and run it under debugger, this often provides valuable
 additional information.
-
-
-e) Common problems
-------------------
-
-- dspam doesn't compile
-+ check that you installed sqlite as explained above
 
 
 2. Cygwin
