@@ -60,6 +60,7 @@
 #include <wx/tokenzr.h>
 #include <wx/textbuf.h>
 #include <wx/fontmap.h>
+#include <wx/scopeguard.h>
 #ifdef __WINE__
 // it includes wrapwin.h which includes windows.h which defines SendMessage under Windows
 #undef SendMessage
@@ -4642,11 +4643,21 @@ wxComposeView::Send(SendMode mode)
    CHECK( !m_sending, false, _T("wxComposeView::Send() reentered") );
 
    m_sending = true;
+   class ResetVar
+   {
+   public:
+      ResetVar(bool *flag) : m_flag(flag) { }
+      ~ResetVar() { *m_flag = false; }
+
+   private:
+      bool *m_flag;
+   } reset(&m_sending);
 
    MBusyCursor bc;
    wxLogStatus(this, m_mode == Mode_News ? _("Posting message")
                                          : _("Sending message..."));
    Disable();
+   wxON_BLOCK_EXIT_OBJ1(*this, wxWindow::Enable, true);
 
    SendMessage_obj msg(BuildMessage());
    if ( !msg )
@@ -4672,7 +4683,7 @@ wxComposeView::Send(SendMode mode)
          wxLogError(_("Cannot schedule message for sending later because "
                       "the calendar module is not available."));
 
-         success = FALSE;
+         success = false;
       }
    }
    else
@@ -4746,15 +4757,8 @@ wxComposeView::Send(SendMode mode)
       wxLogStatus(this, _("Message was not sent."));
    }
 
-   // reenable the window disabled previously
-   Enable();
-
-   m_sending = false;
-
    if ( !success )
-   {
       return false;
-   }
 
    // we can now safely remove the draft message, if any
    DeleteDraft();
