@@ -522,7 +522,8 @@ static bool CheckSubjectFor8Bit(const String& subject)
 // check if the subject is in capitals
 static bool CheckSubjectForCapitals(const String& subject)
 {
-   bool hasSpace = false;
+   bool hasSpace = false,
+        oneWord = true;
    for ( String::const_iterator i = subject.begin(); i != subject.end(); ++i )
    {
       const wxUChar ch = *i;
@@ -535,14 +536,19 @@ static bool CheckSubjectForCapitals(const String& subject)
 
       if ( isspace(ch) )
       {
-         // remember that we have more than one word
+         // remember that we have a space
          hasSpace = true;
+      }
+      else if ( hasSpace )
+      {
+         // non-space after a space -- remember that we have multiple words
+         oneWord = false;
       }
    }
 
    // message with a single work in all caps can be legitimate but if we have a
    // sentence (i.e. more than one word here) in all caps it is very suspicious
-   return hasSpace;
+   return !oneWord;
 }
 
 // check if the subject is of the form "...      foo-12-xyz": spammers seem to
