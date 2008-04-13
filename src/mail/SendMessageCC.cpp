@@ -1916,7 +1916,7 @@ SendMessageCC::WriteToFolder(String const &name)
 static long write_stream_output(void *stream, char *string)
 {
    ostream *o = (ostream *)stream;
-   *o << string;
+   *o << wxString::From8BitData(string).ToUTF8().data();
    if ( o->fail() )
       return NIL;
 
@@ -1927,7 +1927,8 @@ static long write_stream_output(void *stream, char *string)
 static long write_str_output(void *stream, char *string)
 {
    String *o = (String *)stream;
-   *o << string;
+   o->append(wxString::From8BitData(string));
+
    return 1;
 }
 
