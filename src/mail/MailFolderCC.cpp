@@ -2811,7 +2811,7 @@ MailFolderCC::AppendMessage(const String& msg)
 
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
-   wxCharBuffer msgbuf(msg.mb_str(wxConvISO8859_1));
+   wxCharBuffer msgbuf(msg.To8BitData());
    STRING str;
    INIT(&str, mail_string, msgbuf.data(), msg.length());
 
@@ -2858,7 +2858,7 @@ MailFolderCC::AppendMessage(const Message& msg)
    String flags = GetImapFlags(msg.GetStatus());
 
    // keep the char buffer alive until after mail_append_full() returns
-   wxCharBuffer tmpbuf(tmp.mb_str(wxConvISO8859_1));
+   wxCharBuffer tmpbuf(tmp.To8BitData());
    STRING str;
    INIT(&str, mail_string, tmpbuf.data(), tmp.length());
 
