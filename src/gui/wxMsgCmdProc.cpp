@@ -1099,6 +1099,10 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
       }
 
       sendMsg->SetAddresses(address);
+
+      // there is no need to store bounced messages in "sent mail" folder
+      sendMsg->SetFcc("");
+
       if ( !sendMsg->SendOrQueue() )
       {
          ERRORMESSAGE((_("Failed to bounce the message.")));
