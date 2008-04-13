@@ -2812,6 +2812,8 @@ MailFolderCC::AppendMessage(const String& msg)
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    wxCharBuffer msgbuf(msg.To8BitData());
+   CHECK( msgbuf, false, "message contains non-ASCII characters" );
+
    STRING str;
    INIT(&str, mail_string, msgbuf.data(), msg.length());
 
@@ -2859,6 +2861,8 @@ MailFolderCC::AppendMessage(const Message& msg)
 
    // keep the char buffer alive until after mail_append_full() returns
    wxCharBuffer tmpbuf(tmp.To8BitData());
+   CHECK( tmpbuf, false, "message contains non-ASCII characters" );
+
    STRING str;
    INIT(&str, mail_string, tmpbuf.data(), tmp.length());
 
