@@ -110,6 +110,51 @@ enum
 };
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+namespace
+{
+
+/**
+   Checks if the given string is a valid header name conforming to RFC 2822.
+
+   @param header The string to check.
+   @param reason If non-NULL, filled with the explanation of why the header
+                 name is invalid if the function returns false.
+   @return true if the header name is valid, false otherwise
+ */
+bool IsValidHeaderName(const wxString& header, wxString *reason)
+{
+   for ( wxString::const_iterator p = header.begin(); p != header.end(); ++p )
+   {
+      // RFC 822 allows '/' but we don't because it has a special meaning for
+      // the profiles/wxConfig; other characters are excluded in accordance
+      // with the definition of the header name in the section 2.2 of RFC 2822
+      wxChar c = *p;
+      if ( c < 32 || c > 126 )
+      {
+         if ( reason )
+            *reason = "only ASCII characters are allowed";
+
+         return false;
+      }
+
+      if ( c == ':' )
+      {
+         if ( reason )
+            *reason = "colons are not allowed";
+
+         return false;
+      }
+   }
+
+   return true;
+}
+
+} // anonymous namespace
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -165,6 +210,10 @@ public:
    // transfer data to/from window
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
+
+protected:
+   // validate the header names
+   virtual bool OnItemAdd(const wxString& item);
 
 private:
    Profile *m_profile;
@@ -485,21 +534,41 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
 
 wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(Profile *profile,
                                                wxWindow *parent)
-                      : wxSelectionsOrderDialog(parent,
-                                               _("&Headers"),
-                                               _("Configure headers to show "
-                                                 "in message view"),
-                                               _T("MsgViewHeaders"))
+                      : wxSelectionsOrderDialog
+                        (
+                           parent,
+                           _("&Headers to show in message view"),
+                           _("Configure message view headers"),
+                           _T("MsgViewHeaders"),
+                           Allow_Add
+                        )
 {
    m_profile = profile;
    SafeIncRef(profile);
 
-   SetDefaultSize(3*wBtn, 10*hBtn);
+   SetDefaultSize(6*wBtn, 10*hBtn);
 }
 
 wxMsgViewHeadersDialog::~wxMsgViewHeadersDialog()
 {
    SafeDecRef(m_profile);
+}
+
+bool wxMsgViewHeadersDialog::OnItemAdd(const wxString& item)
+{
+   if ( !wxSelectionsOrderDialog::OnItemAdd(item) )
+      return false;
+
+   wxString reason;
+   if ( !IsValidHeaderName(item, &reason) )
+   {
+      wxLogWarning(_("\"%s\" is not a valid header name: %s."),
+                   item.c_str(), reason.c_str());
+
+      return false;
+   }
+
+   return true;
 }
 
 bool wxMsgViewHeadersDialog::TransferDataToWindow()
@@ -749,18 +818,21 @@ bool wxCustomHeaderDialog::TransferDataFromWindow()
    m_headerName = m_textctrlName->GetValue();
 
    // check that this is a valid header name
-   for ( const wxChar *pc = m_headerName.c_str(); *pc; pc++ )
+   wxString reason;
+   if ( IsValidHeaderName(m_headerName, &reason) )
    {
-      // RFC 822 allows '/' but we don't because it has a special meaning for
-      // the profiles/wxConfig; other characters are excluded in accordance
-      // with the definition of the header name in the RFC
-      wxChar c = *pc;
-      if ( c < 32 || c > 126 || c == ':' || c == '/' )
+      // in addition to the standard RFC checks we also forbid slashes as this
+      // string is used as profile key
+      if ( m_headerName.find('/') != wxString::npos )
       {
-         wxLogError(_("The character '%c' is invalid in the header name, "
-                      "please replace or remove it."), c);
-         return false;
+         reason = "slashes are not allowed in this context";
       }
+   }
+
+   if ( !reason.empty() )
+   {
+      wxLogError(_("Specified header name is invalid: %s."), reason.c_str());
+      return false;
    }
 
    m_headerValue = m_textctrlValue->GetValue();
@@ -1119,7 +1191,7 @@ void wxCustomHeadersDialog::OnAdd(wxCommandEvent& WXUNUSED(event))
 
 void wxCustomHeadersDialog::OnDelete(wxCommandEvent& WXUNUSED(event))
 {
-   size_t sel = 0; // inititialize it to fix compiler warnings
+   size_t sel = 0; // initialize it to fix compiler warnings
    CHECK_RET( GetSelection(&sel), _T("button should be disabled") );
 
    m_listctrl->DeleteItem(sel);

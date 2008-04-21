@@ -2399,15 +2399,21 @@ size_t MDialog_GetSelections(const wxString& message,
    return selections->GetCount();
 }
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 // wxSelectionsOrderDialog
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// event table
 // ----------------------------------------------------------------------------
 
 // control ids for wxSelectionsOrderDialog
 enum
 {
    Button_Up = 1000,
-   Button_Down
+   Button_Down,
+   Button_Add,
+   Text_Add
 };
 
 BEGIN_EVENT_TABLE(wxSelectionsOrderDialog, wxManuallyLaidOutDialog)
@@ -2419,13 +2425,19 @@ BEGIN_EVENT_TABLE(wxSelectionsOrderDialog, wxManuallyLaidOutDialog)
    EVT_LISTBOX(-1, wxSelectionsOrderDialog::OnCheckLstBoxSelChanged)
 END_EVENT_TABLE()
 
+// ----------------------------------------------------------------------------
+// wxSelectionsOrderDialog ctor
+// ----------------------------------------------------------------------------
+
 wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
                                                  const wxString& message,
                                                  const wxString& caption,
-                                                 const wxString& profileKey)
+                                                 const wxString& profileKey,
+                                                 int extraFeatures)
                        : wxManuallyLaidOutDialog(parent, caption, profileKey)
 {
    m_hasChanges = false;
+   m_textAdd = NULL;
 
    // layout the controls
    // -------------------
@@ -2454,13 +2466,56 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    c->height.AsIs();
    m_btnUp->SetConstraints(c);
 
+   // optional controls for string editing below the list box
+   wxControl *ctrlBelow = NULL;
+   if ( extraFeatures & Allow_Add )
+   {
+      wxStaticText *labelAdd = new wxStaticText(this, -1, _("&Add another:"));
+      c = new wxLayoutConstraints();
+      c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+      c->width.AsIs();
+      c->height.AsIs();
+      labelAdd->SetConstraints(c);
+
+      m_textAdd = new wxTextCtrl(this, Text_Add, "",
+                                 wxDefaultSize, wxDefaultPosition,
+                                 wxTE_PROCESS_ENTER);
+      c = new wxLayoutConstraints();
+      c->left.RightOf(labelAdd, LAYOUT_X_MARGIN);
+      c->centreY.SameAs(labelAdd, wxCentreY);
+      c->right.LeftOf(m_btnDown, 2*LAYOUT_X_MARGIN);
+      c->height.AsIs();
+      m_textAdd->SetConstraints(c);
+
+      wxButton *btnAdd = new wxButton(this, Button_Add, _("A&dd"));
+      c = new wxLayoutConstraints();
+      c->left.RightOf(m_textAdd, LAYOUT_Y_MARGIN);
+      c->centreY.SameAs(m_textAdd, wxCentreY);
+      c->width.SameAs(m_btnDown, wxWidth);
+      c->height.AsIs();
+      btnAdd->SetConstraints(c);
+
+      ctrlBelow = btnAdd;
+
+      Connect(Button_Add, wxEVT_COMMAND_BUTTON_CLICKED,
+               wxCommandEventHandler(wxSelectionsOrderDialog::OnAdd));
+      Connect(Text_Add, wxEVT_COMMAND_TEXT_ENTER,
+               wxCommandEventHandler(wxSelectionsOrderDialog::OnAdd));
+      Connect(Button_Add, wxEVT_UPDATE_UI,
+               wxUpdateUIEventHandler(wxSelectionsOrderDialog::OnUpdateAddButton));
+   }
+
    // a checklistbox with headers on the space which is left
    m_checklstBox = new wxCheckListBox(this, -1);
    c = new wxLayoutConstraints();
    c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.LeftOf(m_btnDown, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   if ( ctrlBelow )
+      c->bottom.SameAs(ctrlBelow, wxTop, 2*LAYOUT_Y_MARGIN);
+   else
+      c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_checklstBox->SetConstraints(c);
 
    UpdateButtons(m_checklstBox->GetSelection());
@@ -2468,6 +2523,43 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    // set the minimal window size
    SetDefaultSize(3*wBtn, 7*hBtn);
 }
+
+// ----------------------------------------------------------------------------
+// wxSelectionsOrderDialog handling adding items
+// ----------------------------------------------------------------------------
+
+bool wxSelectionsOrderDialog::OnItemAdd(const wxString& item)
+{
+   int count = m_checklstBox->GetCount();
+   for ( int n = 0; n < count; n++ )
+   {
+      if ( m_checklstBox->GetString(n) == item )
+      {
+         wxLogWarning(_("The string \"%s\" is already present in the list."),
+                      item.c_str());
+
+         return false;
+      }
+   }
+
+   return true;
+}
+
+void wxSelectionsOrderDialog::DoAddItem(const wxString& item)
+{
+   if ( OnItemAdd(item) )
+   {
+      const int pos = m_checklstBox->Append(item);
+
+      // we consider that the new item was added in order to be used, so be
+      // smart and do it by default
+      m_checklstBox->Check(pos);
+   }
+}
+
+// ----------------------------------------------------------------------------
+// wxSelectionsOrderDialog event handlers
+// ----------------------------------------------------------------------------
 
 void wxSelectionsOrderDialog::UpdateButtons(int sel)
 {
