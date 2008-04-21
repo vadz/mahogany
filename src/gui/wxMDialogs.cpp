@@ -2479,7 +2479,7 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
       labelAdd->SetConstraints(c);
 
       m_textAdd = new wxTextCtrl(this, Text_Add, "",
-                                 wxDefaultSize, wxDefaultPosition,
+                                 wxDefaultPosition, wxDefaultSize,
                                  wxTE_PROCESS_ENTER);
       c = new wxLayoutConstraints();
       c->left.RightOf(labelAdd, LAYOUT_X_MARGIN);
