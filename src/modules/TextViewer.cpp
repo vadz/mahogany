@@ -169,6 +169,59 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// ClickableFace: a clickable object representing a face picture
+// ----------------------------------------------------------------------------
+
+class ClickableFace : public ClickableInfo
+{
+public:
+   ClickableFace(MessageView *msgView, wxBitmap face)
+      : ClickableInfo(msgView),
+        m_face(face)
+   {
+   }
+
+   virtual String GetLabel() const { return "Face picture"; }
+
+   virtual void OnLeftClick(const wxPoint& pt) const { DoShow(pt); }
+   virtual void OnRightClick(const wxPoint& /* pt */) const { }
+   virtual void OnDoubleClick(const wxPoint& /* pt */) const { }
+
+private:
+   class FaceWindow : public wxDialog
+   {
+   public:
+      FaceWindow(wxWindow *parent, const wxPoint& position, wxBitmap bmp)
+         : wxDialog(parent, wxID_ANY, _("Face picture"),
+                    position, wxDefaultSize,
+                    wxCAPTION | wxCLOSE_BOX),
+           m_bmp(bmp)
+      {
+         Connect(wxEVT_PAINT, wxPaintEventHandler(FaceWindow::OnPaint));
+
+         SetClientSize(bmp.GetWidth(), bmp.GetHeight());
+      }
+
+   private:
+      void OnPaint(wxPaintEvent& /* event */)
+      {
+         wxPaintDC dc(this);
+         dc.DrawBitmap(m_bmp, 0, 0);
+      }
+
+      wxBitmap m_bmp;
+   };
+
+   void DoShow(const wxPoint& pt) const
+   {
+      FaceWindow dlg(GetMessageView()->GetWindow(), pt, m_face);
+      dlg.ShowModal();
+   }
+
+   wxBitmap m_face;
+};
+
+// ----------------------------------------------------------------------------
 // TextViewerClickable: an object we can click on in the text control
 // ----------------------------------------------------------------------------
 
@@ -744,9 +797,16 @@ void TextViewer::EndHeader()
    InsertText(_T("\n"), MTextStyle());
 }
 
-void TextViewer::ShowXFace(const wxBitmap& /* bitmap */)
+void TextViewer::ShowXFace(const wxBitmap& bitmap)
 {
-   // we don't show XFaces
+   FlushText();
+
+   // we can't show faces in the control itself so insert a clickable object
+   // which shows it
+   m_window->InsertClickable(_("[Click here to see the face picture]"),
+                             new ClickableFace(m_msgView, bitmap),
+                             GetOptions().HeaderValueCol);
+   EndHeader();
 }
 
 void TextViewer::EndHeaders()
