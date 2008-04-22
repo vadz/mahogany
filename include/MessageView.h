@@ -42,6 +42,10 @@ class ProcessInfo;
 class ViewFilter;
 class FolderView;
 
+// private structure containing all non-textual but viewable information
+// extracted from the headers by ShowXXXHeaders() functions
+struct ViewableInfoFromHeaders;
+
 WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 
 // ----------------------------------------------------------------------------
@@ -512,6 +516,21 @@ protected:
 
    /// show all configured headers
    void ShowHeaders();
+
+   /// show the contents of the X-Face header
+#ifdef HAVE_XFACES
+   void ShowXFace(const wxString& xfaceString);
+#endif // HAVE_XFACES
+
+   /// show all headers and fill in the provided object with information
+   /// extracted from them (called by ShowHeaders() only)
+   void ShowAllHeaders(ViewableInfoFromHeaders *vi);
+
+   /// show just the selected headers
+   void
+   ShowSelectedHeaders(const wxArrayString& headers, ViewableInfoFromHeaders *vi);
+
+   void ShowInfoFromHeaders(const ViewableInfoFromHeaders& vi);
 
    /**
       Possible values for the second parameter of ProcessPart.
