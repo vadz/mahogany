@@ -40,6 +40,8 @@
 #  include "gui/wxIconManager.h"
 #  include "Mdefaults.h"
 
+#  include "Mcclient.h"          // only for rfc822_base64()
+
 #  include <wx/filedlg.h>
 #endif //USE_PCH
 
@@ -80,6 +82,8 @@
 #include <wx/fontutil.h>
 #include <wx/tokenzr.h>
 #include <wx/fs_mem.h>
+#include <wx/mstream.h>
+#include <wx/scopeguard.h>
 
 #ifdef OS_UNIX
    #include <sys/stat.h>
@@ -93,6 +97,7 @@ M_LIST_OWN(VirtualMimePartsList, MimePart);
 // constants
 // ----------------------------------------------------------------------------
 
+static const char *FACE_HEADER = "Face";
 static const char *XFACE_HEADER = "X-Face";
 
 // ----------------------------------------------------------------------------
@@ -190,6 +195,9 @@ static inline void RecodeText(String *, wxFontEncoding, wxFontEncoding)
 // Information present in headers which needs to be shown in some special way
 struct ViewableInfoFromHeaders
 {
+   // the contents of Face header if non-empty
+   wxString face;
+
 #ifdef HAVE_XFACES
    // the contents of X-Face header if non-empty
    wxString xface;
@@ -1356,10 +1364,15 @@ MessageView::ShowAllHeaders(ViewableInfoFromHeaders *vi)
           value;
    while ( headers.GetNext(&name, &value, HeaderIterator::MultiLineOk) )
    {
+      if ( m_ProfileValues.showFaces )
+      {
+         if ( wxStricmp(name, FACE_HEADER) == 0 )
+            vi->face = value;
 #ifdef HAVE_XFACES
-      if ( wxStricmp(name, XFACE_HEADER) == 0 )
-         vi->xface = value;
+         else if ( wxStricmp(name, XFACE_HEADER) == 0 )
+            vi->xface = value;
 #endif // HAVE_XFACES
+      }
 
       wxFontEncoding encHeader = wxFONTENCODING_SYSTEM;
       if ( m_encodingUser != wxFONTENCODING_DEFAULT )
@@ -1383,13 +1396,14 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
 
    wxArrayString headersUser(headersUser_);
 
-   // X-Face is handled separately
-#ifdef HAVE_XFACES
+   // Face and X-Face headers need to be retrieved if we want to show faces
    if ( m_ProfileValues.showFaces )
    {
+#ifdef HAVE_XFACES
       headersUser.Insert(XFACE_HEADER, 0);
-   }
 #endif // HAVE_XFACES
+      headersUser.Insert(FACE_HEADER, 0);
+   }
 
    size_t countHeaders = headersUser.GetCount();
 
@@ -1590,15 +1604,17 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
       }
    }
 
-   // for the loop below: we start it at 0 normally but at 1 if we have an
-   // X-Face as we don't want to show it verbatim ...
+   // for the loop below: we start it at 0 normally but at 1 or 2 if we had
+   // inserted Face/X-Face headers above as we don't want to show them verbatim
    n = 0;
 
-#ifdef HAVE_XFACES
-   // ... instead we show an icon for it
    if ( m_ProfileValues.showFaces )
+   {
+      vi->face = headerValues[n++];
+#ifdef HAVE_XFACES
       vi->xface = headerValues[n++];
 #endif // HAVE_XFACES
+   }
 
    // show the headers using the correct encoding now
    wxFontEncoding encInHeaders = wxFONTENCODING_SYSTEM;
@@ -1674,6 +1690,60 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
    m_encodingAuto = encInHeaders;
 }
 
+void
+MessageView::ShowFace(const wxString& faceString)
+{
+   // according to the spec at http://quimby.gnus.org/circus/face/ the Face
+   // header must be less than 966 after folding the lines
+   if ( faceString.length() > 966 )
+   {
+      wxLogDebug("Message \"%s\" Face header is too long, ignored.",
+                 m_mailMessage->Subject());
+      return;
+   }
+
+   // TODO: for now we use rfc822_base64() instead of wxBase64Decode() as we
+   //       still support wx 2.8 which doesn't have the latter but we should
+   //       replace this code with wx equivalent in the future
+#if 0
+   #include <wx/base64.h>
+
+   const wxMemoryBuffer faceBuf(wxBase64Decode(faceString));
+   unsigned long faceLen = faceBuf.GetDataLen();
+   if ( !faceLen )
+#endif
+
+   unsigned long faceLen;
+   void *faceData = rfc822_base64(UCHAR_CAST(faceString.char_str()),
+                                  faceString.length(),
+                                  &faceLen);
+   if ( !faceData )
+   {
+      wxLogDebug("Message \"%s\" Face header is not valid base64, ignored.",
+                 m_mailMessage->Subject());
+      return;
+   }
+
+   wxON_BLOCK_EXIT1( fs_give, &faceData );
+
+   wxMemoryInputStream is(faceData, faceLen);
+   wxImage face;
+   if ( !face.LoadFile(is, wxBITMAP_TYPE_PNG) )
+   {
+      wxLogDebug("Message \"%s\" Face header is corrupted, ignored.",
+                 m_mailMessage->Subject());
+      return;
+   }
+
+   if ( face.GetWidth() != 48 || face.GetHeight() != 48 )
+   {
+      wxLogDebug("Message \"%s\" Face header has non-standard size.",
+                 m_mailMessage->Subject());
+   }
+
+   m_viewer->ShowXFace(face);
+}
+
 #ifdef HAVE_XFACES
 
 void
@@ -1710,8 +1780,13 @@ MessageView::ShowXFace(const wxString& xfaceString)
 void
 MessageView::ShowInfoFromHeaders(const ViewableInfoFromHeaders& vi)
 {
+   // normally there will never be both X-Face and Face in the same message but
+   // check for the latter first so that we give it priority (it has higher
+   // resolution and colours) if this does happen
+   if ( !vi.face.empty() )
+      ShowFace(vi.face);
 #ifdef HAVE_XFACES
-   if ( !vi.xface.empty() )
+   else if ( !vi.xface.empty() )
       ShowXFace(vi.xface);
 #endif // HAVE_XFACES
 }

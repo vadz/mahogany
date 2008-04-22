@@ -517,7 +517,8 @@ protected:
    /// show all configured headers
    void ShowHeaders();
 
-   /// show the contents of the X-Face header
+   /// show the contents of Face or X-Face headers
+   void ShowFace(const wxString& faceString);
 #ifdef HAVE_XFACES
    void ShowXFace(const wxString& xfaceString);
 #endif // HAVE_XFACES
