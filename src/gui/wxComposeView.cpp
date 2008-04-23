@@ -2493,26 +2493,7 @@ wxComposeView::AddRecipients(const String& addressOrig,
                SetSubject(subject);
          }
 
-         // an email address
-         {
-            // split the string in addreses and add all of them
-            AddressList_obj addrList(address,
-                                     READ_CONFIG(m_Profile, MP_HOSTNAME));
-            if ( addrList )
-            {
-               Address *addr = addrList->GetFirst();
-               while ( addr )
-               {
-                  String address = addr->GetAddress();
-                  if ( !address.empty() )
-                  {
-                     AddRecipient(address, addrType);
-                  }
-
-                  addr = addrList->GetNext(addr);
-               }
-            }
-         }
+         AddRecipient(address, addrType);
          break;
 
       case Recipient_Fcc:

@@ -525,6 +525,9 @@ AdbExpandAllRecipients(const String& text,
       {
          case '"':
             quoted = !quoted;
+            // we still need to keep the quotes as otherwise we wouldn't parse
+            // the address correctly when creating the mail message later
+            address += '"';
             break;
 
          case '\\':
