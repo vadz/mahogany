@@ -9,7 +9,8 @@
 Release 0.68 '' September xx, 2007
 ---------------------------------------
 
-2008-04-23 VZ: Added support for "Face:" header, similar to "X-Face:"
+2008-04-23 VZ: Allow using wildcards in the headers selected to be seen.
+2008-04-22 VZ: Added support for "Face:" header, similar to "X-Face:"
 2008-04-21 VZ: Allow adding custom headers to show in the message view
 2007-08-04 VZ: Allow autocollecting addresses in outgoing messages only
 2007-04-26 VZ: Add the possibility to treat different addresses as equivalent

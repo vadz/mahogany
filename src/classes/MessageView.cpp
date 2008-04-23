@@ -1250,16 +1250,44 @@ MessageView::ShowHeader(const String& name,
                         const String& valueOrig,
                         wxFontEncoding encHeader)
 {
+   // show the header name -- this is simple as it's always ASCII
    m_viewer->ShowHeaderName(name);
 
+
+   // next deal with the encoding to use for the header value (and as using
+   // correct encoding can involve re-encoding the text, make a copy of it)
    String value(valueOrig);
+   if ( encHeader == wxFONTENCODING_SYSTEM )
+   {
+      if ( m_encodingUser != wxFONTENCODING_DEFAULT )
+      {
+         // use the user specified encoding if none specified in the header
+         // itself
+         encHeader = m_encodingUser;
+
+         RecodeText(&value, wxFONTENCODING_ISO8859_1, m_encodingUser);
+      }
+      else if ( m_encodingAuto != wxFONTENCODING_SYSTEM )
+      {
+         encHeader = m_encodingAuto;
+      }
+   }
+
 #if !wxUSE_UNICODE
+   // special handling for the UTF-7|8 if it's not supported natively
+   if ( encHeader == wxFONTENCODING_UTF8 ||
+         encHeader == wxFONTENCODING_UTF7 )
+   {
+      encHeader = ConvertUTFToMB(&value, encHeader);
+   }
+
    if ( encHeader != wxFONTENCODING_SYSTEM )
    {
       // convert the string to an encoding we can show, if needed
       EnsureAvailableTextEncoding(&encHeader, &value);
    }
 #endif // !wxUSE_UNICODE
+
 
    // don't highlight URLs in headers which contain message IDs or other things
    // which look just like the URLs but, in fact, are not ones
@@ -1362,7 +1390,9 @@ MessageView::ShowAllHeaders(ViewableInfoFromHeaders *vi)
 
    String name,
           value;
-   while ( headers.GetNext(&name, &value, HeaderIterator::MultiLineOk) )
+   wxFontEncoding enc;
+   while ( headers.GetNextDecoded(&name, &value, &enc,
+                                  HeaderIterator::MultiLineOk) )
    {
       if ( m_ProfileValues.showFaces )
       {
@@ -1374,15 +1404,68 @@ MessageView::ShowAllHeaders(ViewableInfoFromHeaders *vi)
 #endif // HAVE_XFACES
       }
 
-      wxFontEncoding encHeader = wxFONTENCODING_SYSTEM;
-      if ( m_encodingUser != wxFONTENCODING_DEFAULT )
+      ShowHeader(name, value, enc);
+   }
+}
+
+void
+MessageView::ShowMatchingHeaders(const wxArrayString& headersToShow,
+                                 ViewableInfoFromHeaders *vi)
+{
+   wxArrayString headerNames,
+                 headerValues;
+   wxArrayInt headerEncodings;
+   size_t countHeaders = m_mailMessage->GetHeaderIterator().GetAllDecoded
+                         (
+                           &headerNames,
+                           &headerValues,
+                           &headerEncodings,
+                           HeaderIterator::DuplicatesOk |
+                           HeaderIterator::MultiLineOk
+                         );
+
+   const size_t countToShow = headersToShow.size();
+   for ( size_t n = 0; n < countToShow; n++ )
+   {
+      const String& hdr = headersToShow[n];
+
+      // as we use HeaderIterator::DuplicatesOk above we can have multiple
+      // occurrences of this header so loop until we find all of them
+      for ( ;; )
       {
-         RecodeText(&value, wxFONTENCODING_ISO8859_1, m_encodingUser);
+         int pos = wxNOT_FOUND;
+         if ( hdr.find_first_of("*?") == String::npos )
+         {
+            pos = headerNames.Index(hdr, false /* case-insensitive */);
+         }
+         else // this header is a wildcard
+         {
+            for ( size_t m = 0; m < countHeaders; m++ )
+            {
+               if ( headerNames[m].Matches(hdr) )
+               {
+                  pos = m;
+                  break;
+               }
+            }
+         }
 
-         encHeader = m_encodingUser;
+         if ( pos == wxNOT_FOUND )
+            break;
+
+         ShowHeader(headerNames[pos],
+                    headerValues[pos],
+                    static_cast<wxFontEncoding>(headerEncodings[pos]));
+
+         // we shouldn't show the same header more than once and this could
+         // happen when using the wildcards (e.g. if we show "X-Foo" and "X-*"
+         // headers and didn't remove "X-Foo" after showing it, it would be
+         // also found during the second pass)
+         headerNames.RemoveAt(pos);
+         headerValues.RemoveAt(pos);
+         headerEncodings.RemoveAt(pos);
+         countHeaders--;
       }
-
-      ShowHeader(name, value, encHeader);
    }
 }
 
@@ -1641,30 +1724,6 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
          // use it later when showing the body
          encInHeaders = encHeader;
       }
-      else // no encoding in the header
-      {
-         if ( m_encodingUser != wxFONTENCODING_DEFAULT )
-         {
-            // use the user specified encoding if none specified in the header
-            // itself
-            encHeader = m_encodingUser;
-
-            RecodeText(&value, wxFONTENCODING_ISO8859_1, m_encodingUser);
-         }
-         else if ( m_encodingAuto != wxFONTENCODING_SYSTEM )
-         {
-            encHeader = m_encodingAuto;
-         }
-      }
-
-#if !wxUSE_UNICODE
-      // special handling for the UTF-7|8 if it's not supported natively
-      if ( encHeader == wxFONTENCODING_UTF8 ||
-            encHeader == wxFONTENCODING_UTF7 )
-      {
-         encHeader = ConvertUTFToMB(&value, encHeader);
-      }
-#endif // !wxUSE_UNICODE
 
       // show the header and mark the URLs in it
       const String& name = headerNames[n];
@@ -1806,18 +1865,28 @@ MessageView::ShowHeaders()
    else // show just the selected headers
    {
       // get all the headers we need to display
-      wxString allHeaders = READ_CONFIG(GetProfile(), MP_MSGVIEW_HEADERS);
+      wxString headers = READ_CONFIG(GetProfile(), MP_MSGVIEW_HEADERS);
 
       // ignore trailing colon as it would result in a dummy empty name after
       // splitting (and unfortunately this extra colon can occur as some old M
       // versions had it in the default value of MP_MSGVIEW_HEADERS by mistake)
-      if ( !allHeaders.empty() && *allHeaders.rbegin() == ':' )
-         allHeaders.erase(allHeaders.length() - 1);
+      if ( !headers.empty() && *headers.rbegin() == ':' )
+         headers.erase(headers.length() - 1);
 
-      if ( allHeaders.empty() )
+      if ( headers.empty() )
          return;
 
-      ShowSelectedHeaders(strutil_restore_array(allHeaders), &vi);
+      const wxArrayString headersArray = strutil_restore_array(headers);
+
+      // if we are using wildcards we need to examine all the headers anyhow so
+      // just do it, otherwise we can retrieve just the headers we need (this
+      // can make a huge difference, the default headers typically are ~100
+      // bytes while the entire message header is commonly 2-3KB and sometimes
+      // more)
+      if ( headers.find_first_of("*?") != String::npos )
+         ShowMatchingHeaders(headersArray, &vi);
+      else
+         ShowSelectedHeaders(headersArray, &vi);
    }
 
    // display anything requiring special treatment that we found in the headers

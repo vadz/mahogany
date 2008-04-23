@@ -527,10 +527,15 @@ protected:
    /// extracted from them (called by ShowHeaders() only)
    void ShowAllHeaders(ViewableInfoFromHeaders *vi);
 
-   /// show just the selected headers
+   /// show just the selected headers (array elements are literal header names)
    void
    ShowSelectedHeaders(const wxArrayString& headers, ViewableInfoFromHeaders *vi);
 
+   /// show all headers matching the array elements (which can contain wildcards)
+   void
+   ShowMatchingHeaders(const wxArrayString& headers, ViewableInfoFromHeaders *vi);
+
+   /// show information collected in vi while examining the headers
    void ShowInfoFromHeaders(const ViewableInfoFromHeaders& vi);
 
    /**

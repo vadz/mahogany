@@ -546,6 +546,9 @@ wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(Profile *profile,
    m_profile = profile;
    SafeIncRef(profile);
 
+   m_textAdd->SetToolTip(_("Type the name of the header here.\n"
+                           "You may use wildcard characters '*' and '?'."));
+
    SetDefaultSize(6*wBtn, 10*hBtn);
 }
 

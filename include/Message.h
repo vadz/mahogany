@@ -65,7 +65,11 @@ public:
       Collapse = 0,
 
       /// return the headers spanning multiple lines in their original form
-      MultiLineOk = 1
+      MultiLineOk = 1,
+
+      /// don't merge together the values of all occurrences of a header,
+      /// instead return multiple entries for it (only valid for GetAll())
+      DuplicatesOk = 2
    };
 
 
@@ -87,6 +91,16 @@ public:
    bool GetNext(String *name, String *value, int flags = Collapse);
 
    /**
+      This is the same as GetNext() above except that the header is also
+      MIME-decoded.
+
+      @a enc may be NULL, in this case the encoding is not returned but the
+      header is still decoded.
+    */
+   bool GetNextDecoded(String *name, String *value, wxFontEncoding *enc,
+                       int flags = Collapse);
+
+   /**
      Get all headers at once. If a header occurs more than once, its values are
      concatenated together with "\r\n" separating them.
 
@@ -98,6 +112,17 @@ public:
    size_t GetAll(wxArrayString *names,
                  wxArrayString *values,
                  int flags = Collapse);
+
+   /**
+      This is the same as GetAll() above except that the returned headers are
+      MIME-decoded and their encodings are returned.
+
+      @a encodings may be NULL if the caller doesn't care about the encodings.
+    */
+   size_t GetAllDecoded(wxArrayString *names,
+                        wxArrayString *values,
+                        wxArrayInt *encodings,
+                        int flags = Collapse);
 
    /**
      Resets the iterator so that the next call to GetNext() will return the

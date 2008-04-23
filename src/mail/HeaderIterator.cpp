@@ -25,6 +25,7 @@
    #include "Mcommon.h"
 #endif // USE_PCH
 
+#include "mail/MimeDecode.h"
 #include "Message.h"
 
 // ============================================================================
@@ -206,22 +207,44 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
    return !name->empty();
 }
 
+bool
+HeaderIterator::GetNextDecoded(String *name,
+                               String *value,
+                               wxFontEncoding *enc,
+                               int flags)
+{
+   if ( !GetNext(name, value, flags) )
+      return false;
+
+   // RFC 2047 has detailed rules about where exactly are encoded words allowed
+   // but currently we just decode everything except for some fields which are
+   // certain not to contain them
+   if ( wxStricmp(*name, "Received") != 0 )
+   {
+      *value = MIME::DecodeHeader(*value, enc);
+   }
+
+   return true;
+}
+
 size_t
-HeaderIterator::GetAll(wxArrayString *names, wxArrayString *values, int flags)
+HeaderIterator::GetAll(wxArrayString *names,
+                       wxArrayString *values,
+                       int flags)
 {
    CHECK( names && values, 0, _T("NULL pointer in HeaderIterator::GetAll()") );
 
    String name, value;
    while ( GetNext(&name, &value, flags) )
    {
-      int idxName = names->Index(name);
+      int idxName = flags & DuplicatesOk ? wxNOT_FOUND : names->Index(name);
       if ( idxName == wxNOT_FOUND )
       {
          // a header we haven't seen yet
          names->Add(name);
          values->Add(value);
       }
-      else // another occurence of a previously seen header
+      else // another occurrence of a previously seen header
       {
          // append to the existing value
          (*values)[(size_t)idxName] << _T("\n") << value;
@@ -231,3 +254,33 @@ HeaderIterator::GetAll(wxArrayString *names, wxArrayString *values, int flags)
    return names->GetCount();
 }
 
+size_t
+HeaderIterator::GetAllDecoded(wxArrayString *names,
+                              wxArrayString *values,
+                              wxArrayInt *encodings,
+                              int flags)
+{
+   CHECK( names && values, 0, "NULL pointer in HeaderIterator::GetAllDecoded()" );
+
+   String name, value;
+   wxFontEncoding enc;
+   while ( GetNextDecoded(&name, &value, &enc, flags) )
+   {
+      int idxName = flags & DuplicatesOk ? wxNOT_FOUND : names->Index(name);
+      if ( idxName == wxNOT_FOUND )
+      {
+         // a header we haven't seen yet
+         names->Add(name);
+         values->Add(value);
+         if ( encodings )
+            encodings->Add(enc);
+      }
+      else // another occurrence of a previously seen header
+      {
+         // append to the existing value
+         (*values)[(size_t)idxName] << _T("\n") << value;
+      }
+   }
+
+   return names->GetCount();
+}
