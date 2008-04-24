@@ -1757,7 +1757,7 @@ MessageView::ShowFace(const wxString& faceString)
    if ( faceString.length() > 966 )
    {
       wxLogDebug("Message \"%s\" Face header is too long, ignored.",
-                 m_mailMessage->Subject());
+                 m_mailMessage->Subject().c_str());
       return;
    }
 
@@ -1779,7 +1779,7 @@ MessageView::ShowFace(const wxString& faceString)
    if ( !faceData )
    {
       wxLogDebug("Message \"%s\" Face header is not valid base64, ignored.",
-                 m_mailMessage->Subject());
+                 m_mailMessage->Subject().c_str());
       return;
    }
 
@@ -1790,14 +1790,14 @@ MessageView::ShowFace(const wxString& faceString)
    if ( !face.LoadFile(is, wxBITMAP_TYPE_PNG) )
    {
       wxLogDebug("Message \"%s\" Face header is corrupted, ignored.",
-                 m_mailMessage->Subject());
+                 m_mailMessage->Subject().c_str());
       return;
    }
 
    if ( face.GetWidth() != 48 || face.GetHeight() != 48 )
    {
       wxLogDebug("Message \"%s\" Face header has non-standard size.",
-                 m_mailMessage->Subject());
+                 m_mailMessage->Subject().c_str());
    }
 
    m_viewer->ShowXFace(face);

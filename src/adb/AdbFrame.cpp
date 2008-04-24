@@ -3098,7 +3098,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // set label and position
   // ----------------------
   wxString strTitle;
-  strTitle.Printf(_("Properties for '%s'"), book->GetName());
+  strTitle.Printf(_("Properties for '%s'"), book->GetName().c_str());
   SetTitle(strTitle);
 
   Centre(wxCENTER_FRAME | wxBOTH);

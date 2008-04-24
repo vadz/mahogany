@@ -683,8 +683,11 @@ SendMessageCC::SetSubject(const String& subject)
 
    // if headers are already encoded, don't do anything, they must be already
    // in ASCII
-   wxCharBuffer buf(m_encodeHeaders ? MIME::EncodeHeader(subject, m_encHeaders)
-                                    : subject.ToAscii());
+   wxCharBuffer buf;
+   if ( m_encodeHeaders )
+      buf = MIME::EncodeHeader(subject, m_encHeaders);
+   else
+      buf = subject.ToAscii();
    m_Envelope->subject = cpystr(buf);
 }
 

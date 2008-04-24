@@ -110,7 +110,9 @@ MIME::Encoding MIME::GetEncodingForFontEncoding(wxFontEncoding enc)
       case wxFONTENCODING_CP1256:
 
       case wxFONTENCODING_KOI8:
+#ifdef wxFONTENCODING_ISO2022_JP
       case wxFONTENCODING_ISO2022_JP:
+#endif
       case wxFONTENCODING_SHIFT_JIS:
       case wxFONTENCODING_GB2312:
       case wxFONTENCODING_BIG5:
@@ -614,7 +616,7 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
       enc = wxLocale::GetSystemEncoding();
    }
 
-   if ( wxCSConv(enc).FromWChar(NULL, 0, in.wc_str()) == wxCONV_FAILED )
+   if ( wxCSConv(enc).FromWChar(NULL, 0, in.wc_str(wxConvLibc)) == wxCONV_FAILED )
    {
       // but if we can't encode with it, fall back to UTF-8 as it never fails
       enc = wxFONTENCODING_UTF8;

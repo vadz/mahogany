@@ -43,13 +43,11 @@
 #   include <wx/wxchar.h>        // for wxPrintf/Scanf
 #   include <wx/dc.h>
 #   include <wx/dcps.h>
+#   include <wx/dcprint.h>
 #   include <wx/print.h>
 #   include <wx/log.h>
 #   include <wx/filefn.h>
 #   include <wx/msgdlg.h>
-#ifdef __WINE__
-#   include <wx/dcprint.h>       // for wxPrinterDC
-#endif // __WINE__
 #endif // USE_PCH
 
 #ifdef M_BASEDIR
@@ -3478,6 +3476,11 @@ bool wxLayoutPrintout::OnPrintPage(int page)
 */
 void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo)
 {
+   // wxGTK doesn't have wxPrinterDC in wx 2.8
+#if !wxCHECK_VERSION(2, 9, 0) && !defined(__MSW__)
+   #define wxPrinterDC wxPostScriptDC
+#endif
+
    /* We allocate a temporary wxDC for printing, so that we can
       determine the correct paper size and scaling. We don't actually
       print anything on it. */

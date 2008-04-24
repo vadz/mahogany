@@ -1132,7 +1132,11 @@ void HtmlViewer::InsertRawContents(const String& data)
 
       // provide stubs for base class pure virtual methods which we don't use
       virtual wxObject* GetProduct() { return NULL; }
+#if wxCHECK_VERSION(2, 9, 0)
       virtual void AddText(const wxString& WXUNUSED(txt)) { }
+#else // wx <= 2.8
+      virtual void AddText(const char *WXUNUSED(txt)) { }
+#endif // wx 2.9+/2.8-
    };
 
    BodyTagHandler *handler = new BodyTagHandler(data);
