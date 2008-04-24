@@ -472,28 +472,39 @@ AdbExpandSingleRecipient(String *address,
    RecipientType rcptType = Recipient_None;
    if ( text.length() > 3 )
    {
+      size_t prefixLen = 2; // we only use it if rcptType != Recipient_None
+
       // check for to:, cc: or bcc: prefix
-      if ( text[2u] == ':' )
+      if ( text[prefixLen] == ':' )
       {
          if ( toupper(text[0u]) == 'T' && toupper(text[1u]) == 'O' )
             rcptType = Recipient_To;
          else if ( toupper(text[0u]) == 'C' && toupper(text[1u]) == 'C' )
             rcptType = Recipient_Cc;
       }
-      else if ( text[3u] == ':' && text(0, 3).Upper() == _T("BCC") )
+      else if ( text[++prefixLen] == ':' )
       {
-         rcptType = Recipient_Bcc;
+         const String prefix = text(0, 3).Upper();
+         if ( prefix == "BCC" )
+            rcptType = Recipient_Bcc;
+         else if ( prefix == "FCC" )
+            rcptType = Recipient_Fcc;
       }
 
       if ( rcptType != Recipient_None )
       {
          // erase the prefix (length 2 or 3) with the colon
-         text.erase(0, rcptType == Recipient_Bcc ? 4 : 3);
+         text.erase(0, prefixLen + 1);
       }
    }
 
-   if ( !AdbExpandSingleAddress(&text, subject, profile, win) )
-     return Recipient_Max;
+   // folders are not currently expanded (we definitely shouldn't expand them
+   // as addresses)
+   if ( rcptType != Recipient_Fcc )
+   {
+      if ( !AdbExpandSingleAddress(&text, subject, profile, win) )
+        return Recipient_Max;
+   }
 
    *address = text;
 
