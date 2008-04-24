@@ -317,21 +317,28 @@ wxFontEncoding MimePartCCBase::GetTextEncoding() const
 
 const void *MimePartCCBase::GetContent(unsigned long *lenptr) const
 {
-   // first check if we don't already have it
-   if ( m_content )
+   MimePartCCBase * const self = const_cast<MimePartCCBase *>(this);
+
+   if ( m_ownsContent )
    {
+      ASSERT_MSG( m_content, "must have some content to own" );
+
+      // if we have the old contents pointer which we own, we can be simply
+      // reuse it
       *lenptr = m_lenContent;
 
       return m_content;
    }
+   //else: if we don't own the content, we can't suppose that it's valid even
+   //      if it's non-NULL because it's a pointer into a per-stream (in
+   //      c-client sense) buffer and so could be overwritten by an operation
+   //      on another part
 
-   // no, get the raw text
    const void *cptr = GetRawContent(lenptr);
    if ( !cptr || !*lenptr )
       return NULL;
 
-   // and decode it
-   return const_cast<MimePartCCBase *>(this)->DecodeRawContent(cptr, lenptr);
+   return self->DecodeRawContent(cptr, lenptr);
 }
 
 const void *
