@@ -74,6 +74,7 @@ skip them unless you're updating from a very old version of Mahogany.
    \item Added the possibility to treat different addresses as equivalent,
          this is useful to avoid sending duplicate replies to the different
          addresses of the same person, for example.
+   \item Allow creation of filters testing individual headers in the GUI.
 \end{itemize}
 
 \subsubsection{0.67 against 0.66}
@@ -3133,7 +3134,7 @@ filters dialog (\ref{FolderFiltersDialog}).
 \subsubsection{\label{FiltersDialog}The Filters Dialog\_4260\_}
 
 This dialog allows you to define any number of filter rules available
-to Mahogany. In a seaparate dialog (\ref{FolderFiltersDialog}) you
+to Mahogany. In a separate dialog (\ref{FolderFiltersDialog}) you
 can then pick any rule from the list and assign it to a folder. As
 you can have different sets of rules for each folder and might want
 to share rules for some folders, this dialog simply sets up rules
@@ -3152,8 +3153,8 @@ is only to help you remember what the rule does and will appear in
 the list of rules in the main Filters Dialog, but is without any further
 significance.
 \item Underneath the name, you find the text {}``If Message...{}'' followed
-by at least one row of conditioncontrols.
-\item Under the condition controls you find the text {}``Then do this:{}``
+by at least one row of condition controls.
+\item Under the condition controls you find the text ``Then do this:``
 followed by some action controls.
 \end{itemize}
 You can add more pattern matching controls by pressing the {[}More{]}
@@ -3167,14 +3168,13 @@ conditions can be tested for at present:
 
 \begin{itemize}
 \item Always - this rule will always be executed
-\item Contains - check if the text next to it is contained in the message
-component selected
-\item Match - check if the message component selected is exactly this text
+\item Contains - check if the target of the test contains the selected text
+\item Match - check if the target of the test is exactly this text
 (case independent)
-\item Match Case - check if the message compent selected is exactly this
+\item Match Case - check if the target of the test is exactly this
 text (case dependent)
-\item Match RegExp - check if the message compent selected matches the regular
-expression specified
+\item Match RegExp - check if the target of the test matches the specified
+regular expression
 \item Larger Than - check if the message is larger than this in KByte
 \item Smaller Than - check if the message is smaller than this in KByte
 \item Older Than - check if the message is older than this many days
@@ -3184,6 +3184,20 @@ as sending unsolicited emails (SPAM).
 \item Python - execute the text in the box in the built-in Python interpreter
 and proceed if it returns a non-0 result.
 \end{itemize}
+
+The target of the text can be selected in the control next to the last one. The
+choices are mostly self-explanatory:
+\begin{itemize}
+\item ``From'', ``To'' and ``Subject'' correspond to the message headers with
+the same names
+\item ``Sender'' is the SMTP sender of the message
+\item ``Any recipient'' corresponds to the union of ``To'', ``Cc'' and ``Bcc''
+\item ``Headers'' corresponds to the entire message header while ``Header''
+selects the contents of the given (in the nearby text control) header only
+\item ``Body'' corresponds to the message body, i.e. everything except headers
+\item ``Message'' corresponds to the full message, including headers and body
+\end{itemize}
+
 The possible actions which can be performed, are:
 
 \begin{itemize}

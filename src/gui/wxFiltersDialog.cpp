@@ -206,9 +206,10 @@ wxString ORC_Where[] =
    gettext_noop("in subject"),          // ORC_W_Subject
    gettext_noop("in sender"),           // ORC_W_Sender
    gettext_noop("in any recipient"),    // ORC_W_Recipients
-   gettext_noop("in header"),           // ORC_W_Header
+   gettext_noop("in headers"),          // ORC_W_Headers
    gettext_noop("in body"),             // ORC_W_Body
-   gettext_noop("in message")           // ORC_W_Message
+   gettext_noop("in message"),          // ORC_W_Message
+   gettext_noop("in header"),           // ORC_W_Header
 };
 
 static const
@@ -225,9 +226,10 @@ MFDialogTarget ORC_W_Swap[] =
    ORC_W_Subject,
    ORC_W_Sender,
    ORC_W_Recipients,
-   ORC_W_Header,
+   ORC_W_Headers,
    ORC_W_Body,
-   ORC_W_Message
+   ORC_W_Message,
+   ORC_W_Header
 };
 ENUM_fromSelect(MFDialogTarget, ORC_W_Swap, ORC_WhereCountS, ORC_W_Subject)
 ENUM_toSelect(  MFDialogTarget, ORC_W_Swap, ORC_WhereCountS, ORC_W_Subject)
@@ -486,6 +488,13 @@ public:
       return MFDialogTarget_fromSelect(m_Where->GetSelection());
    }
 
+   String GetTargetArgument() const
+   {
+      CHECK( m_WhereArg, "", "no target argument control" );
+
+      return m_WhereArg->GetValue();
+   }
+
    String GetArgument()
    {
       MFDialogTest test = GetTest();
@@ -533,6 +542,7 @@ private:
    // create the spam button and position it correctly
    void CreateSpamButton();
 
+
    // the controls which are always shown
    wxCheckBox *m_Not;      // invert the condition if checked
    wxChoice   *m_Logical;  // corresponds to ORC_Logical
@@ -545,7 +555,8 @@ private:
 
    // special controls
    wxChoice   *m_choiceFlags; // used for ORC_T_HasFlag
-   wxButton   *m_btnSpam;  // configure the ORC_T_IsSpam test
+   wxButton   *m_btnSpam;     // configure the ORC_T_IsSpam test
+   wxTextCtrl *m_WhereArg;    // extra argument for some ORC_Where values
 
    // the parent for all these controls
    wxWindow   *m_Parent;
@@ -610,7 +621,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
 
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition,
                          wxDefaultSize, ORC_Msg_Flag_Count, msgflagsTrans);
-   m_Argument = new wxTextCtrl(parent,-1, wxEmptyString, wxDefaultPosition);
+   m_Argument = new wxTextCtrl(parent,-1, wxEmptyString);
 
    wxString whereTrans[ORC_WhereCount];
    for ( size_t nWhere = 0; nWhere < ORC_WhereCountS; nWhere++ )
@@ -620,6 +631,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
 
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
                           wxDefaultSize, ORC_WhereCountS, whereTrans);
+   m_WhereArg = new wxTextCtrl(parent, -1, wxEmptyString);
 
    m_helpText = new wxStaticText(parent, -1, wxEmptyString);
 
@@ -644,6 +656,7 @@ OneCritControl::~OneCritControl()
 
    delete m_choiceFlags;
    delete m_btnSpam;
+   delete m_WhereArg;
 }
 
 void
@@ -679,6 +692,13 @@ OneCritControl::LayoutControls(wxWindow **last)
 
    c = new wxLayoutConstraints;
    c->right.SameAs(m_Parent, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->centreY.SameAs(m_Not, wxCentreY);
+   c->height.AsIs();
+   m_WhereArg->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->right.LeftOf(m_WhereArg, LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->centreY.SameAs(m_Not, wxCentreY);
    c->height.AsIs();
@@ -796,6 +816,7 @@ OneCritControl::UpdateUI(wxTextCtrl *textProgram)
    EnableAndShow(m_choiceFlags, enableMsgFlag);
    EnableAndShow(m_Argument, enableArg);
    EnableAndShow(m_Where, enableTarget);
+   EnableAndShow(m_WhereArg, enableTarget && GetTarget() == ORC_W_Header);
    EnableAndShow(m_helpText, enableHelpText);
 
    if ( enableSpam && !m_btnSpam )
@@ -822,6 +843,8 @@ OneCritControl::Disable()
    m_helpText->Disable();
    if ( m_Logical )
       m_Logical->Disable();
+   if ( m_WhereArg )
+      m_WhereArg->Disable();
 }
 
 void
@@ -834,7 +857,13 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
    MFDialogTest test = settings.GetTest(n);
    m_Not->SetValue(settings.IsInverted(n));
    m_Type->SetSelection(MFDialogTest_toSelect(test));
-   m_Where->SetSelection(MFDialogTarget_toSelect(settings.GetTestTarget(n)));
+
+   const MFDialogTarget target = settings.GetTestTarget(n);
+   m_Where->SetSelection(MFDialogTarget_toSelect(target));
+
+   if ( target == ORC_W_Header )
+      m_WhereArg->SetValue(settings.GetTestTargetArgument(n));
+
    String argument = settings.GetTestArgument(n);
    if ( test == ORC_T_HasFlag )
    {
@@ -1480,11 +1509,17 @@ wxOneFilterDialog::DoTransferDataFromWindow(MFilterDesc *filterData)
       for ( size_t idx = 0; idx < m_nControls; idx++ )
       {
          OneCritControl *ctrl = m_CritControl[idx];
+         const MFDialogTarget target = ctrl->GetTarget();
+         String targetArg;
+         if ( target == ORC_W_Header )
+            targetArg = ctrl->GetTargetArgument();
+
          settings->AddTest(ctrl->GetLogical(),
                            ctrl->IsInverted(),
                            ctrl->GetTest(),
-                           ctrl->GetTarget(),
-                           ctrl->GetArgument());
+                           target,
+                           ctrl->GetArgument(),
+                           targetArg);
       }
 
       settings->SetAction(m_ActionControl->GetAction(),

@@ -72,13 +72,14 @@ enum MFDialogTarget
 {
    ORC_W_Illegal = -1,
    ORC_W_Subject = 0,
-   ORC_W_Header,
+   ORC_W_Headers,
    ORC_W_From,
    ORC_W_Body,
    ORC_W_Message,
    ORC_W_To,
    ORC_W_Sender,
    ORC_W_Recipients,
+   ORC_W_Header,
    ORC_W_Max
 };
 
@@ -168,6 +169,8 @@ public:
    virtual MFDialogLogical GetLogical(size_t n) const = 0;
    /// Return where to apply the n-th test
    virtual MFDialogTarget GetTestTarget(size_t n) const = 0;
+   /// Return the argument of the n-th test target, if any
+   virtual String GetTestTargetArgument(size_t n) const = 0;
    /// Return the n-th test's argument if any:
    virtual String GetTestArgument(size_t n) const = 0;
    /// Return the action component
@@ -181,12 +184,14 @@ public:
           @param test the actual test enum
           @param target where to apply the test to
           @param argument empty string or optional string argument
+          @param targetArg empty string or target argument for ORC_W_Header
       */
    virtual void AddTest(MFDialogLogical l,
                         bool isInverted,
                         MFDialogTest test,
                         MFDialogTarget target,
-                        String argument = wxEmptyString
+                        String argument = wxEmptyString,
+                        String targetArg = wxEmptyString
       ) = 0;
 
    /// sets the action and its argument

@@ -80,6 +80,7 @@ struct MFDialogComponent
    MFDialogLogical m_Logical;
    MFDialogTarget  m_Target;
    String          m_Argument;
+   String          m_TargetArgument;
 
    /// reads settings from a string
    bool ReadSettings(String *str);
@@ -97,6 +98,7 @@ struct MFDialogComponent
              m_Test == other.m_Test &&
              m_Logical == other.m_Logical &&
              m_Target == other.m_Target &&
+             m_TargetArgument == other.m_TargetArgument &&
              m_Argument == other.m_Argument;
    }
 
@@ -135,18 +137,28 @@ MFDialogComponent::ReadSettings(String *str)
       return FALSE;
    m_Target = (MFDialogTarget) number;
 
+   if ( m_Target == ORC_W_Header )
+   {
+      m_TargetArgument = strutil_readString(*str, &success);
+      if(!success)
+         return FALSE;
+   }
+
    return TRUE;
 }
 
 String
 MFDialogComponent::WriteSettings(void)
 {
-   return wxString::Format(_T("%d %d %d \"%s\" %d"),
-                           (int) m_Logical,
-                           (int) m_Inverted,
-                           (int) m_Test,
-                           strutil_escapeString(m_Argument).c_str(),
-                           (int) m_Target);
+   String s = wxString::Format(_T("%d %d %d \"%s\" %d"),
+                               (int) m_Logical,
+                               (int) m_Inverted,
+                               (int) m_Test,
+                               strutil_escapeString(m_Argument).c_str(),
+                               (int) m_Target);
+   if ( m_Target == ORC_W_Header )
+      s << " \"" << strutil_escapeString(m_TargetArgument) << '"';
+   return s;
 }
 
 static
@@ -239,13 +251,14 @@ static
 const wxChar * ORC_W_Names[] =
 {
    _T("subject()"),             // ORC_W_Subject
-   _T("header()"),              // ORC_W_Header
+   _T("header()"),              // ORC_W_Headers
    _T("from()"),                // ORC_W_From
    _T("body()"),                // ORC_W_Body
    _T("message()"),             // ORC_W_Message
    _T("to()"),                  // ORC_W_To
-   _T("header(\"Sender\")"),    // ORC_W_Sender
+   _T("headerline(\"Sender\")"),// ORC_W_Sender
    _T("recipients()"),          // ORC_W_Recipients
+   _T("headerline"),            // ORC_W_Header: parentheses treated specially
    NULL
 };
 
@@ -397,13 +410,14 @@ MFDialogComponent::WriteTest(void)
    bool needsTarget = FilterTestNeedsTarget(m_Test);
    if(needsTarget)
    {
-      if(m_Target != ORC_W_Illegal && m_Target < ORC_W_Max)
-         program << ORC_W_Names[ m_Target ];
-      else
-      {
-         FAIL_MSG(_T("This must not happen!"));
-         return wxEmptyString;
-      }
+      CHECK(m_Target != ORC_W_Illegal && m_Target < ORC_W_Max, wxEmptyString,
+               "invalid target value");
+
+      program << ORC_W_Names[m_Target];
+
+      // this one is special as it has an extra argument of its own
+      if ( m_Target == ORC_W_Header )
+         program << "(\"" << m_TargetArgument << "\")";
    }
 
    bool needsArgument = FilterTestNeedsArgument(m_Test);
@@ -453,27 +467,51 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    // now we need to find the test to be applied:
    m_Test = ORC_T_Illegal;
    for(size_t i = 0; ORC_T_Names[i]; i++)
-      if(wxStrncmp(cptr, ORC_T_Names[i], wxStrlen(ORC_T_Names[i])) == 0)
+   {
+      const size_t len = wxStrlen(ORC_T_Names[i]);
+      if(wxStrncmp(cptr, ORC_T_Names[i], len) == 0)
       {
-         cptr += wxStrlen(ORC_T_Names[i]);
+         cptr += len;
          m_Test = (MFDialogTest) i;
          break;
       }
+   }
    if(m_Test == ORC_T_Illegal)
       return FALSE;
+
    bool needsTarget = FilterTestNeedsTarget(m_Test);
    bool needsArgument = FilterTestNeedsArgument(m_Test);
    m_Target = ORC_W_Illegal;
    if(needsTarget)
    {
       for(size_t i = 0; ORC_W_Names[i]; i++)
-         if(wxStrncmp(cptr, ORC_W_Names[i], wxStrlen(ORC_W_Names[i])) == 0)
+      {
+         const size_t len = wxStrlen(ORC_W_Names[i]);
+         if(wxStrncmp(cptr, ORC_W_Names[i], len) == 0)
          {
             m_Target = (MFDialogTarget) i;
+            cptr += len;
             break;
          }
+      }
+
       if(m_Target == ORC_W_Illegal)
          return FALSE;
+      if(m_Target == ORC_W_Header)
+      {
+         // special case: this one has an extra argument which we must extract
+         if (*cptr++ != '(')
+            return FALSE;
+         bool success;
+         String tmp(cptr);
+         const size_t lenOrig = tmp.length();
+         m_TargetArgument = strutil_readString(tmp, &success);
+         if ( !success )
+            return FALSE;
+         cptr += lenOrig - tmp.length();
+         if (*cptr++ != ')')
+            return FALSE;
+      }
    }
    // comma between target and argument:
    if(needsTarget && needsArgument
@@ -484,14 +522,16 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    if(needsArgument)
    {
       if(*cptr != '"') return FALSE;
-      String tmp = *cptr;
+      String tmp(cptr);
+      const size_t lenOrig = tmp.length();
       bool success;
       m_Argument = strutil_readString(tmp, &success);
       if(! success) return FALSE;
+      cptr += lenOrig - tmp.length();
    }
    if(*cptr++ != ')')
       return FALSE;
-   // assing remaining bit
+   // assign remaining bit
    rule = cptr;
    return TRUE;
 }
@@ -544,6 +584,15 @@ public:
          return m_Tests[n].m_Target;
       }
 
+   virtual String GetTestTargetArgument(size_t n) const
+      {
+         MOcheck();
+         ASSERT_MSG( GetTestTarget(n) == ORC_W_Header,
+                     "only \"header\" target has an argument" );
+
+         return m_Tests[n].m_TargetArgument;
+      }
+
    /// Return the action component
    virtual MFDialogAction GetAction() const
       {
@@ -561,7 +610,8 @@ public:
                         bool isInverted,
                         MFDialogTest test,
                         MFDialogTarget target,
-                        String argument = wxEmptyString
+                        String argument = wxEmptyString,
+                        String targetArg = wxEmptyString
       )
       {
          MOcheck();
@@ -570,6 +620,7 @@ public:
          c.m_Logical = (m_Tests.Count() == 0) ? ORC_L_None : l;
          c.m_Test = test;
          c.m_Target = target;
+         c.m_TargetArgument = targetArg;
          c.m_Argument = argument;
          m_Tests.Add(c);
       }
