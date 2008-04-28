@@ -122,8 +122,11 @@ public:
    struct FieldInfo
    {
       const char   *label;   // which is shown in the dialog
-      int           flags;   // containts the type and the flags (see above)
-      int           enable;  // disable this field if "enable" field is unchecked
+      int           flags;   // contains the type and the flags (see above)
+      int           enable;  // enable this field depending on the value of
+                             // the "enable" one if != -1 (using negative ids
+                             // != -1 negates the condition, i.e. this field is
+                             // disabled when the checkbox is checked)
    };
 
    typedef const FieldInfo *FieldInfoArray;
