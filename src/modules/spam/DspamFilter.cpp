@@ -105,17 +105,17 @@ public:
    operator DSPAM_CTX *() const { return m_ctx; }
    DSPAM_CTX *operator->() const { return m_ctx; }
 
-   // close the database connection 	 
-   static void CloseHashStorage() 	 
-   { 	 
-      if ( ms_hashMap ) 	 
-      { 	 
-         _hash_drv_close(ms_hashMap); 	 
+   // close the database connection
+   static void CloseHashStorage()
+   {
+      if ( ms_hashMap )
+      {
+         _hash_drv_close(ms_hashMap);
          free(ms_hashMap);
-         ms_hashMap = NULL; 	 
+         ms_hashMap = NULL;
 
          _hash_drv_lock_free(&ms_hashLock, DSPAM_USER_NAME);
-      } 	 
+      }
    }
 
 private:
