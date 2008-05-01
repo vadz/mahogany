@@ -919,7 +919,7 @@ MOption::MOption()
 // global functions
 // ----------------------------------------------------------------------------
 
-extern MOptionValue GetOptionValue(Profile *profile, const MOption opt)
+extern MOptionValue GetOptionValue(const Profile *profile, const MOption opt)
 {
    MOptionValue value;
    CHECK( profile, value, _T("NULL profile") );
@@ -933,7 +933,7 @@ extern MOptionValue GetOptionValue(Profile *profile, const MOption opt)
    return value;
 }
 
-extern long GetNumericOptionValue(Profile *profile, const MOption opt)
+extern long GetNumericOptionValue(const Profile *profile, const MOption opt)
 {
    CHECK( profile, -1, _T("NULL profile") );
 
@@ -965,7 +965,7 @@ extern const char *GetStringDefault(const MOption opt)
    return MOptions[opt.GetId()].value.s;
 }
 
-extern int GetFontFamilyFromProfile(Profile *profile, const MOption option)
+extern int GetFontFamilyFromProfile(const Profile *profile, const MOption option)
 {
    static const int fontFamilies[] =
    {

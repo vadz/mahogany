@@ -109,7 +109,7 @@ public:
       The address is constructed using the personal name, host name and default
       domain (if necessary) options.
     */
-   static String GetSenderAddress(Profile *profile);
+   static String GetSenderAddress(const Profile *profile);
 
    /**
       Returns true if the address matches any of the entries in the array.

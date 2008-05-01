@@ -227,16 +227,16 @@ inline String operator+(const String& s, const MOption& opt)
 // ----------------------------------------------------------------------------
 
 /// read the option value from the profile
-extern MOptionValue GetOptionValue(Profile *profile, const MOption opt);
+extern MOptionValue GetOptionValue(const Profile *profile, const MOption opt);
 
 /// read the numeric option value from the profile
-extern long GetNumericOptionValue(Profile *profile, const MOption opt);
+extern long GetNumericOptionValue(const Profile *profile, const MOption opt);
 
 /**
    Return the font family from the profile font setting: this does some checks
    to ensure that it is correct.
  */
-extern int GetFontFamilyFromProfile(Profile *profile, const MOption option);
+extern int GetFontFamilyFromProfile(const Profile *profile, const MOption option);
 
 // from the given profile
 #define READ_CONFIG(profile, opt) GetOptionValue(profile, opt)
