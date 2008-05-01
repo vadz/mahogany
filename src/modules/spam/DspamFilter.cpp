@@ -176,12 +176,17 @@ public:
    void Train(wxWindow *parent);
 
 protected:
-   virtual void DoReclassify(const Message& msg, bool isSpam);
-   virtual void DoTrain(const Message& msg, bool isSpam);
-   virtual int DoCheckIfSpam(const Message& msg,
+   virtual void DoReclassify(const Profile *profile,
+                             const Message& msg,
+                             bool isSpam);
+   virtual void DoTrain(const Profile *profile,
+                        const Message& msg,
+                        bool isSpam);
+   virtual int DoCheckIfSpam(const Profile *profile,
+                             const Message& msg,
                              const String& param,
                              String *result);
-   virtual const wxChar *GetOptionPageIconName() const { return _T("dspam"); }
+   virtual const char *GetOptionPageIconName() const { return "dspam"; }
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
                                              Profile *profile) const;
 
@@ -341,14 +346,18 @@ bool DspamFilter::DoProcess(const Message& msg, ContextHandler& handler)
    return true;
 }
 
-void DspamFilter::DoReclassify(const Message& msg, bool isSpam)
+void DspamFilter::DoReclassify(const Profile * /* profile */,
+                               const Message& msg,
+                               bool isSpam)
 {
    ClassifyContextHandler handler(ClassifyContextHandler::Reclassify, isSpam);
 
    DoProcess(msg, handler);
 }
 
-void DspamFilter::DoTrain(const Message& msg, bool isSpam)
+void DspamFilter::DoTrain(const Profile * /* profile */,
+                          const Message& msg,
+                          bool isSpam)
 {
    ClassifyContextHandler handler(ClassifyContextHandler::Train, isSpam);
 
@@ -356,7 +365,8 @@ void DspamFilter::DoTrain(const Message& msg, bool isSpam)
 }
 
 int
-DspamFilter::DoCheckIfSpam(const Message& msg,
+DspamFilter::DoCheckIfSpam(const Profile * /* profile */,
+                           const Message& msg,
                            const String& param,
                            String *result)
 {
@@ -526,7 +536,7 @@ void DspamFilter::Train(wxWindow *parent)
          Message_obj msg(mf->GetMessage(hi->GetUId()));
          if ( msg )
          {
-            DoTrain(*msg, isSpam);
+            DoTrain(NULL /* unused */, *msg, isSpam);
 
             continue;
          }

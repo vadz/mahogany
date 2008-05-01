@@ -388,7 +388,7 @@ Address::IsInList(const wxArrayString& addresses,
 }
 
 /* static */
-String Address::GetSenderAddress(Profile *profile)
+String Address::GetSenderAddress(const Profile *profile)
 {
    String email(READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS));
 

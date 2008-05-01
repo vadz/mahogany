@@ -273,7 +273,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , wxITEM_NORMAL },
 
    // folder
-   // available accels: DGJKQVXYZ
+   // available accels: DJKQVX
    { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , wxITEM_NORMAL },
    { WXMENU_FOLDER_OPEN_RO,   gettext_noop("Open read-onl&y..."), gettext_noop("Open a folder in read only mode")                  , wxITEM_NORMAL },
    { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , wxITEM_NORMAL },
@@ -281,7 +281,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_MOVE,      gettext_noop("&Move..."), gettext_noop("Move the selected folder")               , wxITEM_NORMAL },
    { WXMENU_FOLDER_REMOVE,    gettext_noop("&Remove from tree"), gettext_noop("Remove the selected folder from the folder tree")               , wxITEM_NORMAL },
    { WXMENU_FOLDER_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete all messages in the folder and remove it")               , wxITEM_NORMAL },
-   { WXMENU_FOLDER_CLEAR,     gettext_noop("C&lear..."), gettext_noop("Delete all messages in the folder")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_CLEAR,     gettext_noop("&Zap..."), gettext_noop("Delete all messages in the folder")               , wxITEM_NORMAL },
    { WXMENU_FOLDER_CLOSE,     gettext_noop("Clos&e"), gettext_noop("Close the current folder")               , wxITEM_NORMAL },
    { WXMENU_FOLDER_CLOSEALL,  gettext_noop("Close &all"), gettext_noop("Close all opened folders")               , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
@@ -302,13 +302,14 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , wxITEM_NORMAL },
    { WXMENU_FOLDER_WHENCE,    gettext_noop("&Where is filter..."), gettext_noop("Find the filters which move messages to this folder")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_SPAM_CONFIG, gettext_noop("Spam fi&lters..."), gettext_noop("Set the options spam filters options"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , wxITEM_NORMAL },
 
    // normal edit
 
    // the available accelerators for this menu:
-   // BHJNVWYZ
+   // ABHJNVWYZ
    { WXMENU_EDIT_CUT,  gettext_noop("Cu&t\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , wxITEM_NORMAL },
@@ -322,7 +323,6 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_MODULES,  gettext_noop("M&odules..."), gettext_noop("Choose which extension modules to use")           , wxITEM_NORMAL },
    { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , wxITEM_NORMAL },
    { WXMENU_EDIT_TEMPLATES,gettext_noop("Te&mplates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
-   { WXMENU_EDIT_SPAM_CONFIG, gettext_noop("Sp&am filters..."), gettext_noop("Set the options for spam detection"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences...\tShift-Ctrl-E"),   gettext_noop("Change options")           , wxITEM_NORMAL },
    { WXMENU_EDIT_CONFIG_SOURCES, gettext_noop("Configuration so&urces..."), gettext_noop("Edit configuration sources list"), wxITEM_NORMAL },

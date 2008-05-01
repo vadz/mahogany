@@ -1813,6 +1813,9 @@
 					<File
 						RelativePath=".\src\modules\spam\HeadersFilter.cpp">
 					</File>
+					<File
+						RelativePath=".\src\modules\spam\ServerSideFilter.cpp">
+					</File>
 				</Filter>
 			</Filter>
 			<Filter

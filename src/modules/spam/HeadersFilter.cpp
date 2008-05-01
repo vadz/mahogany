@@ -206,12 +206,25 @@ public:
    HeadersFilter() { }
 
 protected:
-   virtual void DoReclassify(const Message& msg, bool isSpam);
-   virtual void DoTrain(const Message& msg, bool isSpam);
-   virtual int DoCheckIfSpam(const Message& msg,
+   virtual void DoReclassify(const Profile * /* profile */,
+                             const Message& /* msg */,
+                             bool /* isSpam */)
+   {
+      // this filter can't be trained
+   }
+
+   virtual void DoTrain(const Profile * /* profile */,
+                        const Message& /* msg */,
+                        bool /* isSpam */)
+   {
+      // this filter can't be trained
+   }
+
+   virtual int DoCheckIfSpam(const Profile *profile,
+                             const Message& msg,
                              const String& param,
                              String *result);
-   virtual const wxChar *GetOptionPageIconName() const { return _T("spam"); }
+   virtual const char *GetOptionPageIconName() const { return "spam"; }
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
                                              Profile *profile) const;
 
@@ -398,9 +411,6 @@ class HeadersOptionsPage : public SpamOptionsPage
 {
 public:
    HeadersOptionsPage(wxListOrNoteBook *notebook, Profile *profile);
-
-   void FromString(const String &source);
-   String ToString();
 
 private:
    ConfigValueDefault *GetConfigValues();
@@ -1053,18 +1063,9 @@ static bool findIP(String &header,
 // HeadersFilter itself
 // ----------------------------------------------------------------------------
 
-void HeadersFilter::DoReclassify(const Message& /* msg */, bool /* isSpam */)
-{
-   // we're too stupid to allow user to correct our erros -- nothing to do
-}
-
-void HeadersFilter::DoTrain(const Message& /* msg */, bool /* isSpam */)
-{
-   // we're too stupid to be trained -- nothing to do
-}
-
 int
-HeadersFilter::DoCheckIfSpam(const Message& msg,
+HeadersFilter::DoCheckIfSpam(const Profile *profile,
+                             const Message& msg,
                              const String& param,
                              String *result)
 {
@@ -1072,9 +1073,6 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
    size_t n;
    if ( tests.empty() )
    {
-      // use defaults
-      Profile_obj profile(Profile::CreateModuleProfile(SPAM_FILTER_INTERFACE));
-
       for ( n = 0; n < Spam_Test_Max; n++ )
       {
          const SpamTestDesc& desc = spamTestDescs[n];
@@ -1326,60 +1324,6 @@ void HeadersOptionsPage::SetFalse()
    {
       option->m_active = false;
    }
-}
-
-void HeadersOptionsPage::FromString(const String &source)
-{
-   if ( source.empty() )
-   {
-      SetDefaults();
-      return;
-   }
-
-   SetFalse();
-
-   const wxArrayString tests = strutil_restore_array(source);
-
-   const size_t count = tests.GetCount();
-   for ( size_t token = 0; token < count; token++ )
-   {
-      const wxString& actual = tests[token];
-
-      HeadersOptionsPage::Iterator option(this);
-      while ( !option.IsEnd() )
-      {
-         if ( actual == option->Token() )
-         {
-            option->m_active = true;
-            break;
-         }
-
-         ++option;
-      }
-
-      if ( option.IsEnd() )
-      {
-         FAIL_MSG(String::Format(_T("Unknown spam test \"%s\""), actual.c_str()));
-      }
-   }
-}
-
-String HeadersOptionsPage::ToString()
-{
-   String result;
-
-   for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
-   {
-      if ( option->m_active )
-      {
-         if ( !result.empty() )
-            result += _T(':');
-
-         result += option->Token();
-      }
-   }
-
-   return result;
 }
 
 ConfigValueDefault *HeadersOptionsPage::GetConfigValues()

@@ -117,10 +117,12 @@ public:
 
       This function shows the global filter dialog.
 
+      @param profile the profile to use for storing the options (we don't
+         change its reference count)
       @param parent the parent frame for the dialog
       @return true if something was changed, false otherwise
     */
-   static bool Configure(wxFrame *parent);
+   static bool Configure(Profile *profile, wxFrame *parent);
 
    /**
       Allow the user to edit the parameters of a spam rule.
@@ -193,6 +195,9 @@ protected:
       These methods provide a spam filter API. Client code doesn't have direct
       access to them because they're invoked on all spam filters at once via
       our static public methods.
+
+      The profile parameter passed to them should be used to read the options
+      use by the filter. This profile is never NULL.
     */
    //@{
 
@@ -201,14 +206,18 @@ protected:
 
       This is used by the public Reclassify().
     */
-   virtual void DoReclassify(const Message& msg, bool isSpam) = 0;
+   virtual void DoReclassify(const Profile *profile,
+                             const Message& msg,
+                             bool isSpam) = 0;
 
    /**
       Train filter using this message.
 
       This is used by the public Train().
     */
-   virtual void DoTrain(const Message& msg, bool isSpam) = 0;
+   virtual void DoTrain(const Profile *profile,
+                        const Message& msg,
+                        bool isSpam) = 0;
 
    /**
       Process a message and return whether it is a spam.
@@ -220,7 +229,8 @@ protected:
       @return true if this is a spam, false if we don't think it's a spam and
               -1 if we're sure this is not a spam
     */
-   virtual int DoCheckIfSpam(const Message& msg,
+   virtual int DoCheckIfSpam(const Profile *profile,
+                             const Message& msg,
                              const String& param,
                              String *result) = 0;
 
@@ -233,7 +243,7 @@ protected:
 
       @return the name of the icon to use or NULL
     */
-   virtual const wxChar *GetOptionPageIconName() const { return NULL; }
+   virtual const char *GetOptionPageIconName() const { return NULL; }
 
    /**
       Return a pointer to the option page used for editing this spam filter
@@ -275,6 +285,10 @@ private:
    // the meat of LoadAll(), only called if !ms_loaded and sets it to true
    // after doing its work
    static void DoLoadAll();
+
+   // helper: get the profile to use for this message, tries hard to return
+   // non-NULL profile (and usually succeeds)
+   static Profile *GetProfile(const Message& msg);
 
 
    // the head of the linked list of spam filters

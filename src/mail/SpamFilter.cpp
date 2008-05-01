@@ -36,6 +36,8 @@
 #include "gui/wxOptionsPage.h"
 #include "gui/wxOptionsDlg.h"
 
+#include "Message.h"
+
 #include "SpamFilter.h"
 
 // ----------------------------------------------------------------------------
@@ -46,7 +48,41 @@
 static const wxChar FILTERS_SEPARATOR = _T(';');
 
 // ----------------------------------------------------------------------------
-// local types
+// local functions
+// ----------------------------------------------------------------------------
+
+namespace
+{
+
+/**
+   Return the name in which the status (enabled or disabled) of the given
+   filter is stored in the config.
+ */
+inline String GetSpamFilterKeyName(const char *name)
+{
+   return String::Format("UseSpamFilter_%s", name);
+}
+
+/**
+   Return true if the given filter is enabled in the specified profile.
+ */
+inline bool IsSpamFilterEnabled(const Profile *profile, const char *name)
+{
+   return profile->readEntry(GetSpamFilterKeyName(name), true);
+}
+
+/**
+   Enable or disable the given spam filter.
+ */
+inline void EnableSpamFilter(Profile *profile, const char *name, bool enable)
+{
+   profile->writeEntry(GetSpamFilterKeyName(name), enable);
+}
+
+} // anonymous namespace
+
+// ----------------------------------------------------------------------------
+// local classes
 // ----------------------------------------------------------------------------
 
 class SpamOptionsDialog : public wxOptionsEditDialog
@@ -62,23 +98,77 @@ public:
    {
       m_profile = profile;
       m_imagelist = imagelist;
+      m_chkEnable = NULL;
 
       CreateAllControls();
       Fit();
       Layout();
    }
 
+   virtual wxControl *CreateControlsAbove(wxPanel *panel)
+   {
+      wxControl *last = NULL;
+
+      last = CreateMessage(panel,
+            _("This dialog is used to configure the options of the individual "
+              "spam filters and\n"
+              "to select whether they are used for the \"Message|Spam\" menu "
+              "commands.\n"
+              "\n"
+              "Notice that you still need to configure a filter rule with a "
+              "\"Check if spam\" test\n"
+              "to actually use the spam filters configured here.\n"), last);
+
+      m_chkEnable = CreateCheckBox(panel,
+                        _("&Use the selected filter"),
+                        -1, // no max width as we have just one field
+                        last);
+      last = m_chkEnable;
+
+      Connect(wxEVT_COMMAND_CHECKBOX_CLICKED,
+               wxCommandEventHandler(SpamOptionsDialog::OnCheckBox));
+
+      return last;
+   }
+
    virtual void CreateNotebook(wxPanel *panel)
    {
       m_notebook = new wxPNotebook(_T("SpamOptions"), panel);
+      Connect(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED,
+               wxNotebookEventHandler(SpamOptionsDialog::OnPageChanged));
+
       if ( m_imagelist )
          m_notebook->AssignImageList(m_imagelist);
 
       // now we can put the pages into it
       for ( SpamFilter *p = SpamFilter::ms_first; p; p = p->m_next )
       {
+         // update internal data first so that our OnPageChanged() handler
+         // could use it when it's called from CreateOptionsPage() below
+         const String name = p->GetName();
+         m_used.push_back(IsSpamFilterEnabled(m_profile, name));
+         m_names.push_back(name);
+
          p->CreateOptionPage(m_notebook, m_profile);
       }
+   }
+
+   virtual bool TransferDataFromWindow()
+   {
+      if ( !wxOptionsEditDialog::TransferDataFromWindow() )
+         return false;
+
+      // update the data in the config
+      const size_t count = m_used.size();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         const String& name = m_names[n];
+         const bool used = m_used[n] != false;
+         if ( IsSpamFilterEnabled(m_profile, name) != used )
+            EnableSpamFilter(m_profile, name, used);
+      }
+
+      return true;
    }
 
 protected:
@@ -89,8 +179,39 @@ protected:
    }
 
 private:
+   // update the internal data from checkbox value
+   void OnCheckBox(wxCommandEvent& event)
+   {
+      if ( event.GetEventObject() != m_chkEnable )
+         return;
+
+      const int sel = m_notebook->GetSelection();
+      CHECK_RET( sel != wxNOT_FOUND, "no active page?" );
+
+      m_used[sel] = m_chkEnable->GetValue();
+
+      SetDirty();
+   }
+
+   // update the checkbox from internal data
+   void OnPageChanged(wxNotebookEvent& event)
+   {
+      const int sel = event.GetSelection();
+      if ( sel != wxNOT_FOUND )
+         m_chkEnable->SetValue(m_used[sel] != false);
+   }
+
+
    Profile *m_profile;
    wxImageList *m_imagelist;
+   wxCheckBox *m_chkEnable;
+
+   // the names of the spam filters, indexed by their order in the notebook
+   wxArrayString m_names;
+
+   // the boolean value of the checkbox indicating whether the filter should be
+   // used for each of the pages, indexed by their order in the notebook
+   wxArrayInt m_used;
 };
 
 // ----------------------------------------------------------------------------
@@ -166,6 +287,18 @@ SpamFilter *SpamFilter::FindByLongName(const String& lname)
    return NULL;
 }
 
+/* static */
+Profile *SpamFilter::GetProfile(const Message& msg)
+{
+   Profile *profile = msg.GetProfile();
+   if ( !profile )
+      profile = mApplication->GetProfile();
+
+   ASSERT_MSG( profile, "should have some profile to use" );
+
+   return profile;
+}
+
 // ----------------------------------------------------------------------------
 // forward the real operations to all filters in the spam chain
 // ----------------------------------------------------------------------------
@@ -173,22 +306,32 @@ SpamFilter *SpamFilter::FindByLongName(const String& lname)
 /* static */
 void SpamFilter::Reclassify(const Message& msg, bool isSpam)
 {
+   Profile * const profile = GetProfile(msg);
+   if ( !profile )
+      return;
+
    LoadAll();
 
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
    {
-      p->DoReclassify(msg, isSpam);
+      if ( IsSpamFilterEnabled(profile, p->GetName()) )
+         p->DoReclassify(profile, msg, isSpam);
    }
 }
 
 /* static */
 void SpamFilter::Train(const Message& msg, bool isSpam)
 {
+   Profile * const profile = GetProfile(msg);
+   if ( !profile )
+      return;
+
    LoadAll();
 
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
    {
-      p->DoTrain(msg, isSpam);
+      if ( IsSpamFilterEnabled(profile, p->GetName()) )
+         p->DoTrain(profile, msg, isSpam);
    }
 }
 
@@ -198,6 +341,10 @@ SpamFilter::CheckIfSpam(const Message& msg,
                         const String& paramsAll,
                         String *result)
 {
+   Profile * const profile = GetProfile(msg);
+   if ( !profile )
+      return false;
+
    LoadAll();
 
    // break down the parameters (if we have any) into names and values
@@ -236,7 +383,7 @@ SpamFilter::CheckIfSpam(const Message& msg,
    // now try all filters in turn until one of them returns true
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
    {
-      const String& name(p->GetName());
+      const String name(p->GetName());
 
       String param;
       if ( !paramsAll.empty() )
@@ -250,13 +397,17 @@ SpamFilter::CheckIfSpam(const Message& msg,
 
          param = values[(size_t)n];
       }
-      //else: use all filters
+      else // use only configured filters
+      {
+         if ( !IsSpamFilterEnabled(profile, p->GetName()) )
+            continue;
+      }
 
       // DoCheckIfSpam() may return -1 in addition to true or false which is
       // treated as "definitively false", i.e. not only this spam filter didn't
       // recognize this message as spam but it shouldn't be even checked with
       // the others (this is mainly used for whitelisting support)
-      switch ( p->DoCheckIfSpam(msg, param, result) )
+      switch ( p->DoCheckIfSpam(profile, msg, param, result) )
       {
          case true:
             if ( result )
@@ -292,7 +443,7 @@ SpamFilter::CheckIfSpam(const Message& msg,
 // ----------------------------------------------------------------------------
 
 /* static */
-bool SpamFilter::Configure(wxFrame *parent)
+bool SpamFilter::Configure(Profile *profile, wxFrame *parent)
 {
    LoadAll();
 
@@ -304,7 +455,7 @@ bool SpamFilter::Configure(wxFrame *parent)
    size_t nPages = 0;
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
    {
-      const wxChar *iconname = p->GetOptionPageIconName();
+      const char * const iconname = p->GetOptionPageIconName();
       if ( iconname )
       {
          nPages++;
@@ -321,17 +472,11 @@ bool SpamFilter::Configure(wxFrame *parent)
    }
 
 
-   // now we must select a profile from which the filters options will be read
-   // from and written to
-   Profile_obj profile(Profile::CreateModuleProfile(SPAM_FILTER_INTERFACE));
-
    // do create the dialog (this will create all the pages inside its
    // CreateNotebook()) and show it
    SpamOptionsDialog dlg(parent, profile, imagelist);
 
-   bool ok = dlg.ShowModal() == wxID_OK;
-
-   return ok;
+   return dlg.ShowModal() == wxID_OK;
 }
 
 /* static */

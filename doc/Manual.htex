@@ -75,6 +75,12 @@ skip them unless you're updating from a very old version of Mahogany.
          this is useful to avoid sending duplicate replies to the different
          addresses of the same person, for example.
    \item Allow creation of filters testing individual headers in the GUI.
+   \item Add support for server-side spam filters: this is not especially
+         useful for classifying spam (as you could already check the header
+         added by the server to indicate that a message is spam), although it
+         is much simpler now, but is helpful for training the server-side
+         filters as using the \MenuCmd{Message|Spam} menu commands can now be
+         configured to do the right thing.
 \end{itemize}
 
 \subsubsection{0.67 against 0.66}

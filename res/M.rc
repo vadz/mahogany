@@ -137,9 +137,12 @@ access		BITMAP "access.bmp"
 calendar	BITMAP "calendar.bmp"
 #endif
 
-// these shouldn't be there but loaded from modules... (TODO)
+// Spam filter icons for the options dialog used for configuring them (32x32)
+//
+// TODO: they shouldn't be there at all but loaded from modules... 
 spam		BITMAP "spam.bmp"
 dspam		BITMAP "../lib/dspam/dspam.bmp"
+serverspam	BITMAP "serverspam.bmp"
 
 // Folder tree bitmaps (16x16)
 folder_inbox		BITMAP "folder_inbox.bmp"

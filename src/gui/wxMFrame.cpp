@@ -46,7 +46,6 @@
 
 #include "Composer.h"
 #include "MImport.h"
-#include "SpamFilter.h"
 
 #include "gui/wxFiltersDialog.h" // for ConfigureAllFilters()
 #include "gui/wxOptionsDlg.h"
@@ -603,10 +602,6 @@ wxMFrame::OnMenuCommand(int id)
 
       case WXMENU_EDIT_TEMPLATES:
          EditTemplates(this);
-         break;
-
-      case WXMENU_EDIT_SPAM_CONFIG:
-         SpamFilter::Configure(this);
          break;
 
       case WXMENU_EDIT_RESTORE_PREF:

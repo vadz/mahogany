@@ -45,6 +45,7 @@
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder
 #include "gui/wxIdentityCombo.h" // for IDC_IDENT_COMBO
 #include "MFolderDialogs.h"      // for ShowFolderCreateDialog
+#include "SpamFilter.h"          // for SpamFilter::Configure()
 
 #include "gui/wxMDialogs.h"
 #include "gui/wxMenuDefs.h"
@@ -926,6 +927,17 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                MFolder_obj folder(m_FolderTree->GetSelection());
                if ( folder )
                   FindFiltersForFolder(folder, this);
+            }
+            break;
+
+         case WXMENU_FOLDER_SPAM_CONFIG:
+            {
+               MFolder_obj folder(m_FolderTree->GetSelection());
+               if ( folder )
+               {
+                  Profile_obj profile(folder->GetProfile());
+                  SpamFilter::Configure(profile, this);
+               }
             }
             break;
 

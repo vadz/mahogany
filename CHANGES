@@ -9,6 +9,7 @@
 Release 0.68 '' September xx, 2007
 ---------------------------------------
 
+2008-05-02 VZ: Add support for server-side spam filters.
 2008-04-25 VZ: Add support for filtering on individual headers to the GUI.
 2008-04-23 VZ: Allow using wildcards in the headers selected to be seen.
 2008-04-22 VZ: Added support for "Face:" header, similar to "X-Face:"
