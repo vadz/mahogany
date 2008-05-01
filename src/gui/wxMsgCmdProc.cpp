@@ -1086,31 +1086,11 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
          continue;
       }
 
-      SendMessage_obj sendMsg(SendMessage::CreateResent
-                              (
-                                  GetProfile(),
-                                  msg,
-                                  GetFrame()
-                              ));
-      if ( !sendMsg )
-      {
-         ERRORMESSAGE((_("Failed to create a new message.")));
-         continue;
-      }
-
-      sendMsg->SetAddresses(address);
-
-      // there is no need to store bounced messages in "sent mail" folder
-      sendMsg->SetFcc("");
-
-      if ( !sendMsg->SendOrQueue() )
-      {
-         ERRORMESSAGE((_("Failed to bounce the message.")));
-      }
-      else
+      if ( SendMessage::Bounce(address, GetProfile(), *msg, GetFrame()) )
       {
          countOk++;
       }
+      //else: error message already given
 
       msg->DecRef();
    }
