@@ -25,8 +25,8 @@ class Profile;
 class MFolder;
 class MPersMsgBox;
 
-class WXDLLEXPORT wxFrame;
-class WXDLLEXPORT wxStaticText;
+class WXDLLIMPEXP_FWD_BASE wxFrame;
+class WXDLLIMPEXP_FWD_BASE wxStaticText;
 
 /**
   Flags for MDialog_YesNoDialog()

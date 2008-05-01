@@ -25,7 +25,7 @@
 #  include "FolderType.h"    // for Protocol enum
 #endif // USE_PCH
 
-class WXDLLEXPORT wxArrayString;
+class WXDLLIMPEXP_FWD_BASE wxArrayString;
 
 class AddressList;
 class MailFolder;

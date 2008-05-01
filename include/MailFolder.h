@@ -44,8 +44,8 @@ struct SortParams;
 struct ThreadData;
 struct ThreadParams;
 
-class WXDLLEXPORT wxFrame;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 #ifndef MsgnoArray
    #define MsgnoArray UIdArray
