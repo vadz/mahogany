@@ -33,6 +33,9 @@
    #define wxPNotebook wxPListbook
    #define wxNotebookEvent wxListbookEvent
 
+   #undef wxNotebookEventHandler
+   #define wxNotebookEventHandler wxListbookEventHandler
+
    #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED
    #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING
 

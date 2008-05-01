@@ -290,8 +290,11 @@ wxCheckBox *CreateCheckBox(wxWindow *parent,
    wxLayoutConstraints *c = new wxLayoutConstraints;
    SetTopConstraint(parent, c, last, 0);
    c->width.AsIs();
-   c->right.SameAs(parent, wxLeft, -(int)(2*LAYOUT_X_MARGIN + widthMax
-                                           + widthCheck));
+   if ( widthMax == -1 )
+      c->left.SameAs(parent, wxLeft, LAYOUT_X_MARGIN);
+   else
+      c->right.SameAs(parent, wxLeft, -(int)(2*LAYOUT_X_MARGIN + widthMax
+                                              + widthCheck));
    c->height.AsIs();
 
    checkbox->SetConstraints(c);
