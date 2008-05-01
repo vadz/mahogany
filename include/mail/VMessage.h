@@ -78,6 +78,7 @@ public:
 
    virtual MailFolder *GetFolder() const { return m_mf; }
    virtual UIdType GetUId() const { return m_uid; }
+   virtual Profile *GetProfile() const { return m_message->GetProfile(); }
 
    //@}
 

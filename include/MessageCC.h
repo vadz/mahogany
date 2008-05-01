@@ -103,6 +103,8 @@ public:
    */
    virtual MailFolder * GetFolder(void) const;
 
+   virtual Profile *GetProfile() const { return m_Profile; }
+
    /** Return the numeric status of message.
        @return flags of message
    */

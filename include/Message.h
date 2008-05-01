@@ -346,6 +346,13 @@ public:
    /// Return the numeric uid
    virtual UIdType GetUId(void) const = 0;
 
+   /**
+      Return the profile associated with this message.
+
+      Returned object may be NULL and doesn't need to be DecRef()'d.
+    */
+   virtual Profile *GetProfile() const = 0;
+
    //@}
 
    /** @name Methods accessing individual parts of a message.
