@@ -111,7 +111,7 @@ protected:
    /**
      Ctor for base class static Create()
    */
-   SendMessageCC(Profile *profile,
+   SendMessageCC(const Profile *profile,
                  Protocol protocol,
                  wxFrame *frame,
                  const Message *message = NULL);
@@ -194,7 +194,7 @@ private:
    //@}
 
    /// the profile containing our settings
-   Profile *m_profile;
+   const Profile * const m_profile;
 
    /// server name to use
    String m_ServerHost;

@@ -64,7 +64,7 @@ public:
       @param protocol which protocol to use for sending
       @param frame the parent window for dialogs, may be NULL
    */
-   static SendMessage *Create(Profile *profile,
+   static SendMessage *Create(const Profile *profile,
                               Protocol protocol = Prot_Default,
                               wxFrame *frame = NULL);
 
@@ -79,7 +79,7 @@ public:
       @param message the original message (can't be NULL)
       @param frame the parent window for dialogs, may be NULL
    */
-   static SendMessage *CreateResent(Profile *profile,
+   static SendMessage *CreateResent(const Profile *profile,
                                     const Message *message,
                                     wxFrame *frame = NULL);
 
@@ -95,13 +95,30 @@ public:
                          the message (consistent with Message::GetMimePart()
                          interpretation) to not copy to the new one
     */
-   static SendMessage *CreateFromMsg(Profile *profile,
+   static SendMessage *CreateFromMsg(const Profile *profile,
                                      const Message *message,
                                      Protocol protocol = Prot_Default,
                                      wxFrame *frame = NULL,
                                      const wxArrayInt *partsToOmit = NULL);
 
    //@}
+
+
+   /**
+      @name Various static helper functions.
+    */
+   //@{
+
+   /**
+      Bounce (i.e. resend) a message to the given address.
+    */
+   static bool Bounce(const String& address,
+                      const Profile *profile,
+                      const Message& message,
+                      wxFrame *frame = NULL);
+
+   //@}
+
 
    /** @name Standard headers */
    //@{

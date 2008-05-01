@@ -207,14 +207,14 @@ private:
 
 /* static */
 SendMessage *
-SendMessage::Create(Profile *profile, Protocol protocol, wxFrame *frame)
+SendMessage::Create(const Profile *profile, Protocol protocol, wxFrame *frame)
 {
    return new SendMessageCC(profile, protocol, frame);
 }
 
 /* static */
 SendMessage *
-SendMessage::CreateResent(Profile *profile,
+SendMessage::CreateResent(const Profile *profile,
                           const Message *message,
                           wxFrame *frame)
 {
@@ -228,7 +228,7 @@ SendMessage::CreateResent(Profile *profile,
 
 /* static */
 SendMessage *
-SendMessage::CreateFromMsg(Profile *profile,
+SendMessage::CreateFromMsg(const Profile *profile,
                            const Message *message,
                            Protocol protocol,
                            wxFrame *frame,
@@ -242,6 +242,35 @@ SendMessage::CreateFromMsg(Profile *profile,
    return msg;
 }
 
+/* static */
+bool SendMessage::Bounce(const String& address,
+                         const Profile *profile,
+                         const Message& message,
+                         wxFrame *frame)
+{
+   SendMessage_obj sendMsg(SendMessage::CreateResent(profile, &message, frame));
+   if ( !sendMsg )
+   {
+      ERRORMESSAGE((_("Failed to create the message to bounce.")));
+      return false;
+   }
+
+   sendMsg->SetAddresses(address);
+
+   // there is no need to store bounced messages in "sent mail" folder
+   sendMsg->SetFcc("");
+
+   if ( !sendMsg->SendOrQueue() )
+   {
+      ERRORMESSAGE((_("Failed to bounce the message to \"%s\"."),
+                    address.c_str()));
+
+      return false;
+   }
+
+   return true;
+}
+
 SendMessage::~SendMessage()
 {
 }
@@ -250,10 +279,11 @@ SendMessage::~SendMessage()
 // SendMessageCC creation and destruction
 // ----------------------------------------------------------------------------
 
-SendMessageCC::SendMessageCC(Profile *profile,
+SendMessageCC::SendMessageCC(const Profile *profile,
                              Protocol protocol,
                              wxFrame *frame,
                              const Message *message)
+             : m_profile(profile)
 {
    m_frame = frame;
    m_encHeaders = wxFONTENCODING_SYSTEM;
@@ -278,8 +308,7 @@ SendMessageCC::SendMessageCC(Profile *profile,
       profile = mApplication->GetProfile();
    }
 
-   m_profile = profile;
-   m_profile->IncRef();
+   const_cast<Profile *>(m_profile)->IncRef();
 
    // choose the protocol: mail (and whether it is SMTP or sendmail) or news
    if ( protocol == Prot_Default )
@@ -602,7 +631,7 @@ SendMessageCC::~SendMessageCC()
       delete [] m_headerValues;
    }
 
-   m_profile->DecRef();
+   const_cast<Profile *>(m_profile)->DecRef();
 }
 
 // ----------------------------------------------------------------------------
