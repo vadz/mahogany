@@ -110,10 +110,6 @@ private:
 // event tables
 // -----------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(wxProfileSettingsEditDialog, wxManuallyLaidOutDialog)
-   EVT_CHOICE(-1, wxProfileSettingsEditDialog::OnConfigSourceChange)
-END_EVENT_TABLE()
-
 BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxManuallyLaidOutDialog)
    EVT_CHECKBOX(-1, wxOptionsPageSubdialog::OnChange)
    EVT_RADIOBOX(-1, wxOptionsPageSubdialog::OnChange)
@@ -1350,6 +1346,11 @@ wxControl *wxProfileSettingsEditDialog::CreateControlsBelow(wxPanel *panel)
    }
 
    m_chcSources = new wxChoice(panel, -1);
+
+   Connect(wxEVT_COMMAND_CHOICE_SELECTED,
+             wxCommandEventHandler(
+                wxProfileSettingsEditDialog::OnConfigSourceChange));
+
    for ( AllConfigSources::List::iterator i = sources.begin(),
                                         end = sources.end();
          i != end;
