@@ -326,11 +326,14 @@ public:
       return Profile::GetAllFilters();
    }
 
-   /// return the filter descrption
-   virtual MFilterDesc GetDesc(void) const = 0;
+   /// return the filter description
+   virtual MFilterDesc GetDesc() const = 0;
 
    /// set the filter parameters
    virtual void Set(const MFilterDesc& desc) = 0;
+
+   /// return the profile this filter uses, caller must DecRef() it
+   virtual Profile *GetProfile() const = 0;
 };
 
 /// smart reference to MFilter

@@ -847,6 +847,12 @@ public:
       m_dirty = true;
    }
 
+   virtual Profile *GetProfile() const
+   {
+      m_Profile->IncRef();
+      return m_Profile;
+   }
+
    static MFilterFromProfile * Create(Profile *p)
       { return new MFilterFromProfile(p); }
 
