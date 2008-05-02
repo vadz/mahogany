@@ -2270,7 +2270,7 @@ void wxFolderFiltersDialog::OnUpdateEditBtn(wxUpdateUIEvent& event)
 // wxQuickFilterDialog
 // ----------------------------------------------------------------------------
 
-class wxQuickFilterDialog : public wxManuallyLaidOutDialog
+class wxQuickFilterDialog : public wxProfileSettingsEditDialog
 {
 public:
    enum FilterControl
@@ -2293,6 +2293,10 @@ public:
    virtual bool TransferDataFromWindow();
 
 protected:
+   // implement base class pure virtual
+   virtual Profile *GetProfile() const;
+   virtual wxWindow *CreateMainWindow(wxPanel *panel);
+
    void DoUpdateUI() { m_action->UpdateUI(); }
 
    // event handlers
@@ -2314,11 +2318,17 @@ private:
 
    MFolder *m_folder;
 
+   // ctor arguments which we store as member variables to pass them to
+   // CreateMainWindow()
+   const String m_from,
+                m_subject,
+                m_to;
+
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxQuickFilterDialog)
 };
 
-BEGIN_EVENT_TABLE(wxQuickFilterDialog, wxManuallyLaidOutDialog)
+BEGIN_EVENT_TABLE(wxQuickFilterDialog, wxProfileSettingsEditDialog)
    EVT_CHOICE(-1, wxQuickFilterDialog::OnChoice)
    EVT_TEXT(-1, wxQuickFilterDialog::OnText)
 
@@ -2330,9 +2340,12 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
                                          const String& subject,
                                          const String& to,
                                          wxWindow *parent)
-                   : wxManuallyLaidOutDialog(parent,
-                                             _("Create quick filter"),
-                                             _T("QuickFilter"))
+                   : wxProfileSettingsEditDialog(parent,
+                                                 _("Create quick filter"),
+                                                 "QuickFilter"),
+                     m_from(from),
+                     m_subject(subject),
+                     m_to(to)
 {
    m_folder = folder;
    m_folder->IncRef();
@@ -2341,14 +2354,22 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    // the dialog
    m_action = NULL;
 
+   CreateAllControls();
+
+   SetDefaultSize(8*wBtn, 13*hBtn);
+
+   DoUpdateUI();
+}
+
+wxWindow *wxQuickFilterDialog::CreateMainWindow(wxPanel *panel)
+{
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Apply this filter"),
-                                             FALSE, MH_DIALOG_QUICK_FILTERS);
+   wxStaticBox *box = new wxStaticBox(panel, -1, _("Apply this filter"));
 
    wxStaticText *msg = new wxStaticText
                            (
-                            this, -1,
+                            panel, -1,
                             _("Only if all of the below conditions are true:")
                            );
 
@@ -2363,16 +2384,16 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    labels.Add(_("the message was sent &from"));
    labels.Add(_("the message &subject contains"));
    labels.Add(_("the message was sent &to"));
-   long widthMax = GetMaxLabelWidth(labels, this) + 4*LAYOUT_X_MARGIN;
+   long widthMax = GetMaxLabelWidth(labels, panel) + 4*LAYOUT_X_MARGIN;
 
    wxArrayString text;
-   text.Add(from);
-   text.Add(subject);
-   text.Add(to);
+   text.Add(m_from);
+   text.Add(m_subject);
+   text.Add(m_to);
 
    for ( size_t n = 0; n < Filter_Max; n++ )
    {
-      m_text[n] = new wxTextCtrl(this, -1, text[n]);
+      m_text[n] = new wxTextCtrl(panel, -1, text[n]);
       c = new wxLayoutConstraints;
 
       if ( n == 0 )
@@ -2392,7 +2413,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
       c->height.AsIs();
       m_text[n]->SetConstraints(c);
 
-      m_check[n] = new wxCheckBox(this, -1, labels[n]);
+      m_check[n] = new wxCheckBox(panel, -1, labels[n]);
       c = new wxLayoutConstraints;
       c->centreY.SameAs(m_text[n], wxCentreY);
       c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -2401,7 +2422,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
       m_check[n]->SetConstraints(c);
    }
 
-   msg = new wxStaticText(this, -1, _("&And if they are, then:"));
+   msg = new wxStaticText(panel, -1, _("&And if they are, then:"));
    c = new wxLayoutConstraints;
    c->top.Below(m_check[Filter_Max - 1], 3*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -2409,13 +2430,17 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    c->height.AsIs();
    msg->SetConstraints(c);
 
-   m_action = new OneActionControl(this);
+   m_action = new OneActionControl(panel);
 
    wxWindow *last = msg;
    m_action->LayoutControls(&last, 2*LAYOUT_X_MARGIN, 3*LAYOUT_X_MARGIN);
-   SetDefaultSize(8*wBtn, 11*hBtn);
 
-   DoUpdateUI();
+   return box;
+}
+
+Profile *wxQuickFilterDialog::GetProfile() const
+{
+   return m_folder->GetProfile();
 }
 
 void wxQuickFilterDialog::AddTest(MFDialogSettings **settings,
@@ -2465,6 +2490,7 @@ bool wxQuickFilterDialog::TransferDataToWindow()
 
 bool wxQuickFilterDialog::TransferDataFromWindow()
 {
+   // construct the object we use to initialize the filter
    MFDialogSettings *settings = NULL;
    String name = _("quick filter ");
 
@@ -2482,6 +2508,17 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
    MFilterDesc fd;
    fd.SetName(name);
    fd.Set(settings);
+
+   // ensure that we write changes to the correct config source
+   Profile_obj profileFolder(m_folder->GetProfile());
+   if ( profileFolder )
+      ApplyConfigSourceSelectedByUser(*profileFolder);
+
+   Profile_obj profileFilter(filter->GetProfile());
+   if ( profileFilter )
+      ApplyConfigSourceSelectedByUser(*profileFilter);
+
+   // update the filter itself
    filter->Set(fd);
 
    // add it to the beginning of the filter list as it should override any
