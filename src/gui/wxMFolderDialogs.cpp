@@ -127,6 +127,13 @@ public:
       SafeDecRef(m_profile);
    }
 
+   // call this to show the specified page initially
+   void ShowPage(FolderCreatePage page)
+   {
+      CreateAllControls();
+      SetNotebookPage(page);
+   }
+
    // initialization (should be called before the dialog is shown)
       // set folder we're working with
    void SetFolder(MFolder *folder)
@@ -191,9 +198,6 @@ public:
       return m_profile;
    }
 
-   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderBaseDialog() { }
-
 protected:
    // return TRUE if the Ok/Apply buttons should be enabled (depending on the
    // state of the other controls)
@@ -219,7 +223,8 @@ protected:
    bool m_mayEnableOk;
 
 private:
-   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderBaseDialog)
+   DECLARE_ABSTRACT_CLASS(wxFolderBaseDialog)
+   DECLARE_NO_COPY_CLASS(wxFolderBaseDialog)
 };
 
 // folder properties dialog
@@ -232,11 +237,9 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
-   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderPropertiesDialog() { wxFAIL_MSG(_T("not reached")); }
-
 private:
-   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderPropertiesDialog)
+   DECLARE_ABSTRACT_CLASS(wxFolderPropertiesDialog)
+   DECLARE_NO_COPY_CLASS(wxFolderPropertiesDialog)
 };
 
 // folder creation dialog
@@ -259,15 +262,13 @@ public:
    void OnFolderNameChange(wxCommandEvent& event);
    void OnUpdateButton(wxUpdateUIEvent& event);
 
-   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderCreateDialog() { wxFAIL_MSG(_T("not reached")); }
-
 private:
    // set to TRUE if the user changed the folder name, FALSE otherwise and -1
    // if we're changing it programmatically
    int m_nameModifiedByUser;
 
-   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderCreateDialog)
+   DECLARE_ABSTRACT_CLASS(wxFolderCreateDialog)
+   DECLARE_NO_COPY_CLASS(wxFolderCreateDialog)
    DECLARE_EVENT_TABLE()
 };
 
@@ -571,9 +572,9 @@ private:
 // event tables
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxFolderBaseDialog, wxOptionsEditDialog)
-IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
-IMPLEMENT_DYNAMIC_CLASS(wxFolderPropertiesDialog, wxFolderBaseDialog)
+IMPLEMENT_ABSTRACT_CLASS(wxFolderBaseDialog, wxOptionsEditDialog)
+IMPLEMENT_ABSTRACT_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
+IMPLEMENT_ABSTRACT_CLASS(wxFolderPropertiesDialog, wxFolderBaseDialog)
 
 BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxOptionsEditDialog)
    EVT_TEXT(wxFolderCreateDialog::Folder_Name,
@@ -2704,8 +2705,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
 static MFolder *DoShowFolderDialog(wxFolderBaseDialog& dlg,
                                    FolderCreatePage page)
 {
-   dlg.CreateAllControls();
-   dlg.SetNotebookPage(page);
+   dlg.ShowPage(page);
 
    if ( dlg.ShowModal() == wxID_OK )
    {

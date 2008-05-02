@@ -110,18 +110,21 @@ private:
 // event tables
 // -----------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxProfileSettingsEditDialog)
+BEGIN_EVENT_TABLE(wxProfileSettingsEditDialog, wxManuallyLaidOutDialog)
+   EVT_CHOICE(-1, wxProfileSettingsEditDialog::OnConfigSourceChange)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxManuallyLaidOutDialog)
    EVT_CHECKBOX(-1, wxOptionsPageSubdialog::OnChange)
    EVT_RADIOBOX(-1, wxOptionsPageSubdialog::OnChange)
    EVT_TEXT(-1,     wxOptionsPageSubdialog::OnChange)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxOptionsEditDialog, wxDialog)
+BEGIN_EVENT_TABLE(wxOptionsEditDialog, wxProfileSettingsEditDialog)
    EVT_BUTTON(M_WXID_HELP, wxOptionsEditDialog::OnHelp)
    EVT_BUTTON(wxID_OK,     wxOptionsEditDialog::OnOK)
    EVT_BUTTON(wxID_APPLY,  wxOptionsEditDialog::OnApply)
    EVT_BUTTON(wxID_CANCEL, wxOptionsEditDialog::OnCancel)
-   EVT_CHOICE(-1,          wxOptionsEditDialog::OnConfigSourceChange)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxEnhancedPanel, wxPanel)
@@ -553,13 +556,13 @@ wxOptionsPageSubdialog::wxOptionsPageSubdialog(Profile *profile,
                                                wxWindow *parent,
                                                const wxString& label,
                                                const wxString& windowName)
-                      : wxProfileSettingsEditDialog
+                      : wxManuallyLaidOutDialog
                         (
-                           profile,
-                           windowName,
                            GET_PARENT_OF_CLASS(parent, wxFrame),
-                           label
-                        )
+                           label,
+                           windowName
+                        ),
+                        ProfileHolder(profile)
 {
 }
 
@@ -1264,42 +1267,80 @@ void wxManuallyLaidOutDialog::OnHelp(wxCommandEvent & /*ev*/)
 // wxProfileSettingsEditDialog
 // ----------------------------------------------------------------------------
 
-wxProfileSettingsEditDialog::wxProfileSettingsEditDialog(Profile *profile,
-                                    const wxString& profileKey,
-                                    wxWindow *parent,
-                                    const wxString& title)
-   : wxManuallyLaidOutDialog(parent, title, profileKey)
+wxProfileSettingsEditDialog::wxProfileSettingsEditDialog(wxWindow *parent,
+                                                         const wxString& title,
+                                                         const wxString& key)
+   : wxManuallyLaidOutDialog(parent, title, key)
 {
-   m_profile = profile;
-   m_profile->IncRef(); // paranoid
-   m_hasChanges = FALSE;
-}
-
-wxProfileSettingsEditDialog::~wxProfileSettingsEditDialog()
-{
-   m_profile->DecRef();
-}
-
-// -----------------------------------------------------------------------------
-// wxOptionsEditDialog
-// -----------------------------------------------------------------------------
-
-wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
-                                   const wxString& title,
-                                   const wxString& profileKey)
-                   : wxManuallyLaidOutDialog(parent, title, profileKey)
-{
-   m_btnOk =
-   m_btnApply = NULL;
-
-   m_profileForButtons = NULL;
-
-   m_lastBtn = MEventOptionsChangeData::Invalid;
-
+   m_bDirty = false;
    m_changedConfigSource = false;
 }
 
-wxControl *wxOptionsEditDialog::CreateControlsBelow(wxPanel *panel)
+void wxProfileSettingsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
+{
+   if ( event.GetEventObject() != m_chcSources )
+   {
+      event.Skip();
+      return;
+   }
+
+   Profile_obj profile(GetProfile());
+   if ( profile )
+   {
+      ApplyConfigSourceSelectedByUser(*profile);
+   }
+   //else: this can happen when we're creating a new folder, its profile isn't
+   //      created before the folder itself is
+}
+
+void
+wxProfileSettingsEditDialog::ApplyConfigSourceSelectedByUser(Profile& profile)
+{
+   const int sel = m_chcSources->GetSelection();
+   ConfigSource *config = NULL;
+   if ( sel != -1 )
+   {
+      AllConfigSources::List::iterator
+         i = AllConfigSources::Get().GetSources().begin();
+      for ( int n = 0; n < sel; n++ )
+         ++i;
+
+      config = i.operator->();
+   }
+
+   ConfigSource *configOld = profile.SetConfigSourceForWriting(config);
+
+   // remember the original config source if this is the first time we change
+   // it
+   if ( !m_changedConfigSource )
+   {
+      m_configOld = configOld;
+      m_changedConfigSource = true;
+   }
+}
+
+void wxProfileSettingsEditDialog::EndModal(int rc)
+{
+   if ( m_changedConfigSource )
+   {
+      Profile_obj profile(GetProfile());
+      if ( profile )
+      {
+         profile->SetConfigSourceForWriting(m_configOld);
+      }
+      else
+      {
+         FAIL_MSG( "no profile in wxOptionsEditDialog?" );
+      }
+
+      m_changedConfigSource = false;
+   }
+
+   wxManuallyLaidOutDialog::EndModal(rc);
+}
+
+
+wxControl *wxProfileSettingsEditDialog::CreateControlsBelow(wxPanel *panel)
 {
    const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
    if ( sources.size() == 1 )
@@ -1345,7 +1386,7 @@ wxControl *wxOptionsEditDialog::CreateControlsBelow(wxPanel *panel)
    return line;
 }
 
-void wxOptionsEditDialog::CreateAllControls()
+void wxProfileSettingsEditDialog::CreateAllControls()
 {
    wxLayoutConstraints *c;
 
@@ -1375,7 +1416,7 @@ void wxOptionsEditDialog::CreateAllControls()
              *bottom = CreateControlsBelow(panel);
 
    // the notebook itself is created by this function
-   CreateNotebook(panel);
+   wxWindow * const winMain = CreateMainWindow(panel);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
@@ -1388,7 +1429,7 @@ void wxOptionsEditDialog::CreateAllControls()
       c->bottom.SameAs(bottom, wxTop, 2*LAYOUT_Y_MARGIN);
    else
       c->bottom.SameAs(panel, wxBottom, 4*LAYOUT_Y_MARGIN + hBtn);
-   m_notebook->SetConstraints(c);
+   winMain->SetConstraints(c);
 
    // create the buttons
    // ------------------
@@ -1431,6 +1472,23 @@ void wxOptionsEditDialog::CreateAllControls()
 
    // set dialog size (FIXME these are more or less arbitrary numbers)
    SetDefaultSize(6*wBtn, 27*hBtn, TRUE /* set as min size too */);
+}
+
+// -----------------------------------------------------------------------------
+// wxOptionsEditDialog
+// -----------------------------------------------------------------------------
+
+wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
+                                   const wxString& title,
+                                   const wxString& profileKey)
+                   : wxProfileSettingsEditDialog(parent, title, profileKey)
+{
+   m_btnOk =
+   m_btnApply = NULL;
+
+   m_profileForButtons = NULL;
+
+   m_lastBtn = MEventOptionsChangeData::Invalid;
 }
 
 // transfer the data to/from notebook pages
@@ -1509,68 +1567,6 @@ wxOptionsEditDialog::SendOptionsChangeEvent()
 
       MEventManager::Send(data);
    }
-}
-
-void wxOptionsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
-{
-   if ( event.GetEventObject() != m_chcSources )
-   {
-      event.Skip();
-      return;
-   }
-
-   Profile_obj profile(GetProfile());
-   if ( profile )
-   {
-      ApplyConfigSourceSelectedByUser(*profile);
-   }
-   //else: this can happen when we're creating a new folder, its profile isn't
-   //      created before the folder itself is
-}
-
-void wxOptionsEditDialog::ApplyConfigSourceSelectedByUser(Profile& profile)
-{
-   const int sel = m_chcSources->GetSelection();
-   ConfigSource *config = NULL;
-   if ( sel != -1 )
-   {
-      AllConfigSources::List::iterator
-         i = AllConfigSources::Get().GetSources().begin();
-      for ( int n = 0; n < sel; n++ )
-         ++i;
-
-      config = i.operator->();
-   }
-
-   ConfigSource *configOld = profile.SetConfigSourceForWriting(config);
-
-   // remember the original config source if this is the first time we change
-   // it
-   if ( !m_changedConfigSource )
-   {
-      m_configOld = configOld;
-      m_changedConfigSource = true;
-   }
-}
-
-void wxOptionsEditDialog::EndModal(int rc)
-{
-   if ( m_changedConfigSource )
-   {
-      Profile_obj profile(GetProfile());
-      if ( profile )
-      {
-         profile->SetConfigSourceForWriting(m_configOld);
-      }
-      else
-      {
-         FAIL_MSG( _T("no profile in wxOptionsEditDialog?") );
-      }
-
-      m_changedConfigSource = false;
-   }
-
-   wxManuallyLaidOutDialog::EndModal(rc);
 }
 
 void wxOptionsEditDialog::EnableButtons(bool enable)

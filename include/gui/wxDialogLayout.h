@@ -202,6 +202,81 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// A base class for all dialogs which are used to edit the profile settings.
+// ----------------------------------------------------------------------------
+
+class wxProfileSettingsEditDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxProfileSettingsEditDialog(wxWindow *parent,
+                               const wxString& title,
+                               const wxString& profileKey);
+
+   virtual bool HasChanges() const { return m_bDirty; }
+   virtual void SetDirty() { m_bDirty = TRUE; }
+
+   virtual void EndModal(int rc);
+
+protected:
+   // override this to return the profile which we're editing
+   //
+   // we will DecRef() it so return a new or IncRef()'d profile
+   virtual Profile *GetProfile() const = 0;
+
+   // these methods may (or must) be overridden to create the dialog contents:
+   // the dialog consists of the main window, optional controls above it,
+   // optional controls below it and the buttons below them
+
+   // create the controls above the main window, return the last control
+   // created (in the top-to-bottom order)
+   virtual wxControl *CreateControlsAbove(wxPanel * /* panel */) { return NULL; }
+
+   // create the main window itself
+   virtual wxWindow *CreateMainWindow(wxPanel *panel) = 0;
+
+   // create the controls below the main window, return the top-most
+   virtual wxControl *CreateControlsBelow(wxPanel *panel);
+
+   // must call this from the derived class ctor to create the main window and
+   // the standard Ok/Cancel/Apply buttons, calls CreateControlsAbove/Below()
+   // and CreateMainWindow() which may be overridden in the derived classes
+   void CreateAllControls();
+
+   // call this after creating a new profile (as is done by the folder creation
+   // dialog which only creates the profile when the folder itself is being
+   // created) to ensure that changes to it are written to the config source
+   // selected by the user
+   void ApplyConfigSourceSelectedByUser(Profile& profile);
+
+
+   // true if anything changed in the dialog
+   bool m_bDirty;
+
+   wxButton *m_btnHelp,
+            *m_btnOk,
+            *m_btnApply;
+
+private:
+   // event handlers
+   void OnConfigSourceChange(wxCommandEvent& event);
+
+
+   // choice containing all config sources, may be NULL
+   wxChoice *m_chcSources;
+
+   // original config source used by profile returned by GetProfile(): only
+   // valid if m_changedConfigSource == true
+   class ConfigSource *m_configOld;
+
+   // true if we had called SetConfigSourceForWriting() on our profile
+   bool m_changedConfigSource;
+
+
+   DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxProfileSettingsEditDialog)
+};
+
+// ----------------------------------------------------------------------------
 // a dialog which contains a notebook with the standard Ok/Cancel/Apply buttons
 // below it and, optionally, some extra controls above/below the notebook. For
 // example, options dialog and folder creation dialogs in M derive from this
@@ -212,26 +287,13 @@ private:
 // via virtual GetProfile() function - and it is only used for this purpose.
 // ----------------------------------------------------------------------------
 
-class wxOptionsEditDialog : public wxManuallyLaidOutDialog
+class wxOptionsEditDialog : public wxProfileSettingsEditDialog
 {
 public:
    // ctor
    wxOptionsEditDialog(wxFrame *parent,
                        const wxString& title,
                        const wxString& profileKey = wxEmptyString);
-
-   // populate the dialog
-      // create the controls above the main notebook, return the last control
-      // created (in the top-to-bottom order)
-   virtual wxControl *CreateControlsAbove(wxPanel * /* panel */) { return NULL; }
-      // create the notebook itself (assign the pointer to m_notebook)
-   virtual void CreateNotebook(wxPanel *panel) = 0;
-      // create the controls below the main notebook, return the top-most
-   virtual wxControl *CreateControlsBelow(wxPanel *panel);
-      // create the notebook and the standard Ok/Cancel/Apply buttons, calls
-      // CreateControlsAbove/Below() and CreateNotebook() which may be
-      // overriden in the derived classes
-   void CreateAllControls();
 
    // function called when the user chooses Apply or Ok button and something
    // has really changed in the dialog: return TRUE from it to allow change
@@ -263,12 +325,6 @@ public:
    void OnOK(wxCommandEvent& event);
    void OnApply(wxCommandEvent& event);
    void OnCancel(wxCommandEvent& event);
-   void OnConfigSourceChange(wxCommandEvent& event);
-
-   virtual void EndModal(int rc);
-
-   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxOptionsEditDialog() { wxFAIL_MSG(_T("unaccessible")); }
 
    // disable or reenable Ok and Apply buttons
    virtual void EnableButtons(bool enable);
@@ -283,30 +339,29 @@ protected:
       m_btnApply->Enable(FALSE);
    }
 
-   // call this after creating a new profile (as is done by the folder creation
-   // dialog which only creates the profile when the folder itself is being
-   // created) to ensure that changes to it are written to the config source
-   // selected by the user
-   void ApplyConfigSourceSelectedByUser(Profile& profile);
-
    // the helper for the handlers of Apply/Ok buttons, returns TRUE if the
    // changes were accepted
    bool DoApply();
-
-   // get the profile for event sending: the caller will DecRef() it
-   virtual Profile *GetProfile() const = 0;
 
 
    // the notebook occupying the main part of the dialog
    wxPNotebook *m_notebook;
 
 private:
+   // implement base class pure virtual in terms of our existing function for
+   // compatibility (CreateNotebook() existed before CreateMainWindow())
+   virtual wxWindow *CreateMainWindow(wxPanel *panel)
+   {
+      CreateNotebook(panel);
+      return m_notebook;
+   }
+
+   // override this to create the notebook and assign the pointer to m_notebook
+   virtual void CreateNotebook(wxPanel *panel) = 0;
+
+
    // send a notification event about options change using m_lastBtn value
    void SendOptionsChangeEvent();
-
-   wxButton *m_btnHelp,
-            *m_btnOk,
-            *m_btnApply;
 
    // Ok/Cancel/Apply depending on the last button pressed
    MEventOptionsChangeData::ChangeKind m_lastBtn;
@@ -317,51 +372,14 @@ private:
    // with the same path
    Profile *m_profileForButtons;
 
-   // choice containing all config sources, may be NULL
-   wxChoice *m_chcSources;
-
-   // original config source used by profile returned by GetProfile(): only
-   // valid if m_changedConfigSource == true
-   class ConfigSource *m_configOld;
-
-   // true if we had called SetConfigSourceForWriting() on our profile
-   bool m_changedConfigSource;
-
    // flags
-   bool m_bDirty,           // something changed
-        m_bTest,            // test new settings?
+   bool m_bTest,            // test new settings?
         m_bRestartWarning;  // changes will take effect after restart
 
 
-   DECLARE_DYNAMIC_CLASS_NO_COPY(wxOptionsEditDialog)
+   DECLARE_ABSTRACT_CLASS(wxOptionsEditDialog)
+   DECLARE_NO_COPY_CLASS(wxOptionsEditDialog)
    DECLARE_EVENT_TABLE()
-};
-
-// ----------------------------------------------------------------------------
-// a base class for all dialogs which are used to edit the profile settings: it
-// adds the member profile variable and the "hasChanges" flag. As it derives
-// from wxPDialog, it saves and restores its position.
-// ----------------------------------------------------------------------------
-
-class wxProfileSettingsEditDialog : public wxManuallyLaidOutDialog
-{
-public:
-   wxProfileSettingsEditDialog(Profile *profile,
-                                       const wxString& profileKey,
-                                       wxWindow *parent,
-                                       const wxString& title);
-
-   virtual ~wxProfileSettingsEditDialog();
-   virtual Profile *GetProfile() const { return m_profile; }
-
-   virtual bool HasChanges() const { return m_hasChanges; }
-   virtual void MarkDirty() { m_hasChanges = TRUE; }
-
-protected:
-   Profile *m_profile;
-   bool         m_hasChanges;
-
-   DECLARE_NO_COPY_CLASS(wxProfileSettingsEditDialog)
 };
 
 // ----------------------------------------------------------------------------
@@ -369,15 +387,19 @@ protected:
 // parent: this is useful when we're shown from the options dialog because the
 // option pages there suppose that all command events can only originate from
 // their controls.
+//
+// it also conveniently stores the profile passed to its ctor (it doesn't take
+// its ownership)
 // ----------------------------------------------------------------------------
 
-class wxOptionsPageSubdialog : public wxProfileSettingsEditDialog
+class wxOptionsPageSubdialog : public wxManuallyLaidOutDialog,
+                               public ProfileHolder
 {
 public:
    wxOptionsPageSubdialog(Profile *profile,
-                                  wxWindow *parent,
-                                  const wxString& label,
-                                  const wxString& windowName);
+                          wxWindow *parent,
+                          const wxString& label,
+                          const wxString& windowName);
 
    virtual void OnChange(wxCommandEvent& event);
 

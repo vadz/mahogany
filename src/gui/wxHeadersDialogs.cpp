@@ -169,6 +169,9 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+   // did we do anything?
+   bool HasChanges() const { return m_hasChanges; }
+
 protected:
    // event handlers
 
@@ -194,6 +197,8 @@ private:
    wxTextCtrl *m_textvalues[Header_Max];
 
    static void InitStaticArrays();
+
+   bool m_hasChanges;
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxComposeHeadersDialog)
@@ -398,6 +403,8 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
                                                  "message composition"),
                                                _T("ComposeHeaders"))
 {
+   m_hasChanges = false;
+
    InitStaticArrays();
 
    // layout the controls

@@ -674,16 +674,17 @@ private:
 class wxGlobalOptionsDialog : public wxOptionsEditDialog
 {
 public:
-   wxGlobalOptionsDialog(wxFrame *parent, const wxString& configKey = _T("OptionsDlg"));
+   wxGlobalOptionsDialog(wxFrame *parent,
+                         const wxString& configKey = "OptionsDlg");
+
+   // call this after creation to show a specific page
+   void ShowPage(OptionsPage page);
 
    virtual ~wxGlobalOptionsDialog();
 
    // override base class functions
    virtual void CreateNotebook(wxPanel *panel);
    virtual bool TransferDataToWindow();
-
-   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxGlobalOptionsDialog() { wxFAIL_MSG(_T("should be never used")); }
 
    // return TRUE if this dialog edits global options for the program, FALSE
    // if this is another kind of dialog
@@ -697,7 +698,8 @@ protected:
    }
 
 private:
-   DECLARE_DYNAMIC_CLASS_NO_COPY(wxGlobalOptionsDialog)
+   DECLARE_ABSTRACT_CLASS(wxGlobalOptionsDialog)
+   DECLARE_NO_COPY_CLASS(wxGlobalOptionsDialog)
 };
 
 // just like wxGlobalOptionsDialog but uses the given wxOptionsPage and not the
@@ -730,6 +732,9 @@ public:
       SafeIncRef(m_profile);
 
       SetPagesDesc(nPages, pageDesc);
+
+      CreateAllControls();
+      Layout();
    }
 
    // delayed initializetion: use these methods for an object constructed with
@@ -802,6 +807,9 @@ public:
       SetPagesDesc(m_nPages, m_aPages);
 
       SetTitle(wxString::Format(_("Settings for identity '%s'"), m_identity.c_str()));
+
+      CreateAllControls();
+      Layout();
    }
 
    virtual ~wxIdentityOptionsDialog()
@@ -844,16 +852,22 @@ private:
 
 // another dialog (not for options this one) which allows to restore the
 // previously changed settings
-class wxRestoreDefaultsDialog : public wxProfileSettingsEditDialog
+class wxRestoreDefaultsDialog : public wxManuallyLaidOutDialog,
+                                private ProfileHolder
 {
 public:
    wxRestoreDefaultsDialog(Profile *profile, wxFrame *parent);
+
+   // return true if we did anything
+   bool HasChanges() const { return m_hasChanges; }
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
 
 private:
    wxCheckListBox *m_checklistBox;
+
+   bool m_hasChanges;
 
    DECLARE_NO_COPY_CLASS(wxRestoreDefaultsDialog)
 };
@@ -902,7 +916,7 @@ private:
 // event tables and such
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxGlobalOptionsDialog, wxOptionsEditDialog)
+IMPLEMENT_ABSTRACT_CLASS(wxGlobalOptionsDialog, wxOptionsEditDialog)
 
 BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    // any change should make us dirty
@@ -4643,9 +4657,27 @@ void wxOptionsPageFolders::OnAddFolder(wxCommandEvent& event)
 // wxGlobalOptionsDialog
 // ----------------------------------------------------------------------------
 
-wxGlobalOptionsDialog::wxGlobalOptionsDialog(wxFrame *parent, const wxString& configKey)
-               : wxOptionsEditDialog(parent, _("Program options"), configKey)
+wxGlobalOptionsDialog::wxGlobalOptionsDialog(wxFrame *parent,
+                                             const wxString& configKey)
+                     : wxOptionsEditDialog(parent,
+                                           _("Program options"),
+                                           configKey)
 {
+}
+
+void wxGlobalOptionsDialog::ShowPage(OptionsPage page)
+{
+#ifdef PROFILE_OPTIONS_DLG
+   wxStopWatch sw;
+#endif
+
+   CreateAllControls();
+   SetNotebookPage(page);
+   Layout();
+
+#ifdef PROFILE_OPTIONS_DLG
+   wxLogStatus(_T("Options dialog created in %ldms"), sw.Time());
+#endif
 }
 
 bool
@@ -4850,14 +4882,16 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
 
 wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(Profile *profile,
                                                  wxFrame *parent)
-                       : wxProfileSettingsEditDialog
+                       : wxManuallyLaidOutDialog
                          (
-                           profile,
-                           _T("RestoreOptionsDlg"),
                            parent,
-                           _("Restore default options")
-                         )
+                           _("Restore default options"),
+                           "RestoreOptionsDlg"
+                         ),
+                         ProfileHolder(profile)
 {
+   m_hasChanges = false;
+
    wxLayoutConstraints *c;
 
    // create the Ok and Cancel buttons in the bottom right corner
@@ -4927,7 +4961,7 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
    {
       if ( m_checklistBox->IsChecked(n) )
       {
-         MarkDirty();
+         m_hasChanges = true;
 
          GetProfile()->GetConfig()->DeleteEntry(
                wxOptionsPageStandard::ms_aConfigDefaults[n].name);
@@ -5215,18 +5249,8 @@ void wxConfigSourcesDialog::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
 
 void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
 {
-#ifdef PROFILE_OPTIONS_DLG
-   wxStopWatch sw;
-#endif
-
    wxGlobalOptionsDialog dlg(parent);
-   dlg.CreateAllControls();
-   dlg.SetNotebookPage(page);
-   dlg.Layout();
-
-#ifdef PROFILE_OPTIONS_DLG
-   wxLogStatus(_T("Options dialog created in %ldms"), sw.Time());
-#endif
+   dlg.ShowPage(page);
 
    (void)dlg.ShowModal();
 }
@@ -5251,8 +5275,6 @@ bool ShowCustomOptionsDialog(size_t nPages,
                              wxFrame *parent)
 {
    wxCustomOptionsDialog dlg(nPages, pageDesc, profile, parent);
-   dlg.CreateAllControls();
-   dlg.Layout();
 
    return dlg.ShowModal() == wxID_OK;
 }
@@ -5260,8 +5282,6 @@ bool ShowCustomOptionsDialog(size_t nPages,
 void ShowIdentityDialog(const wxString& identity, wxFrame *parent)
 {
    wxIdentityOptionsDialog dlg(identity, parent);
-   dlg.CreateAllControls();
-   dlg.Layout();
 
    (void)dlg.ShowModal();
 }
