@@ -443,6 +443,28 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// a helper class which doesn't take ownership of Profile (unlike Profile_obj)
+// but ensures that it's kept alive during its own lifetime
+// ----------------------------------------------------------------------------
+
+class ProfileHolder
+{
+public:
+   ProfileHolder(Profile *profile) : m_profile(profile) { SafeIncRef(profile); }
+   ~ProfileHolder() { SafeDecRef(m_profile); }
+
+   // don't DecRef() the pointer returned by this method
+   Profile *GetProfile() const { return m_profile; }
+
+protected:
+   Profile * const m_profile;
+
+private:
+   ProfileHolder(const ProfileHolder&);
+   ProfileHolder& operator=(const ProfileHolder&);
+};
+
+// ----------------------------------------------------------------------------
 // a small class to temporarily suspend env var expansion
 // ----------------------------------------------------------------------------
 
