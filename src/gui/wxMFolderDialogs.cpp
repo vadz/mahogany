@@ -2445,7 +2445,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    Profile_obj profileDlg(dlg->GetProfile());
    ConfigSource * const config = profileDlg->GetConfigSourceForWriting();
-   folder->SetConfigSourceForWriting(config);
+
+   Profile_obj profileFolder(folder->GetProfile());
+   CHECK( profileFolder, false, "folder must have profile here" );
+   profileFolder->SetConfigSourceForWriting(config);
 
    // 2nd step: put what we can in MFolder
    folder->SetComment(m_comment->GetValue());

@@ -198,13 +198,6 @@ public:
    //@{
 
    /**
-     Set the config source to use for saving changes.
-
-     @sa Profile::SetConfigSourceForWriting().
-    */
-   virtual void SetConfigSourceForWriting(ConfigSource *config) = 0;
-
-   /**
      Get the profile associated with this folder: it will never be NULL (as
      we fall back to the application profile if we don't have our own) and
      can be used to read the other (than the ones we have explicit functions
