@@ -23,12 +23,12 @@
 
 // we can be compiled inside wxWin or not
 #ifdef WXMAKINGDLL
-    #define WXDLLMAYEXP WXDLLEXPORT
+    #define WXDLLMAYEXP WXDLLIMPEXP_FWD_CORE
 #else
     #define WXDLLMAYEXP
 #endif
 
-class WXDLLEXPORT wxDateTime;
+class WXDLLIMPEXP_FWD_BASE wxDateTime;
 class WXDLLMAYEXP wxVCardObject;
 class WXDLLMAYEXP wxVCard;
 

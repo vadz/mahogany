@@ -24,7 +24,7 @@ class MessageView;
 class MFolder;
 class UIdArray;
 
-class WXDLLEXPORT wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 #include "MEvent.h"
 

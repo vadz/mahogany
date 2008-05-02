@@ -14,7 +14,7 @@
 #ifndef _M_GUI_FOLDERMENU_H_
 #define _M_GUI_FOLDERMENU_H_
 
-class WXDLLEXPORT wxMenu;
+class WXDLLIMPEXP_FWD_CORE wxMenu;
 class MFolder;
 
 class wxFolderMenu

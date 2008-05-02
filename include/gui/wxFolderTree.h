@@ -22,9 +22,9 @@ class wxFolderTreeImpl;
 class MFolder;
 class wxMainFrame;
 
-class WXDLLEXPORT wxMenu;
-class WXDLLEXPORT wxPoint;
-class WXDLLEXPORT wxSize;
+class WXDLLIMPEXP_FWD_CORE wxMenu;
+class WXDLLIMPEXP_FWD_CORE wxPoint;
+class WXDLLIMPEXP_FWD_CORE wxSize;
 
 // abstraction of the folder tree control for M usage
 class wxFolderTree

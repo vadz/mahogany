@@ -58,18 +58,18 @@
 // forward declarations
 // -----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxFrame;
-class WXDLLEXPORT wxCheckBox;
-class WXDLLEXPORT wxCheckListBox;
-class WXDLLEXPORT wxChoice;
-class WXDLLEXPORT wxControl;
-class WXDLLEXPORT wxComboBox;
-class WXDLLEXPORT wxListBox;
-class WXDLLEXPORT wxRadioBox;
-class WXDLLEXPORT wxScrolledWindow;
-class WXDLLEXPORT wxStaticBitmap;
-class WXDLLEXPORT wxStaticBox;
-class WXDLLEXPORT wxStaticText;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxCheckBox;
+class WXDLLIMPEXP_FWD_CORE wxCheckListBox;
+class WXDLLIMPEXP_FWD_CORE wxChoice;
+class WXDLLIMPEXP_FWD_CORE wxControl;
+class WXDLLIMPEXP_FWD_CORE wxComboBox;
+class WXDLLIMPEXP_FWD_CORE wxListBox;
+class WXDLLIMPEXP_FWD_CORE wxRadioBox;
+class WXDLLIMPEXP_FWD_CORE wxScrolledWindow;
+class WXDLLIMPEXP_FWD_CORE wxStaticBitmap;
+class WXDLLIMPEXP_FWD_CORE wxStaticBox;
+class WXDLLIMPEXP_FWD_CORE wxStaticText;
 
 class /* WXDLLEXPORT */ wxColorBrowseButton;
 class /* WXDLLEXPORT */ wxDirBrowseButton;

@@ -20,7 +20,7 @@ class Profile;
 class ASMailFolder;
 class MFolder;
 
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 /**
    FolderView class, a window displaying a MailFolder.

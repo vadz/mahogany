@@ -30,8 +30,8 @@ class wxFolderTree;
 
 class GlobalSearchData;
 
-class WXDLLEXPORT wxMenu;
-class WXDLLEXPORT wxSplitterWindow;
+class WXDLLIMPEXP_FWD_CORE wxMenu;
+class WXDLLIMPEXP_FWD_CORE wxSplitterWindow;
 
 class wxMainFrame : public wxMFrame, public MEventReceiver
 {

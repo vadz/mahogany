@@ -19,7 +19,7 @@
 
 #include "MailFolder.h"    // for MailFolder::MessageStatus
 
-class WXDLLEXPORT wxArrayString;
+class WXDLLIMPEXP_FWD_BASE wxArrayString;
 class Sequence;
 
 struct SortParams;

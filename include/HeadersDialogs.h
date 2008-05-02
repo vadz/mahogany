@@ -13,7 +13,7 @@
 #ifndef _HEADERDIALOGS_H
 #define _HEADERDIALOGS_H
 
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 class Profile;
 
 /** custom header type: a custom header may be added only to mail messages,

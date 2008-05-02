@@ -20,7 +20,7 @@
 #include "MModule.h"    // the base class
 
 class MFolder;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 // ----------------------------------------------------------------------------
 // constants

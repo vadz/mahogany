@@ -18,7 +18,7 @@
 
 class MCryptoEngineOutputLog;
 
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 /**
    MCryptoEngine defines an abstract interface for all supported cryptographic

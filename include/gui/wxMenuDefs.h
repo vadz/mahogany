@@ -16,9 +16,9 @@
 
 #include <wx/fontenc.h>
 
-class WXDLLEXPORT wxMenu;
-class WXDLLEXPORT wxToolBar;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxMenu;
+class WXDLLIMPEXP_FWD_CORE wxToolBar;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 // ----------------------------------------------------------------------------
 // menu functions

@@ -25,7 +25,7 @@
 
 // forward declaration
 class MFolder;
-class WXDLLEXPORT wxStaticBitmap;
+class WXDLLIMPEXP_FWD_CORE wxStaticBitmap;
 
 // ----------------------------------------------------------------------------
 // A base class for all "browse" buttons: these are the small buttons positioned

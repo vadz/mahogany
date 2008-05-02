@@ -38,7 +38,7 @@
 
 #include "MModule.h"
 
-class WXDLLEXPORT wxConfigBase;
+class WXDLLIMPEXP_FWD_BASE wxConfigBase;
 
 /// The name of the config section containing the config sources info
 #define M_CONFIGSRC_CONFIG_SECTION _T("/Configs")

@@ -23,10 +23,10 @@
 #define _M_GUI_LISTBOOK_H_
 
 #if wxUSE_LISTBOOK
-   class WXDLLEXPORT wxListbook;
+   class WXDLLIMPEXP_FWD_CORE wxListbook;
    typedef wxListbook wxListOrNoteBook;
 #else
-   class WXDLLEXPORT wxNotebook;
+   class WXDLLIMPEXP_FWD_CORE wxNotebook;
    typedef wxNotebook wxListOrNoteBook;
 #endif
 

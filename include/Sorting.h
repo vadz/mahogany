@@ -18,7 +18,7 @@
 #endif // USE_PCH
 
 class Profile;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 /**
    Sort order enum for sorting message listings.

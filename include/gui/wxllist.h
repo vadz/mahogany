@@ -104,10 +104,10 @@ class wxLayoutList;
 class wxLayoutLine;
 class wxLayoutObject;
 
-class WXDLLEXPORT wxCaret;
-class WXDLLEXPORT wxColour;
-class WXDLLEXPORT wxDC;
-class WXDLLEXPORT wxFont;
+class WXDLLIMPEXP_FWD_CORE wxCaret;
+class WXDLLIMPEXP_FWD_CORE wxColour;
+class WXDLLIMPEXP_FWD_CORE wxDC;
+class WXDLLIMPEXP_FWD_CORE wxFont;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

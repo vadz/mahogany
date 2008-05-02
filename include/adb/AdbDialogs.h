@@ -13,8 +13,8 @@
 #ifndef _ADB_DIALOGS_H
 #define _ADB_DIALOGS_H
 
-class WXDLLEXPORT wxWindow;
-class WXDLLEXPORT wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 class AdbEntryGroup;
 class ArrayAdbElements;

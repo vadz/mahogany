@@ -34,14 +34,14 @@
    class WXDLLEXPORT wxDialUpEvent;
    class WXDLLEXPORT wxDialUpManager;
 #endif // USE_DIALUP
-class WXDLLEXPORT wxLocale;
-class WXDLLEXPORT wxLog;
-class WXDLLEXPORT wxLogChain;
-class WXDLLEXPORT wxHelpControllerBase;
-class WXDLLEXPORT wxPrintData;
-class WXDLLEXPORT wxServerBase;
-class WXDLLEXPORT wxSingleInstanceChecker;
-class WXDLLEXPORT wxTimer;
+class WXDLLIMPEXP_FWD_BASE wxLocale;
+class WXDLLIMPEXP_FWD_BASE wxLog;
+class WXDLLIMPEXP_FWD_BASE wxLogChain;
+class WXDLLIMPEXP_FWD_BASE wxHelpControllerBase;
+class WXDLLIMPEXP_FWD_BASE wxPrintData;
+class WXDLLIMPEXP_FWD_BASE wxServerBase;
+class WXDLLIMPEXP_FWD_BASE wxSingleInstanceChecker;
+class WXDLLIMPEXP_FWD_BASE wxTimer;
 
 class wxIconManager;
 

@@ -14,10 +14,10 @@
 #ifndef _MESSAGEEDITOR_H_
 #define _MESSAGEEDITOR_H_
 
-class WXDLLEXPORT wxBitmap;
-class WXDLLEXPORT wxPoint;
-class WXDLLEXPORT wxTextAttr;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxBitmap;
+class WXDLLIMPEXP_FWD_CORE wxPoint;
+class WXDLLIMPEXP_FWD_CORE wxTextAttr;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 class EditorContentPart;
 class Composer;

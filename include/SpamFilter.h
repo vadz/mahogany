@@ -28,7 +28,7 @@
 class Message;
 class SpamOptionsPage;
 
-class WXDLLEXPORT wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 
 /*

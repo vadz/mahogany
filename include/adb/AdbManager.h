@@ -28,7 +28,7 @@
 class AdbBook;
 class AdbDataProvider;
 
-class WXDLLEXPORT wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 // arrays
 WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);

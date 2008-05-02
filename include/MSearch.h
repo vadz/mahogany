@@ -15,7 +15,7 @@
 
 class MFolder;
 class Profile;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 /**
   Search criterium for searching folders for certain messages.

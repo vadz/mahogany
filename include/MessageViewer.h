@@ -14,10 +14,10 @@
 #ifndef _MESSAGEVIEWER_H_
 #define _MESSAGEVIEWER_H_
 
-class WXDLLEXPORT wxBitmap;
-class WXDLLEXPORT wxTextAttr;
-class WXDLLEXPORT wxWindow;
-class WXDLLEXPORT wxImage;
+class WXDLLIMPEXP_FWD_CORE wxBitmap;
+class WXDLLIMPEXP_FWD_CORE wxTextAttr;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxImage;
 
 class ClickableInfo;
 class MTextStyle;

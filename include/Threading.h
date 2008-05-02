@@ -18,7 +18,7 @@
 
 class Profile;
 class HeaderInfoList;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 // THREADNODE is defined in <cclient.h> which may have been or not included
 #ifndef THREADNODE

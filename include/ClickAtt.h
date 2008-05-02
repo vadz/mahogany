@@ -19,7 +19,7 @@
 class MessageView;
 class MimePart;
 
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 class ClickableAttachment : public ClickableInfo
 {

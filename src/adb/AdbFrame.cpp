@@ -75,7 +75,7 @@
 class MPersMsgBox;
 class MOption;
 class wxPTextEntry;
-class WXDLLEXPORT wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 // ----------------------------------------------------------------------------
 // options we use here

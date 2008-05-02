@@ -26,8 +26,8 @@
 #   include "Profile.h"        // for Profile_obj
 #endif // USE_PCH
 
-class WXDLLEXPORT wxFrame;
-class WXDLLEXPORT wxTextCtrl;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
 
 /**
    AddressExpander is not a control but can be associated with an existing

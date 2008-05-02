@@ -13,7 +13,7 @@
 #ifndef _M_COLOURNAMES_H_
 #define _M_COLOURNAMES_H_
 
-class WXDLLEXPORT wxColour;
+class WXDLLIMPEXP_FWD_CORE wxColour;
 class MOption;
 class Profile;
 

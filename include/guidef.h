@@ -16,7 +16,7 @@
 #  include <wx/frame.h>
 #endif // USE_PCH
 
-class WXDLLEXPORT wxClassInfo;
+class WXDLLIMPEXP_FWD_BASE wxClassInfo;
 
 /// how much space to leave in frame around other items
 #define   WXFRAME_WIDTH_DELTA   16

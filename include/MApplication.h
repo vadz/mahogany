@@ -24,12 +24,12 @@ class MModuleCommon;
 class ArrayFrames;
 class wxMFrame;
 
-class WXDLLEXPORT wxDynamicLibrary;
-class WXDLLEXPORT wxMimeTypesManager;
-class WXDLLEXPORT wxPageSetupDialogData;
-class WXDLLEXPORT wxPrintData;
-class WXDLLEXPORT wxConfigBase;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_BASE wxDynamicLibrary;
+class WXDLLIMPEXP_FWD_BASE wxMimeTypesManager;
+class WXDLLIMPEXP_FWD_BASE wxPageSetupDialogData;
+class WXDLLIMPEXP_FWD_BASE wxPrintData;
+class WXDLLIMPEXP_FWD_BASE wxConfigBase;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 M_LIST_PTR(ListLibraries, wxDynamicLibrary);
 

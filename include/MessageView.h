@@ -24,9 +24,9 @@
 
 #include "MEvent.h"
 
-class WXDLLEXPORT wxFrame;
-class WXDLLEXPORT wxPoint;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxPoint;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 class ASMailFolder;
 class ClickableInfo;

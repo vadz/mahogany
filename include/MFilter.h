@@ -15,7 +15,7 @@
 
 #include "MObject.h"            // for MObjectRC
 
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 class FilterRule;
 class MFolder;

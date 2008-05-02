@@ -37,12 +37,12 @@ class wxEnhancedPanel;
 class SendMessage;
 class MessageEditor;
 
-class WXDLLEXPORT wxChoice;
-class WXDLLEXPORT wxMenuItem;
-class WXDLLEXPORT wxProcess;
-class WXDLLEXPORT wxProcessEvent;
-class WXDLLEXPORT wxSplitterWindow;
-class WXDLLEXPORT wxTextCtrl;
+class WXDLLIMPEXP_FWD_CORE wxChoice;
+class WXDLLIMPEXP_FWD_CORE wxMenuItem;
+class WXDLLIMPEXP_FWD_BASE wxProcess;
+class WXDLLIMPEXP_FWD_BASE wxProcessEvent;
+class WXDLLIMPEXP_FWD_CORE wxSplitterWindow;
+class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
 
 WX_DEFINE_ARRAY(wxRcptExtraControl *, ArrayRcptControls);
 

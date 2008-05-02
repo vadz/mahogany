@@ -13,8 +13,8 @@
 #ifndef _M_CACHEFILE_H_
 #define _M_CACHEFILE_H_
 
-class WXDLLEXPORT wxTempFile;
-class WXDLLEXPORT wxTextFile;
+class WXDLLIMPEXP_FWD_BASE wxTempFile;
+class WXDLLIMPEXP_FWD_BASE wxTextFile;
 
 // ----------------------------------------------------------------------------
 // CacheFile

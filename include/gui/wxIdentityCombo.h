@@ -13,8 +13,8 @@
 #ifndef _GUI_WXIDENTITYCOMBO_H_
 #define _GUI_WXIDENTITYCOMBO_H_
 
-class WXDLLEXPORT wxChoice;
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxChoice;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 /// the id of the identity combobox (always the same)
 enum
