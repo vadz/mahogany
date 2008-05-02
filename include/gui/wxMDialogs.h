@@ -25,7 +25,7 @@ class Profile;
 class MFolder;
 class MPersMsgBox;
 
-class WXDLLIMPEXP_FWD_BASE wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
 class WXDLLIMPEXP_FWD_BASE wxStaticText;
 
 /**
