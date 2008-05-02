@@ -2578,10 +2578,15 @@ public:
    {
    }
 
+#if wxCHECK_VERSION(2, 9, 0)
+   virtual bool OnExec(const wxString& WXUNUSED(topic),
+                       const wxString& data)
+#else // wx < 2.9
    virtual bool OnExecute(const wxString& WXUNUSED(topic),
-                          wxChar *data,
+                          char *data,
                           int WXUNUSED(size),
                           wxIPCFormat WXUNUSED(format))
+#endif
    {
       return wxGetApp().OnRemoteRequest(data);
    }
