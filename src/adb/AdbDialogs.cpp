@@ -513,6 +513,13 @@ void wxAdbExpandDialog::OnBtnDelete(wxCommandEvent& WXUNUSED(event))
 
    // first remove it from the listbox
    m_listbox->Delete(n);
+   const size_t countLbox = m_listbox->GetCount();
+   if ( n < countLbox )
+      m_listbox->Select(n);
+   else if ( countLbox )
+      m_listbox->Select(countLbox - 1);
+   //else: no more items left
+
 
    // now remove it from the internal data as well
    AdbEntry *entry;
