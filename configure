@@ -568,7 +568,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in 7285 2007-06-13 10:08:21Z vadz 
+# From configure.in Id: configure.in 7373 2007-09-09 22:15:18Z nerijus 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4293,6 +4293,9 @@ esac
 
 MIN_WX_VERSION=2.8.4
 
+wxlibs=html,adv,qa,core,xml,net,base
+
+
     
     if test x${WX_CONFIG_NAME+set} != xset ; then
      WX_CONFIG_NAME=wx-config
@@ -4316,14 +4319,14 @@ MIN_WX_VERSION=2.8.4
 
     if test -x "$WX_CONFIG_NAME" ; then
      echo $ac_n "checking for wx-config""... $ac_c" 1>&6
-echo "configure:4320: checking for wx-config" >&5
+echo "configure:4323: checking for wx-config" >&5
      WX_CONFIG_PATH="$WX_CONFIG_NAME"
      echo "$ac_t""$WX_CONFIG_PATH" 1>&6
   else
      # Extract the first word of "$WX_CONFIG_NAME", so it can be a program name with args.
 set dummy $WX_CONFIG_NAME; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4327: checking for $ac_word" >&5
+echo "configure:4330: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_WX_CONFIG_PATH'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4364,10 +4367,10 @@ fi
     min_wx_version=$MIN_WX_VERSION
     if test -z "--unicode=no --debug=$debug_option" ; then
       echo $ac_n "checking for wxWidgets version >= $min_wx_version""... $ac_c" 1>&6
-echo "configure:4368: checking for wxWidgets version >= $min_wx_version" >&5
+echo "configure:4371: checking for wxWidgets version >= $min_wx_version" >&5
     else
       echo $ac_n "checking for wxWidgets version >= $min_wx_version (--unicode=no --debug=$debug_option)""... $ac_c" 1>&6
-echo "configure:4371: checking for wxWidgets version >= $min_wx_version (--unicode=no --debug=$debug_option)" >&5
+echo "configure:4374: checking for wxWidgets version >= $min_wx_version (--unicode=no --debug=$debug_option)" >&5
     fi
 
             WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args --unicode=no --debug=$debug_option"
@@ -4410,11 +4413,11 @@ echo "configure:4371: checking for wxWidgets version >= $min_wx_version (--unico
 
     if test -n "$wx_ver_ok"; then
       echo "$ac_t""yes (version $WX_VERSION)" 1>&6
-      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs adv,base,core,html,net,qa`
+      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs $wxlibs`
 
                               echo $ac_n "checking for wxWidgets static library""... $ac_c" 1>&6
-echo "configure:4417: checking for wxWidgets static library" >&5
-      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs adv,base,core,html,net,qa 2>/dev/null`
+echo "configure:4420: checking for wxWidgets static library" >&5
+      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs $wxlibs 2>/dev/null`
       if test "x$WX_LIBS_STATIC" = "x"; then
         echo "$ac_t""no" 1>&6
       else
@@ -4455,16 +4458,16 @@ echo "configure:4417: checking for wxWidgets static library" >&5
       fi
 
       if test "x$wx_has_cppflags" = x ; then
-                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags adv,base,core,html,net,qa`
+                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags $wxlibs`
          WX_CPPFLAGS=$WX_CFLAGS
          WX_CXXFLAGS=$WX_CFLAGS
 
          WX_CFLAGS_ONLY=$WX_CFLAGS
          WX_CXXFLAGS_ONLY=$WX_CFLAGS
       else
-                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags adv,base,core,html,net,qa`
-         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags adv,base,core,html,net,qa`
-         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags adv,base,core,html,net,qa`
+                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags $wxlibs`
+         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags $wxlibs`
+         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags $wxlibs`
 
          WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
          WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
@@ -4569,14 +4572,14 @@ if test "$wxOK" != 1; then
 
     if test -x "$WX_CONFIG_NAME" ; then
      echo $ac_n "checking for wx-config""... $ac_c" 1>&6
-echo "configure:4573: checking for wx-config" >&5
+echo "configure:4576: checking for wx-config" >&5
      WX_CONFIG_PATH="$WX_CONFIG_NAME"
      echo "$ac_t""$WX_CONFIG_PATH" 1>&6
   else
      # Extract the first word of "$WX_CONFIG_NAME", so it can be a program name with args.
 set dummy $WX_CONFIG_NAME; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4580: checking for $ac_word" >&5
+echo "configure:4583: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_WX_CONFIG_PATH'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4617,10 +4620,10 @@ fi
     min_wx_version=2.9.0
     if test -z "--debug=$debug_option" ; then
       echo $ac_n "checking for wxWidgets version >= $min_wx_version""... $ac_c" 1>&6
-echo "configure:4621: checking for wxWidgets version >= $min_wx_version" >&5
+echo "configure:4624: checking for wxWidgets version >= $min_wx_version" >&5
     else
       echo $ac_n "checking for wxWidgets version >= $min_wx_version (--debug=$debug_option)""... $ac_c" 1>&6
-echo "configure:4624: checking for wxWidgets version >= $min_wx_version (--debug=$debug_option)" >&5
+echo "configure:4627: checking for wxWidgets version >= $min_wx_version (--debug=$debug_option)" >&5
     fi
 
             WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args --debug=$debug_option"
@@ -4663,11 +4666,11 @@ echo "configure:4624: checking for wxWidgets version >= $min_wx_version (--debug
 
     if test -n "$wx_ver_ok"; then
       echo "$ac_t""yes (version $WX_VERSION)" 1>&6
-      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs adv,base,core,html,net,qa`
+      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs $wxlibs`
 
                               echo $ac_n "checking for wxWidgets static library""... $ac_c" 1>&6
-echo "configure:4670: checking for wxWidgets static library" >&5
-      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs adv,base,core,html,net,qa 2>/dev/null`
+echo "configure:4673: checking for wxWidgets static library" >&5
+      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs $wxlibs 2>/dev/null`
       if test "x$WX_LIBS_STATIC" = "x"; then
         echo "$ac_t""no" 1>&6
       else
@@ -4708,16 +4711,16 @@ echo "configure:4670: checking for wxWidgets static library" >&5
       fi
 
       if test "x$wx_has_cppflags" = x ; then
-                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags adv,base,core,html,net,qa`
+                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags $wxlibs`
          WX_CPPFLAGS=$WX_CFLAGS
          WX_CXXFLAGS=$WX_CFLAGS
 
          WX_CFLAGS_ONLY=$WX_CFLAGS
          WX_CXXFLAGS_ONLY=$WX_CFLAGS
       else
-                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags adv,base,core,html,net,qa`
-         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags adv,base,core,html,net,qa`
-         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags adv,base,core,html,net,qa`
+                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags $wxlibs`
+         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags $wxlibs`
+         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags $wxlibs`
 
          WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
          WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
@@ -4840,7 +4843,7 @@ if test "$USE_MAC" = 1; then
     # Extract the first word of "SetFile", so it can be a program name with args.
 set dummy SetFile; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4844: checking for $ac_word" >&5
+echo "configure:4847: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_SETFILE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4886,7 +4889,7 @@ fi
 
 case "$USE_THREADS" in 1)
 	echo $ac_n "checking if wxWidgets was compiled with threads""... $ac_c" 1>&6
-echo "configure:4890: checking if wxWidgets was compiled with threads" >&5
+echo "configure:4893: checking if wxWidgets was compiled with threads" >&5
 if eval "test \"`echo '$''{'m_cv_wx_threads'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4894,7 +4897,7 @@ else
   m_cv_wx_threads=x
 else
   cat > conftest.$ac_ext <<EOF
-#line 4898 "configure"
+#line 4901 "configure"
 #include "confdefs.h"
 #include "wx/setup.h"
 			int main(){
@@ -4905,7 +4908,7 @@ else
 			#endif
 			}
 EOF
-if { (eval echo configure:4909: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:4912: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   m_cv_wx_threads=yes
 else
@@ -4941,7 +4944,7 @@ esac
 case "$OSTYPE" in
    linux* | Linux*)
       echo $ac_n "checking for pam_end in -lpam""... $ac_c" 1>&6
-echo "configure:4945: checking for pam_end in -lpam" >&5
+echo "configure:4948: checking for pam_end in -lpam" >&5
 ac_lib_var=`echo pam'_'pam_end | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4949,7 +4952,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpam  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4953 "configure"
+#line 4956 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4960,7 +4963,7 @@ int main() {
 pam_end()
 ; return 0; }
 EOF
-if { (eval echo configure:4964: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4967: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4988,7 +4991,7 @@ case "$USE_MINGW" in
 0)
 case "$USE_CCOSTYPE" in
 ''|0|1)	echo $ac_n "checking for c-client library OS type""... $ac_c" 1>&6
-echo "configure:4992: checking for c-client library OS type" >&5
+echo "configure:4995: checking for c-client library OS type" >&5
 	case "$OSTYPE" in
 	linux* | Linux*)
 		;; 	Solaris* | solaris* | SunOS*)
@@ -5049,17 +5052,17 @@ case "$USE_PISOCK" in
 1)
     ac_safe=`echo "pi-source.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for pi-source.h""... $ac_c" 1>&6
-echo "configure:5053: checking for pi-source.h" >&5
+echo "configure:5056: checking for pi-source.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 5058 "configure"
+#line 5061 "configure"
 #include "confdefs.h"
 #include <pi-source.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:5063: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:5066: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -5076,7 +5079,7 @@ fi
 if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
   echo $ac_n "checking for main in -lpisock""... $ac_c" 1>&6
-echo "configure:5080: checking for main in -lpisock" >&5
+echo "configure:5083: checking for main in -lpisock" >&5
 ac_lib_var=`echo pisock'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5084,14 +5087,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5088 "configure"
+#line 5091 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:5095: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5098: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5112,7 +5115,7 @@ EOF
 
 	MAKE_PISOCKLIB="PISOCK_LIB:=-lpisock"
 	echo $ac_n "checking for pi_setmaxspeed in -lpisock""... $ac_c" 1>&6
-echo "configure:5116: checking for pi_setmaxspeed in -lpisock" >&5
+echo "configure:5119: checking for pi_setmaxspeed in -lpisock" >&5
 ac_lib_var=`echo pisock'_'pi_setmaxspeed | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5120,7 +5123,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5124 "configure"
+#line 5127 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -5131,7 +5134,7 @@ int main() {
 pi_setmaxspeed()
 ; return 0; }
 EOF
-if { (eval echo configure:5135: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5138: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5156,7 +5159,7 @@ echo "configure: warning: Your pisock library is old - some functionality will b
 fi
 
 	echo $ac_n "checking for pi_accept_to in -lpisock""... $ac_c" 1>&6
-echo "configure:5160: checking for pi_accept_to in -lpisock" >&5
+echo "configure:5163: checking for pi_accept_to in -lpisock" >&5
 ac_lib_var=`echo pisock'_'pi_accept_to | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5164,7 +5167,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5168 "configure"
+#line 5171 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -5175,7 +5178,7 @@ int main() {
 pi_accept_to()
 ; return 0; }
 EOF
-if { (eval echo configure:5179: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:5182: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5221,7 +5224,7 @@ case "$MAKE_PISOCKLIB" in
 '') ;;
 *)
 	echo $ac_n "checking for libmal in lib""... $ac_c" 1>&6
-echo "configure:5225: checking for libmal in lib" >&5
+echo "configure:5228: checking for libmal in lib" >&5
 	if test ! -d $srcdir/lib/libmal 
 	then	echo "$ac_t""not found - no MAL synch for PalmOS" 1>&6
 	elif test -f $srcdir/lib/libmal/Makefile.in \
@@ -5279,7 +5282,7 @@ EOF
 	;;
 auto|Auto|AUTO|1)
 	echo $ac_n "checking how to link modules""... $ac_c" 1>&6
-echo "configure:5283: checking how to link modules" >&5
+echo "configure:5286: checking how to link modules" >&5
 		if test "$USE_MAC" = 0; then
 	    LDD="ldd"
 	else
@@ -5336,7 +5339,7 @@ MAKE_HAVE_DOCTOOLS='HAVE_DOCTOOLS=yes'
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5340: checking for $ac_word" >&5
+echo "configure:5343: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5371,7 +5374,7 @@ case "$PERL" in '') MAKE_HAVE_DOCTOOLS='' PERL='false "No perl available"';; esa
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5375: checking for $ac_word" >&5
+echo "configure:5378: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5406,7 +5409,7 @@ case "$LATEX" in '') MAKE_HAVE_DOCTOOLS='' LATEX='false "No latex available"';; 
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5410: checking for $ac_word" >&5
+echo "configure:5413: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5441,7 +5444,7 @@ case "$MAKEINDEX" in '') MAKE_HAVE_DOCTOOLS='' MAKEINDEX='false "No makeindex av
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5445: checking for $ac_word" >&5
+echo "configure:5448: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5476,7 +5479,7 @@ case "$DVIPS" in '') MAKE_HAVE_DOCTOOLS='' DVIPS='false "No dvips available"';; 
 # Extract the first word of "ps2pdf", so it can be a program name with args.
 set dummy ps2pdf; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5480: checking for $ac_word" >&5
+echo "configure:5483: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PSTOPDF'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5511,7 +5514,7 @@ case "$PSTOPDF" in '') MAKE_HAVE_DOCTOOLS='' PSTOPDF='false "No ps2pdf available
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5515: checking for $ac_word" >&5
+echo "configure:5518: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5579,7 +5582,7 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 
 IMAP_CFLAGS="$CFLAGS $IMAP_CFLAGS"
 echo $ac_n "checking whether $CC accepts -Wno-pointer-sign""... $ac_c" 1>&6
-echo "configure:5583: checking whether $CC accepts -Wno-pointer-sign" >&5
+echo "configure:5586: checking whether $CC accepts -Wno-pointer-sign" >&5
 if eval "test \"`echo '$''{'m_cv_cc_no_warn_ptr_sign'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5604,7 +5607,7 @@ if test $m_cv_cc_no_warn_ptr_sign = "yes"; then
     IMAP_CFLAGS="$IMAP_CFLAGS -Wno-pointer-sign"
 fi
 echo $ac_n "checking whether $CC accepts -Wno-pointer-to-int-cast""... $ac_c" 1>&6
-echo "configure:5608: checking whether $CC accepts -Wno-pointer-to-int-cast" >&5
+echo "configure:5611: checking whether $CC accepts -Wno-pointer-to-int-cast" >&5
 if eval "test \"`echo '$''{'m_cv_cc_no_warn_ptr_to_int_cast'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5680,7 +5683,7 @@ fi
 if test "x$DEPFLAGS" != "x"; then
             if test "x$GXX" != "xyes"; then
 	echo $ac_n "checking whether ${CXX} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5684: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
+echo "configure:5687: checking whether ${CXX} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_cxx_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5703,7 +5706,7 @@ echo "$ac_t""$m_cv_cxx_depflags" 1>&6
     if test "x$DEPFLAGS" != "x"; then
 	if test "x$GCC" != "xyes"; then
 	    echo $ac_n "checking whether ${CC} accepts ${DEPFLAGS}""... $ac_c" 1>&6
-echo "configure:5707: checking whether ${CC} accepts ${DEPFLAGS}" >&5
+echo "configure:5710: checking whether ${CC} accepts ${DEPFLAGS}" >&5
 if eval "test \"`echo '$''{'m_cv_c_depflags'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

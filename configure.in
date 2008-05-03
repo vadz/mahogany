@@ -966,13 +966,17 @@ dnl --------------------------------------------------------------------------
 dnl check for wxWidgets installation: traditionally, we could only use ANSI
 dnl build
 MIN_WX_VERSION=2.8.4
-AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[adv,base,core,html,net,qa],
+
+dnl notice that libraries option should use correct order, otherwise statically
+dnl linking won't work!
+wxlibs=html,adv,qa,core,xml,net,base
+
+AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[$wxlibs],
 		 [--unicode=no --debug=$debug_option])
 
 dnl but with wx3 we can also use Unicode build
 if test "$wxOK" != 1; then
-    AM_PATH_WXCONFIG(2.9.0, [wxOK=1],[wxOK=0],[adv,base,core,html,net,qa],
-		     [--debug=$debug_option])
+    AM_PATH_WXCONFIG(2.9.0, [wxOK=1],[wxOK=0],[$wxlibs], [--debug=$debug_option])
 fi
 
 if test "$wxOK" != 1; then
