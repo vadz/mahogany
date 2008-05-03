@@ -1032,7 +1032,7 @@ wxListBox *wxEnhancedPanel::CreateListbox(const wxChar *label, wxControl *last)
    // and the listbox itself
    wxListBox *listbox = new wxListBox(GetCanvas(), -1);
    c = new wxLayoutConstraints;
-   c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
    c->right.LeftOf(buttonModify, LAYOUT_X_MARGIN);;
    c->bottom.SameAs(box, wxBottom, LAYOUT_Y_MARGIN);
