@@ -26,8 +26,12 @@ ifdef SWIG
 # this command runs swig to generate .cpp file from an .i one and then replaces
 # #include Python.h in the generated C++ code with #include MPython.h which we
 # need for dynamic Python linking to work
+#
+# NB: current versions of swig (at least from 1.3.29 to 1.3.33) are confused by
+#     WXDLLIMPEXP_FWD_XXX in declarations, so we need to undefine them
 define create_cpp
-	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) -o $*.cpp.tmp $< && \
+	$(SWIG) -DWXDLLIMPEXP_FWD_BASE="" -DWXDLLIMPEXP_FWD_CORE="" \
+	    -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) -o $*.cpp.tmp $< && \
 	    sed -e 's/Python\.h/MPython.h/' $*.cpp.tmp > $(@:.o=.cpp) && \
 		rm $*.cpp.tmp
 endef
