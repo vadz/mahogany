@@ -415,7 +415,7 @@ wxMessageView::OnShowHeadersChange()
    wxMenuBar *mbar = frame->GetMenuBar();
    CHECK_RET( mbar, _T("message view frame without menu bar?") );
 
-   mbar->Check(WXMENU_MSG_TOGGLEHEADERS, GetProfileValues().showHeaders);
+   mbar->Check(WXMENU_VIEW_HEADERS, GetProfileValues().showHeaders);
 }
 
 // ----------------------------------------------------------------------------
@@ -474,12 +474,12 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
       WXMENU_MSG_UNDELETE,
       WXMENU_MSG_SEP3,
       WXMENU_MSG_SAVEADDRESSES,
-      WXMENU_MSG_TOGGLEHEADERS,
-      WXMENU_MSG_SHOWRAWTEXT,
+      WXMENU_VIEW_HEADERS,
+      WXMENU_VIEW_SHOWRAWTEXT,
 #ifdef EXPERIMENTAL_show_uid
-      WXMENU_MSG_SHOWUID,
+      WXMENU_VIEW_SHOWUID,
 #endif // EXPERIMENTAL_show_uid
-      WXMENU_MSG_SHOWMIME,
+      WXMENU_VIEW_SHOWMIME,
    };
 
    wxMenu *menu = new wxMenu(wxEmptyString, wxMENU_TEAROFF);

@@ -451,16 +451,15 @@ static const MenuItemInfo g_aMenuItems[] =
    // ABCDEFGIJKNOPQRSTUVXYZ
    { WXMENU_SUBMENU,       gettext_noop("&Viewer to use"), "", wxITEM_NORMAL },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
-   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
-   { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , wxITEM_CHECK },
-   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , wxITEM_NORMAL },
-#ifdef EXPERIMENTAL_show_uid
-   { WXMENU_MSG_SHOWUID, "Show message UID&L", "", wxITEM_NORMAL },
-#endif // EXPERIMENTAL_show_uid
-   { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , wxITEM_NORMAL },
-   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_SUBMENU,       gettext_noop("&Filters"), "", wxITEM_NORMAL },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_VIEW_HEADERS,  gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , wxITEM_CHECK },
+   { WXMENU_VIEW_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , wxITEM_NORMAL },
+#ifdef EXPERIMENTAL_show_uid
+   { WXMENU_VIEW_SHOWUID,  "Show message UID&L", "", wxITEM_NORMAL },
+#endif // EXPERIMENTAL_show_uid
+   { WXMENU_VIEW_SHOWMIME, gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , wxITEM_NORMAL },
 
    // compose
 

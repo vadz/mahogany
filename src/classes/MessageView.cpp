@@ -3606,7 +3606,7 @@ MessageView::DoMenuCommand(int id)
          mApplication->Help(MH_MESSAGE_VIEW, GetParentFrame());
          break;
 
-      case WXMENU_MSG_TOGGLEHEADERS:
+      case WXMENU_VIEW_HEADERS:
          if ( m_uid != UID_ILLEGAL )
          {
             m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;

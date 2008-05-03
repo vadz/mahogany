@@ -260,21 +260,18 @@ enum
       // this submenu is filled dynamically and the ids of its items start at
       // WXMENU_VIEW_VIEWERS_BEGIN defined below
    WXMENU_VIEW_VIEWERS_SUBMENU_END,
-   WXMENU_VIEW_SEP1,
-   // for backwards compatibility the commands below have MSG (as they were in
-   // the "Message" menu earlier), even though if they're in "View" menu now
-   WXMENU_MSG_TOGGLEHEADERS,
-   WXMENU_MSG_SHOWRAWTEXT,
-#ifdef EXPERIMENTAL_show_uid
-   WXMENU_MSG_SHOWUID,
-#endif // EXPERIMENTAL_show_uid
-   WXMENU_MSG_SHOWMIME,
-   WXMENU_VIEW_SEP2,
    WXMENU_VIEW_FILTERS_SUBMENU_BEGIN,
       // this submenu is filled dynamically and the ids of its items start at
       // WXMENU_VIEW_FILTERS_BEGIN defined below
    WXMENU_VIEW_FILTERS_SUBMENU_END,
-   WXMENU_VIEW_END = WXMENU_VIEW_FILTERS_SUBMENU_END,
+   WXMENU_VIEW_SEP1,
+   WXMENU_VIEW_HEADERS,
+   WXMENU_VIEW_SHOWRAWTEXT,
+#ifdef EXPERIMENTAL_show_uid
+   WXMENU_VIEW_SHOWUID,
+#endif // EXPERIMENTAL_show_uid
+   WXMENU_VIEW_SHOWMIME,
+   WXMENU_VIEW_END = WXMENU_VIEW_SHOWMIME,
 
    WXMENU_COMPOSE_BEGIN = WXMENU_VIEW_END,
    WXMENU_COMPOSE_INSERTFILE,

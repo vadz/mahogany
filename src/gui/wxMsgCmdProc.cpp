@@ -715,17 +715,17 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          ApplyFilters(messages);
          break;
 
-      case WXMENU_MSG_SHOWRAWTEXT:
+      case WXMENU_VIEW_SHOWRAWTEXT:
          ShowRawText(messages[0]);
          break;
 
 #ifdef EXPERIMENTAL_show_uid
-      case WXMENU_MSG_SHOWUID:
+      case WXMENU_VIEW_SHOWUID:
          ShowUIDL(messages[0]);
          break;
 #endif // EXPERIMENTAL_show_uid
 
-      case WXMENU_MSG_SHOWMIME:
+      case WXMENU_VIEW_SHOWMIME:
          ShowMIMEDialog(messages[0]);
          break;
 

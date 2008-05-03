@@ -1753,7 +1753,7 @@ void wxFolderListCtrl::OnContextMenu(wxContextMenuEvent& event)
          WXMENU_MSG_SPAM_MARK,
          WXMENU_MSG_SPAM_UNMARK,
          WXMENU_MSG_SEP3,
-         WXMENU_MSG_SHOWRAWTEXT,
+         WXMENU_VIEW_SHOWRAWTEXT,
       };
 
       m_menu = new wxMenu;
@@ -4559,7 +4559,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          break;
 
       case 'H': // headers
-         cmd = WXMENU_MSG_TOGGLEHEADERS;
+         cmd = WXMENU_VIEW_HEADERS;
          break;
 
       case '*':
