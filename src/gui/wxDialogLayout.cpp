@@ -1725,7 +1725,7 @@ static size_t GetBrowseButtonWidth(wxWindow *win)
    static size_t s_widthBtn = 0;
    if ( s_widthBtn == 0 ) {
       // calculate it only once, it's almost a constant
-      s_widthBtn = 2*win->GetCharWidth();
+      s_widthBtn = 3*win->GetCharWidth();
    }
 
    return s_widthBtn;
