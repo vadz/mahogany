@@ -71,7 +71,8 @@ static void GroupLookup(
                         const String& what,
                         int where,
                         int how,
-                        ArrayAdbGroups *aGroups = NULL
+                        ArrayAdbGroups *aGroups = NULL,
+                        wxSortedArrayString *entriesToIgnore = NULL
                        );
 
 // search in the books specified or in all loaded books otherwise
@@ -110,7 +111,8 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
                         const String& what,
                         int where,
                         int how,
-                        ArrayAdbGroups *aGroups)
+                        ArrayAdbGroups *aGroups,
+                        wxSortedArrayString *entriesToIgnore)
 {
   // check if this book doesn't match itself: the other groups are checked in
   // the parent one but the books don't have a parent
@@ -131,12 +133,17 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
      }
   }
 
+  wxSortedArrayString entriesToIgnoreLocal;
+  if ( !entriesToIgnore )
+    entriesToIgnore = &entriesToIgnoreLocal;
+
   wxArrayString aNames;
   size_t nGroupCount = pGroup->GetGroupNames(aNames);
   for ( size_t nGroup = 0; nGroup < nGroupCount; nGroup++ ) {
     AdbEntryGroup *pSubGroup = pGroup->GetGroup(aNames[nGroup]);
 
-    GroupLookup(aEntries, aMoreEntries, pSubGroup, what, where, how);
+    GroupLookup(aEntries, aMoreEntries, pSubGroup, what, where, how,
+                aGroups, entriesToIgnore);
 
     // groups are matched by name only (case-insensitive)
     if ( aGroups && aNames[nGroup].Lower().Matches(nameMatch) ) {
@@ -147,14 +154,31 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
     }
   }
 
+  bool checkExclusions = false;
+
   aNames.Empty();
   size_t nEntryCount = pGroup->GetEntryNames(aNames);
   for ( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ ) {
     AdbEntry *pEntry = pGroup->GetEntry(aNames[nEntry]);
 
+    const String desc = pEntry->GetDescription();
     if ( pEntry->GetField(AdbField_ExpandPriority) == _T("-1") )
     {
-      // never use this one for expansion
+      // never use this one for expansion and also remember its email so that
+      // another entry, with the same email, wouldn't be used neither
+      entriesToIgnore->Add(desc);
+
+      // it is still possible that we had other entries with the same address
+      // before so set a flag telling us to check whether this was the case at
+      // the end
+      checkExclusions = true;
+
+      pEntry->DecRef();
+      continue;
+    }
+
+    if ( entriesToIgnore->Index(desc) != wxNOT_FOUND )
+    {
       pEntry->DecRef();
       continue;
     }
@@ -179,6 +203,18 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
         break;
     }
   }
+
+  if ( checkExclusions ) {
+    for ( size_t nEntry = aEntries.size(); nEntry > 0; ) {
+      nEntry--;
+
+      if ( entriesToIgnore->Index(aEntries[nEntry]->GetDescription())
+            != wxNOT_FOUND )
+      {
+        entriesToIgnore->RemoveAt(nEntry);
+      }
+    }
+  }
 }
 
 static bool
@@ -195,10 +231,11 @@ AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
   if ( paBooks == NULL || paBooks->IsEmpty() )
     paBooks = &gs_booksCache;
 
+  wxSortedArrayString entriesToIgnore;
   size_t nBookCount = paBooks->Count();
   for ( size_t nBook = 0; nBook < nBookCount; nBook++ ) {
     GroupLookup(aEntries, aMoreEntries,
-                (*paBooks)[nBook], what, where, how, aGroups);
+                (*paBooks)[nBook], what, where, how, aGroups, &entriesToIgnore);
   }
 
   // return true if something found
