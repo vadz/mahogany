@@ -37,7 +37,7 @@ class WXDLLIMPEXP_FWD_CORE wxStaticBitmap;
 // information about what exactly this button does (as all browse buttons look
 // alike, there is no other way to know it).
 //
-// This class can not be used directly, DoBrowse() must be overriden in the
+// This class can not be used directly, DoBrowse() must be overridden in the
 // derived classes.
 // ----------------------------------------------------------------------------
 
@@ -45,16 +45,19 @@ class wxBrowseButton : public wxButton
 {
 public:
    wxBrowseButton(wxWindow *parent, const wxString& tooltip)
-      : wxButton(parent, -1, _T(">>"))
+      : wxButton(parent, -1, ">>",
+                 wxDefaultPosition, wxDefaultSize,
+                 wxBU_EXACTFIT)
    {
 #if wxUSE_TOOLTIPS
       SetToolTip(tooltip);
 #endif // wxUSE_TOOLTIPS
    }
 
-   // function which shows the file selection dialog and changes the associated
-   // controls contents; it is called in response to the click on the button,
-   // but may be also called directly
+   // function which shows the dialog allowing the user to select the value and
+   // changes the associated controls contents if a choice was made in this
+   // dialog; it is called in response to the click on the button, but may be
+   // also called directly
    virtual void DoBrowse() = 0;
 
 protected:
@@ -73,7 +76,7 @@ private:
 // The wxTextBrowseButton also manages enabled/disabled state of the text control:
 // it enables it when it is enabled and disables otherwise.
 //
-// This class can not be used directly, DoBrowse() must be overriden in the
+// This class can not be used directly, DoBrowse() must be overridden in the
 // derived classes.
 // ----------------------------------------------------------------------------
 
