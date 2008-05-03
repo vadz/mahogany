@@ -63,7 +63,9 @@ extern const MOption MP_TMPGFXFORMAT;
 // constants
 // ----------------------------------------------------------------------------
 
-static const wxChar *wxTraceIconLoading = _T("iconload");
+#ifdef __WXDEBUG__
+static const char *wxTraceIconLoading = "iconload";
+#endif
 
 /** @name built-in icon names */
 //@{
