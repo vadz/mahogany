@@ -1580,9 +1580,10 @@ bool wxMApp::InitHelp()
 #ifdef OS_UNIX
    if ( helpBrowserIsExternal )
    {
-      ((wxExtHelpController *)m_HelpController)->SetBrowser(
-         READ_APPCONFIG(MP_HELPBROWSER),
-         READ_APPCONFIG(MP_HELPBROWSER_ISNS));
+      long flags = 0;
+      if ( READ_APPCONFIG(MP_HELPBROWSER_ISNS) )
+         flags |= wxHELP_NETSCAPE;
+      m_HelpController->SetViewer(READ_APPCONFIG(MP_HELPBROWSER), flags);
    }
 #endif // OS_UNIX
 
