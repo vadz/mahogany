@@ -3245,7 +3245,7 @@ MailFolderCC::DoSearch(struct search_program *pgm, int flags) const
                              flags | SE_FREE | SE_NOSERVER) )
       {
          delete m_SearchMessagesFound;
-         m_SearchMessagesFound = NULL;
+         self->m_SearchMessagesFound = NULL;
 
          return NULL;
       }
