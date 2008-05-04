@@ -274,11 +274,10 @@ private:
    MessageHeadersList m_extraHeaders;
 
    /**
-      Normally true and we RFC2047-encode all text headers, but false if we aer
-      created from an existing message in which case all of the headers had
-      been already encoded and don't need to be reencoded again.
+      True if we're a copy of an existing message, false if this is a new
+      message.
     */
-   bool m_encodeHeaders;
+   bool m_cloneOfExisting;
 
    /// a list of folders to save copies of the message in after sending
    M_LIST_OWN(StringList, String) m_FccList;

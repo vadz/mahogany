@@ -124,23 +124,29 @@ extern const MPersMsgBox *M_MSGBOX_SEND_OFFLINE;
 static long write_stream_output(void *, char *);
 static long write_str_output(void *, char *);
 
+// test if the header corresponds to one of the address headers
+//
+// NB: the header name must be in upper case
 static inline
 bool IsAddressHeader(const String& name)
 {
-   return name == _T("FROM") ||
-          name == _T("TO") ||
-          name == _T("CC") ||
-          name == _T("BCC");
+   return name == "FROM" ||
+          name == "TO" ||
+          name == "CC" ||
+          name == "BCC";
 }
 
+// test if we allow this header to be set by user
+//
+// NB: the header name must be in upper case
 static inline
 bool HeaderCanBeSetByUser(const String& name)
 {
-   return name != _T("MIME-VERSION") &&
-          name != _T("CONTENT-TYPE") &&
-          name != _T("CONTENT-DISPOSITION") &&
-          name != _T("CONTENT-TRANSFER-ENCODING") &&
-          name != _T("MESSAGE-ID");
+   return name != "MIME-VERSION" &&
+          name != "CONTENT-TYPE" &&
+          name != "CONTENT-DISPOSITION" &&
+          name != "CONTENT-TRANSFER-ENCODING" &&
+          name != "MESSAGE-ID";
 }
 
 // check if the header name is valid (as defined in 2.2 of RFC 2822)
@@ -288,7 +294,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    m_frame = frame;
    m_encHeaders = wxFONTENCODING_SYSTEM;
 
-   m_encodeHeaders = true;
+   m_cloneOfExisting = false;
 
    m_headerNames =
    m_headerValues = NULL;
@@ -519,9 +525,7 @@ void SendMessageCC::InitResent(const Message *message)
 void
 SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit)
 {
-   // the headers must be already encoded in the existing message, don't encode
-   // them twice
-   m_encodeHeaders = false;
+   m_cloneOfExisting = true;
 
    InitBody();
 
@@ -585,9 +589,20 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
    HeaderIterator hdrIter = message->GetHeaderIterator();
    while ( hdrIter.GetNext(&name, &value) )
    {
-      nameUpper = name.Upper();
-      if ( !IsAddressHeader(nameUpper) && HeaderCanBeSetByUser(nameUpper) )
-         AddHeaderEntry(name, value);
+      if ( !IsAddressHeader(name.Upper()) )
+      {
+         // we can't use AddHeaderEntry() here because it replaces the existing
+         // header value if it appears multiple times while we want to preserve
+         // the headers exactly as they were
+         if ( wxStricmp(name, "subject") == 0 )
+         {
+            SetSubject(value);
+         }
+         else
+         {
+            m_extraHeaders.push_back(new MessageHeader(name, value));
+         }
+      }
    }
 
    // finally fill the body with the message contents
@@ -710,13 +725,13 @@ SendMessageCC::SetSubject(const String& subject)
    if(m_Envelope->subject)
       fs_give((void **)&m_Envelope->subject);
 
-   // if headers are already encoded, don't do anything, they must be already
-   // in ASCII
+   // don't encode the headers of an existing message second time, we want to
+   // preserve them as they are
    wxCharBuffer buf;
-   if ( m_encodeHeaders )
-      buf = MIME::EncodeHeader(subject, m_encHeaders);
-   else
+   if ( m_cloneOfExisting )
       buf = subject.ToAscii();
+   else
+      buf = MIME::EncodeHeader(subject, m_encHeaders);
    m_Envelope->subject = cpystr(buf);
 }
 
@@ -1124,9 +1139,9 @@ SendMessageCC::Build(bool forStorage)
          return false;
       }
 
-      if ( wxStricmp(name, _T("Reply-To")) == 0 )
+      if ( wxStricmp(name, "Reply-To") == 0 )
          replyToSet = true;
-      else if ( wxStricmp(name, _T("X-Mailer")) == 0 )
+      else if ( wxStricmp(name, "X-Mailer") == 0 )
          xmailerSet = true;
 
 
@@ -1136,59 +1151,55 @@ SendMessageCC::Build(bool forStorage)
       h++;
    }
 
-   // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
-   // it - why not?)
-   if ( !xmailerSet )
+   // don't add any extra headers when cloning an existing message
+   if ( !m_cloneOfExisting )
    {
-      m_headerNames[h] = strutil_strdup("X-Mailer");
-
-      // NB: do *not* translate these strings, this doesn't make much sense
-      //     (the user doesn't usually see them) and, worse, we shouldn't
-      //     include 8bit chars (which may - and do - occur in translations) in
-      //     headers!
-      String version;
-      version << _T("Mahogany ") << M_VERSION_STRING;
-#ifdef OS_UNIX
-      version  << _T(", compiled for ") << M_OSINFO;
-#else // Windows
-      version << _T(", running under ") << wxGetOsDescription();
-#endif // Unix/Windows
-      m_headerValues[h++] = strutil_strdup(version.ToAscii());
-   }
-
-   // set Reply-To if it hadn't been set by the user as a custom header
-   if ( !replyToSet )
-   {
-      ASSERT_MSG( !HasHeaderEntry(_T("Reply-To")), _T("logic error") );
-
-      if ( !m_ReplyTo.empty() )
+      // add X-Mailer header if it wasn't overridden by the user (yes, we do
+      // allow it -- why not?)
+      if ( !xmailerSet )
       {
-         m_headerNames[h] = strutil_strdup("Reply-To");
-         m_headerValues[h++] = strutil_strdup(m_ReplyTo.ToAscii());
+         m_headerNames[h] = strutil_strdup("X-Mailer");
+
+         // NB: do *not* translate these strings, this doesn't make much sense
+         //     (the user doesn't usually see them) and, worse, we shouldn't
+         //     include 8bit chars (which may - and do - occur in translations)
+         //     in headers!
+         String version;
+         version << "Mahogany " << M_VERSION_STRING;
+#ifdef OS_UNIX
+         version  << ", compiled for " << M_OSINFO;
+#else // Windows
+         version << ", running under " << wxGetOsDescription();
+#endif // Unix/Windows
+         m_headerValues[h++] = strutil_strdup(version.ToAscii());
       }
-   }
+
+      // set Reply-To if it hadn't been set by the user as a custom header
+      if ( !replyToSet )
+      {
+         ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
+
+         if ( !m_ReplyTo.empty() )
+         {
+            m_headerNames[h] = strutil_strdup("Reply-To");
+            m_headerValues[h++] = strutil_strdup(m_ReplyTo.ToAscii());
+         }
+      }
 
 #ifdef HAVE_XFACES
-   // add an XFace?
-   if ( !HasHeaderEntry(_T("X-Face")) && !m_XFaceFile.empty() )
-   {
-      XFace xface;
-      if ( xface.CreateFromFile(m_XFaceFile) )
+      // add an XFace?
+      if ( !HasHeaderEntry("X-Face") && !m_XFaceFile.empty() )
       {
-         m_headerNames[h] = strutil_strdup("X-Face");
-         m_headerValues[h] = strutil_strdup(xface.GetHeaderLine().ToAscii());
-         if(strlen(m_headerValues[h]))  // paranoid, I know.
+         XFace xface;
+         if ( xface.CreateFromFile(m_XFaceFile) )
          {
-            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', _T("String should have been DOSified") );
-            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', _T("String should have been DOSified") );
-            ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] =
-               '\0'; // cut off \n
+            m_headerNames[h] = strutil_strdup("X-Face");
+            m_headerValues[h++] = strutil_strdup(xface.GetHeaderLine().ToAscii());
          }
-         h++;
+         //else: couldn't read X-Face from file (complain?)
       }
-      //else: couldn't read X-Face from file (complain?)
-   }
 #endif // HAVE_XFACES
+   }
 
    m_headerNames[h] = NULL;
    m_headerValues[h] = NULL;
