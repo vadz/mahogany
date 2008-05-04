@@ -436,15 +436,16 @@ public:
    */
    virtual Profile *GetFolderProfile(void) const;
 
-   /// don't even think of using this!
-   wxFolderViewFrame(void) { wxFAIL_MSG(_T("unreachable")); }
-
 protected:
    // event processing
    void OnCommandEvent(wxCommandEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
 
 private:
+   // implement base class pure virtual methods
+   virtual void DoCreateToolBar();
+   virtual void DoCreateStatusBar();
+
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
 
    /// ctor
@@ -453,7 +454,8 @@ private:
    /// the associated folder view
    wxFolderView *m_FolderView;
 
-   DECLARE_DYNAMIC_CLASS_NO_COPY(wxFolderViewFrame)
+   DECLARE_ABSTRACT_CLASS(wxFolderViewFrame)
+   DECLARE_NO_COPY_CLASS(wxFolderViewFrame)
    DECLARE_EVENT_TABLE()
 };
 

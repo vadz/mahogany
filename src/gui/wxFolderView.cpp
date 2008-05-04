@@ -5334,7 +5334,7 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
                        wxFolderViewFrame::OnUpdateUI)
 END_EVENT_TABLE()
 
-IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
+IMPLEMENT_ABSTRACT_CLASS(wxFolderViewFrame, wxMFrame)
 
 // ----------------------------------------------------------------------------
 // wxFolderViewFrame ctor and such
@@ -5346,11 +5346,6 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
    CHECK_RET( fv, _T("No folder view in wxFolderViewFrame::InternalCreate()?") );
 
    m_FolderView = fv;
-
-   // add a toolbar to the frame
-   //
-   // NB: the buttons must have the same ids as the menu commands
-   CreateMToolbar(this, WXFRAME_FOLDER);
 
    // construct menubar
    AddFileMenu();
@@ -5365,10 +5360,10 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
    m_FolderView->CreateViewMenu();
    AddLanguageMenu();
 
-   // and the status bar
-   CreateStatusBar();
+   // and the tool/status bar if necessary
+   CreateToolAndStatusBars();
 
-   Show(true);
+   ShowInInitialState();
 }
 
 wxFolderViewFrame *
@@ -5408,6 +5403,16 @@ wxFolderViewFrame::wxFolderViewFrame(const String& name, wxMFrame *parent)
                  : wxMFrame(name, parent)
 {
    m_FolderView = NULL;
+}
+
+void wxFolderViewFrame::DoCreateToolBar()
+{
+   CreateMToolbar(this, WXFRAME_FOLDER);
+}
+
+void wxFolderViewFrame::DoCreateStatusBar()
+{
+   CreateStatusBar();
 }
 
 wxFolderViewFrame::~wxFolderViewFrame()

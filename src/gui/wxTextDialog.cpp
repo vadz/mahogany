@@ -49,7 +49,7 @@ public:
    MTextDialog(wxWindow *parent,
                const wxString& title,
                const wxString& text,
-               const wxChar *configPath);
+               const char *configPath);
 
    virtual ~MTextDialog();
 
@@ -97,7 +97,7 @@ private:
    int m_flagsFind;
 
    // the path for our size/position info in config (may be NULL)
-   const wxChar *m_configPath;
+   const char *m_configPath;
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(MTextDialog)
@@ -124,7 +124,7 @@ END_EVENT_TABLE()
 MTextDialog::MTextDialog(wxWindow *parent,
                          const wxString& title,
                          const wxString& text,
-                         const wxChar *configPath)
+                         const char *configPath)
            : wxDialog(parent,
                       -1,
                       _T("Mahogany: ") + title,
@@ -357,7 +357,7 @@ extern "C"
 void MDialog_ShowText(wxWindow *parent,
                       const wxChar *title,
                       const wxChar *text,
-                      const wxChar *configPath)
+                      const char *configPath)
 {
    // show the dialog modelessly because otherwise we wouldn't be able to show
    // a find dialog from it

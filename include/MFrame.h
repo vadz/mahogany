@@ -26,7 +26,7 @@ public:
    MFrameBase(const String& str) : name(str) { }
 
    /// retrieve the name of the window class
-   const wxChar *GetName() const { return name.c_str(); }
+   const char *GetName() const { return name.c_str(); }
 
    // VZ: this could lead to an ambiguity as wxFrame (from which wxMFrame
    //     derives as well) has this (virtual) method too

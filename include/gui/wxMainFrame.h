@@ -63,6 +63,7 @@ public:
    void OnCommandEvent(wxCommandEvent &event);
    void OnIdentChange(wxCommandEvent &event);
    void OnIdle(wxIdleEvent &event);
+   void OnUpdateUIEnableIfHasFolder(wxUpdateUIEvent& event);
    void OnUpdateUIEnableIfHasPreview(wxUpdateUIEvent& event);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
@@ -138,6 +139,10 @@ protected:
 #endif // wxHAS_POWER_EVENTS
 
 private:
+   // implement base class pure virtual methods
+   virtual void DoCreateToolBar();
+   virtual void DoCreateStatusBar();
+
    /// create and initialize the modules menu
    void MakeModulesMenu(void);
 

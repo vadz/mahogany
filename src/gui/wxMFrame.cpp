@@ -76,6 +76,9 @@ extern const MOption MP_HEIGHT;
 extern const MOption MP_ICONISED;
 extern const MOption MP_MAXIMISED;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
+extern const MOption MP_SHOW_TOOLBAR;
+extern const MOption MP_SHOW_STATUSBAR;
+extern const MOption MP_SHOW_FULLSCREEN;
 extern const MOption MP_USEPYTHON;
 extern const MOption MP_WIDTH;
 extern const MOption MP_XPOS;
@@ -150,7 +153,7 @@ private:
 // wxWin macros
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
+IMPLEMENT_ABSTRACT_CLASS(wxMFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
    EVT_MENU(-1,    wxMFrame::OnCommandEvent)
@@ -189,6 +192,7 @@ wxMFrame::wxMFrame(const String &name, wxWindow *parent)
 #endif // USE_PYTHON
 
    m_initialised = false;
+
    Create(name, parent);
 }
 
@@ -259,7 +263,7 @@ wxMFrame::~wxMFrame()
    delete m_pyOptHandler;
 #endif // USE_PYTHON
 
-   SavePosition(MFrameBase::GetName(), this);
+   SaveState(MFrameBase::GetName(), this, Save_Geometry | Save_State | Save_View);
 }
 
 // ----------------------------------------------------------------------------
@@ -346,20 +350,31 @@ wxMFrame::AddLanguageMenu(void)
 // saving and restoring frame position
 // ----------------------------------------------------------------------------
 
-bool wxMFrame::RestorePosition(const wxChar *name,
-                               int *x, int *y, int *w, int *h,
-                               bool *i, bool *m)
+/* static */
+wxConfigBase *wxMFrame::GetFrameOptionsConfig(const char *name)
 {
-   // only i can be NULL
-   CHECK( x && y && w && h, FALSE,
-          _T("NULL pointer in wxMFrame::RestorePosition") );
-
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
    if ( pConf != NULL )
    {
       String path;
       path << Profile::GetFramesPath() << '/' << name;
       pConf->SetPath(path);
+   }
+
+   return pConf;
+}
+
+bool wxMFrame::RestorePosition(const char *name,
+                               int *x, int *y, int *w, int *h,
+                               bool *i, bool *m)
+{
+   // only i and m might be NULL
+   CHECK( x && y && w && h, FALSE,
+          _T("NULL pointer in wxMFrame::RestorePosition") );
+
+   wxConfigBase * const pConf = GetFrameOptionsConfig(name);
+   if ( pConf != NULL )
+   {
       *x = GetOptionValue(pConf, MP_XPOS);
       *y = GetOptionValue(pConf, MP_YPOS);
       *w = GetOptionValue(pConf, MP_WIDTH);
@@ -369,6 +384,7 @@ bool wxMFrame::RestorePosition(const wxChar *name,
           *i = GetOptionValue(pConf, MP_ICONISED).GetBoolValue();
       if ( m )
           *m = GetOptionValue(pConf, MP_MAXIMISED).GetBoolValue();
+
 
       // assume that if one entry existed, then the other existed too
       return pConf->HasEntry(GetOptionName(MP_XPOS));
@@ -389,84 +405,144 @@ bool wxMFrame::RestorePosition(const wxChar *name,
    }
 }
 
-void
-wxMFrame::SavePosition(const wxChar *name, wxWindow *frame)
+void wxMFrame::CreateToolAndStatusBars()
 {
-   SavePositionInternal(name, frame, FALSE);
-}
+   bool tb, sb;
 
-void
-wxMFrame::SavePosition(const wxChar *name, wxFrame *frame)
-{
-   SavePositionInternal(name, frame, TRUE);
-}
-
-void
-wxMFrame::SavePositionInternal(const wxChar *name, wxWindow *frame, bool isFrame)
-{
-   wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
+   wxConfigBase * const pConf = GetFrameOptionsConfig();
    if ( pConf != NULL )
    {
-      String path;
-      path << Profile::GetFramesPath() << '/' << name;
+      tb = GetOptionValue(pConf, MP_SHOW_TOOLBAR).GetBoolValue();
+      sb = GetOptionValue(pConf, MP_SHOW_STATUSBAR).GetBoolValue();
+   }
+   else
+   {
+      tb = GetNumericDefault(MP_SHOW_TOOLBAR) != 0;
+      sb = GetNumericDefault(MP_SHOW_STATUSBAR) != 0;
+   }
 
-      pConf->SetPath(path);
+   wxMenuBar * const mb = GetMenuBar();
+   mb->Check(WXMENU_VIEW_TOOLBAR, tb);
+   mb->Check(WXMENU_VIEW_STATUSBAR, sb);
 
-      if ( isFrame )
+   if ( tb )
+      DoCreateToolBar();
+   if ( sb )
+      DoCreateStatusBar();
+}
+
+void wxMFrame::ShowInInitialState()
+{
+   bool showFullScreen;
+   wxConfigBase * const pConf = GetFrameOptionsConfig();
+   if ( pConf )
+      showFullScreen = GetOptionValue(pConf, MP_SHOW_FULLSCREEN).GetBoolValue();
+   else
+      showFullScreen = GetNumericDefault(MP_SHOW_FULLSCREEN) != 0;
+
+   Show(true);
+
+   if ( showFullScreen )
+      ShowFullScreen(true);
+}
+
+void
+wxMFrame::SavePosition(const char *name, wxWindow *frame)
+{
+   SaveState(name, frame, Save_Geometry);
+}
+
+void
+wxMFrame::SavePosition(const char *name, wxFrame *frame)
+{
+   SaveState(name, frame, Save_Geometry | Save_State);
+}
+
+// helper function which either writes the given boolean value option to the
+// config or deletes it from it if the new value is the same as default one
+//
+// notice that this only works for the frame values as there is no inheritance
+// with the frames profiles, otherwise deleting the value wouldn't have been
+// enough
+static void
+UpdateBoolConfigValue(wxConfigBase *pConf,
+                      const MOption opt,
+                      bool value)
+{
+   // to compare boolean value with option value we need to cast it to long to
+   // avoid ambiguities
+   const long lValue = value;
+
+   if ( GetOptionValue(pConf, opt) != lValue )
+   {
+      // current value must be changed but how?
+      if ( lValue == GetNumericDefault(opt) )
       {
-         wxFrame *fr = (wxFrame *)frame;
+         // it's enough to just delete the existing value
+         pConf->DeleteEntry(GetOptionName(opt));
+      }
+      else // we must really write the new value to the config
+      {
+         pConf->Write(GetOptionName(opt), value);
+      }
+   }
+   //else: we already have the right value in the config, nothing to do
 
-         // IsIconized() is broken in wxGTK, it returns TRUE sometimes when the
-         // frame is not at all iconized - no idea why :-(
-#ifdef __WXGTK__
-         bool isIconized = false;
-#else
-         bool isIconized = fr->IsIconized();
-#endif
-         bool isMaximized = fr->IsMaximized();
+   ASSERT_MSG( GetOptionValue(pConf, opt) == lValue,
+               "didn't update a boolean option correctly" );
+}
 
-         // the frames are rarely icon/maximized, so don't write these
-         // settings to config unless really needed
-         if ( GetOptionValue(pConf, MP_ICONISED) )
-         {
-            if ( !isIconized )
-               pConf->DeleteEntry(GetOptionName(MP_ICONISED));
-         }
-         else // !iconized in config
-         {
-            if ( isIconized )
-               pConf->Write(GetOptionName(MP_ICONISED), isIconized);
-         }
+void
+wxMFrame::SaveState(const char *name, wxWindow *frame, int flags)
+{
+   wxConfigBase *pConf = GetFrameOptionsConfig(name);
+   if ( !pConf )
+      return;
 
-         if ( GetOptionValue(pConf, MP_MAXIMISED) )
-         {
-            if ( !isMaximized )
-               pConf->DeleteEntry(GetOptionName(MP_MAXIMISED));
-         }
-         else // !maximized in config
-         {
-            if ( isMaximized )
-               pConf->Write(GetOptionName(MP_MAXIMISED), isMaximized);
-         }
+   if ( flags & Save_State )
+   {
+      wxFrame *fr = wxDynamicCast(frame, wxFrame);
+      CHECK_RET( fr, "should have a frame when saving state" );
 
-         if ( isMaximized || isIconized )
-         {
-            // don't remember the coords in this case: wxWindows returns
-            // something weird for them for iconized frames and we don't need
-            // them for maximized ones anyhow
-            return;
-         }
+      if ( flags & Save_View )
+      {
+         UpdateBoolConfigValue(pConf, MP_SHOW_TOOLBAR,
+                               fr->GetToolBar() != NULL);
+         UpdateBoolConfigValue(pConf, MP_SHOW_STATUSBAR,
+                               fr->GetStatusBar() != NULL);
       }
 
-      int x, y;
-      frame->GetPosition(&x, &y);
-      pConf->Write(GetOptionName(MP_XPOS), (long)x);
-      pConf->Write(GetOptionName(MP_YPOS), (long)y);
+      UpdateBoolConfigValue(pConf, MP_SHOW_FULLSCREEN, fr->IsFullScreen());
 
-      frame->GetSize(&x,&y);
-      pConf->Write(GetOptionName(MP_WIDTH), (long)x);
-      pConf->Write(GetOptionName(MP_HEIGHT), (long)y);
+      // IsIconized() is broken in wxGTK, it returns TRUE sometimes when the
+      // frame is not at all iconized - no idea why :-(
+#ifdef __WXGTK__
+      bool isIconized = false;
+#else
+      bool isIconized = fr->IsIconized();
+#endif
+      bool isMaximized = fr->IsMaximized();
+
+      UpdateBoolConfigValue(pConf, MP_ICONISED, isIconized);
+      UpdateBoolConfigValue(pConf, MP_MAXIMISED, isMaximized);
+
+      if ( isMaximized || isIconized )
+      {
+         // don't remember the coords in this case: wxWindows returns
+         // something weird for them for iconized frames and we don't need
+         // them for maximized ones anyhow
+         return;
+      }
    }
+
+   int x, y;
+   frame->GetPosition(&x, &y);
+   pConf->Write(GetOptionName(MP_XPOS), (long)x);
+   pConf->Write(GetOptionName(MP_YPOS), (long)y);
+
+   frame->GetSize(&x,&y);
+   pConf->Write(GetOptionName(MP_WIDTH), (long)x);
+   pConf->Write(GetOptionName(MP_HEIGHT), (long)y);
 }
 
 // ----------------------------------------------------------------------------
@@ -1022,6 +1098,34 @@ wxMFrame::OnMenuCommand(int id)
             mApplication->GetProfile()->writeEntry(MP_MSGVIEW_DEFAULT_ENCODING,
                                                    enc);
          }
+         break;
+
+      case WXMENU_VIEW_TOOLBAR:
+         if ( GetMenuBar()->IsChecked(id) )
+         {
+            DoCreateToolBar();
+         }
+         else // hide the toolbar
+         {
+            delete GetToolBar();
+            SetToolBar(NULL);
+         }
+         break;
+
+      case WXMENU_VIEW_STATUSBAR:
+         if ( GetMenuBar()->IsChecked(id) )
+         {
+            DoCreateStatusBar();
+         }
+         else // hide the status bar
+         {
+            delete GetStatusBar();
+            SetStatusBar(NULL);
+         }
+         break;
+
+      case WXMENU_VIEW_FULLSCREEN:
+         ShowFullScreen(GetMenuBar()->IsChecked(id));
          break;
    }
 }

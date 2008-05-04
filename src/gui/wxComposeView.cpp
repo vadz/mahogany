@@ -920,7 +920,7 @@ AttachmentMenu::OnCommandEvent(wxCommandEvent &event)
                GetFrame(m_window),
                wxString::Format(_("Attached file \"%s\""), filename.c_str()),
                content,
-               _T("AttachView")
+               "AttachView"
             );
          }
          break;
@@ -1934,11 +1934,13 @@ wxComposeView::CreateMenu()
    }
 }
 
-void
-wxComposeView::CreateToolAndStatusBars()
+void wxComposeView::DoCreateToolBar()
 {
    CreateMToolbar(this, WXFRAME_COMPOSE);
+}
 
+void wxComposeView::DoCreateStatusBar()
+{
    CreateStatusBar(2);
    static const int s_widths[] = { -1, 90 };
    SetStatusWidths(WXSIZEOF(s_widths), s_widths);
@@ -2187,7 +2189,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // build menu
    CreateMenu();
 
-   // and tool/status bars
+   // and tool/status bars if needed
    CreateToolAndStatusBars();
 
 #if wxUSE_DRAG_AND_DROP
@@ -2224,8 +2226,8 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // note that we must show and layout the frame before setting the control
    // values or the text would be scrolled to the right in the text fields as
    // they initially don't have enough space to show it...
-   Show();
    Layout();
+   ShowInInitialState();
 
    // initialize the controls
    // -----------------------

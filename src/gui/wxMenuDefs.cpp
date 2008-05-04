@@ -448,7 +448,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // view
 
    // the available accelerators for this menu:
-   // ABCDEFGIJKNOPQRSTUVXYZ
+   // ABCDEGIJKNOPQRXYZ
    { WXMENU_SUBMENU,       gettext_noop("&Viewer to use"), "", wxITEM_NORMAL },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
    { WXMENU_SUBMENU,       gettext_noop("&Filters"), "", wxITEM_NORMAL },
@@ -460,6 +460,10 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_VIEW_SHOWUID,  "Show message UID&L", "", wxITEM_NORMAL },
 #endif // EXPERIMENTAL_show_uid
    { WXMENU_VIEW_SHOWMIME, gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_VIEW_TOOLBAR, gettext_noop("Show &tool bar"), "", wxITEM_CHECK },
+   { WXMENU_VIEW_STATUSBAR, gettext_noop("Show &status bar"), "", wxITEM_CHECK },
+   { WXMENU_VIEW_FULLSCREEN, gettext_noop("F&ull screen\tF11"), "", wxITEM_CHECK },
 
    // compose
 

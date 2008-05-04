@@ -555,6 +555,10 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
 
    EVT_IDLE(wxMainFrame::OnIdle)
 
+   EVT_UPDATE_UI(WXMENU_VIEW_SHOWMIME, wxMainFrame::OnUpdateUIEnableIfHasFolder)
+   EVT_UPDATE_UI(WXMENU_VIEW_SHOWRAWTEXT, wxMainFrame::OnUpdateUIEnableIfHasFolder)
+
+   EVT_UPDATE_UI(WXMENU_VIEW_HEADERS, wxMainFrame::OnUpdateUIEnableIfHasPreview)
    EVT_UPDATE_UI(WXMENU_EDIT_FIND, wxMainFrame::OnUpdateUIEnableIfHasPreview)
    EVT_UPDATE_UI(WXMENU_EDIT_FINDAGAIN, wxMainFrame::OnUpdateUIEnableIfHasPreview)
 
@@ -590,8 +594,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
    SetTitle(_("Copyright (C) 1997-2007 The Mahogany Developers Team"));
-
-   CreateStatusBar();
 
    // create the child controls
    m_splitter = new wxPSplitterWindow(_T("MainSplitter"), this, -1,
@@ -643,7 +645,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    AddHelpMenu();
 
-   CreateMToolbar(this, WXFRAME_MAIN);
+   CreateToolAndStatusBars();
 
    // disable the operations which don't make sense for viewer
    wxMenuBar *menuBar = GetMenuBar();
@@ -667,6 +669,18 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_splitter->SplitVertically(winLeft, winRight, sizeFrame.x/3);
 
    m_FolderTree->GetWindow()->SetFocus();
+
+   ShowInInitialState();
+}
+
+void wxMainFrame::DoCreateToolBar()
+{
+   CreateMToolbar(this, WXFRAME_MAIN);
+}
+
+void wxMainFrame::DoCreateStatusBar()
+{
+   CreateStatusBar();
 }
 
 void wxMainFrame::AddFolderMenu(void)
@@ -801,7 +815,6 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    if ( hasFolder != s_hasFolder )
    {
       EnableMMenu(MMenu_Message, this, hasFolder);
-      EnableMMenu(MMenu_View, this, hasFolder);
 
       // also update the toolbar buttons
       static const int buttonsToDisable[] =
@@ -815,10 +828,13 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
          WXTBAR_MSG_DELETE,
       };
 
-      wxToolBar *tbar = GetToolBar();
-      for ( size_t n = 0; n < WXSIZEOF(buttonsToDisable); n++ )
+      wxToolBar * const tbar = GetToolBar();
+      if ( tbar )
       {
-         EnableToolbarButton(tbar, buttonsToDisable[n], hasFolder);
+         for ( size_t n = 0; n < WXSIZEOF(buttonsToDisable); n++ )
+         {
+            EnableToolbarButton(tbar, buttonsToDisable[n], hasFolder);
+         }
       }
 
       s_hasFolder = hasFolder;
@@ -833,6 +849,11 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
       // enabling/disabling the menu, otherwise it would get out of sync
       s_hasPreview = hasPreview;
    }
+}
+
+void wxMainFrame::OnUpdateUIEnableIfHasFolder(wxUpdateUIEvent& event)
+{
+   event.Enable( m_FolderView && m_FolderView->HasFolder() );
 }
 
 void wxMainFrame::OnUpdateUIEnableIfHasPreview(wxUpdateUIEvent& event)

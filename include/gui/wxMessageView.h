@@ -100,6 +100,10 @@ protected:
    virtual bool OnMEvent(MEventData& event);
 
 private:
+   // implement base class pure virtual methods
+   virtual void DoCreateToolBar();
+   virtual void DoCreateStatusBar();
+
    /// the message view shown inside this frame
    MessageView *m_MessageView;
 

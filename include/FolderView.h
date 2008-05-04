@@ -89,6 +89,9 @@ public:
    /// return pointer to associated mail folder (IncRef()'d as usual)
    MailFolder *GetMailFolder() const;
 
+   /// Return true if we have an opened folder.
+   bool HasFolder() const { return m_ASMailFolder != NULL; }
+
    //@}
 
    /// event processing function

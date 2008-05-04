@@ -240,7 +240,7 @@ ClickablePGPInfo::ShowDetails() const
       MDialog_ShowText(m_msgView->GetWindow(),
                        _("PGP Information"),
                        allText,
-                       _T("PGPDetails"));
+                       "PGPDetails");
    }
    else // no log??
    {
@@ -254,7 +254,7 @@ ClickablePGPInfo::ShowRawText() const
    MDialog_ShowText(m_msgView->GetWindow(),
                     _("PGP Message Raw Text"),
                     m_textRaw,
-                    _T("PGPRawText"));
+                    "PGPRawText");
 }
 
 // ----------------------------------------------------------------------------

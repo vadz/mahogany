@@ -38,13 +38,13 @@ public:
       // read the frame position and size from config (the variables needn't be
       // initialized, they will receive some values in any case), returns FALSE
       // if there is no config object to read settings from
-   static bool RestorePosition(const wxChar *name,
+   static bool RestorePosition(const char *name,
                                int *x, int *y, int *w, int *h,
                                bool *iconised = NULL, bool *maximised = NULL);
 
       //  save the given frame's position and size in config file
-   static void SavePosition(const wxChar *name, wxFrame *frame);
-   static void SavePosition(const wxChar *name, wxWindow *frame);
+   static void SavePosition(const char *name, wxFrame *frame);
+   static void SavePosition(const char *name, wxWindow *frame);
 
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
    wxMFrame() : MFrameBase(M_EMPTYSTRING) { FAIL_MSG(_T("unreachable")); }
@@ -100,10 +100,64 @@ public:
    void OnCloseWindow(wxCloseEvent& event);
 
 protected:
-   static void SavePositionInternal(const wxChar *name, wxWindow *frame, bool isFrame);
+   /// Flags for SaveState()
+   enum
+   {
+      /// Geometry is always saved
+      Save_Geometry = 0,
+
+      /// Minimized/maximized/full-screen state of a frame
+      Save_State = 1,
+
+      /// Status of the tool/status bars
+      Save_View = 2
+   };
+
+   /**
+      Save state of this window in config.
+
+      Window geometry is always saved, for the frames we can also save their
+      minimized/maximized state as well as whether their tool/status bar should
+      be shown.
+    */
+   static void SaveState(const char *name, wxWindow *frame, int flags);
+
+   /**
+      Create the tool and status bars if they are configured to be shown.
+
+      This method calls the pure virtual DoCreateToolBar() and
+      DoCreateStatusBar() if necessary.
+    */
+   void CreateToolAndStatusBars();
+
+   /**
+      Convenient function for derived classes: show the frame either normally
+      or full-screen, depending on the last saved state.
+    */
+   void ShowInInitialState();
 
    /// is it initialised?
    bool m_initialised;
+
+private:
+   // implement these to create tool/status bars for this frame: they're called
+   // by wxMFrame itself when the user decides to show a previously non-existent call them from
+   // bar and also from the derived classes ctor via CreateToolAndStatusBars()
+   virtual void DoCreateToolBar() = 0;
+   virtual void DoCreateStatusBar() = 0;
+
+   // get the config object with its path set to the frames option
+   //
+   // may return NULL during the initial program execution
+   wxConfigBase *GetFrameOptionsConfig() const
+   {
+      return GetFrameOptionsConfig(MFrameBase::GetName());
+   }
+
+   // same as above except takes the frame name as parameter so it can be used
+   // from the static methods
+   static wxConfigBase *GetFrameOptionsConfig(const char *name);
+
 
 #ifdef USE_PYTHON
    /// update the state (enabled/disabled) of the "Run Python script" menu item
@@ -115,7 +169,8 @@ protected:
 #endif // USE_PYTHON
 
    DECLARE_EVENT_TABLE()
-   DECLARE_DYNAMIC_CLASS_NO_COPY(wxMFrame)
+   DECLARE_ABSTRACT_CLASS(wxMFrame)
+   DECLARE_NO_COPY_CLASS(wxMFrame)
 };
 
 #endif

@@ -507,6 +507,10 @@ protected:
 
 
 private:
+   // implement base class pure virtual methods
+   virtual void DoCreateToolBar() { }
+   virtual void DoCreateStatusBar() { CreateStatusBar(); }
+
    MInterface * m_MInterface;
    /// profile settings
    Profile *m_Profile;
@@ -658,9 +662,9 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    new MMessagesCalDropTarget(this);
 #endif // wxUSE_DRAG_AND_DROP
 
-   CreateStatusBar();
    GetConfig();
-   Show(m_Show);
+   if ( m_Show )
+      ShowInInitialState();
 }
 
 

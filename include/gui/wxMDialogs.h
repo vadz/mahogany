@@ -222,7 +222,7 @@ MDlgResult MDialog_YesNoCancel(wxChar const *message,
 void MDialog_ShowText(wxWindow *parent,
                       const wxChar *title,
                       const wxChar *text,
-                      const wxChar *configPath = NULL);
+                      const char *configPath = NULL);
 
 } // extern "C"
 

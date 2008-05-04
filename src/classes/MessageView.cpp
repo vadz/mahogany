@@ -3546,7 +3546,7 @@ MessageView::MimeViewText(const MimePart *mimepart)
          title << _T(" ('") << filename << _T("')");
       }
 
-      MDialog_ShowText(GetParentFrame(), title, content, _T("MimeView"));
+      MDialog_ShowText(GetParentFrame(), title, content, "MimeView");
    }
    else
    {

@@ -501,20 +501,26 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
    m_MessageView->CreateViewMenu();
    AddLanguageMenu();
 
-   // add a toolbar to the frame
-   CreateMToolbar(this, WXFRAME_MESSAGE);
-
-   // a status bar
-   CreateStatusBar(2);
-   static const int s_widths[] = { -1, 70 };
-   SetStatusWidths(WXSIZEOF(s_widths), s_widths);
+   CreateToolAndStatusBars();
 
    // do it after creating the menu as it access the "Toggle headers" item in
    // it
    m_MessageView->SetFolder(asmf);
    m_MessageView->ShowMessage(uid);
 
-   Show(true);
+   ShowInInitialState();
+}
+
+void wxMessageViewFrame::DoCreateToolBar()
+{
+   CreateMToolbar(this, WXFRAME_MESSAGE);
+}
+
+void wxMessageViewFrame::DoCreateStatusBar()
+{
+   CreateStatusBar(2);
+   static const int s_widths[] = { -1, 70 };
+   SetStatusWidths(WXSIZEOF(s_widths), s_widths);
 }
 
 void

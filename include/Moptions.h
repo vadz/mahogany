@@ -31,6 +31,9 @@ extern const MOption MP_WIDTH;
 extern const MOption MP_HEIGHT;
 extern const MOption MP_ICONISED;
 extern const MOption MP_MAXIMISED;
+extern const MOption MP_SHOW_TOOLBAR;
+extern const MOption MP_SHOW_STATUSBAR;
+extern const MOption MP_SHOW_FULLSCREEN;
 extern const MOption MP_SHOWLOG;
 extern const MOption MP_LOGFILE;
 extern const MOption MP_DEBUG_CCLIENT;
@@ -468,6 +471,12 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_ICONISED_NAME         "Iconised"
 /// window maximized?
 #define   MP_MAXIMISED_NAME         "Maximised"
+/// tool bars shown?
+#define   MP_SHOW_TOOLBAR_NAME    "ShowToolBar"
+/// status bars shown?
+#define   MP_SHOW_STATUSBAR_NAME  "ShowStatusBar"
+/// window shown full-screen?
+#define   MP_SHOW_FULLSCREEN_NAME "ShowFullScreen"
 
 /// show log window?
 #define   MP_SHOWLOG_NAME          "ShowLog"
@@ -1313,6 +1322,12 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_ICONISED_DEFVAL 0l
 /// window maximized?
 #define   MP_MAXIMISED_DEFVAL 0l
+/// tool bars shown?
+#define   MP_SHOW_TOOLBAR_DEFVAL    1L
+/// status bars shown?
+#define   MP_SHOW_STATUSBAR_DEFVAL  1L
+/// window shown full-screen?
+#define   MP_SHOW_FULLSCREEN_DEFVAL 0L
 /// show log window?
 #define   MP_SHOWLOG_DEFVAL  1
 /// the file to save log messages to (if not empty)

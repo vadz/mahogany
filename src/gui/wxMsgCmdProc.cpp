@@ -793,7 +793,7 @@ MsgCmdProcImpl::ShowRawText(UIdType uid)
    }
    else
    {
-      MDialog_ShowText(GetFrame(), _("Raw message text"), text, _T("RawMsgPreview"));
+      MDialog_ShowText(GetFrame(), _("Raw message text"), text, "RawMsgPreview");
    }
 }
 

@@ -773,6 +773,10 @@ public:
   ~wxAdbEditFrame();
 
 private:
+  // implement base class pure virtual methods
+  virtual void DoCreateToolBar() { CreateMToolbar(this, WXFRAME_ADB); }
+  virtual void DoCreateStatusBar() { CreateStatusBar(2); }
+
   // associate an ADB entry with the notebook panels
   void UpdateNotebook();
 
@@ -1194,8 +1198,7 @@ END_EVENT_TABLE()
 
 void ShowAdbFrame(wxFrame *parent)
 {
-  wxFrame *pAdbFrame = new wxAdbEditFrame(parent);
-  pAdbFrame->Show(TRUE);
+  new wxAdbEditFrame(parent);
 
   mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, TRUE);
 }
@@ -1268,11 +1271,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // toolbar and status bar
   // ----------------------
 
-  // standard M toolbar
-  CreateMToolbar(this, WXFRAME_ADB);
-
-  // create a status bar with 2 panes
-  CreateStatusBar(2);
+  CreateToolAndStatusBars();
 
   // make a panel with some items
   // ----------------------------
@@ -1343,8 +1342,6 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // final initializations
   // ---------------------
 
-  RestoreSettings1();
-
   // create the root item
   m_root = new AdbTreeRoot(m_astrAdb, m_astrProviders);
   m_root->TreeInsert(*m_treeAdb);
@@ -1353,6 +1350,8 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   m_current = m_root;
 
   RestoreSettings2();
+
+  ShowInInitialState();
 }
 
 void wxAdbEditFrame::TransferSettings(bool bSave)

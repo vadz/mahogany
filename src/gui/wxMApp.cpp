@@ -153,7 +153,7 @@ extern const MPersMsgBox *M_MSGBOX_SHOWLOGWINHINT;
 // ----------------------------------------------------------------------------
 
 // the name of config section where the log window position is saved
-#define  LOG_FRAME_SECTION    _T("LogWindow")
+static const char *LOG_FRAME_SECTION = "LogWindow";
 
 // trace mask for timer events
 #define TRACE_TIMER _T("timer")
@@ -1243,7 +1243,6 @@ wxMApp::OnInit()
 wxMFrame *wxMApp::CreateTopLevelFrame()
 {
    m_topLevelFrame = new wxMainFrame();
-   m_topLevelFrame->Show(true);
    SetTopWindow(m_topLevelFrame);
    return m_topLevelFrame;
 }

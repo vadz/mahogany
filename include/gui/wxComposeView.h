@@ -435,11 +435,12 @@ protected:
    kbStringList m_extraHeadersValues;
 
 private:
+   // implement base class pure virtual methods
+   virtual void DoCreateToolBar();
+   virtual void DoCreateStatusBar();
+
    /// initialize the menubar
    void CreateMenu();
-
-   /// initialize the toolbar and statusbar
-   void CreateToolAndStatusBars();
 
    /// create and initialize the editor
    void CreateEditor(void);

@@ -1498,7 +1498,7 @@ void SendMessageCC::Preview(String *text)
 {
    String textTmp;
    WriteToString(textTmp);
-   MDialog_ShowText(m_frame, _T("Outgoing message text"), textTmp, _T("SendPreview"));
+   MDialog_ShowText(m_frame, _("Outgoing message text"), textTmp, "SendPreview");
 
    if ( text )
       *text = textTmp;
