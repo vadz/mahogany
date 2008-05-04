@@ -63,9 +63,9 @@ extern const MOption MP_TMPGFXFORMAT;
 // constants
 // ----------------------------------------------------------------------------
 
-#ifdef __WXDEBUG__
-static const char *wxTraceIconLoading = "iconload";
-#endif
+// #define and not a constant to avoid warnings about it being unused in
+// release build from g++ (but it still needs to be defined for MSVC)
+#define wxTraceIconLoading "iconload"
 
 /** @name built-in icon names */
 //@{
