@@ -398,7 +398,10 @@ enum ConfigFields
    ConfigField_MessageViewInlineGraphicsSize,
    ConfigField_MessageViewInlineGraphicsExternal,
    ConfigField_MessageViewPlainIsText,
+   ConfigField_MessageViewRfc822InlineHelp,
    ConfigField_MessageViewRfc822IsText,
+   ConfigField_MessageViewRfc822Decorate,
+   ConfigField_MessageViewRfc822ShowHeaders,
    ConfigField_ViewWrapMargin,
    ConfigField_ViewWrapAuto,
 #ifdef OS_UNIX
@@ -1541,7 +1544,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("But only if size is less than (kb)"), Field_Number, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("&Enable showing external images"), Field_Bool,    ConfigField_MessageViewInlineGraphics },
    { gettext_noop("Display &text attachments inline"),Field_Bool,    -1 },
-   { gettext_noop("Display &mail messages as text"),Field_Bool,    -1 },
+   { gettext_noop("Mahogany may display embedded mail messages directly "
+                  "inline in the main message text\n"
+                  "and you may choose whether they should be separated from "
+                  "the surrounding text and\n"
+                  "whether their headers should be displayed."), Field_Message,    -1 },
+   { gettext_noop("Display embedded &messages inline"),Field_Bool,    -1 },
+   { gettext_noop("Put &separator lines around them"),Field_Bool, ConfigField_MessageViewRfc822IsText },
+   { gettext_noop("Show embedded messages &headers"),Field_Bool, ConfigField_MessageViewRfc822IsText },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("Wra&p lines automatically"),    Field_Bool,  -1,                        },
 #ifdef OS_UNIX
@@ -2138,7 +2148,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_INLINE_GFX_SIZE),
    CONFIG_ENTRY(MP_INLINE_GFX_EXTERNAL),
    CONFIG_ENTRY(MP_PLAIN_IS_TEXT),
+   CONFIG_NONE(), // embedded mail messages help
    CONFIG_ENTRY(MP_RFC822_IS_TEXT),
+   CONFIG_ENTRY(MP_RFC822_DECORATE),
+   CONFIG_ENTRY(MP_RFC822_SHOW_HEADERS),
    CONFIG_ENTRY(MP_VIEW_WRAPMARGIN),
    CONFIG_ENTRY(MP_VIEW_AUTOMATIC_WORDWRAP),
 #ifdef OS_UNIX

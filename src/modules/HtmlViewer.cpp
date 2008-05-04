@@ -134,6 +134,9 @@ public:
    bool ShouldInlineImage(const String& url) const;
 
 private:
+   // called by StartHeaders() first time it's called on a new message
+   void StartMessage();
+
    // HTML helpers
    // ------------
 
@@ -158,6 +161,7 @@ private:
    // emulate a key press: this is the only way I found to scroll
    // wxScrolledWindow
    void EmulateKeyPress(int keycode);
+
 
    // the viewer window
    HtmlViewerWindow *m_window;
@@ -890,11 +894,7 @@ void HtmlViewer::FreeMemoryFS()
    m_nImage = 0;
 }
 
-// ----------------------------------------------------------------------------
-// header showing
-// ----------------------------------------------------------------------------
-
-void HtmlViewer::StartHeaders()
+void HtmlViewer::StartMessage()
 {
    // set the default attributes
    const ProfileValues& profileValues = GetOptions();
@@ -925,8 +925,20 @@ void HtmlViewer::StartHeaders()
       m_htmlText << _T("<tt>");
       m_htmlEnd.Prepend(_T("</tt>"));
    }
+}
 
-   // the next header is going to be the first one
+// ----------------------------------------------------------------------------
+// header showing
+// ----------------------------------------------------------------------------
+
+void HtmlViewer::StartHeaders()
+{
+   // this can be called multiple times for display of the embedded message
+   // headers, only start the message once
+   if ( m_htmlText.empty() )
+      StartMessage();
+
+   // the next header will be the first one
    m_firstheader = true;
 }
 
@@ -993,6 +1005,8 @@ void HtmlViewer::EndHeaders()
    {
       // close the headers table
       m_htmlText += _T("</table>");
+
+      m_firstheader = true;
    }
    //else: we had no headers at all
 

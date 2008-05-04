@@ -249,6 +249,8 @@ extern const MOption MP_VIEW_AUTOMATIC_WORDWRAP;
 extern const MOption MP_VIEW_WRAPMARGIN;
 extern const MOption MP_PLAIN_IS_TEXT;
 extern const MOption MP_RFC822_IS_TEXT;
+extern const MOption MP_RFC822_DECORATE;
+extern const MOption MP_RFC822_SHOW_HEADERS;
 extern const MOption MP_SHOW_XFACES;
 extern const MOption MP_INLINE_GFX;
 extern const MOption MP_INLINE_GFX_EXTERNAL;
@@ -908,6 +910,10 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_PLAIN_IS_TEXT_NAME      "PlainIsText"
 /// show MESSAGE/RFC822 as inlined text?
 #define   MP_RFC822_IS_TEXT_NAME      "Rfc822IsText"
+/// show decorations around inlined MESSAGE/RFC822 text?
+#define   MP_RFC822_DECORATE_NAME "Rfc822AsTextDecorate"
+/// show headers of the inlined MESSAGE/RFC822 text?
+#define   MP_RFC822_SHOW_HEADERS_NAME "Rfc822AsTextHeaders"
 /// show XFaces?
 #define   MP_SHOW_XFACES_NAME         "ShowXFaces"
 /// show graphics inline
@@ -1768,6 +1774,10 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_PLAIN_IS_TEXT_DEFVAL      1l
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT_DEFVAL      0l
+/// show decorations around inlined MESSAGE/RFC822 text?
+#define   MP_RFC822_DECORATE_DEFVAL 1L
+/// show headers of the inlined MESSAGE/RFC822 text?
+#define   MP_RFC822_SHOW_HEADERS_DEFVAL 1L
 /// show XFaces?
 #define   MP_SHOW_XFACES_DEFVAL      1
 /// show graphics inline

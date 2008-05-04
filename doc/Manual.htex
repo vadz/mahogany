@@ -81,6 +81,9 @@ skip them unless you're updating from a very old version of Mahogany.
          is much simpler now, but is helpful for training the server-side
          filters as using the \MenuCmd{Message|Spam} menu commands can now be
          configured to do the right thing.
+   \item Improve the display of the embedded messages: now their headers can be
+         displayed inline too, see the new options in the message view
+         preferences dialog page.
 \end{itemize}
 
 \subsubsection{0.67 against 0.66}

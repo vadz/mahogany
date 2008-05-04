@@ -30,6 +30,7 @@ class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 class ASMailFolder;
 class ClickableInfo;
+class HeaderIterator;
 class MessageViewer;
 class Message;
 class MEventData;
@@ -368,8 +369,14 @@ protected:
       /// show all headers?
       bool showHeaders:1;
 
-      /// inline MESSAGE/RFC822 attachments?
-      bool inlineRFC822:1;
+      /// inline embedded MESSAGE/RFC822 attachments?
+      bool inlineEmbedded:1;
+
+      /// put decorations around embedded messages?
+      bool decorateEmbedded:1;
+
+      /// show headers for the embedded messages?
+      bool showEmbeddedHeaders:1;
 
       /// inline TEXT/PLAIN attachments?
       bool inlinePlainText:1;
@@ -531,12 +538,18 @@ protected:
    void
    ShowSelectedHeaders(const wxArrayString& headers, ViewableInfoFromHeaders *vi);
 
-   /// show all headers matching the array elements (which can contain wildcards)
+   /// show all headers from headerIterator matching the names in the array
+   /// (which can contain wildcards)
    void
-   ShowMatchingHeaders(const wxArrayString& headers, ViewableInfoFromHeaders *vi);
+   ShowMatchingHeaders(HeaderIterator headerIterator,
+                       const wxArrayString& headers,
+                       ViewableInfoFromHeaders *vi);
 
    /// show information collected in vi while examining the headers
    void ShowInfoFromHeaders(const ViewableInfoFromHeaders& vi);
+
+   /// return a colon separated list of names of the headers we should display
+   String GetHeaderNamesToDisplay() const;
 
    /**
       Possible values for the second parameter of ProcessPart.
@@ -603,14 +616,29 @@ protected:
    /// show a text part
    void ShowTextPart(const MimePart *part);
 
-   /// show a text
-   void ShowText(String textPart, wxFontEncoding textEnc = wxFONTENCODING_SYSTEM);
+   /// show a text (passed by value as it is modified inside)
+   void ShowText(String textPart,
+                 wxFontEncoding textEnc = wxFONTENCODING_SYSTEM);
+
+   /// show a [single line of] text terminated by a new line
+   void ShowTextLine(const String& text = String(),
+                     wxFontEncoding textEnc = wxFONTENCODING_SYSTEM)
+   {
+      ShowText(text + "\r\n", textEnc);
+   }
 
    /// show an attachment
    void ShowAttachment(const MimePart *part);
 
    /// show an inline image
    void ShowImage(const MimePart *part);
+
+   /// helper of ShowEmbeddedMessageStart/End()
+   void ShowEmbeddedMessageSeparator();
+
+   /// functions used before/after embedded message
+   void ShowEmbeddedMessageStart(const MimePart& part);
+   void ShowEmbeddedMessageEnd(const MimePart& part);
 
    /// return the clickable info object (basicly a label) for this part
    ClickableInfo *GetClickableInfo(const MimePart *part) const;

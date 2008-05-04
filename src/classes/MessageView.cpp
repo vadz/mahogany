@@ -136,6 +136,8 @@ extern const MOption MP_PGP_COMMAND;
 extern const MOption MP_PLAIN_IS_TEXT;
 extern const MOption MP_REPLY_QUOTE_SELECTION;
 extern const MOption MP_RFC822_IS_TEXT;
+extern const MOption MP_RFC822_DECORATE;
+extern const MOption MP_RFC822_SHOW_HEADERS;
 extern const MOption MP_SHOWHEADERS;
 extern const MOption MP_SHOW_XFACES;
 extern const MOption MP_TIFF2PS;
@@ -509,7 +511,9 @@ MessageView::AllProfileValues::AllProfileValues()
    fontSize = -1;
 
    showHeaders =
-   inlineRFC822 =
+   inlineEmbedded =
+   decorateEmbedded =
+   showEmbeddedHeaders =
    inlinePlainText =
    showFaces =
    highlightURLs =
@@ -533,7 +537,10 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
           CMP(fontDesc) &&
           (!fontDesc.empty() || (CMP(fontFamily) && CMP(fontSize))) &&
-          CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
+          CMP(showHeaders) &&
+          CMP(inlineEmbedded) && (!inlineEmbedded ||
+            (CMP(decorateEmbedded) && CMP(showEmbeddedHeaders))) &&
+          CMP(inlinePlainText) &&
           CMP(inlineGFX) && CMP(showExtImages) &&
           CMP(highlightURLs) && (!highlightURLs || CMP(UrlCol)) &&
           // even if these fields are different, they don't change our
@@ -1204,7 +1211,11 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
 
    settings->showHeaders = READ_CONFIG_BOOL(profile, MP_SHOWHEADERS);
    settings->inlinePlainText = READ_CONFIG_BOOL(profile, MP_PLAIN_IS_TEXT);
-   settings->inlineRFC822 = READ_CONFIG_BOOL(profile, MP_RFC822_IS_TEXT);
+   settings->inlineEmbedded = READ_CONFIG_BOOL(profile, MP_RFC822_IS_TEXT);
+   settings->decorateEmbedded =
+      READ_CONFIG_BOOL(profile, MP_RFC822_DECORATE);
+   settings->showEmbeddedHeaders =
+      READ_CONFIG_BOOL(profile, MP_RFC822_SHOW_HEADERS);
 
    // we set inlineGFX to 0 if we don't inline graphics at all and to the
    // max size limit of graphics to show inline otherwise (-1 if no limit)
@@ -1408,13 +1419,14 @@ MessageView::ShowAllHeaders(ViewableInfoFromHeaders *vi)
 }
 
 void
-MessageView::ShowMatchingHeaders(const wxArrayString& headersToShow,
+MessageView::ShowMatchingHeaders(HeaderIterator headerIterator,
+                                 const wxArrayString& headersToShow,
                                  ViewableInfoFromHeaders *vi)
 {
    wxArrayString headerNames,
                  headerValues;
    wxArrayInt headerEncodings;
-   size_t countHeaders = m_mailMessage->GetHeaderIterator().GetAllDecoded
+   size_t countHeaders = headerIterator.GetAllDecoded
                          (
                            &headerNames,
                            &headerValues,
@@ -1849,6 +1861,21 @@ MessageView::ShowInfoFromHeaders(const ViewableInfoFromHeaders& vi)
 #endif // HAVE_XFACES
 }
 
+String
+MessageView::GetHeaderNamesToDisplay() const
+{
+   // get all the headers we need to display
+   wxString headers = READ_CONFIG(GetProfile(), MP_MSGVIEW_HEADERS);
+
+   // ignore trailing colon as it would result in a dummy empty name after
+   // splitting (and unfortunately this extra colon can occur as some old M
+   // versions had it in the default value of MP_MSGVIEW_HEADERS by mistake)
+   if ( !headers.empty() && *headers.rbegin() == ':' )
+      headers.erase(headers.length() - 1);
+
+   return headers;
+}
+
 void
 MessageView::ShowHeaders()
 {
@@ -1863,29 +1890,28 @@ MessageView::ShowHeaders()
    }
    else // show just the selected headers
    {
-      // get all the headers we need to display
-      wxString headers = READ_CONFIG(GetProfile(), MP_MSGVIEW_HEADERS);
+      const String headers = GetHeaderNamesToDisplay();
+      if ( !headers.empty() )
+      {
+         const wxArrayString headersArray = strutil_restore_array(headers);
 
-      // ignore trailing colon as it would result in a dummy empty name after
-      // splitting (and unfortunately this extra colon can occur as some old M
-      // versions had it in the default value of MP_MSGVIEW_HEADERS by mistake)
-      if ( !headers.empty() && *headers.rbegin() == ':' )
-         headers.erase(headers.length() - 1);
-
-      if ( headers.empty() )
-         return;
-
-      const wxArrayString headersArray = strutil_restore_array(headers);
-
-      // if we are using wildcards we need to examine all the headers anyhow so
-      // just do it, otherwise we can retrieve just the headers we need (this
-      // can make a huge difference, the default headers typically are ~100
-      // bytes while the entire message header is commonly 2-3KB and sometimes
-      // more)
-      if ( headers.find_first_of("*?") != String::npos )
-         ShowMatchingHeaders(headersArray, &vi);
-      else
-         ShowSelectedHeaders(headersArray, &vi);
+         // if we are using wildcards we need to examine all the headers anyhow
+         // so just do it, otherwise we can retrieve just the headers we need
+         // (this can make a huge difference, the default headers typically are
+         // ~100 bytes while the entire message header is commonly 2-3KB and
+         // sometimes more and, even more importantly, we can already have the
+         // envelope headers and if this is all we display we can avoid another
+         // trip to server completely)
+         if ( headers.find_first_of("*?") != String::npos )
+         {
+            ShowMatchingHeaders(m_mailMessage->GetHeaderIterator(),
+                                headersArray, &vi);
+         }
+         else
+         {
+            ShowSelectedHeaders(headersArray, &vi);
+         }
+      }
    }
 
    // display anything requiring special treatment that we found in the headers
@@ -1992,6 +2018,50 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
 
    filter->StartText();
    filter->Process(textPart, m_viewer, style);
+}
+
+// ----------------------------------------------------------------------------
+// MessageView embedded messages display
+// ----------------------------------------------------------------------------
+
+// TODO: make this stuff configurable, e.g. by having an option specifying the
+//       template to use and using MessageTemplateVarExpander here
+
+void MessageView::ShowEmbeddedMessageSeparator()
+{
+   if ( m_ProfileValues.decorateEmbedded )
+      ShowTextLine(wxString(80, '_'));
+}
+
+void MessageView::ShowEmbeddedMessageStart(const MimePart& part)
+{
+   ShowEmbeddedMessageSeparator();
+
+   if ( !m_ProfileValues.showEmbeddedHeaders )
+      return;
+
+   const MimePart * const nested = part.GetNested();
+   if ( nested )
+   {
+      const wxArrayString
+         displayHeaders = strutil_restore_array(GetHeaderNamesToDisplay());
+      if ( !displayHeaders.empty() )
+      {
+         m_viewer->StartHeaders();
+
+         ViewableInfoFromHeaders vi;
+         ShowMatchingHeaders(nested->GetHeaders(), displayHeaders, &vi);
+
+         ShowInfoFromHeaders(vi);
+
+         m_viewer->EndHeaders();
+      }
+   }
+}
+
+void MessageView::ShowEmbeddedMessageEnd(const MimePart& part)
+{
+   ShowEmbeddedMessageSeparator();
 }
 
 // ----------------------------------------------------------------------------
@@ -2448,13 +2518,13 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 
    pgpInfo->SetLog(log);
 
-   ShowText("\r\n");
+   ShowTextLine();
 
    m_viewer->InsertClickable(pgpInfo->GetBitmap(),
                              pgpInfo,
                              pgpInfo->GetColour());
 
-   ShowText("\r\n");
+   ShowTextLine();
 
    factory->DecRef();
 
@@ -2532,13 +2602,13 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
 
    pgpInfo->SetLog(log);
 
-   ShowText("\r\n");
+   ShowTextLine();
 
    m_viewer->InsertClickable(pgpInfo->GetBitmap(),
                              pgpInfo,
                              pgpInfo->GetColour());
 
-   ShowText("\r\n");
+   ShowTextLine();
 
    factory->DecRef();
 
@@ -2616,9 +2686,17 @@ MessageView::ProcessPart(const MimePart *mimepart, MimePartAction action)
          return ProcessMultiPart(mimepart, type.GetSubType(), action);
 
       case MimeType::MESSAGE:
-         if ( m_ProfileValues.inlineRFC822 )
+         if ( m_ProfileValues.inlineEmbedded )
          {
-            return ProcessAllNestedParts(mimepart, action);
+            if ( action == Part_Show )
+               ShowEmbeddedMessageStart(*mimepart);
+
+            const bool rc = ProcessAllNestedParts(mimepart, action);
+
+            if ( action == Part_Show )
+               ShowEmbeddedMessageEnd(*mimepart);
+
+            return rc;
          }
          //else: fall through and show it as attachment
 
@@ -2752,7 +2830,7 @@ MessageView::DeterminePartContent(const MimePart *mimepart)
       switch ( type.GetPrimary() )
       {
          case MimeType::MESSAGE:
-            if ( !m_ProfileValues.inlineRFC822 )
+            if ( !m_ProfileValues.inlineEmbedded )
                break;
             //else: fall through and handle it as embedded multipart
 
