@@ -216,7 +216,7 @@ public:
                const String& errormsg)
       : m_errormsg(errormsg)
    {
-      ASSERT_MSG( process && pid, _T("invalid process in ProcessInfo") );
+      ASSERT_MSG( process && pid, "invalid process in ProcessInfo" );
 
       m_process = process;
       m_pid = pid;
@@ -285,7 +285,7 @@ class MIMEFSHandler : public wxMemoryFSHandler
 public:
    virtual bool CanOpen(const wxString& location)
    {
-      return GetProtocol(location) == _T("cid");
+      return GetProtocol(location) == "cid";
    }
 };
 
@@ -404,7 +404,7 @@ size_t GetAllAvailablePlugins(const char *iface,
                               wxArrayString *descs,
                               wxArrayInt *states = NULL)
 {
-   CHECK( names && descs, 0, _T("NULL pointer in GetAllAvailablePlugins()") );
+   CHECK( names && descs, 0, "NULL pointer in GetAllAvailablePlugins()" );
 
    names->Empty();
    descs->Empty();
@@ -439,7 +439,7 @@ size_t GetAllAvailablePlugins(const char *iface,
          }
          else
          {
-            FAIL_MSG( _T("failed to create ViewFilterFactory") );
+            FAIL_MSG( "failed to create ViewFilterFactory" );
 
             states->Add(false);
          }
@@ -656,7 +656,7 @@ MessageView::SetViewer(MessageViewer *viewer,
       // simpler/cleaner than inserting "if ( m_viewer )" checks everywhere
       viewer = CreateDefaultViewer();
 
-      ASSERT_MSG( viewer, _T("must have default viewer, will crash without it!") );
+      ASSERT_MSG( viewer, "must have default viewer, will crash without it!" );
 
       m_usingDefViewer = true;
 
@@ -806,7 +806,7 @@ MessageView::GetAllAvailableFilters(wxArrayString *names,
 void
 MessageView::InitializeViewFilters()
 {
-   CHECK_RET( !m_filters, _T("InitializeViewFilters() called twice?") );
+   CHECK_RET( !m_filters, "InitializeViewFilters() called twice?" );
 
    // always insert the terminating, "do nothing", filter at the end
    m_filters = new ViewFilterNode
@@ -933,7 +933,7 @@ MessageView::GetFirstViewFilter(String *name,
                                 bool *enabled,
                                 void **cookie)
 {
-   CHECK( cookie, false, _T("NULL cookie in GetFirstFilter") );
+   CHECK( cookie, false, "NULL cookie in GetFirstFilter" );
 
    *cookie = m_filters;
 
@@ -947,7 +947,7 @@ MessageView::GetNextViewFilter(String *name,
                                void **cookie)
 {
    CHECK( name && desc && enabled && cookie, false,
-          _T("NULL parameter in GetNextFilter") );
+          "NULL parameter in GetNextFilter" );
 
    if ( !*cookie )
       return false;
@@ -986,8 +986,7 @@ wxFrame *MessageView::GetParentFrame() const
 
 String MessageView::GetFolderName() const
 {
-   CHECK( m_mailMessage->GetFolder(), _T("unknown"),
-          _T("no folder in MessageView?") );
+   CHECK( m_mailMessage->GetFolder(), "unknown", "no folder in MessageView?" );
 
    return m_mailMessage->GetFolder()->GetName();
 }
@@ -1021,9 +1020,9 @@ MessageView::RegisterForEvents()
 {
    // register with the event manager
    m_regCookieOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
-   ASSERT_MSG( m_regCookieOptionsChange, _T("can't register for options change event"));
+   ASSERT_MSG( m_regCookieOptionsChange, "can't register for options change event");
    m_regCookieASFolderResult = MEventManager::Register(*this, MEventId_ASFolderResult);
-   ASSERT_MSG( m_regCookieASFolderResult, _T("can't reg folder view with event manager"));
+   ASSERT_MSG( m_regCookieASFolderResult, "can't reg folder view with event manager");
 }
 
 void MessageView::UnregisterForEvents()
@@ -1073,7 +1072,7 @@ void MessageView::OnOptionsChange(MEventOptionsChangeData& event)
          break;
 
       default:
-         FAIL_MSG(_T("unknown options change event"));
+         FAIL_MSG("unknown options change event");
    }
 }
 
@@ -1105,7 +1104,7 @@ MessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
          break;
 
          default:
-            FAIL_MSG(_T("Unexpected async result event"));
+            FAIL_MSG("Unexpected async result event");
       }
    }
 
@@ -1171,7 +1170,7 @@ void
 MessageView::ReadAllSettings(AllProfileValues *settings)
 {
    Profile *profile = GetProfile();
-   CHECK_RET( profile, _T("MessageView::ReadAllSettings: no profile") );
+   CHECK_RET( profile, "MessageView::ReadAllSettings: no profile" );
 
    // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(col, name) \
@@ -1295,11 +1294,11 @@ MessageView::ShowHeader(const String& name,
    String nameUpper(name.Upper());
    if ( highlightURLs )
    {
-      if ( nameUpper == _T("IN-REPLY-TO") ||
-            nameUpper == _T("REFERENCES") ||
-             nameUpper == _T("CONTENT-ID") ||
-              nameUpper == _T("MESSAGE-ID") ||
-               nameUpper == _T("RESENT-MESSAGE-ID") )
+      if ( nameUpper == "IN-REPLY-TO" ||
+            nameUpper == "REFERENCES" ||
+             nameUpper == "CONTENT-ID" ||
+              nameUpper == "MESSAGE-ID" ||
+               nameUpper == "RESENT-MESSAGE-ID" )
       {
          highlightURLs = false;
       }
@@ -1317,13 +1316,13 @@ MessageView::ShowHeader(const String& name,
 
          // for headers (usually) containing addresses with personal names try
          // to detect the personal names as well
-         if ( *url.c_str() == _T('<') &&
-               (nameUpper == _T("FROM") ||
-                 nameUpper == _T("TO") ||
-                  nameUpper == _T("CC") ||
-                   nameUpper == _T("BCC") ||
-                    nameUpper == _T("RESENT-FROM") ||
-                     nameUpper == _T("RESENT-TO")) )
+         if ( *url.c_str() == '<' &&
+               (nameUpper == "FROM" ||
+                 nameUpper == "TO" ||
+                  nameUpper == "CC" ||
+                   nameUpper == "BCC" ||
+                    nameUpper == "RESENT-FROM" ||
+                     nameUpper == "RESENT-TO") )
          {
             urlText = url;
 
@@ -1337,12 +1336,12 @@ MessageView::ShowHeader(const String& name,
                wxChar ch = before.Last();
                switch ( ch )
                {
-                  case _T('"'):
+                  case '"':
                      inQuotes = !inQuotes;
                      break;
 
-                  case _T(','):
-                  case _T(';'):
+                  case ',':
+                  case ';':
                      if ( !inQuotes )
                         stop = true;
                }
@@ -1535,7 +1534,7 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
       };
 
       ASSERT_MSG( EnvelopHeader_Max == WXSIZEOF(envelopHeadersNames),
-                  _T("forgot to update something - should be kept in sync!") );
+                  "forgot to update something - should be kept in sync!" );
 
       for ( n = 0; n < WXSIZEOF(envelopHeadersNames); n++ )
       {
@@ -1591,7 +1590,7 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
       }
 
       // did their number change from just recounting?
-      ASSERT_MSG( nNonEnv == countNonEnvHeaders, _T("logic error") );
+      ASSERT_MSG( nNonEnv == countNonEnvHeaders, "logic error" );
 
       headerPtrs[countNonEnvHeaders] = NULL;
 
@@ -1614,7 +1613,7 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
          if ( envhdr == wxNOT_FOUND )
          {
             // if headerIsEnv, then it must be in the array
-            FAIL_MSG( _T("logic error") );
+            FAIL_MSG( "logic error" );
 
             continue;
          }
@@ -1631,7 +1630,7 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
                   MessageAddressType mat;
                   switch ( envhdr )
                   {
-                     default: FAIL_MSG( _T("forgot to add header here") );
+                     default: FAIL_MSG( "forgot to add header here" );
                      case EnvelopHeader_From: mat = MAT_FROM; break;
                      case EnvelopHeader_To: mat = MAT_TO; break;
                      case EnvelopHeader_Cc: mat = MAT_CC; break;
@@ -1670,7 +1669,7 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
 
 
             default:
-               FAIL_MSG( _T("unknown envelop header") );
+               FAIL_MSG( "unknown envelop header" );
          }
 
          // extract encoding info from it
@@ -1733,7 +1732,7 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
       // wrong because there could be a single header with a multiline value
       // as well, this is the best we can do considering that GetHeaderLine
       // concatenates the values of all headers with the same name anyhow
-      wxArrayString values = wxStringTokenize(value, _T("\n"));
+      wxArrayString values = wxStringTokenize(value, "\n");
 
       const size_t linesCount = values.GetCount();
       for ( size_t line = 0; line < linesCount; ++line )
@@ -1989,7 +1988,7 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
    }
 
    ViewFilter *filter = m_filters->GetFilter();
-   CHECK_RET( filter, _T("no view filters at all??") );
+   CHECK_RET( filter, "no view filters at all??" );
 
    filter->StartText();
    filter->Process(textPart, m_viewer, style);
@@ -2144,11 +2143,11 @@ MessageView::ShowPart(const MimePart *mimepart)
       return;
    }
 
-   MimeType type = mimepart->GetType();
+   const MimeType type = mimepart->GetType();
 
-   String mimeType = type.GetFull();
+   const String mimeType = type.GetFull();
 
-   String fileName = mimepart->GetFilename();
+   const String fileName = mimepart->GetFilename();
 
    MimeType::Primary primaryType = type.GetPrimary();
 
@@ -2160,7 +2159,7 @@ MessageView::ShowPart(const MimePart *mimepart)
    {
       wxString typeName = type.GetType();
 
-      if ( typeName == _T("OCTET") )
+      if ( typeName == "OCTET" )
       {
          // I have messages with "Content-Type: OCTET/STREAM", convert them
          // to "APPLICATION/OCTET-STREAM"
@@ -2168,7 +2167,7 @@ MessageView::ShowPart(const MimePart *mimepart)
       }
       else
       {
-         wxLogDebug(_T("Invalid MIME type '%s'!"), typeName.c_str());
+         wxLogDebug("Invalid MIME type '%s'!", typeName.c_str());
       }
    }
 
@@ -2177,7 +2176,7 @@ MessageView::ShowPart(const MimePart *mimepart)
    if ( primaryType == MimeType::APPLICATION )
    {
       // get the MIME type for the files of this extension
-      wxString ext = fileName.AfterLast('.');
+      wxString ext = wxFileName(fileName).GetExt();
       if ( !ext.empty() )
       {
          wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
@@ -2188,11 +2187,11 @@ MessageView::ShowPart(const MimePart *mimepart)
             ft->GetMimeType(&mt);
             delete ft;
 
-            if(wxMimeTypesManager::IsOfType(mt,_T("image/*")))
+            if(wxMimeTypesManager::IsOfType(mt,"image/*"))
                primaryType = MimeType::IMAGE;
-            else if(wxMimeTypesManager::IsOfType(mt,_T("audio/*")))
+            else if(wxMimeTypesManager::IsOfType(mt,"audio/*"))
                primaryType = MimeType::AUDIO;
-            else if(wxMimeTypesManager::IsOfType(mt,_T("video/*")))
+            else if(wxMimeTypesManager::IsOfType(mt,"video/*"))
                primaryType = MimeType::VIDEO;
          }
       }
@@ -2248,10 +2247,8 @@ MessageView::ShowPart(const MimePart *mimepart)
       //else: skip this part
    }
    else if ( !isAttachment &&
-             ((mimeType == _T("TEXT/PLAIN") &&
-               (fileName.empty() || m_ProfileValues.inlinePlainText)) ||
-              (primaryType == MimeType::MESSAGE &&
-                m_ProfileValues.inlineRFC822)) )
+             ((mimeType == "TEXT/PLAIN" &&
+               (fileName.empty() || m_ProfileValues.inlinePlainText))) )
    {
       ShowTextPart(mimepart);
    }
@@ -2298,7 +2295,7 @@ MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart,
    {
       String mimetype = partChild->GetType().GetFull();
 
-      if ( mimetype == _T("TEXT/PLAIN") || CanViewerProcessPart(partChild) )
+      if ( mimetype == "TEXT/PLAIN" || CanViewerProcessPart(partChild) )
       {
          // remember this one as the best so far
          partBest = partChild;
@@ -2308,7 +2305,7 @@ MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart,
    }
 
    // show just the best one
-   CHECK(partBest, false, _T("No part can be displayed !"));
+   CHECK(partBest, false, "No part can be displayed !");
 
    // the content of an alternative is not necessarily a single
    // part, so process it as well.
@@ -2357,7 +2354,7 @@ MessageView::ProcessRelatedMultiPart(const MimePart *mimepart,
          {
             if ( partStart )
             {
-               wxLogDebug(_T("Duplicate CIDs in multipart/related message"));
+               wxLogDebug("Duplicate CIDs in multipart/related message");
             }
 
             partStart = partChild;
@@ -2375,7 +2372,7 @@ MessageView::ProcessRelatedMultiPart(const MimePart *mimepart,
       partChild = partChild->GetNext();
    }
 
-   CHECK( partStart, false, _T("No start part in multipart/related") );
+   CHECK( partStart, false, "No start part in multipart/related" );
 
    return ProcessPart(partStart, action);
 }
@@ -2383,7 +2380,7 @@ MessageView::ProcessRelatedMultiPart(const MimePart *mimepart,
 bool
 MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 {
-   if ( mimepart->GetParam(_T("protocol")) != _T("application/pgp-signature") )
+   if ( mimepart->GetParam("protocol") != "application/pgp-signature" )
    {
       // unknown signature protocol, don't try to interpret it
       return false;
@@ -2407,11 +2404,11 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
    //CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
    //            signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
    //            signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
-   //           _T("Signed part should be 7 bits"));
-   //CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
-   //CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
+   //           "Signed part should be 7 bits");
+   //CHECK_RET( signaturePart->GetNext() == 0, "Signature should be the last part" );
+   //CHECK_RET( signaturePart->GetNested() == 0, "Signature should not have nested parts" );
 
-   if ( signaturePart->GetType().GetFull() != _T("APPLICATION/PGP-SIGNATURE") )
+   if ( signaturePart->GetType().GetFull() != "APPLICATION/PGP-SIGNATURE" )
    {
       wxLogWarning(String(_("Signed message signature does not have a "
                             "\"application/pgp-signature\" type.")) +
@@ -2421,8 +2418,8 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
    }
 
    MCryptoEngineFactory * const factory
-      = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
-   CHECK( factory, false, _T("failed to create PGPEngineFactory") );
+      = (MCryptoEngineFactory *)MModule::LoadModule("PGPEngine");
+   CHECK( factory, false, "failed to create PGPEngineFactory" );
 
    MCryptoEngine *pgpEngine = factory->Get();
    MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
@@ -2451,13 +2448,13 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 
    pgpInfo->SetLog(log);
 
-   ShowText(_T("\r\n"));
+   ShowText("\r\n");
 
    m_viewer->InsertClickable(pgpInfo->GetBitmap(),
                              pgpInfo,
                              pgpInfo->GetColour());
 
-   ShowText(_T("\r\n"));
+   ShowText("\r\n");
 
    factory->DecRef();
 
@@ -2467,7 +2464,7 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 bool
 MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
 {
-   if ( mimepart->GetParam(_T("protocol")) != _T("application/pgp-encrypted") )
+   if ( mimepart->GetParam("protocol") != "application/pgp-encrypted" )
    {
       // unknown encryption protocol, don't try to interpret it
       return false;
@@ -2487,7 +2484,7 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
    // - that the control part actually has an "application/pgp-encrypted" type
    // - that it contains a "Version: 1" field (and only that)
 
-   if ( encryptedPart->GetType().GetFull() != _T("APPLICATION/OCTET-STREAM") )
+   if ( encryptedPart->GetType().GetFull() != "APPLICATION/OCTET-STREAM" )
    {
       wxLogError(_("The actual encrypted data part does not have a "
                    "\"application/octet-stream\" type, "
@@ -2498,8 +2495,8 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
    String encryptedData = encryptedPart->GetRawContentAsString();
 
    MCryptoEngineFactory * const factory
-      = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
-   CHECK( factory, false, _T("failed to create PGPEngineFactory") );
+      = (MCryptoEngineFactory *)MModule::LoadModule("PGPEngine");
+   CHECK( factory, false, "failed to create PGPEngineFactory" );
 
    MCryptoEngine* pgpEngine = factory->Get();
 
@@ -2535,13 +2532,13 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
 
    pgpInfo->SetLog(log);
 
-   ShowText(_T("\r\n"));
+   ShowText("\r\n");
 
    m_viewer->InsertClickable(pgpInfo->GetBitmap(),
                              pgpInfo,
                              pgpInfo->GetColour());
 
-   ShowText(_T("\r\n"));
+   ShowText("\r\n");
 
    factory->DecRef();
 
@@ -2556,15 +2553,15 @@ MessageView::ProcessMultiPart(const MimePart *mimepart,
    // TODO: support for DIGEST
 
    bool processed = false;
-   if ( subtype == _T("ALTERNATIVE") )
+   if ( subtype == "ALTERNATIVE" )
    {
       processed = ProcessAlternativeMultiPart(mimepart, action);
    }
-   else if ( subtype == _T("RELATED") )
+   else if ( subtype == "RELATED" )
    {
       processed = ProcessRelatedMultiPart(mimepart, action);
    }
-   else if ( subtype == _T("SIGNED") )
+   else if ( subtype == "SIGNED" )
    {
       switch ( action )
       {
@@ -2578,10 +2575,10 @@ MessageView::ProcessMultiPart(const MimePart *mimepart,
             break;
 
          default:
-            FAIL_MSG( _T("unknown MIME part processing action") );
+            FAIL_MSG( "unknown MIME part processing action" );
       }
    }
-   else if ( subtype == _T("ENCRYPTED") )
+   else if ( subtype == "ENCRYPTED" )
    {
       switch ( action )
       {
@@ -2596,7 +2593,7 @@ MessageView::ProcessMultiPart(const MimePart *mimepart,
             break;
 
          default:
-            FAIL_MSG( _T("unknown MIME part processing action") );
+            FAIL_MSG( "unknown MIME part processing action" );
       }
    }
    //else: process all unknown as MIXED (according to the RFC 2047)
@@ -2610,7 +2607,7 @@ MessageView::ProcessMultiPart(const MimePart *mimepart,
 bool
 MessageView::ProcessPart(const MimePart *mimepart, MimePartAction action)
 {
-   CHECK( mimepart, false, _T("MessageView::ProcessPart: NULL mimepart") );
+   CHECK( mimepart, false, "MessageView::ProcessPart: NULL mimepart" );
 
    const MimeType type = mimepart->GetType();
    switch ( type.GetPrimary() )
@@ -2654,12 +2651,12 @@ MessageView::ProcessPart(const MimePart *mimepart, MimePartAction action)
                }
 
             default:
-               FAIL_MSG( _T("unknown MIME part processing action") );
+               FAIL_MSG( "unknown MIME part processing action" );
          }
          break;
 
       default:
-         FAIL_MSG( _T("unknown MIME type") );
+         FAIL_MSG( "unknown MIME type" );
    }
 
    return false;
@@ -2746,7 +2743,7 @@ MessageView::DeterminePartContent(const MimePart *mimepart)
 {
    int contents = 0;
 
-   // if the part is explicitely an attachment we show it as attachment anyhow
+   // if the part is explicitly an attachment we show it as attachment anyhow
    // so its real contents don't matter
    if ( !mimepart->IsAttachment() )
    {
@@ -2772,7 +2769,7 @@ MessageView::DeterminePartContent(const MimePart *mimepart)
                   contents |= DeterminePartContent(partChild);
                }
 
-               if ( type.GetSubType() == _T("RELATED") )
+               if ( type.GetSubType() == "RELATED" )
                {
                   // this is, of course, just a particular cas but a very
                   // common one so we handle the situation when we have
@@ -2789,9 +2786,9 @@ MessageView::DeterminePartContent(const MimePart *mimepart)
             break;
 
          case MimeType::TEXT:
-            if ( subtype == _T("PLAIN") )
+            if ( subtype == "PLAIN" )
                contents |= PartContent_Text;
-            else if ( subtype == _T("HTML") )
+            else if ( subtype == "HTML" )
                contents |= PartContent_HTML;
             break;
 
@@ -2800,7 +2797,7 @@ MessageView::DeterminePartContent(const MimePart *mimepart)
             break;
 
          default:
-            wxFAIL_MSG( _T("Unknown MIME part type") );
+            wxFAIL_MSG( "Unknown MIME part type" );
             // fall through
 
          case MimeType::APPLICATION:
@@ -2839,7 +2836,7 @@ MessageView::AutoAdjustViewer(const MimePart *mimepart)
                ((contents & PartContent_HTMLImage) &&
                   m_ProfileValues.allowImages) )
       {
-         viewerName = _T("HtmlViewer");
+         viewerName = "HtmlViewer";
       }
    }
 
@@ -2850,7 +2847,7 @@ MessageView::AutoAdjustViewer(const MimePart *mimepart)
          if ( m_ProfileValues.allowImages )
          {
             // this is the best viewer for showing images currently
-            viewerName = _T("LayoutViewer");
+            viewerName = "LayoutViewer";
          }
       }
    }
@@ -2880,7 +2877,7 @@ MessageView::AutoAdjustViewer(const MimePart *mimepart)
 
 bool MessageView::ChangeViewerWithoutUpdate(const String& viewerName)
 {
-   ASSERT_MSG( !viewerName.empty(), _T("empty viewer name") );
+   ASSERT_MSG( !viewerName.empty(), "empty viewer name" );
 
    MessageViewer *viewer = LoadViewer(viewerName);
    if ( !viewer )
@@ -2929,7 +2926,7 @@ MessageView::Update()
       m_uid = m_mailMessage->GetUId();
 
       const MimePart *mimepart = m_mailMessage->GetTopMimePart();
-      CHECK_RET( mimepart, _T("No MIME part to show?") );
+      CHECK_RET( mimepart, "No MIME part to show?" );
 
       // use the encoding of the first body part as the default encoding for
       // the headers - this cares for the (horribly broken) mailers which send
@@ -3010,7 +3007,7 @@ MessageView::DisplayMessageInViewer()
    m_viewer->EndBody();
 
 #ifdef PROFILE_VIEWER
-   wxLogStatus(_T("Message shown in %ldms"), timeViewer.Time());
+   wxLogStatus("Message shown in %ldms", timeViewer.Time());
 #endif
 }
 
@@ -3056,11 +3053,11 @@ MessageView::MimeInfo(const MimePart *mimepart)
       for ( plist_it = plist.begin(); plist_it != plist.end(); plist_it++ )
       {
          name = plist_it->name;
-         message << NormalizeString(name) << _T(": ");
+         message << NormalizeString(name) << ": ";
 
          // filenames are case-sensitive, don't modify them
          value = plist_it->value;
-         if ( name.CmpNoCase(_T("name")) != 0 )
+         if ( name.CmpNoCase("name") != 0 )
          {
             value.MakeLower();
          }
@@ -3082,10 +3079,10 @@ MessageView::MimeInfo(const MimePart *mimepart)
       for ( plist_it = dlist.begin(); plist_it != dlist.end(); plist_it++ )
       {
          name = plist_it->name;
-         message << NormalizeString(name) << _T(": ");
+         message << NormalizeString(name) << ": ";
 
          value = plist_it->value;
-         if ( name.CmpNoCase(_T("filename")) != 0 )
+         if ( name.CmpNoCase("filename") != 0 )
          {
             value.MakeLower();
          }
@@ -3119,7 +3116,7 @@ void MessageView::MimeOpenAsMessage(const MimePart *mimepart)
 #else // 1
    bool ok = false;
    wxString filename;
-   if ( wxGetTempFileName(_T("Mtemp"), filename) )
+   if ( wxGetTempFileName("Mtemp", filename) )
    {
       if ( MimeSaveAsMessage(mimepart, filename) )
       {
@@ -3186,7 +3183,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
    wxFileType *fileType = NULL;
-   if ( wxMimeTypesManager::IsOfType(mimetype, _T("APPLICATION/OCTET-STREAM")) )
+   if ( wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM") )
    {
       // special handling of "APPLICATION/OCTET-STREAM": this is the default
       // MIME type for all binary attachments and many e-mail clients don't
@@ -3213,7 +3210,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    // First, we check for those contents that we handle in M itself:
 
    // handle internally MESSAGE/*
-   if ( wxMimeTypesManager::IsOfType(mimetype, _T("MESSAGE/*")) )
+   if ( wxMimeTypesManager::IsOfType(mimetype, "MESSAGE/*") )
    {
       MimeOpenAsMessage(mimepart);
 
@@ -3221,7 +3218,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    }
 
    String filename;
-   if ( !wxGetTempFileName(_T("Mtemp"), filename) )
+   if ( !wxGetTempFileName("Mtemp", filename) )
    {
       wxLogError(_("Failed to open the attachment."));
 
@@ -3252,7 +3249,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       // Windows creates the temp file even if we didn't use it yet
       if ( !wxRemoveFile(filename) )
       {
-         wxLogDebug(_T("Warning: stale temp file '%s' will be left."),
+         wxLogDebug("Warning: stale temp file '%s' will be left.",
                     filename.c_str());
       }
 
@@ -3281,8 +3278,8 @@ MessageView::MimeHandle(const MimePart *mimepart)
       proceed in the usual fashion. This allows the use of a special
       image/tiff-g3 mailcap entry. */
    if ( READ_CONFIG(profile,MP_INCFAX_SUPPORT) &&
-        (wxMimeTypesManager::IsOfType(mimetype, _T("IMAGE/TIFF"))
-         || wxMimeTypesManager::IsOfType(mimetype, _T("APPLICATION/OCTET-STREAM"))))
+        (wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF")
+         || wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM")) )
    {
       const wxArrayString faxdomains(
             strutil_restore_array(READ_CONFIG(profile, MP_INCFAX_DOMAINS)));
@@ -3304,10 +3301,10 @@ MessageView::MimeHandle(const MimePart *mimepart)
       if(isfax
          && MimeSave(mimepart, filename))
       {
-         wxLogDebug(_T("Detected image/tiff fax content."));
+         wxLogDebug("Detected image/tiff fax content.");
          // use TIFF2PS command to create a postscript file, open that
          // one with the usual ps viewer
-         String filenamePS = filename.BeforeLast('.') + _T(".ps");
+         String filenamePS = filename.BeforeLast('.') + ".ps";
          String command;
          command.Printf(READ_CONFIG_TEXT(profile,MP_TIFF2PS),
                         filename.c_str(), filenamePS.c_str());
@@ -3323,7 +3320,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
 
          wxRemoveFile(filename);
          filename = filenamePS;
-         mimetype = _T("application/postscript");
+         mimetype = "application/postscript";
          if(fileType) delete fileType;
          fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
 
@@ -3377,7 +3374,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
    wxFileType *fileType = NULL;
    fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
 
-   String filename = wxGetTempFileName(_T("Mtemp"));
+   String filename = wxGetTempFileName("Mtemp");
 
    wxString ext;
    wxSplitPath(filenameOrig, NULL, NULL, &ext);
@@ -3401,7 +3398,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
       // Windows creates the temp file even if we didn't use it yet
       if ( !wxRemoveFile(filename) )
       {
-         wxLogDebug(_T("Warning: stale temp file '%s' will be left."),
+         wxLogDebug("Warning: stale temp file '%s' will be left.",
                     filename.c_str());
       }
 
@@ -3543,7 +3540,7 @@ MessageView::MimeViewText(const MimePart *mimepart)
       String filename = mimepart->GetFilename();
       if ( !filename.empty() )
       {
-         title << _T(" ('") << filename << _T("')");
+         title << " ('" << filename << "')";
       }
 
       MDialog_ShowText(GetParentFrame(), title, content, "MimeView");
@@ -3561,7 +3558,7 @@ MessageView::MimeViewText(const MimePart *mimepart)
 bool
 MessageView::DoMenuCommand(int id)
 {
-   CHECK( GetFolder(), false, _T("no folder in message view?") );
+   CHECK( GetFolder(), false, "no folder in message view?" );
 
    Profile *profile = GetProfile();
 
@@ -3647,7 +3644,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
    if ( !mApplication->AllowBgProcessing() )
       return;
 
-   CHECK_RET( ci, _T("MessageView::DoMouseCommand(): NULL ClickableInfo") );
+   CHECK_RET( ci, "MessageView::DoMouseCommand(): NULL ClickableInfo" );
 
    switch ( id )
    {
@@ -3664,7 +3661,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
          break;
 
       default:
-         FAIL_MSG(_T("unknown mouse action"));
+         FAIL_MSG("unknown mouse action");
    }
 }
 
@@ -3680,7 +3677,7 @@ MessageView::SetEncoding(wxFontEncoding encoding)
 {
    // use wxFONTENCODING_DEFAULT instead!
    ASSERT_MSG( encoding != wxFONTENCODING_SYSTEM,
-               _T("invalid encoding in MessageView::SetEncoding()") );
+               "invalid encoding in MessageView::SetEncoding()" );
 
    m_encodingUser = encoding;
 
@@ -3770,7 +3767,7 @@ MessageView::ShowMessage(UIdType uid)
       // Reset the status bar, so that some information pertaining
       // to the previous message does not stay there...
       wxFrame *frame = GetParentFrame();
-      CHECK_RET( frame, _T("message view without parent frame?") );
+      CHECK_RET( frame, "message view without parent frame?" );
       frame->SetStatusText(wxEmptyString);
    }
 }
@@ -3827,8 +3824,8 @@ MessageView::CheckMessageSize(const Message *message) const
 void
 MessageView::DoShowMessage(Message *mailMessage)
 {
-   CHECK_RET( mailMessage, _T("no message to show in MessageView") );
-   CHECK_RET( m_asyncFolder, _T("no folder in MessageView::DoShowMessage()") );
+   CHECK_RET( mailMessage, "no message to show in MessageView" );
+   CHECK_RET( m_asyncFolder, "no folder in MessageView::DoShowMessage()" );
 
    if ( !CheckMessageSize(mailMessage) )
    {
@@ -3848,7 +3845,7 @@ MessageView::DoShowMessage(Message *mailMessage)
    if ( !(m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN) )
    {
       MailFolder *mf = m_mailMessage->GetFolder();
-      CHECK_RET( mf, _T("mail message without associated folder?") );
+      CHECK_RET( mf, "mail message without associated folder?" );
 
       // mark it as seen if we can
       if ( mf->CanSetFlag(MailFolder::MSG_STAT_SEEN) )
@@ -3894,7 +3891,7 @@ String MessageView::GetText() const
    // trim trailing empty lines, it is annoying to have to delete them manually
    // when replying
    wxString::const_iterator p = m_textBody.end() - 1;
-   while ( *p == _T('\r') || *p == _T('\n') )
+   while ( *p == '\r' || *p == '\n' )
       p--;
 
    const_cast<String &>(m_textBody).erase(p - m_textBody.begin() + 1);
@@ -3958,7 +3955,7 @@ MessageView::LaunchProcess(const String& command,
       delete process;
 
       if ( !errormsg.empty() )
-         wxLogError(_T("%s."), errormsg.c_str());
+         wxLogError("%s.", errormsg.c_str());
 
       return false;
    }
@@ -3986,7 +3983,7 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
          break;
    }
 
-   CHECK_RET( n != procCount, _T("unknown process terminated!") );
+   CHECK_RET( n != procCount, "unknown process terminated!" );
 
    ProcessInfo *info = m_processes[n];
    if ( exitcode != 0 )
