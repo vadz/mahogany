@@ -1069,7 +1069,11 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
               id == WXMENU_EDIT_FIND ||
               id == WXMENU_EDIT_FINDAGAIN ||
               id == WXMENU_EDIT_SELECT_ALL ||
-              WXMENU_CONTAINS(VIEW, id) ||
+              // same is true for the view menu
+              (WXMENU_CONTAINS(VIEW, id) &&
+               id != WXMENU_VIEW_TOOLBAR &&
+               id != WXMENU_VIEW_STATUSBAR &&
+               id != WXMENU_VIEW_FULLSCREEN) ||
               WXMENU_CONTAINS(VIEW_FILTERS, id) ||
               WXMENU_CONTAINS(VIEW_VIEWERS, id) ) )
    {
