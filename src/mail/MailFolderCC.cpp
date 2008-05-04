@@ -3217,31 +3217,43 @@ MsgnoArray *
 MailFolderCC::DoSearch(struct search_program *pgm, int flags) const
 {
    ASSERT_MSG( flags == SEARCH_UID || flags == SEARCH_MSGNO,
-               _T("DoSearch(): invalid flags value") );
+               "DoSearch(): invalid flags value" );
 
-   CHECK( m_MailStream, NULL, _T("DoSearch(): folder is closed") );
+   CHECK( m_MailStream, NULL, "DoSearch(): folder is closed" );
 
    // at best we're going to have a memory leak, at worse c-client is locked
    // and we will just crash
-   ASSERT_MSG( !m_SearchMessagesFound, _T("MailFolderCC::DoSearch() reentrancy") );
+   ASSERT_MSG( !m_SearchMessagesFound, "MailFolderCC::DoSearch() reentrancy" );
 
-   MailFolderCC *self = (MailFolderCC *)this; // const_cast
+   MailFolderCC * const self = const_cast<MailFolderCC *>(this);
    self->m_SearchMessagesFound = new UIdArray;
+
+   // set up the flags:
+   flags = flags == SEARCH_UID ? SE_UID : 0;
 
    // never prefetch the results as we often want to just count them and
    // prefetching messages may also result in unwanted reentrancies so it's
    // safer to avoid it
-   //
-   // also, as we never reuse the program, we always free it immediately
-   mail_search_full
-   (
-      m_MailStream,
-      NIL,   // charset: use the default US-ASCII
-      pgm,
-      (flags & SEARCH_UID ? SE_UID : 0) | SE_FREE | SE_NOPREFETCH
-   );
+   flags |= SE_NOPREFETCH;
 
-   CHECK( m_SearchMessagesFound, NULL, _T("who deleted m_SearchMessagesFound?") );
+   char *cset = NIL; // TODO: use the appropriate one
+   if ( !mail_search_full(m_MailStream, cset, pgm, flags) )
+   {
+      // some (broken) servers return "NO" in reply to "SEARCH" command, retry
+      // using local search in this case
+      if ( !mail_search_full(m_MailStream, cset, pgm,
+                             flags | SE_FREE | SE_NOSERVER) )
+      {
+         delete m_SearchMessagesFound;
+         m_SearchMessagesFound = NULL;
+
+         return NULL;
+      }
+   }
+
+   mail_free_searchpgm(&pgm);
+
+   CHECK( m_SearchMessagesFound, NULL, "who deleted m_SearchMessagesFound?" );
 
    MsgnoArray *searchMessagesFound = m_SearchMessagesFound;
    self->m_SearchMessagesFound = NULL;
@@ -3440,7 +3452,13 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit, int flags)
       pgm->cc_not->pgm = pgmReal;
    }
 
-   return DoSearch(pgm, flags);
+   // perform the server-side search using c-client (which also falls back to
+   // the local search if server fails)
+   MsgnoArray * const results = DoSearch(pgm, flags);
+
+   // but if c-client search failed too (should never happen but who knows) try
+   // our own inefficient local search as last resort
+   return results ? results : MailFolderCmn::SearchMessages(crit, flags);
 }
 
 // ----------------------------------------------------------------------------
