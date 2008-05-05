@@ -869,33 +869,13 @@ CclientParseMessage(const char *msgText,
                     BODY **ppBody,
                     size_t *pHdrLen)
 {
-   const char *bodycptr = NULL;
-   unsigned long headerLen = 0;
-
-   // find end of header "\r\n\r\n"
-   bool eol = true;
-   for ( unsigned long pos = 0; msgText[pos]; pos++ )
-   {
-      // empty line or end of text?
-      if ( msgText[pos] == '\r' && msgText[++pos] == '\n' )
-      {
-         if ( eol )
-         {
-            headerLen = pos - 1;
-            bodycptr = msgText + pos + 1; // skip eol
-            break;
-         }
-
-         eol = true;
-      }
-      else
-      {
-         eol = false;
-      }
-   }
-
-   if ( !headerLen )
+   // find end of header indicated by a blank line
+   const char *bodycptr = strstr(msgText, "\r\n\r\n");
+   if ( !bodycptr )
       return false;
+
+   const unsigned long headerLen = bodycptr - msgText + 2; // include EOL
+   bodycptr += 4; // skip 2 EOLs
 
    STRING str;
    INIT(&str, mail_string, const_cast<char *>(bodycptr), strlen(bodycptr));

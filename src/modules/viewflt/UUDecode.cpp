@@ -59,10 +59,10 @@ protected:
 
 // all UUencoded data start with a line whose prefix is "begin" and preceded by
 // a blank line
-#define UU_BEGIN_PREFIX _T("begin ")
+#define UU_BEGIN_PREFIX "begin "
 
 // UUencoded data ends at a line consisting solely of "end"
-#define UU_END_PREFIX _T("\r\nend\r\n")
+#define UU_END_PREFIX "\r\nend\r\n"
 
 // ============================================================================
 // UUDecodeFilter implementation
@@ -89,99 +89,95 @@ UUDecodeFilter::UUDecodeFilter(MessageView *msgView,
 // UUDecodeFilter work function
 // ----------------------------------------------------------------------------
 
-// check if c is valid in uuencoded text
-static inline bool IsUUValid(wxChar c)
+namespace
 {
-   return c >= _T(' ') && c <= _T('`');
+
+// check if c is valid in uuencoded text
+inline bool IsUUValid(char c)
+{
+   return c >= ' ' && c <= '`';
 }
 
+static const int MAX_UU_LINE_LEN = 45;
+
 // "decode" a single character
-#define DEC(c)    (((c) - ' ') & 077)
+#define UUdec(c)    (((c) - ' ') & 077)
 
-int UUdecodeLine(const wxChar* input, wxChar* output, const wxChar** endOfLine)
+int UUdecodeLine(const char *input, char *output, const char **endOfLine)
 {
-   // "input[0] - space" contains the count of characters in this line, check
-   // that it is valid
-   if ( input[0] <= _T(' ') || input[0] > _T('`') )
-   {
-      // invalid uu char
+   if ( !IsUUValid(*input) )
       return -1;
-   }
 
-   wxChar * cv_ptr = output;
-   register const wxChar * p = input;
-
-   const int cv_len = DEC(*p++);
+   const int cv_len = UUdec(*input++);
+   if ( cv_len > MAX_UU_LINE_LEN )
+      return -1;
 
    // Actually decode the uue data; ensure characters are in range.
-   for (int i=0; i<cv_len; i+=3, p+=4)
+   for ( int i = 0; i < cv_len; i += 3, input += 4 )
    {
-      if ( !IsUUValid(p[0]) ||
-           !IsUUValid(p[1]) ||
-           !IsUUValid(p[2]) ||
-           !IsUUValid(p[3]) )
+      if ( !IsUUValid(input[0]) || !IsUUValid(input[1]) ||
+           !IsUUValid(input[2]) || !IsUUValid(input[3]) )
       {
          return -1;
       }
 
-      *cv_ptr++ = DEC(p[0]) << 2 | DEC(p[1]) >> 4;
-      *cv_ptr++ = DEC(p[1]) << 4 | DEC(p[2]) >> 2;
-      *cv_ptr++ = DEC(p[2]) << 6 | DEC(p[3]);
+      *output++ = UUdec(input[0]) << 2 | UUdec(input[1]) >> 4;
+      *output++ = UUdec(input[1]) << 4 | UUdec(input[2]) >> 2;
+      *output++ = UUdec(input[2]) << 6 | UUdec(input[3]);
    }
-   if (*p != _T('\r') && *p != _T('\n') && *p != _T('\0'))
-      return -1;
-   //else  *p=0;
 
-   *endOfLine = p;
+   if ( *input != '\r' && *input != '\n' && *input != '\0' )
+      return -1;
+
+   *endOfLine = input;
    return cv_len;
 }
 
-bool UUdecodeFile(const wxChar* input, String& output, const wxChar** endOfEncodedStream)
+bool
+UUdecodeFile(const char *input,
+             wxMemoryBuffer& output,
+             const char **endOfEncodedStream)
 {
-   static const int allocationSize = 10000;
+   static const size_t allocationSize = 10000;
 
-   String decodedFile;
    size_t totalAllocatedBytes = 0;
 
    size_t totalDecodedBytes = 0;
    int decodedBytesInLine;
-   const wxChar* startOfLine = input;
-   const wxChar* endOfLine = 0; // init not needed
-   wxChar* buffer = new wxChar[45];
+   const char *startOfLine = input;
+   const char *endOfLine = 0; // init not needed
+   char buffer[MAX_UU_LINE_LEN];
    while ( (decodedBytesInLine =
                UUdecodeLine(startOfLine, buffer, &endOfLine)) > 0 )
    {
       // We've just decoded a line
       totalDecodedBytes += decodedBytesInLine;
-      String decodedLine(buffer, decodedBytesInLine);
-      if (decodedFile.length() + (size_t)decodedBytesInLine >= totalAllocatedBytes)
+      if ( output.GetDataLen() + decodedBytesInLine >= totalAllocatedBytes )
       {
          totalAllocatedBytes += allocationSize;
-         decodedFile.Alloc(totalAllocatedBytes);
+         output.GetWriteBuf(totalAllocatedBytes);
       }
-      decodedFile += decodedLine;
 
-      ASSERT_MSG( decodedFile.Length() == totalDecodedBytes,
-            _T("Number of decoded bytes does not match!") );
-      ASSERT_MSG( endOfLine[0] == _T('\r'), _T("Line has no '\\r' at the end!") );
-      ASSERT_MSG( endOfLine[1] == _T('\n'), _T("Line has no '\\n' at the end!") );
+      output.AppendData(buffer, decodedBytesInLine);
+
+      ASSERT_MSG( endOfLine[0] == '\r', "Line has no '\\r' at the end!" );
+      ASSERT_MSG( endOfLine[1] == '\n', "Line has no '\\n' at the end!" );
 
       startOfLine = endOfLine + lenEOL;
    }
 
-   delete[] buffer;
-   if (decodedBytesInLine < 0)
+   if ( decodedBytesInLine < 0 )
    {
       wxLogWarning(_("Invalid character in uuencoded text."));
       return false;
    }
 
-   decodedFile.Shrink();
-   output = decodedFile;
    *endOfEncodedStream = endOfLine;
+
    return true;
 }
 
+} // anonymous namespace
 
 
 void
@@ -192,8 +188,8 @@ UUDecodeFilter::DoProcess(String& text,
    // do we have something looking like UUencoded data?
    static const size_t lenBegin = wxStrlen(UU_BEGIN_PREFIX);
 
-   const wxChar *start = text.c_str();
-   const wxChar *nextToOutput = start;
+   const char *start = text.c_str();
+   const char *nextToOutput = start;
    while ( *start )
    {
       bool hasBegin = wxStrncmp(start, UU_BEGIN_PREFIX, lenBegin) == 0;
@@ -216,10 +212,10 @@ UUDecodeFilter::DoProcess(String& text,
                // 2 or 4 and more characters after the start
             default:
                // only blank line allowed before
-               if ( start[-1] != _T('\n') || start[-2] != _T('\r') )
+               if ( start[-1] != '\n' || start[-2] != '\r' )
                   hasBegin = false;
                if ( start - text.c_str() > 2 &&
-                        (start[-3] != _T('\n') || start[-4] != _T('\r')) )
+                        (start[-3] != '\n' || start[-4] != '\r') )
                   hasBegin = false;
          }
       }
@@ -227,7 +223,7 @@ UUDecodeFilter::DoProcess(String& text,
       if ( !hasBegin )
       {
          // try the next line (but only if not already at the end)
-         start = wxStrchr(start, _T('\n'));
+         start = wxStrchr(start, '\n');
          if ( start )
          {
             start++;  // skip '\n' itself
@@ -244,7 +240,7 @@ UUDecodeFilter::DoProcess(String& text,
          }
       }
 
-      const wxChar* startBeginLine = start;
+      const char *startBeginLine = start;
       start += lenBegin;
 
       // Let's check that the next 4 chars after the 'begin ' are
@@ -252,34 +248,71 @@ UUDecodeFilter::DoProcess(String& text,
       //
       // NB: 4 digit mode masks are in theory possible but shouldn't be used
       //     with uuencoded files
-      if ( !(    start[0] >= _T('0') && start[0] <= _T('7')
-              && start[1] >= _T('0') && start[1] <= _T('7')
-              && start[2] >= _T('0') && start[2] <= _T('7')
-              && start[3] == _T(' ') ) )
+      if ( !(    start[0] >= '0' && start[0] <= '7'
+              && start[1] >= '0' && start[1] <= '7'
+              && start[2] >= '0' && start[2] <= '7'
+              && start[3] == ' ' ) )
       {
          wxLogWarning(_("The BEGIN line is not correctly formed."));
          continue;
       }
 
-      const wxChar* startName = start+4;     // skip mode and space
-      const wxChar* endName = startName;
+      const char *startName = start+4;     // skip mode and space
+      const char *endName = startName;
       // Rest of the line is the name
-      while (*endName != _T('\r'))
+      while ( *endName != '\r' )
       {
-         ++endName;
-         ASSERT_MSG( endName < text.c_str()+text.length(),
-                         _T("'begin' line does not end?") );
+         if ( !*endName++ )
+         {
+            wxLogWarning(_("The BEGIN line is unterminated."));
+            String prolog(nextToOutput);
+            if ( !prolog.empty() )
+            {
+               m_next->Process(prolog, viewer, style);
+            }
+            return;   // no more text
+         }
       }
 
-      ASSERT_MSG( endName[1] == _T('\n'),
-                     _T("'begin' line does not end with \"\\r\\n\"?") );
+      ASSERT_MSG( endName[1] == '\n',
+                     "'begin' line does not end with \"\\r\\n\"?" );
 
-      String fileName = String(startName, endName);
-      const wxChar* start_data = endName + lenEOL;
+      const String fileName(startName, endName);
+      const char *start_data = endName + lenEOL;
 
-      String decodedFile;
-      const wxChar* endOfEncodedStream = 0;
-      bool ok = UUdecodeFile(start_data, decodedFile, &endOfEncodedStream);
+
+      // buffer with the entire virtual part contents
+      wxMemoryBuffer virtData;
+
+      // start with the header for the uudecoded virtual part
+      String header("Mime-Version: 1.0\r\n"
+                    //"Content-Transfer-Encoding: uuencode\r\n"
+                    "Content-Disposition: attachment; filename=\"" +
+                    fileName + "\"\r\n");
+
+      // get a mimeType from the extention
+      String mimeType;
+      String ext;
+      wxSplitPath(fileName, NULL, NULL, &ext);
+      if ( !ext.empty() )
+      {
+         wxFileType *
+            ft = mApplication->GetMimeManager().GetFileTypeFromExtension(ext);
+         if ( ft )
+            ft->GetMimeType(&mimeType);
+         delete ft;
+      }
+
+      if ( mimeType.empty() )
+         mimeType = "APPLICATION/OCTET-STREAM";
+      header += "Content-Type: " + mimeType;
+      header += "; name=\"" + fileName + "\"\r\n";
+      header += "\r\n"; // blank line separating the header from body
+
+      virtData.AppendData(header.ToAscii(), header.length());
+
+      const char *endOfEncodedStream = 0;
+      bool ok = UUdecodeFile(start_data, virtData, &endOfEncodedStream);
       if ( ok )
       {
          static const size_t lenEnd = wxStrlen(UU_END_PREFIX);
@@ -303,29 +336,8 @@ UUDecodeFilter::DoProcess(String& text,
             m_next->Process(prolog, viewer, style);
          }
 
-         // now create the header for the uuencoded part
-         String header(_T("Mime-Version: 1.0\r\n")
-                       _T("Content-Disposition: uuencoded\r\n"));
-
-         // get a mimeType from the extention
-         String mimeType;
-         String ext;
-         wxSplitPath(fileName, NULL, NULL, &ext);
-         if ( !ext.empty() )
-         {
-            wxFileType *
-               ft = mApplication->GetMimeManager().GetFileTypeFromExtension(ext);
-            if ( ft )
-               ft->GetMimeType(&mimeType);
-            delete ft;
-         }
-
-         if ( mimeType.empty() )
-            mimeType = _T("APPLICATION/OCTET-STREAM");
-         header += _T("Content-Type: ") + mimeType + _T("\r\n");
-
-         MimePartVirtual *
-            mimepart = new MimePartVirtual(header + _T("\r\n") + decodedFile);
+         // create and process the virtual part containing uudecoded contents
+         MimePartVirtual * const mimepart = new MimePartVirtual(virtData);
          m_msgView->AddVirtualMimePart(mimepart);
          m_msgView->ShowPart(mimepart);
 

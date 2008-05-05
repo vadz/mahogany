@@ -44,17 +44,17 @@ static const size_t lenEOL = 2;
 // ----------------------------------------------------------------------------
 
 // ctor for top level part
-MimePartVirtual::MimePartVirtual(const String& msgText)
+MimePartVirtual::MimePartVirtual(const wxMemoryBuffer& msgText)
                : m_msgText(msgText)
 {
-   m_pStart = m_msgText;
+   m_pStart = static_cast<char *>(m_msgText.GetData());
 
    m_env = NULL;
 
    m_lenHeader =
    m_lenBody = 0;
 
-   if ( !CclientParseMessage(msgText, &m_env, &m_body, &m_lenHeader) )
+   if ( !CclientParseMessage(m_pStart, &m_env, &m_body, &m_lenHeader) )
    {
       // no idea what is user supposed to make out of this message...
       wxLogError(_("Failed to create a virtual MIME part."));
@@ -62,7 +62,13 @@ MimePartVirtual::MimePartVirtual(const String& msgText)
       return;
    }
 
-   m_lenBody = m_msgText.length() - m_lenHeader - lenEOL;
+   m_lenBody = m_msgText.GetDataLen() - m_lenHeader - lenEOL;
+
+   // c-client can't determine it itself correctly (the "string" we pass to it
+   // can have embedded NULs and we don't pass the real length), so fix it here
+   m_body->size.bytes =
+   m_body->contents.text.size = m_lenBody;
+
 
    CreateSubParts();
 }

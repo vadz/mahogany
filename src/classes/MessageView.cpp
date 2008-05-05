@@ -2583,7 +2583,9 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
          pgpInfo = new PGPInfoGoodMsg(this);
 
          {
-            MimePartVirtual *mpv = new MimePartVirtual(decryptedData);
+            wxMemoryBuffer buf;
+            buf.AppendData(decryptedData.To8BitData(), decryptedData.length());
+            MimePartVirtual *mpv = new MimePartVirtual(buf);
             AddVirtualMimePart(mpv);
             ProcessPart(mpv);
          }

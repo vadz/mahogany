@@ -31,7 +31,7 @@ public:
    /**
       Construct a MIME part from the entire part text (body + header).
     */
-   MimePartVirtual(const String& msgText);
+   MimePartVirtual(const wxMemoryBuffer& msgText);
 
    /**
       Construct a nested MIME part.
@@ -62,7 +62,7 @@ private:
 
 
    // the entire text of the message, only non empty for the top level part
-   String m_msgText;
+   wxMemoryBuffer m_msgText;
 
    // pointer to the start of headers of this part
    const char *m_pStart;
