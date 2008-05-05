@@ -1738,7 +1738,7 @@ wxLayoutLine::Copy(wxLayoutList *llist,
       llist->Insert( (**i).Copy() );
 
    // And now the last object:
-   if(lastOffset != 0)
+   if(lastOffset != 0 && last != m_ObjectList.end())
    {
       if( (**last).GetType() == WXLO_TYPE_TEXT )
       {
