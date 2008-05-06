@@ -93,7 +93,7 @@ namespace
 {
 
 // check if c is valid in uuencoded text
-inline bool IsUUValid(char c)
+inline bool IsUUValid(wxChar c)
 {
    return c >= ' ' && c <= '`';
 }
@@ -103,7 +103,7 @@ static const int MAX_UU_LINE_LEN = 45;
 // "decode" a single character
 #define UUdec(c)    (((c) - ' ') & 077)
 
-int UUdecodeLine(const char *input, char *output, const char **endOfLine)
+int UUdecodeLine(const wxChar *input, char *output, const wxChar **endOfLine)
 {
    if ( !IsUUValid(*input) )
       return -1;
@@ -112,7 +112,7 @@ int UUdecodeLine(const char *input, char *output, const char **endOfLine)
    if ( cv_len > MAX_UU_LINE_LEN )
       return -1;
 
-   // Actually decode the uue data; ensure characters are in range.
+   // Actually decode the uuencoded data; ensure characters are in range.
    for ( int i = 0; i < cv_len; i += 3, input += 4 )
    {
       if ( !IsUUValid(input[0]) || !IsUUValid(input[1]) ||
@@ -134,9 +134,9 @@ int UUdecodeLine(const char *input, char *output, const char **endOfLine)
 }
 
 bool
-UUdecodeFile(const char *input,
+UUdecodeFile(const wxChar *input,
              wxMemoryBuffer& output,
-             const char **endOfEncodedStream)
+             const wxChar **endOfEncodedStream)
 {
    static const size_t allocationSize = 10000;
 
@@ -144,8 +144,8 @@ UUdecodeFile(const char *input,
 
    size_t totalDecodedBytes = 0;
    int decodedBytesInLine;
-   const char *startOfLine = input;
-   const char *endOfLine = 0; // init not needed
+   const wxChar *startOfLine = input;
+   const wxChar *endOfLine = 0; // init not needed
    char buffer[MAX_UU_LINE_LEN];
    while ( (decodedBytesInLine =
                UUdecodeLine(startOfLine, buffer, &endOfLine)) > 0 )
@@ -188,8 +188,8 @@ UUDecodeFilter::DoProcess(String& text,
    // do we have something looking like UUencoded data?
    static const size_t lenBegin = wxStrlen(UU_BEGIN_PREFIX);
 
-   const char *start = text.c_str();
-   const char *nextToOutput = start;
+   const wxChar *start = text.c_str();
+   const wxChar *nextToOutput = start;
    while ( *start )
    {
       bool hasBegin = wxStrncmp(start, UU_BEGIN_PREFIX, lenBegin) == 0;
@@ -223,7 +223,7 @@ UUDecodeFilter::DoProcess(String& text,
       if ( !hasBegin )
       {
          // try the next line (but only if not already at the end)
-         start = wxStrchr(start, '\n');
+         start = wxStrchr(start, _T('\n'));
          if ( start )
          {
             start++;  // skip '\n' itself
@@ -240,7 +240,7 @@ UUDecodeFilter::DoProcess(String& text,
          }
       }
 
-      const char *startBeginLine = start;
+      const wxChar *startBeginLine = start;
       start += lenBegin;
 
       // Let's check that the next 4 chars after the 'begin ' are
@@ -257,8 +257,8 @@ UUDecodeFilter::DoProcess(String& text,
          continue;
       }
 
-      const char *startName = start+4;     // skip mode and space
-      const char *endName = startName;
+      const wxChar *startName = start+4;     // skip mode and space
+      const wxChar *endName = startName;
       // Rest of the line is the name
       while ( *endName != '\r' )
       {
@@ -278,7 +278,7 @@ UUDecodeFilter::DoProcess(String& text,
                      "'begin' line does not end with \"\\r\\n\"?" );
 
       const String fileName(startName, endName);
-      const char *start_data = endName + lenEOL;
+      const wxChar *start_data = endName + lenEOL;
 
 
       // buffer with the entire virtual part contents
@@ -311,7 +311,7 @@ UUDecodeFilter::DoProcess(String& text,
 
       virtData.AppendData(header.ToAscii(), header.length());
 
-      const char *endOfEncodedStream = 0;
+      const wxChar *endOfEncodedStream = NULL;
       bool ok = UUdecodeFile(start_data, virtData, &endOfEncodedStream);
       if ( ok )
       {
