@@ -320,25 +320,31 @@ void wxMFrame::UpdateRunPyScriptMenu()
 #endif // USE_PYTHON
 
 void
-wxMFrame::AddEditMenu(void)
+wxMFrame::AddEditMenu()
 {
    WXADD_MENU(GetMenuBar(), EDIT, _("&Edit"));
 }
 
 void
-wxMFrame::AddHelpMenu(void)
+wxMFrame::AddViewMenu()
+{
+   WXADD_MENU(GetMenuBar(), VIEW, _("&View"));
+}
+
+void
+wxMFrame::AddHelpMenu()
 {
    WXADD_MENU(GetMenuBar(), HELP, _("&Help"));
 }
 
 void
-wxMFrame::AddMessageMenu(void)
+wxMFrame::AddMessageMenu()
 {
    WXADD_MENU(GetMenuBar(), MSG, _("Me&ssage"));
 }
 
 void
-wxMFrame::AddLanguageMenu(void)
+wxMFrame::AddLanguageMenu()
 {
    WXADD_MENU(GetMenuBar(), LANG, _("&Language"));
 

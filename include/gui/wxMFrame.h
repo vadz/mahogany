@@ -79,12 +79,20 @@ public:
    /// Passes a menu id to modules for reacting to it.
    virtual bool ProcessModulesMenu(int id);
 
-   /// add a menu to the bar
-   virtual void AddFileMenu(void);
-   virtual void AddHelpMenu(void);
-   void AddEditMenu(void);
-   void AddMessageMenu(void);
-   void AddLanguageMenu(void);
+   /**
+      Methods for adding standard menus to the frame menu bar.
+
+      All frames should use AddFileMenu() and AddHelpMenu() and either
+      AddMessageMenu() if they show a message or AddViewMenu() otherwise.
+    */
+   //@{
+   virtual void AddFileMenu();
+   virtual void AddHelpMenu();
+   void AddEditMenu();
+   void AddViewMenu();
+   void AddMessageMenu();
+   void AddLanguageMenu();
+   //@}
 
    /// wxMFrame handles all print setup
    void OnPrintSetup();

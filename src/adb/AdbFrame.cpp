@@ -1266,6 +1266,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   WXADD_MENU(GetMenuBar(), ADBBOOK, _("&Book"));  // operations on address books
   WXADD_MENU(GetMenuBar(), ADBEDIT, _("&Edit"));  // commands to edit ADB entries
   WXADD_MENU(GetMenuBar(), ADBFIND, _("&Find"));  // searching and moving
+  AddViewMenu();                               // frame viewing options
   AddHelpMenu();                               // help
 
   // toolbar and status bar

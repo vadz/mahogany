@@ -255,7 +255,10 @@ enum
    WXMENU_MSG_SAVEADDRESSES,
    WXMENU_MSG_END = WXMENU_MSG_SAVEADDRESSES,
 
-   WXMENU_VIEW_BEGIN = WXMENU_MSG_END,
+   // MSGVIEW menu should be used by the frames showing the messages in them
+   // (wxMainFrame and wxMessageViewFrame currently) and combines the VIEW menu
+   // (which should be shown by all frames) with the message-specific commands
+   WXMENU_MSGVIEW_BEGIN = WXMENU_MSG_END,
    WXMENU_VIEW_VIEWERS_SUBMENU_BEGIN,
       // this submenu is filled dynamically and the ids of its items start at
       // WXMENU_VIEW_VIEWERS_BEGIN defined below
@@ -272,10 +275,12 @@ enum
 #endif // EXPERIMENTAL_show_uid
    WXMENU_VIEW_SHOWMIME,
    WXMENU_VIEW_SEP2,
+   WXMENU_VIEW_BEGIN = WXMENU_VIEW_SEP2,
    WXMENU_VIEW_TOOLBAR,
    WXMENU_VIEW_STATUSBAR,
    WXMENU_VIEW_FULLSCREEN,
    WXMENU_VIEW_END = WXMENU_VIEW_FULLSCREEN,
+   WXMENU_MSGVIEW_END = WXMENU_VIEW_END,
 
    WXMENU_COMPOSE_BEGIN = WXMENU_VIEW_END,
    WXMENU_COMPOSE_INSERTFILE,

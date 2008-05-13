@@ -1908,6 +1908,7 @@ wxComposeView::CreateMenu()
    AddEditMenu();
    WXADD_MENU(GetMenuBar(), COMPOSE, _("&Compose"));
    AddLanguageMenu();
+   AddViewMenu();
    AddHelpMenu();
 
    GetMenuBar()->Enable(WXMENU_EDIT_PASTE_QUOTED, m_OriginalMessage != NULL);

@@ -296,7 +296,7 @@ wxMessageView::CreateViewMenu()
    CHECK_RET( frame, _T("no parent frame in wxMessageView") );
 
    // create the top level menu
-   WXADD_MENU(frame->GetMenuBar(), VIEW, _("&View"));
+   WXADD_MENU(frame->GetMenuBar(), MSGVIEW, _("&View"));
 
    // initialize viewers submenu
    // --------------------------
