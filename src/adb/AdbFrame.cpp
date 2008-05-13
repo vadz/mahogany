@@ -40,25 +40,26 @@
 
 // wxWindows
 #ifndef USE_PCH
-#   include <wx/log.h>          // for wxLogError
+#   include <wx/log.h
 #   include <wx/toolbar.h>
 #   include <wx/menu.h>
 #   include <wx/layout.h>
 #   include <wx/statbox.h>
 #   include <wx/choicdlg.h>
-#   include <wx/stattext.h>     // for wxStaticText
+#   include <wx/stattext.h>
 #   include <wx/textctrl.h>
-#   include <wx/button.h>       // for wxButton
+#   include <wx/button.h>
 #   include <wx/filedlg.h>
 #   include <wx/settings.h>
 #   include <wx/dcclient.h>
 #endif // USE_PCH
 
-#include <wx/notebook.h>        // for wxNotebook
-#include <wx/treectrl.h>        // for wxTreeCtrl
-#include <wx/file.h>            // for wxFile
-#include <wx/imaglist.h>        // for wxImageList
-#include <wx/confbase.h>        // for wxConfigBase
+#include <wx/notebook.h>
+#include <wx/treectrl.h>
+#include <wx/file.h>
+#include <wx/imaglist.h>
+#include <wx/confbase.h>
+#include <wx/busyinfo.h>
 
 #include "adb/AdbManager.h"
 #include "adb/AdbEntry.h"
@@ -1893,6 +1894,10 @@ void wxAdbEditFrame::DoFind()
   m_aFindResults.Empty();
   m_nFindIndex = -1;
   m_strFind = m_textKey->GetValue();
+
+  wxBusyInfo busy(wxString::Format("Searching for \"%s\"...", m_strFind.c_str()),
+                  this);
+
   DoFind(m_strFind, m_root);
   m_bFindDone = TRUE;
   AdvanceToNextFound();
@@ -3395,7 +3400,7 @@ wxAdbPage::wxAdbPage(wxNotebook *notebook, const wxString& title, int idImage,
   LayoutControls(m_nLastField - m_nFirstField, m_aEntries,
                  &AdbTreeEntry::ms_aFields[m_nFirstField]);
   SetAutoLayout(TRUE);
-  
+
   m_checkBoxOldValue.Add(&gs_constantFalse, m_aEntries.GetCount());
 }
 
