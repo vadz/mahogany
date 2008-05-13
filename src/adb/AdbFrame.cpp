@@ -3586,7 +3586,7 @@ wxListBox *wxAdbPage::CreateListBox(const wxString& label, wxControl *last)
   for ( nBtn = 0; nBtn < WXSIZEOF(aszLabels); nBtn++ ) {
     c = new wxLayoutConstraints;
     if ( nBtn == 0 )
-      c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
+      c->top.Set(wxBelow, box, wxTop, 0, 5*LAYOUT_Y_MARGIN);
     else
       c->top.Below(button, LAYOUT_Y_MARGIN);
     c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -3599,7 +3599,7 @@ wxListBox *wxAdbPage::CreateListBox(const wxString& label, wxControl *last)
   // and the listbox itself
   wxListBox *listbox = new wxListBox(this, -1);
   c = new wxLayoutConstraints;
-  c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
+  c->top.Set(wxBelow, box, wxTop, 0, 4*LAYOUT_Y_MARGIN);
   c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
   c->right.LeftOf(button, LAYOUT_X_MARGIN);;
   c->bottom.SameAs(box, wxBottom, LAYOUT_Y_MARGIN);
