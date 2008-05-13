@@ -167,9 +167,9 @@ static const char *LOG_FRAME_SECTION = "LogWindow";
  */
 static int SaveAll()
 {
-   int rc = Composer::SaveAll();
+   bool rc = Composer::SaveAll() != -1;
 
-   Profile::FlushAll();
+   rc &= Profile::FlushAll();
 
    MfStatusCache::Flush();
 

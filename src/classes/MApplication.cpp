@@ -702,7 +702,30 @@ MAppBase::OnShutDown()
       // clean up
       MEventManager::DispatchPending();
       AdbManager::Delete();
-      Profile::FlushAll();
+
+      // if saving the options failed it could be because of some transient
+      // error (e.g. the user pulled out the USB removal disk which contains
+      // our configuration files), give him the opportunity to correct it as
+      // otherwise changes would be simply lost
+      for ( bool flushed = false; !flushed; )
+      {
+         flushed = Profile::FlushAll();
+
+         if ( !flushed )
+         {
+            // show the error messages which could have been generated at wx
+            // level
+            wxLog::FlushActive();
+
+            if ( !MDialog_YesNoDialog
+                 (
+                  _("Saving the program options failed, would you like to retry?\n"
+                    "\n"
+                    "Otherwise changes to the program configuration could be lost.")
+                 ) )
+               break;
+         }
+      }
    }
 
    if ( m_profile )
