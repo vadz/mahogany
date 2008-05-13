@@ -1343,6 +1343,8 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // final initializations
   // ---------------------
 
+  RestoreSettings1();
+
   // create the root item
   m_root = new AdbTreeRoot(m_astrAdb, m_astrProviders);
   m_root->TreeInsert(*m_treeAdb);
