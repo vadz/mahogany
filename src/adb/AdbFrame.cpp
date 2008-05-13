@@ -1278,7 +1278,11 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // ----------------------------
   wxPanel *panel = new wxPanel(this, -1);
   wxStaticText *label = new wxStaticText(panel, -1, _("&Lookup:"));
-  m_textKey = new wxPTextEntry(ADB_CONFIG_PATH _T("/FindKey"), panel, AdbView_Lookup);
+  m_textKey = new wxPTextEntry(ADB_CONFIG_PATH _T("/FindKey"), panel,
+                               AdbView_Lookup,
+                               "", // initial value
+                               wxDefaultPosition, wxDefaultSize,
+                               wxTE_PROCESS_ENTER);
   m_treeAdb = new wxAdbTree(this, panel, AdbView_Tree);
   m_notebook = new wxAdbNotebook(panel, AdbView_Notebook);
 

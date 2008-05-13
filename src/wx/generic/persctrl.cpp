@@ -482,7 +482,7 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
                            const wxSize& size,
                            long style,
                            wxConfigBase *config)
-           : wxComboBox(parent, id, value, pos, size, style)
+           : wxComboBox(parent, id, value, pos, size, 0, NULL, style)
 {
     Init();
 
