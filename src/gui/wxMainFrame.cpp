@@ -1069,11 +1069,11 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
               id == WXMENU_EDIT_FIND ||
               id == WXMENU_EDIT_FINDAGAIN ||
               id == WXMENU_EDIT_SELECT_ALL ||
-              // same is true for the view menu
-              (WXMENU_CONTAINS(VIEW, id) &&
-               id != WXMENU_VIEW_TOOLBAR &&
-               id != WXMENU_VIEW_STATUSBAR &&
-               id != WXMENU_VIEW_FULLSCREEN) ||
+              // view menu is handled by the base class but we extend it with
+              // extra commands in message view menu which we must handle
+              // ourselves
+              (WXMENU_CONTAINS(MSGVIEW, id) &&
+               !WXMENU_CONTAINS(VIEW, id)) ||
               WXMENU_CONTAINS(VIEW_FILTERS, id) ||
               WXMENU_CONTAINS(VIEW_VIEWERS, id) ) )
    {
