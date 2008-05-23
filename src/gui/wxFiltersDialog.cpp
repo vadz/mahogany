@@ -335,9 +335,9 @@ class OneActionControl;
 // wxOneFilterDialog - dialog for exactly one filter rule
 // ----------------------------------------------------------------------------
 
-#define MAX_CONTROLS   256
-
-/** A class representing the configuration GUI for a single filter. */
+/**
+   A class representing the configuration GUI for a single filter.
+ */
 class wxOneFilterDialog : public wxManuallyLaidOutDialog
 {
 public:
@@ -364,6 +364,9 @@ public:
    void OnCheckBox(wxCommandEvent&) { UpdateProgram(); }
 
 protected:
+   // maximal number of controls in the dialog
+   enum { MAX_CONTROLS = 16 };
+
    void DoUpdateUI();
 
    void AddOneControl();
