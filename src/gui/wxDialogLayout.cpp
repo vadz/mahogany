@@ -48,11 +48,10 @@
 #include <wx/imaglist.h>
 #include <wx/statline.h>
 
+#include "gui/ConfigSourceChoice.h"
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
 #include "gui/wxMenuDefs.h"
-
-#include "ConfigSourcesAll.h"
 
 #include "Mupgrade.h"      // for VerifyEMailSendingWorks()
 
@@ -1292,19 +1291,8 @@ void wxProfileSettingsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
 void
 wxProfileSettingsEditDialog::ApplyConfigSourceSelectedByUser(Profile& profile)
 {
-   const int sel = m_chcSources->GetSelection();
-   ConfigSource *config = NULL;
-   if ( sel != -1 )
-   {
-      AllConfigSources::List::iterator
-         i = AllConfigSources::Get().GetSources().begin();
-      for ( int n = 0; n < sel; n++ )
-         ++i;
-
-      config = i.operator->();
-   }
-
-   ConfigSource *configOld = profile.SetConfigSourceForWriting(config);
+   ConfigSource * const configOld =
+      profile.SetConfigSourceForWriting(m_chcSources->GetSelectedSource());
 
    // remember the original config source if this is the first time we change
    // it
@@ -1335,56 +1323,17 @@ void wxProfileSettingsEditDialog::EndModal(int rc)
    wxManuallyLaidOutDialog::EndModal(rc);
 }
 
-
 wxControl *wxProfileSettingsEditDialog::CreateControlsBelow(wxPanel *panel)
 {
-   const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
-   if ( sources.size() == 1 )
+   m_chcSources = ConfigSourceChoice::Create(panel, hBtn);
+   if ( m_chcSources )
    {
-      m_chcSources = NULL;
-      return NULL;
+      Connect(wxEVT_COMMAND_CHOICE_SELECTED,
+                wxCommandEventHandler(
+                   wxProfileSettingsEditDialog::OnConfigSourceChange));
    }
 
-   m_chcSources = new wxChoice(panel, -1);
-
-   Connect(wxEVT_COMMAND_CHOICE_SELECTED,
-             wxCommandEventHandler(
-                wxProfileSettingsEditDialog::OnConfigSourceChange));
-
-   for ( AllConfigSources::List::iterator i = sources.begin(),
-                                        end = sources.end();
-         i != end;
-         ++i )
-   {
-      m_chcSources->Append(i->GetName());
-   }
-
-   wxLayoutConstraints *c;
-
-   c = new wxLayoutConstraints;
-   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
-   c->width.AsIs();
-   c->height.AsIs();
-   c->bottom.SameAs(panel, wxBottom, 5*LAYOUT_Y_MARGIN + hBtn);
-   m_chcSources->SetConstraints(c);
-
-   wxStaticText *label = new wxStaticText(panel, -1, _("&Save changes to:"));
-   c = new wxLayoutConstraints;
-   c->right.LeftOf(m_chcSources, LAYOUT_X_MARGIN);
-   c->width.AsIs();
-   c->height.AsIs();
-   c->centreY.SameAs(m_chcSources, wxCentreY);
-   label->SetConstraints(c);
-
-   wxStaticLine *line = new wxStaticLine(panel, -1);
-   c = new wxLayoutConstraints;
-   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
-   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
-   c->height.AsIs();
-   c->bottom.Above(m_chcSources, -LAYOUT_Y_MARGIN);
-   line->SetConstraints(c);
-
-   return line;
+   return m_chcSources;
 }
 
 void wxProfileSettingsEditDialog::CreateAllControls()

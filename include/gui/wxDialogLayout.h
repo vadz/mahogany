@@ -262,7 +262,7 @@ private:
 
 
    // choice containing all config sources, may be NULL
-   wxChoice *m_chcSources;
+   class ConfigSourceChoice *m_chcSources;
 
    // original config source used by profile returned by GetProfile(): only
    // valid if m_changedConfigSource == true

@@ -377,6 +377,9 @@
 					RelativePath=".\src\gui\ClickURL.cpp">
 				</File>
 				<File
+					RelativePath=".\src\gui\ConfigSourceChoice.cpp">
+				</File>
+				<File
 					RelativePath=".\src\gui\Mdnd.cpp">
 				</File>
 				<File

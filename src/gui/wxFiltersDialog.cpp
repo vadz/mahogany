@@ -42,6 +42,7 @@
 #include "MModule.h"
 #include "SpamFilter.h"
 
+#include "gui/ConfigSourceChoice.h"
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFiltersDialog.h"
@@ -319,10 +320,11 @@ static bool FilterExists(const String& name);
 
 // create a new filter, return its name (or an empty string if the filter
 // creation was cancelled)
-static String CreateNewFilter(wxWindow *parent);
+static String CreateNewFilter(wxWindow *parent, ConfigSource *config = NULL);
 
 // edit the filter with given name, return TRUE if anything changed
-static bool EditFilter(const String& name, wxWindow *parent);
+static bool
+EditFilter(const String& name, wxWindow *parent, ConfigSource *config = NULL);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -335,14 +337,11 @@ class OneActionControl;
 // wxOneFilterDialog - dialog for exactly one filter rule
 // ----------------------------------------------------------------------------
 
-/**
-   A class representing the configuration GUI for a single filter.
- */
 class wxOneFilterDialog : public wxManuallyLaidOutDialog
 {
 public:
    // ctor & dtor
-   wxOneFilterDialog(class MFilterDesc *fd, wxWindow *parent);
+   wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent);
    virtual ~wxOneFilterDialog();
 
    // transfer data to/from dialog
@@ -1577,6 +1576,10 @@ protected:
    // listbox contains the names of all filters
    wxListBox *m_lboxFilters;
 
+   // contains the config source to use for saving the changes in this dialog,
+   // may be NULL if no specific config source needs to be used
+   ConfigSourceChoice *m_chcSources;
+
    // did anything change?
    bool m_hasChanges;
 
@@ -1613,7 +1616,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox(wxEmptyString, FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("All &filters:"), FALSE,
                                              MH_DIALOG_FILTERS);
 
    /* This dialog is supposed to look like this:
@@ -1687,7 +1690,20 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
                                   wxLB_SORT);
    m_lboxFilters->SetConstraints(c);
 
-   SetDefaultSize(5*wBtn, 11*hBtn);
+   // deal with optional "Save changes to" combobox
+   int heightDef = 11*hBtn;
+
+   m_chcSources = ConfigSourceChoice::Create(this, hBtn);
+   if ( m_chcSources )
+   {
+      heightDef += hBtn;
+
+      // we need to adjust the box constraints as it shouldn't extend down to
+      // the buttons
+      box->GetConstraints()->bottom.SameAs(m_chcSources, wxTop, LAYOUT_Y_MARGIN);
+   }
+
+   SetDefaultSize(5*wBtn, heightDef);
 
    m_lboxFilters->SetFocus();
 }
@@ -1699,8 +1715,13 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
 void
 wxAllFiltersDialog::OnAddFiter(wxCommandEvent& /* event */)
 {
-   String name = CreateNewFilter(this);
-   if ( !name )
+   // ensure that we save changes to the selected config source, if any
+   ConfigSource * const config = m_chcSources
+                                    ? m_chcSources->GetSelectedSource()
+                                    : NULL;
+
+   const String name = CreateNewFilter(this, config);
+   if ( name.empty() )
    {
       // cancelled
       return;
@@ -1712,7 +1733,7 @@ wxAllFiltersDialog::OnAddFiter(wxCommandEvent& /* event */)
       m_lboxFilters->Append(name);
 
       // a newly added filter is not used by any folders yet, but this could
-      // be surprizing (well, in fact, it's really bad design and we should
+      // be surprising (well, in fact, it's really bad design and we should
       // just allow to configure the folders which use this filter in the
       // wxOneFilterDialog - TODO)
       String msg;
@@ -1733,6 +1754,9 @@ wxAllFiltersDialog::OnAddFiter(wxCommandEvent& /* event */)
          MFolder_obj folder(MDialog_FolderChoose(this));
          if ( folder )
          {
+            Profile_obj profile(folder->GetProfile());
+            ProfileConfigSourceChange change(profile, config);
+
             // activate the filter for this folder
             folder->AddFilter(name);
          }
@@ -1780,7 +1804,8 @@ wxAllFiltersDialog::OnEditFiter(wxCommandEvent& /* event */)
    String name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, _T("must have selection in the listbox") );
 
-   if ( EditFilter(name, this) )
+   if ( EditFilter(name, this, m_chcSources ? m_chcSources->GetSelectedSource()
+                                            : NULL) )
    {
       // filter changed
       m_hasChanges = true;
@@ -2595,7 +2620,7 @@ static bool FilterExists(const String& name)
    return false;
 }
 
-static String CreateNewFilter(wxWindow *parent)
+static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
 {
    String name;
    MFilterDesc fd;
@@ -2619,14 +2644,27 @@ static String CreateNewFilter(wxWindow *parent)
 
       // create the new filter
       MFilter_obj filter(name);
+
+      // ensure that it is saved to the specified config source
+      Profile_obj profileFilter(filter->GetProfile());
+      ProfileConfigSourceChange change(profileFilter, config);
+
       filter->Set(fd);
+
+      // if we don't do this, ProfileConfigSourceChange dtor would be executed
+      // before MFilter one which is where the filter is really saved to config
+      {
+         MFilter_obj filterNull;
+         filter.Swap(filterNull);
+      }
    }
    //else: cancelled
 
    return name;
 }
 
-static bool EditFilter(const String& name, wxWindow *parent)
+static bool
+EditFilter(const String& name, wxWindow *parent, ConfigSource *config)
 {
    MFilter_obj filter(name);
    CHECK( filter, false, _T("filter unexpectedly missing") );
@@ -2637,6 +2675,10 @@ static bool EditFilter(const String& name, wxWindow *parent)
       // cancelled
       return false;
    }
+
+   // ensure it's saved to the specified config source
+   Profile_obj profileFilter(filter->GetProfile());
+   ProfileConfigSourceChange change(profileFilter, config);
 
    filter->Set(fd);
 
