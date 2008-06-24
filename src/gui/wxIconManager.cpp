@@ -101,20 +101,20 @@ int wxIconManager::ms_NumOfHandlers = 0;
 #define NUMBER_OF_FORMATS 4
 
 bool wxIconManager::m_knowHandlers = false;
-long wxIconManager::m_wxBitmapHandlers[] =
+wxBitmapType wxIconManager::m_wxBitmapHandlers[] =
 {
-   wxBITMAP_TYPE_XPM,  // XPM must be first entry!
-   wxBITMAP_TYPE_PNG,  //wxGTK
-   wxBITMAP_TYPE_BMP,  //wxGTK
-   wxBITMAP_TYPE_JPEG, //wxGTK optional
+   wxBITMAP_TYPE_XPM,
+   wxBITMAP_TYPE_PNG,
+   wxBITMAP_TYPE_BMP,
+   wxBITMAP_TYPE_JPEG,
    wxBITMAP_TYPE_GIF,
    wxBITMAP_TYPE_PNM,
    wxBITMAP_TYPE_PCX,
    wxBITMAP_TYPE_TIF,
    wxBITMAP_TYPE_ANY,
    wxBITMAP_TYPE_CUR,
-   wxBITMAP_TYPE_ICO,  //wxGTK ??
-   -1
+   wxBITMAP_TYPE_ICO,
+   wxBITMAP_TYPE_MAX
 };
 
 static const wxChar *HandlerNames[]    =
@@ -144,44 +144,32 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
    if(! m_knowHandlers) // first time initialisation
    {
       ms_NumOfHandlers = 0;
-      for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
-         if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
-            m_wxBitmapHandlers[i] = 0; // not available
+      for ( int i = 0; m_wxBitmapHandlers[i] != wxBITMAP_TYPE_MAX; i++ )
+      {
+         if ( !wxImage::FindHandler(m_wxBitmapHandlers[i]) )
+            m_wxBitmapHandlers[i] = wxBITMAP_TYPE_INVALID; // not available
          else
-         {
             ms_NumOfHandlers ++;
-         }
+      }
 
       m_knowHandlers = true;
    }
 
-   MProgressDialog *pdlg = NULL;
-   int   step = 0;
-   if(showDlg)
-   {
-      pdlg = new MProgressDialog(_("Please wait"), _("Loading image..."),
-                                 ms_NumOfHandlers+3);
-   }
    // suppress any error logging from image handlers, some of them
    // will fail.
    {
       wxLogNull logNo;
 
-      for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
-         if(m_wxBitmapHandlers[i])
+      for ( int i = 0; m_wxBitmapHandlers[i] != wxBITMAP_TYPE_MAX; i++ )
+      {
+         if ( m_wxBitmapHandlers[i] != wxBITMAP_TYPE_INVALID )
          {
-            loaded = img->LoadFile(filename, m_wxBitmapHandlers[i]);
-            if(pdlg)
-            {
-               if(!pdlg->Update(++step))
-               {
-                  if(success) *success = loaded;
-                  delete pdlg;
-                  return *img;
-               }
-            }
+            if ( img->LoadFile(filename, m_wxBitmapHandlers[i]) )
+               break;
          }
-   }// normal logging again
+      }
+   } // normal logging again
+
 #ifdef OS_UNIX
    if(! loaded) // try to use imageMagick to convert image to another format:
    {
@@ -189,7 +177,8 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
       String tempfile = filename;
       int format = READ_APPCONFIG(MP_TMPGFXFORMAT);
       if((format < 0 || format > NUMBER_OF_FORMATS)
-         || (format != 0 && m_wxBitmapHandlers[format] == 0)) //xpm we do ourselves
+         || (format != 0 &&
+             m_wxBitmapHandlers[format] == wxBITMAP_TYPE_XPM)) //xpm we do ourselves
       {
          wxLogInfo(_("Unsupported intermediary image format '%s' specified,\n"
                      "reset to '%s'."),
@@ -229,15 +218,6 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
                     command.c_str());
          if(wxSystem(command) == 0)
          {
-            if(pdlg)
-            {
-               if(!pdlg->Update(++step))
-               {
-                  if(success) *success = false;
-                  delete pdlg;
-                  return *img;
-               }
-            }
             wxLogNull lo; // suppress error messages
             if(format != 0) // not xpm which we handle internally
             {
@@ -258,24 +238,13 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          if(tempfile.length()) // using a temporary file
             wxRemoveFile(tempfile);
       }// if(wxFile::Exists())
-      if(pdlg)
-      {
-         if(!pdlg->Update(++step))
-         {
-            if(success) *success = loaded;
-            delete pdlg;
-            return *img;
-         }
-      }
    }//! loaded
 #endif // OS_UNIX
 
    // if everything else failed, try xpm loading:
-   if((! loaded) /*&& m_wxBitmapHandlers[0] == 0*/) // try our own XPM loading code
+   if( !loaded ) // try our own XPM loading code
    {
       char ** cpptr = LoadImageXpm(filename);
-      if(pdlg)
-         pdlg->Update(++step); // ignore break here
       if(cpptr)
       {
          *img = wxBitmap(cpptr).ConvertToImage();
@@ -285,7 +254,6 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
    }
    if(success)
       *success = loaded;
-   if(pdlg) delete pdlg;
    return *img;
 }
 

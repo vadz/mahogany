@@ -131,7 +131,7 @@ private:
    /// have we checked for supported formats?
    static bool m_knowHandlers;
    /// list of supported types, terminated with -1
-   static long m_wxBitmapHandlers[];
+   static wxBitmapType m_wxBitmapHandlers[];
    /// number of handlers
    static int ms_NumOfHandlers;
    /// check this path first
