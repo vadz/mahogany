@@ -2863,13 +2863,20 @@ wxComposeView::DoInitText(Message *msgOrig)
             static const wxChar *QUOTE = _T("quote");
             static const size_t LEN_QUOTE = wxStrlen(QUOTE);
 
+            static const wxChar *QUOTE822 = _T("quote822");
+            static const size_t LEN_QUOTE822 = wxStrlen(QUOTE822);
+
             static const wxChar *TEXT = _T("text");
             static const size_t LEN_TEXT = wxStrlen(TEXT);
 
             if ( wxStrnicmp(pc, QUOTE, LEN_QUOTE) == 0 )
             {
-               pc += LEN_QUOTE;
-               pcEnd = pc;
+               // don't erroneously remove $quote822
+               if ( wxStrnicmp(pc, QUOTE822, LEN_QUOTE822) != 0 )
+               {
+                  pc += LEN_QUOTE;
+                  pcEnd = pc;
+               }
             }
             else if ( wxStrnicmp(pc, TEXT, LEN_TEXT) == 0 )
             {
