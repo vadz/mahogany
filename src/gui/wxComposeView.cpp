@@ -4437,7 +4437,7 @@ wxComposeView::BuildMessage(int flags) const
                msg->AddPart(
                               MimeType::TEXT,
                               textBuf,
-                              text.length(),
+                              strlen(textBuf),
                               _T("PLAIN"),
                               _T("INLINE"),  // disposition
                               NULL,          // disposition parameters
