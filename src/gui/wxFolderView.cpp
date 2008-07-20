@@ -4588,8 +4588,13 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
 
             m_searchData.forward = key == '/';
 
+            // if the string contains a '@', assume it's an address and we want
+            // to find the sender, otherwise consider it a keyword to search
+            // for in the subjects
             SearchCriterium crit;
-            crit.m_What = SearchCriterium::SC_HEADER;
+            crit.m_What = m_searchData.str.find('@') == String::npos
+                           ? SearchCriterium::SC_SUBJECT
+                           : SearchCriterium::SC_FROM;
             crit.m_Key = m_searchData.str;
             m_TicketList->Add(m_ASMailFolder->SearchMessages(&crit, this));
          }
