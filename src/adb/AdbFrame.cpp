@@ -40,7 +40,7 @@
 
 // wxWindows
 #ifndef USE_PCH
-#   include <wx/log.h
+#   include <wx/log.h>
 #   include <wx/toolbar.h>
 #   include <wx/menu.h>
 #   include <wx/layout.h>
