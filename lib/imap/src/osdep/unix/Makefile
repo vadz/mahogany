@@ -21,7 +21,7 @@
 #		Internet: MRC@CAC.Washington.EDU
 #
 # Date:		11 May 1989
-# Last Edited:	1 March 2007
+# Last Edited:	17 December 2007
 
 
 # Command line build parameters
@@ -101,8 +101,13 @@ SPOOLDIR=/usr/spool
 MAILSPOOL=$(SPOOLDIR)/mail
 NEWSSPOOL=$(SPOOLDIR)/news
 RSHPATH=/usr/ucb/rsh
-LOCKPGM=/etc/mlock
-MD5PWD="/etc/cram-md5.pwd"
+MD5PWD=/etc/cram-md5.pwd
+# Tries one of the test alternatives below if not specified.
+LOCKPGM=
+# Test alternatives if LOCKPGM not specified
+LOCKPGM1=/usr/libexec/mlock
+LOCKPGM2=/usr/sbin/mlock
+LOCKPGM3=/etc/mlock
 
 
 # Default formats for creating new mailboxes and for empty mailboxes in the
@@ -775,6 +780,15 @@ ssn:	# Secure SUN-OS
 	 BASECFLAGS="-g -Dconst=" \
 	 BASELDFLAGS="-ldl"
 
+sua:	# Windows Vista Subsystem for UNIX Applications
+	$(BUILD) `$(CAT) SPECIALS` OS=sua \
+	 SIGTYPE=psx CRXTYPE=nfs LOGINPW=old \
+	 SPOOLDIR=/var/spool MAILSPOOL=/var/mail \
+	 ACTIVEFILE=/var/lib/news/active \
+	 RSHPATH=/usr/bin/rsh \
+	 BASECFLAGS="-g -O2" \
+	 BASELDFLAGS="-lcrypt"
+
 sun:	# SUN-OS
 	$(BUILD) `$(CAT) SPECIALS` OS=$@ \
 	 CRXTYPE=nfs \
@@ -847,7 +861,7 @@ $(ARCHIVE): $(BINARIES)
 # Cleanup
 
 clean:
-	sh -c '$(RM) auths.c crexcl.c linkage.[ch] siglocal.c osdep*.[ch] *.o ARCHIVE *FLAGS *TYPE $(ARCHIVE) || true'
+	sh -c '$(RM) auths.c crexcl.c ip_unix.c linkage.[ch] siglocal.c osdep*.[ch] *.o ARCHIVE *FLAGS *TYPE $(ARCHIVE) || true'
 
 
 # Dependencies
@@ -950,12 +964,15 @@ onceenv:
 	 -DMD5ENABLE=\"$(MD5PWD)\" -DMAILSPOOL=\"$(MAILSPOOL)\" \
 	 -DANONYMOUSHOME=\"$(MAILSPOOL)/anonymous\" \
 	 -DACTIVEFILE=\"$(ACTIVEFILE)\" -DNEWSSPOOL=\"$(NEWSSPOOL)\" \
-	 -DRSHPATH=\"$(RSHPATH)\" -DLOCKPGM=\"$(LOCKPGM)\" > OSCFLAGS
+	 -DRSHPATH=\"$(RSHPATH)\" -DLOCKPGM=\"$(LOCKPGM)\" \
+	 -DLOCKPGM1=\"$(LOCKPGM1)\" -DLOCKPGM2=\"$(LOCKPGM2)\" \
+	 -DLOCKPGM3=\"$(LOCKPGM3)\" > OSCFLAGS
 	echo $(BASELDFLAGS) $(EXTRALDFLAGS) > LDFLAGS
 	echo "$(ARRC) $(ARCHIVE) $(BINARIES);$(RANLIB) $(ARCHIVE)" > ARCHIVE
 	echo $(OS) > OSTYPE
 	./drivers $(EXTRADRIVERS) $(DEFAULTDRIVERS) dummy
 	./mkauths $(EXTRAAUTHENTICATORS) $(DEFAULTAUTHENTICATORS)
+	echo "  mail_versioncheck (CCLIENTVERSION);" >> linkage.c
 	$(LN) os_$(OS).h osdep.h
 	$(LN) os_$(OS).c osdepbas.c
 	$(LN) log_$(LOGINPW).c osdeplog.c

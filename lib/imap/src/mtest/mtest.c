@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	8 July 1988
- * Last Edited:	30 August 2006
+ * Last Edited:	5 November 2007
  *
  * This original version of this file is
  * Copyright 1988 Stanford University
@@ -555,8 +555,13 @@ void status (MAILSTREAM *stream)
 	  puts (" Atomic multiple APPEND (RFC 3502)");
 	if (LEVELBINARY (stream))
 	  puts (" Binary body content (RFC 3516)");
+	if (LEVELUNSELECT (stream)) puts (" Mailbox unselect (RFC 3691)");
+	if (LEVELURLAUTH (stream))
+	  puts (" URL authenticated fetch (RFC 4467)");
+	if (LEVELCATENATE (stream)) puts (" Catenation (RFC 4469)");
+	if (LEVELCONDSTORE (stream)) puts (" Conditional STORE (RFC 4551)");
+	if (LEVELESEARCH (stream)) puts (" Extended SEARCH (RFC 4731)");
 	puts ("Supported draft extensions:");
-	if (LEVELUNSELECT (stream)) puts (" Mailbox unselect");
 	if (LEVELSASLIR (stream)) puts (" SASL initial client response");
 	if (LEVELSORT (stream)) puts (" Server-based sorting");
 	if (LEVELTHREAD (stream)) {
@@ -690,22 +695,24 @@ void mm_dlog (char *string)
 
 void mm_login (NETMBX *mb,char *user,char *pwd,long trial)
 {
-  char tmp[MAILTMPLEN];
+  char *s,tmp[MAILTMPLEN];
   if (curhst) fs_give ((void **) &curhst);
   curhst = (char *) fs_get (1+strlen (mb->host));
   strcpy (curhst,mb->host);
-  if (*mb->user) {
-    strcpy (user,mb->user);
-    sprintf (tmp,"{%s/%s/user=\"%s\"} password: ",mb->host,mb->service,mb->user);
-  }
+  sprintf (s = tmp,"{%s/%s",mb->host,mb->service);
+  if (*mb->user) sprintf (tmp+strlen (tmp),"/user=%s",strcpy (user,mb->user));
+  if (*mb->authuser) sprintf (tmp+strlen (tmp),"/authuser=%s",mb->authuser);
+  if (*mb->user) strcat (s = tmp,"} password:");
   else {
-    sprintf (tmp,"{%s/%s} username: ",mb->host,mb->service);
-    prompt (tmp,user);
-    strcpy (tmp,"Password: ");
+    printf ("%s} username: ",tmp);
+    fgets (user,NETMAXUSER-1,stdin);
+    user[NETMAXUSER-1] = '\0';
+    if (s = strchr (user,'\n')) *s = '\0';
+    s = "password: ";
   }
   if (curusr) fs_give ((void **) &curusr);
   curusr = cpystr (user);
-  strcpy (pwd,getpass (tmp));
+  strcpy (pwd,getpass (s));
 }
 
 

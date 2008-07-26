@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	23 February 1992
- * Last Edited:	30 January 2007
+ * Last Edited:	11 October 2007
  */
 
 
@@ -315,7 +315,7 @@ void *mh_parameters (long function,void *value)
 }
 
 
-/* MX test for directory format internal node
+/* MH test for directory format internal node
  * Accepts: candidate node name
  * Returns: T if internal name, NIL otherwise
  */
@@ -903,7 +903,7 @@ long mh_ping (MAILSTREAM *stream)
 				/* snarf message from Berkeley mailbox */
 	selt = mail_elt (sysibx,i);
 	if (((fd = open (LOCAL->buf,O_WRONLY|O_CREAT|O_EXCL,
-			 (int) mail_parameters (NIL,GET_MBXPROTECTION,NIL)))
+			 (long) mail_parameters (NIL,GET_MBXPROTECTION,NIL)))
 	     >= 0) &&
 	    (s = mail_fetchheader_full (sysibx,i,NIL,&j,FT_INTERNAL)) &&
 	    (write (fd,s,j) == j) &&
@@ -925,6 +925,7 @@ long mh_ping (MAILSTREAM *stream)
 	  elt->hours = selt->hours;elt->minutes = selt->minutes;
 	  elt->seconds = selt->seconds;
 	  elt->zhours = selt->zhours; elt->zminutes = selt->zminutes;
+	  elt->zoccident = selt->zoccident;
 	  mh_setdate (LOCAL->buf,elt);
 	  sprintf (tmp,"%lu",i);/* delete it from the sysinbox */
 	  mail_flag (sysibx,tmp,"\\Deleted",ST_SET);
@@ -1155,7 +1156,7 @@ long mh_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
     mh_file (tmp,mailbox);	/* build file name we will use */
     sprintf (tmp + strlen (tmp),"/%ld",++last);
     if (((fd = open (tmp,O_WRONLY|O_CREAT|O_EXCL,
-		     (int) mail_parameters (NIL,GET_MBXPROTECTION,NIL))) < 0)||
+		     (long)mail_parameters (NIL,GET_MBXPROTECTION,NIL))) < 0)||
 	!(df = fdopen (fd,"ab"))) {
       sprintf (tmp,"Can't open append message: %s",strerror (errno));
       mm_log (tmp,ERROR);
@@ -1263,7 +1264,7 @@ long mh_canonicalize (char *pattern,char *ref,char *pat)
     for (i = 0, s = pattern; *s; *s++) if ((*s == '*') || (*s == '%')) ++i;
 				/* success if not too many */
     if (i <= MAXWILDCARDS) return LONGT;
-    MM_LOG ("Excessive wildcards in LIST/LSUB",ERROR);
+    mm_log ("Excessive wildcards in LIST/LSUB",ERROR);
   }
   return NIL;
 }

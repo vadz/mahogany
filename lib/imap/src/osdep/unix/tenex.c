@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	22 May 1990
- * Last Edited:	20 December 2006
+ * Last Edited:	11 October 2007
  */
 
 
@@ -298,7 +298,7 @@ long tenex_rename (MAILSTREAM *stream,char *old,char *newname)
 	     "Can't rename mailbox %.80s to %.80s: invalid name" :
 	     "Can't delete mailbox %.80s: invalid name",
 	     old,newname);
-    mm_log (tmp,ERROR);
+    MM_LOG (tmp,ERROR);
     return NIL;
   }
   else if ((fd = open (file,O_RDWR,NIL)) < 0) {
@@ -409,7 +409,7 @@ MAILSTREAM *tenex_open (MAILSTREAM *stream)
 				/* canonicalize the mailbox name */
   if (!tenex_file (tmp,stream->mailbox)) {
     sprintf (tmp,"Can't open - invalid name: %.80s",stream->mailbox);
-    mm_log (tmp,ERROR);
+    MM_LOG (tmp,ERROR);
   }
   if (stream->rdonly ||
       (fd = open (tmp,O_RDWR,NIL)) < 0) {
@@ -964,6 +964,10 @@ long tenex_copy (MAILSTREAM *stream,char *sequence,char *mailbox,long options)
     return NIL;
   case 0:			/* merely empty file? */
     break;
+  case EACCES:			/* file protected */
+    sprintf (LOCAL->buf,"Can't access destination: %.80s",mailbox);
+    MM_LOG (LOCAL->buf,ERROR);
+    return NIL;
   case EINVAL:
     if (pc) return (*pc) (stream,sequence,mailbox,options);
     sprintf (LOCAL->buf,"Invalid Tenex-format mailbox name: %.80s",mailbox);
@@ -1036,7 +1040,7 @@ long tenex_copy (MAILSTREAM *stream,char *sequence,char *mailbox,long options)
     }
   }
   if (ret && mail_parameters (NIL,GET_COPYUID,NIL))
-    mm_log ("Can not return meaningful COPYUID with this mailbox format",WARN);
+    MM_LOG ("Can not return meaningful COPYUID with this mailbox format",WARN);
   return ret;
 }
 
@@ -1073,6 +1077,10 @@ long tenex_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
 				/* falls through */
   case 0:			/* merely empty file? */
     break;
+  case EACCES:			/* file protected */
+    sprintf (tmp,"Can't access destination: %.80s",mailbox);
+    MM_LOG (tmp,ERROR);
+    return NIL;
   case EINVAL:
     sprintf (tmp,"Invalid TENEX-format mailbox name: %.80s",mailbox);
     MM_LOG (tmp,ERROR);
@@ -1156,7 +1164,7 @@ long tenex_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
   unlockfd (ld,lock);		/* release exclusive parse/append permission */
   MM_NOCRITICAL (stream);	/* release critical */
   if (ret && mail_parameters (NIL,GET_APPENDUID,NIL))
-    mm_log ("Can not return meaningful APPENDUID with this mailbox format",
+    MM_LOG ("Can not return meaningful APPENDUID with this mailbox format",
 	    WARN);
   return ret;
 }
@@ -1220,7 +1228,7 @@ long tenex_parse (MAILSTREAM *stream)
     tenex_close (stream,NIL);
     return NIL;
   }
-  stream->silent = T;		/* don't pass up mm_exists() events yet */
+  stream->silent = T;		/* don't pass up exists events yet */
   while (sbuf.st_size - curpos){/* while there is stuff to parse */
 				/* get to that position in the file */
     lseek (LOCAL->fd,curpos,L_SET);

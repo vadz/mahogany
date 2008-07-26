@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2008 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  * Program:	RFC 2822 and MIME routines
  *
  * Author:	Mark Crispin
- *		Networks and Distributed Computing
- *		Computing & Communications
+ *		UW Technology
  *		University of Washington
- *		Administration Building, AG-44
  *		Seattle, WA  98195
- *		Internet: MRC@CAC.Washington.EDU
+ *		Internet: MRC@Washington.EDU
  *
  * Date:	27 July 1988
- * Last Edited:	6 December 2006
+ * Last Edited:	14 May 2008
  *
  * This original version of this file is
  * Copyright 1988 Stanford University
@@ -304,8 +302,17 @@ void rfc822_parse_content (BODY *body,STRING *bs,char *h,unsigned long depth,
 	}
 	if (c == '\n') body->size.lines++;
       }
-				/* otherwise assume US-ASCII */
-      if (!body->parameter->value) body->parameter->value = cpystr("US-ASCII");
+				/* 7-bit content */
+      if (!body->parameter->value) switch (body->encoding) {
+      case ENC7BIT:		/* unadorned 7-bit */
+      case ENC8BIT:		/* unadorned 8-bit (but 7-bit content) */
+      case ENCBINARY:		/* binary (but 7-bit content( */
+	body->parameter->value = cpystr ("US-ASCII");
+	break;
+      default:			/* QUOTED-PRINTABLE, BASE64, etc. */
+	body->parameter->value = cpystr ("X-UNKNOWN");
+	break;
+      }
     }
 				/* just count lines */
     else while (i--) if ((SNX (bs)) == '\n') body->size.lines++;
@@ -503,7 +510,10 @@ void rfc822_parse_content (BODY *body,STRING *bs,char *h,unsigned long depth,
 	  if (!part->body.parameter) {
 	    part->body.parameter = mail_newbody_parameter ();
 	    part->body.parameter->attribute = cpystr ("CHARSET");
-	    part->body.parameter->value = cpystr ("US-ASCII");
+				/* only assume US-ASCII if 7BIT */
+	    part->body.parameter->value =
+	      cpystr ((part->body.encoding == ENC7BIT) ?
+		      "US-ASCII" : "X-UNKNOWN");
 	  }
 	  break;
 	case TYPEMESSAGE:	/* encapsulated message in digest */
@@ -529,7 +539,7 @@ void rfc822_parse_content (BODY *body,STRING *bs,char *h,unsigned long depth,
 
 void rfc822_parse_content_header (BODY *body,char *name,char *s)
 {
-  char c,*t;
+  char c,*t,tmp[MAILTMPLEN];
   long i;
   STRINGLIST *stl;
   rfc822_skipws (&s);		/* skip leading comments */
@@ -585,14 +595,25 @@ void rfc822_parse_content_header (BODY *body,char *name,char *s)
       if (!(name = rfc822_parse_word (s,tspecials))) break;
       c = *name;		/* remember delimiter */
       *name = '\0';		/* tie off type */
-      s = ucase (rfc822_cpy(s));/* search for body type */
-      for (i = 0; (i <= TYPEMAX) && body_types[i] &&
-	     strcmp (s,body_types[i]); i++);
-				/* record body type index */
-      body->type = (i <= TYPEMAX) ? (unsigned short) i : TYPEOTHER;
+				/* search for body type */
+      for (i = 0,s = rfc822_cpy (s);
+	   (i <= TYPEMAX) && body_types[i] &&
+	     compare_cstring (s,body_types[i]); i++);
+      if (i > TYPEMAX) {	/* fell off end of loop? */
+	body->type = TYPEOTHER;	/* coerce to X-UNKNOWN */
+	sprintf (tmp,"MIME type table overflow: %.100s",s);
+	MM_LOG (tmp,PARSE);
+      }
+      else {			/* record body type index */
+	body->type = (unsigned short) i;
 				/* and name if new type */
-      if (body_types[body->type]) fs_give ((void **) &s);
-      else body_types[body->type] = s;
+	if (body_types[body->type]) fs_give ((void **) &s);
+	else {			/* major MIME body type unknown to us */
+	  body_types[body->type] = ucase (s);
+	  sprintf (tmp,"Unknown MIME type: %.100s",s);
+	  MM_LOG (tmp,PARSE);
+	}
+      }
       *name = c;		/* restore delimiter */
       rfc822_skipws (&name);	/* skip whitespace */
       if ((*name == '/') &&	/* subtype? */
@@ -610,17 +631,32 @@ void rfc822_parse_content_header (BODY *body,char *name,char *s)
       }
       rfc822_parse_parameter (&body->parameter,name);
     }
+
     else if (!strcmp (name+1,"RANSFER-ENCODING")) {
       if (!(name = rfc822_parse_word (s,tspecials))) break;
+      c = *name;		/* remember delimiter */
       *name = '\0';		/* tie off encoding */
-      s = ucase (rfc822_cpy(s));/* search for body encoding */
-      for (i = 0; (i <= ENCMAX) && body_encodings[i] &&
-	   strcmp (s,body_encodings[i]); i++);
-				/* record body encoding index */
-      body->encoding = (i <= ENCMAX) ? (unsigned short) i : ENCOTHER;
+				/* search for body encoding */      
+      for (i = 0,s = rfc822_cpy (s);
+	   (i <= ENCMAX) && body_encodings[i] &&
+	     compare_cstring (s,body_encodings[i]); i++);
+      if (i > ENCMAX) {		/* fell off end of loop? */
+	body->encoding = ENCOTHER;
+	sprintf (tmp,"MIME encoding table overflow: %.100s",s);
+	MM_LOG (tmp,PARSE);
+      }
+      else {			/* record body encoding index */
+	body->encoding = (unsigned short) i;
 				/* and name if new encoding */
-      if (body_encodings[body->encoding]) fs_give ((void **) &s);
-      else body_encodings[body->encoding] = ucase (cpystr (s));
+	if (body_encodings[body->encoding]) fs_give ((void **) &s);
+	else {
+	  body_encodings[body->encoding] = ucase (s);
+	  sprintf (tmp,"Unknown MIME transfer encoding: %.100s",s);
+	  MM_LOG (tmp,PARSE);
+	}
+      }
+      *name = c;		/* restore delimiter */
+      /* ??check for cruft here?? */
     }
     break;
   default:			/* otherwise unknown */
@@ -1528,7 +1564,7 @@ long rfc822_output_address_list (RFC822BUFFER *buf,ADDRESS *adr,long pretty,
 	  ((!--n && adr->next && adr->next->mailbox) &&
 	   !rfc822_output_string (buf,", "))) return NIL;
     }
-    if (pretty &&		/* pretty printing? */
+    if (pretty && adr->next &&	/* pretty printing? */
 	((pretty += ((buf->cur > base) ? buf->cur - base :
 		     (buf->end - base) + (buf->cur - buf->beg))) >= 78)) {
       if (!(rfc822_output_string (buf,"\015\012") &&

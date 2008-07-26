@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	10 February 1992
- * Last Edited:	30 January 2007
+ * Last Edited:	6 September 2007
  */
 
 
@@ -741,7 +741,7 @@ MAILSTREAM *nntp_mopen (MAILSTREAM *stream)
   stream->rdonly = stream->perm_deleted = T;
 				/* UIDs are always valid */
   stream->uid_validity = 0xbeefface;
-  sprintf (tmp,"{%s:%lu/nntp",(int) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
+  sprintf (tmp,"{%s:%lu/nntp",(long) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
 	   net_host (nstream->netstream) : mb.host,
 	   net_port (nstream->netstream));
   if (LOCAL->tlsflag) strcat (tmp,"/tls");
@@ -1211,21 +1211,14 @@ long nntp_search (MAILSTREAM *stream,char *charset,SEARCHPGM *pgm,long flags)
   unsigned long i;
   MESSAGECACHE *elt;
   OVERVIEW ov;
-  if (charset && *charset &&	/* convert if charset not US-ASCII or UTF-8 */
-      !(((charset[0] == 'U') || (charset[0] == 'u')) &&
-	((((charset[1] == 'S') || (charset[1] == 's')) &&
-	  (charset[2] == '-') &&
-	  ((charset[3] == 'A') || (charset[3] == 'a')) &&
-	  ((charset[4] == 'S') || (charset[4] == 's')) &&
-	  ((charset[5] == 'C') || (charset[5] == 'c')) &&
-	  ((charset[6] == 'I') || (charset[6] == 'i')) &&
-	  ((charset[7] == 'I') || (charset[7] == 'i')) && !charset[8]) ||
-	 (((charset[1] == 'T') || (charset[1] == 't')) &&
-	  ((charset[2] == 'F') || (charset[2] == 'f')) &&
-	  (charset[3] == '-') && (charset[4] == '8') && !charset[5])))) {
-    if (utf8_text (NIL,charset,NIL,T)) utf8_searchpgm (pgm,charset);
-    else return NIL;		/* charset unknown */
+  char *msg;
+				/* make sure that charset is good */
+  if (msg = utf8_badcharset (charset)) {
+    MM_LOG (msg,ERROR);		/* output error */
+    fs_give ((void **) &msg);
+    return NIL;
   }
+  utf8_searchpgm (pgm,charset);
   if (flags & SO_OVERVIEW) {	/* only if specified to use overview */
 				/* identify messages that will be searched */
     for (i = 1; i <= stream->nmsgs; ++i)
@@ -1265,6 +1258,7 @@ long nntp_search_msg (MAILSTREAM *stream,unsigned long msgno,SEARCHPGM *pgm,
 		      OVERVIEW *ov)
 {
   unsigned short d;
+  unsigned long now = (unsigned long) time (0);
   MESSAGECACHE *elt = mail_elt (stream,msgno);
   SEARCHHEADER *hdr;
   SEARCHOR *or;
@@ -1316,7 +1310,7 @@ long nntp_search_msg (MAILSTREAM *stream,unsigned long msgno,SEARCHPGM *pgm,
 	(pgm->smaller && (ov->optional.octets >= pgm->smaller))) return NIL;
 				/* date ranges */
     if ((pgm->sentbefore || pgm->senton || pgm->sentsince ||
-	 (pgm->before || pgm->on || pgm->since)) &&
+	 pgm->before || pgm->on || pgm->since) &&
 	(!mail_parse_date (&delt,ov->date) ||
 	 !(d = mail_shortdate (delt.year,delt.month,delt.day)) ||
 	 (pgm->sentbefore && (d >= pgm->sentbefore)) ||
@@ -1325,6 +1319,11 @@ long nntp_search_msg (MAILSTREAM *stream,unsigned long msgno,SEARCHPGM *pgm,
 	 (pgm->before && (d >= pgm->before)) ||
 	 (pgm->on && (d != pgm->on)) ||
 	 (pgm->since && (d < pgm->since)))) return NIL;
+    if (pgm->older || pgm->younger) {
+      unsigned long msgd = mail_longdate (elt);
+      if (pgm->older && msgd > (now - pgm->older)) return NIL;
+      if (pgm->younger && msgd < (now - pgm->younger)) return NIL;
+    }
     if ((pgm->from && !mail_search_addr (ov->from,pgm->from)) ||
 	(pgm->subject && !mail_search_header_text (ov->subject,pgm->subject))||
 	(pgm->message_id &&
@@ -1685,7 +1684,7 @@ SENDSTREAM *nntp_open_full (NETDRIVER *dv,char **hostlist,char *service,
 				/* initialize stream */
 	memset ((void *) stream,0,sizeof (SENDSTREAM));
 	stream->netstream = netstream;
-	stream->host = cpystr ((int) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
+	stream->host = cpystr ((long) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
 			       net_host (netstream) : mb.host);
 	stream->debug = (mb.dbgflag || (options & NOP_DEBUG)) ? T : NIL;
 	if (mb.loser) stream->loser = T;
@@ -1739,9 +1738,9 @@ SENDSTREAM *nntp_open_full (NETDRIVER *dv,char **hostlist,char *service,
   }
   if (stream) {			/* have a session? */
     if (mb.user[0]) {		/* yes, have user name? */
-      if ((int) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
+      if ((long) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
 				/* remote name for authentication */
-	strncpy (mb.host,(int) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
+	strncpy (mb.host,(long) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
 		 net_remotehost (netstream) : net_host (netstream),
 		 NETMAXHOST-1);
 	mb.host[NETMAXHOST-1] = '\0';
@@ -1764,8 +1763,8 @@ SENDSTREAM *nntp_open_full (NETDRIVER *dv,char **hostlist,char *service,
     break;
   case NNTPWANTAUTH:		/* server wants auth first, do so and retry */
   case NNTPWANTAUTH2:		/* remote name for authentication */
-    if ((int) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
-      strncpy (mb.host,(int) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
+    if ((long) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
+      strncpy (mb.host,(long) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
 	       net_remotehost (netstream) : net_host (netstream),NETMAXHOST-1);
       mb.host[NETMAXHOST-1] = '\0';
     }
@@ -1997,8 +1996,8 @@ long nntp_send_auth (SENDSTREAM *stream,long flags)
   NETMBX mb;
   char tmp[MAILTMPLEN];
 				/* remote name for authentication */
-  sprintf (tmp,"{%.200s/nntp",(int) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
-	   ((int) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
+  sprintf (tmp,"{%.200s/nntp",(long) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
+	   ((long) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
 	    net_remotehost (stream->netstream) : net_host (stream->netstream)):
 	   stream->host);
   if (stream->netstream->dtb ==
@@ -2043,7 +2042,7 @@ long nntp_send_auth_work (SENDSTREAM *stream,NETMBX *mb,char *pwd,long flags)
 	fs_give ((void **) &lsterr);
       }
       stream->saslcancel = NIL;
-      if (nntp_send (stream,"AUTHINFO SASL",at->name)) {
+      if (nntp_send (stream,"AUTHINFO SASL",at->name) == NNTPCHALLENGE) {
 				/* hide client authentication responses */
 	if (!(at->flags & AU_SECURE)) stream->sensitive = T;
 	if ((*at->client) (nntp_challenge,nntp_response,"nntp",mb,stream,

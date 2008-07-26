@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2007 University of Washington
+ * Copyright 1988-2008 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,19 @@
  * Program:	Mailbox Access routines
  *
  * Author:	Mark Crispin
- *		Networks and Distributed Computing
- *		Computing & Communications
+ *		UW Technology
  *		University of Washington
- *		Administration Building, AG-44
  *		Seattle, WA  98195
- *		Internet: MRC@CAC.Washington.EDU
+ *		Internet: MRC@Washington.EDU
  *
  * Date:	22 November 1989
- * Last Edited:	30 January 2007
+ * Last Edited:	25 March 2008
  */
 
+/* The Version */
+
+#define CCLIENTVERSION "2007b"
+
 /* Build parameters */
 
 #define CACHEINCREMENT 250	/* cache growth increments */
@@ -139,6 +141,8 @@
 #define SET_APPENDUID (long) 158
 #define GET_RFC822OUTPUTFULL (long) 159
 #define SET_RFC822OUTPUTFULL (long) 160
+#define GET_BLOCKENVINIT (long) 161
+#define SET_BLOCKENVINIT (long) 162
 
 	/* 2xx: environment */
 #define GET_USERNAME (long) 201
@@ -268,7 +272,9 @@
 #define GET_SENDCOMMAND (long) 450
 #define SET_SENDCOMMAND (long) 451
 #define GET_IDLETIMEOUT (long) 452
-#define SET_IDLETIMEOUT (long) 452
+#define SET_IDLETIMEOUT (long) 453
+#define GET_FETCHLOOKAHEADLIMIT (long) 454
+#define SET_FETCHLOOKAHEADLIMIT (long) 455
 
 	/* 5xx: local file drivers */
 #define GET_MBXPROTECTION (long) 500
@@ -362,7 +368,7 @@
 #define DR_CRLF (long) 0x200	/* driver internal form uses CRLF newlines */
 #define DR_NOSTICKY (long) 0x400/* driver does not support sticky UIDs */
 #define DR_RECYCLE (long) 0x800	/* driver does stream recycling */
-#define DR_XPOINT (long) 0x1000	/* needs to be checkpointed when recycling */
+#define DR_XPOINT (long) 0x1000	/* needs to be checkpointed */
 				/* driver has no real internal date */
 #define DR_NOINTDATE (long) 0x2000
 				/* driver does not announce new mail */
@@ -819,6 +825,7 @@ typedef struct message_cache {
     unsigned int sequence : 1;	/* saved sequence bit */
     unsigned int dirty : 1;	/* driver internal use */
     unsigned int filter : 1;	/* driver internal use */
+    unsigned int ghost : 1;	/* driver internal use */
   } private;
 			/* internal date */
   unsigned int day : 5;		/* day of month (1-31) */
@@ -944,6 +951,8 @@ SEARCHPGM {			/* search program */
   STRINGLIST *to;		/* to recipients */
   unsigned long larger;		/* larger than this size */
   unsigned long smaller;	/* smaller than this size */
+  unsigned long older;		/* older than this interval */
+  unsigned long younger;	/* younger than this interval */
   unsigned short sentbefore;	/* sent before this date */
   unsigned short senton;	/* sent on this date */
   unsigned short sentsince;	/* sent since this date */
@@ -1596,6 +1605,7 @@ void mm_fatal (char *string);
 void *mm_cache (MAILSTREAM *stream,unsigned long msgno,long op);
 
 extern STRINGDRIVER mail_string;
+void mail_versioncheck (char *version);
 void mail_link (DRIVER *driver);
 void *mail_parameters (MAILSTREAM *stream,long function,void *value);
 DRIVER *mail_valid (MAILSTREAM *stream,char *mailbox,char *purpose);
@@ -1610,6 +1620,7 @@ long mail_unsubscribe (MAILSTREAM *stream,char *mailbox);
 long mail_create (MAILSTREAM *stream,char *mailbox);
 long mail_delete (MAILSTREAM *stream,char *mailbox);
 long mail_rename (MAILSTREAM *stream,char *old,char *newname);
+char *mail_utf7_valid (char *mailbox);
 long mail_status (MAILSTREAM *stream,char *mbx,long flags);
 long mail_status_default (MAILSTREAM *stream,char *mbx,long flags);
 MAILSTREAM *mail_open (MAILSTREAM *stream,char *name,long options);

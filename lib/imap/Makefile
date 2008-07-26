@@ -1,5 +1,5 @@
 # ========================================================================
-# Copyright 1988-2006 University of Washington
+# Copyright 1988-2008 University of Washington
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +13,12 @@
 # Program:	IMAP Toolkit Makefile
 #
 # Author:	Mark Crispin
-#		Networks and Distributed Computing
-#		Computing & Communications
-#		University of Washington
-#		Administration Building, AG-44
+#		UW Technology
 #		Seattle, WA  98195
-#		Internet: MRC@CAC.Washington.EDU
+#		Internet: MRC@Washington.EDU
 #
 # Date:		7 December 1989
-# Last Edited:	29 March 2007
+# Last Edited:	12 May 2008
 
 
 # Normal command to build IMAP toolkit:
@@ -82,6 +79,7 @@
 # isc	Interactive Systems
 # ldb	Debian Linux
 # lfd	Fedora Core 4
+# ln8	Linux for Nokia N800
 # lnx	Linux with traditional passwords and crypt() in the C library
 #	 (see lnp, sl4, sl5, and slx)
 # lnp	Linux with Pluggable Authentication Modules (PAM)
@@ -92,13 +90,14 @@
 # lyn	LynxOS
 # mct	MachTen
 # mnt	Atari ST Mint (not MacMint)
-# neb	NetBSD/FreeBSD
+# neb	NetBSD
 # nec	NEC UX
 # nto	QNX Neutrine RTP
 # nxt	NEXTSTEP
 # nx3	NEXTSTEP 3.x
 # osf	OSF/1 (see sos, os4)
 # os4	OSF/1 (Digital UNIX) 4
+# osi	Apple iPhone and iPod Touch
 # osx	Mac OS X
 # oxp	Mac OS X with Pluggable Authentication Modules (PAM)
 # ptx	PTX
@@ -118,6 +117,7 @@
 # sol	Solaris (won't work unless "ucbcc" works -- use gso instead)
 # sos	OSF/1 with SecureWare
 # ssn	SUN-OS with shadow password security
+# sua	Windows Vista (Enterprise or Ultima) Subsystem for Unix Applications
 # sun	SUN-OS 4.1 or better (*not* Solaris) (see ssn)
 # sv2	SVR2 on AT&T PC-7300 (incomplete port)
 # sv4	generic SVR4
@@ -306,7 +306,7 @@ SPECIALS:
 
 # Note on SCO you may have to set LN to "ln".
 
-a32 a41 aix bs3 bsi d-g d54 do4 drs epx ga4 gas gh9 ghp ghs go5 gsc gsg gso gul h11 hpp hpx lnp lyn mct mnt neb nec nto nxt nx3 osf os4 ptx qnx sc5 sco sgi sg6 shp sl4 sl5 slx snx soc sol sos uw2: an
+a32 a41 aix bs3 bsi d-g d54 do4 drs epx ga4 gas gh9 ghp ghs go5 gsc gsg gso gul h11 hpp hpx lnp lyn mct mnt nec nto nxt nx3 osf os4 ptx qnx sc5 sco sgi sg6 shp sl4 sl5 slx snx soc sol sos uw2: an
 	$(BUILD) BUILDTYPE=$@
 
 # If you use sv4, you may find that it works to move it to use the an process.
@@ -319,14 +319,28 @@ aos art asv aux bsd cvx dpx dyn isc pyr sv4 ult vul vu2: ua
 
 # Knotheads moved Kerberos and SSL locations on these platforms
 
+# Paul Vixie claims that all FreeBSD versions have working IPv6
+
 bsf:	an
-	$(BUILD) BUILDTYPE=$@ \
+	$(TOUCH) ip6
+	$(BUILD) BUILDTYPE=$@ IP=$(IP6) \
 	PASSWDTYPE=pam \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl/certs SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock PAMLDFLAGS=-lpam"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl/certs SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib PAMLDFLAGS=-lpam"
+
+# I assume that Theo did the right thing for IPv6.  OpenBSD does not have PAM.
 
 bso:	an
-	$(BUILD) BUILDTYPE=$@ \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
+	$(TOUCH) ip6
+	$(BUILD) BUILDTYPE=$@ IP=$(IP6) \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib"
+
+# Info from Joel Reicher about NetBSD SSL paths.  I assume it has PAM because pam is in NetBSD sources...
+
+neb:	an
+	$(TOUCH) ip6
+	$(BUILD) BUILDTYPE=$@ IP=$(IP6) \
+	PASSWDTYPE=pam \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/openssl/certs SSLKEYS=/etc/openssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib PAMLDFLAGS=-lpam"
 
 cyg:	an
 	$(BUILD) BUILDTYPE=cyg \
@@ -338,21 +352,34 @@ gcs:	an
 
 ldb:	an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl/certs SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/ssl/certs SSLKEYS=/etc/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib MAILSPOOL=/var/mail"
 
-lfd lr5: an
+lfd:	an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
-	EXTRACFLAGS="$(EXTRACFLAGS) -I/usr/kerberos/include" \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/pki/tls/certs SSLKEYS=/etc/pki/tls/private GSSDIR=/usr/kerberos LOCKPGM=/usr/sbin/mlock"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/pki/tls/certs SSLKEYS=/etc/pki/tls/private GSSDIR=/usr/kerberos"
+
+ln8:	an
+	$(TOUCH) ip6
+	$(BUILD) BUILDTYPE=slx IP=$(IP6) \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/lib/ssl/certs MAILSPOOL=/var/mail"
+
+
+# RHE5 does not have the IPv6 bug
+
+lr5:	an
+	$(TOUCH) ip6
+	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/etc/pki/tls/certs SSLKEYS=/etc/pki/tls/private GSSDIR=/usr/kerberos"
 
 lmd:	an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/lib/ssl/certs SSLKEYS=/usr/lib/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/lib/ssl/certs SSLKEYS=/usr/lib/ssl/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib"
+
+# RHE3 definitely has the IPv6 bug
 
 lrh:	lrhok an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
-	EXTRACFLAGS="$(EXTRACFLAGS) -I/usr/kerberos/include" \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/share/ssl/certs SSLKEYS=/usr/share/ssl/private GSSDIR=/usr/kerberos LOCKPGM=/usr/sbin/mlock"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/share/ssl/certs SSLKEYS=/usr/share/ssl/private GSSDIR=/usr/kerberos"
 
 lrhok:
 	@$(SH) -c '(test ! -d /etc/pki/tls ) || make lrhwarn'
@@ -376,20 +403,28 @@ lrhwarn:
 
 lsu:	an
 	$(BUILD) BUILDTYPE=lnp IP=$(IP6) \
-	EXTRACFLAGS="$(EXTRACFLAGS) -I/usr/kerberos/include" \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/share/ssl/certs SSLKEYS=/usr/share/ssl/private GSSDIR=/usr/kerberos LOCKPGM=/usr/sbin/mlock"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/usr/share/ssl/certs SSLKEYS=/usr/share/ssl/private GSSDIR=/usr/kerberos"
+
+# iToy does not have Kerberos or PAM.  It doesn't have a
+# /System/Library/OpenSSL directory either, but the libcrypto shared library
+# has these locations so this is what we will use.
+
+osi:	an
+	$(TOUCH) ip6
+	$(BUILD) BUILDTYPE=osx IP=$(IP6) CC=arm-apple-darwin-gcc \
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private"
 
 oxp:	an
 	$(TOUCH) ip6
 	$(BUILD) BUILDTYPE=osx IP=$(IP6) EXTRAAUTHENTICATORS="$(EXTRAAUTHENTICATORS) gss" \
 	PASSWDTYPE=pam \
 	EXTRACFLAGS="$(EXTRACFLAGS) -DMAC_OSX_KLUDGE=1" \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock PAMDLFLAGS=-lpam"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib PAMDLFLAGS=-lpam"
 
 osx:	osxok an
 	$(TOUCH) ip6
 	$(BUILD) BUILDTYPE=$@ IP=$(IP6) EXTRAAUTHENTICATORS="$(EXTRAAUTHENTICATORS) gss" \
-	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib LOCKPGM=/usr/sbin/mlock"
+	SPECIALS="SSLINCLUDE=/usr/include/openssl SSLLIB=/usr/lib SSLCERTS=/System/Library/OpenSSL/certs SSLKEYS=/System/Library/OpenSSL/private GSSINCLUDE=/usr/include GSSLIB=/usr/lib"
 
 osxok:
 	@$(SH) -c '(test ! -f /usr/include/pam/pam_appl.h ) || make osxwarn'
@@ -474,6 +509,14 @@ sunok:
 sv2:
 	$(MAKE) ua LN=ln
 	$(BUILD) BUILDTYPE=$@ LN=ln
+
+# Hard links don't quite work right in SUA, and there don't seem to be any
+# SSL includes.  However, IPv6 works.
+
+sua:
+	$(TOUCH) ip6 sslnone
+	$(MAKE) an LN=cp SSLTYPE=none
+	$(BUILD) BUILDTYPE=$@ LN=cp IP=$(IP6) SSLTYPE=none
 
 
 # Pine port names, not distinguished in c-client

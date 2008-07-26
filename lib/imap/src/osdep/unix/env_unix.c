@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2007 University of Washington
+ * Copyright 1988-2008 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  * Program:	UNIX environment routines
  *
  * Author:	Mark Crispin
- *		Networks and Distributed Computing
- *		Computing & Communications
+ *		UW Technology
  *		University of Washington
- *		Administration Building, AG-44
  *		Seattle, WA  98195
- *		Internet: MRC@CAC.Washington.EDU
+ *		Internet: MRC@Washington.EDU
  *
  * Date:	1 August 1988
- * Last Edited:	31 January 2007
+ * Last Edited:	15 May 2008
  */
 
 #include <grp.h>
@@ -81,6 +79,8 @@ static short blackBox = NIL;	/* is a black box */
 static short closedBox = NIL;	/* is a closed box (uses chroot() jail) */
 static short restrictBox = NIL;	/* is a restricted box */
 static short has_no_life = NIL;	/* is a cretin with no life */
+				/* block environment init */
+static short block_env_init = NIL;
 static short hideDotFiles = NIL;/* hide files whose names start with . */
 				/* advertise filesystem root */
 static short advertisetheworld = NIL;
@@ -113,6 +113,12 @@ static long list_max_level = 20;/* maximum level of list recursion */
 				/* facility for syslog */
 static int syslog_facility = LOG_MAIL;
 
+/* Path of the privileged system lock program (mlock).  Normally set by
+ * logic test.
+ */
+
+static char *lockpgm = LOCKPGM;
+
 /* Directory used for shared locks.  MUST be the same for all users of the
  * system, and MUST be protected 1777.  /var/tmp may be preferable on some
  * systems.
@@ -459,6 +465,11 @@ void *env_parameters (long function,void *value)
   case GET_NETFSSTATBUG:
     ret = (void *) (netfsstatbug ? VOIDT : NIL);
     break;
+  case SET_BLOCKENVINIT:
+    block_env_init = value ? T : NIL;
+  case GET_BLOCKENVINIT:
+    ret = (void *) (block_env_init ? VOIDT : NIL);
+    break;
   case SET_BLOCKNOTIFY:
     mailblocknotify = (blocknotify_t) value;
   case GET_BLOCKNOTIFY:
@@ -554,17 +565,33 @@ void internal_date (char *date)
  */
 
 void server_init (char *server,char *service,char *sslservice,
-		  void *clkint,void *kodint,void *hupint,void *trmint)
+		  void *clkint,void *kodint,void *hupint,void *trmint,
+		  void *staint)
 {
-				/* only do this if for init call */
-  if (server && service && sslservice) {
+  int onceonly = server && service && sslservice;
+  if (onceonly) {		/* set server name in syslog */
     int mask;
-    long port;
-    struct servent *sv;
-				/* set server name in syslog */
     openlog (myServerName = cpystr (server),LOG_PID,syslog_facility);
     fclose (stderr);		/* possibly save a process ID */
     dorc (NIL,NIL);		/* do systemwide configuration */
+    switch (mask = umask (022)){/* check old umask */
+    case 0:			/* definitely unreasonable */
+    case 022:			/* don't need to change it */
+      break;
+    default:			/* already was a reasonable value */
+      umask (mask);		/* so change it back */
+    }
+  }
+  arm_signal (SIGALRM,clkint);	/* prepare for clock interrupt */
+  arm_signal (SIGUSR2,kodint);	/* prepare for Kiss Of Death */
+  arm_signal (SIGHUP,hupint);	/* prepare for hangup */
+  arm_signal (SIGPIPE,hupint);	/* alternative hangup */
+  arm_signal (SIGTERM,trmint);	/* prepare for termination */
+				/* status dump */
+  if (staint) arm_signal (SIGUSR1,staint);
+  if (onceonly) {		/* set up network and maybe SSL */
+    long port;
+    struct servent *sv;
     /* Use SSL if SSL service, or if server starts with "s" and not service */
     if (((port = tcp_serverport ()) >= 0)) {
       if ((sv = getservbyname (service,"tcp")) && (port == ntohs (sv->s_port)))
@@ -581,19 +608,7 @@ void server_init (char *server,char *service,char *sslservice,
 	if (*server == 's') ssl_server_init (server);
       }
     }
-    switch (mask = umask (022)){/* check old umask */
-    case 0:			/* definitely unreasonable */
-    case 022:			/* don't need to change it */
-      break;
-    default:			/* already was a reasonable value */
-      umask (mask);		/* so change it back */
-    }
   }
-  arm_signal (SIGALRM,clkint);	/* prepare for clock interrupt */
-  arm_signal (SIGUSR2,kodint);	/* prepare for Kiss Of Death */
-  arm_signal (SIGHUP,hupint);	/* prepare for hangup */
-  arm_signal (SIGPIPE,hupint);	/* alternative hangup */
-  arm_signal (SIGTERM,trmint);	/* prepare for termination */
 }
 
 /* Wait for stdin input
@@ -788,11 +803,16 @@ long env_init (char *user,char *home)
   struct passwd *pw;
   struct stat sbuf;
   char tmp[MAILTMPLEN];
+				/* don't init if blocked */
+  if (block_env_init) return LONGT;
   if (myUserName) fatal ("env_init called twice!");
 				/* initially nothing in namespace list */
   nslist[0] = nslist[1] = nslist[2] = NIL;
 				/* myUserName must be set before dorc() call */
   myUserName = cpystr (user ? user : ANONYMOUSUSER);
+				/* force default prototypes to be set */
+  if (!createProto) createProto = &CREATEPROTO;
+  if (!appendProto) appendProto = &EMPTYPROTO;
   dorc (NIL,NIL);		/* do systemwide configuration */
   if (!home) {			/* closed box server */
 				/* standard user can only reference home */
@@ -861,9 +881,6 @@ long env_init (char *user,char *home)
   if (!myNewsrc) myNewsrc = cpystr(strcat (strcpy (tmp,myHomeDir),"/.newsrc"));
   if (!newsActive) newsActive = cpystr (ACTIVEFILE);
   if (!newsSpool) newsSpool = cpystr (NEWSSPOOL);
-				/* force default prototype to be set */
-  if (!createProto) createProto = &CREATEPROTO;
-  if (!appendProto) appendProto = &EMPTYPROTO;
 				/* re-do open action to get flags */
   (*createProto->dtb->open) (NIL);
   endpwent ();			/* close pw database */
@@ -887,11 +904,16 @@ char *myusername_full (unsigned long *flags)
 				/* yes, look up getlogin() user name or EUID */
     if (((s = (char *) getlogin ()) && *s && (strlen (s) < NETMAXUSER) &&
 	 (pw = getpwnam (s)) && (pw->pw_uid == euid)) ||
-	(pw = getpwuid (euid)))
+	(pw = getpwuid (euid))) {
+      if (block_env_init) {	/* don't env_init if blocked */
+	if (flags) *flags = MU_LOGGEDIN;
+	return pw->pw_name;
+      }
       env_init (pw->pw_name,
 		((s = getenv ("HOME")) && *s && (strlen (s) < NETMAXMBX) &&
 		 !stat (s,&sbuf) && ((sbuf.st_mode & S_IFMT) == S_IFDIR)) ?
 		s : pw->pw_dir);
+    }
     else fatal ("Unable to look up user name");
   }
   if (myUserName) {		/* logged in? */
@@ -909,10 +931,16 @@ char *myusername_full (unsigned long *flags)
 
 char *mylocalhost ()
 {
-  char tmp[MAILTMPLEN];
   if (!myLocalHost) {
-    gethostname(tmp,MAILTMPLEN);/* get local host name */
-    myLocalHost = cpystr (tcp_canonical (tmp));
+    char *s,tmp[MAILTMPLEN];
+    char *t = "unknown";
+    tmp[0] = tmp[MAILTMPLEN-1] = '\0';
+    if (!gethostname (tmp,MAILTMPLEN-1) && tmp[0]) {
+				/* sanity check of name */
+      for (s = tmp; (*s > 0x20) && (*s < 0x7f); ++s);
+      if (!*s) t = tcp_canonical (tmp);
+    }
+    myLocalHost = cpystr (t);
   }
   return myLocalHost;
 }
@@ -1164,8 +1192,14 @@ long dotlock_lock (char *file,DOTLOCK *base,int fd)
   if (fd >= 0) switch (errno) {
   case EACCES:			/* protection failure? */
     MM_CRITICAL (NIL);		/* go critical */
-				/* make command pipes */
-    if (!closedBox && !stat (LOCKPGM,&sb) && (pipe (pi) >= 0)) {
+    if (closedBox || !lockpgm);	/* can't do on closed box or disabled */
+    else if ((*lockpgm && stat (lockpgm,&sb)) ||
+	     (!*lockpgm && stat (lockpgm = LOCKPGM1,&sb) &&
+	      stat (lockpgm = LOCKPGM2,&sb) && stat (lockpgm = LOCKPGM3,&sb)))
+      lockpgm = NIL;		/* disable if can't find lockpgm */
+    else if (pipe (pi) >= 0) {	/* make command pipes */
+      long cf;
+      char *argv[4],arg[20];
 				/* if input pipes usable create output pipes */
       if ((pi[0] < FD_SETSIZE) && (pi[1] < FD_SETSIZE) && (pipe (po) >= 0)) {
 				/* make sure output pipes are usable */
@@ -1173,11 +1207,9 @@ long dotlock_lock (char *file,DOTLOCK *base,int fd)
 				/* all is good, make inferior process */
 	else if (!(j = fork ())) {
 	  if (!fork ()) {	/* make grandchild so it's inherited by init */
-	    long cf;		/* don't change caller vars in case vfork() */
-	    char *argv[4],arg[20];
 				/* prepare argument vector */
 	    sprintf (arg,"%d",fd);
-	    argv[0] = LOCKPGM; argv[1] = arg;
+	    argv[0] = lockpgm; argv[1] = arg;
 	    argv[2] = file; argv[3] = NIL;
 				/* set parent's I/O to my O/I */
 	    dup2 (pi[1],1); dup2 (pi[1],2); dup2 (po[0],0);
@@ -1546,16 +1578,22 @@ void dorc (char *file,long flag)
 	if (myUserName) {	/* only valid if logged in */
 	  if (!compare_cstring (s,"set new-mailbox-format") ||
 	      !compare_cstring (s,"set new-folder-format")) {
-	    if (!compare_cstring (k,"same-as-inbox"))
-	      createProto = ((d = mail_valid (NIL,"INBOX",NIL)) &&
-			     compare_cstring (d->name,"dummy")) ?
-			       ((*d->open) (NIL)) : &CREATEPROTO;
+	    if (!compare_cstring (k,"same-as-inbox")) {
+	      if (d = mail_valid (NIL,"INBOX",NIL)) {
+		if (!compare_cstring (d->name,"mbox"))
+		  d = (DRIVER *) mail_parameters (NIL,GET_DRIVER,
+						  (void *) "unix");
+		else if (!compare_cstring (d->name,"dummy")) d = NIL;
+	      }
+	      createProto = d ? ((*d->open) (NIL)) : &CREATEPROTO;
+	    }
 	    else if (!compare_cstring (k,"system-standard"))
 	      createProto = &CREATEPROTO;
-	    else {		/* see if a driver name */
-	      for (d = (DRIVER *) mail_parameters (NIL,GET_DRIVERS,NIL);
-		   d && compare_cstring (d->name,k); d = d->next);
-	      if (d) createProto = (*d->open) (NIL);
+	    else {		/* canonicalize mbox to unix */
+	      if (!compare_cstring (k,"mbox")) k = "unix";
+				/* see if a driver name */
+	      if (d = (DRIVER *) mail_parameters (NIL,GET_DRIVER,(void *) k))
+		createProto = (*d->open) (NIL);
 	      else {		/* duh... */
 		sprintf (tmpx,"Unknown new mailbox format in %s: %s",
 			 file ? file : SYSCONFIG,k);
@@ -1565,7 +1603,8 @@ void dorc (char *file,long flag)
 	  }
 	  if (!compare_cstring (s,"set empty-mailbox-format") ||
 	      !compare_cstring (s,"set empty-folder-format")) {
-	    if (!compare_cstring (k,"same-as-inbox"))
+	    if (!compare_cstring (k,"invalid")) appendProto = NIL;
+	    else if (!compare_cstring (k,"same-as-inbox"))
 	      appendProto = ((d = mail_valid (NIL,"INBOX",NIL)) &&
 			     compare_cstring (d->name,"dummy")) ?
 			       ((*d->open) (NIL)) : &EMPTYPROTO;
@@ -1700,6 +1739,8 @@ void dorc (char *file,long flag)
 	  mail_parameters (NIL,SET_SASLUSESPTRNAME,(void *) atol (k));
 	else if (!compare_cstring (s,"set network-filesystem-stat-bug"))
 	  netfsstatbug = atoi (k);
+	else if (!compare_cstring (s,"set nntp-range"))
+	  mail_parameters (NIL,SET_NNTPRANGE,(void *) atol (k));
 
 	else if (!file) {	/* only allowed in system init */
 	  if (!compare_cstring (s,"set black-box-directory") &&
@@ -1794,10 +1835,10 @@ void *mm_blocknotify (int reason,void *data)
   void *ret = data;
   switch (reason) {
   case BLOCK_SENSITIVE:		/* entering sensitive code */
-    ret = (void *) alarm (0);
+    ret = (void *) (unsigned long) alarm (0);
     break;
   case BLOCK_NONSENSITIVE:	/* exiting sensitive code */
-    if ((unsigned int) data) alarm ((unsigned int) data);
+    if ((unsigned long) data) alarm ((unsigned long) data);
     break;
   default:			/* ignore all other reasons */
     break;

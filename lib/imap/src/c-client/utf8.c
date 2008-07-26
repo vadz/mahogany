@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2007 University of Washington
+ * Copyright 1988-2008 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	11 June 1997
- * Last Edited:	16 March 2007
+ * Last Edited:	17 January 2008
  */
 
 
@@ -112,60 +112,98 @@ static const struct utf8_eucparam ksc_param = {
 /* List of supported charsets */
 
 static const CHARSET utf8_csvalid[] = {
-  {"US-ASCII",CT_ASCII,NIL,NIL,NIL},
-  {"UTF-8",CT_UTF8,NIL,SC_UNICODE,NIL},
-  {"UTF-7",CT_UTF7,NIL,SC_UNICODE,"UTF-8"},
-  {"ISO-8859-1",CT_1BYTE0,NIL,SC_LATIN_1,NIL},
-  {"ISO-8859-2",CT_1BYTE,(void *) iso8859_2tab,SC_LATIN_2,NIL},
-  {"ISO-8859-3",CT_1BYTE,(void *) iso8859_3tab,SC_LATIN_3,NIL},
-  {"ISO-8859-4",CT_1BYTE,(void *) iso8859_4tab,SC_LATIN_4,NIL},
-  {"ISO-8859-5",CT_1BYTE,(void *) iso8859_5tab,SC_CYRILLIC,"KOI8-R"},
-  {"ISO-8859-6",CT_1BYTE,(void *) iso8859_6tab,SC_ARABIC,NIL},
-  {"ISO-8859-7",CT_1BYTE,(void *) iso8859_7tab,SC_GREEK,NIL},
-  {"ISO-8859-8",CT_1BYTE,(void *) iso8859_8tab,SC_HEBREW,NIL},
-  {"ISO-8859-9",CT_1BYTE,(void *) iso8859_9tab,SC_LATIN_5,NIL},
-  {"ISO-8859-10",CT_1BYTE,(void *) iso8859_10tab,SC_LATIN_6,NIL},
-  {"ISO-8859-11",CT_1BYTE,(void *) iso8859_11tab,SC_THAI,NIL},
+  {"US-ASCII",CT_ASCII,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   NIL,NIL,NIL},
+  {"UTF-8",CT_UTF8,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   NIL,SC_UNICODE,NIL},
+  {"UTF-7",CT_UTF7,CF_PRIMARY | CF_POSTING | CF_UNSUPRT,
+   NIL,SC_UNICODE,"UTF-8"},
+  {"ISO-8859-1",CT_1BYTE0,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   NIL,SC_LATIN_1,NIL},
+  {"ISO-8859-2",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_2tab,SC_LATIN_2,NIL},
+  {"ISO-8859-3",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_3tab,SC_LATIN_3,NIL},
+  {"ISO-8859-4",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_4tab,SC_LATIN_4,NIL},
+  {"ISO-8859-5",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_5tab,SC_CYRILLIC,"KOI8-R"},
+  {"ISO-8859-6",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_6tab,SC_ARABIC,NIL},
+  {"ISO-8859-7",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_7tab,SC_GREEK,NIL},
+  {"ISO-8859-8",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_8tab,SC_HEBREW,NIL},
+  {"ISO-8859-9",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_9tab,SC_LATIN_5,NIL},
+  {"ISO-8859-10",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_10tab,SC_LATIN_6,NIL},
+  {"ISO-8859-11",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_11tab,SC_THAI,NIL},
 #if 0				/* ISO 8859-12 reserved for ISCII(?) */
-  {"ISO-8859-12",CT_1BYTE,(void *) iso8859_12tab,NIL,NIL},
+  {"ISO-8859-12",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_12tab,NIL,NIL},
 #endif
-  {"ISO-8859-13",CT_1BYTE,(void *) iso8859_13tab,SC_LATIN_7,NIL},
-  {"ISO-8859-14",CT_1BYTE,(void *) iso8859_14tab,SC_LATIN_8,NIL},
-  {"ISO-8859-15",CT_1BYTE,(void *) iso8859_15tab,SC_LATIN_9,NIL},
-  {"ISO-8859-16",CT_1BYTE,(void *) iso8859_16tab,SC_LATIN_10,NIL},
-  {"KOI8-R",CT_1BYTE,(void *) koi8rtab,SC_CYRILLIC,NIL},
-  {"KOI8-U",CT_1BYTE,(void *) koi8utab,SC_CYRILLIC | SC_UKRANIAN,NIL},
-  {"KOI8-RU",CT_1BYTE,(void *) koi8utab,SC_CYRILLIC | SC_UKRANIAN,"KOI8-U"},
-  {"TIS-620",CT_1BYTE,(void *) tis620tab,SC_THAI,"ISO-8859-11"},
-  {"VISCII",CT_1BYTE8,(void *) visciitab,SC_VIETNAMESE,NIL},
+  {"ISO-8859-13",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_13tab,SC_LATIN_7,NIL},
+  {"ISO-8859-14",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_14tab,SC_LATIN_8,NIL},
+  {"ISO-8859-15",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_15tab,SC_LATIN_9,NIL},
+  {"ISO-8859-16",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) iso8859_16tab,SC_LATIN_10,NIL},
+  {"KOI8-R",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) koi8rtab,SC_CYRILLIC,NIL},
+  {"KOI8-U",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) koi8utab,SC_CYRILLIC | SC_UKRANIAN,NIL},
+  {"KOI8-RU",CT_1BYTE,CF_DISPLAY,
+   (void *) koi8utab,SC_CYRILLIC | SC_UKRANIAN,"KOI8-U"},
+  {"TIS-620",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) tis620tab,SC_THAI,"ISO-8859-11"},
+  {"VISCII",CT_1BYTE8,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) visciitab,SC_VIETNAMESE,NIL},
 
 #ifdef GBTOUNICODE
-  {"GBK",CT_DBYTE,(void *) &gb_param,SC_CHINESE_SIMPLIFIED,NIL},
-  {"GB2312",CT_DBYTE,(void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
-  {"CN-GB",CT_DBYTE,(void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
+  {"GBK",CT_DBYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+     (void *) &gb_param,SC_CHINESE_SIMPLIFIED,NIL},
+  {"GB2312",CT_DBYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+   (void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
+  {"CN-GB",CT_DBYTE,CF_DISPLAY,
+     (void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
 #ifdef CNS1TOUNICODE
-  {"ISO-2022-CN",CT_2022,NIL,SC_CHINESE_SIMPLIFIED | SC_CHINESE_TRADITIONAL,
+  {"ISO-2022-CN",CT_2022,CF_PRIMARY | CF_UNSUPRT,
+     NIL,SC_CHINESE_SIMPLIFIED | SC_CHINESE_TRADITIONAL,
    NIL},
 #endif
 #endif
 #ifdef GB12345TOUNICODE
-  {"CN-GB-12345",CT_DBYTE,(void *) &gbt_param,SC_CHINESE_TRADITIONAL,"BIG5"},
+  {"CN-GB-12345",CT_DBYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) &gbt_param,SC_CHINESE_TRADITIONAL,"BIG5"},
 #endif
 #ifdef BIG5TOUNICODE
-  {"BIG5",CT_DBYTE2,(void *) big5_param,SC_CHINESE_TRADITIONAL,NIL},
-  {"CN-BIG5",CT_DBYTE2,(void *) big5_param,SC_CHINESE_TRADITIONAL,"BIG5"},
-  {"BIG-5",CT_DBYTE2,(void *) big5_param,SC_CHINESE_TRADITIONAL,"BIG5"},
+  {"BIG5",CT_DBYTE2,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+     (void *) big5_param,SC_CHINESE_TRADITIONAL,NIL},
+  {"CN-BIG5",CT_DBYTE2,CF_DISPLAY,
+     (void *) big5_param,SC_CHINESE_TRADITIONAL,"BIG5"},
+  {"BIG-5",CT_DBYTE2,CF_DISPLAY,
+     (void *) big5_param,SC_CHINESE_TRADITIONAL,"BIG5"},
 #endif
 #ifdef JISTOUNICODE
-  {"ISO-2022-JP",CT_2022,NIL,SC_JAPANESE,NIL},
-  {"EUC-JP",CT_EUC,(void *) jis_param,SC_JAPANESE,"ISO-2022-JP"},
-  {"SHIFT_JIS",CT_SJIS,NIL,SC_JAPANESE,"ISO-2022-JP"},
-  {"SHIFT-JIS",CT_SJIS,NIL,SC_JAPANESE,"ISO-2022-JP"},
+  {"ISO-2022-JP",CT_2022,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+     NIL,SC_JAPANESE,NIL},
+  {"EUC-JP",CT_EUC,CF_PRIMARY | CF_DISPLAY,
+     (void *) jis_param,SC_JAPANESE,"ISO-2022-JP"},
+  {"SHIFT_JIS",CT_SJIS,CF_PRIMARY | CF_DISPLAY,
+     NIL,SC_JAPANESE,"ISO-2022-JP"},
+  {"SHIFT-JIS",CT_SJIS,CF_PRIMARY | CF_DISPLAY,
+     NIL,SC_JAPANESE,"ISO-2022-JP"},
 #ifdef JIS0212TOUNICODE
-  {"ISO-2022-JP-1",CT_2022,NIL,SC_JAPANESE,"ISO-2022-JP"},
+  {"ISO-2022-JP-1",CT_2022,CF_UNSUPRT,
+     NIL,SC_JAPANESE,"ISO-2022-JP"},
 #ifdef GBTOUNICODE
 #ifdef KSCTOUNICODE
-  {"ISO-2022-JP-2",CT_2022,NIL,
+  {"ISO-2022-JP-2",CT_2022,CF_UNSUPRT,
+     NIL,
      SC_LATIN_1 | SC_LATIN_2 | SC_LATIN_3 | SC_LATIN_4 | SC_LATIN_5 |
        SC_LATIN_6 | SC_LATIN_7 | SC_LATIN_8 | SC_LATIN_9 | SC_LATIN_10 |
 	 SC_ARABIC | SC_CYRILLIC | SC_GREEK | SC_HEBREW | SC_THAI |
@@ -178,72 +216,129 @@ static const CHARSET utf8_csvalid[] = {
 #endif
 #endif
 #endif
+
 #ifdef KSCTOUNICODE
-  {"ISO-2022-KR",CT_2022,NIL,SC_KOREAN,"EUC-KR"},
-  {"EUC-KR",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,NIL},
-  {"KSC5601",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
-  {"KSC_5601",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
-  {"KS_C_5601-1987",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
-  {"KS_C_5601-1989",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
-  {"KS_C_5601-1992",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
-  {"KS_C_5601-1997",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"ISO-2022-KR",CT_2022,CF_PRIMARY | CF_DISPLAY | CF_UNSUPRT,
+     NIL,SC_KOREAN,"EUC-KR"},
+  {"EUC-KR",CT_DBYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+     (void *) &ksc_param,SC_KOREAN,NIL},
+  {"KSC5601",CT_DBYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"KSC_5601",CT_DBYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"KS_C_5601-1987",CT_DBYTE,CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"KS_C_5601-1989",CT_DBYTE,CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"KS_C_5601-1992",CT_DBYTE,CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"KS_C_5601-1997",CT_DBYTE,CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
 #endif
 
 				/* deep sigh */
-  {"WINDOWS-874",CT_1BYTE,(void *) windows_874tab,SC_THAI,"ISO-8859-11"},
-  {"CP874",CT_1BYTE,(void *) windows_874tab,SC_THAI,"ISO-8859-11"},
+  {"WINDOWS-874",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_874tab,SC_THAI,"ISO-8859-11"},
+  {"CP874",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_874tab,SC_THAI,"ISO-8859-11"},
 #ifdef GBTOUNICODE
-  {"WINDOWS-936",CT_DBYTE,(void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
-  {"CP936",CT_DBYTE,(void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
+  {"WINDOWS-936",CT_DBYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
+  {"CP936",CT_DBYTE,CF_DISPLAY,
+     (void *) &gb_param,SC_CHINESE_SIMPLIFIED,"GBK"},
 #endif
 #ifdef KSCTOUNICODE
-  {"WINDOWS-949",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
-  {"CP949",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
-  {"X-WINDOWS-949",CT_DBYTE,(void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"WINDOWS-949",CT_DBYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"CP949",CT_DBYTE,CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
+  {"X-WINDOWS-949",CT_DBYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) &ksc_param,SC_KOREAN,"EUC-KR"},
 #endif
-  {"WINDOWS-1250",CT_1BYTE,(void *) windows_1250tab,SC_LATIN_2,"ISO-8859-2"},
-  {"CP1250",CT_1BYTE,(void *) windows_1250tab,SC_LATIN_2,"ISO-8859-2"},
-  {"WINDOWS-1251",CT_1BYTE,(void *) windows_1251tab,SC_CYRILLIC,"KOI8-R"},
-  {"CP1251",CT_1BYTE,(void *) windows_1251tab,SC_CYRILLIC,"KOI8-R"},
-  {"WINDOWS-1252",CT_1BYTE,(void *) windows_1252tab,SC_LATIN_1,"ISO-8859-1"},
-  {"CP1252",CT_1BYTE,(void *) windows_1252tab,SC_LATIN_1,"ISO-8859-1"},
-  {"WINDOWS-1253",CT_1BYTE,(void *) windows_1253tab,SC_GREEK,"ISO-8859-7"},
-  {"CP1253",CT_1BYTE,(void *) windows_1253tab,SC_GREEK,"ISO-8859-7"},
-  {"WINDOWS-1254",CT_1BYTE,(void *) windows_1254tab,SC_LATIN_5,"ISO-8859-9"},
-  {"CP1254",CT_1BYTE,(void *) windows_1254tab,SC_LATIN_5,"ISO-8859-9"},
-  {"WINDOWS-1255",CT_1BYTE,(void *) windows_1255tab,SC_HEBREW,"ISO-8859-8"},
-  {"CP1255",CT_1BYTE,(void *) windows_1255tab,SC_HEBREW,"ISO-8859-8"},
-  {"WINDOWS-1256",CT_1BYTE,(void *) windows_1256tab,SC_ARABIC,"ISO-8859-6"},
-  {"CP1256",CT_1BYTE,(void *) windows_1256tab,SC_ARABIC,"ISO-8859-6"},
-  {"WINDOWS-1257",CT_1BYTE,(void *) windows_1257tab,SC_LATIN_7,"ISO-8859-13"},
-  {"CP1257",CT_1BYTE,(void *) windows_1257tab,SC_LATIN_7,"ISO-8859-13"},
-  {"WINDOWS-1258",CT_1BYTE,(void *) windows_1258tab,SC_VIETNAMESE,"VISCII"},
-  {"CP1258",CT_1BYTE,(void *) windows_1258tab,SC_VIETNAMESE,"VISCII"},
+  {"WINDOWS-1250",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1250tab,SC_LATIN_2,"ISO-8859-2"},
+  {"CP1250",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1250tab,SC_LATIN_2,"ISO-8859-2"},
+  {"WINDOWS-1251",CT_1BYTE,CF_PRIMARY | CF_DISPLAY | CF_POSTING,
+     (void *) windows_1251tab,SC_CYRILLIC,"KOI8-R"},
+  {"CP1251",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1251tab,SC_CYRILLIC,"KOI8-R"},
+  {"WINDOWS-1252",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1252tab,SC_LATIN_1,"ISO-8859-1"},
+  {"CP1252",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1252tab,SC_LATIN_1,"ISO-8859-1"},
+  {"WINDOWS-1253",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1253tab,SC_GREEK,"ISO-8859-7"},
+  {"CP1253",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1253tab,SC_GREEK,"ISO-8859-7"},
+  {"WINDOWS-1254",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1254tab,SC_LATIN_5,"ISO-8859-9"},
+  {"CP1254",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1254tab,SC_LATIN_5,"ISO-8859-9"},
+  {"WINDOWS-1255",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1255tab,SC_HEBREW,"ISO-8859-8"},
+  {"CP1255",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1255tab,SC_HEBREW,"ISO-8859-8"},
+  {"WINDOWS-1256",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1256tab,SC_ARABIC,"ISO-8859-6"},
+  {"CP1256",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1256tab,SC_ARABIC,"ISO-8859-6"},
+  {"WINDOWS-1257",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1257tab,SC_LATIN_7,"ISO-8859-13"},
+  {"CP1257",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1257tab,SC_LATIN_7,"ISO-8859-13"},
+  {"WINDOWS-1258",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) windows_1258tab,SC_VIETNAMESE,"VISCII"},
+  {"CP1258",CT_1BYTE,CF_DISPLAY,
+     (void *) windows_1258tab,SC_VIETNAMESE,"VISCII"},
+
 				/* deeper sigh */
-  {"IBM367",CT_ASCII,NIL,NIL,"US-ASCII"},
-  {"IBM437",CT_1BYTE,(void *) ibm_437tab,SC_LATIN_1,"ISO-8859-1"},
-  {"IBM737",CT_1BYTE,(void *) ibm_737tab,SC_GREEK,"ISO-8859-7"},
-  {"IBM775",CT_1BYTE,(void *) ibm_775tab,SC_LATIN_7,"ISO-8859-13"},
-  {"IBM850",CT_1BYTE,(void *) ibm_850tab,SC_LATIN_1,"ISO-8859-1"},
-  {"IBM852",CT_1BYTE,(void *) ibm_852tab,SC_LATIN_2,"ISO-8859-2"},
-  {"IBM855",CT_1BYTE,(void *) ibm_855tab,SC_CYRILLIC,"ISO-8859-5"},
-  {"IBM857",CT_1BYTE,(void *) ibm_857tab,SC_LATIN_5,"ISO-8859-9"},
-  {"IBM860",CT_1BYTE,(void *) ibm_860tab,SC_LATIN_1,"ISO-8859-1"},
-  {"IBM861",CT_1BYTE,(void *) ibm_861tab,SC_LATIN_6,"ISO-8859-10"},
-  {"IBM862",CT_1BYTE,(void *) ibm_862tab,SC_HEBREW,"ISO-8859-8"},
-  {"IBM863",CT_1BYTE,(void *) ibm_863tab,SC_LATIN_1,"ISO-8859-1"},
-  {"IBM864",CT_1BYTE,(void *) ibm_864tab,SC_ARABIC,"ISO-8859-6"},
-  {"IBM865",CT_1BYTE,(void *) ibm_865tab,SC_LATIN_6,"ISO-8859-10"},
-  {"IBM866",CT_1BYTE,(void *) ibm_866tab,SC_CYRILLIC,"KOI8-R"},
-  {"IBM869",CT_1BYTE,(void *) ibm_869tab,SC_GREEK,"ISO-8859-7"},
-  {"IBM874",CT_1BYTE,(void *) ibm_874tab,SC_THAI,"ISO-8859-11"},
+  {"IBM367",CT_ASCII,CF_PRIMARY | CF_DISPLAY,
+     NIL,NIL,"US-ASCII"},
+  {"IBM437",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_437tab,SC_LATIN_1,"ISO-8859-1"},
+  {"IBM737",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_737tab,SC_GREEK,"ISO-8859-7"},
+  {"IBM775",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_775tab,SC_LATIN_7,"ISO-8859-13"},
+  {"IBM850",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_850tab,SC_LATIN_1,"ISO-8859-1"},
+  {"IBM852",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_852tab,SC_LATIN_2,"ISO-8859-2"},
+  {"IBM855",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_855tab,SC_CYRILLIC,"ISO-8859-5"},
+  {"IBM857",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_857tab,SC_LATIN_5,"ISO-8859-9"},
+  {"IBM860",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_860tab,SC_LATIN_1,"ISO-8859-1"},
+  {"IBM861",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_861tab,SC_LATIN_6,"ISO-8859-10"},
+  {"IBM862",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_862tab,SC_HEBREW,"ISO-8859-8"},
+  {"IBM863",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_863tab,SC_LATIN_1,"ISO-8859-1"},
+  {"IBM864",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_864tab,SC_ARABIC,"ISO-8859-6"},
+  {"IBM865",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_865tab,SC_LATIN_6,"ISO-8859-10"},
+  {"IBM866",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_866tab,SC_CYRILLIC,"KOI8-R"},
+  {"IBM869",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_869tab,SC_GREEK,"ISO-8859-7"},
+  {"IBM874",CT_1BYTE,CF_PRIMARY | CF_DISPLAY,
+     (void *) ibm_874tab,SC_THAI,"ISO-8859-11"},
 				/* deepest sigh */
-  {"ANSI_X3.4-1968",CT_ASCII,NIL,NIL,"US-ASCII"},
-  {"UNICODE-1-1-UTF-7",CT_UTF7,NIL,SC_UNICODE,"UTF-8"},
+  {"ANSI_X3.4-1968",CT_ASCII,CF_DISPLAY,
+     NIL,NIL,"US-ASCII"},
+  {"UNICODE-1-1-UTF-7",CT_UTF7,CF_UNSUPRT,
+     NIL,SC_UNICODE,"UTF-8"},
 				/* these should never appear in email */
-  {"UCS-2",CT_UCS2,NIL,SC_UNICODE,"UTF-8"},
-  {"UCS-4",CT_UCS4,NIL,SC_UNICODE,"UTF-8"},
-  {"UTF-16",CT_UTF16,NIL,SC_UNICODE,"UTF-8"},
+  {"UCS-2",CT_UCS2,CF_PRIMARY | CF_DISPLAY | CF_NOEMAIL,
+     NIL,SC_UNICODE,"UTF-8"},
+  {"UCS-4",CT_UCS4,CF_PRIMARY | CF_DISPLAY | CF_NOEMAIL,
+     NIL,SC_UNICODE,"UTF-8"},
+  {"UTF-16",CT_UTF16,CF_PRIMARY | CF_DISPLAY | CF_NOEMAIL,
+     NIL,SC_UNICODE,"UTF-8"},
   NIL
 };
 
@@ -354,7 +449,7 @@ char *utf8_badcharset (char *charset)
 long utf8_text (SIZEDTEXT *text,char *charset,SIZEDTEXT *ret,long flags)
 {
   ucs4cn_t cv = (flags & U8T_CASECANON) ? ucs4_titlecase : NIL;
-  ucs4de_t de = (flags & U8T_DECOMPOSE) ? ucs4_decompose : NIL;
+  ucs4de_t de = (flags & U8T_DECOMPOSE) ? ucs4_decompose_recursive : NIL;
   const CHARSET *cs = (charset && *charset) ?
     utf8_charset (charset) : utf8_infercharset (text);
   if (cs) return (text && ret) ? utf8_text_cs (text,cs,ret,cv,de) : LONGT;
@@ -596,7 +691,12 @@ unsigned short *utf8_rmap_gen (const CHARSET *cs,unsigned short *oldmap)
 				/* initialize table for ASCII */
     for (i = 0; i < 128; i++) rmap[i] = (unsigned short) i;
 				/* populate remainder of table with NOCHAR */
-    memset (rmap + 128,NOCHAR,(65536 - 128) * sizeof (unsigned short));
+#define NOCHARBYTE (NOCHAR & 0xff)
+#if NOCHAR - ((NOCHARBYTE << 8) | NOCHARBYTE)
+    while (i < 65536) rmap[i++] = NOCHAR;
+#else
+    memset (rmap + 128,NOCHARBYTE,(65536 - 128) * sizeof (unsigned short));
+#endif
     break;
   default:			/* unsupported charset type */
     rmap = NIL;			/* no map possible */
@@ -901,7 +1001,7 @@ unsigned long utf8_get (unsigned char **s,unsigned long *i)
 
 unsigned long utf8_get_raw (unsigned char **s,unsigned long *i)
 {
-  unsigned char c;
+  unsigned char c,c1;
   unsigned char *t = *s;
   unsigned long j = *i;
   unsigned long ret = U8G_NOTUTF8;
@@ -919,27 +1019,29 @@ unsigned long utf8_get_raw (unsigned char **s,unsigned long *i)
 				/* incomplete UTF-8 character */
     else if (more) return U8G_INCMPLT;
     else {			/* start of sequence */
+      c1 = j ? *t : 0xbf;	/* assume valid continuation if incomplete */
       if (c < 0x80) ret = c;	/* U+0000 - U+007f */
-				/* multi-octet, make sure more to come */
-      else if (!j) return U8G_ENDSTRI;
       else if (c < 0xc2);	/* c0 and c1 never valid */
       else if (c < 0xe0) {	/* U+0080 - U+07ff */
 	if (c &= 0x1f) more = 1;
       }
       else if (c < 0xf0) {	/* U+0800 - U+ffff */
-	if ((c &= 0x0f) || (*t >= 0xa0)) more = 2;
+	if ((c &= 0x0f) || (c1 >= 0xa0)) more = 2;
       }
       else if (c < 0xf8) {	/* U+10000 - U+10ffff (and 110000 - 1fffff) */
-	if ((c &= 0x07) || (*t >= 0x90)) more = 3;
+	if ((c &= 0x07) || (c1 >= 0x90)) more = 3;
       }
       else if (c < 0xfc) {	/* ISO 10646 200000 - 3ffffff */
-	if ((c &= 0x03) || (*t >= 0x88)) more = 4;
+	if ((c &= 0x03) || (c1 >= 0x88)) more = 4;
       }
       else if (c < 0xfe) {	/* ISO 10646 4000000 - 7fffffff */
-	if ((c &= 0x01) || (*t >= 0x84)) more = 5;
+	if ((c &= 0x01) || (c1 >= 0x84)) more = 5;
       }
 				/* fe and ff never valid */
-      if (more) ret = c;	/* continuation needed, save start bits */
+      if (more) {		/* multi-octet, make sure more to come */
+	if (!j) return U8G_ENDSTRI;
+	ret = c;		/* continuation needed, save start bits */
+      }
     }
   } while (more);
   if (!(ret & U8G_ERROR)) {	/* success return? */
@@ -1004,7 +1106,7 @@ unsigned long ucs4_cs_get (CHARSET *cs,unsigned char **s,unsigned long *i)
 	    }
 	  }
 	  else if ((c1 >= p2->base_ku) && (c1 < p2->max_ku)) {
-	    ret = c1 + ((unsigned int) p2->tab);
+	    ret = c1 + ((unsigned long) p2->tab);
 	    break;
 	  }
 	}
@@ -1022,7 +1124,7 @@ unsigned long ucs4_cs_get (CHARSET *cs,unsigned char **s,unsigned long *i)
 	    }
 	  }
 	  else if ((c1 >= p3->base_ku) && (c1 < p3->max_ku)) {
-	    ret = c1 + ((unsigned int) p3->tab);
+	    ret = c1 + ((unsigned long) p3->tab);
 	    break;
 	  }
 	}
@@ -1116,7 +1218,8 @@ unsigned long ucs4_cs_get (CHARSET *cs,unsigned char **s,unsigned long *i)
       d = (*t++) << 8;		/* first octet of second surrogate */
       d |= *t++;		/* second octet of second surrogate */
       if ((d < UTF16_SURRL) || (d > UTF16_SURRLEND)) return U8G_NOTUTF8;
-      ret = 0x10000 + ((ret & 0x3ff) << 10) + (d & 0x3ff);
+      ret = UTF16_BASE + ((ret & UTF16_MASK) << UTF16_SHIFT) +
+	(d & UTF16_MASK);
     }
     break;
   default:			/* unknown/unsupported character set type */
@@ -1124,6 +1227,148 @@ unsigned long ucs4_cs_get (CHARSET *cs,unsigned char **s,unsigned long *i)
   }
   *s = t;			/* update pointer and counter */
   *i = j;
+  return ret;
+}
+
+/* Produce charset validity map for BMP
+ * Accepts: list of charsets to map
+ * Returns: validity map, indexed by BMP codepoint
+ *
+ * Bit 0x1 is the "not-CJK" character bit
+ */
+
+unsigned long *utf8_csvalidmap (char *charsets[])
+{
+  unsigned short u,*tab;
+  unsigned int m,ku,ten;
+  unsigned long i,csi,csb;
+  struct utf8_eucparam *param,*p2;
+  char *s;
+  const CHARSET *cs;
+  unsigned long *ret = (unsigned long *)
+    fs_get (i = 0x10000 * sizeof (unsigned long));
+  memset (ret,0,i);		/* zero the entire vector */
+				/* mark all the non-CJK codepoints */
+	/* U+0000 - U+2E7F non-CJK */
+  for (i = 0; i < 0x2E7F; ++i) ret[i] = 0x1;
+	/* U+2E80 - U+2EFF CJK Radicals Supplement
+	 * U+2F00 - U+2FDF Kangxi Radicals
+	 * U+2FE0 - U+2FEF unassigned
+	 * U+2FF0 - U+2FFF Ideographic Description Characters
+	 * U+3000 - U+303F CJK Symbols and Punctuation
+	 * U+3040 - U+309F Hiragana
+	 * U+30A0 - U+30FF Katakana
+	 * U+3100 - U+312F BoPoMoFo
+	 * U+3130 - U+318F Hangul Compatibility Jamo
+	 * U+3190 - U+319F Kanbun
+	 * U+31A0 - U+31BF BoPoMoFo Extended
+	 * U+31C0 - U+31EF CJK Strokes
+	 * U+31F0 - U+31FF Katakana Phonetic Extensions
+	 * U+3200 - U+32FF Enclosed CJK Letters and Months
+	 * U+3300 - U+33FF CJK Compatibility
+	 * U+3400 - U+4DBF CJK Unified Ideographs Extension A
+	 * U+4DC0 - U+4DFF Yijing Hexagram Symbols
+	 * U+4E00 - U+9FFF CJK Unified Ideographs
+	 * U+A000 - U+A48F Yi Syllables
+	 * U+A490 - U+A4CF Yi Radicals
+	 * U+A700 - U+A71F Modifier Tone Letters
+	 */
+  for (i = 0xa720; i < 0xabff; ++i) ret[i] = 0x1;
+	/* U+AC00 - U+D7FF Hangul Syllables */
+  for (i = 0xd800; i < 0xf8ff; ++i) ret[i] = 0x1;
+	/* U+F900 - U+FAFF CJK Compatibility Ideographs */
+  for (i = 0xfb00; i < 0xfe2f; ++i) ret[i] = 0x1;
+	/* U+FE30 - U+FE4F CJK Compatibility Forms
+	 * U+FE50 - U+FE6F Small Form Variants (for CNS 11643)
+	 */
+  for (i = 0xfe70; i < 0xfeff; ++i) ret[i] = 0x1;
+	/* U+FF00 - U+FFEF CJK Compatibility Ideographs */
+  for (i = 0xfff0; i < 0x10000; ++i) ret[i] = 0x1;
+
+				/* for each supplied charset */
+  for (csi = 1; ret && charsets && (s = charsets[csi - 1]); ++csi) {
+				/* substitute EUC-JP for ISO-2022-JP */
+    if (!compare_cstring (s,"ISO-2022-JP")) s = "EUC-JP";
+				/* look up charset */
+    if (cs = utf8_charset (s)) {
+      csb = 1 << csi;		/* charset bit */
+      switch (cs->type) {
+      case CT_ASCII:		/* 7-bit ASCII no table */
+      case CT_1BYTE0:		/* 1 byte no table */
+      case CT_1BYTE:		/* 1 byte ASCII + table 0x80-0xff */
+      case CT_1BYTE8:		/* 1 byte table 0x00 - 0xff */
+      case CT_EUC:		/* 2 byte ASCII + utf8_eucparam base/CS2/CS3 */
+      case CT_DBYTE:		/* 2 byte ASCII + utf8_eucparam */
+      case CT_DBYTE2:		/* 2 byte ASCII + utf8_eucparam plane1/2 */
+      case CT_SJIS:		/* 2 byte Shift-JIS */
+				/* supported charset type, all ASCII is OK */
+	for (i = 0; i < 128; ++i) ret[i] |= csb;
+	break;
+      default:			/* unsupported charset type */
+	fs_give ((void **) &ret);
+	break;
+      }
+				/* now do additional operations */
+      if (ret) switch (cs->type) {
+      case CT_1BYTE0:		/* 1 byte no table */
+	for (i = 128; i < 256; i++) ret[i] |= csb;
+	break;
+      case CT_1BYTE:		/* 1 byte ASCII + table 0x80-0xff */
+	for (tab = (unsigned short *) cs->tab,i = 128; i < 256; i++)
+	  if (tab[i & BITS7] != UBOGON) ret[tab[i & BITS7]] |= csb;
+	break;
+      case CT_1BYTE8:		/* 1 byte table 0x00 - 0xff */
+	for (tab = (unsigned short *) cs->tab,i = 0; i < 256; i++)
+	  if (tab[i] != UBOGON) ret[tab[i]] |= csb;
+      break;
+      case CT_EUC:		/* 2 byte ASCII + utf8_eucparam base/CS2/CS3 */
+	for (param = (struct utf8_eucparam *) cs->tab,
+	       tab = (unsigned short *) param->tab, ku = 0;
+	     ku < param->max_ku; ku++)
+	  for (ten = 0; ten < param->max_ten; ten++)
+	    if ((u = tab[(ku * param->max_ten) + ten]) != UBOGON)
+	      ret[u] |= csb;
+	break;
+
+      case CT_DBYTE:		/* 2 byte ASCII + utf8_eucparam */
+	for (param = (struct utf8_eucparam *) cs->tab,
+	       tab = (unsigned short *) param->tab, ku = 0;
+	     ku < param->max_ku; ku++)
+	  for (ten = 0; ten < param->max_ten; ten++)
+	    if ((u = tab[(ku * param->max_ten) + ten]) != UBOGON)
+	      ret[u] |= csb;
+      break;
+      case CT_DBYTE2:		/* 2 byte ASCII + utf8_eucparam plane1/2 */
+	param = (struct utf8_eucparam *) cs->tab;
+	p2 = param + 1;		/* plane 2 parameters */
+				/* only ten parameters should differ */
+	if ((param->base_ku != p2->base_ku) || (param->max_ku != p2->max_ku))
+	  fatal ("ku definition error for CT_DBYTE2 charset");
+				/* total codepoints in each ku */
+	m = param->max_ten + p2->max_ten;
+	tab = (unsigned short *) param->tab;
+	for (ku = 0; ku < param->max_ku; ku++) {
+	  for (ten = 0; ten < param->max_ten; ten++)
+	    if ((u = tab[(ku * m) + ten]) != UBOGON)
+	      ret[u] |= csb;
+	  for (ten = 0; ten < p2->max_ten; ten++)
+	    if ((u = tab[(ku * m) + param->max_ten + ten]) != UBOGON)
+	      ret[u] |= csb;
+	}
+	break;
+      case CT_SJIS:		/* 2 byte Shift-JIS */
+	for (ku = 0; ku < MAX_JIS0208_KU; ku++)
+	  for (ten = 0; ten < MAX_JIS0208_TEN; ten++)
+	    if ((u = jis0208tab[ku][ten]) != UBOGON) ret[u] |= csb;
+				/* JIS hankaku katakana */
+	for (u = 0; u < (MAX_KANA_8 - MIN_KANA_8); u++)
+	  ret[UCS2_KATAKANA + u] |= csb;
+	break;
+      }
+    }
+				/* invalid charset, punt */
+    else fs_give ((void **) &ret);
+  }
   return ret;
 }
 
@@ -1295,7 +1540,7 @@ void utf8_text_euc (SIZEDTEXT *text,SIZEDTEXT *ret,void *tab,ucs4cn_t cv,
 		   ((ten = (c & BITS7) - p2->base_ten) < p2->max_ten)) ?
 		     t2[(ku*p2->max_ten) + ten] : UBOGON;
 	    else c = ((c1 >= p2->base_ku) && (c1 < p2->max_ku)) ?
-	      c1 + ((unsigned int) p2->tab) : UBOGON;
+	      c1 + ((unsigned long) p2->tab) : UBOGON;
 	  }	  
 	  else {		/* CS2 not set up */
 	    c = UBOGON;		/* swallow byte, say bogon */
@@ -1310,7 +1555,7 @@ void utf8_text_euc (SIZEDTEXT *text,SIZEDTEXT *ret,void *tab,ucs4cn_t cv,
 		   ((ten = (c & BITS7) - p3->base_ten) < p3->max_ten)) ?
 		     t3[(ku*p3->max_ten) + ten] : UBOGON;
 	    else c = ((c1 >= p3->base_ku) && (c1 < p3->max_ku)) ?
-	      c1 + ((unsigned int) p3->tab) : UBOGON;
+	      c1 + ((unsigned long) p3->tab) : UBOGON;
 	  }	  
 	  else {		/* CS3 not set up */
 	    c = UBOGON;		/* swallow byte, say bogon */
@@ -1749,7 +1994,7 @@ void utf8_text_utf7 (SIZEDTEXT *text,SIZEDTEXT *ret,ucs4cn_t cv,ucs4de_t de)
 {
   unsigned long i;
   unsigned char *s;
-  unsigned int c,c1,d,uc,pass,e,e1,state;
+  unsigned int c,c1,d,uc,pass,e,e1,state,surrh;
   for (pass = 0,s = NIL,ret->size = 0; pass <= 1; pass++) {
     c1 = d = uc = e = e1 = 0;
     for (i = 0,state = NIL; i < text->size;) {
@@ -1809,6 +2054,14 @@ void utf8_text_utf7 (SIZEDTEXT *text,SIZEDTEXT *ret,ucs4cn_t cv,ucs4de_t de)
 	}
 	c = uc | (d & 0xff);	/* build UCS-2 character */
 	e1 = NIL;		/* back to first UCS-2 state, drop in */
+				/* surrogate pair?  */
+	if ((c >= UTF16_SURR) && (c <= UTF16_MAXSURR)) {
+				/* save high surrogate for later */
+	  if (c < UTF16_SURRL) surrh = c;
+	  else c = UTF16_BASE + ((surrh & UTF16_MASK) << UTF16_SHIFT) +
+		 (c & UTF16_MASK);
+	  break;		/* either way with surrogates, we're done */
+	}
       case U7_ASCII:		/* just install if ASCII */
 				/* convert if second pass */
 	if (pass) UTF8_WRITE_BMP (s,c,cv,de)
@@ -1925,7 +2178,8 @@ void utf8_text_utf16 (SIZEDTEXT *text,SIZEDTEXT *ret,ucs4cn_t cv,ucs4de_t de)
 	--i;			/* swallowed another 16-bits */
 				/* invalid second surrogate */
 	if ((d < UTF16_SURRL) || (d > UTF16_SURRLEND)) c = UBOGON;
-	else c = 0x10000 + ((c & 0x3ff) << 10) + (d & 0x3ff);
+	else c = UTF16_BASE + ((c & UTF16_MASK) << UTF16_SHIFT) +
+	       (d & UTF16_MASK);
       }
     }
     UTF8_COUNT (ret->size,c,cv,de);
@@ -1944,7 +2198,8 @@ void utf8_text_utf16 (SIZEDTEXT *text,SIZEDTEXT *ret,ucs4cn_t cv,ucs4de_t de)
 	--i;			/* swallowed another 16-bits */
 				/* invalid second surrogate */
 	if ((d < UTF16_SURRL) || (d > UTF16_SURRLEND)) c = UBOGON;
-	else c = 0x10000 + ((c & 0x3ff) << 10) + (d & 0x3ff);
+	else c = UTF16_BASE + ((c & UTF16_MASK) << UTF16_SHIFT) +
+	       (d & UTF16_MASK);
       }
     }
     UTF8_WRITE (s,c,cv,de)	/* convert UCS-4 to UTF-8 */
@@ -2117,6 +2372,13 @@ struct decomposemore {
   } data;
 };
 
+#define RECURSIVEMORE struct recursivemore
+
+RECURSIVEMORE {
+  struct decomposemore *more;
+  RECURSIVEMORE *next;
+};
+
 
 /* Return decomposition of a UCS-4 character
  * Accepts: character or U8G_ERROR to return next from "more"
@@ -2233,4 +2495,60 @@ unsigned long ucs4_decompose (unsigned long c,void **more)
 	       ucs4_sipdecomptab[c - UCS4_SIPMIN] : c)) ret = c;
   }
   return ret;
+}
+
+/* Return recursive decomposition of a UCS-4 character
+ * Accepts: character or U8G_ERROR to return next from "more"
+ *	    pointer to returned more
+ * Returns: [next] decomposed value, more set if still more decomposition
+ */
+
+unsigned long ucs4_decompose_recursive (unsigned long c,void **more)
+{
+  unsigned long c1;
+  void *m,*mn;
+  RECURSIVEMORE *mr;
+  if (c & U8G_ERROR) {		/* want to chase more? */
+    mn = NIL;
+    if (mr = (RECURSIVEMORE *) *more) switch (mr->more->type) {
+    case MORESINGLE:		/* decompose single value */
+      c = ucs4_decompose_recursive (mr->more->data.single,&mn);
+      *more = mr->next;		/* done with this more, remove it */
+      fs_give ((void **) &mr->more);
+      fs_give ((void **) &mr);
+      break;
+    case MOREMULTIPLE:		/* decompose current value in multiple */
+      c = ucs4_decompose_recursive (*mr->more->data.multiple.next++,&mn);
+				/* if done with this multiple decomposition */
+      if (!--mr->more->data.multiple.count) {
+	*more = mr->next;	/* done with this more, remove it */
+	fs_give ((void **) &mr->more);
+	fs_give ((void **) &mr);
+      }
+      break;
+    default:			/* uh-oh */
+      fatal ("invalid more block argument to ucs4_decompose_recursive!");
+    }
+    else fatal ("no more block provided to ucs4_decompose_recursive!");
+    if (mr = mn) {		/* did this value recurse on us? */
+      mr->next = *more;		/* yes, insert new more at head */
+      *more = mr;
+    }
+  }
+  else {			/* start decomposition */
+    *more = NIL;		/* initially set no more */
+    mr = NIL;
+    do {			/* repeatedly decompose this codepoint */
+      c = ucs4_decompose (c1 = c,&m);
+      if (m) {			/* multi-byte decomposition */
+	if (c1 == c) fatal ("endless multiple decomposition!");
+				/* create a block to stash this more */
+	mr = memset (fs_get (sizeof (RECURSIVEMORE)),0,sizeof (RECURSIVEMORE));
+	mr->more = m;		/* note the expansion */
+	mr->next = *more;	/* old list is the tail */
+	*more = mr;		/* and this is the new head */
+      }
+    } while (c1 != c);		/* until nothing more to decompose */
+  }
+  return c;
 }

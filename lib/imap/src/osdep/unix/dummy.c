@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	9 May 1991
- * Last Edited:	17 October 2006
+ * Last Edited:	1 June 2007
  */
 
 
@@ -245,8 +245,15 @@ long dummy_subscribe (MAILSTREAM *stream,char *mailbox)
   char *s,tmp[MAILTMPLEN];
   struct stat sbuf;
 				/* must be valid local mailbox */
-  if ((s = mailboxfile (tmp,mailbox)) && *s && !stat (s,&sbuf) &&
-      ((sbuf.st_mode & S_IFMT) == S_IFREG)) return sm_subscribe (mailbox);
+  if ((s = mailboxfile (tmp,mailbox)) && *s && !stat (s,&sbuf))
+    switch (sbuf.st_mode & S_IFMT) {
+    case S_IFDIR:		/* allow but snarl */
+      sprintf (tmp,"CLIENT BUG DETECTED: subscribe of non-mailbox directory %.80s",
+	       mailbox);
+      MM_NOTIFY (stream,tmp,WARN);
+    case S_IFREG:
+      return sm_subscribe (mailbox);
+    }
   sprintf (tmp,"Can't subscribe %.80s: not a mailbox",mailbox);
   MM_LOG (tmp,ERROR);
   return NIL;
@@ -287,7 +294,7 @@ void dummy_list_work (MAILSTREAM *stream,char *dir,char *pat,char *contents,
     if (!dir || dir[(len = strlen (dir)) - 1] == '/') while (d = readdir (dp))
       if ((!(dt && (*dt) (d->d_name))) &&
 	  ((d->d_name[0] != '.') ||
-	   (((int) mail_parameters (NIL,GET_HIDEDOTFILES,NIL)) ? NIL :
+	   (((long) mail_parameters (NIL,GET_HIDEDOTFILES,NIL)) ? NIL :
 	    (d->d_name[1] && (((d->d_name[1] != '.') || d->d_name[2]))))) &&
 	  ((len + strlen (d->d_name)) <= NETMAXMBX)) {
 				/* see if name is useful */
@@ -295,7 +302,8 @@ void dummy_list_work (MAILSTREAM *stream,char *dir,char *pat,char *contents,
 	else strcpy (tmp,d->d_name);
 				/* make sure useful and can get info */
 	if ((pmatch_full (strcpy (path,tmp),pat,'/') ||
-	     pmatch_full (strcat (path,"/"),pat,'/') || dmatch (path,pat,'/')) &&
+	     pmatch_full (strcat (path,"/"),pat,'/') ||
+	     dmatch (path,pat,'/')) &&
 	    mailboxdir (path,dir,"x") && (len = strlen (path)) &&
 	    strcpy (path+len-1,d->d_name) && !stat (path,&sbuf)) {
 				/* only interested in file type */
@@ -311,7 +319,7 @@ void dummy_list_work (MAILSTREAM *stream,char *dir,char *pat,char *contents,
 	      }
 				/* try again with trailing / */
 	      else if (pmatch_full (path,pat,'/') &&
-		       !dummy_listed (stream,'/',tmp,LATT_NOSELECT,contents))
+		       !dummy_listed (stream,'/',path,LATT_NOSELECT,contents))
 		break;
 	    }
 	    if (dmatch (path,pat,'/') &&
@@ -397,11 +405,33 @@ long dummy_scan_contents (char *name,char *contents,unsigned long csiz,
 long dummy_listed (MAILSTREAM *stream,char delimiter,char *name,
 		   long attributes,char *contents)
 {
-  DRIVER *d = NIL;
+  DRIVER *d;
+  DIR *dp;
+  struct direct *dr;
+  dirfmttest_t dt;
   unsigned long csiz;
   struct stat sbuf;
+  int nochild;
   char *s,tmp[MAILTMPLEN];
-				/* don't \NoSelect dir if it has a driver */
+  if (!(attributes & LATT_NOINFERIORS) && mailboxdir (tmp,name,NIL) &&
+      (dp = opendir (tmp))) {	/* if not \NoInferiors */
+				/* locate dirfmttest if any */
+    for (d = (DRIVER *) mail_parameters (NIL,GET_DRIVERS,NIL), dt = NIL;
+	 !dt && d; d = d->next)
+      if (!(d->flags & DR_DISABLE) && (d->flags & DR_DIRFMT) &&
+	  (*d->valid) (name))
+	dt = mail_parameters ((*d->open) (NIL),GET_DIRFMTTEST,NIL);
+				/* scan directory for children */
+    for (nochild = T; nochild && (dr = readdir (dp)); )
+      if ((!(dt && (*dt) (dr->d_name))) &&
+	  ((dr->d_name[0] != '.') ||
+	   (((long) mail_parameters (NIL,GET_HIDEDOTFILES,NIL)) ? NIL :
+	    (dr->d_name[1] && ((dr->d_name[1] != '.') || dr->d_name[2])))))
+	nochild = NIL;
+    attributes |= nochild ? LATT_HASNOCHILDREN : LATT_HASCHILDREN;
+    closedir (dp);		/* all done, flush directory */
+  }
+  d = NIL;			/* don't \NoSelect dir if it has a driver */
   if ((attributes & LATT_NOSELECT) && (d = mail_valid (NIL,name,NIL)) &&
       (d != &dummydriver)) attributes &= ~LATT_NOSELECT;
   if (!contents ||		/* notify main program */
@@ -469,7 +499,7 @@ long dummy_create_path (MAILSTREAM *stream,char *path,long dirmode)
   }
 				/* create file */
   else if ((fd = open (path,O_WRONLY|O_CREAT|O_EXCL,
-		       (int) mail_parameters(NIL,GET_MBXPROTECTION,NIL))) >= 0)
+		       (long) mail_parameters(NIL,GET_MBXPROTECTION,NIL))) >=0)
     ret = !close (fd);
   if (!ret) {			/* error? */
     sprintf (tmp,"Can't create mailbox node %.80s: %.80s",path,strerror (errno));
@@ -692,18 +722,23 @@ long dummy_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
   int e;
   char tmp[MAILTMPLEN];
   MAILSTREAM *ts = default_proto (T);
-  if (compare_cstring (mailbox,"INBOX") && dummy_file (tmp,mailbox) &&
-      ((fd = open (tmp,O_RDONLY,NIL)) < 0)) {
-    if ((e = errno) == ENOENT)	/* failed, was it no such file? */
+				/* append to INBOX? */
+  if (!compare_cstring (mailbox,"INBOX")) {
+				/* yes, if no empty proto try creating */
+    if (!ts && !(*(ts = default_proto (NIL))->dtb->create) (ts,"INBOX"))
+      ts = NIL;
+  }
+  else if (dummy_file (tmp,mailbox) && ((fd = open (tmp,O_RDONLY,NIL)) < 0)) {
+    if ((e = errno) == ENOENT) /* failed, was it no such file? */
       MM_NOTIFY (stream,"[TRYCREATE] Must create mailbox before append",NIL);
     sprintf (tmp,"%.80s: %.80s",strerror (e),mailbox);
     MM_LOG (tmp,ERROR);		/* pass up error */
     return NIL;			/* always fails */
   }
-  if (fd >= 0) {		/* found file? */
+  else if (fd >= 0) {		/* found file? */
     fstat (fd,&sbuf);		/* get its size */
     close (fd);			/* toss out the fd */
-    if (sbuf.st_size) ts = NIL;	/* non-empty file? */
+    if (sbuf.st_size) ts = NIL; /* non-empty file? */
   }
   if (ts) return (*ts->dtb->append) (stream,mailbox,af,data);
   sprintf (tmp,"Indeterminate mailbox format: %.80s",mailbox);

@@ -1,6 +1,6 @@
 <!--
  * ========================================================================
- * Copyright 1988-2006 University of Washington
+ * Copyright 1988-2007 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -863,7 +863,7 @@
       directory and each message is a file within that directory; these
       formats support sub-mailboxes within such mailboxes. However, for
       technical reasons, the "flat file" formats are generally preferred
-      since they perform better. Read imap-2006/docs/formats.txt for more
+      since they perform better. Read imap-2007/docs/formats.txt for more
       information on this topic.</p>
 
       <p>It is always permissible to create a directory that is not a
@@ -1377,12 +1377,12 @@ code works.
 
   <dl>
     <dd>
-      imap-2006 supports SSL and TLS client functionality on UNIX and 32-bit
+      imap-2007 supports SSL and TLS client functionality on UNIX and 32-bit
       Windows for IMAP, POP3, SMTP, and NNTP; and SSL and TLS server
       functionality on UNIX for IMAP and POP3.
 
       <p>UNIX SSL build requires that a third-party software package,
-      OpenSSL, be installed on the system first. Read imap-2006/docs/SSLBUILD
+      OpenSSL, be installed on the system first. Read imap-2007/docs/SSLBUILD
       for more information.</p>
 
       <p>SSL is supported via undocumented Microsoft interfaces in Windows 9x
@@ -1427,7 +1427,7 @@ code works.
 
   <dl>
     <dd>
-      imap-2006 supports client and server functionality on UNIX and 32-bit
+      imap-2007 supports client and server functionality on UNIX and 32-bit
       Windows.
 
       <p>Kerberos V5 is supported by default in Windows 2000 builds:</p>
@@ -1957,7 +1957,7 @@ mtest.c:515: the `gets' function is dangerous and should not be used.
 
       <p>A number of sites have done full-fledged format conversions, and are
       reportedly quite happy with the results. Feel free to ask in the
-      comp.mail.imap newsgroup or the c-client mailing list for advice or
+      comp.mail.imap newsgroup or the imap-uw mailing list for advice or
       help.</p>
     </dd>
   </dl>
@@ -2993,7 +2993,7 @@ most traditional format and nobody will flame you for using it.
       the directory by itself, it will try to call mlock to do it. I do not
       recommend doing this for performance reasons.</p>
 
-      <p>A sample mlock program is included as part of imap-2006. We have
+      <p>A sample mlock program is included as part of imap-2007. We have
       tried to make this sample program secure, but it has not been
       thoroughly audited.</p>
     </dd>
@@ -4089,7 +4089,7 @@ interpreted by mail reading software as an internal header line.
 
       <p>The SECURITY PROBLEM came about because the server advertised the
       AUTH=PLAIN SASL authentication mechanism outside of a TLS-encrypted
-      session, in violation of RFC 2595. This message is just a warning, and
+      session, in violation of RFC 4616. This message is just a warning, and
       in fact occurred after the server had disconnected.</p>
     </dd>
   </dl>
@@ -4116,18 +4116,18 @@ interpreted by mail reading software as an internal header line.
       initial challenge, qmail issues a bogus response:</p>
       <pre>
  334 ok, go on
-</pre>The problem is the "ok, go on". This violates RFC 2554's requirement
+</pre>The problem is the "ok, go on". This violates RFC 4954's requirement
 that the text part in a 334 response be a BASE64 encoded string; in other
 words, it is a protocol syntax error.
 
-      <p>In the case of AUTH=PLAIN, RFC 2222 (pp 4-5) requires that the
+      <p>In the case of AUTH=PLAIN, RFC 4422 (page 7) requires that the
       encoded string have no data. In other words, the appropropiate
       standards-compliant server response is "334" followed by a SPACE and a
       CRLF.</p>
 
       <p>The SECURITY PROBLEM came about because the server advertised the
       AUTH=PLAIN SASL authentication mechanism outside of a TLS-encrypted
-      session, in violation of RFC 2595. This message is just a warning, and
+      session, in violation of RFC 4616. This message is just a warning, and
       is not related the "Authentication cancelled" problem.</p>
     </dd>
   </dl>
@@ -4170,16 +4170,23 @@ words, it is a protocol syntax error.
     <dd>
       If you have questions about the IMAP protocol, or want to participate
       in discussions of future directions of the IMAP protocol, the
-      appropriate mailing list is imap@u.washington.edu. You must be a
-      subscriber to post to the list; to subscribe, use <a href=
-      "mailto:imap-request@u.washington.edu"><tt>imap-request@u.washington.edu</tt></a>
+      appropriate mailing list is imap-protocol@u.washington.edu. You can
+      subscribe to this list via <a href=
+      "mailto:imap-protocol-request@u.washington.edu"><tt>imap-protocol-request@u.washington.edu</tt></a>
 
       <p>If you have questions about this software, you can send me email
-      directly or use the c-client@u.washington.edu mailing list. You can
+      directly or use the imap-uw@u.washington.edu mailing list. You can
       subscribe to this list via <a href=
-      "mailto:c-client-request@u.washington.edu"><tt>c-client-request@u.washington.edu</tt></a></p>
+      "mailto:imap-uw-request@u.washington.edu"><tt>imap-uw-request@u.washington.edu</tt></a></p>
 
-      <p>As an alternative to either of these, you can use the
+      <p>If you have general questions about the use of IMAP software
+      (not specific to the UW IMAP toolkit) use the
+      imap-use@u.washington.edu mailing list. You can subscribe to
+      this list via <a href=
+      "mailto:imap-use-request@u.washington.edu"><tt>imap-use-request@u.washington.edu</tt></a></p>
+
+      <p>You must be a subscriber to post to these lists.  As an
+      alternative, you can use the
       <strong>comp.mail.imap</strong> newsgroup.</p>
     </dd>
   </dl>
@@ -4213,7 +4220,7 @@ words, it is a protocol syntax error.
 
   <p><a href="#top">Back to top</a></p>
 
-  <p>Last Updated: 11 December 2006</p>
+  <p>Last Updated: 15 November 2007</p>
 
 <!--chtml include "//imap/incs/bottom.inc"-->
 

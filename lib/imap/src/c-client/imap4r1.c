@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2007 University of Washington
+ * Copyright 1988-2008 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  * Program:	Interactive Message Access Protocol 4rev1 (IMAP4R1) routines
  *
  * Author:	Mark Crispin
- *		Networks and Distributed Computing
- *		Computing & Communications
+ *		UW Technology
  *		University of Washington
- *		Administration Building, AG-44
  *		Seattle, WA  98195
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	15 June 1988
- * Last Edited:	19 March 2007
+ * Last Edited:	8 May 2008
  *
  * This original version of this file is
  * Copyright 1988 Stanford University
@@ -316,6 +314,7 @@ MAILSTREAM imapproto = {&imapdriver};
 static unsigned long imap_maxlogintrials = MAXLOGINTRIALS;
 static long imap_lookahead = IMAPLOOKAHEAD;
 static long imap_uidlookahead = IMAPUIDLOOKAHEAD;
+static long imap_fetchlookaheadlimit = IMAPLOOKAHEAD;
 static long imap_defaultport = 0;
 static long imap_sslport = 0;
 static long imap_tryssl = NIL;
@@ -437,6 +436,15 @@ void *imap_parameters (long function,void *value)
   case GET_IMAPTRYSSL:
     value = (void *) imap_tryssl;
     break;
+  case SET_FETCHLOOKAHEADLIMIT:
+    imap_fetchlookaheadlimit = (long) value;
+    break;
+  case GET_FETCHLOOKAHEADLIMIT:
+    value = (void *) imap_fetchlookaheadlimit;
+    break;
+
+  case SET_IDLETIMEOUT:
+    fatal ("SET_IDLETIMEOUT not permitted");
   case GET_IDLETIMEOUT:
     value = (void *) IDLETIMEOUT;
     break;
@@ -891,9 +899,9 @@ MAILSTREAM *imap_open (MAILSTREAM *stream)
 	return NIL;
       }
       if (LOCAL->netstream) {	/* still in the land of the living? */
-	if ((int) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
+	if ((long) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
 				/* remote name for authentication */
-	  strncpy (mb.host,(int) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL)?
+	  strncpy (mb.host,(long) mail_parameters(NIL,GET_SASLUSESPTRNAME,NIL)?
 		   net_remotehost (LOCAL->netstream) :
 		   net_host (LOCAL->netstream),NETMAXHOST-1);
 	  mb.host[NETMAXHOST-1] = '\0';
@@ -940,7 +948,7 @@ MAILSTREAM *imap_open (MAILSTREAM *stream)
       stream->perm_draft = LEVELIMAP4 (stream) ? NIL : T;
     stream->perm_user_flags = LEVELIMAP4 (stream) ? NIL : 0xffffffff;
     stream->sequence++;		/* bump sequence number */
-    sprintf (tmp,"{%s",(int) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
+    sprintf (tmp,"{%s",(long) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
 	     net_host (LOCAL->netstream) : mb.host);
     if (!((i = net_port (LOCAL->netstream)) & 0xffff0000))
       sprintf (tmp + strlen (tmp),":%lu",i);
@@ -967,6 +975,7 @@ MAILSTREAM *imap_open (MAILSTREAM *stream)
       ambx.type = ASTRING;
       ambx.text = (void *) mb.mailbox;
       args[0] = &ambx; args[1] = NIL;
+      stream->nmsgs = 0;
       if (imap_OK (stream,reply = imap_send (stream,stream->rdonly ?
 					     "EXAMINE": "SELECT",args))) {
 	strcat (tmp,mb.mailbox);/* mailbox name */
@@ -1477,12 +1486,14 @@ ENVELOPE *imap_structure (MAILSTREAM *stream,unsigned long msgno,BODY **body,
     env = &elt->private.msg.env;/* get envelope and body pointers */
     b = &elt->private.msg.body;
 				/* prefetch if don't have envelope */
-    if (!(flags & FT_NOLOOKAHEAD) && (k = imap_lookahead) && 
+    if (!(flags & FT_NOLOOKAHEAD) &&
 	((!*env || (*env)->incomplete) ||
 	 (body && !*b && LEVELIMAP2bis (stream)))) {
       if (set) {		/* have a lookahead list? */
 	MESSAGE *msg;
-	do {
+	for (k = imap_fetchlookaheadlimit;
+	     k && set && (((s += strlen (s)) - seq) < (MAXCOMMAND - 30));
+	     set = set->next) {
 	  i = (set->first == 0xffffffff) ? stream->nmsgs :
 	    min (set->first,stream->nmsgs);
 	  if (j = (set->last == 0xffffffff) ? stream->nmsgs :
@@ -1522,10 +1533,10 @@ ENVELOPE *imap_structure (MAILSTREAM *stream,unsigned long msgno,BODY **body,
 	    sprintf (s += strlen (s),",%lu",i);
 	    k--;		/* prefetching one message */
 	  }
-	} while (k && (set = set->next) && ((s - seq) < (MAXCOMMAND - 30)));
+      }
       }
 				/* build message number list */
-      else for (i = msgno + 1; k && (i <= stream->nmsgs); i++)
+      else for (i = msgno+1,k = imap_lookahead; k && (i <= stream->nmsgs); i++)
 	if (!mail_elt (stream,i)->private.msg.env) {
 	  s += strlen (s);	/* find string end, see if nearing end */
 	  if ((s - seq) > (MAILTMPLEN - 20)) break;
@@ -1987,7 +1998,8 @@ long imap_search (MAILSTREAM *stream,char *charset,SEARCHPGM *pgm,long flags)
 	pgm->sentbefore || pgm->senton || pgm->sentsince || pgm->draft ||
 	pgm->undraft || pgm->return_path || pgm->sender || pgm->reply_to ||
 	pgm->message_id || pgm->in_reply_to || pgm->newsgroups ||
-	pgm->followup_to || pgm->references))) {
+	pgm->followup_to || pgm->references)) ||
+      (!LEVELWITHIN (stream) && (pgm->older || pgm->younger))) {
     if ((flags & SE_NOLOCAL) ||
 	!mail_search_default (stream,charset,pgm,flags | SE_NOSERVER))
       return NIL;
@@ -2113,7 +2125,8 @@ unsigned long *imap_sort (MAILSTREAM *stream,char *charset,SEARCHPGM *spg,
   unsigned long *ret = NIL;
   pgm->nmsgs = 0;		/* start off with no messages */
 				/* can use server-based sort? */
-  if (LEVELSORT (stream) && !(flags & SE_NOSERVER)) {
+  if (LEVELSORT (stream) && !(flags & SE_NOSERVER) &&
+      (!spg || (LEVELWITHIN (stream) || !(spg->older || spg->younger)))) {
     char *cmd = (flags & SE_UID) ? "UID SORT" : "SORT";
     IMAPARG *args[4],apgm,achs,aspg;
     IMAPPARSEDREPLY *reply;
@@ -2251,7 +2264,9 @@ THREADNODE *imap_thread (MAILSTREAM *stream,char *type,char *charset,
 			 SEARCHPGM *spg,long flags)
 {
   THREADER *thr;
-  if (!(flags & SE_NOSERVER))	/* does server have this threader type? */
+  if (!(flags & SE_NOSERVER) &&
+      (!spg || (LEVELWITHIN (stream) || !(spg->older || spg->younger))))
+				/* does server have this threader type? */
     for (thr = LOCAL->cap.threader; thr; thr = thr->next)
       if (!compare_cstring (thr->name,type)) 
 	return imap_thread_work (stream,type,charset,spg,flags);
@@ -2379,28 +2394,28 @@ long imap_expunge (MAILSTREAM *stream,char *sequence,long options)
 				/* otherwise try to make into UID EXPUNGE */
     else if (mail_sequence (stream,sequence)) {
       unsigned long i,j;
-      char *s = LOCAL->tmp;
+      char *t = (char *) fs_get (IMAPTMPLEN);
+      char *s = t;
 				/* search through mailbox */
-      for (s = '\0',i = 1; i <= stream->nmsgs; ++i) 
+      for (*s = '\0', i = 1; i <= stream->nmsgs; ++i)
 	if (mail_elt (stream,i)->sequence) {
-				/* prepend with comma if not first time */
-	if (LOCAL->tmp[0]) *s++ = ',';
-	sprintf (s,"%lu",mail_uid (stream,j = i));
-	s += strlen (s);	/* point at end of string */
-				/* search for possible end of range */
-	while ((i < stream->nmsgs) && mail_elt (stream,i+1)->sequence) i++;
-	if (i != j) {		/* output end of range */
-	  sprintf (s,":%lu",mail_uid (stream,i));
+	  if (t[0]) *s++ = ',';	/* prepend with comma if not first time */
+	  sprintf (s,"%lu",mail_uid (stream,j = i));
 	  s += strlen (s);	/* point at end of string */
+				/* search for possible end of range */
+	  while ((i < stream->nmsgs) && mail_elt (stream,i+1)->sequence) i++;
+	  if (i != j) {		/* output end of range */
+	    sprintf (s,":%lu",mail_uid (stream,i));
+	    s += strlen (s);	/* point at end of string */
+	  }
+	  if ((s - t) > (IMAPTMPLEN - 50)) {
+	    mm_log ("Excessively complex sequence",ERROR);
+	    return NIL;
+	  }
 	}
-	if ((s - LOCAL->tmp) > (IMAPTMPLEN - 50)) {
-	  mm_log ("Excessively complex sequence",ERROR);
-	  return NIL;
-	}
-      }
 				/* now do as UID EXPUNGE */
-      ret = imap_expunge (stream,s = cpystr (s),EX_UID);
-      fs_give ((void **) &s);
+      ret = imap_expunge (stream,t,EX_UID);
+      fs_give ((void **) &t);
     }
   }
 				/* ordinary EXPUNGE */
@@ -2592,7 +2607,7 @@ IMAPPARSEDREPLY *imap_append_single (MAILSTREAM *stream,char *mailbox,
     aflg.type = FLAGS; aflg.text = (void *) flags;
     args[++i] = &aflg;
   }
-  if (date) {		/* ensure date in INTERNALDATE format */
+  if (date) {			/* ensure date in INTERNALDATE format */
     if (!mail_parse_date (&elt,date)) {
 				/* flush previous reply */
       if (LOCAL->reply.line) fs_give ((void **) &LOCAL->reply.line);
@@ -2609,9 +2624,9 @@ IMAPPARSEDREPLY *imap_append_single (MAILSTREAM *stream,char *mailbox,
   amsg.type = LITERAL; amsg.text = (void *) message;
   args[++i] = &amsg;
   args[++i] = NIL;
-  if (!strcmp ((reply = imap_send (stream,"APPEND",args))->key,"BAD") &&
-      (flags || date)) {	/* full form and got a BAD? */
-				/* yes, retry with old IMAP2bis form */
+				/* easy if IMAP4[rev1] */
+  if (LEVELIMAP4 (stream)) reply = imap_send (stream,"APPEND",args);
+  else {			/* try the IMAP2bis way */
     args[1] = &amsg; args[2] = NIL;
     reply = imap_send (stream,"APPEND",args);
   }
@@ -3283,6 +3298,14 @@ IMAPPARSEDREPLY *imap_send_spgm (MAILSTREAM *stream,char *tag,char *base,
   if (pgm->before) imap_send_sdate (s,"BEFORE",pgm->before);
   if (pgm->on) imap_send_sdate (s,"ON",pgm->on);
   if (pgm->since) imap_send_sdate (s,"SINCE",pgm->since);
+  if (pgm->older) {
+    sprintf (*s," OLDER %lu",pgm->older);
+    *s += strlen (*s);
+  }
+  if (pgm->younger) {
+    sprintf (*s," YOUNGER %lu",pgm->younger);
+    *s += strlen (*s);
+  }
 				/* search texts */
   if ((pgm->bcc && (reply = imap_send_slist (stream,tag,base,s," BCC ",
 					     pgm->bcc,limit))) ||
@@ -3684,8 +3707,10 @@ void imap_parse_unsolicited (MAILSTREAM *stream,IMAPPARSEDREPLY *reply)
     t = strtok_r (NIL,"\n",&r);
 				/* now take the action */
 				/* change in size of mailbox */
-    if (!strcmp (s,"EXISTS")) mail_exists (stream,msgno);
-    else if (!strcmp (s,"RECENT")) mail_recent (stream,msgno);
+    if (!strcmp (s,"EXISTS") && (msgno >= stream->nmsgs))
+      mail_exists (stream,msgno);
+    else if (!strcmp (s,"RECENT") && (msgno <= stream->nmsgs))
+      mail_recent (stream,msgno);
     else if (!strcmp (s,"EXPUNGE") && msgno && (msgno <= stream->nmsgs)) {
       mailcache_t mc = (mailcache_t) mail_parameters (NIL,GET_CACHE,NIL);
       MESSAGECACHE *elt = (MESSAGECACHE *) (*mc) (stream,msgno,CH_ELT);
@@ -5483,6 +5508,10 @@ void imap_parse_capabilities (MAILSTREAM *stream,char *t)
     else if (!compare_cstring (t,"UNSELECT")) LOCAL->cap.unselect = T;
     else if (!compare_cstring (t,"SASL-IR")) LOCAL->cap.sasl_ir = T;
     else if (!compare_cstring (t,"SCAN")) LOCAL->cap.scan = T;
+    else if (!compare_cstring (t,"URLAUTH")) LOCAL->cap.urlauth = T;
+    else if (!compare_cstring (t,"CATENATE")) LOCAL->cap.catenate = T;
+    else if (!compare_cstring (t,"CONDSTORE")) LOCAL->cap.condstore = T;
+    else if (!compare_cstring (t,"ESEARCH")) LOCAL->cap.esearch = T;
     else if (((t[0] == 'S') || (t[0] == 's')) &&
 	     ((t[1] == 'O') || (t[1] == 'o')) &&
 	     ((t[2] == 'R') || (t[2] == 'r')) &&

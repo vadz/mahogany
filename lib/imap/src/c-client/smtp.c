@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2007 University of Washington
+ * Copyright 1988-2008 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	27 July 1988
- * Last Edited:	30 January 2007
+ * Last Edited:	28 January 2008
  *
  * This original version of this file is
  * Copyright 1988 Stanford University
@@ -67,7 +67,8 @@ long smtp_rcpt (SENDSTREAM *stream,ADDRESS *adr,long *error);
 long smtp_send (SENDSTREAM *stream,char *command,char *args);
 long smtp_reply (SENDSTREAM *stream);
 long smtp_ehlo (SENDSTREAM *stream,char *host,NETMBX *mb);
-long smtp_fake (SENDSTREAM *stream,long code,char *text);
+long smtp_fake (SENDSTREAM *stream,char *text);
+static long smtp_seterror (SENDSTREAM *stream,long code,char *text);
 long smtp_soutr (void *stream,char *s);
 
 /* Mailer parameters */
@@ -175,7 +176,7 @@ SENDSTREAM *smtp_open_full (NETDRIVER *dv,char **hostlist,char *service,
 	stream = (SENDSTREAM *) memset (fs_get (sizeof (SENDSTREAM)),0,
 					sizeof (SENDSTREAM));
 	stream->netstream = netstream;
-	stream->host = cpystr ((int) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
+	stream->host = cpystr ((long) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
 			       net_host (netstream) : mb.host);
 	stream->debug = (mb.dbgflag || (options & OP_DEBUG)) ? T : NIL;
 	if (options & SOP_SECURE) mb.secflag = T;
@@ -203,7 +204,7 @@ SENDSTREAM *smtp_open_full (NETDRIVER *dv,char **hostlist,char *service,
 	  ESMTP.ok = T;		/* ESMTP server, start TLS if present */
 	  if (!dv && stls && ESMTP.service.starttls &&
 	      !mb.sslflag && !mb.notlsflag &&
-	      smtp_send (stream,"STARTTLS",NIL) == SMTPGREET) {
+	      (smtp_send (stream,"STARTTLS",NIL) == SMTPGREET)) {
 	    mb.tlsflag = T;	/* TLS OK, get into TLS at this end */
 	    stream->netstream->dtb = ssld;
 				/* TLS started, negotiate it */
@@ -238,10 +239,10 @@ SENDSTREAM *smtp_open_full (NETDRIVER *dv,char **hostlist,char *service,
 				/* remote name for authentication */
 	  if (stream && ((mb.secflag || mb.user[0]))) {
 	    if (ESMTP.auth) {	/* use authenticator? */
-	      if ((int) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
+	      if ((long) mail_parameters (NIL,GET_TRUSTDNS,NIL)) {
 				/* remote name for authentication */
 		strncpy (mb.host,
-			 (int) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
+			 (long) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
 			 net_remotehost (netstream) : net_host (netstream),
 			 NETMAXHOST-1);
 		mb.host[NETMAXHOST-1] = '\0';
@@ -306,7 +307,7 @@ long smtp_auth (SENDSTREAM *stream,NETMBX *mb,char *tmp)
 	fs_give ((void **) &lsterr);
       }
       stream->saslcancel = NIL;
-      if (smtp_send (stream,"AUTH",at->name)) {
+      if (smtp_send (stream,"AUTH",at->name) == SMTPAUTHREADY) {
 				/* hide client authentication responses */
 	if (!(at->flags & AU_SECURE)) stream->sensitive = T;
 	if ((*at->client) (smtp_challenge,smtp_response,"smtp",mb,stream,
@@ -427,7 +428,7 @@ long smtp_mail (SENDSTREAM *stream,char *type,ENVELOPE *env,BODY *body)
   tmp[SENDBUFLEN] = '\0';	/* must have additional null guard byte */
   if (!(env->to || env->cc || env->bcc)) {
   				/* no recipients in request */
-    smtp_fake (stream,SMTPHARDERROR,"No recipients specified");
+    smtp_seterror (stream,SMTPHARDERROR,"No recipients specified");
     return NIL;
   }
   do {				/* make sure stream is in good shape */
@@ -436,8 +437,8 @@ long smtp_mail (SENDSTREAM *stream,char *type,ENVELOPE *env,BODY *body)
       NETMBX mb;
 				/* yes, build remote name for authentication */
       sprintf (tmp,"{%.200s/smtp%s}<none>",
-	       (int) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
-	       ((int) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
+	       (long) mail_parameters (NIL,GET_TRUSTDNS,NIL) ?
+	       ((long) mail_parameters (NIL,GET_SASLUSESPTRNAME,NIL) ?
 		net_remotehost (stream->netstream) :
 		net_host (stream->netstream)) :
 	       stream->host,
@@ -492,18 +493,37 @@ long smtp_mail (SENDSTREAM *stream,char *type,ENVELOPE *env,BODY *body)
     if (!retry && env->bcc) retry = smtp_rcpt (stream,env->bcc,&error);
     if (!retry && error) {	/* any recipients failed? */
       smtp_send (stream,"RSET",NIL);
-      smtp_fake (stream,SMTPHARDERROR,"One or more recipients failed");
+      smtp_seterror (stream,SMTPHARDERROR,"One or more recipients failed");
       return NIL;
     }
   } while (retry);
 				/* negotiate data command */
   if (!(smtp_send (stream,"DATA",NIL) == SMTPREADY)) return NIL;
-				/* set up error in case failure */
-  smtp_fake (stream,SMTPSOFTFATAL,"SMTP connection went away!");
-				/* output data, return success status */
-  return rfc822_output_full (&buf,env,body,
-			     ESMTP.eightbit.ok && ESMTP.eightbit.want) &&
-    (smtp_send (stream,".",NIL) == SMTPOK);
+				/* send message data */
+  if (!rfc822_output_full (&buf,env,body,
+			   ESMTP.eightbit.ok && ESMTP.eightbit.want)) {
+    smtp_fake (stream,"SMTP connection broken (message data)");
+    return NIL;			/* can't do much else here */
+  }
+				/* send trailing dot */
+  return (smtp_send (stream,".",NIL) == SMTPOK) ? LONGT : NIL;
+}
+
+/* Simple Mail Transfer Protocol send VERBose
+ * Accepts: SMTP stream
+ * Returns: T if successful, else NIL
+ *
+ * Descriptive text formerly in [al]pine sources:
+ * At worst, this command may cause the SMTP connection to get nuked.  Modern
+ * sendmail's recognize it, and possibly other SMTP implementations (the "ON"
+ * arg is for PMDF).  What's more, if it works, the reply code and accompanying
+ * text may vary from server to server.
+ */
+
+long smtp_verbose (SENDSTREAM *stream)
+{
+				/* accept any 2xx reply code */
+  return ((smtp_send (stream,"VERB","ON") / (long) 100) == 2) ? LONGT : NIL;
 }
 
 /* Internal routines */
@@ -601,17 +621,17 @@ long smtp_send (SENDSTREAM *stream,char *command,char *args)
   if (stream->debug) mail_dlog (s,stream->sensitive);
   strcat (s,"\015\012");
 				/* send the command */
-  if (!net_soutr (stream->netstream,s))
-    ret = smtp_fake (stream,SMTPSOFTFATAL,"SMTP connection broken (command)");
-  else {
+  if (stream->netstream && net_soutr (stream->netstream,s)) {
     do stream->replycode = smtp_reply (stream);
     while ((stream->replycode < 100) || (stream->reply[3] == '-'));
     ret = stream->replycode;
   }
+  else ret = smtp_fake (stream,"SMTP connection broken (command)");
   fs_give ((void **) &s);
   return ret;
 }
-
+
+
 /* Simple Mail Transfer Protocol get reply
  * Accepts: SMTP stream
  * Returns: reply code
@@ -624,11 +644,13 @@ long smtp_reply (SENDSTREAM *stream)
 				/* flush old reply */
   if (stream->reply) fs_give ((void **) &stream->reply);
   				/* get reply */
-  if (!(stream->reply = net_getline (stream->netstream)))
-    return smtp_fake (stream,SMTPSOFTFATAL,"SMTP connection went away!");
-  if (stream->debug) mm_dlog (stream->reply);
-  reply = atol (stream->reply);	/* return response code */
-  if (pv && (reply < 100)) (*pv) (stream->reply);
+  if (stream->netstream && (stream->reply = net_getline (stream->netstream))) {
+    if (stream->debug) mm_dlog (stream->reply);
+				/* return response code */
+    reply = atol (stream->reply);
+    if (pv && (reply < 100)) (*pv) (stream->reply);
+  }
+  else reply = smtp_fake (stream,"SMTP connection broken (reply)");
   return reply;
 }
 
@@ -653,7 +675,7 @@ long smtp_ehlo (SENDSTREAM *stream,char *host,NETMBX *mb)
   strcat (tmp,"\015\012");
 				/* send the command */
   if (!net_soutr (stream->netstream,tmp))
-    return smtp_fake (stream,SMTPSOFTFATAL,"SMTP connection broken (EHLO)");
+    return smtp_fake (stream,"SMTP connection broken (EHLO)");
 				/* got an OK reply? */
   do if ((i = smtp_reply (stream)) == SMTPOK) {
 				/* hack for AUTH= */
@@ -710,14 +732,31 @@ long smtp_ehlo (SENDSTREAM *stream,char *host,NETMBX *mb)
   return i;			/* return the response code */
 }
 
-/* Simple Mail Transfer Protocol set fake error
+/* Simple Mail Transfer Protocol set fake error and abort
+ * Accepts: SMTP stream
+ *	    error text
+ * Returns: SMTPSOFTFATAL, always
+ */
+
+long smtp_fake (SENDSTREAM *stream,char *text)
+{
+  if (stream->netstream) {	/* close net connection if still open */
+    net_close (stream->netstream);
+    stream->netstream = NIL;
+  }
+				/* set last error */
+  return smtp_seterror (stream,SMTPSOFTFATAL,text);
+}
+
+
+/* Simple Mail Transfer Protocol set error
  * Accepts: SMTP stream
  *	    SMTP error code
  *	    error text
  * Returns: error code
  */
 
-long smtp_fake (SENDSTREAM *stream,long code,char *text)
+static long smtp_seterror (SENDSTREAM *stream,long code,char *text)
 {
 				/* flush any old reply */
   if (stream->reply ) fs_give ((void **) &stream->reply);

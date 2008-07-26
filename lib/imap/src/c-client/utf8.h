@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright 1988-2007 University of Washington
+ * Copyright 1988-2008 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *		Internet: MRC@CAC.Washington.EDU
  *
  * Date:	11 June 1997
- * Last Edited:	16 March 2007
+ * Last Edited:	17 January 2008
  */
 
 /* UTF-8 size and conversion routines from UCS-2 values (thus in the BMP).
@@ -349,7 +349,9 @@
 #define UCS2_KATAKANA 0xff61	/* first katakana codepoint */
 #define UCS2_BOM 0xfeff		/* byte order mark */
 #define UCS2_BOGON 0xfffd	/* replacement character */
-
+				/* next two codepoints are not Unicode chars */
+#define UCS2_BOMCHECK 0xfffe	/* used to check byte order with UCS2_BOM */
+#define UCS2_NOTCHAR 0xffff	/* not a character */
 
 #define UCS4_BMPBASE 0x0000	/* Basic Multilingual Plane */
 #define UCS4_SMPBASE 0x10000	/* Supplementary Multilinugual Plane */
@@ -360,6 +362,9 @@
 #define UCS4_PVTBASE 0xf0000	/* private-space (two planes) */
 #define UCS4_MAXUNICODE 0x10ffff/* highest Unicode codepoint */
 
+#define UTF16_BASE 0x10000	/* base of codepoints needing surrogates */
+#define UTF16_SHIFT 10		/* surrogate shift */
+#define UTF16_MASK 0x3ff	/* surrogate mask */
 #define UTF16_SURR 0xd800	/* UTF-16 surrogate area */
 #define UTF16_SURRH 0xd800	/* UTF-16 first high surrogate */
 #define UTF16_SURRHEND 0xdbff	/* UTF-16 last high surrogate */
@@ -368,15 +373,18 @@
 #define UTF16_MAXSURR 0xdfff	/* end of UTF-16 surrogates */
 
 
-/*  UBOGON is used to represent a codepoint in a character set which does not
+/* UBOGON is used to represent a codepoint in a character set which does not
  * map to Unicode.  It is also used for mapping failures, e.g. incomplete
- * shift sequences.  NOCHAR is used to represent a codepoint in Unicode
- * which does not map to the target character set.  Note that these names
- * have the same text width as 0x????, for convenience in the mapping tables.
+ * shift sequences.  This name has the same text width as 0x????, for
+ * convenience in the mapping tables.
+ *
+ * NOCHAR is used to represent a codepoint in Unicode which does not map to
+ * the target character set in a reverse mapping table.  This name has the
+ * same text width as 0x???? in case we ever add static reverse mapping tables.
  */
 
 #define UBOGON UCS2_BOGON
-#define NOCHAR 0xffff
+#define NOCHAR UCS2_NOTCHAR
 
 /* Codepoints in non-Unicode character sets */
 
@@ -449,6 +457,7 @@
 #define SC_JAPANESE 0x4000000
 #define SC_KOREAN 0x8000000
 
+
 /* Script table */
 
 typedef struct utf8_scent {
@@ -461,7 +470,8 @@ typedef struct utf8_scent {
 
 typedef struct utf8_csent {
   char *name;			/* charset name */
-  unsigned long type;		/* type of charset */
+  unsigned short type;		/* type of charset */
+  unsigned short flags;		/* charset flags */
   void *tab;			/* additional data */
   unsigned long script;		/* script(s) implemented by this charset */
   char *preferred;		/* preferred charset over this one */
@@ -494,6 +504,15 @@ struct utf8_eucparam {
 #define CT_UTF7 1002		/* variable UTF-7 encoded Unicode no table */
 #define CT_2022 10000		/* variable ISO-2022 encoded no table */
 #define CT_SJIS 10001		/* 2 byte Shift-JIS encoded JIS no table */
+
+
+/* Character set flags */
+
+#define CF_PRIMARY 0x1		/* primary name for this charset */
+#define CF_DISPLAY 0x2		/* charset used in displays */
+#define CF_POSTING 0x4		/* charset used in email posting */
+#define CF_UNSUPRT 0x8		/* charset unsupported (can't convert to it) */
+#define CF_NOEMAIL 0x10		/* charset not used in email */
 
 
 /* UTF-7 engine states */
@@ -534,6 +553,7 @@ long ucs4_rmapbuf (unsigned char *t,unsigned long *ucs4,unsigned long len,
 unsigned long utf8_get (unsigned char **s,unsigned long *i);
 unsigned long utf8_get_raw (unsigned char **s,unsigned long *i);
 unsigned long ucs4_cs_get (CHARSET *cs,unsigned char **s,unsigned long *i);
+unsigned long *utf8_csvalidmap (char *charsets[]);
 const CHARSET *utf8_infercharset (SIZEDTEXT *src);
 long utf8_validate (unsigned char *s,unsigned long i);
 void utf8_text_1byte0 (SIZEDTEXT *text,SIZEDTEXT *ret,ucs4cn_t cv,ucs4de_t de);
@@ -561,3 +581,4 @@ long ucs4_width (unsigned long c);
 long utf8_strwidth (unsigned char *s);
 long utf8_textwidth (SIZEDTEXT *utf8);
 unsigned long ucs4_decompose (unsigned long c,void **more);
+unsigned long ucs4_decompose_recursive (unsigned long c,void **more);
