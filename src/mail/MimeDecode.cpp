@@ -456,7 +456,7 @@ static bool NeedsEncoding(const String& in)
 
 // encode the given text unconditionally, i.e. without checking if it must be
 // encoded (this is supposed to be done in the caller) and using the specified
-// encodings andcharset (which are supposed to be detected by the caller too)
+// encodings and charset (which are supposed to be detected by the caller too)
 static String
 EncodeText(const String& in,
            wxFontEncoding enc,
@@ -512,6 +512,14 @@ EncodeText(const String& in,
       }
       else // Base64
       {
+         // rfc822_binary() splits lines after 60 characters so don't make
+         // chunks longer than this as the base64-encoded headers can't have
+         // EOLs in them
+         static const int CCLIENT_MAX_BASE64_LEN = 60;
+
+         if ( lenRemaining > CCLIENT_MAX_BASE64_LEN )
+            lenRemaining = CCLIENT_MAX_BASE64_LEN;
+
          // we can calculate how many characters we may put into lenRemaining
          // directly
          len = (lenRemaining / 4) * 3 - 2;
