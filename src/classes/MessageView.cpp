@@ -2030,7 +2030,7 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
 void MessageView::ShowEmbeddedMessageSeparator()
 {
    if ( m_ProfileValues.decorateEmbedded )
-      ShowTextLine(wxString(80, '_'));
+      ShowTextLine("\r\n" + wxString(80, '_'));
 }
 
 void MessageView::ShowEmbeddedMessageStart(const MimePart& part)
@@ -2040,22 +2040,29 @@ void MessageView::ShowEmbeddedMessageStart(const MimePart& part)
    if ( !m_ProfileValues.showEmbeddedHeaders )
       return;
 
-   const MimePart * const nested = part.GetNested();
-   if ( nested )
+   const wxArrayString
+      displayHeaders = strutil_restore_array(GetHeaderNamesToDisplay());
+   if ( !displayHeaders.empty() )
    {
-      const wxArrayString
-         displayHeaders = strutil_restore_array(GetHeaderNamesToDisplay());
-      if ( !displayHeaders.empty() )
-      {
-         m_viewer->StartHeaders();
+      m_viewer->StartHeaders();
 
-         ViewableInfoFromHeaders vi;
-         ShowMatchingHeaders(nested->GetHeaders(), displayHeaders, &vi);
+      // we need to get the headers of the embedded message, which are not the
+      // headers of MESSAGE/RFC822 part (they're basically limited to just
+      // "Content-Type: message/rfc822") nor the headers of the nested part
+      unsigned long len = 0;
+      const char * const hdrStart = (const char *)part.GetRawContent(&len);
 
-         ShowInfoFromHeaders(vi);
+      // headers are separated from the body by a blank line
+      const char * const hdrEnd = strstr(hdrStart, "\r\n\r\n");
+      if ( hdrEnd )
+         len = hdrEnd - hdrStart + 2; // leave "\r\n" terminating last header
 
-         m_viewer->EndHeaders();
-      }
+      ViewableInfoFromHeaders vi;
+      ShowMatchingHeaders(String(hdrStart, len), displayHeaders, &vi);
+
+      ShowInfoFromHeaders(vi);
+
+      m_viewer->EndHeaders();
    }
 }
 
