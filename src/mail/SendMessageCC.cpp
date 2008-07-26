@@ -1633,11 +1633,10 @@ SendMessageCC::Send(int flags)
    hostlist[1] = NIL;
 
    // preview message being sent if asked for it
-   String msgText;
    bool confirmSend;
    if ( READ_CONFIG(m_profile, MP_PREVIEW_SEND) )
    {
-      Preview(&msgText);
+      Preview();
 
       // if we preview it, we want to confirm it too
       confirmSend = true;
