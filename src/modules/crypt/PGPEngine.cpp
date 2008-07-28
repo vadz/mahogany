@@ -52,6 +52,30 @@ extern const MOption MP_PGP_KEYSERVER;
 extern const MPersMsgBox *M_MSGBOX_REMEMBER_PGP_PASSPHRASE;
 
 // ----------------------------------------------------------------------------
+// miscellaneous helper functions
+// ----------------------------------------------------------------------------
+
+namespace
+{
+
+void SkipSpaces(const wxChar *& pc)
+{
+   while ( *pc && wxIsspace(*pc) )
+      pc++;
+}
+
+String ReadNumber(const wxChar *& pc)
+{
+   const wxChar * const start = pc;
+   while ( *pc && ('0' <= *pc && *pc <= '9') )
+      pc++;
+
+   return String(start, pc - start);
+}
+
+} // anonymous namespace
+
+// ----------------------------------------------------------------------------
 // PassphraseManager: this class can be used to remember the passphrases
 //                    instead of asking the user to reenter them again and
 //                    again (and again...)
@@ -130,7 +154,7 @@ protected:
    /**
       Executes PGP/GPG with messageIn on stdin and puts stdout into messageOut.
 
-      @param options are hte PGP/GPG program options
+      @param options are the PGP/GPG program options
       @param messageIn will be written to child stdin
       @param messageOut will contain child stdout
       @param log may contain miscellaneous additional info
@@ -140,12 +164,6 @@ protected:
                       const String& messageIn,
                       String& messageOut,
                       MCryptoEngineOutputLog *log);
-
-   /// this is the worker function used by ExecCommand()
-   Status DoExecCommand(const String& options,
-                        const String& messageIn,
-                        String& messageOut,
-                        MCryptoEngineOutputLog *log);
 
 private:
    DECLARE_CRYPTO_ENGINE(PGPEngine)
@@ -168,7 +186,7 @@ IMPLEMENT_CRYPTO_ENGINE(PGPEngine,
 // ----------------------------------------------------------------------------
 
 /*
-   The format of "gnupg --status-fd" output is descrived in the DETAILS file of
+   The format of "gnupg --status-fd" output is described in the DETAILS file of
    gnupg distribution, see
 
    http://cvs.gnupg.org/cgi-bin/viewcvs.cgi/gnupg/doc/DETAILS?rev=HEAD
@@ -193,15 +211,11 @@ private:
 };
 
 PGPEngine::Status
-PGPEngine::DoExecCommand(const String& options,
-                         const String& messageIn,
-                         String& messageOut,
-                         MCryptoEngineOutputLog *log)
+PGPEngine::ExecCommand(const String& options,
+                       const String& messageIn,
+                       String& messageOut,
+                       MCryptoEngineOutputLog *log)
 {
-   // First copy from in to out, in case there is a problem and we can't
-   // execute the command. At least, the original message will be visible.
-   messageOut = messageIn;
-
    // check if we have a PGP command: it can be set to nothing to disable pgp
    // support
    const String pgp = READ_APPCONFIG_TEXT(MP_PGP_COMMAND);
@@ -247,7 +261,6 @@ PGPEngine::DoExecCommand(const String& options,
    wxTextInputStream errText(*err);
 
    Status status = MAX_ERROR;
-   bool encryptedForSomeoneElse = false;
 
    // the user hint and the passphrase
    String user,
@@ -261,13 +274,14 @@ PGPEngine::DoExecCommand(const String& options,
    const char *ptrIn = bufIn;
 
    bool outEof = false,
-        errEof = false;
+        errEof = false,
+        inEof = false;  // set to true when we can safely close child stdin
    while ( !process.IsDone() || !outEof || !errEof )
    {
       wxYieldIfNeeded();
 
       // the order is important here, lest we deadlock: first get everything
-      // gpg has for us and only then try to feed it more data
+      // GPG has for us and only then try to feed it more data
       if ( out->GetLastError() == wxSTREAM_EOF )
       {
          outEof = true;
@@ -292,9 +306,11 @@ PGPEngine::DoExecCommand(const String& options,
 
          lenIn -= lenChunk;
          ptrIn += lenChunk;
-
-         if ( !lenIn )
-            process.CloseOutput();
+      }
+      else if ( inEof && in )
+      {
+         process.CloseOutput();
+         in = NULL;
       }
 
       if ( err->GetLastError() == wxSTREAM_EOF )
@@ -328,23 +344,28 @@ PGPEngine::DoExecCommand(const String& options,
                  code == _T("SIG_ID") ||
                  code == _T("DECRYPTION_OKAY") )
             {
-               if ( status != SIGNATURE_EXPIRED_ERROR ) {
+               if ( status != SIGNATURE_EXPIRED_ERROR )
+               {
+                  wxLogStatus(_("Valid signature from \"%s\""),
+                              log->GetUserID().c_str());
                   status = OK;
                }
-
             }
             else if ( code == _T("BADARMOR") )
             {
                status = BAD_ARGUMENT_ERROR;
                wxLogWarning(_("The PGP message is malformed, "
                               "processing aborted."));
-               // If the message is not correctly formatted, GPG does not 
+               // If the message is not correctly formatted, GPG does not
                // output the resulting message, so we must copy the input
                // into the output
                messageOut = messageIn;
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
+               wxLogWarning(_("Expired signature from \"%s\""),
+                            log->GetUserID().c_str());
+
                status = SIGNATURE_EXPIRED_ERROR;
             }
             else if ( code == _T("BADSIG") )
@@ -366,6 +387,8 @@ PGPEngine::DoExecCommand(const String& options,
                     code == _T("TRUST_NEVER") )
                {
                   status = SIGNATURE_UNTRUSTED_WARNING;
+                  wxLogStatus(_("Valid signature from (invalid) \"%s\""),
+                              log->GetUserID().c_str());
                }
                // else: "_MARGINAL, _FULLY and _ULTIMATE" do not trigger a warning
             }
@@ -375,8 +398,7 @@ PGPEngine::DoExecCommand(const String& options,
                while ( *pc && !wxIsspace(*pc) )
                   pc++;
 
-               if ( *pc )
-                  pc++;
+               SkipSpaces(pc);
 
                // remember the user
                user = pc;
@@ -393,8 +415,6 @@ PGPEngine::DoExecCommand(const String& options,
                if ( !PassphraseManager::Get(user, pass) )
                {
                   status = OPERATION_CANCELED_BY_USER;
-
-                  process.CloseOutput();
 
                   break;
                }
@@ -426,10 +446,15 @@ PGPEngine::DoExecCommand(const String& options,
                   if ( wxStrcmp(pc, _T("passphrase.enter")) == 0 )
                   {
                      // we're being asked for a passphrase
-                     String pass2 = pass;
-                     pass2 += wxTextFile::GetEOL();
+                     const String passNL = pass + wxTextFile::GetEOL();
 
-                     in->Write(pass2.c_str(), pass2.length());
+                     wxWX2MBbuf buf(passNL.mb_str());
+                     const size_t len = strlen(buf);
+                     in->Write(buf, len);
+                     if ( in->LastWrite() != len )
+                     {
+                        wxLogSysError("Failed to communicate with PGP: ");
+                     }
                   }
                   else
                   {
@@ -466,7 +491,107 @@ PGPEngine::DoExecCommand(const String& options,
             }
             else if ( code == _T("NO_SECKEY") )
             {
-               encryptedForSomeoneElse = true;
+               wxLogWarning(_("Secret key needed to decrypt this message is "
+                              "not available"));
+            }
+            else if ( code == _T("BEGIN_SIGNING") )
+            {
+               // we don't need to send anything more to GPG, close its stdin
+               // so it knows that nothing more is coming
+               inEof = true;
+            }
+            else if ( code == _T("SIG_CREATED") )
+            {
+               status = OK;
+
+               // extract hash algorithm, the caller needs it to create OpenPGP
+               // message
+
+               // the format of this line is:
+               //
+               // SIG_CREATED <type> <pkalg> <micalg> <cls> <timestamp> <fp>
+               //
+               // where <type> is one of 'D' (detached), 'C' (clear text) and
+               // 'S' (standard); pkalg is a number (typical value is 17 for
+               // DSA) and the known hash algorithm values are below, see
+               // http://cvs.gnupg.org/cgi-bin/viewcvs.cgi/trunk/include/cipher.h
+               static const struct
+               {
+                  unsigned micalg;
+                  const char *name;
+               } micalgNames[] =
+               {
+                  {  1, "md5" },
+                  {  2, "sha1" },
+                  {  3, "ripemd160" },
+                  {  8, "sha256" },
+                  {  9, "sha384" },
+                  { 10, "sha512" },
+               };
+
+               String err;
+               if ( *pc++ != 'D' )
+               {
+                  err.Printf(_("unexpected signature type '%c'"), pc[-1]);
+               }
+               else
+               {
+                  SkipSpaces(pc);
+
+                  const String pkalg(ReadNumber(pc));
+                  unsigned long n;
+                  if ( !pkalg.ToULong(&n) )
+                  {
+                     err.Printf(_("unexpected public key algorithm \"%s\""),
+                                pkalg.c_str());
+                  }
+                  else
+                  {
+                     SkipSpaces(pc);
+
+                     const String micalg(ReadNumber(pc));
+                     if ( !micalg.ToULong(&n) )
+                     {
+                        err.Printf(_("unexpected hash algorithm \"%s\""),
+                                   micalg.c_str());
+                     }
+                     else
+                     {
+                        bool found = false;
+                        for ( size_t i = 0; i < WXSIZEOF(micalgNames); i++ )
+                        {
+                           if ( micalgNames[i].micalg == n )
+                           {
+                              if ( log )
+                                 log->SetMicAlg(micalgNames[i].name);
+
+                              found = true;
+                              status = OK;
+                              break;
+                           }
+                        }
+
+                        if ( !found )
+                        {
+                           err.Printf(_("unsupported hash algorithm \"%s\", "
+                                        "please configure GPG to use a hash "
+                                        "algorithm compatible with RFC 3156"),
+                                      micalg.c_str());
+
+                           status = SIGN_UNKNOWN_MICALG;
+                        }
+                     }
+                  }
+               }
+
+               if ( !err.empty() )
+               {
+                  // don't overwrite a more specific error code if set above
+                  if ( status != SIGN_UNKNOWN_MICALG )
+                     status = SIGN_ERROR;
+
+                  wxLogError(_("Failed to sign message: %s"), err.c_str());
+               }
             }
             else if ( code == _T("ENC_TO") ||
                       code == _T("BEGIN_DECRYPTION") ||
@@ -488,16 +613,14 @@ PGPEngine::DoExecCommand(const String& options,
                             line.c_str());
             }
             // Extract user id used to sign
-            if ( log &&
-                 ( code == _T("GOODSIG") ||
-                   code == _T("BADSIG") ) )
+            if ( log && (code == _T("GOODSIG") || code == _T("BADSIG")) )
             {
                String userId = String(pc).AfterFirst(' ');
                log->SetUserID(userId);
             }
          }
-#if defined(NDEBUG) // In non-debug mode, log only free-form output
-         else // normal (free form) gpg output
+#ifndef DEBUG // In non-debug mode, log only free-form output
+         else // normal (free form) GPG output
          {
             // remember in the output log object if we have one
             if ( log )
@@ -505,34 +628,12 @@ PGPEngine::DoExecCommand(const String& options,
                log->AddMessage(line);
             }
          }
-#endif
+#endif // release
       }
    }
 
-   switch (status) 
-   {
-      case OK:
-         wxLogStatus(_("Valid signature from \"%s\""),
-                     log->GetUserID().c_str());
-         break;
-
-      case SIGNATURE_UNTRUSTED_WARNING:
-         wxLogStatus(_("Valid signature from (invalid) \"%s\""),
-                     log->GetUserID().c_str());
-         break;
-
-      case SIGNATURE_EXPIRED_ERROR:
-         wxLogWarning(_("Expired signature from \"%s\""),
-                      log->GetUserID().c_str());
-         break;
-
-      default:
-         if ( encryptedForSomeoneElse )
-         {
-            wxLogWarning(_("Secret key needed to decrypt this message is "
-                           "not available"));
-         }
-   }
+   if ( in )
+      process.CloseOutput();
 
    // Removing this assert:
    // There is at least one case (signature not detached) where GPG does not output
@@ -546,15 +647,6 @@ PGPEngine::DoExecCommand(const String& options,
       wxYield();
 
    return status;
-}
-
-PGPEngine::Status
-PGPEngine::ExecCommand(const String& options,
-                       const String& messageIn,
-                       String& messageOut,
-                       MCryptoEngineOutputLog *log)
-{
-   return DoExecCommand(options, messageIn, messageOut, log);
 }
 
 // ----------------------------------------------------------------------------
@@ -584,6 +676,10 @@ PGPEngine::Decrypt(const String& messageIn,
       return CANNOT_EXEC_PROGRAM;
    }
 
+   // First copy from in to out, in case there is a problem and we can't
+   // execute the command. At least, the original message will be visible.
+   messageOut = messageIn;
+
    return ExecCommand(tmpfname.GetName(), wxEmptyString, messageOut, log);
 }
 
@@ -605,14 +701,30 @@ PGPEngine::Encrypt(const String& /* recipient */,
 // ----------------------------------------------------------------------------
 
 PGPEngine::Status
-PGPEngine::Sign(const String& /* user */,
-                const String& /* messageIn */,
-                String& /* messageOut */,
-                MCryptoEngineOutputLog * /* log */)
+PGPEngine::Sign(const String& user,
+                const String& messageIn,
+                String& messageOut,
+                MCryptoEngineOutputLog *log)
 {
-   FAIL_MSG( _T("TODO") );
+   // as in Decrypt(), using stdin to pass both the input file contents and the
+   // passphrase doesn't work well, so use a temporary file
+   wxFile f;
+   MTempFileName tmpfname(&f);
+   if ( !tmpfname.IsOk() || !f.Write(messageIn) )
+   {
+      wxLogError(_("Can't pass the encrypted data to PGP."));
 
-   return NOT_IMPLEMENTED_ERROR;
+      return CANNOT_EXEC_PROGRAM;
+   }
+
+   f.Close(); // close it before calling gpg, otherwise it fails to open it
+
+   String options("--detach-sign");
+   if ( !user.empty() )
+      options += "--local-user " + user;
+
+   options += ' ' + tmpfname.GetName();
+   return ExecCommand(options, wxEmptyString, messageOut, log);
 }
 
 
@@ -656,8 +768,8 @@ PGPEngine::VerifyDetachedSignature(const String& message,
 
    wxString messageOut;
 
-   return ExecCommand(_T("--verify ") + tmpfileSig.GetName() +
-                      _T(" ") + tmpfileText.GetName(),
+   return ExecCommand("--verify " + tmpfileSig.GetName() +
+                      " " + tmpfileText.GetName(),
                       wxEmptyString, messageOut, log);
 }
 
@@ -671,11 +783,11 @@ PGPEngine::GetPublicKey(const String& pk,
                         MCryptoEngineOutputLog *log) const
 {
    String dummyOut;
-   Status status = const_cast<PGPEngine *>(this)->DoExecCommand
+   Status status = const_cast<PGPEngine *>(this)->ExecCommand
                    (
                      wxString::Format
                      (
-                        _T("--keyserver %s --recv-keys %s"),
+                        "--keyserver %s --recv-keys %s",
                         keyserver.c_str(),
                         pk.c_str()
                      ),

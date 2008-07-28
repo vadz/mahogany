@@ -218,10 +218,21 @@ public:
    virtual void AddPart(MimeType::Primary type,
                         const void *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
-                        const String &disposition = _T("INLINE"),
+                        const String &disposition = "INLINE",
                         MessageParameterList const *dlist = NULL,
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM) = 0;
+
+   /**
+      Indicate whether the message should be cryptographically signed.
+
+      By default the message is not signed, this method must be called to try
+      signing it.
+
+      @param user The user name to use for signing, can be empty to use the
+                  default one.
+    */
+   virtual void EnableSigning(const String& user = "") = 0;
 
    /** Writes the message to a String
        @param output string to write to

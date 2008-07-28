@@ -84,10 +84,12 @@ public:
    virtual void AddPart(MimeType::Primary type,
                         const void *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
-                        const String &disposition = _T("INLINE"),
+                        const String &disposition = "INLINE",
                         MessageParameterList const *dlist = NULL,
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM);
+
+   virtual void EnableSigning(const String& user = "");
 
    virtual bool WriteToString(String  &output);
 
@@ -125,9 +127,6 @@ protected:
    /// init the header and contents from an existing message
    void InitFromMsg(const Message *message, const wxArrayInt *partsToOmit);
 
-   /// common part of InitNew() and InitFromMsg()
-   void InitBody();
-
    //@}
 
    /** Sends the message.
@@ -138,16 +137,25 @@ protected:
    bool Send(int flags);
 
    /// set sender address fields
-   void SetupFromAddresses(void);
+   void SetupFromAddresses();
+
+   /**
+      Sign the message cryptographically.
+
+      This is called by Build() if m_sign == true.
+
+      @return false if signing failed, this is a fatal error for this message
+    */
+   bool Sign();
 
    /**
       Builds the message prior to sending or saving it.
 
-      @param forStorage if this is TRUE, store some extra information that is
+      @param forStorage if this is true, store some extra information that is
                         not supposed to be sent, like BCC header.
       @return true if ok or false if we failed to build the message
     */
-   bool Build(bool forStorage = FALSE);
+   bool Build(bool forStorage = false);
 
    /// translate the (wxWin) encoding to (MIME) charset
    String EncodingToCharset(wxFontEncoding enc);
@@ -184,12 +192,23 @@ private:
    /// the envelope
    ENVELOPE *m_Envelope;
 
-   /// the body
-   BODY     *m_Body;
+   /**
+      The top level part.
 
-   /// the next and last body parts
-   PART     *m_NextPart,
-            *m_LastPart;
+      We only used the BODY member of this part but using a PART (which
+      contains a BODY and a pointer to the next PART) allows us to efficiently
+      change the structure of the message by just switching pointers and
+      without copying any data. E.g. the first part added to this message
+      becomes m_partTop but if another part is added later we change m_partTop
+      to be a MULTIPART/MIXED part and set its nested part pointer to the
+      previous value. And if we need to sign the message at the end it's again
+      enough to simply replace m_partTop with a MULTIPART/SIGNED part and move
+      the previous m_partTop value to be its nested part.
+    */
+   PART *m_partTop;
+
+   /// Return the message BODY structure.
+   BODY *GetBody() const { return &m_partTop->body; }
 
    //@}
 
@@ -286,6 +305,19 @@ private:
 
    /// the parent frame (only used for the dialogs)
    wxFrame *m_frame;
+
+
+   /// @name Cryptographic stuff.
+   //@{
+
+   /// If true, we must sign the message. False by default.
+   bool m_sign;
+
+   /// The user name to sign the message as, only used if m_sign and can be
+   /// empty even if m_sign is true.
+   String m_signAsUser;
+
+   //@}
 
    // it uses our ctor
    friend class SendMessage;

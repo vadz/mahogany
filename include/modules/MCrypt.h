@@ -37,30 +37,20 @@ public:
       OK = 0,
       CANNOT_EXEC_PROGRAM,
       OPERATION_CANCELED_BY_USER,
-      NO_PASSPHRASE,
-      OUT_OF_ENV_SPACE_ERROR,
-      BATCH_MODE_ERROR,
-      BAD_ARGUMENT_ERROR,
-      PROCESS_INTERRUPTED_ERROR,
-      OUT_OF_MEM_ERROR,
-      NONEXISTING_KEY_ERROR,
-      KEYRING_ADD_ERROR,
-      KEYRING_EXTRACT_ERROR,
-      KEYRING_EDIT_ERROR,
-      KEYRING_VIEW_ERROR,
-      KEYRING_CHECK_ERROR,
-      KEYRING_SIGNATURE_ERROR,
-      SIGNATURE_EXPIRED_ERROR,
-      SIGNATURE_UNTRUSTED_WARNING,
-      SIGNATURE_ERROR,
-      PUBLIC_KEY_ENCRIPTION_ERROR,
-      ENCRYPTION_ERROR,
-      COMPRESSION_ERROR,
-      SIGNATURE_CHECK_ERROR,
-      PUBLIC_KEY_DECRIPTION_ERROR,
-      DECRYPTION_ERROR,
-      DECOMPRESSION_ERROR,
+      BAD_ARGUMENT_ERROR,           // bad input data format
+      NONEXISTING_KEY_ERROR,        // no public key found
+
+      SIGNATURE_EXPIRED_ERROR,      // expired signature in VerifySignature()
+      SIGNATURE_UNTRUSTED_WARNING,  // valid signature from untrusted source
+      SIGNATURE_ERROR,              // incorrect signature
+      SIGNATURE_CHECK_ERROR,        // generic failure to verify signature
+
+      DECRYPTION_ERROR,             // generic failure of decryption
       NO_DATA_ERROR,                // or no signature in VerifySignature()
+
+      SIGN_ERROR,                   // generic signing error
+      SIGN_UNKNOWN_MICALG,          // unknown hash algorithm used in Sign()
+
       NOT_IMPLEMENTED_ERROR,        // operation not implemented by this engine
       MAX_ERROR
    };
@@ -117,6 +107,21 @@ public:
       Just signs the message.
 
       Takes the user id to use and creates a signed message on output.
+
+      Notice that to create an RFC 3156 compliant message the caller must
+      retrieve the name of the hashing ("Message Integrity Check") algorithm
+      used during signing using MCryptoEngineOutputLog::GetMicAlg().
+
+      @param user
+         The user name to sign the message as, may be empty to use the default
+         user name.
+      @param messageIn
+         The contents of the message to sign, including any MIME headers (see
+         section 6.1 of the RFC 3156 for an example).
+      @param messageOut
+         Contains the input signature on successful return.
+      @param log
+         Optional sink for the messages generated during the operation.
     */
    virtual Status Sign(const String& user,
                        const String& messageIn,
@@ -206,6 +211,19 @@ public:
    const String& GetPublicKey() const { return m_pubkey; }
    void  SetPublicKey(const String& pubkey) { m_pubkey = pubkey; }
 
+   /**
+      Return the name of the hashing algorithm used for generating the
+      signature.
+
+      This only makes sense to use after calling MCryptoEngine::Sign().
+
+      The name of the method comes from "micalg" parameter of multipart/signed
+      in OpenPGP message format, which in turn is an abbreviation of "Message
+      Integrity Check Algorithm".
+    */
+   const String& GetMicAlg() const { return m_micalg; }
+   void SetMicAlg(const String& micalg) { m_micalg = micalg; }
+
    wxWindow *GetParent() const { return m_parent; }
 
 private:
@@ -220,6 +238,9 @@ private:
 
    // the public key mentioned in the PGP output
    String        m_pubkey;
+
+   // the name of the hash algorithm used for signing
+   String        m_micalg;
 };
 
 // ----------------------------------------------------------------------------

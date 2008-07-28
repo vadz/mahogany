@@ -57,9 +57,12 @@
 #include "XFace.h"
 #include "gui/wxMDialogs.h"
 
+#include "modules/MCrypt.h"
+
 #include <wx/file.h>
 #include <wx/filename.h>
 #include <wx/datetime.h>
+#include <wx/scopeguard.h>
 
 extern bool InitSSL(); // from src/util/ssl.cpp
 
@@ -124,10 +127,13 @@ extern const MPersMsgBox *M_MSGBOX_SEND_OFFLINE;
 static long write_stream_output(void *, char *);
 static long write_str_output(void *, char *);
 
+namespace
+{
+
 // test if the header corresponds to one of the address headers
 //
 // NB: the header name must be in upper case
-static inline
+inline
 bool IsAddressHeader(const String& name)
 {
    return name == "FROM" ||
@@ -139,7 +145,7 @@ bool IsAddressHeader(const String& name)
 // test if we allow this header to be set by user
 //
 // NB: the header name must be in upper case
-static inline
+inline
 bool HeaderCanBeSetByUser(const String& name)
 {
    return name != "MIME-VERSION" &&
@@ -150,7 +156,7 @@ bool HeaderCanBeSetByUser(const String& name)
 }
 
 // check if the header name is valid (as defined in 2.2 of RFC 2822)
-static bool IsValidHeaderName(const char *name)
+bool IsValidHeaderName(const char *name)
 {
    if ( !name )
       return false;
@@ -163,6 +169,19 @@ static bool IsValidHeaderName(const char *name)
 
    return true;
 }
+
+// create a new BODY parameter and initialize it
+PARAMETER *CreateBodyParameter(const char *name, const char *value)
+{
+   PARAMETER * const par = mail_newbody_parameter();
+   par->attribute = strdup(name);
+   par->value = strdup(value);
+   par->next = NULL;
+
+   return par;
+}
+
+} // anonymous namespace
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -295,6 +314,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    m_encHeaders = wxFONTENCODING_SYSTEM;
 
    m_cloneOfExisting = false;
+   m_sign = false;
 
    m_headerNames =
    m_headerValues = NULL;
@@ -302,10 +322,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    m_wasBuilt = false;
 
    m_Envelope = mail_newenvelope();
-   m_Body = mail_newbody();
-
-   m_NextPart =
-   m_LastPart = NULL;
+   m_partTop = NULL;
 
    if ( !profile )
    {
@@ -410,24 +427,8 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    }
 }
 
-void SendMessageCC::InitBody()
-{
-   // this is some strange code: we start by creating a fake multipart and then
-   // flatten it in Build() if we realize that we don't have any other parts
-   //
-   // it could probably have been done simpler but this code is there since a
-   // long time and seems to work, so let's not touch it without reason
-   m_Body->type = TYPEMULTIPART;
-   m_Body->nested.part = mail_newbody_part();
-   m_Body->nested.part->next = NULL;
-   m_NextPart = m_Body->nested.part;
-   m_LastPart = m_NextPart;
-}
-
 void SendMessageCC::InitNew()
 {
-   InitBody();
-
    m_ReplyTo = READ_CONFIG_TEXT(m_profile, MP_REPLY_ADDRESS);
 
    /*
@@ -439,7 +440,7 @@ void SendMessageCC::InitNew()
    if ( READ_CONFIG(m_profile, MP_GUESS_SENDER) )
    {
       m_Sender = READ_CONFIG_TEXT(m_profile, MP_SMTPHOST_LOGIN);
-      m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
+      m_Sender.Trim().Trim(false); // remove all spaces on begin/end
 
       if ( Address::Compare(m_From, m_Sender) )
       {
@@ -512,22 +513,22 @@ void SendMessageCC::InitResent(const Message *message)
 
    // now copy the body: note that we have to use ENC7BIT here to prevent
    // c-client from (re)encoding the body
-   m_Body->type = TYPETEXT;
-   m_Body->encoding = ENC7BIT;
-   m_Body->subtype = cpystr("PLAIN");
+   m_partTop = mail_newbody_part();
+   BODY& body = m_partTop->body;
+   body.type = TYPETEXT;
+   body.encoding = ENC7BIT;
+   body.subtype = cpystr("PLAIN");
 
-   // FIXME: we potentially copy a lot of data here!
-   String text = message->FetchText();
-   m_Body->contents.text.data = (unsigned char *)cpystr(text.To8BitData());
-   m_Body->contents.text.size = text.length();
+   // FIXME-OPT: we potentially copy a lot of data here!
+   const wxWX2MBbuf text8bit(message->FetchText().To8BitData());
+   body.contents.text.data = (unsigned char *)cpystr(text8bit);
+   body.contents.text.size = strlen(text8bit);
 }
 
 void
 SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit)
 {
    m_cloneOfExisting = true;
-
-   InitBody();
 
    // set the headers not supported by AddHeaderEntry()
 
@@ -632,8 +633,8 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
 
 SendMessageCC::~SendMessageCC()
 {
-   mail_free_envelope (&m_Envelope);
-   mail_free_body (&m_Body);
+   mail_free_envelope(&m_Envelope);
+   mail_free_body_part(&m_partTop);
 
    if(m_headerNames)
    {
@@ -1019,6 +1020,90 @@ String BuildMessageId(const char *hostname)
 }
 
 bool
+SendMessageCC::Sign()
+{
+   // get the text to sign
+   BODY * const bodyOrig = GetBody();
+   rfc822_encode_body_7bit(NULL /* env is unused */, bodyOrig);
+
+   String textToSign;
+   char tmp[MAILTMPLEN + 1];
+   RFC822BUFFER
+      buf = { write_str_output, &textToSign, tmp, tmp, tmp + MAILTMPLEN  };
+
+   if ( !rfc822_output_body_header(&buf, bodyOrig) ||
+        !rfc822_output_flush(&buf) ||
+        !(textToSign += "\r\n", rfc822_output_text(&buf, bodyOrig)) ||
+        !rfc822_output_flush(&buf) )
+   {
+      ERRORMESSAGE((_("Failed to create the text to sign.")));
+      return false;
+   }
+
+   // according to 5.1.1 of RFC 2046 the EOL before the boundary line in a
+   // multipart MIME message belongs to the boundary, and not the preceding
+   // line (so that it's possible to have content not terminating with EOL)
+   //
+   // as the old body will become the first part of multipart/signed message
+   // this EOL hence shouldn't be taken into account when signing it
+   if ( textToSign.EndsWith("\r\n") )
+      textToSign.erase(textToSign.length() - 2);
+
+
+   // sign it
+   MCryptoEngineFactory * const
+      factory = (MCryptoEngineFactory *)MModule::LoadModule("PGPEngine");
+   CHECK( factory, false, "failed to create PGPEngineFactory" );
+
+   wxON_BLOCK_EXIT_OBJ0(*factory, MCryptoEngineFactory::DecRef);
+
+   MCryptoEngine * const pgpEngine = factory->Get();
+   MCryptoEngineOutputLog log(m_frame);
+
+   String signature;
+   MCryptoEngine::Status status = pgpEngine->Sign
+                                             (
+                                                m_signAsUser,
+                                                textToSign,
+                                                signature,
+                                                &log
+                                             );
+   if ( status != MCryptoEngine::OK )
+   {
+      const size_t n = log.GetMessageCount();
+      String err = n == 0 ? String(_("no error information available"))
+                          : log.GetMessage(n - 1);
+      
+      ERRORMESSAGE((_("Signing the message failed: %s"), err.c_str()));
+
+      return false;
+   }
+
+   // create the new multipart/signed message
+   PART * const partOrig = m_partTop;
+
+   m_partTop = mail_newbody_part();
+   BODY& body = m_partTop->body;
+   body.type = TYPEMULTIPART;
+   body.subtype = cpystr("SIGNED");
+   body.nested.part = partOrig;
+
+   // fill in required parameters, see RFC 3156 section 5
+   body.parameter = CreateBodyParameter("protocol",
+                                        "application/pgp-signature");
+   body.parameter->next = CreateBodyParameter("micalg",
+                                              "pgp-" + log.GetMicAlg());
+
+   const wxWX2MBbuf asciiSig(signature.ToAscii());
+   AddPart(MimeType::APPLICATION,
+           asciiSig, strlen(asciiSig),
+           "PGP-SIGNATURE",
+           "" /* no disposition */);
+
+   return true;
+}
+
+bool
 SendMessageCC::Build(bool forStorage)
 {
    if ( m_wasBuilt )
@@ -1204,17 +1289,14 @@ SendMessageCC::Build(bool forStorage)
    m_headerNames[h] = NULL;
    m_headerValues[h] = NULL;
 
-   mail_free_body_part(&m_LastPart->next);
-   m_LastPart->next = NULL;
 
-   // check if there is only one part, then we don't need multipart/mixed
-   if(m_LastPart == m_Body->nested.part)
-   {
-      BODY *oldbody = m_Body;
-      m_Body = &(m_LastPart->body);
-      oldbody->nested.part = NULL;
-      mail_free_body(&oldbody);
-   }
+   // after fully constructing everything check if we need to add a
+   // cryptographic signature
+   //
+   // notice that we shouldn't sign (or modify in any other way) messages being
+   // resent/bounced nor those we don't send right now
+   if ( !forStorage && m_sign && !m_Envelope->remail && !Sign() )
+      return false;
 
    return true;
 }
@@ -1228,39 +1310,73 @@ SendMessageCC::AddPart(MimeType::Primary type,
                        MessageParameterList const *plist,
                        wxFontEncoding enc)
 {
-   BODY *bdy;
-   unsigned char *data;
+   // adjust the input parameters
 
-   // the text must be NUL terminated or it will not be encoded correctly and
-   // it won't hurt to add a NUL after the end of data in the other cases as
-   // well (note that cclient won't get this last NUL as len will be
-   // decremented below)
-   len += sizeof(char);
-   data = (unsigned char *) fs_get (len);
-   len -= sizeof(char);
+   // FIXME-OPT: we're copying a lot of data here, if we could ensure that
+   //            buf is already allocated with malloc() and is NUL-terminated
+   //            (this is important of encoding it wouldn't work correctly) we
+   //            would be able to avoid it
+   unsigned char * const data = (unsigned char *) fs_get(len + sizeof(char));
    data[len] = '\0';
    memcpy(data, buf, len);
 
    String subtype(subtype_given);
-   if( subtype.length() == 0 )
+   if( subtype.empty() )
    {
       if ( type == TYPETEXT )
-         subtype = _T("PLAIN");
+         subtype = "PLAIN";
       else if ( type == TYPEAPPLICATION )
-         subtype = _T("OCTET-STREAM");
+         subtype = "OCTET-STREAM";
       else
       {
          // shouldn't send message without MIME subtype, but we don't have any
          // and can't find the default!
          ERRORMESSAGE((_("MIME type specified without subtype and\n"
                          "no default subtype for this type.")));
-         subtype = _T("UNKNOWN");
+         subtype = "UNKNOWN";
       }
    }
 
-   bdy = &(m_NextPart->body);
-   bdy->type = type;
+   // create a new MIME part
 
+   // if it's the first one, it [provisionally] becomes the top level one
+   BODY *bdy;
+   if ( !m_partTop )
+   {
+      m_partTop = mail_newbody_part();
+
+      bdy = &m_partTop->body;
+   }
+   else // we already have some part(s)
+   {
+      PART *part = m_partTop->body.nested.part;
+      if ( !part )
+      {
+         // we need to create a new multipart/mixed top part and make the old
+         // part and this one its subparts
+         PART * const partOrig = m_partTop;
+
+         m_partTop = mail_newbody_part();
+         m_partTop->body.type = TYPEMULTIPART;
+         m_partTop->body.subtype = cpystr("MIXED");
+
+         part =
+         m_partTop->body.nested.part = partOrig;
+      }
+      else // we already have a top-level multipart
+      {
+         // add this part after the existing subparts
+         while ( part->next )
+            part = part->next;
+      }
+
+      PART * const partNew = mail_newbody_part();
+      part->next = partNew;
+
+      bdy = &partNew->body;
+   }
+
+   bdy->type = type;
    bdy->subtype = cpystr(subtype.c_str());
 
    bdy->contents.text.data = data;
@@ -1323,13 +1439,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
          break;
 
       default:
-         bdy->encoding = ENCBINARY;
+         bdy->encoding = NeedsToBeEncoded(data) ? ENCBINARY : ENC7BIT;
    }
-
-   m_NextPart->next = mail_newbody_part();
-   m_LastPart = m_NextPart;
-   m_NextPart = m_NextPart->next;
-   m_NextPart->next = NULL;
 
    PARAMETER *lastpar = NULL,
              *par;
@@ -1398,7 +1509,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
    }
 
    bdy->parameter = lastpar;
-   bdy->disposition.type = strdup(disposition.ToAscii());
+   if ( !disposition.empty() )
+      bdy->disposition.type = strdup(disposition.ToAscii());
    if ( dlist )
    {
       PARAMETER *lastpar = NULL,
@@ -1417,6 +1529,12 @@ SendMessageCC::AddPart(MimeType::Primary type,
             bdy->disposition.parameter = par;
       }
    }
+}
+
+void SendMessageCC::EnableSigning(const String& user)
+{
+   m_sign = true;
+   m_signAsUser = user; // can be empty, ok
 }
 
 // ----------------------------------------------------------------------------
@@ -1508,7 +1626,9 @@ SendMessageCC::SendOrQueue(int flags)
 void SendMessageCC::Preview(String *text)
 {
    String textTmp;
-   WriteToString(textTmp);
+   if ( !WriteToString(textTmp) )
+      return;
+
    MDialog_ShowText(m_frame, _("Outgoing message text"), textTmp, "SendPreview");
 
    if ( text )
@@ -1787,13 +1907,13 @@ SendMessageCC::Send(int flags)
       switch ( m_Protocol )
       {
          case Prot_SMTP:
-            success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
+            success = smtp_mail(stream, "MAIL", m_Envelope, GetBody()) != NIL;
             reply = wxString::From8BitData(stream->reply);
             smtp_close (stream);
             break;
 
          case Prot_NNTP:
-            success = nntp_mail (stream,m_Envelope,m_Body) != 0;
+            success = nntp_mail(stream, m_Envelope, GetBody()) != NIL;
             reply = wxString::From8BitData(stream->reply);
             nntp_close (stream);
             break;
@@ -1869,7 +1989,8 @@ bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
    // install our output routine temporarily
    Rfc822OutputRedirector redirect(true /* with bcc */, this);
 
-   return rfc822_output(headers, m_Envelope, m_Body, writer, where, NIL) != NIL;
+   return rfc822_output(headers, m_Envelope, GetBody(),
+                        writer, where, NIL) != NIL;
 }
 
 bool
