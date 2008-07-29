@@ -2438,7 +2438,7 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          wxCMD_LINE_PARAM,
          "",
          "",
-         gettext_noop("address(es to start composing the message to"),
+         gettext_noop("address(es) to start composing the message to"),
          wxCMD_LINE_VAL_STRING,
          wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE
       },
