@@ -256,14 +256,14 @@ enum ConfigFields
 
    // compose
    ConfigField_ComposeFirst = ConfigField_NewMailLast,
-   ConfigField_UseOutgoingFolder,
-   ConfigField_OutgoingFolder,
-   ConfigField_WrapMargin,
+   ConfigField_ComposeShowFrom,
    ConfigField_Signature,
    ConfigField_SignatureFile,
    ConfigField_SignatureSeparator,
    ConfigField_XFaceFile,
+   ConfigField_WrapMargin,
 
+   ConfigField_ComposerSpacer1,
    ConfigField_ComposerAppearanceHelp,
 #ifdef USE_FONT_DESC
    ConfigField_ComposeViewFont,
@@ -275,17 +275,17 @@ enum ConfigFields
    ConfigField_ComposeViewBGColour,
    ConfigField_ComposeViewColourHeaders,
 
+   ConfigField_ComposerSpacer2,
    ConfigField_ComposeForgottenAttachmentsHelp,
    ConfigField_ComposeCheckForgottenAttachments,
    ConfigField_ComposeCheckAttachmentsRegex,
 
+   ConfigField_ComposerSpacer3,
    ConfigField_ComposePreviewHelp,
    ConfigField_ComposePreview,
    ConfigField_ComposeConfirm,
 
-   ConfigField_ComposeSpacer,
-   ConfigField_ComposeShowFrom,
-
+   ConfigField_ComposeSpacer4,
    ConfigField_ComposeHeaders,
    ConfigField_ComposeTemplates,
 
@@ -322,6 +322,10 @@ enum ConfigFields
    ConfigField_OutboxHelp,
    ConfigField_UseOutbox,
    ConfigField_OutboxName,
+   ConfigField_FoldersSpacer1,
+   ConfigField_OutgoingFolderHelp,
+   ConfigField_UseOutgoingFolder,
+   ConfigField_OutgoingFolder,
    ConfigField_TrashHelp,
    ConfigField_UseTrash,
    ConfigField_TrashName,
@@ -1298,19 +1302,17 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    ConfigField_NewMailMonitor },
 
    // compose
-   { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
-   { gettext_noop("&Folder for sent messages"),
-                                                   Field_Folder,    ConfigField_UseOutgoingFolder },
-   { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
+   { gettext_noop("Allow changing \"&From\" field"),
+                                                   Field_Bool | Field_Advanced,  -1},
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
 
    { gettext_noop("Configure &XFace..."),          Field_XFace,   -1          },
-   // not very useful { gettext_noop("Mail alias substring ex&pansion"), Field_Bool,    -1,                        },
+   { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
 
-   { gettext_noop("\n"
-                  "The following settings control the appearance "
+   { "",                                           Field_Message, -1 },
+   { gettext_noop("The following settings control the appearance "
                   "of the composer window:"),      Field_Message, -1 },
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font | Field_Global, -1 },
@@ -1326,18 +1328,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use these settings for &headers too"),
                                                    Field_Bool | Field_Global,   -1},
 
-   { gettext_noop("\n"
-                  "Mahogany can try to detect if you forget to attach a file\n"
+   { "",                                           Field_Message, -1 },
+   { gettext_noop("Mahogany can try to detect if you forget to attach a file "
                   "to your message when you mentioned it in the message text.\n"
-                  "If the check is activated, the regular expression below can\n"
+                  "If the check is activated, the regular expression below can "
                   "be used to select the words which indicate attachment present."),
                                                    Field_Message, -1 },
    { gettext_noop("Check for &forgotten attachments"), Field_Bool, -1 },
    { gettext_noop("Attachments check rege&x"),     Field_Text,
                                                    ConfigField_ComposeCheckForgottenAttachments },
 
-   { gettext_noop("\n"
-                  "The settings below allow you to have a last look at the\n"
+   { "",                                           Field_Message, -1 },
+   { gettext_noop("The settings below allow you to have a last look at the\n"
                   "message before sending it and/or change your mind about\n"
                   "sending it even after pressing the \"Send\" button."),
                                                    Field_Message |
@@ -1349,18 +1351,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                   -ConfigField_ComposePreview },
 
    { "",                                           Field_Message, -1},
-   { gettext_noop("Show \"&From\" field"),         Field_Bool |
-                                                   Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
 
    // reply
    { gettext_noop("There are several different reply commands in Mahogany:\n"
                   "reply to sender only replies to the person who sent the "
-                  "message, reply to all -- to all message recipients and "
-                  "reply to list replies to the mailing list address only\n"
+                  "message,\n"
+                  "reply to all -- to all message recipients and reply to "
+                  "list replies to the mailing list address only\n"
                   "(for this to work you need to configure the mailing list "
                   "addresses in the \"Addresses\" page).\n"
+                  "\n"
                   "What do you want the default reply command to do?"),
                                                    Field_Message |
                                                    Field_Advanced, -1},
@@ -1422,6 +1424,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Folder for &outgoing messages"), Field_Folder |
                                                     Field_Restart |
                                                     Field_AppWide, ConfigField_UseOutbox },
+
+   { "",                                           Field_Message, -1},
+   { gettext_noop("Mahogany may save a copy of outgoing messages locally, "
+                  "should it do it?"),             Field_Message, -1},
+   { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
+   { gettext_noop("&Folder to save them in"),      Field_Folder,    ConfigField_UseOutgoingFolder },
 
    { gettext_noop("\n"
                   "When you delete a message in the folder it can be\n"
@@ -1768,7 +1776,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // Win/Unix
    },
 #ifdef OS_UNIX
-   { "\n",                                         Field_Message, -1 },
+   { "",                                           Field_Message, -1 },
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"
                   ":internal"
@@ -1778,13 +1786,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // OS_UNIX
 
 #ifdef OS_UNIX
-   { "\n",                                         Field_Message, -1 },
-   { gettext_noop("&Image format converter"),     Field_File,    -1                      },
+   { "",                                           Field_Message, -1 },
+   { gettext_noop("&Image format converter"),      Field_File,    -1                      },
    { gettext_noop("Conversion &graphics format"
-                  ":XPM:PNG:BMP:JPG:GIF:PCX:PNM"),    Field_Combo,   -1 },
+                  ":XPM:PNG:BMP:JPG:GIF:PCX:PNM"), Field_Combo,   -1 },
 #endif // OS_UNIX
 
-   { "\n",                                         Field_Message, -1 },
+   { "",                                           Field_Message, -1 },
    { gettext_noop("You may configure the external editor to be used when composing the messages\n"
                   "and optionally choose to always launch it automatically."),
                                                   Field_Message, -1                      },
@@ -1792,7 +1800,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
 
 #ifdef USE_OPENSSL
-   { "\n",                                         Field_Message, -1 },
+   { "",                                           Field_Message, -1 },
    { gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure, "
                   "encrypted communications, if you have the libssl and libcrypto\n"
                   "shared libraries (DLLs) on your system."),
@@ -1801,7 +1809,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Location of libcr&ypto"),      Field_File,    -1                     },
 #endif // USE_OPENSSL
 
-   { "\n",                                         Field_Message, -1 },
+   { "",                                           Field_Message, -1 },
    { gettext_noop("GNU Privacy Guard or a compatible program may be used "
                   "to verify the cryptographic signatures of the messages "
                   "you receive and decrypt them.\n"
@@ -2042,15 +2050,15 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COLLECTATSTARTUP),
 
    // compose
-   CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of messages sent
-   CONFIG_ENTRY(MP_OUTGOINGFOLDER),
-   CONFIG_ENTRY(MP_WRAPMARGIN),
+   CONFIG_ENTRY(MP_COMPOSE_SHOW_FROM),
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
+   CONFIG_ENTRY(MP_WRAPMARGIN),
 
-   CONFIG_NONE(),
+   CONFIG_NONE(), // spacer
+   CONFIG_NONE(), // appearance help
 #ifdef USE_FONT_DESC
    CONFIG_ENTRY(MP_CVIEW_FONT_DESC),
 #else // !USE_FONT_DESC
@@ -2061,17 +2069,17 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_COLOUR_HEADERS),
 
+   CONFIG_NONE(), // spacer
    CONFIG_NONE(), // forgotten attachments help
    CONFIG_ENTRY(MP_CHECK_FORGOTTEN_ATTACHMENTS),
    CONFIG_ENTRY(MP_CHECK_ATTACHMENTS_REGEX),
 
+   CONFIG_NONE(), // spacer
    CONFIG_NONE(), // preview help
    CONFIG_ENTRY(MP_PREVIEW_SEND),
    CONFIG_ENTRY(MP_CONFIRM_SEND),
 
    CONFIG_NONE(), // spacer
-   CONFIG_ENTRY(MP_COMPOSE_SHOW_FROM),
-
    CONFIG_NONE(), // headers button
    CONFIG_NONE(), // templates button
 
@@ -2103,6 +2111,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // outbox help
    CONFIG_ENTRY(MP_USE_OUTBOX),
    CONFIG_ENTRY(MP_OUTBOX_NAME),
+   CONFIG_NONE(), // spacer
+   CONFIG_NONE(), // sent mail help
+   CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
+   CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_NONE(), // trash help
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
