@@ -27,6 +27,7 @@
 #   include <fcntl.h>
 #endif
 
+#include <wx/mimetype.h>
 
 bool sysutil_compare_filenames(String const &file1, String const
                               &file2)
@@ -77,3 +78,12 @@ bool sysutil_compare_filenames(String const &file1, String const
    return strutil_compare_filenames(file1, file2);
 #endif
 }
+
+String ExpandExternalCommand(String command, const String& parameter)
+{
+   if ( command.find("%s") == String::npos )
+      command += " %s";
+
+   return wxFileType::ExpandCommand(command, parameter);
+}
+

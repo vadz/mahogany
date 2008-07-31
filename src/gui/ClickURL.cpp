@@ -47,8 +47,9 @@
 #include "Composer.h"
 #include "Collect.h"
 
+#include "sysutil.h"
+
 #include <wx/clipbrd.h>
-#include <wx/mimetype.h>
 
 #ifdef OS_UNIX
    #include <sys/stat.h>
@@ -502,10 +503,10 @@ void ClickableURL::OpenInBrowser(int options) const
          }
       }
 #endif // Unix
-      // either not netscape or ns isn't running or we have non-UNIX
-      if(! bOk)
+      // either not Netscape or Netscape isn't running or we have non-UNIX
+      if ( !bOk )
       {
-         String command = wxFileType::ExpandCommand(browser, m_url);
+         const String command = ExpandExternalCommand(browser, m_url);
 
          wxString errmsg;
          errmsg.Printf(_("Couldn't launch browser: '%s' failed"),

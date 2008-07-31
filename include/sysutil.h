@@ -94,6 +94,19 @@ private:
    bool   m_keepFile;
 };
 
+/**
+   Helper function to create the full command string from the name of an
+   external command and the given parameter.
+
+   @param command
+      The external command. It may include "%s" to be replaced by the parameter
+      value or not, in the latter case the parameter is appended to the end of
+      the command.
+   @param parameter
+      The parameter to be passed to the external command.
+ */
+String ExpandExternalCommand(String command, const String& parameter);
+
 //@}
 
 #endif // M_SYSUTIL_H

@@ -513,7 +513,9 @@ enum ConfigFields
 
    // helper programs
    ConfigField_HelpersFirst = ConfigField_AdbLast,
-   ConfigField_HelpersHelp1,
+   ConfigField_HelpersHelpPercentS,
+   ConfigField_HelpersSkip0,
+   ConfigField_HelpersHelpBrowser,
    ConfigField_Browser,
 #ifndef OS_WIN    // we don't care about browser kind under Windows
    ConfigField_BrowserIsNetscape,
@@ -521,6 +523,7 @@ enum ConfigFields
    ConfigField_BrowserInNewWindow,
 
 #ifdef OS_UNIX
+   ConfigField_HelpersSkip1,
    ConfigField_HelpersHelp2,
    ConfigField_HelpBrowserKind,
    ConfigField_HelpBrowser,
@@ -528,18 +531,24 @@ enum ConfigFields
 #endif // OS_UNIX
 
 #ifdef OS_UNIX
+   ConfigField_HelpersSkip2,
    ConfigField_ImageConverter,
    ConfigField_ConvertGraphicsFormat,
 #endif // OS_UNIX
 
+   ConfigField_HelpersSkip3,
    ConfigField_HelpExternalEditor,
    ConfigField_ExternalEditor,
    ConfigField_AutoLaunchExtEditor,
+
 #ifdef USE_OPENSSL
+   ConfigField_HelpersSkip4,
    ConfigField_SslHelp,
    ConfigField_SslDllName,
    ConfigField_CryptoDllName,
 #endif // USE_OPENSSL
+
+   ConfigField_HelpersSkip4,
    ConfigField_PGPHelp,
    ConfigField_PGPCommand,
    ConfigField_PGPKeyServer,
@@ -1731,7 +1740,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_BBDB
 
    // helper programs
-   { gettext_noop("The following program will be used to open URLs embedded in messages:"),       Field_Message, -1                      },
+   { gettext_noop("The specification of the helper programs below can include "
+                  "the special string \"%s\" to be replaced with the parameter "
+                  "to the command (i.e. the URL or the name of the file).\n"
+                  "If it is not used, the parameter is appended to the end of "
+                  "the command."),                 Field_Message, -1 },
+   { "\n\n",                                       Field_Message, -1 },
+   { gettext_noop("The following program will be used to open URLs embedded "
+                  "in messages.\n"
+                  "Leave it empty to use the system default browser."),
+                                                  Field_Message, -1                      },
    { gettext_noop("Open &URLs with"),             Field_File,    -1                      },
       // we don't care if it is Netscape or not under Windows
 #ifndef OS_WIN
@@ -1747,39 +1765,45 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // Win/Unix
    },
 #ifdef OS_UNIX
+   { "\n",                                         Field_Message, -1 },
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"
                   ":internal"
-                  ":external"),                Field_Combo,    -1                      },
-   { gettext_noop("&External viewer"),                Field_File,    -1                      },
-   { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
+                  ":external"),                    Field_Combo,    -1                      },
+   { gettext_noop("&External viewer"),             Field_File,    -1                      },
+   { gettext_noop("Help &viewer is Netscape"),     Field_Bool,    -1                      },
 #endif // OS_UNIX
 
 #ifdef OS_UNIX
+   { "\n",                                         Field_Message, -1 },
    { gettext_noop("&Image format converter"),     Field_File,    -1                      },
    { gettext_noop("Conversion &graphics format"
                   ":XPM:PNG:BMP:JPG:GIF:PCX:PNM"),    Field_Combo,   -1 },
 #endif // OS_UNIX
 
+   { "\n",                                         Field_Message, -1 },
    { gettext_noop("You may configure the external editor to be used when composing the messages\n"
-                  "and optionally choose to launch it automatically."),
+                  "and optionally choose to always launch it automatically."),
                                                   Field_Message, -1                      },
    { gettext_noop("&External editor"),            Field_File,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
+
 #ifdef USE_OPENSSL
-   { gettext_noop("\n"
-                  "Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
+   { "\n",                                         Field_Message, -1 },
+   { gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure, "
                   "encrypted communications, if you have the libssl and libcrypto\n"
                   "shared libraries (DLLs) on your system."),
      Field_Message, -1                     },
    { gettext_noop("Location of lib&ssl"),         Field_File,    -1                     },
    { gettext_noop("Location of libcr&ypto"),      Field_File,    -1                     },
 #endif // USE_OPENSSL
-   { gettext_noop("\n"
-                  "GNU Privacy Guard or a compatible program may be used\n"
-                  "to verify the cryptographic signatures of the messages\n"
-                  "you receive and decrypt them. The public key server is\n"
-                  "used to retrieve the keys of the senders."), Field_Message, -1 },
+
+   { "\n",                                         Field_Message, -1 },
+   { gettext_noop("GNU Privacy Guard or a compatible program may be used "
+                  "to verify the cryptographic signatures of the messages "
+                  "you receive and decrypt them.\n"
+                  "The public key server is used to retrieve the keys of "
+                  "the senders."),                Field_Message, -1 },
    { gettext_noop("&GPG command"),                Field_File,    -1                      },
    { gettext_noop("GPG public &key server"),      Field_Text,    -1                      },
 
@@ -2253,6 +2277,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    // helper programs
    CONFIG_NONE(),
+   CONFIG_NONE(),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_BROWSER),
 #ifndef OS_WIN
    CONFIG_ENTRY(MP_BROWSER_ISNS),
@@ -2261,24 +2287,29 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
 #ifdef OS_UNIX
    CONFIG_NONE(),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_HELPBROWSER_KIND),
    CONFIG_ENTRY(MP_HELPBROWSER),
    CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
 #endif // OS_UNIX
 
 #ifdef OS_UNIX
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_CONVERTPROGRAM),
    CONFIG_ENTRY(MP_TMPGFXFORMAT),
 #endif
 
    CONFIG_NONE(),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
    CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
 #ifdef USE_OPENSSL
    CONFIG_NONE(),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_SSL_DLL_SSL),
    CONFIG_ENTRY(MP_SSL_DLL_CRYPTO),
 #endif // USE_OPENSSL
+   CONFIG_NONE(),
    CONFIG_NONE(), // PGP help
    CONFIG_ENTRY(MP_PGP_COMMAND),
    CONFIG_ENTRY(MP_PGP_KEYSERVER),
