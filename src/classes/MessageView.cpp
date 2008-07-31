@@ -147,7 +147,6 @@ extern const MOption MP_TIFF2PS;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_GFX_NOT_INLINED;
-extern const MPersMsgBox *M_MSGBOX_ASK_URL_BROWSER;
 
 // ----------------------------------------------------------------------------
 // helper functions
