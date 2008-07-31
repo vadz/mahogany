@@ -259,23 +259,10 @@ enum ConfigFields
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
-//   ConfigField_WrapAuto,
-   ConfigField_ReplyDefKindHelp,
-   ConfigField_ReplyDefKind,
-   ConfigField_ReplyString,
-   ConfigField_ForwardString,
-   ConfigField_ReplyCollapse,
-   ConfigField_ReplyQuoteOrig,
-   ConfigField_ReplyQuoteSelection,
-   ConfigField_ReplyCharacters,
-   ConfigField_ReplyUseXAttr,
-   ConfigField_ReplyUseSenderInitials,
-   ConfigField_ReplyQuoteEmpty,
    ConfigField_Signature,
    ConfigField_SignatureFile,
    ConfigField_SignatureSeparator,
    ConfigField_XFaceFile,
-   // not very useful ConfigField_AdbSubstring,
 
    ConfigField_ComposerAppearanceHelp,
 #ifdef USE_FONT_DESC
@@ -304,8 +291,23 @@ enum ConfigFields
 
    ConfigField_ComposeLast = ConfigField_ComposeTemplates,
 
+   // reply
+   ConfigField_ReplyFirst = ConfigField_ComposeLast,
+   ConfigField_ReplyDefKindHelp,
+   ConfigField_ReplyDefKind,
+   ConfigField_ReplyString,
+   ConfigField_ForwardString,
+   ConfigField_ReplyCollapse,
+   ConfigField_ReplyQuoteOrig,
+   ConfigField_ReplyQuoteSelection,
+   ConfigField_ReplyCharacters,
+   ConfigField_ReplyUseXAttr,
+   ConfigField_ReplyUseSenderInitials,
+   ConfigField_ReplyQuoteEmpty,
+   ConfigField_ReplyLast = ConfigField_ReplyQuoteEmpty,
+
    // folders
-   ConfigField_FoldersFirst = ConfigField_ComposeLast,
+   ConfigField_FoldersFirst = ConfigField_ReplyLast,
    ConfigField_ReopenLastFolder_HelpText,
    ConfigField_DontOpenAtStartup,
    ConfigField_ReopenLastFolder,
@@ -1300,30 +1302,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Folder for sent messages"),
                                                    Field_Folder,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
-//   { gettext_noop("Wra&p lines automatically"),    Field_Bool | Field_Global,  -1,                        },
-   { gettext_noop("There are several different reply commands in Mahogany:\n"
-                  "reply to sender only replies to the person who sent the\n"
-                  "message, reply to all - to all message recipients and\n"
-                  "reply to list replies to the mailing list address only\n"
-                  "(for this to work you need to configure the mailing list\n"
-                  "addresses in the \"Addresses\" page).\n"
-                  "What do you want the default reply command to do?"),
-                                                   Field_Message |
-                                                   Field_Advanced, -1},
-   { gettext_noop("Default &reply kind:sender:all:list:newsgroup"),
-                                                   Field_Combo |
-                                                   Field_Advanced, -1},
-   { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
-   { gettext_noop("&Forward string in subject"),   Field_Text,    -1,                        },
-   { gettext_noop("Co&llapse reply markers"
-                  ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
-   { gettext_noop("Quote &original message in reply"), Field_Radio,   -1,                        },
-   { gettext_noop("Quote &selected part only"),    Field_Bool, ConfigField_ReplyQuoteOrig,                        },
-   { gettext_noop("Reply prefi&x"),                Field_Text, ConfigField_ReplyQuoteOrig,                        },
-   { gettext_noop("Use &sender attribution"),      Field_Bool, ConfigField_ReplyCharacters },
-   { gettext_noop("Prepend &sender initials"),     Field_Bool, ConfigField_ReplyCharacters,                        },
-   { gettext_noop("&Quote empty lines too"),       Field_Bool |
-                                                   Field_Advanced,    ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
@@ -1375,6 +1353,31 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
+
+   // reply
+   { gettext_noop("There are several different reply commands in Mahogany:\n"
+                  "reply to sender only replies to the person who sent the "
+                  "message, reply to all -- to all message recipients and "
+                  "reply to list replies to the mailing list address only\n"
+                  "(for this to work you need to configure the mailing list "
+                  "addresses in the \"Addresses\" page).\n"
+                  "What do you want the default reply command to do?"),
+                                                   Field_Message |
+                                                   Field_Advanced, -1},
+   { gettext_noop("Default &reply kind:sender:all:list:newsgroup"),
+                                                   Field_Combo |
+                                                   Field_Advanced, -1},
+   { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
+   { gettext_noop("&Forward string in subject"),   Field_Text,    -1,                        },
+   { gettext_noop("Co&llapse reply markers"
+                  ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
+   { gettext_noop("Quote &original message in reply"), Field_Radio,   -1,                        },
+   { gettext_noop("Quote &selected part only"),    Field_Bool, ConfigField_ReplyQuoteOrig,                        },
+   { gettext_noop("Reply prefi&x"),                Field_Text, ConfigField_ReplyQuoteOrig,                        },
+   { gettext_noop("Use &sender attribution"),      Field_Bool, ConfigField_ReplyCharacters },
+   { gettext_noop("Prepend &sender initials"),     Field_Bool, ConfigField_ReplyCharacters,                        },
+   { gettext_noop("&Quote empty lines too"),       Field_Bool |
+                                                   Field_Advanced,    ConfigField_ReplyCharacters,                        },
 
    // folders
    { gettext_noop("You may choose to not open any folders at all on startup,\n"
@@ -2042,23 +2045,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of messages sent
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_WRAPMARGIN),
-//   CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP), // Meaningless with minimal editor
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_DEFAULT_REPLY_KIND),
-   CONFIG_ENTRY(MP_REPLY_PREFIX),
-   CONFIG_ENTRY(MP_FORWARD_PREFIX),
-   CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
-   CONFIG_ENTRY(MP_REPLY_QUOTE_ORIG),
-   CONFIG_ENTRY(MP_REPLY_QUOTE_SELECTION),
-   CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
-   CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_XATTR),
-   CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
-   CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
-   // not very useful: CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
 
    CONFIG_NONE(),
 #ifdef USE_FONT_DESC
@@ -2084,6 +2074,19 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    CONFIG_NONE(), // headers button
    CONFIG_NONE(), // templates button
+
+   // reply
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_DEFAULT_REPLY_KIND),
+   CONFIG_ENTRY(MP_REPLY_PREFIX),
+   CONFIG_ENTRY(MP_FORWARD_PREFIX),
+   CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
+   CONFIG_ENTRY(MP_REPLY_QUOTE_ORIG),
+   CONFIG_ENTRY(MP_REPLY_QUOTE_SELECTION),
+   CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
+   CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_XATTR),
+   CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
+   CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
 
    // folders
    CONFIG_NONE(),
@@ -3529,6 +3532,22 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
 }
 
 // ----------------------------------------------------------------------------
+// wxOptionsPageReply
+// ----------------------------------------------------------------------------
+
+wxOptionsPageReply::wxOptionsPageReply(wxNotebook *parent, Profile *profile)
+                  : wxOptionsPageStandard(parent,
+                                          _("Reply"),
+                                          profile,
+                                          ConfigField_ReplyFirst,
+                                          ConfigField_ReplyLast,
+                                          // TODO: update help topics
+                                          MH_OPAGE_COMPOSE)
+{
+}
+
+
+// ----------------------------------------------------------------------------
 // wxOptionsPageMessageView
 // ----------------------------------------------------------------------------
 
@@ -4813,6 +4832,7 @@ const char *wxOptionsNotebook::ms_aszImages[] =
    "network",
    "newmail",
    "compose",
+   "reply",
    "folders",
    "msgview",
    "folderview",
@@ -4848,6 +4868,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPageNetwork(this, profile);
    new wxOptionsPageNewMail(this, profile);
    new wxOptionsPageCompose(this, profile);
+   new wxOptionsPageReply(this, profile);
    new wxOptionsPageFolders(this, profile);
    new wxOptionsPageMessageView(this, profile);
    new wxOptionsPageFolderView(this, profile);

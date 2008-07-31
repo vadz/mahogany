@@ -121,6 +121,7 @@ ident		BITMAP "ident.bmp"
 network		BITMAP "network.bmp"
 newmail		BITMAP "newmail.bmp"
 compose		BITMAP "compose.bmp"
+reply		BITMAP "reply.bmp"
 folders		BITMAP "folders.bmp"
 #ifdef USE_PYTHON
 python		BITMAP "python.bmp"

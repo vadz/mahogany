@@ -2686,6 +2686,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
    (void)new wxOptionsPageNetwork(this, profile);
    (void)new wxOptionsPageNewMail(this, profile);
    (void)new wxOptionsPageCompose(this, profile);
+   (void)new wxOptionsPageReply(this, profile);
    (void)new wxOptionsPageFolders(this, profile);
    (void)new wxOptionsPageMessageView(this, profile);
    (void)new wxOptionsPageFolderView(this, profile);

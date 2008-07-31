@@ -33,6 +33,7 @@ enum OptionsPage
    OptionsPage_Network,
    OptionsPage_NewMail,
    OptionsPage_Compose,
+   OptionsPage_Reply,
    OptionsPage_Folders,
 #ifdef USE_PYTHON
    OptionsPage_Python,

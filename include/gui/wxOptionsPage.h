@@ -614,7 +614,7 @@ private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageNewMail)
 };
 
-// settings concerning the compose window
+// settings concerning the compose window and outgoing mail in general
 class wxOptionsPageCompose : public wxOptionsPageStandard
 {
 public:
@@ -657,6 +657,17 @@ private:
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxOptionsPageCompose)
+};
+
+// settings concerning replies (extracted from the compose page because it was
+// starting to have too many entries)
+class wxOptionsPageReply : public wxOptionsPageStandard
+{
+public:
+   wxOptionsPageReply(wxNotebook *parent, Profile *profile);
+
+private:
+   DECLARE_NO_COPY_CLASS(wxOptionsPageReply)
 };
 
 // settings concerning the message view window
