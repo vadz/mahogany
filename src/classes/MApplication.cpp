@@ -427,8 +427,9 @@ MAppBase::OnStartup()
    // called
    m_debugMail = m_cmdLineOptions->debugMail;
 
-   // safe mode disables remote calls
-   if ( !m_cmdLineOptions->safe )
+   // delegating to another instance can be disabled with a special
+   // command-line option
+   if ( !m_cmdLineOptions->noRemote )
    {
       // before doing anything else, if the corresponding option is set, check
       // if another program instance is not already running

@@ -2317,6 +2317,7 @@ void wxMApp::ShowLog(bool doShow)
 #define OPTION_LANG        "lang"
 #define OPTION_NEWSGROUP   "newsgroup"
 #define OPTION_NOPYTHON    "nopython"
+#define OPTION_NOREMOTE    "noremote"
 #define OPTION_SAFE        "safe"
 #define OPTION_SUBJECT     "subject"
 
@@ -2409,6 +2410,15 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          gettext_noop("don't load Python interpreter even if configured to do so"),
       },
 
+      // --noremote to disable MP_RUNONEONLY option even if it's on
+      {
+         wxCMD_LINE_SWITCH,
+         "",
+         OPTION_NOREMOTE,
+         gettext_noop("don't reuse an already running instance even if "
+                     "configured to do so")
+      },
+
       // --newsgroup to specify the newsgroup to post the message to
       {
          wxCMD_LINE_OPTION,
@@ -2480,6 +2490,17 @@ bool wxMApp::OnCmdLineParsed(wxCmdLineParser& parser)
    }
 
    m_cmdLineOptions->safe = parser.Found(OPTION_SAFE);
+   if ( m_cmdLineOptions->safe )
+   {
+      // safe mode implies running this instance and not switching to another
+      // one
+      m_cmdLineOptions->noRemote = true;
+   }
+   else
+   {
+      m_cmdLineOptions->noRemote = parser.Found(OPTION_NOREMOTE);
+   }
+
    m_cmdLineOptions->debugMail = parser.Found(OPTION_DEBUGMAIL);
 
 #ifdef USE_PYTHON

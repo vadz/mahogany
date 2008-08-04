@@ -61,6 +61,9 @@ public:
    bool noPython;
 #endif // USE_PYTHON
 
+   // don't switch to an already running instance even if configured to do it
+   bool noRemote;
+
    /**
      @name Conversion to/from string
 

@@ -1016,6 +1016,9 @@ either {\tt /} or {\tt -} but only {\tt -{}-} can be used for the long ones.
    -{}-nopython & disable the embedded Python interpreter, even if it is
 enabled in the program options (\ref{PythonOptions}) \\
    \hline
+   -{}-noremote & don't reuse an already running instance of Mahogany even if
+the corresponding option is set \\
+   \hline
    \end{tabular}
 }
 
