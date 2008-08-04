@@ -2205,7 +2205,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // (we use it to make the tab navigation work)
    m_splitter = new wxPSplitterWindow(_T("ComposeSplit"), this, -1,
                                       wxDefaultPosition, wxDefaultSize,
-                                      wxSP_3D);
+                                      wxSP_3D | wxSP_NO_XP_THEME);
 
    m_panel = new wxPanel(m_splitter, -1);
 
