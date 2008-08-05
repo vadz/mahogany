@@ -20,7 +20,7 @@
 /// version info
 #define M_VERSION_MAJOR   0
 #define M_VERSION_MINOR   67
-#define M_VERSION_RELEASE 1
+#define M_VERSION_RELEASE 2
 #define M_VERSION_STATUS  wxEmptyString // "a"=alpha
 
 /// the macros to build the version string from the components
