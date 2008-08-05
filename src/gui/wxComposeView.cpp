@@ -1757,7 +1757,7 @@ Composer *Composer::CheckForExistingReply(Message *original)
       {
          if ( !MDialog_YesNoDialog
                (
-                  _("Thee is already an existing composer window for this\n"
+                  _("There is already an existing composer window for this\n"
                     "message, do you want to reuse it?"),
                   cv->GetFrame(),
                   MDIALOG_YESNOTITLE,
