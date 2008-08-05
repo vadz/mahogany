@@ -1733,7 +1733,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// show PGP-related controls in the composer?
 #define   MP_COMPOSE_USE_PGP_DEFVAL   1L
 /// sign messages with PGP?
-#define   MP_COMPOSE_PGPSIGN_DEFVAL   1L
+#define   MP_COMPOSE_PGPSIGN_DEFVAL   0L
 /// the user name to sign messages with PGP as
 #define   MP_COMPOSE_PGPSIGN_AS_DEFVAL   ""
 
