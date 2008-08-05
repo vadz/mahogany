@@ -1767,12 +1767,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_BBDB
 
    // helper programs
-   { gettext_noop("The specification of the helper programs below can include "
-                  "the special string \"%s\" to be replaced with the parameter "
-                  "to the command (i.e. the URL or the name of the file).\n"
-                  "If it is not used, the parameter is appended to the end of "
-                  "the command."),                 Field_Message, -1 },
-   { "\n\n",                                       Field_Message, -1 },
+   { gettext_noop("The specification of the helper programs below can include the special\n"
+                  "string \"%s\" to be replaced with the parameter to the command (i.e.\n"
+                  "the URL or the name of the file).\n"
+                  "If it is not used, the parameter is appended to the end of the command."),
+                                                   Field_Message, -1 },
+   { "\n",                                         Field_Message, -1 },
    { gettext_noop("The following program will be used to open URLs embedded "
                   "in messages.\n"
                   "Leave it empty to use the system default browser."),
