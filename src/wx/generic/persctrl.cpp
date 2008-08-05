@@ -1839,6 +1839,11 @@ int wxPMessageBox(const wxString& configPath,
                ::ReleaseCapture();
 #endif // __WINDOWS__
 
+                // show any previous error messages, they could contain useful
+                // information which could help the user to answer our question
+                // or otherwise understand this message
+                wxLog::FlushActive();
+
                 // do show the msg box
                 wxPMessageDialog dlg(parent, message, caption, style, *params);
                 rc = dlg.ShowModal();
