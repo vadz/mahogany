@@ -438,7 +438,7 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 // highlight the options according to their origin in the options dialog
 extern const MOption MP_OPTION_SHOW_ORIGIN;
 #define MP_OPTION_SHOW_ORIGIN_NAME "ShowOptionOrigin"
-#define MP_OPTION_SHOW_ORIGIN_DEFVAL 1l
+#define MP_OPTION_SHOW_ORIGIN_DEFVAL 1L
 
 // the colour for the options set at this folder level
 extern const MOption MP_OPTION_ORIGIN_HERE;
@@ -1308,22 +1308,22 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /** @name default values of configuration entries */
 //@{
 /// The Profile Type. [OBSOLETE]
-#define   MP_PROFILE_TYPE_DEFVAL      0l
+#define   MP_PROFILE_TYPE_DEFVAL      0L
 /// The type of the config source
 #define   MP_CONFIG_SOURCE_TYPE_DEFVAL ""
 /// The priority of the config source
-#define   MP_CONFIG_SOURCE_PRIO_DEFVAL 0l
+#define   MP_CONFIG_SOURCE_PRIO_DEFVAL 0L
 /// our version
 #define   MP_VERSION_DEFVAL          ""
 /// are we running for the first time?
 #define   MP_FIRSTRUN_DEFVAL         1
 /// shall we record default values in configuration files
-#define   MP_RECORDDEFAULTS_DEFVAL      0l
+#define   MP_RECORDDEFAULTS_DEFVAL      0L
 /// expand env vars in entries read from config?
 #ifdef OS_WIN
-#define   MP_EXPAND_ENV_VARS_DEFVAL 0l
+#define   MP_EXPAND_ENV_VARS_DEFVAL 0L
 #else
-#define   MP_EXPAND_ENV_VARS_DEFVAL 1l
+#define   MP_EXPAND_ENV_VARS_DEFVAL 1L
 #endif
 /// default window position x
 #define   MP_XPOS_DEFVAL        20
@@ -1334,9 +1334,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// default window height
 #define   MP_HEIGHT_DEFVAL   400
 /// window iconisation status
-#define   MP_ICONISED_DEFVAL 0l
+#define   MP_ICONISED_DEFVAL 0L
 /// window maximized?
-#define   MP_MAXIMISED_DEFVAL 0l
+#define   MP_MAXIMISED_DEFVAL 0L
 /// tool bars shown?
 #define   MP_SHOW_TOOLBAR_DEFVAL    1L
 /// status bars shown?
@@ -1348,7 +1348,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the file to save log messages to (if not empty)
 #define   MP_LOGFILE_DEFVAL ""
 /// debug protocols and folder access?
-#define   MP_DEBUG_CCLIENT_DEFVAL   0l
+#define   MP_DEBUG_CCLIENT_DEFVAL   0L
 /// open ADB editor on startup?
 #define   MP_SHOWADBEDITOR_DEFVAL 0L
 /// show tips at startup?
@@ -1362,13 +1362,13 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// is help browser of netscape type?
 #define   MP_HELPBROWSER_ISNS_DEFVAL   1
 /// width of help frame
-#define MP_HELPFRAME_WIDTH_DEFVAL 560l
+#define MP_HELPFRAME_WIDTH_DEFVAL 560L
 /// height of help frame
-#define MP_HELPFRAME_HEIGHT_DEFVAL    500l
+#define MP_HELPFRAME_HEIGHT_DEFVAL    500L
 /// xpos of help frame
-#define MP_HELPFRAME_XPOS_DEFVAL 40l
+#define MP_HELPFRAME_XPOS_DEFVAL 40L
 /// ypos of help frame
-#define MP_HELPFRAME_YPOS_DEFVAL  40l
+#define MP_HELPFRAME_YPOS_DEFVAL  40L
 /// the directory for mbox folders
 #define   MP_MBOXDIR_DEFVAL         ""
 /// the news spool directory
@@ -1380,22 +1380,22 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL_DEFVAL   1
 /// focus follows mouse?
-#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    0l
+#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    0L
 /// dockable menu bars?
-#define   MP_DOCKABLE_MENUBARS_DEFVAL   1l
+#define   MP_DOCKABLE_MENUBARS_DEFVAL   1L
 /// dockable tool bars?
-#define   MP_DOCKABLE_TOOLBARS_DEFVAL   1l
+#define   MP_DOCKABLE_TOOLBARS_DEFVAL   1L
 /// flat tool bars?
-#define   MP_FLAT_TOOLBARS_DEFVAL      1l
+#define   MP_FLAT_TOOLBARS_DEFVAL      1L
 
 /// the user's M directory
 #define   MP_USERDIR_DEFVAL         ""
 
 /// the acceptance status of the license
-#define MP_LICENSE_ACCEPTED_DEFVAL   0l
+#define MP_LICENSE_ACCEPTED_DEFVAL   0L
 
 /// run onl one copy of the program at once?
-#define MP_RUNONEONLY_DEFVAL 1l
+#define MP_RUNONEONLY_DEFVAL 1L
 
 /// show images in the toolbar
 #define MP_TBARIMAGES_DEFVAL 0l // == TbarShow_Icons - 1
@@ -1443,11 +1443,11 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the strftime() format for dates
 #define   MP_DATE_FMT_DEFVAL         "%c"
 /// display all dates as GMT?
-#define   MP_DATE_GMT_DEFVAL         0l
+#define   MP_DATE_GMT_DEFVAL         0L
 /// show console window
 #define   MP_SHOWCONSOLE_DEFVAL      1
 /// open any folders at all on startup?
-#define   MP_DONTOPENSTARTUP_DEFVAL   0l
+#define   MP_DONTOPENSTARTUP_DEFVAL   0L
 /// names of folders to open at startup
 #define   MP_OPENFOLDERS_DEFVAL      ""
 /// reopen the last opened folder in the main frame
@@ -1460,7 +1460,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_PYTHONDLL_DEFVAL         ""
 #ifdef OS_WIN
 // under Windows, the setup program will create the appropriate registry key
-#define   MP_USEPYTHON_DEFVAL         0l
+#define   MP_USEPYTHON_DEFVAL         0L
 #else
 /// is Python enabled (this is a run-time option)?
 #define   MP_USEPYTHON_DEFVAL         1
@@ -1476,31 +1476,31 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// how often should we check for incoming mail (secs, 0 to disable)?
 #define   MP_POLLINCOMINGDELAY_DEFVAL       300
 /// poll folder only if it is opened
-#define   MP_POLL_OPENED_ONLY_DEFVAL 0l
+#define   MP_POLL_OPENED_ONLY_DEFVAL 0L
 /// collect all new mail at startup?
-#define   MP_COLLECTATSTARTUP_DEFVAL 0l
+#define   MP_COLLECTATSTARTUP_DEFVAL 0L
 /// ask user if he really wants to exit?
-#define   MP_CONFIRMEXIT_DEFVAL      1l
+#define   MP_CONFIRMEXIT_DEFVAL      1L
 /// open folders when they're clicked (otherwise - double clicked)
-#define   MP_OPEN_ON_CLICK_DEFVAL     0l
+#define   MP_OPEN_ON_CLICK_DEFVAL     0L
 /// show all folders (even hidden ones) in the folder tree?
-#define   MP_SHOW_HIDDEN_FOLDERS_DEFVAL 0l
+#define   MP_SHOW_HIDDEN_FOLDERS_DEFVAL 0L
 /// create .profile files?
-#define   MP_CREATE_PROFILES_DEFVAL   0l
+#define   MP_CREATE_PROFILES_DEFVAL   0L
 /// umask setting for normal files
 #define   MP_UMASK_DEFVAL               022
 /// the last selected message in the folder view (or -1)
 #define   MP_LASTSELECTED_MESSAGE_DEFVAL -1
 /// automatically show th last selected message in folderview?
-#define   MP_AUTOSHOW_LASTSELECTED_DEFVAL 1l
+#define   MP_AUTOSHOW_LASTSELECTED_DEFVAL 1L
 /// automatically show first message in folderview?
-#define   MP_AUTOSHOW_FIRSTMESSAGE_DEFVAL 0l
+#define   MP_AUTOSHOW_FIRSTMESSAGE_DEFVAL 0L
 /// automatically show first unread message in folderview?
-#define   MP_AUTOSHOW_FIRSTUNREADMESSAGE_DEFVAL 1l
+#define   MP_AUTOSHOW_FIRSTUNREADMESSAGE_DEFVAL 1L
 /// open messages when they're clicked (otherwise - double clicked)
-#define   MP_PREVIEW_ON_SELECT_DEFVAL     1l
+#define   MP_PREVIEW_ON_SELECT_DEFVAL     1L
 /// select the initially focused message
-#define   MP_AUTOSHOW_SELECT_DEFVAL 0l
+#define   MP_AUTOSHOW_SELECT_DEFVAL 0L
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_DEFVAL      "convert %s -compress None %s"
 /// list of modules to load at startup
@@ -1536,15 +1536,15 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// print in colour?
 #define MP_PRINT_COLOUR_DEFVAL 1
 /// top margin
-#define MP_PRINT_TOPMARGIN_X_DEFVAL    0l
+#define MP_PRINT_TOPMARGIN_X_DEFVAL    0L
 /// left margin
-#define MP_PRINT_TOPMARGIN_Y_DEFVAL   0l
+#define MP_PRINT_TOPMARGIN_Y_DEFVAL   0L
 /// bottom margin
-#define MP_PRINT_BOTTOMMARGIN_X_DEFVAL   0l
+#define MP_PRINT_BOTTOMMARGIN_X_DEFVAL   0L
 /// right margin
-#define MP_PRINT_BOTTOMMARGIN_Y_DEFVAL 0l
+#define MP_PRINT_BOTTOMMARGIN_Y_DEFVAL 0L
 /// zoom level in print preview
-#define MP_PRINT_PREVIEWZOOM_DEFVAL   100l
+#define MP_PRINT_PREVIEWZOOM_DEFVAL   100L
 //@}
 /**@name for BBDB address book support */
 //@{
@@ -1581,17 +1581,17 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the default POP3 host
 #define   MP_POPHOST_DEFVAL          "pop"
 /// don't use AUTH with POP3
-#define   MP_POP_NO_AUTH_DEFVAL     0l
+#define   MP_POP_NO_AUTH_DEFVAL     0L
 /// the default IMAP4 host
 #define   MP_IMAPHOST_DEFVAL          "imap"
 /// use SSL for POP/IMAP?
 #define   MP_USE_SSL_DEFVAL       1l // SSLSupport_TLSIfAvailable
 /// accept unsigned SSL certificates?
-#define   MP_USE_SSL_UNSIGNED_DEFVAL 0l
+#define   MP_USE_SSL_UNSIGNED_DEFVAL 0L
 /// the mail host
 #define   MP_SMTPHOST_DEFVAL         "mail"
 /// use the specified sender value or guess it automatically?
-#define   MP_GUESS_SENDER_DEFVAL  1l
+#define   MP_GUESS_SENDER_DEFVAL  1L
 /// the smtp sender value
 #define   MP_SENDER_DEFVAL           ""
 /// the mail host user-id
@@ -1601,9 +1601,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// use SSL?
 #define   MP_SMTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
 /// check ssl-certs for SMTP connections?
-#define   MP_SMTPHOST_USE_SSL_UNSIGNED_DEFVAL   0l
+#define   MP_SMTPHOST_USE_SSL_UNSIGNED_DEFVAL   0L
 /// use ESMTP 8BITMIME extension if available
-#define   MP_SMTP_USE_8BIT_DEFVAL 1l
+#define   MP_SMTP_USE_8BIT_DEFVAL 1L
 /// disabled SMTP authentificators
 #define   MP_SMTP_DISABLED_AUTHS_DEFVAL ""
 /// sendmail command  FIXME - should be detected by configure
@@ -1614,9 +1614,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #endif
 /// use sendmail?
 #ifdef OS_UNIX
-#  define MP_USE_SENDMAIL_DEFVAL 1l
+#  define MP_USE_SENDMAIL_DEFVAL 1L
 #else
-#  define MP_USE_SENDMAIL_DEFVAL 0l
+#  define MP_USE_SENDMAIL_DEFVAL 0L
 #endif
 /// the news server
 #define   MP_NNTPHOST_DEFVAL      "news"
@@ -1627,7 +1627,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// use SSL?
 #define   MP_NNTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
 /// check ssl-certs for NNTP connections?
-#define   MP_NNTPHOST_USE_SSL_UNSIGNED_DEFVAL   0l
+#define   MP_NNTPHOST_USE_SSL_UNSIGNED_DEFVAL   0L
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_DEFVAL      ""
 #ifdef USE_DIALUP
@@ -1636,16 +1636,16 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #endif // USE_DIALUP
 
 /// set reply string from To: field?
-#define MP_SET_REPLY_FROM_TO_DEFVAL   0l
+#define MP_SET_REPLY_FROM_TO_DEFVAL   0L
 /// set reply address only?
-#define MP_SET_REPLY_STD_NAME_DEFVAL  1l
+#define MP_SET_REPLY_STD_NAME_DEFVAL  1L
 /// should we attach vCard to outgoing messages?
-#define MP_USEVCARD_DEFVAL 0l
+#define MP_USEVCARD_DEFVAL 0L
 /// the vCard to use
 #define MP_VCARD_DEFVAL "vcard.vcf"
 
 /// use the folder create wizard (or the dialog directly)?
-#define MP_USE_FOLDER_CREATE_WIZARD_DEFVAL 1l
+#define MP_USE_FOLDER_CREATE_WIZARD_DEFVAL 1L
 
 #ifdef USE_DIALUP
 
@@ -1666,15 +1666,15 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// passwor for mailbox
 #define   MP_FOLDER_PASSWORD_DEFVAL      ""
 /// log level
-#define   MP_LOGLEVEL_DEFVAL         0l
+#define   MP_LOGLEVEL_DEFVAL         0L
 /// show busy info while sorting/threading?
-#define   MP_SHOWBUSY_DURING_SORT_DEFVAL 1l
+#define   MP_SHOWBUSY_DURING_SORT_DEFVAL 1L
 /// threshold for displaying mailfolder progress dialog
 #define   MP_FOLDERPROGRESS_THRESHOLD_DEFVAL 20L
 /// threshold for displaying message retrieval progress dialog (kbytes)
-#define   MP_MESSAGEPROGRESS_THRESHOLD_SIZE_DEFVAL  40l
+#define   MP_MESSAGEPROGRESS_THRESHOLD_SIZE_DEFVAL  40L
 /// threshold for displaying message retrieval progress dialog (seconds)
-#define   MP_MESSAGEPROGRESS_THRESHOLD_TIME_DEFVAL  1l
+#define   MP_MESSAGEPROGRESS_THRESHOLD_TIME_DEFVAL  1L
 /// the default path for saving files
 #define   MP_DEFAULT_SAVE_PATH_DEFVAL      ""
 /// the default filename for saving files
@@ -1694,7 +1694,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC_DEFVAL      ""
 /// show "From:" field in composer?
-#define   MP_COMPOSE_SHOW_FROM_DEFVAL 0l
+#define   MP_COMPOSE_SHOW_FROM_DEFVAL 0L
 
 /// default reply kind
 #define   MP_DEFAULT_REPLY_KIND_DEFVAL 0l  // MailFolder::REPLY_SENDER
@@ -1707,7 +1707,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// prefix for subject in forwards
 #define   MP_FORWARD_PREFIX_DEFVAL      _("Forwarded message: ")
 /// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
-#define   MP_REPLY_COLLAPSE_PREFIX_DEFVAL 2l
+#define   MP_REPLY_COLLAPSE_PREFIX_DEFVAL 2L
 /// include the original message in the reply [no,ask,yes]
 #define MP_REPLY_QUOTE_ORIG_DEFVAL (long)M_ACTION_ALWAYS
 /// include only the selected text (if any) in the reply?
@@ -1715,11 +1715,11 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX_DEFVAL      "> "
 /// use the value of X-Attribution header as the prefix
-#define   MP_REPLY_MSGPREFIX_FROM_XATTR_DEFVAL 1l
+#define   MP_REPLY_MSGPREFIX_FROM_XATTR_DEFVAL 1L
 /// prepend the initials of the sender to the reply prefix?
-#define   MP_REPLY_MSGPREFIX_FROM_SENDER_DEFVAL 0l
+#define   MP_REPLY_MSGPREFIX_FROM_SENDER_DEFVAL 0L
 /// quote the empty lines when replying?
-#define   MP_REPLY_QUOTE_EMPTY_DEFVAL      1l
+#define   MP_REPLY_QUOTE_EMPTY_DEFVAL      1L
 /// use signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_DEFVAL   1
 /// filename of signature file
@@ -1731,9 +1731,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// use "-- " to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_DEFVAL   1
 /// show PGP-related controls in the composer?
-#define   MP_COMPOSE_USE_PGP_DEFVAL   1l
+#define   MP_COMPOSE_USE_PGP_DEFVAL   1L
 /// sign messages with PGP?
-#define   MP_COMPOSE_PGPSIGN_DEFVAL   1l
+#define   MP_COMPOSE_PGPSIGN_DEFVAL   1L
 /// the user name to sign messages with PGP as
 #define   MP_COMPOSE_PGPSIGN_AS_DEFVAL   ""
 
@@ -1750,21 +1750,21 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the position of the folder in the tree
 #define MP_FOLDER_TREEINDEX_DEFVAL      (long)-1        // see enum MFolderIndex
 /// Move new mail to the NewMail folder (if not, only copy)?
-#define MP_MOVE_NEWMAIL_DEFVAL      1l
+#define MP_MOVE_NEWMAIL_DEFVAL      1L
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_DEFVAL      "" // obsolete
 /// Which folder to use as Outbox
 #define MP_OUTBOX_NAME_DEFVAL         ""
 /// Use Outbox?
-#define MP_USE_OUTBOX_DEFVAL            0l
+#define MP_USE_OUTBOX_DEFVAL            0L
 /// Name of Trash folder?
 #define MP_TRASH_FOLDER_DEFVAL      ""
 /// Use a trash folder?
-#define MP_USE_TRASH_FOLDER_DEFVAL   1l
+#define MP_USE_TRASH_FOLDER_DEFVAL   1L
 /// Name of the Drafts folder
 #define MP_DRAFTS_FOLDER_DEFVAL ""
 /// Delete the drafts automatically after the message was sent?
-#define MP_DRAFTS_AUTODELETE_DEFVAL  1l
+#define MP_DRAFTS_AUTODELETE_DEFVAL  1L
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_DEFVAL      ((const char *)NULL) // don't change this!
 /// comment
@@ -1772,23 +1772,23 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_DEFVAL      60
 /// close of folders delayed by
-#define MP_FOLDER_CLOSE_DELAY_DEFVAL    0l
+#define MP_FOLDER_CLOSE_DELAY_DEFVAL    0L
 /// close of network connection delayed by
 #define MP_CONN_CLOSE_DELAY_DEFVAL    60
 /// Wrap quoted lines?
-#define MP_AUTOMATIC_WORDWRAP_DEFVAL   1l
+#define MP_AUTOMATIC_WORDWRAP_DEFVAL   1L
 /// do automatic word wrap?
-#define MP_WRAP_QUOTED_DEFVAL 0l
+#define MP_WRAP_QUOTED_DEFVAL 0L
 /// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN_DEFVAL      75
 /// do automatic word wrap in message view?
-#define MP_VIEW_AUTOMATIC_WORDWRAP_DEFVAL   1l
+#define MP_VIEW_AUTOMATIC_WORDWRAP_DEFVAL   1L
 /// wrapmargin for message view (set to -1 to disable it)
 #define   MP_VIEW_WRAPMARGIN_DEFVAL      100
 /// show TEXT/PLAIN as inlined text?
-#define   MP_PLAIN_IS_TEXT_DEFVAL      1l
+#define   MP_PLAIN_IS_TEXT_DEFVAL      1L
 /// show MESSAGE/RFC822 as text?
-#define   MP_RFC822_IS_TEXT_DEFVAL      0l
+#define   MP_RFC822_IS_TEXT_DEFVAL      0L
 /// show decorations around inlined MESSAGE/RFC822 text?
 #define   MP_RFC822_DECORATE_DEFVAL 1L
 /// show headers of the inlined MESSAGE/RFC822 text?
@@ -1798,7 +1798,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// show graphics inline
 #define   MP_INLINE_GFX_DEFVAL       1
 /// show the external images (for HTML viewer only) too?
-#define   MP_INLINE_GFX_EXTERNAL_DEFVAL 0l
+#define   MP_INLINE_GFX_EXTERNAL_DEFVAL 0L
 /// limit size for inline graphics in Kb (-1 for no limit)
 #define   MP_INLINE_GFX_SIZE_DEFVAL  100
 /// show viewer bar in the message view?
@@ -1806,13 +1806,13 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// which viewer to use in the message view?
 #define MP_MSGVIEW_VIEWER_DEFVAL "LayoutViewer"
 /// select the "best" viewer automatically?
-#define MP_MSGVIEW_AUTO_VIEWER_DEFVAL 1l
+#define MP_MSGVIEW_AUTO_VIEWER_DEFVAL 1L
 /// use HTML viewer whenever there is HTML content?
-#define MP_MSGVIEW_PREFER_HTML_DEFVAL 0l
+#define MP_MSGVIEW_PREFER_HTML_DEFVAL 0L
 /// allow HTML viewer when there is only HTML content?
-#define MP_MSGVIEW_ALLOW_HTML_DEFVAL 1l
+#define MP_MSGVIEW_ALLOW_HTML_DEFVAL 1L
 /// allow image-capable viewer when there are inline images?
-#define MP_MSGVIEW_ALLOW_IMAGES_DEFVAL 1l
+#define MP_MSGVIEW_ALLOW_IMAGES_DEFVAL 1L
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_DEFVAL     \
           "Date:" \
@@ -2014,7 +2014,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// automatically select next unread folder after finishing the current one
 #define MP_FVIEW_AUTONEXT_UNREAD_FOLDER_DEFVAL 0L
 /// how to show the size (MessageSizeShow enum value)
-#define MP_FVIEW_SIZE_FORMAT_DEFVAL  0l
+#define MP_FVIEW_SIZE_FORMAT_DEFVAL  0L
 /// update the folder view status bar to show the msg info?
 #define   MP_FVIEW_STATUS_UPDATE_DEFVAL 0L
 /// folder view status bar string
@@ -2072,37 +2072,37 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_DEFVAL      1
 /// do we want to use server side sort?
-#define MP_MSGS_SERVER_SORT_DEFVAL    1l
+#define MP_MSGS_SERVER_SORT_DEFVAL    1L
 /// sort criterium for folder listing (== MSO_NONE)
-#define MP_MSGS_SORTBY_DEFVAL         0l
+#define MP_MSGS_SORTBY_DEFVAL         0L
 /// re-sort messages on status change?
-#define MP_MSGS_RESORT_ON_CHANGE_DEFVAL 0l
+#define MP_MSGS_RESORT_ON_CHANGE_DEFVAL 0L
 /// use threading
-#define MP_MSGS_USE_THREADING_DEFVAL  1l
+#define MP_MSGS_USE_THREADING_DEFVAL  1L
 /// use server side threading?
 #define MP_MSGS_SERVER_THREAD_DEFVAL 1L
 /// only use server side threading by references (best threading method)?
 #define MP_MSGS_SERVER_THREAD_REF_ONLY_DEFVAL 0L
 
 /// Gather messages with same subject in one thread
-#define MP_MSGS_GATHER_SUBJECTS_DEFVAL 1l
+#define MP_MSGS_GATHER_SUBJECTS_DEFVAL 1L
 /// break thread when subject changes
-#define MP_MSGS_BREAK_THREAD_DEFVAL 1l
+#define MP_MSGS_BREAK_THREAD_DEFVAL 1L
 /// Indent messages when common ancestor is missing
-#define MP_MSGS_INDENT_IF_DUMMY_DEFVAL 0l
+#define MP_MSGS_INDENT_IF_DUMMY_DEFVAL 0L
 
 #if wxUSE_REGEX
 #  define MP_MSGS_SIMPLIFYING_REGEX_DEFVAL "^ *(R[Ee](\\[[0-9]+\\])?: +)*(\\[[^][]+\\]+)?(R[Ee](\\[[0-9]+\\])?: +)*"
 #  define MP_MSGS_REPLACEMENT_STRING_DEFVAL "\\3"
 #else // wxUSE_REGEX
    /// Remove list prefix when comparing message's subject to gather them
-#  define MP_MSGS_REMOVE_LIST_PREFIX_GATHERING_DEFVAL 1l
+#  define MP_MSGS_REMOVE_LIST_PREFIX_GATHERING_DEFVAL 1L
    /// Remove list prefix when comparing message's subject to break threads
-#  define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING_DEFVAL 1l
+#  define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING_DEFVAL 1L
 #endif // wxUSE_REGEX
 
 /// search criterium for searching in folders
-#define MP_MSGS_SEARCH_CRIT_DEFVAL   0l
+#define MP_MSGS_SEARCH_CRIT_DEFVAL   0L
 /// search argument
 #define MP_MSGS_SEARCH_ARG_DEFVAL   ""
 /// open URLs with
@@ -2112,8 +2112,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #  define   MP_BROWSER_INNW_DEFVAL    1
 #else  // under Windows, we know better...
 #  define   MP_BROWSER_DEFVAL         ""
-#  define   MP_BROWSER_ISNS_DEFVAL    0l
-#  define   MP_BROWSER_INNW_DEFVAL    1l
+#  define   MP_BROWSER_ISNS_DEFVAL    0L
+#  define   MP_BROWSER_INNW_DEFVAL    1L
 #endif // Unix/Win
 
 /// external editor to use for message composition (use %s for filename)
@@ -2124,7 +2124,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #endif // Unix/Win
 
 /// start external editor automatically?
-#define MP_ALWAYS_USE_EXTERNALEDITOR_DEFVAL    0l
+#define MP_ALWAYS_USE_EXTERNALEDITOR_DEFVAL    0L
 
 /// PGP/GPG application
 #ifdef OS_UNIX
@@ -2137,14 +2137,14 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_PGP_KEYSERVER_DEFVAL "wwwkeys.eu.pgp.net"
 
 /// command to execute when new mail arrives
-#define   MP_USE_NEWMAILCOMMAND_DEFVAL   0l
+#define   MP_USE_NEWMAILCOMMAND_DEFVAL   0L
 #define   MP_NEWMAILCOMMAND_DEFVAL   ""
 
 /// play a sound on new mail?
 #ifdef __CYGWIN__
-#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 0l
+#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 0L
 #else
-#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 1l
+#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 1L
 #endif // cygwin
 
 #if defined(OS_UNIX) || defined(__CYGWIN__)
@@ -2164,23 +2164,23 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// consider only unseen messages as new?
 #define   MP_NEWMAIL_UNSEEN_DEFVAL  1
 /// collect mail from INBOX?
-#define   MP_COLLECT_INBOX_DEFVAL 0l
+#define   MP_COLLECT_INBOX_DEFVAL 0L
 /// keep copies of outgoing mail?
 #define   MP_USEOUTGOINGFOLDER_DEFVAL  1
 /// write outgoing mail to folder:
 #define   MP_OUTGOINGFOLDER_DEFVAL  "" // obsolete
 /// Show all message headers?
-#define   MP_SHOWHEADERS_DEFVAL         0l
+#define   MP_SHOWHEADERS_DEFVAL         0L
 /// Autocollect email addresses?
 #define   MP_AUTOCOLLECT_INCOMING_DEFVAL     (long)M_ACTION_ALWAYS
 /// Name of the address books for autocollected addresses
 #define   MP_AUTOCOLLECT_ADB_DEFVAL    "autocollect.adb"
 /// Autocollect email addresses from sender only ?
-#define   MP_AUTOCOLLECT_SENDER_DEFVAL     1l
+#define   MP_AUTOCOLLECT_SENDER_DEFVAL     1L
 /// Autocollect addresses in mail sent by user?
-#define   MP_AUTOCOLLECT_OUTGOING_DEFVAL     1l
+#define   MP_AUTOCOLLECT_OUTGOING_DEFVAL     1L
 /// Autocollect entries with names only?
-#define   MP_AUTOCOLLECT_NAMED_DEFVAL 0l
+#define   MP_AUTOCOLLECT_NAMED_DEFVAL 0L
 
 /// Default names for the SSL and crypto libraries
 #ifdef OS_UNIX
@@ -2207,7 +2207,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_INCFAX_DOMAINS_DEFVAL      "efax.com"
 //@}
 /// Use substrings in address expansion?
-#define   MP_ADB_SUBSTRINGEXPANSION_DEFVAL 0l
+#define   MP_ADB_SUBSTRINGEXPANSION_DEFVAL 0L
 
 /// replace "From" address with "To" in messages from oneself?
 #define MP_FVIEW_FROM_REPLACE_DEFVAL 0L
@@ -2217,30 +2217,30 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /** @name maximal amounts of data to retrieve from remote servers */
 //@{
 /// ask confirmation before retrieveing messages bigger than this (in Kb)
-#define MP_MAX_MESSAGE_SIZE_DEFVAL 100l
+#define MP_MAX_MESSAGE_SIZE_DEFVAL 100L
 /// ask confirmation before retrieveing more headers than this
-#define MP_MAX_HEADERS_NUM_DEFVAL  100l
+#define MP_MAX_HEADERS_NUM_DEFVAL  100L
 /// never download more than that many messages
-#define MP_MAX_HEADERS_NUM_HARD_DEFVAL 0l
+#define MP_MAX_HEADERS_NUM_HARD_DEFVAL 0L
 //@}
 /// setting this prevents the filters from expuning the msgs automatically
-#define MP_SAFE_FILTERS_DEFVAL 0l
+#define MP_SAFE_FILTERS_DEFVAL 0L
 /** @name timeout values for c-client mail library */
 //@{
 /// IMAP lookahead value
-#define MP_IMAP_LOOKAHEAD_DEFVAL 0l
+#define MP_IMAP_LOOKAHEAD_DEFVAL 0L
 /// TCP/IP open timeout in seconds.
-#define MP_TCP_OPENTIMEOUT_DEFVAL      30l
+#define MP_TCP_OPENTIMEOUT_DEFVAL      30L
 /// TCP/IP read timeout in seconds.
-#define MP_TCP_READTIMEOUT_DEFVAL       90l
+#define MP_TCP_READTIMEOUT_DEFVAL       90L
 /// TCP/IP write timeout in seconds.
-#define  MP_TCP_WRITETIMEOUT_DEFVAL    90l
+#define  MP_TCP_WRITETIMEOUT_DEFVAL    90L
 /// TCP/IP close timeout in seconds.
-#define  MP_TCP_CLOSETIMEOUT_DEFVAL 60l
+#define  MP_TCP_CLOSETIMEOUT_DEFVAL 60L
 /// rsh connection timeout in seconds.
-#define MP_TCP_RSHTIMEOUT_DEFVAL 0l
+#define MP_TCP_RSHTIMEOUT_DEFVAL 0L
 /// ssh connection timeout in seconds.
-#define MP_TCP_SSHTIMEOUT_DEFVAL 0l
+#define MP_TCP_SSHTIMEOUT_DEFVAL 0L
 /// the path to rsh
 #define MP_RSH_PATH_DEFVAL "rsh"
 /// the path to ssh
@@ -2264,7 +2264,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /** @name for folder list ctrls: column numbers */
 //@{
 /// status
-#define   MP_FLC_STATUSCOL_DEFVAL  0l
+#define   MP_FLC_STATUSCOL_DEFVAL  0L
 /// subject
 #define   MP_FLC_SUBJECTCOL_DEFVAL 1
 /// from
@@ -2274,7 +2274,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// size
 #define   MP_FLC_SIZECOL_DEFVAL   4
 /// size
-#define   MP_FLC_MSGNOCOL_DEFVAL   -1l
+#define   MP_FLC_MSGNOCOL_DEFVAL   -1L
 //@}
 
 /// the wildcard for save dialog
