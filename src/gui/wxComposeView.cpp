@@ -4698,7 +4698,7 @@ wxComposeView::BuildMessage(int flags) const
    // -----------------------
 
    // cryptographically sign the message if configured to do it
-   if ( m_chkPGPSign->GetValue() )
+   if ( m_chkPGPSign && m_chkPGPSign->GetValue() )
    {
       msg->EnableSigning(m_txtPGPSignAs->GetValue());
    }
