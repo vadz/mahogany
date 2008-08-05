@@ -559,7 +559,7 @@ enum ConfigFields
    ConfigField_CryptoDllName,
 #endif // USE_OPENSSL
 
-   ConfigField_HelpersSkip4,
+   ConfigField_HelpersSkip5,
    ConfigField_PGPHelp,
    ConfigField_PGPCommand,
    ConfigField_PGPKeyServer,
