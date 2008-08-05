@@ -2854,7 +2854,10 @@ Upgrade(const String& fromVersion)
          oldVersion = Version_064_1;
       else if ( version == "0.65" )
          oldVersion = Version_065;
-      else if ( version == "0.66" || version == "0.67" )
+      else if ( version == "0.66" ||
+                version == "0.67" ||
+                version == "0.67.1" ||
+                version == "0.67.2" )
          oldVersion = Version_066;
       else if ( version == "0.68" )
          oldVersion = Version_068;
