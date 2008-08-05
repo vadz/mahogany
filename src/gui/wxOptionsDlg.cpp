@@ -1817,18 +1817,17 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
 #ifdef USE_OPENSSL
    { "",                                           Field_Message, -1 },
-   { gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure, "
-                  "encrypted communications, if you have the libssl and libcrypto\n"
-                  "shared libraries (DLLs) on your system."),
+   { gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure, encrypted\n"
+                  "communications, if you have the libssl and libcrypto shared libraries\n"
+                  "(DLLs) on your system."),
      Field_Message, -1                     },
    { gettext_noop("Location of lib&ssl"),         Field_File,    -1                     },
    { gettext_noop("Location of libcr&ypto"),      Field_File,    -1                     },
 #endif // USE_OPENSSL
 
    { "",                                           Field_Message, -1 },
-   { gettext_noop("GNU Privacy Guard or a compatible program may be used "
-                  "to verify the cryptographic signatures of the messages "
-                  "you receive and decrypt them.\n"
+   { gettext_noop("GNU Privacy Guard or a compatible program may be used to verify the\n"
+                  "cryptographic signatures of the messages you receive and decrypt them.\n"
                   "The public key server is used to retrieve the keys of "
                   "the senders."),                Field_Message, -1 },
    { gettext_noop("&GPG command"),                Field_File,    -1                      },
