@@ -316,8 +316,7 @@ PGPEngine::ExecCommand(const String& options,
    const char *ptrIn = bufIn;
 
    bool outEof = false,
-        errEof = false,
-        inEof = false;  // set to true when we can safely close child stdin
+        errEof = false;
    while ( !process.IsDone() || !outEof || !errEof )
    {
       wxYieldIfNeeded();
@@ -349,7 +348,7 @@ PGPEngine::ExecCommand(const String& options,
          lenIn -= lenChunk;
          ptrIn += lenChunk;
       }
-      else if ( inEof && in )
+      else if ( !lenIn )
       {
          process.CloseOutput();
          in = NULL;
@@ -536,12 +535,6 @@ PGPEngine::ExecCommand(const String& options,
                wxLogWarning(_("Secret key needed to decrypt this message is "
                               "not available"));
             }
-            else if ( code == _T("BEGIN_SIGNING") )
-            {
-               // we don't need to send anything more to GPG, close its stdin
-               // so it knows that nothing more is coming
-               inEof = true;
-            }
             else if ( code == _T("SIG_CREATED") )
             {
                status = OK;
@@ -635,6 +628,13 @@ PGPEngine::ExecCommand(const String& options,
                   wxLogError(_("Failed to sign message: %s"), err.c_str());
                }
             }
+            else if ( code == _T("BEGIN_SIGNING") ||
+                      code == _T("PLAINTEXT") )
+            {
+               // these codes indicate that we don't need to send anything more
+               // to GPG, check that we did send everything
+               ASSERT_MSG( !lenIn, "should have sent everything by now" );
+            }
             else if ( code == _T("ENC_TO") ||
                       code == _T("BEGIN_DECRYPTION") ||
                       code == _T("END_DECRYPTION") ||
@@ -642,8 +642,7 @@ PGPEngine::ExecCommand(const String& options,
                       code == _T("GOT_IT") ||
                       code == _T("SIGEXPIRED") || // we will give a warning
                       code == _T("KEYEXPIRED") || // when we get EXPKEYSIG
-                      code == _T("PLAINTEXT") ||   // not sure what to do with
-                      code == _T("PLAINTEXT_LENGTH") || // those two...
+                      code == _T("PLAINTEXT_LENGTH") || // not sure about this
                       code == _T("IMPORT_OK") ||
                       code == _T("IMPORT_RES") )
             {
