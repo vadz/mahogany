@@ -1327,9 +1327,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Configure &XFace..."),          Field_XFace,   -1          },
    { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
 
-   { "",                                           Field_Message, -1 },
+   { "",                                           Field_Message | Field_Global, -1 },
    { gettext_noop("The following settings control the appearance "
-                  "of the composer window:"),      Field_Message, -1 },
+                  "of the composer window:"),      Field_Message | Field_Global, -1 },
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font | Field_Global, -1 },
 #else // !USE_FONT_DESC
@@ -1344,26 +1344,29 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use these settings for &headers too"),
                                                    Field_Bool | Field_Global,   -1},
 
-   { "",                                           Field_Message, -1 },
+   { "",                                           Field_Message | Field_Global, -1 },
    { gettext_noop("Mahogany can try to detect if you forget to attach a file "
                   "to your message when you mentioned it in the message text.\n"
                   "If the check is activated, the regular expression below can "
                   "be used to select the words which indicate attachment present."),
-                                                   Field_Message, -1 },
-   { gettext_noop("Check for &forgotten attachments"), Field_Bool, -1 },
-   { gettext_noop("Attachments check rege&x"),     Field_Text,
+                                                   Field_Message | Field_Global, -1 },
+   { gettext_noop("Check for &forgotten attachments"), Field_Bool | Field_Global, -1 },
+   { gettext_noop("Attachments check rege&x"),     Field_Text | Field_Global,
                                                    ConfigField_ComposeCheckForgottenAttachments },
 
-   { "",                                           Field_Message, -1 },
+   { "",                                           Field_Message | Field_Global, -1 },
    { gettext_noop("The settings below allow you to have a last look at the\n"
                   "message before sending it and/or change your mind about\n"
                   "sending it even after pressing the \"Send\" button."),
                                                    Field_Message |
-                                                   Field_Advanced, -1 },
+                                                   Field_Advanced |
+                                                   Field_Global, -1 },
    { gettext_noop("P&review message before sending"), Field_Bool |
-                                                   Field_Advanced, -1 },
+                                                   Field_Advanced |
+                                                   Field_Global, -1 },
    { gettext_noop("&Confirm sending mail"),        Field_Bool |
-                                                   Field_Advanced,
+                                                   Field_Advanced |
+                                                   Field_Global,
                                                   -ConfigField_ComposePreview },
 
    { "",                                           Field_Message, -1},
