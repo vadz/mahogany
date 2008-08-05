@@ -50,6 +50,7 @@ extern const MOption MP_PGP_KEYSERVER;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_REMEMBER_PGP_PASSPHRASE;
+extern const MPersMsgBox *M_MSGBOX_CONFIGURE_PGP_PATH;
 
 // ----------------------------------------------------------------------------
 // miscellaneous helper functions
@@ -216,40 +217,81 @@ PGPEngine::ExecCommand(const String& options,
                        String& messageOut,
                        MCryptoEngineOutputLog *log)
 {
+   PGPProcess process;
+   long pid = 0;
+
    // check if we have a PGP command: it can be set to nothing to disable pgp
    // support
-   const String pgp = READ_APPCONFIG_TEXT(MP_PGP_COMMAND);
-   if ( pgp.empty() )
+   String pgp = READ_APPCONFIG_TEXT(MP_PGP_COMMAND);
+   bool pgpChanged = false;
+
+   while ( !pid )
    {
-      if ( log )
+      if ( !pgp.empty() )
       {
-         log->AddMessage(_("PGP command not configured, set its value in "
-                           "the \"Helpers\" page of the preferences dialog "
-                           "to enable PGP support"));
+         const String
+            command = wxString::Format
+                      (
+                       _T("%s --status-fd=2 --command-fd 0 --output - -a %s"),
+                       pgp.c_str(),
+                       options.c_str()
+                      );
+
+         if ( log )
+            log->AddMessage(String::Format(_("Executing \"%s\""), command.c_str()));
+
+         pid = wxExecute(command, wxEXEC_ASYNC, &process);
       }
 
-      return OPERATION_CANCELED_BY_USER;
+      if ( pid )
+         break;
+
+      wxString msg;
+      if ( pgp.empty() )
+      {
+         msg = _("PGP/GPG program location is not configured.");
+      }
+      else // have command but executing it failed
+      {
+         msg = String::Format(_("Failed to execute \"%s\"."), pgp.c_str());
+      }
+
+      msg += "\n";
+      msg += _("If you have PGP/GPG installed on this system, would you "
+               "like to specify its location now?"
+               "\n"
+               "If you don't, the current operation will be cancelled.");
+
+      wxWindow * const parent = log ? log->GetParent() : NULL;
+      if ( !MDialog_YesNoDialog
+            (
+               msg,
+               parent,
+               MDIALOG_YESNOTITLE,
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_CONFIGURE_PGP_PATH
+            ) )
+      {
+         return CANNOT_EXEC_PROGRAM;
+      }
+
+      pgp = MDialog_FileRequester(_("Please choose PGP/GPG program"), parent);
+      if ( pgp.empty() )
+      {
+         // cancelled by user
+         return CANNOT_EXEC_PROGRAM;
+      }
+
+      pgpChanged = true;
    }
 
-   PGPProcess process;
-   String command = wxString::Format
-               (
-                _T("%s --status-fd=2 --command-fd 0 --output - -a %s"),
-                pgp.c_str(),
-                options.c_str()
-               );
+   // if we get here, we managed to launch the PGP subprocess successfully
 
-#ifdef DEBUG
-   if ( log )
-      log->AddMessage(command);
-#endif
+   // if we had to change the PGP path in order to do it, remember the value
+   // that worked for us
+   if ( pgpChanged )
+      mApplication->GetProfile()->writeEntry(MP_PGP_COMMAND, pgp);
 
-   long pid = wxExecute(command, wxEXEC_ASYNC, &process);
-
-   if ( !pid )
-   {
-      return CANNOT_EXEC_PROGRAM;
-   }
 
    wxOutputStream *in = process.GetOutputStream();
    wxInputStream *out = process.GetInputStream(),

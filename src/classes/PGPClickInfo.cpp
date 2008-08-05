@@ -142,11 +142,12 @@ ClickablePGPInfo::CreateFromSigStatusCode(MCryptoEngine *engine,
          break;
 
       case MCryptoEngine::OPERATION_CANCELED_BY_USER:
+      case MCryptoEngine::CANNOT_EXEC_PROGRAM:
          pgpInfo = new PGPSignatureInfo
                        (
                         msgView,
                         _("Unverified PGP signature"),
-                        _T("pgpsig_bad"),
+                        "pgpsig_bad",
                         *wxLIGHT_GREY
                        );
          break;
