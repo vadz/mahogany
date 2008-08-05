@@ -443,7 +443,10 @@ private:
    void CreateMenu();
 
    /// create and initialize the editor
-   void CreateEditor(void);
+   void CreateEditor();
+
+   /// create the PGP-related controls, returns the window containing them all
+   wxWindow *CreatePGPControls();
 
    /// init our various appearance parameters
    void InitAppearance();
@@ -475,6 +478,12 @@ private:
 
    /// get the options (for MessageEditor)
    const Options& GetOptions() const { return m_options; }
+
+   /// update UI handler for "sign as" control
+   void OnUpdateUISignAs(wxUpdateUIEvent& event)
+   {
+      event.Enable( m_chkPGPSign->GetValue() );
+   }
 
    /// the profile (never NULL)
    Profile *m_Profile;
@@ -523,6 +532,12 @@ private:
 
       /// the editor where the message is really edited
    MessageEditor *m_editor;
+
+      /// checkbox enabling cryptographically signing the message
+   wxCheckBox *m_chkPGPSign;
+
+      /// the user name to use for cryptographically signing the message
+   wxTextCtrl *m_txtPGPSignAs;
 
    //@}
 

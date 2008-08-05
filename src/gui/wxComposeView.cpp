@@ -118,8 +118,11 @@ extern const MOption MP_CHECK_ATTACHMENTS_REGEX;
 extern const MOption MP_CHECK_FORGOTTEN_ATTACHMENTS;
 extern const MOption MP_COMPOSE_BCC;
 extern const MOption MP_COMPOSE_CC;
+extern const MOption MP_COMPOSE_PGPSIGN;
+extern const MOption MP_COMPOSE_PGPSIGN_AS;
 extern const MOption MP_COMPOSE_SHOW_FROM;
 extern const MOption MP_COMPOSE_TO;
+extern const MOption MP_COMPOSE_USE_PGP;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_CVIEW_BGCOLOUR;
 extern const MOption MP_CVIEW_COLOUR_HEADERS;
@@ -956,6 +959,10 @@ void ComposerOptions::Read(Profile *profile)
       m_fontFamily = GetFontFamilyFromProfile(profile, MP_CVIEW_FONT);
       m_fontSize = READ_CONFIG(profile, MP_CVIEW_FONT_SIZE);
    }
+
+   // PGP options
+   m_signWithPGP = READ_CONFIG_BOOL(profile, MP_COMPOSE_PGPSIGN);
+   m_signWithPGPAs = READ_CONFIG_TEXT(profile, MP_COMPOSE_PGPSIGN_AS);
 }
 
 wxFont ComposerOptions::GetFont() const
@@ -1808,6 +1815,9 @@ wxComposeView::wxComposeView(const String &name,
    m_encoding = wxFONTENCODING_SYSTEM;
 
    m_txtSubject = NULL;
+
+   m_chkPGPSign = NULL;
+   m_txtPGPSignAs = NULL;
 }
 
 bool wxComposeView::IsReplyTo(const Message& original) const
@@ -1860,6 +1870,16 @@ void wxComposeView::SetDraft(Message *msg)
 
 wxComposeView::~wxComposeView()
 {
+   // save the last values of PGP options
+   if ( m_chkPGPSign )
+   {
+      const bool sign = m_chkPGPSign->GetValue();
+      m_Profile->writeEntry(MP_COMPOSE_PGPSIGN, sign);
+      if ( sign )
+         m_Profile->writeEntry(MP_COMPOSE_PGPSIGN_AS, m_txtPGPSignAs->GetValue());
+   }
+
+
    delete m_rcptMain;
    WX_CLEAR_ARRAY(m_rcptExtra);
 
@@ -2224,6 +2244,15 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    m_splitter->SplitHorizontally(m_panel, m_editor->GetWindow(), heightHeaders);
    m_splitter->SetMinimumPaneSize(heightHeaders);
 
+   if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_PGP) )
+   {
+      wxBoxSizer * const sizer = new wxBoxSizer(wxVERTICAL);
+      sizer->Add(m_splitter, wxSizerFlags(1).Expand());
+      sizer->Add(CreatePGPControls(), wxSizerFlags().Expand());
+      SetSizer(sizer);
+   }
+   //else: rely on splitter taking up the entire frame as its only child
+
    // note that we must show and layout the frame before setting the control
    // values or the text would be scrolled to the right in the text fields as
    // they initially don't have enough space to show it...
@@ -2247,9 +2276,8 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
 }
 
-/// create the compose window itself
 void
-wxComposeView::CreateEditor(void)
+wxComposeView::CreateEditor()
 {
    wxASSERT_MSG( m_editor == NULL, _T("creating the editor twice?") );
 
@@ -2309,6 +2337,48 @@ wxComposeView::CreateEditor(void)
 
    // Commit
    m_editor = editor;
+}
+
+wxWindow *
+wxComposeView::CreatePGPControls()
+{
+   wxPanel * const panelPGP = new wxPanel(this);
+   wxBoxSizer * const sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   // align all subsequent controls to the right by inserting an expandable
+   // sizer before them
+   sizer->AddStretchSpacer();
+
+   m_chkPGPSign = new wxCheckBox(panelPGP, wxID_ANY, _("&Sign message"));
+   m_chkPGPSign->SetToolTip(
+      _("If checked, the message will be cryptographically signed.\n"
+        "\n"
+        "You need to have access to the private key which will be "
+        "used for signing.")
+   );
+   m_chkPGPSign->SetValue(m_options.m_signWithPGP);
+   sizer->Add(m_chkPGPSign, wxSizerFlags().Border(wxALL & ~wxRIGHT).Centre());
+
+   sizer->Add(new wxStaticText(panelPGP, wxID_ANY, _("a&s ")),
+              wxSizerFlags().Centre());
+
+   m_txtPGPSignAs = new wxTextCtrl(panelPGP, wxID_ANY, m_options.m_signWithPGPAs);
+   m_txtPGPSignAs->SetToolTip(
+      _("Enter here the user name to use for signing or leave empty to use "
+        "the default key in your key store.")
+   );
+   sizer->Add(m_txtPGPSignAs, wxSizerFlags().Border(wxALL & ~wxLEFT).Centre());
+
+   m_txtPGPSignAs->Connect(
+      wxEVT_UPDATE_UI,
+      wxUpdateUIEventHandler(wxComposeView::OnUpdateUISignAs),
+      NULL,
+      this
+   );
+
+   panelPGP->SetSizer(sizer);
+
+   return panelPGP;
 }
 
 void
@@ -4621,6 +4691,16 @@ wxComposeView::BuildMessage(int flags) const
    for ( size_t nHeader = 0; nHeader < nHeaders; nHeader++ )
    {
       msg->AddHeaderEntry(headerNames[nHeader], headerValues[nHeader]);
+   }
+
+
+   // postprocess the message
+   // -----------------------
+
+   // cryptographically sign the message if configured to do it
+   if ( m_chkPGPSign->GetValue() )
+   {
+      msg->EnableSigning(m_txtPGPSignAs->GetValue());
    }
 
    // the caller is responsible for deleting the object

@@ -32,6 +32,9 @@ class wxComposeView;
 /// the composer options (i.e. values read from profile)
 struct ComposerOptions
 {
+   /// @name Appearance options
+   //@{
+
    /// font description
    String m_font;
 
@@ -42,6 +45,20 @@ struct ComposerOptions
    /// composer colours
    wxColour m_fg,
             m_bg;
+
+   //@}
+
+   /// @name PGP options
+   //@{
+
+   /// sign the message cryptographically?
+   bool m_signWithPGP;
+
+   /// the user name to sign as
+   String m_signWithPGPAs;
+
+   //@}
+
 
    /// ctor initializes everything to some invalid values
    ComposerOptions();

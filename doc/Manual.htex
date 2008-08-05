@@ -69,6 +69,8 @@ skip them unless you're updating from a very old version of Mahogany.
 
 \begin{itemize}
    \item A much faster DSPAM storage driver is used now.
+   \item Mahogany now supports signing outgoing messages using OpenPGP, see
+         the new options in the composer options page (\ref{ComposePage}).
    \item Added ``Remove attachments'' command which can be used to strip the
          unwanted attachments from a message in a local or IMAP folder.
    \item Added the possibility to treat different addresses as equivalent,
@@ -2319,6 +2321,20 @@ to each message sent.
 \item \textbf{Use signature separator}\\
 If enabled, your signature will be separated from the text with two
 dashes. This is a common Internet/Usenet convention.
+\item \textbf{Show signing controls in composer}\\
+If this option is enabled, the checkbox allowing you to choose whether you want
+to sign the message cryptographically is shown in the composer. Disable this
+option only if you are sure that you never want to sign your messages to free
+up some screen space.
+\item \textbf{Enable signing by default}\\
+If true, the checkbox mentioned above will be initially checked. Notice that
+if you are editing the options of an individual folder, this option can be set
+from here but that it is also changed by simply setting or clearing the
+checkbox -- its contents will be remembered for the next messages composed from
+this folder.
+\item \textbf{User name to sign messages as}\\
+If you have multiple keys, select the one to be used by default (it will be
+possible to change it for the individual messages in the composer window) here.
 \item \textbf{Use XFace}\\
 XFaces are small black and white bitmaps which can be added to the
 message header to identify the sender. Mahogany will recognise and

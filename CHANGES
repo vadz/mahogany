@@ -6,9 +6,10 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.68 '' September xx, 2007
+Release 0.68 '' September xx, 2008
 ---------------------------------------
 
+2008-08-05 VZ: Add support for signing outgoing messages using OpenPGP
 2008-05-04 VZ: Improve the display of the embedded messages.
 2008-05-04 VZ: Allow toggling tool/status bars and showing full-screen.
 2008-05-02 VZ: Add support for server-side spam filters.
