@@ -348,11 +348,6 @@ PGPEngine::ExecCommand(const String& options,
          lenIn -= lenChunk;
          ptrIn += lenChunk;
       }
-      else if ( !lenIn )
-      {
-         process.CloseOutput();
-         in = NULL;
-      }
 
       if ( err->GetLastError() == wxSTREAM_EOF )
       {
@@ -634,6 +629,10 @@ PGPEngine::ExecCommand(const String& options,
                // these codes indicate that we don't need to send anything more
                // to GPG, check that we did send everything
                ASSERT_MSG( !lenIn, "should have sent everything by now" );
+
+               // and close the input stream as we have nothing more to send
+               process.CloseOutput();
+               in = NULL;
             }
             else if ( code == _T("ENC_TO") ||
                       code == _T("BEGIN_DECRYPTION") ||
