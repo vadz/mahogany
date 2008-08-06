@@ -1691,7 +1691,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC_DEFVAL      ""
 /// show "From:" field in composer?
-#define   MP_COMPOSE_SHOW_FROM_DEFVAL 0L
+#define   MP_COMPOSE_SHOW_FROM_DEFVAL 1L
 
 /// default reply kind
 #define   MP_DEFAULT_REPLY_KIND_DEFVAL 0l  // MailFolder::REPLY_SENDER
