@@ -318,6 +318,11 @@ public:
    // get the current value of the text field
    wxString GetValue() const;
 
+
+   // helper for layout
+   int GetTypeControlWidth() const;
+
+
    // starting from now, all methods are for the wxRcptXXX controls only
 
    // change type of this one -- called by choice
@@ -606,6 +611,8 @@ public:
                         _("This is a reply to another message"),
                         _("This is a start of new thread"))
    {
+      UpdateWithoutRefresh();
+
       // AddHeaderEntry("In-Reply-To") is called after composer creation, so we
       // want to update our state a bit later
       Connect(wxEVT_IDLE, wxIdleEventHandler(IsReplyButton::OnIdle));
@@ -1209,6 +1216,11 @@ void wxRcptControl::OnTypeChange(RecipientType rcptType)
       default:
          FAIL_MSG( _T("unexpected rcpt type on wxRcptControl") );
    }
+}
+
+int wxRcptControl::GetTypeControlWidth() const
+{
+   return m_choice->GetBestSize().x;
 }
 
 void wxRcptControl::OnExpand()
@@ -2066,71 +2078,57 @@ void wxComposeView::DeletePlaceHolder()
    delete win;
 }
 
+// small helper class for labels created in CreateHeaderFields()
+class RightAlignedLabel : public wxStaticText
+{
+public:
+   RightAlignedLabel(wxWindow *parent, const wxString& label)
+      : wxStaticText(parent, wxID_ANY, label,
+                     wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT)
+   {
+   }
+};
+
 wxSizer *wxComposeView::CreateHeaderFields()
 {
    // top level vertical (box) sizer
-   wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
+   wxSizer * const sizerTop = new wxBoxSizer(wxVERTICAL);
 
-   // leave number of rows unspecified, it can be calculated from number of
-   // columns (2)
-   wxFlexGridSizer *sizerHeaders =
-      new wxFlexGridSizer(0, 2, LAYOUT_MARGIN, LAYOUT_MARGIN);
-
-   sizerHeaders->AddGrowableCol(1);
+   const wxSizerFlags flagsCenter(wxSizerFlags().Align(wxALIGN_CENTRE_VERTICAL));
+   const wxSizerFlags flagsLBorder(wxSizerFlags(flagsCenter).Border(wxLEFT));
 
    // add "From" header if configured to show it
+   wxSizer *sizerFrom;
    if ( READ_CONFIG(m_Profile, MP_COMPOSE_SHOW_FROM) )
    {
-      sizerHeaders->Add(new wxStaticText(m_panel, -1, _("&From:")),
-                        0, wxALIGN_CENTRE_VERTICAL);
-
-      wxSizer *sizerFrom = new wxBoxSizer(wxHORIZONTAL);
+      sizerFrom = new wxBoxSizer(wxHORIZONTAL);
+      sizerFrom->Add(new RightAlignedLabel(m_panel, _("&From:")), flagsCenter);
 
       m_txtFrom = new wxTextCtrl(m_panel, -1, wxEmptyString);
-      sizerFrom->Add(m_txtFrom, 1, wxALIGN_CENTRE_VERTICAL);
+      sizerFrom->Add(m_txtFrom, wxSizerFlags(flagsLBorder).Proportion(1));
       SetTextAppearance(m_txtFrom);
 
-      wxChoice *choiceIdent = CreateIdentCombo(m_panel);
+      wxChoice * const choiceIdent = CreateIdentCombo(m_panel);
       if ( choiceIdent )
       {
-         sizerFrom->Add(choiceIdent, 0,
-                        wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+         sizerFrom->Add(choiceIdent, flagsLBorder);
       }
       //else: no identities configured
 
       m_btnPGPSign = new PGPSignButton(this, m_panel);
-      sizerFrom->Add(m_btnPGPSign,
-                     0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+      sizerFrom->Add(m_btnPGPSign, flagsLBorder);
 
-      sizerHeaders->Add(sizerFrom, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
+      sizerTop->Add(sizerFrom, wxSizerFlags().Expand().Border(wxALL & ~wxBOTTOM));
    }
    else // no from line
    {
-      m_txtFrom = NULL;
+      sizerFrom = NULL;
    }
-
-   // subject
-   sizerHeaders->Add(new wxStaticText(m_panel, -1, _("&Subject:")),
-                     0, wxALIGN_CENTRE_VERTICAL);
-
-   wxSizer *sizerSubj = new wxBoxSizer(wxHORIZONTAL);
-   m_txtSubject = new wxSubjectTextCtrl(m_panel, this);
-   sizerSubj->Add(m_txtSubject, 1, wxALIGN_CENTRE_VERTICAL);
-   SetTextAppearance(m_txtSubject);
-
-   m_btnIsReply = new IsReplyButton(this, m_panel);
-   sizerSubj->Add(m_btnIsReply,
-                  0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
-
-   sizerHeaders->Add(sizerSubj, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
-
-   sizerTop->Add(sizerHeaders, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
 
    // main recipient line
    m_rcptMain = new wxRcptMainControl(this);
-   wxSizer *sizerRcpt = m_rcptMain->CreateControls(m_panel);
-
-   sizerTop->Add(sizerRcpt, 0, wxEXPAND | (wxALL & ~wxBOTTOM), LAYOUT_MARGIN/2);
+   wxSizer * const sizerRcpt = m_rcptMain->CreateControls(m_panel);
+   sizerTop->Add(sizerRcpt, wxSizerFlags().Expand().Border(wxALL & ~wxBOTTOM));
 
    // the spare space for already entered recipients below: we use an extra
    // sizer because we keep it to add more stuff to it later
@@ -2141,10 +2139,36 @@ wxSizer *wxComposeView::CreateHeaderFields()
 
    m_panelRecipients->GetCanvas()->SetSizer(m_sizerRcpts);
 
-   sizerTop->Add(m_panelRecipients, 1, wxEXPAND);
-
    // this number is completely arbitrary
    sizerTop->SetItemMinSize(m_panelRecipients, 0, 80);
+
+   sizerTop->Add(m_panelRecipients, wxSizerFlags(1).Expand().Border());
+
+
+   // subject
+   wxSizer * const sizerSubj = new wxBoxSizer(wxHORIZONTAL);
+   sizerSubj->Add(new RightAlignedLabel(m_panel, _("&Subject:")), flagsCenter);
+
+   m_txtSubject = new wxSubjectTextCtrl(m_panel, this);
+   SetTextAppearance(m_txtSubject);
+   sizerSubj->Add(m_txtSubject, wxSizerFlags(flagsLBorder).Proportion(1));
+
+   m_btnIsReply = new IsReplyButton(this, m_panel);
+   sizerSubj->Add(m_btnIsReply, flagsLBorder);
+
+   sizerTop->Add(sizerSubj, wxSizerFlags().Expand().Border(wxALL & ~wxTOP));
+
+
+   // adjust the layout a bit so that things align better
+   static const size_t FIRST_ITEM = 0;
+   const int widthFirstCol = sizerRcpt->GetItem(FIRST_ITEM)->GetMinSize().x;
+   if ( sizerFrom )
+      sizerFrom->SetItemMinSize(FIRST_ITEM, widthFirstCol, -1);
+   sizerSubj->SetItemMinSize(FIRST_ITEM, widthFirstCol, -1);
+
+   // arrange the tab order to be more convenient by putting the most useful
+   // controls first
+   m_txtSubject->MoveAfterInTabOrder(m_rcptMain->GetText());
 
    return sizerTop;
 }
@@ -2294,7 +2318,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    m_panel = new wxPanel(m_splitter, -1);
 
    // the sizer containing all header fields
-   wxSizer *sizerHeaders = CreateHeaderFields();
+   wxSizer * const sizerHeaders = CreateHeaderFields();
 
    // associate this sizer with the window
    m_panel->SetSizer(sizerHeaders);
@@ -2484,7 +2508,7 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    // off
    m_rcptExtra.Insert(rcpt, 0);
 
-   m_sizerRcpts->Prepend(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN / 2);
+   m_sizerRcpts->Prepend(sizerRcpt, wxSizerFlags().Expand());
 
    // hide the newly added controls for now and set the flag telling our
    // OnIdle() to show it, after laying it out, later
@@ -2848,11 +2872,11 @@ wxComposeView::InitText(Message *msg, const MessageView *msgview)
 void wxComposeView::Launch()
 {
    // we also use this method to initialize the focus as we can't do it before
-   // the composer text is inited
+   // the composer text is initialized
 
-   // if the subject is already not empty (which it is when
-   // replying/forwarding), put the cursor directly into the compose window,
-   // otherwise let the user enter the subject first
+   // the natural order is to enter recipients first and then the subject but
+   // put the cursor directly into the compose window if both of them already
+   // have reasonable default values as is the case when replying
    switch ( m_kind )
    {
       default:
@@ -2860,15 +2884,12 @@ void wxComposeView::Launch()
          // fall through
 
       case Message_New:
-         m_txtSubject->SetFocus();
+      case Message_Forward:
+         m_rcptMain->GetText()->SetFocus();
          break;
 
       case Message_Reply:
          SetFocusToComposer();
-         break;
-
-      case Message_Forward:
-         m_rcptMain->GetText()->SetFocus();
          break;
    }
 }
