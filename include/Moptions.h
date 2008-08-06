@@ -1353,7 +1353,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the index of the last tip which was shown
 #define MP_LASTTIP_DEFVAL 0L
 /// help browser kind
-#define   MP_HELPBROWSER_KIND_DEFVAL 0l // internal
+#define   MP_HELPBROWSER_KIND_DEFVAL 0L // internal
 /// help browser name
 #define   MP_HELPBROWSER_DEFVAL   "netscape"
 /// is help browser of netscape type?
@@ -1395,7 +1395,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_RUNONEONLY_DEFVAL 1L
 
 /// show images in the toolbar
-#define MP_TBARIMAGES_DEFVAL 0l // == TbarShow_Icons - 1
+#define MP_TBARIMAGES_DEFVAL 0L // == TbarShow_Icons - 1
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -1582,7 +1582,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the default IMAP4 host
 #define   MP_IMAPHOST_DEFVAL          "imap"
 /// use SSL for POP/IMAP?
-#define   MP_USE_SSL_DEFVAL       1l // SSLSupport_TLSIfAvailable
+#define   MP_USE_SSL_DEFVAL       1L // SSLSupport_TLSIfAvailable
 /// accept unsigned SSL certificates?
 #define   MP_USE_SSL_UNSIGNED_DEFVAL 0L
 /// the mail host
@@ -1596,7 +1596,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the mail host password
 #define   MP_SMTPHOST_PASSWORD_DEFVAL   ""
 /// use SSL?
-#define   MP_SMTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
+#define   MP_SMTPHOST_USE_SSL_DEFVAL   1L // SSLSupport_TLSIfAvailable
 /// check ssl-certs for SMTP connections?
 #define   MP_SMTPHOST_USE_SSL_UNSIGNED_DEFVAL   0L
 /// use ESMTP 8BITMIME extension if available
@@ -1622,7 +1622,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the news server password
 #define   MP_NNTPHOST_PASSWORD_DEFVAL      ""
 /// use SSL?
-#define   MP_NNTPHOST_USE_SSL_DEFVAL   1l // SSLSupport_TLSIfAvailable
+#define   MP_NNTPHOST_USE_SSL_DEFVAL   1L // SSLSupport_TLSIfAvailable
 /// check ssl-certs for NNTP connections?
 #define   MP_NNTPHOST_USE_SSL_UNSIGNED_DEFVAL   0L
 /// the beacon host to test for net connection
@@ -1694,7 +1694,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_COMPOSE_SHOW_FROM_DEFVAL 1L
 
 /// default reply kind
-#define   MP_DEFAULT_REPLY_KIND_DEFVAL 0l  // MailFolder::REPLY_SENDER
+#define   MP_DEFAULT_REPLY_KIND_DEFVAL 0L  // MailFolder::REPLY_SENDER
 /// the mailing list addresses
 #define   MP_LIST_ADDRESSES_DEFVAL ""
 /// array of equivalent address pairs
