@@ -482,11 +482,13 @@ protected:
 // wxSubjectTextCtrl: text control for the subject
 // ----------------------------------------------------------------------------
 
-class wxSubjectTextCtrl : public wxTextCtrlProcessingEnter
+class wxSubjectTextCtrl : public wxTextCtrl
 {
 public:
    wxSubjectTextCtrl(wxWindow *parent, wxComposeView *composeView)
-      : wxTextCtrlProcessingEnter(parent)
+      : wxTextCtrl(parent, wxID_ANY, "",
+                   wxDefaultPosition, wxDefaultSize,
+                   wxTE_PROCESS_ENTER)
    {
       m_composeView = composeView;
    }
@@ -498,14 +500,20 @@ private:
       m_composeView->UpdateTitle();
    }
 
+   void OnEnter(wxCommandEvent& WXUNUSED(event))
+   {
+      m_composeView->SetFocusToComposer();
+   }
+
    wxComposeView *m_composeView;
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxSubjectTextCtrl)
 };
 
-BEGIN_EVENT_TABLE(wxSubjectTextCtrl, wxTextCtrlProcessingEnter)
+BEGIN_EVENT_TABLE(wxSubjectTextCtrl, wxTextCtrl)
    EVT_TEXT(wxID_ANY, wxSubjectTextCtrl::OnChange)
+   EVT_TEXT_ENTER(wxID_ANY, wxSubjectTextCtrl::OnEnter)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -2875,23 +2883,33 @@ void wxComposeView::Launch()
    // the composer text is initialized
 
    // the natural order is to enter recipients first and then the subject but
-   // put the cursor directly into the compose window if both of them already
-   // have reasonable default values as is the case when replying
-   switch ( m_kind )
+   // if we already have some recipients (e.g. because we're replying to an
+   // existing message or because there are some default recipients at the
+   // folder level even for the new messages) we give focus to the subject
+   // first and, finally, if the subject is also specified (as happens when
+   // replying or forwarding) we go directly to the composer
+
+   // notice that CC, BCC and FCC shouldn't count: even if we have them, we
+   // still need at least one recipient (usually)
+   const size_t numRcpts = m_rcptExtra.size();
+   for ( size_t n = 0; n < numRcpts; n++ )
    {
-      default:
-         FAIL_MSG( _T("unknown message kind") );
-         // fall through
+      switch ( m_rcptExtra[n]->GetType() )
+      {
+         case Recipient_To:
+         case Recipient_Newsgroup:
+            // we already have a recipient, go to the subject field
+            if ( m_txtSubject->GetValue().empty() )
+               m_txtSubject->SetFocus();
+            else // or directly to the composer if we already have subject too
+               SetFocusToComposer();
 
-      case Message_New:
-      case Message_Forward:
-         m_rcptMain->GetText()->SetFocus();
-         break;
-
-      case Message_Reply:
-         SetFocusToComposer();
-         break;
+            return; // skip SetFocus() call below
+      }
    }
+
+   // no recipients yet, set the focus there
+   m_rcptMain->GetText()->SetFocus();
 }
 
 void
