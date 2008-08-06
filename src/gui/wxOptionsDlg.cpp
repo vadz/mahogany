@@ -262,7 +262,6 @@ enum ConfigFields
    ConfigField_SignatureSeparator,
    ConfigField_ComposerSpacer0,
    ConfigField_SignWithPGPHelp,
-   ConfigField_SignWithPGPEnable,
    ConfigField_SignWithPGP,
    ConfigField_SignWithPGPAs,
    ConfigField_XFaceFile,
@@ -1307,21 +1306,17 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    ConfigField_NewMailMonitor },
 
    // compose
-   { gettext_noop("Allow changing \"&From\" field"),
-                                                   Field_Bool | Field_Advanced,  -1},
-   { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
+   { gettext_noop("Show \"&From\" field"),         Field_Bool | Field_Advanced,  -1},
+   { gettext_noop("&Append signature"),            Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
-
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
 
    { "",                                           Field_Message, -1 },
    { gettext_noop("Mahogany may sign outgoing messages in OpenPGP format.\n"
                   "You need to have a private key to be able to do this, "
                   "if you have several of them you may specify the one to use\n"
-                  "by default below (you will be able to change it in the "
-                  "composer window)"),             Field_Message, -1 },
-   { gettext_noop("Show &signing controls in composer"), Field_Bool, -1 },
-   { gettext_noop("Enable signing by &default"),   Field_Bool, ConfigField_SignWithPGPEnable },
+                  "by default below"),             Field_Message, -1 },
+   { gettext_noop("Enable signing by &default"),   Field_Bool, -1 },
    { gettext_noop("&User name to sign messages as"), Field_Advanced | Field_Text,
                                                    ConfigField_SignWithPGP },
    { gettext_noop("Configure &XFace..."),          Field_XFace,   -1          },
@@ -2074,7 +2069,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
    CONFIG_NONE(), // spacer
    CONFIG_NONE(), // PGP help
-   CONFIG_ENTRY(MP_COMPOSE_USE_PGP),
    CONFIG_ENTRY(MP_COMPOSE_PGPSIGN),
    CONFIG_ENTRY(MP_COMPOSE_PGPSIGN_AS),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),

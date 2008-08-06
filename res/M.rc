@@ -177,8 +177,11 @@ migrate		BITMAP	"migrate.bmp"
 msg_copy	CURSOR	"msg_copy.cur"
 msg_move	CURSOR	"msg_move.cur"
 
+// composer toggle button icons
+pgp_sign	BITMAP	"pgp_sign.bmp"
+pgp_nosign	BITMAP	"pgp_nosign.bmp"
 
-// PGP icons
+// PGP icons (48x48)
 pgpsig_good	BITMAP  "sig_good.bmp"
 pgpsig_exp	BITMAP	"sig_unk.bmp"
 pgpsig_untrust	BITMAP	"sig_unk.bmp"

@@ -122,7 +122,6 @@ extern const MOption MP_COMPOSE_PGPSIGN;
 extern const MOption MP_COMPOSE_PGPSIGN_AS;
 extern const MOption MP_COMPOSE_SHOW_FROM;
 extern const MOption MP_COMPOSE_TO;
-extern const MOption MP_COMPOSE_USE_PGP;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_CVIEW_BGCOLOUR;
 extern const MOption MP_CVIEW_COLOUR_HEADERS;
@@ -526,61 +525,131 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// wxIsReplyButton: button indicating whether this is a reply
+// ToggleIconButton: wxToggleButton with images
 // ----------------------------------------------------------------------------
 
-class wxIsReplyButton : public IconButton
+class ToggleIconButton : public IconButton
 {
 public:
-   wxIsReplyButton(wxComposeView *composer, wxWindow *parent)
+   // NB: derived class ctor must call UpdateWithoutRefresh()
+   ToggleIconButton(wxComposeView *composer,
+                    wxWindow *parent,
+                    const char *iconOn,
+                    const char *iconOff,
+                    const wxString& tooltipOn,
+                    const wxString& tooltipOff)
       : IconButton(parent, wxNullBitmap),
-        m_composer(composer)
+        m_composer(composer),
+        m_iconOn(iconOn),
+        m_iconOff(iconOff),
+        m_tooltipOn(tooltipOn),
+        m_tooltipOff(tooltipOff)
    {
-      UpdateAppearance();
-
       Connect(wxEVT_COMMAND_BUTTON_CLICKED,
-               wxCommandEventHandler(wxIsReplyButton::OnClick));
+               wxCommandEventHandler(ToggleIconButton::OnClick));
+   }
 
-      // AddHeaderEntry("In-Reply-To") is called after composer creation, so we
-      // want to update our state a bit later
-      Connect(wxEVT_IDLE, wxIdleEventHandler(wxIsReplyButton::OnIdle));
+   void Update()
+   {
+      UpdateWithoutRefresh();
+      Refresh();
+   }
+
+protected:
+   wxComposeView * const m_composer;
+
+   void UpdateWithoutRefresh()
+   {
+      m_isOn = DoGetValue();
+
+      SetBitmapLabel(mApplication->GetIconManager()->
+                        GetBitmap(m_isOn ? m_iconOn : m_iconOff));
+      SetToolTip(m_isOn ? m_tooltipOn : m_tooltipOff);
    }
 
 private:
-   void UpdateAppearance()
-   {
-      m_isReply = m_composer->IsInReplyTo();
+   // perform the action when the button is clicked
+   virtual void DoHandleClick() = 0;
 
-      SetBitmapLabel(mApplication->GetIconManager()->GetBitmap
-                     (
-                        m_isReply ? _T("tb_mail_reply") : _T("tb_mail_new")
-                     ));
-      SetToolTip(m_isReply ? _("This is a reply to another message")
-                         : _("This is a start of new thread"));
-   }
+   // return if we're in "on" or "off" state
+   virtual bool DoGetValue() const = 0;
+
 
    void OnClick(wxCommandEvent& /* event */)
    {
-      if ( m_composer->ConfigureInReplyTo() )
-      {
-         UpdateAppearance();
-         Refresh();
-      }
+      DoHandleClick();
+      if ( DoGetValue() != m_isOn )
+         Update();
    }
+
+   const char * const m_iconOn;
+   const char * const m_iconOff;
+
+   const wxString m_tooltipOn; 
+   const wxString m_tooltipOff; 
+
+   bool m_isOn;
+
+   DECLARE_NO_COPY_CLASS(ToggleIconButton)
+};
+
+// ----------------------------------------------------------------------------
+// IsReplyButton: button indicating whether this is a reply
+// ----------------------------------------------------------------------------
+
+class IsReplyButton : public ToggleIconButton
+{
+public:
+   IsReplyButton(wxComposeView *composer, wxWindow *parent)
+      : ToggleIconButton(composer, parent,
+                         "tb_mail_reply", "tb_mail_new",
+                        _("This is a reply to another message"),
+                        _("This is a start of new thread"))
+   {
+      // AddHeaderEntry("In-Reply-To") is called after composer creation, so we
+      // want to update our state a bit later
+      Connect(wxEVT_IDLE, wxIdleEventHandler(IsReplyButton::OnIdle));
+   }
+
+private:
+   virtual void DoHandleClick() { m_composer->ConfigureInReplyTo(); }
+   virtual bool DoGetValue() const { return m_composer->IsInReplyTo(); }
 
    void OnIdle(wxIdleEvent& /* event */)
    {
-      UpdateAppearance();
-
       Disconnect(wxID_ANY, wxEVT_IDLE,
-                     wxIdleEventHandler(wxIsReplyButton::OnIdle));
+                     wxIdleEventHandler(IsReplyButton::OnIdle));
+
+      Update();
    }
 
+   DECLARE_NO_COPY_CLASS(IsReplyButton)
+};
 
-   wxComposeView * const m_composer;
-   bool m_isReply;
+// ----------------------------------------------------------------------------
+// PGPSignButton: allows the user to choose whether to sign the message or not
+// ----------------------------------------------------------------------------
 
-   DECLARE_NO_COPY_CLASS(wxIsReplyButton)
+class PGPSignButton : public ToggleIconButton
+{
+public:
+   PGPSignButton(wxComposeView *composer, wxWindow *parent)
+      : ToggleIconButton(composer, parent,
+                         "pgp_sign", "pgp_nosign",
+                         _("Message will be cryptographically signed.\n"
+                           "\n"
+                           "You will need access to the private key to be "
+                           "used for message signing."),
+                         _("Message will not be signed"))
+   {
+      UpdateWithoutRefresh();
+   }
+
+private:
+   virtual void DoHandleClick() { m_composer->TogglePGPSigning(); }
+   virtual bool DoGetValue() const { return m_composer->IsPGPSigningEnabled(); }
+
+   DECLARE_NO_COPY_CLASS(PGPSignButton)
 };
 
 // ----------------------------------------------------------------------------
@@ -1816,8 +1885,8 @@ wxComposeView::wxComposeView(const String &name,
 
    m_txtSubject = NULL;
 
-   m_chkPGPSign = NULL;
-   m_txtPGPSignAs = NULL;
+   m_btnIsReply = NULL;
+   m_btnPGPSign = NULL;
 }
 
 bool wxComposeView::IsReplyTo(const Message& original) const
@@ -1870,16 +1939,6 @@ void wxComposeView::SetDraft(Message *msg)
 
 wxComposeView::~wxComposeView()
 {
-   // save the last values of PGP options
-   if ( m_chkPGPSign )
-   {
-      const bool sign = m_chkPGPSign->GetValue();
-      m_Profile->writeEntry(MP_COMPOSE_PGPSIGN, sign);
-      if ( sign )
-         m_Profile->writeEntry(MP_COMPOSE_PGPSIGN_AS, m_txtPGPSignAs->GetValue());
-   }
-
-
    delete m_rcptMain;
    WX_CLEAR_ARRAY(m_rcptExtra);
 
@@ -2039,6 +2098,10 @@ wxSizer *wxComposeView::CreateHeaderFields()
       }
       //else: no identities configured
 
+      m_btnPGPSign = new PGPSignButton(this, m_panel);
+      sizerFrom->Add(m_btnPGPSign,
+                     0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+
       sizerHeaders->Add(sizerFrom, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
    }
    else // no from line
@@ -2055,8 +2118,9 @@ wxSizer *wxComposeView::CreateHeaderFields()
    sizerSubj->Add(m_txtSubject, 1, wxALIGN_CENTRE_VERTICAL);
    SetTextAppearance(m_txtSubject);
 
-   sizerSubj->Add(new wxIsReplyButton(this, m_panel),
-                     0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+   m_btnIsReply = new IsReplyButton(this, m_panel);
+   sizerSubj->Add(m_btnIsReply,
+                  0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
 
    sizerHeaders->Add(sizerSubj, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
 
@@ -2244,15 +2308,6 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    m_splitter->SplitHorizontally(m_panel, m_editor->GetWindow(), heightHeaders);
    m_splitter->SetMinimumPaneSize(heightHeaders);
 
-   if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_PGP) )
-   {
-      wxBoxSizer * const sizer = new wxBoxSizer(wxVERTICAL);
-      sizer->Add(m_splitter, wxSizerFlags(1).Expand());
-      sizer->Add(CreatePGPControls(), wxSizerFlags().Expand());
-      SetSizer(sizer);
-   }
-   //else: rely on splitter taking up the entire frame as its only child
-
    // note that we must show and layout the frame before setting the control
    // values or the text would be scrolled to the right in the text fields as
    // they initially don't have enough space to show it...
@@ -2337,48 +2392,6 @@ wxComposeView::CreateEditor()
 
    // Commit
    m_editor = editor;
-}
-
-wxWindow *
-wxComposeView::CreatePGPControls()
-{
-   wxPanel * const panelPGP = new wxPanel(this);
-   wxBoxSizer * const sizer = new wxBoxSizer(wxHORIZONTAL);
-
-   // align all subsequent controls to the right by inserting an expandable
-   // sizer before them
-   sizer->AddStretchSpacer();
-
-   m_chkPGPSign = new wxCheckBox(panelPGP, wxID_ANY, _("&Sign message"));
-   m_chkPGPSign->SetToolTip(
-      _("If checked, the message will be cryptographically signed.\n"
-        "\n"
-        "You need to have access to the private key which will be "
-        "used for signing.")
-   );
-   m_chkPGPSign->SetValue(m_options.m_signWithPGP);
-   sizer->Add(m_chkPGPSign, wxSizerFlags().Border(wxALL & ~wxRIGHT).Centre());
-
-   sizer->Add(new wxStaticText(panelPGP, wxID_ANY, _("a&s ")),
-              wxSizerFlags().Centre());
-
-   m_txtPGPSignAs = new wxTextCtrl(panelPGP, wxID_ANY, m_options.m_signWithPGPAs);
-   m_txtPGPSignAs->SetToolTip(
-      _("Enter here the user name to use for signing or leave empty to use "
-        "the default key in your key store.")
-   );
-   sizer->Add(m_txtPGPSignAs, wxSizerFlags().Border(wxALL & ~wxLEFT).Centre());
-
-   m_txtPGPSignAs->Connect(
-      wxEVT_UPDATE_UI,
-      wxUpdateUIEventHandler(wxComposeView::OnUpdateUISignAs),
-      NULL,
-      this
-   );
-
-   panelPGP->SetSizer(sizer);
-
-   return panelPGP;
 }
 
 void
@@ -3522,7 +3535,18 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_COMPOSE_IN_REPLY_TO:
-         ConfigureInReplyTo();
+         if ( ConfigureInReplyTo() )
+         {
+            CHECK_RET( m_btnIsReply, "should have the button" );
+            m_btnIsReply->Update();
+         }
+         break;
+
+      case WXMENU_COMPOSE_PGP_SIGN:
+         TogglePGPSigning();
+
+         CHECK_RET( m_btnPGPSign, "should have the button" );
+         m_btnPGPSign->Update();
          break;
 
       case WXMENU_COMPOSE_CUSTOM_HEADERS:
@@ -4694,13 +4718,16 @@ wxComposeView::BuildMessage(int flags) const
    }
 
 
-   // postprocess the message
-   // -----------------------
+   // postprocess the message if we're really going to send it
+   // --------------------------------------------------------
 
-   // cryptographically sign the message if configured to do it
-   if ( m_chkPGPSign && m_chkPGPSign->GetValue() )
+   if ( flags & ForSending )
    {
-      msg->EnableSigning(m_txtPGPSignAs->GetValue());
+      // cryptographically sign the message if configured to do it
+      if ( IsPGPSigningEnabled() )
+      {
+         msg->EnableSigning(m_options.m_signWithPGPAs);
+      }
    }
 
    // the caller is responsible for deleting the object
@@ -4865,6 +4892,16 @@ wxComposeView::AddHeaderEntry(const String& name, const String& value)
    // if we didn't find it, add a new one
    m_extraHeadersNames.push_back(new String(name));
    m_extraHeadersValues.push_back(new String(value));
+}
+
+bool wxComposeView::IsPGPSigningEnabled() const
+{
+   return m_options.m_signWithPGP;
+}
+
+void wxComposeView::TogglePGPSigning()
+{
+   m_options.m_signWithPGP = !m_options.m_signWithPGP;
 }
 
 bool wxComposeView::IsInReplyTo() const
@@ -5158,6 +5195,8 @@ bool wxComposeView::DeleteDraft()
 
 SendMessage *wxComposeView::BuildDraftMessage(int flags) const
 {
+   ASSERT_MSG( !(flags & ForSending), "draft is not for sending" );
+
    SendMessage_obj msg(BuildMessage(flags));
    if ( !msg )
    {

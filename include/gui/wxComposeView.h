@@ -37,6 +37,9 @@ class wxEnhancedPanel;
 class SendMessage;
 class MessageEditor;
 
+class IsReplyButton;
+class PGPSignButton;
+
 class WXDLLIMPEXP_FWD_CORE wxChoice;
 class WXDLLIMPEXP_FWD_CORE wxMenuItem;
 class WXDLLIMPEXP_FWD_BASE wxProcess;
@@ -100,7 +103,10 @@ public:
       NonInteractive = 0,
 
       /// If this flag is specified, we can ask questions to the user
-      Interactive = 1
+      Interactive = 1,
+
+      /// If this flag is specified, the message is going to be sent right now
+      ForSending = 2
    };
 
 
@@ -291,12 +297,22 @@ public:
    void SetTextAppearance(wxTextCtrl *text);
 
    /**
+      Return true if we're configured to cryptographically sign the message.
+    */
+  bool IsPGPSigningEnabled() const;
+
+   /**
       Return true if we're a reply to another message.
 
       This doesn't simply check whether we have an original message but checks
       if we have an In-Reply-To header.
     */
    bool IsInReplyTo() const;
+
+   /**
+      Toggles the value returned by IsPGPSigningEnabled().
+    */
+   void TogglePGPSigning();
 
    /**
       Configures whether this message is a reply to another one.
@@ -413,7 +429,7 @@ protected:
      @param flags by default contains Interactive flag
      @return SendMessage object to be deleted by the caller
    */
-   SendMessage *BuildMessage(int flags = Interactive) const;
+   SendMessage *BuildMessage(int flags = Interactive | ForSending) const;
 
    /**
      Return the message to be sent as a draft: it simply adds a few additional
@@ -479,12 +495,6 @@ private:
    /// get the options (for MessageEditor)
    const Options& GetOptions() const { return m_options; }
 
-   /// update UI handler for "sign as" control
-   void OnUpdateUISignAs(wxUpdateUIEvent& event)
-   {
-      event.Enable( m_chkPGPSign->GetValue() );
-   }
-
    /// the profile (never NULL)
    Profile *m_Profile;
 
@@ -533,11 +543,11 @@ private:
       /// the editor where the message is really edited
    MessageEditor *m_editor;
 
-      /// checkbox enabling cryptographically signing the message
-   wxCheckBox *m_chkPGPSign;
+      /// button toggling In-Reply-To header
+   IsReplyButton *m_btnIsReply;
 
-      /// the user name to use for cryptographically signing the message
-   wxTextCtrl *m_txtPGPSignAs;
+      /// button enabling cryptographically signing the message
+   PGPSignButton *m_btnPGPSign;
 
    //@}
 

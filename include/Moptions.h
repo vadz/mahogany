@@ -223,7 +223,6 @@ extern const MOption MP_REPLY_QUOTE_EMPTY;
 extern const MOption MP_COMPOSE_USE_SIGNATURE;
 extern const MOption MP_COMPOSE_SIGNATURE;
 extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
-extern const MOption MP_COMPOSE_USE_PGP;
 extern const MOption MP_COMPOSE_PGPSIGN;
 extern const MOption MP_COMPOSE_PGPSIGN_AS;
 extern const MOption MP_COMPOSE_USE_XFACE;
@@ -860,8 +859,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_COMPOSE_SIGNATURE_NAME      "SignatureFile"
 /// use "-- " to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_NAME   "ComposeSeparateSignature"
-/// show PGP-related controls in the composer?
-#define   MP_COMPOSE_USE_PGP_NAME   "ShowPGPControls"
 /// sign messages with PGP?
 #define   MP_COMPOSE_PGPSIGN_NAME   "SignWithPGP"
 /// the user name to sign messages with PGP as
@@ -1730,8 +1727,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #endif
 /// use "-- " to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_DEFVAL   1
-/// show PGP-related controls in the composer?
-#define   MP_COMPOSE_USE_PGP_DEFVAL   1L
 /// sign messages with PGP?
 #define   MP_COMPOSE_PGPSIGN_DEFVAL   0L
 /// the user name to sign messages with PGP as

@@ -468,7 +468,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // compose
 
    // the available accelerators for this menu:
-   // ABFGJMQUXYZ
+   // ABFJMQUXYZ
    { WXMENU_COMPOSE_INSERTFILE,     gettext_noop("&Insert file...\tCtrl-I"),
                                     gettext_noop("Attach a file to the message")            , wxITEM_NORMAL },
    { WXMENU_COMPOSE_LOADTEXT,       gettext_noop("I&nsert text...\tCtrl-T"),
@@ -494,6 +494,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor\tCtrl-E"),gettext_noop("Invoke alternative editor"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_COMPOSE_IN_REPLY_TO, gettext_noop("Set if this is a &reply..."), gettext_noop("Set whether this message is a start of new thread or a reply to another message"), wxITEM_NORMAL },
+   { WXMENU_COMPOSE_PGP_SIGN, gettext_noop("Sign message with P&GP\tCtrl-G"), gettext_noop("Cryptographically sign the message using OpenPGP format"), wxITEM_CHECK },
    { WXMENU_COMPOSE_CUSTOM_HEADERS, gettext_noop("Custom &header...\tCtrl-H"), gettext_noop("Add/edit header fields not shown on the screen"), wxITEM_NORMAL },
 
    // language
