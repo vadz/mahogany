@@ -1,5 +1,5 @@
 /* XPM */
-static char *pgp_nosign[] = {
+static const char *pgp_nosign[] = {
 /* columns rows colors chars-per-pixel */
 "22 22 256 2",
 "   c gray1",

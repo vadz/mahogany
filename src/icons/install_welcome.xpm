@@ -1,5 +1,5 @@
 /* XPM */
-static char * install_welcome_xpm[] = {
+static const char * install_welcome_xpm[] = {
 "165 369 257 2",
 "  	c None",
 ". 	c #FFFFFF",

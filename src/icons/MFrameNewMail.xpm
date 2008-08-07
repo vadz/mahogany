@@ -1,5 +1,5 @@
 /* XPM */
-static char * MFrameNewMail_xpm[] = {
+static const char * MFrameNewMail_xpm[] = {
 "64 48 2275 2",
 "  	c None",
 ". 	c #3E3D72",

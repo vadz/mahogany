@@ -1,5 +1,5 @@
 /* XPM */
-static char * old_unread_xpm[] = {
+static const char * old_unread_xpm[] = {
 "16 16 13 1",
 "       g None",
 ".      g #E3E3E3",

@@ -1,5 +1,5 @@
 /* XPM */
-static char *adbimport[] = {
+static const char *adbimport[] = {
 /* columns rows colors chars-per-pixel */
 "32 32 256 2",
 "   c Gray0",

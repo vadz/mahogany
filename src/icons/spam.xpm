@@ -1,5 +1,5 @@
 /* XPM */
-static char *spam_xpm[] = {
+static const char *spam_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "32 32 27 1",
 "  c #fcfce8e8f5f5",

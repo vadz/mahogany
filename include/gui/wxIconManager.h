@@ -32,7 +32,7 @@
 #ifdef  USE_ICONS_FROM_RESOURCES
   typedef const char *IconResourceType;
 #else   //Unix
-  typedef char *IconResourceType[];
+  typedef const char *IconResourceType[];
 #endif  //Win/Unix
 
 /** A structure holding name and wxIcon pointer.

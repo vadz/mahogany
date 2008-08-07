@@ -1,5 +1,5 @@
 /* XPM */
-static char * tb_book_blue_xpm[] = {
+static const char * tb_book_blue_xpm[] = {
 "24 24 28 1",
 " 	c None",
 ".	c #000000",

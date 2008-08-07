@@ -1,5 +1,5 @@
 /* XPM */
-static char *serverspam[] = {
+static const char *serverspam[] = {
 /* columns rows colors chars-per-pixel */
 "32 32 188 2",
 "   c #364878",

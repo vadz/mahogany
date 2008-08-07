@@ -1,5 +1,5 @@
 /* XPM */
-static char * tb_mail_xpm[] = {
+static const char * tb_mail_xpm[] = {
 "24 24 115 2",
 "  	c None",
 ". 	c #000000",

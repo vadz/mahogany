@@ -1,5 +1,5 @@
 /* XPM */
-static char * Mahogany_xpm[] = {
+static const char * Mahogany_xpm[] = {
 "248 48 251 2",
 "  	c None",
 ". 	c #F0F700",

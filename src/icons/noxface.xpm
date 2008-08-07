@@ -1,5 +1,5 @@
 /* XPM */
-static char * noxface_xpm[] = {
+static const char * noxface_xpm[] = {
 "48 48 11 1",
 " 	c None",
 ".	c #FFFFFF",

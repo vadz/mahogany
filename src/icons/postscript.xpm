@@ -1,5 +1,5 @@
 /* XPM */
-static char *postscript_xpm[] = {
+static const char *postscript_xpm[] = {
 /* width height ncolors chars_per_pixel */
 "32 32 13 1",
 /* colors */

@@ -1,5 +1,5 @@
 /* XPM */
-static char *hlink_xpm[] = {
+static const char *hlink_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32       14            1",
 /* colors */

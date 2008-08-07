@@ -1,5 +1,5 @@
 /* XPM */
-static char *tb_trash[] = {
+static const char *tb_trash[] = {
 /* width height num_colors chars_per_pixel */
 "    24    24       84            2",
 /* colors */

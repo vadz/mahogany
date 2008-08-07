@@ -1,5 +1,5 @@
 /* XPM */
-static char **bbdb={
+static const char **bbdb={
 "16 16 8 1",
 ". c None",
 "a c #303030",

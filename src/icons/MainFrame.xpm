@@ -1,5 +1,5 @@
 /* XPM */
-static char *MainFrame_xpm[] = {
+static const char *MainFrame_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    64    48      253            2",
 /* colors */

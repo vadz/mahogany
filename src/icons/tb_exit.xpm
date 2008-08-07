@@ -1,5 +1,5 @@
 /* XPM */
-static char *tb_exit[] = {
+static const char *tb_exit[] = {
 /* width height num_colors chars_per_pixel */
 "    24    24       13            1",
 /* colors */

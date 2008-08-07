@@ -1,5 +1,5 @@
 /* XPM */
-static char *Micon_xpm[] = {
+static const char *Micon_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    64    48      254            2",
 /* colors */

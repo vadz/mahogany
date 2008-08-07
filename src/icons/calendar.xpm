@@ -1,5 +1,5 @@
 /* XPM */
-static char * calendar_xpm[] = {
+static const char * calendar_xpm[] = {
 "32 32 6 1",
 " 	s None	c None",
 ".	c grey4",

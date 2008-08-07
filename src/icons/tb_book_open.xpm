@@ -1,5 +1,5 @@
 /* XPM */
-static char *tb_book_open[] = {
+static const char *tb_book_open[] = {
 /* width height num_colors chars_per_pixel */
 "    24    24       64            1",
 /* colors */

@@ -1,5 +1,5 @@
 /* XPM */
-static char *nomail_s[] = {
+static const char *nomail_s[] = {
 /* width height num_colors chars_per_pixel */
 "    48    48       11            1",
 /* colors */

@@ -1,5 +1,5 @@
 /* XPM */
-static char *M_32x32[] = {
+static const char *M_32x32[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32      225            2",
 /* colors */

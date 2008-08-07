@@ -1,5 +1,5 @@
 /* XPM */
-static char * adrbook_xpm[] = {
+static const char * adrbook_xpm[] = {
 "32 32 28 1",
 " 	c None",
 ".	c #000000",

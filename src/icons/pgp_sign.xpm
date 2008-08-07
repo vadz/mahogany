@@ -1,5 +1,5 @@
 /* XPM */
-static char *pgp_sign[] = {
+static const char *pgp_sign[] = {
 /* columns rows colors chars-per-pixel */
 "22 22 223 2",
 "   c #010100",

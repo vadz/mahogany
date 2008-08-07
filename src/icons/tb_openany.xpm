@@ -1,5 +1,5 @@
 /* XPM */
-static char * tb_openany_xpm[] = {
+static const char * tb_openany_xpm[] = {
 "24 24 85 1",
 " 	c None",
 ".	c None",

@@ -1,5 +1,5 @@
 /* XPM */
-static char *compose[] = {
+static const char *compose[] = {
 /* columns rows colors chars-per-pixel */
 "32 32 252 2",
 "   c #9C600A",

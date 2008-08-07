@@ -1,5 +1,5 @@
 /* XPM */
-static char *wxlogo_xpm[] = {
+static const char *wxlogo_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "300 64 256 2",
 "   c #0B251B",

@@ -1,5 +1,5 @@
 /* XPM */
-static char* lemacs = {
+static const char* lemacs = {
 "32 32 9 1",
 "  c None",
 "` c #adadad",

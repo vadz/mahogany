@@ -1,5 +1,5 @@
 /* XPM */
-static char * adbedit_xpm[] = {
+static const char * adbedit_xpm[] = {
 "64 48 345 2",
 "  	c None",
 ". 	c #04020B",

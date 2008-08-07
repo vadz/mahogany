@@ -1,5 +1,5 @@
 /* XPM */
-static char *ssllogo_xpm[] = {
+static const char *ssllogo_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "102 47 64 1",
 "  c Gray0",

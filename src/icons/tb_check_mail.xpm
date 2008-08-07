@@ -1,5 +1,5 @@
 /* XPM */
-static char * balsa_receive_xpm[] = {
+static const char * balsa_receive_xpm[] = {
 "24 24 74 1",
 "       c None",
 ".      c #000000",

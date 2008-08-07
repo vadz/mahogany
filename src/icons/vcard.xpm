@@ -1,5 +1,5 @@
 /* XPM */
-static char *vcard[] = {
+static const char *vcard[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32       54            1",
 /* colors */

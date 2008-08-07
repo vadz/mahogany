@@ -1,5 +1,5 @@
 /* XPM */
-static char *palmpilot_xpm[] = {
+static const char *palmpilot_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "24 32 255 2",
 "   c #000100",

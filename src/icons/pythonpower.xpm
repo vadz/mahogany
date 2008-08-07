@@ -1,5 +1,5 @@
 /* XPM */
-static char *pythonpower[] = {
+static const char *pythonpower[] = {
 /* width height num_colors chars_per_pixel */
 "    55    22        6            1",
 /* colors */

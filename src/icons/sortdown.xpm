@@ -1,5 +1,5 @@
 /* XPM */
-static char *sort_down_xpm[] = {
+static const char *sort_down_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "11 11 3 1",
 ". c None",

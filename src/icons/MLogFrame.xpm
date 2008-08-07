@@ -1,5 +1,5 @@
 /* XPM */
-static char * MLogFrame_xpm[] = {
+static const char * MLogFrame_xpm[] = {
 "64 48 340 2",
 "  	c None",
 ". 	c #04020B",

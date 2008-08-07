@@ -1,5 +1,5 @@
 /* XPM */
-static char *folder_nntp_xpm[] = {
+static const char *folder_nntp_xpm[] = {
 /* columns rows colors chars-per-pixel */
 "16 16 135 2",
 "   c Gray0",

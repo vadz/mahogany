@@ -1,5 +1,5 @@
 /* XPM */
-static char *access[] = {
+static const char *access[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32        5            1",
 /* colors */

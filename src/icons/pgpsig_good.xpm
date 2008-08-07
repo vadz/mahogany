@@ -1,5 +1,5 @@
 /* XPM */
-static char *pgpsig_good[] = {
+static const char *pgpsig_good[] = {
 /* columns rows colors chars-per-pixel */
 "48 48 143 2",
 "   c #000000",

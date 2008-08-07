@@ -1,5 +1,5 @@
 /* XPM */
-static char *ftplink_xpm[] = {
+static const char *ftplink_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32       11            1",
 /* colors */

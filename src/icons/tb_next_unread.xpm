@@ -1,5 +1,5 @@
 /* XPM */
-static char * tb_next_unread_xpm[] = {
+static const char * tb_next_unread_xpm[] = {
 "24 24 49 1",
 " 	c None",
 ".	c #000000",

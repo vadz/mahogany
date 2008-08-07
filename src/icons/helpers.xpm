@@ -1,5 +1,5 @@
 /* XPM */
-static char *ComputerPC[] = {
+static const char *ComputerPC[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32       20            1",
 /* colors */

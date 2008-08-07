@@ -1,7 +1,7 @@
 /* XPM */
 /* Drawn  by Nico Shirwing for the K Desktop Environment */
 /* See http://www.kde.org */
-static char*ksnake[]={
+static const char*ksnake[]={
 "32 32 8 1",
 "# c #000000",
 "b c #ffffff",

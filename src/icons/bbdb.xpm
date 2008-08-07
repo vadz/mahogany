@@ -1,5 +1,5 @@
 /* XPM */
-static char *bbdb[] = {
+static const char *bbdb[] = {
 /* width height num_colors chars_per_pixel */
 "    31    32       38            1",
 /* colors */
