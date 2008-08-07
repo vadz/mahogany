@@ -502,6 +502,9 @@ private:
 
    void OnEnter(wxCommandEvent& WXUNUSED(event))
    {
+      // starting to edit the message after the subject is entered is more
+      // useful than going (back, i.e. above, as we're near the beginning of
+      // the TAB chain) to the recipient controls
       m_composeView->SetFocusToComposer();
    }
 
@@ -1561,14 +1564,12 @@ RecipientType wxAddressTextCtrl::DoExpand()
 // wxMainAddressTextCtrl
 // ----------------------------------------------------------------------------
 
-void wxMainAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
+void wxMainAddressTextCtrl::OnEnter(wxCommandEvent& event)
 {
-   // if there is nothing in the address field, start editing instead, this is
-   // handy to be able to switch to the composer window rapidly - tabbing to it
-   // can take ages if there are a lot of recipient controls below us
    if ( GetValue().empty() )
    {
-      GetComposer()->SetFocusToComposer();
+      // let Enter act like TAB and so go to the subject field
+      event.Skip();
    }
    else // add the contents of the control as a new recipient
    {
