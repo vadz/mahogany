@@ -2908,6 +2908,9 @@ void wxComposeView::Launch()
                SetFocusToComposer();
 
             return; // skip SetFocus() call below
+
+         default:
+            continue;
       }
    }
 
