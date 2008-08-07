@@ -212,6 +212,16 @@ strutil_compare_filenames(const String& path1, const String& path2);
 
 /** Enforces DOS/RFC822 CR/LF newline convention.
 
+    @param out the output buffer which will contain the text with CR/LF EOLs.
+    @param outLen the length of the output buffer.
+    @param in original string, with any EOLs, it must be NUL-terminated.
+    @return true if ok, false if the output buffer is too small.
+ */
+bool
+strutil_enforceCRLF(unsigned char *out, size_t outLen, const unsigned char *in);
+
+/** Enforces DOS/RFC822 CR/LF newline convention.
+
     @param in string to copy
     @return the DOSified string
 */

@@ -493,6 +493,40 @@ strutil_path_filename(String const &path, wxChar separator)
 
 
 
+bool
+strutil_enforceCRLF(char *out, size_t outLen, const char *in)
+{
+   for ( char * const outEnd = out + outLen; out != outEnd; )
+   {
+      switch ( char ch = *in++ )
+      {
+         case '\0':
+            *out = '\0';
+            return true;
+
+         case '\r':
+            if ( *in == '\n' )
+            {
+               // this line already has CR LF
+               in++;
+            }
+            // fall through
+
+         case '\n':
+            *out++ = '\r';
+            if ( out != outEnd )
+               *out++ = '\n';
+            break;
+
+         default:
+            *out++ = ch;
+      }
+   }
+
+   // if we get here out must have reached outEnd
+   return false;
+}
+
 /** Enforces CR/LF newline convention.
 
     @param in string to copy

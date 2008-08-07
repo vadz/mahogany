@@ -683,32 +683,75 @@ SendMessageCC::GetPassword(String& password) const
 
 // Check if the given data can be sent without encoding it (using QP or
 // Base64): for this it must not contain 8bit chars nor embedded NUL chars and
-// must not have too long lines
-static bool Is7BitText(const unsigned char *text, size_t len)
+// must not have too long lines.
+//
+// If it can be sent as 7 bit also enforce the CR LF as line end terminators as
+// c-client doesn't apply any transformation to 7 bit data and sending CR (or
+// LF) delimited data violates RFC 2822.
+static bool CanSendAs7BitText(const unsigned char *& text, size_t& len)
 {
    if ( !text )
       return true;
 
-   size_t lenLine = 0;
+   // check if we have 7 bit text and also find out whether we need to correct
+   // EOLs
+   bool isCRLF = true;
+   size_t lenLine = 0,
+          numLines = 0; // actually number of EOLs
    for ( size_t n = 0; n < len; n++ )
    {
-      if ( *text == '\0' )
-         return false;
+      const unsigned char ch = text[n];
 
-      if ( *text == '\n' )
+      switch ( ch )
       {
-         lenLine = 0;
-         text++;
-         continue;
-      }
+         case '\0':
+            // text can't have embedded NULs
+            return false;
 
-      if ( !isascii(*text++) )
-         return false;
+         case '\r':
+            if ( n < len - 1 && text[n + 1] == '\n' )
+            {
+               lenLine = 0;
+               numLines++;
+               continue;
+            }
+            // fall through
+
+         case '\n':
+            // we get here for '\n's not preceded by '\r's and '\r's not
+            // followed by '\n's
+            lenLine = 0;
+            numLines++;
+            isCRLF = false;
+            continue;
+
+         default:
+            if ( !isascii(ch) )
+               return false;
+      }
 
       // the real limit is bigger (~990) but chances are that anything with
       // lines of such length is not plain text
       if ( ++lenLine > 800 )
          return false;
+   }
+
+   // it is a 7 bit text but we may need to correct its line endings
+   if ( !isCRLF )
+   {
+      const unsigned char * const textOld = text;
+
+      // we're going to add at most numLines characters for the EOLs and
+      // another one for the trailing NUL
+      len += numLines + sizeof(char);
+      text = (unsigned char *) fs_get(len);
+
+      if ( !strutil_enforceCRLF(text, len, textOld) )
+      {
+         FAIL_MSG( "buffer should have been big enough" );
+      }
+
+      fs_give((void **)&textOld);
    }
 
    return true;
@@ -1320,7 +1363,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
    //            buf is already allocated with malloc() and is NUL-terminated
    //            (this is important of encoding it wouldn't work correctly) we
    //            would be able to avoid it
-   unsigned char * const data = (unsigned char *) fs_get(len + sizeof(char));
+   unsigned char *data = (unsigned char *) fs_get(len + sizeof(char));
    data[len] = '\0';
    memcpy(data, buf, len);
 
@@ -1383,9 +1426,6 @@ SendMessageCC::AddPart(MimeType::Primary type,
    bdy->type = type;
    bdy->subtype = cpystr(subtype.c_str());
 
-   bdy->contents.text.data = data;
-   bdy->contents.text.size = len;
-
    // set the transfer encoding
    switch ( type )
    {
@@ -1400,7 +1440,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       case TYPETEXT:
          // if the actual message text is in 7 bit, avoid encoding it even if
          // some charset which we would have normally encoded was used
-         if ( Is7BitText(data, len) )
+         if ( CanSendAs7BitText(data, len) )
          {
             bdy->encoding = ENC7BIT;
          }
@@ -1443,8 +1483,12 @@ SendMessageCC::AddPart(MimeType::Primary type,
          break;
 
       default:
-         bdy->encoding = Is7BitText(data, len) ? ENC7BIT : ENCBINARY;
+         bdy->encoding = CanSendAs7BitText(data, len) ? ENC7BIT : ENCBINARY;
    }
+
+   bdy->contents.text.data = data;
+   bdy->contents.text.size = len;
+
 
    PARAMETER *lastpar = NULL,
              *par;
