@@ -552,7 +552,7 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(showFaces) &&
 #endif // HAVE_XFACES
           CMP(autoViewer) &&
-          (!autoViewer || CMP(preferHTML) && CMP(allowHTML) && CMP(allowImages));
+          (!autoViewer || (CMP(preferHTML) && CMP(allowHTML) && CMP(allowImages)));
 
    #undef CMP
 }
