@@ -2910,7 +2910,7 @@ void wxComposeView::Launch()
             return; // skip SetFocus() call below
 
          default:
-            continue;
+            ; // suppress gcc warning
       }
    }
 
