@@ -1658,7 +1658,7 @@ bool wxOptionsEditDialog::OnSettingsChange()
       MDialog_Message(_("Some of the changes to the program options will\n"
                         "only take effect when the progam will be run the\n"
                         "next time and not during this session."),
-                      this, MDIALOG_MSGTITLE, _T("WarnRestartOpt"));
+                      this, MDIALOG_MSGTITLE, "WarnRestartOpt");
       m_bRestartWarning = FALSE;
    }
 

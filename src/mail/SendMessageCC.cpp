@@ -118,7 +118,7 @@ extern const MPersMsgBox *M_MSGBOX_SEND_OFFLINE;
 // ----------------------------------------------------------------------------
 
 // trace mask for message sending/queuing operations
-#define TRACE_SEND   _T("send")
+#define TRACE_SEND   "send"
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -243,7 +243,7 @@ SendMessage::CreateResent(const Profile *profile,
                           const Message *message,
                           wxFrame *frame)
 {
-   CHECK( message, NULL, _T("no Message in SendMessage::CreateResent()") );
+   CHECK( message, NULL, "no Message in SendMessage::CreateResent()" );
 
    SendMessageCC *msg = new SendMessageCC(profile, Prot_Default, frame, message);
    if ( msg )
@@ -259,7 +259,7 @@ SendMessage::CreateFromMsg(const Profile *profile,
                            wxFrame *frame,
                            const wxArrayInt *partsToOmit)
 {
-   CHECK( message, NULL, _T("no Message in SendMessage::CreateFromMsg()") );
+   CHECK( message, NULL, "no Message in SendMessage::CreateFromMsg()" );
 
    SendMessageCC *msg = new SendMessageCC(profile, protocol, frame, message);
    if ( msg )
@@ -326,7 +326,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
 
    if ( !profile )
    {
-      FAIL_MSG( _T("SendMessageCC::Create() requires profile") );
+      FAIL_MSG( "SendMessageCC::Create() requires profile" );
 
       profile = mApplication->GetProfile();
    }
@@ -341,7 +341,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
       {
          // autodetect protocol:
          String tmp;
-         if ( message->GetHeaderLine(_T("Newsgroups"), tmp) )
+         if ( message->GetHeaderLine("Newsgroups", tmp) )
             protocol = Prot_NNTP;
       }
 
@@ -361,7 +361,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    switch ( m_Protocol )
    {
       default:
-         FAIL_MSG( _T("unknown SendMessage protocol") );
+         FAIL_MSG( "unknown SendMessage protocol" );
          // fall through
 
       case Prot_SMTP:
@@ -461,9 +461,9 @@ void SendMessageCC::InitNew()
 
 void SendMessageCC::InitResent(const Message *message)
 {
-   CHECK_RET( message, _T("message being resent can't be NULL") );
+   CHECK_RET( message, "message being resent can't be NULL" );
 
-   CHECK_RET( m_Envelope, _T("envelope must be created in InitResent") );
+   CHECK_RET( m_Envelope, "envelope must be created in InitResent" );
 
    // get the original message header and copy it to remail envelope field
    // almost without any changes except that we have to mask the transport
@@ -496,11 +496,11 @@ void SendMessageCC::InitResent(const Message *message)
 
 #define STARTS_WITH(p, what) (!(wxStrnicmp((p), (what), wxStrlen(what))))
 
-         if ( STARTS_WITH(p, _T("Delivered-To:")) ||
-               STARTS_WITH(p, _T("Received:")) ||
-                 STARTS_WITH(p, _T("Resent-")) )
+         if ( STARTS_WITH(p, "Delivered-To:") ||
+               STARTS_WITH(p, "Received:") ||
+                 STARTS_WITH(p, "Resent-") )
          {
-            hdr += _T("X-");
+            hdr += "X-";
          }
 
 #undef STARTS_WITH
@@ -572,7 +572,7 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
       case Prot_NNTP:
          {
             String newsgroups;
-            if ( message->GetHeaderLine(_T("Newsgroups"), newsgroups) )
+            if ( message->GetHeaderLine("Newsgroups", newsgroups) )
                SetNewsgroups(newsgroups);
          }
          break;
@@ -580,7 +580,7 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
       // make gcc happy
       case Prot_Illegal:
       default:
-         FAIL_MSG(_T("unknown protocol"));
+         FAIL_MSG("unknown protocol");
    }
 
    // next deal with the remaining headers
@@ -658,7 +658,7 @@ bool
 SendMessageCC::GetPassword(String& password) const
 {
    ASSERT_MSG( !m_UserName.empty(),
-                  _T("password shouldn't be needed if no login") );
+                  "password shouldn't be needed if no login" );
 
    if ( m_Password.empty() )
    {
@@ -774,7 +774,7 @@ SendMessageCC::SetupFromAddresses(void)
    if ( adr )
    {
       // Return-Path (it is used as SMTP "MAIL FROM: <>" argument)
-      ASSERT_MSG( m_Envelope->return_path == NIL, _T("Return-Path already set?") );
+      ASSERT_MSG( m_Envelope->return_path == NIL, "Return-Path already set?" );
 
       m_Envelope->return_path = mail_newaddr();
       m_Envelope->return_path->mailbox = cpystr(adr->mailbox);
@@ -785,7 +785,7 @@ SendMessageCC::SetupFromAddresses(void)
 void
 SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
 {
-   ASSERT_MSG( !*pAdr, _T("shouldn't be called twice") );
+   ASSERT_MSG( !*pAdr, "shouldn't be called twice" );
 
    if ( address.empty() )
    {
@@ -812,7 +812,7 @@ void SendMessageCC::CheckAddressFieldForErrors(ADDRESS *adrStart)
       {
          adrPrev->next = adr->next;
 
-         DBGMESSAGE((_T("Invalid recipient address '%s' ignored."),
+         DBGMESSAGE(("Invalid recipient address '%s' ignored.",
                     AddressCC(adr).GetAddress().c_str()));
 
          // prevent mail_free_address() from freeing the entire list tail
@@ -850,7 +850,7 @@ SendMessageCC::SetNewsgroups(const String &groups)
 
    // TODO-NEWS: we should support sending and posting the message, doing
    //            it separately if necessary
-   ASSERT_MSG( m_Protocol == Prot_NNTP, _T("can't post and send message") );
+   ASSERT_MSG( m_Protocol == Prot_NNTP, "can't post and send message" );
 
    if ( !groups.empty() )
    {
@@ -948,14 +948,14 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
 
    if ( IsAddressHeader(name) )
    {
-      FAIL_MSG( _T("Address headers not supported here, use SetFrom() &c!") );
+      FAIL_MSG( "Address headers not supported here, use SetFrom() &c!" );
    }
    else if ( !HeaderCanBeSetByUser(name) )
    {
       ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
                     nameIn.c_str()));
    }
-   else if ( name == _T("SUBJECT") )
+   else if ( name == "SUBJECT" )
    {
       SetSubject(value);
    }
@@ -978,7 +978,7 @@ void
 SendMessageCC::RemoveHeaderEntry(const String& name)
 {
    MessageHeadersList::iterator i = FindHeaderEntry(name);
-   CHECK_RET( i != m_extraHeaders.end(), _T("RemoveHeaderEntry(): no such header") );
+   CHECK_RET( i != m_extraHeaders.end(), "RemoveHeaderEntry(): no such header" );
 
    (void)m_extraHeaders.erase(i);
 }
@@ -1015,10 +1015,10 @@ String BuildMessageId(const char *hostname)
       s_numInSec = 0;
    }
 
-   return String::Format(_T("<Mahogany-%s-%lu-%s.%02u@%s>"),
+   return String::Format("<Mahogany-%s-%lu-%s.%02u@%s>",
                          M_VERSION,
                          s_pid,
-                         dt.Format(_T("%Y%m%d-%H%M%S")).c_str(),
+                         dt.Format("%Y%m%d-%H%M%S").c_str(),
                          s_numInSec,
                          hostname);
 }
@@ -1131,7 +1131,7 @@ SendMessageCC::Build(bool forStorage)
 
    // Date:
    //
-   if ( m_Envelope->remail && !HasHeaderEntry(_T("Date")) )
+   if ( m_Envelope->remail && !HasHeaderEntry("Date") )
    {
       char tmpbuf[MAILTMPLEN];
       rfc822_date (tmpbuf);
@@ -1165,7 +1165,7 @@ SendMessageCC::Build(bool forStorage)
    {
       // The X-BCC will be converted back to BCC by Send()
       if ( m_Envelope->bcc )
-         AddHeaderEntry(_T("X-BCC"), m_Bcc);
+         AddHeaderEntry("X-BCC", m_Bcc);
    }
    else // send, not store
    {
@@ -1174,18 +1174,18 @@ SendMessageCC::Build(bool forStorage)
          might have come from the Outbox queue, so we translate X-BCC
          back to a proper bcc setting:
        */
-      if ( HasHeaderEntry(_T("X-BCC")) )
+      if ( HasHeaderEntry("X-BCC") )
       {
          if ( m_Envelope->bcc )
          {
             mail_free_address(&m_Envelope->bcc);
          }
 
-         SetAddressField(&m_Envelope->bcc, GetHeaderEntry(_T("X-BCC")));
+         SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
 
          // don't send X-BCC field or the recipient would still see the BCC
          // contents (which is highly undesirable!)
-         RemoveHeaderEntry(_T("X-BCC"));
+         RemoveHeaderEntry("X-BCC");
       }
       
       char tmpbuf[MAILTMPLEN];
@@ -1409,7 +1409,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
             // some encodings should be encoded in QP as they typically contain
             // only a small number of non printable characters while others
             // should be encoded in Base64 as almost all characters used in them
-            // are outside basic Ascii set
+            // are outside basic ASCII set
             switch ( MIME::GetEncodingForFontEncoding(enc) )
             {
                case MIME::Encoding_Unknown:
@@ -1419,7 +1419,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
                   break;
 
                default:
-                  FAIL_MSG( _T("unknown MIME encoding") );
+                  FAIL_MSG( "unknown MIME encoding" );
                   // fall through
 
                case MIME::Encoding_Base64:
@@ -1460,12 +1460,12 @@ SendMessageCC::AddPart(MimeType::Primary type,
          par = mail_newbody_parameter();
 
          String name = i->name;
-         if ( name.Lower() == _T("charset") )
+         if ( name.Lower() == "charset" )
          {
             if ( hasCharset )
             {
                // although not fatal, this shouldn't happen
-               wxLogDebug(_T("Multiple CHARSET parameters!"));
+               wxLogDebug("Multiple CHARSET parameters!");
             }
 
             hasCharset = true;
@@ -1486,7 +1486,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       {
          // plain text messages should be in US_ASCII as all clients should be
          // able to show them and some might complain [even] about iso8859-1
-         cs = _T("US-ASCII");
+         cs = "US-ASCII";
       }
       else // 8bit message
       {
@@ -1599,7 +1599,7 @@ SendMessageCC::SendOrQueue(int flags)
                i != m_FccList.end();
                i++ )
          {
-            wxLogTrace(TRACE_SEND, _T("FCCing message to %s"), (*i)->c_str());
+            wxLogTrace(TRACE_SEND, "FCCing message to %s", (*i)->c_str());
 
             WriteToFolder(**i);
          }
@@ -1642,7 +1642,7 @@ void SendMessageCC::Preview(String *text)
 bool
 SendMessageCC::Send(int flags)
 {
-   ASSERT_MSG( m_wasBuilt, _T("Build() must have been called!") );
+   ASSERT_MSG( m_wasBuilt, "Build() must have been called!" );
 
    if ( !MailFolder::Init() )
       return false;
@@ -1670,7 +1670,7 @@ SendMessageCC::Send(int flags)
    // use authentication if the user name is specified
    if ( !m_UserName.empty() )
    {
-      server << _T("/user=\"") << m_UserName << _T('"');
+      server << "/user=\"" << m_UserName << '"';
 
       String password;
       if ( !GetPassword(password) )
@@ -1707,7 +1707,7 @@ SendMessageCC::Send(int flags)
    {
       if ( useSSL == SSLSupport_None )
       {
-         server << _T("/notls");
+         server << "/notls";
       }
       else // do use SSL/TLS
       {
@@ -1715,7 +1715,7 @@ SendMessageCC::Send(int flags)
          {
             if ( useSSL != SSLSupport_TLSIfAvailable )
             {
-               ERRORMESSAGE((_T("SSL support is unavailable; try disabling SSL/TLS.")));
+               ERRORMESSAGE(("SSL support is unavailable; try disabling SSL/TLS."));
 
                return false;
             }
@@ -1725,15 +1725,15 @@ SendMessageCC::Send(int flags)
          switch ( useSSL )
          {
             case SSLSupport_SSL:
-               server << _T("/ssl");
+               server << "/ssl";
                break;
 
             case SSLSupport_TLS:
-               server << _T("/tls");
+               server << "/tls";
                break;
 
             default:
-               FAIL_MSG( _T("unknown value of SSLSupport") );
+               FAIL_MSG( "unknown value of SSLSupport" );
                // fall through
 
             case SSLSupport_TLSIfAvailable:
@@ -1743,7 +1743,7 @@ SendMessageCC::Send(int flags)
 
          if ( acceptUnsigned )
          {
-            server << _T("/novalidate-cert");
+            server << "/novalidate-cert";
          }
       }
    }
@@ -1787,7 +1787,7 @@ SendMessageCC::Send(int flags)
       case Prot_SMTP:
          {
             wxLogTrace(TRACE_SEND,
-                       _T("Trying to open connection to SMTP server '%s'"),
+                       "Trying to open connection to SMTP server \"%s\"",
                        m_ServerHost.c_str());
 
             if ( READ_CONFIG(m_profile, MP_SMTP_USE_8BIT) )
@@ -1820,7 +1820,8 @@ SendMessageCC::Send(int flags)
          break;
 
       case Prot_NNTP:
-         wxLogTrace(TRACE_SEND, _T("Trying to open connection to NNTP server '%s'"),
+         wxLogTrace(TRACE_SEND,
+                    "Trying to open connection to NNTP server \"%s\"",
                     m_ServerHost.c_str());
 
          stream = nntp_open(hostlist, options);
@@ -1881,7 +1882,7 @@ SendMessageCC::Send(int flags)
                   MDialog_Message(_("Message sent."),
                                   m_frame, // parent window
                                   MDIALOG_MSGTITLE,
-                                  _T("MailSentMessage"));
+                                  "MailSentMessage");
                }
             }
             else
@@ -1900,7 +1901,7 @@ SendMessageCC::Send(int flags)
          // make gcc happy
          case Prot_Illegal:
          default:
-            FAIL_MSG(_T("illegal protocol"));
+            FAIL_MSG("illegal protocol");
    }
 
    bool success;
@@ -1925,7 +1926,7 @@ SendMessageCC::Send(int flags)
          // make gcc happy
          case Prot_Illegal:
          default:
-            FAIL_MSG(_T("illegal protocol"));
+            FAIL_MSG("illegal protocol");
             success = false;
       }
 
@@ -1937,7 +1938,7 @@ SendMessageCC::Send(int flags)
                                                     : _("Article posted."),
                             m_frame, // parent window
                             MDIALOG_MSGTITLE,
-                            _T("MailSentMessage"));
+                            "MailSentMessage");
          }
 
          return true;
@@ -1953,7 +1954,7 @@ SendMessageCC::Send(int flags)
 
       // always show the server reply but do it first so it's not the top most
       // message show
-      ERRORMESSAGE((_T("%s"), reply.c_str()));
+      ERRORMESSAGE(("%s", reply.c_str()));
    }
 
    // give the general error message anyhow
@@ -1964,14 +1965,14 @@ SendMessageCC::Send(int flags)
    const String explanation = log.GuessError();
    if ( explanation.empty() )
    {
-      err += _T(".");
+      err += ".";
    }
    else // have explanation
    {
-      err += _T(":\n\n") + explanation;
+      err += ":\n\n" + explanation;
    }
 
-   ERRORMESSAGE((_T("%s"), err.c_str()));
+   ERRORMESSAGE(("%s", err.c_str()));
 
    return false;
 }
@@ -2005,7 +2006,7 @@ SendMessageCC::WriteToString(String& output)
 
    if ( !WriteMessage(write_str_output, &output) )
    {
-      ERRORMESSAGE ((_T("Can't write message to string.")));
+      ERRORMESSAGE(("Failed to create the message text."));
 
       return false;
    }
@@ -2165,7 +2166,7 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
   else
   {
      // just in case MRC decides to change it in the future...
-     wxFAIL_MSG(_T("cclient message header doesn't have terminating blank line?"));
+     wxFAIL_MSG("cclient message header doesn't have terminating blank line?");
   }
 
   // save the pointer as rfc822_address_line() modifies it

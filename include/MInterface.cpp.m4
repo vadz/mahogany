@@ -116,9 +116,9 @@ Profile * profile
 
 
 virtual void  MessageDialog (
-const wxChar * message, const wxWindow * parent,
-const wxChar * title,
-const wxChar * configPath )
+const String & message, const wxWindow * parent,
+const String & title,
+const char * configPath )
 
 {
 

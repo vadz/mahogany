@@ -3372,7 +3372,7 @@ VerifyEMailSendingWorks(MProgressInfo *proginfo)
    msg << _("Sent email message to:\n")
        << me
        << _("\n\nPlease check whether it arrives.");
-   MDialog_Message(msg, NULL, _("Testing your configuration"), _T("TestMailSent"));
+   MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
 
    return true; // till we know something better
 }

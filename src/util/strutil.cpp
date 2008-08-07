@@ -871,7 +871,7 @@ strutil_encrypt_initialise(void)
               "so that we can fix it."),
             NULL,
             _("Missing feature"),
-            _T("EncryptionAlgoBroken"));
+            "EncryptionAlgoBroken");
          strutil_has_twofish = FALSE;
       }
       else

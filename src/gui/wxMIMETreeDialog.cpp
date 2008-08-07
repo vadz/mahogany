@@ -384,7 +384,7 @@ void wxMIMETreeDialog::SaveAttachments(size_t count, const MimePart **parts)
                   _("Choose directory to save attachments to:"),
                   wxEmptyString,
                   this,
-                  _T("MimeSave")
+                  "MimeSave"
                 );
    if ( dir.empty() )
    {

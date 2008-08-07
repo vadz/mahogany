@@ -133,9 +133,9 @@ extern "C"
        @param title   title for message box window
        @param modal   true to make messagebox modal
    */
-void   MDialog_ErrorMessage(wxChar const *message,
+void   MDialog_ErrorMessage(const wxString& message,
                             const wxWindow *parent = NULL,
-                            wxChar const *title = MDIALOG_ERRTITLE,
+                            const wxString& title = MDIALOG_ERRTITLE,
                             bool modal = false);
 
 /** display system error message:
@@ -144,9 +144,9 @@ void   MDialog_ErrorMessage(wxChar const *message,
        @param title   title for message box window
        @param modal   true to make messagebox modal
    */
-void   MDialog_SystemErrorMessage(wxChar const *message,
+void   MDialog_SystemErrorMessage(const wxString& message,
                                   const wxWindow *parent = NULL,
-                                  wxChar const *title = MDIALOG_SYSERRTITLE,
+                                  const wxString& title = MDIALOG_SYSERRTITLE,
                                   bool modal = false);
 
 /** display error message and exit application
@@ -154,9 +154,9 @@ void   MDialog_SystemErrorMessage(wxChar const *message,
        @param title   title for message box window
        @param parent   the parent frame
    */
-void   MDialog_FatalErrorMessage(wxChar const *message,
+void   MDialog_FatalErrorMessage(const wxString& message,
                                  const wxWindow *parent = NULL,
-                                 wxChar const *title = MDIALOG_FATALERRTITLE);
+                                 const wxString& title = MDIALOG_FATALERRTITLE);
 
 /** display normal message and, if configPath != NULL, give a user a checkbox
     "don't show this message again" which allows not to show the same message
@@ -168,10 +168,10 @@ void   MDialog_FatalErrorMessage(wxChar const *message,
 
        @return TRUE if Ok was pressed, FALSE if Cancel
    */
-bool   MDialog_Message(wxChar const *message,
+bool   MDialog_Message(const wxString& message,
                        const wxWindow *parent = NULL,
-                       wxChar const *title = MDIALOG_MSGTITLE,
-                       const wxChar *configPath = NULL,
+                       const wxString& title = MDIALOG_MSGTITLE,
+                       const char *configPath = NULL,
                        int flags = 0);
 
 /** profile-aware Yes/No dialog: if persMsg is not NULL, it has a "don't show
@@ -187,9 +187,9 @@ bool   MDialog_Message(wxChar const *message,
 
     @return true if yes was selected
 */
-bool   MDialog_YesNoDialog(wxChar const *message,
+bool   MDialog_YesNoDialog(const wxString& message,
                            const wxWindow *parent = NULL,
-                           wxChar const *title = MDIALOG_YESNOTITLE,
+                           const wxString& title = MDIALOG_YESNOTITLE,
                            int flags = M_DLG_YES_DEFAULT,
                            const MPersMsgBox *persMsg = NULL,
                            const wxChar *folderName = NULL);
@@ -206,9 +206,9 @@ bool   MDialog_YesNoDialog(wxChar const *message,
 
   @return M_DLG_ if yes was chosen, 0 if no and -1 if cancel
  */
-MDlgResult MDialog_YesNoCancel(wxChar const *message,
+MDlgResult MDialog_YesNoCancel(const wxString& message,
                                const wxWindow *parent = NULL,
-                               wxChar const *title = MDIALOG_YESNOTITLE,
+                               const wxString& title = MDIALOG_YESNOTITLE,
                                int flags = M_DLG_YES_DEFAULT,
                                const MPersMsgBox *persMsg = NULL);
 
@@ -220,8 +220,8 @@ MDlgResult MDialog_YesNoCancel(wxChar const *message,
            and size and may be NULL
 */
 void MDialog_ShowText(wxWindow *parent,
-                      const wxChar *title,
-                      const wxChar *text,
+                      const wxString& title,
+                      const wxString& text,
                       const char *configPath = NULL);
 
 } // extern "C"
@@ -237,11 +237,11 @@ void MDialog_ShowText(wxWindow *parent,
 
   @return TRUE if Ok was pressed, FALSE if Cancel
  */
-bool MDialog_Message(wxChar const *message,
+bool MDialog_Message(const wxString& message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
                      int flags = 0,
-                     wxChar const *title = MDIALOG_MSGTITLE);
+                     const wxString& title = MDIALOG_MSGTITLE);
 
 /** File requester dialog: asks user for a file name
        @param message the text to display
@@ -274,7 +274,7 @@ String MDialog_FileRequester(const String &message,
 String MDialog_DirRequester(const String& message,
                             const String& path = NULLstring,
                             wxWindow *parent = NULL,
-                            const wxChar *configPath = NULL);
+                            const char *configPath = NULL);
 
 /**
   Ask the user to enter some text and remember the last value in the "Prompt"
@@ -414,8 +414,9 @@ extern void RunImportFoldersWizard(void);
 /// Accept or reject certificate
 extern "C"
 {
-   int AcceptCertificateDialog(const wxChar *subject, const wxChar *issuer,
-                               const wxChar *fingerprint);
+   int AcceptCertificateDialog(const wxString& subject,
+                               const wxString& issuer,
+                               const wxString& fingerprint);
 }
 #endif
 

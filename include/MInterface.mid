@@ -71,9 +71,9 @@ ARG(Profile *, profile, =NULL)
 ')
 
 FUNCTION(MessageDialog, void , (
-ARG(STRING, message), ARG(const wxWindow *, parent, =NULL),
-ARG(STRING, title, =MDIALOG_MSGTITLE),
-ARG(STRING, configPath, =NULL) )
+ARG(const String &, message), ARG(const wxWindow *, parent, =NULL),
+ARG(const String &, title, =MDIALOG_MSGTITLE),
+ARG(STRINGA, configPath, =NULL) )
 ,
 `
  MDialog_Message(message,parent,title,configPath);

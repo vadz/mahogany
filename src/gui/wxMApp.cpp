@@ -1996,7 +1996,7 @@ wxMApp::OnConnected(wxDialUpEvent&)
    MDialog_Message(_("Dial-Up network connection established."),
                    m_topLevelFrame,
                    _("Information"),
-                   _T("DialUpConnectedMsg"));
+                   "DialUpConnectedMsg");
 }
 
 void
@@ -2009,7 +2009,7 @@ wxMApp::OnDisconnected(wxDialUpEvent&)
    MDialog_Message(_("Dial-Up network shut down."),
                    m_topLevelFrame,
                    _("Information"),
-                   _T("DialUpDisconnectedMsg"));
+                   "DialUpDisconnectedMsg");
 }
 
 void

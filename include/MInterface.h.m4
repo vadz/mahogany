@@ -86,9 +86,9 @@ Profile * profile =NULL
 
 
 virtual void  MessageDialog (
-const wxChar * message , const wxWindow * parent =NULL,
-const wxChar * title =MDIALOG_MSGTITLE,
-const wxChar * configPath =NULL )
+const wxString & message , const wxWindow * parent =NULL,
+const wxString & title =MDIALOG_MSGTITLE,
+const char * configPath =NULL )
  = 0;
 
 

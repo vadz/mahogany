@@ -529,9 +529,9 @@ bool MInputBox(wxString *pstr,
 // other functions
 // ----------------------------------------------------------------------------
 void
-MDialog_ErrorMessage(const wxChar *msg,
+MDialog_ErrorMessage(const wxString& msg,
                      const wxWindow *parent,
-                     const wxChar *title,
+                     const wxString& title,
                      bool /* modal */)
 {
    //MGuiLocker lock;
@@ -550,9 +550,9 @@ MDialog_ErrorMessage(const wxChar *msg,
     @param modal  true to make messagebox modal
    */
 void
-MDialog_SystemErrorMessage(const wxChar *message,
+MDialog_SystemErrorMessage(const wxString& message,
                const wxWindow *parent,
-               const wxChar *title,
+               const wxString& title,
                bool modal)
 {
    String
@@ -571,9 +571,9 @@ MDialog_SystemErrorMessage(const wxChar *message,
        @param parent the parent frame
    */
 void
-MDialog_FatalErrorMessage(const wxChar *message,
+MDialog_FatalErrorMessage(const wxString& message,
               const wxWindow *parent,
-              const wxChar *title)
+              const wxString& title)
 {
    String msg = String(message) + _("\nExiting application...");
 
@@ -589,10 +589,10 @@ MDialog_FatalErrorMessage(const wxChar *message,
        @param modal  true to make messagebox modal
    */
 bool
-MDialog_Message(const wxChar *message,
+MDialog_Message(const wxString& message,
                 const wxWindow *parent,
-                const wxChar *title,
-                const wxChar *configPath,
+                const wxString& title,
+                const char *configPath,
                 int flags)
 {
    // if the msg box is disabled, don't make the splash disappear, return
@@ -623,11 +623,11 @@ MDialog_Message(const wxChar *message,
           ) != wxCANCEL;
 }
 
-bool MDialog_Message(wxChar const *message,
+bool MDialog_Message(const wxString& message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
                      int flags,
-                     wxChar const *title)
+                     const wxString& title)
 {
    String configPath;
    if ( persMsg )
@@ -635,12 +635,13 @@ bool MDialog_Message(wxChar const *message,
 
    return MDialog_Message(message, parent, title,
                           persMsg ? configPath.c_str()
-                                  : (const wxChar *)NULL, flags);
+                                  : (const char *)NULL,
+                          flags);
 }
 
-MDlgResult MDialog_YesNoCancel(wxChar const *message,
+MDlgResult MDialog_YesNoCancel(const wxString& message,
                                const wxWindow *parent,
-                               wxChar const *title,
+                               const wxString& title,
                                int flags,
                                const MPersMsgBox *persMsg)
 {
@@ -690,9 +691,9 @@ MDlgResult MDialog_YesNoCancel(wxChar const *message,
     @return true if Yes was selected
 */
 bool
-MDialog_YesNoDialog(const wxChar *message,
+MDialog_YesNoDialog(const wxString& message,
                     const wxWindow *parent,
-                    const wxChar *title,
+                    const wxString& title,
                     int flags,
                     const MPersMsgBox *msgBox,
                     const wxChar *folderName)
@@ -826,7 +827,7 @@ MDialog_FileRequester(String const & message,
 String MDialog_DirRequester(const String& message,
                             const String& pathOrig,
                             wxWindow *parent,
-                            const wxChar *confpath)
+                            const wxString& confpath)
 {
    return wxPDirSelector(confpath, message, pathOrig, parent);
 }
@@ -2134,8 +2135,9 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
 /// Accept or reject certificate
 extern "C"
 {
-   int AcceptCertificateDialog(const wxChar *subject, const wxChar *issuer,
-                               const wxChar *fingerprint)
+   int AcceptCertificateDialog(const wxString& subject,
+                               const wxString& issuer,
+                               const wxString& fingerprint)
    {
       wxString info;
       info << _("The server presents the following certificate:\n")

@@ -1542,7 +1542,7 @@ wxFolderPropertiesPage::DoUpdateUI()
             "contain any mail messages at all, but only other folders) these\n"
             "values will be used as defaults for all folders created under\n"
             "this group folder."),
-                         this, _("Group folders hint"), _T("FolderGroupHint"));
+                         this, _("Group folders hint"), "FolderGroupHint");
       }
 
       // set the defaults for this kind of folder
