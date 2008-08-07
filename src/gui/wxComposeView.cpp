@@ -2363,7 +2363,11 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    AddBcc(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
    AddCc(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
 
-   AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
+   // it doesn't make sense to use the default recipient when replying (or if
+   // it does, we need a separate option for this because it's definitely
+   // inconvenient by default)
+   if ( m_kind == Message_New )
+      AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
 }
 
 void
