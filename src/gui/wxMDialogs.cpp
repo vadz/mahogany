@@ -827,7 +827,7 @@ MDialog_FileRequester(String const & message,
 String MDialog_DirRequester(const String& message,
                             const String& pathOrig,
                             wxWindow *parent,
-                            const wxString& confpath)
+                            const char *confpath)
 {
    return wxPDirSelector(confpath, message, pathOrig, parent);
 }
