@@ -38,6 +38,7 @@ bool sysutil_compare_filenames(String const &file1, String const
 
    rc = wxStat(file1, &statbuf1);
    if(rc != 0)
+   {
       if(rc == ENOENT)
       {
          // using all flags but x, will be modified by umask anyway
@@ -52,9 +53,11 @@ bool sysutil_compare_filenames(String const &file1, String const
       }
       else
             return strutil_compare_filenames(file1, file2);
+   }
 
    rc = wxStat(file2, &statbuf2);
    if(rc != 0)
+   {
       if(rc == ENOENT)
       {
          // using all flags but x, will be modified by umask anyway
@@ -69,6 +72,7 @@ bool sysutil_compare_filenames(String const &file1, String const
       }
       else
             return strutil_compare_filenames(file1, file2);
+   }
 
    return
       statbuf1.st_dev == statbuf2.st_dev // same device

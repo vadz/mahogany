@@ -2194,6 +2194,7 @@ MailFolderCmn::SendMsgStatusChangeEvent()
             } \
             else if ( (!wasDeleted && msgStatusOld.what) && \
                       (isDeleted || !msgStatusNew.what) ) \
+            { \
                if ( status.what > 0 ) \
                { \
                   wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "-- (now %lu)", \
@@ -2201,7 +2202,8 @@ MailFolderCmn::SendMsgStatusChangeEvent()
                   status.what--; \
                } \
                else \
-                  FAIL_MSG( _T("error in msg status change logic") )
+                  FAIL_MSG( _T("error in msg status change logic") ); \
+            }
 
          UPDATE_NUM_OF(recent);
          UPDATE_NUM_OF(unread);
