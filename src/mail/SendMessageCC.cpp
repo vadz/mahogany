@@ -681,16 +681,20 @@ SendMessageCC::GetPassword(String& password) const
 // SendMessageCC encodings
 // ----------------------------------------------------------------------------
 
-// Check if text can be sent without encoding it (using QP or Base64): for
-// this it must not contain 8bit chars and must not have too long lines
-static bool NeedsToBeEncoded(const unsigned char *text)
+// Check if the given data can be sent without encoding it (using QP or
+// Base64): for this it must not contain 8bit chars nor embedded NUL chars and
+// must not have too long lines
+static bool Is7BitText(const unsigned char *text, size_t len)
 {
    if ( !text )
-      return false;
+      return true;
 
    size_t lenLine = 0;
-   while ( *text )
+   for ( size_t n = 0; n < len; n++ )
    {
+      if ( *text == '\0' )
+         return false;
+
       if ( *text == '\n' )
       {
          lenLine = 0;
@@ -699,15 +703,15 @@ static bool NeedsToBeEncoded(const unsigned char *text)
       }
 
       if ( !isascii(*text++) )
-         return true;
+         return false;
 
       // the real limit is bigger (~990) but chances are that anything with
       // lines of such length is not plain text
       if ( ++lenLine > 800 )
-         return true;
+         return false;
    }
 
-   return false;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1396,7 +1400,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       case TYPETEXT:
          // if the actual message text is in 7 bit, avoid encoding it even if
          // some charset which we would have normally encoded was used
-         if ( !NeedsToBeEncoded(data) )
+         if ( Is7BitText(data, len) )
          {
             bdy->encoding = ENC7BIT;
          }
@@ -1439,7 +1443,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
          break;
 
       default:
-         bdy->encoding = NeedsToBeEncoded(data) ? ENCBINARY : ENC7BIT;
+         bdy->encoding = Is7BitText(data, len) ? ENC7BIT : ENCBINARY;
    }
 
    PARAMETER *lastpar = NULL,
