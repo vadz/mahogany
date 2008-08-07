@@ -1986,6 +1986,8 @@ wxComposeView::~wxComposeView()
       }
    }
 
+   // clean up the autosave file: if m_filenameAutoSave is set we must have it,
+   // otherwise AutoSave() wouldn't have initialized it
    if ( !m_filenameAutoSave.empty() )
    {
       if ( !wxRemoveFile(m_filenameAutoSave) )
@@ -5388,6 +5390,12 @@ static String GetComposerAutosaveDir()
 bool
 wxComposeView::AutoSave()
 {
+   // we disable autosave if we don't have a directory to save files to
+   static bool s_autosaveEnabled = true;
+
+   if ( !s_autosaveEnabled )
+      return true;
+
    if ( !m_editor )
       return true;
 
@@ -5401,7 +5409,8 @@ wxComposeView::AutoSave()
    if ( !msg )
       return false;
 
-   if ( m_filenameAutoSave.empty() )
+   String fname = m_filenameAutoSave;  // reuse the last file name
+   if ( fname.empty() )                // but initialize if it's the first time
    {
       // make sure the directory we use for these scratch files exists
       String name = GetComposerAutosaveDir();
@@ -5411,6 +5420,14 @@ wxComposeView::AutoSave()
          {
             wxLogSysError(_("Failed to create the directory '%s' for the "
                             "temporary composer files"), name.c_str());
+
+            wxLogError(_("Composer messages won't be saved automatically "
+                         "for the duration of this session.\n"
+                         "Please make sure that Mahogany can create the "
+                         "directory \"%s\" and restart the program."),
+                       name.c_str());
+            s_autosaveEnabled = false;
+
             return false;
          }
       }
@@ -5418,7 +5435,7 @@ wxComposeView::AutoSave()
       // we need a unique file name during the life time of this object as this
       // file is always going to be deleted if we're destroyed correctly, it
       // can only be left if the program crashes
-      m_filenameAutoSave = name + String::Format(_T("%05d%p"), (int)getpid(), this);
+      fname = name + String::Format(_T("%05d%p"), (int)getpid(), this);
    }
 
    String contents;
@@ -5430,13 +5447,24 @@ wxComposeView::AutoSave()
       return false;
    }
 
-   if ( !MailFolder::SaveMessageAsMBOX(m_filenameAutoSave, contents) )
+   if ( !MailFolder::SaveMessageAsMBOX(fname, contents) )
    {
-      // TODO: disable autosaving? we risk to give many such messages if
-      //       something is wrong...
-      wxLogError(_("Failed to automatically save the message."));
+      // don't make this a wxLogError() as it would result in a message box
+      // which is a wrong thing to do for a background operation
+      wxLogStatus(_("Failed to automatically save the message."));
+
+      // if we did manage to create the file, leave it even if saving failed,
+      // it might still contain something useful for recovery
+      if ( wxFileName::FileExists(fname) )
+         m_filenameAutoSave = fname;
 
       return false;
+   }
+
+   if ( m_filenameAutoSave.empty() )
+   {
+      // remember the file name for the subsequent calls of this function
+      m_filenameAutoSave = fname;
    }
 
    // mark the editor as not modified to avoid resaving it the next time
