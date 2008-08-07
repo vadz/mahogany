@@ -1800,10 +1800,10 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
 bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
                                    const MFolder *folderDst)
 {
-   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ProcessNewMail(%lu msgs) for %s"),
-              GetName().c_str(),
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ProcessNewMail(%lu msgs) for %s",
+              GetName(),
               (unsigned long)uidsNew.GetCount(),
-              folderDst ? folderDst->GetFullName().c_str() : _T("ourselves"));
+              folderDst ? folderDst->GetFullName() : "ourselves");
 
    // use the settings for the folder where the new mail is!
    MFolder *folderWithNewMail;
