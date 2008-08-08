@@ -688,7 +688,7 @@ SendMessageCC::GetPassword(String& password) const
 // If it can be sent as 7 bit also enforce the CR LF as line end terminators as
 // c-client doesn't apply any transformation to 7 bit data and sending CR (or
 // LF) delimited data violates RFC 2822.
-static bool CanSendAs7BitText(const unsigned char *& text, size_t& len)
+static bool CanSendAs7BitText(unsigned char *& text, size_t& len)
 {
    if ( !text )
       return true;

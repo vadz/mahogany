@@ -494,11 +494,11 @@ strutil_path_filename(String const &path, wxChar separator)
 
 
 bool
-strutil_enforceCRLF(char *out, size_t outLen, const char *in)
+strutil_enforceCRLF(unsigned char *out, size_t outLen, const unsigned char *in)
 {
-   for ( char * const outEnd = out + outLen; out != outEnd; )
+   for ( unsigned char * const outEnd = out + outLen; out != outEnd; )
    {
-      switch ( char ch = *in++ )
+      switch ( unsigned char ch = *in++ )
       {
          case '\0':
             *out = '\0';
