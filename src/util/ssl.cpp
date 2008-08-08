@@ -289,8 +289,8 @@ error:
            "if you have these libraries in non default location"
            " or if they have some other names on your system."),
          NULL,
-         _T("SSL tip"),
-         _T("SSLLibTip")
+         "SSL tip",
+         "SSLLibTip"
       );
    }
 

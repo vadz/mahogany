@@ -3170,7 +3170,7 @@ VerifyStdFolders(void)
            ),
           NULL,
           MDIALOG_MSGTITLE,
-          _T("WarnInbox")
+          "WarnInbox"
          );
       }
 
