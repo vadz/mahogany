@@ -405,12 +405,12 @@ AdbExpandSingleAddress(String *address,
       // address assume that it doesn't need to be expanded (this saves a lot
       // of time as expanding a non existing address looks through all address
       // books...)
-      size_t pos = textOrig.find('@');
-      if ( pos != String::npos && pos > 0 && pos < textOrig.length() )
+      const size_t posAt = textOrig.find('@');
+      if ( posAt != String::npos )
       {
          // also check that the host part of the address is expanded - it
          // should contain at least one dot normally
-         if ( wxStrchr(textOrig.c_str() + pos + 1, '.') )
+         if ( textOrig.find('.', posAt + 1) != String::npos )
          {
             // looks like a valid address - nothing to do
             newText = textOrig;
