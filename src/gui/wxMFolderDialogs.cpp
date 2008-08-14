@@ -2654,6 +2654,7 @@ const char *wxFolderCreateNotebook::s_aszImages[] =
    "network",
    "newmail",
    "compose",
+   "reply",
    "folders",
    "msgview",
    "folderview",
