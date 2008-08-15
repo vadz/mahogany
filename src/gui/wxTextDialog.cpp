@@ -355,8 +355,8 @@ void MTextDialog::OnFindDialogClose(wxFindDialogEvent&)
 
 extern "C"
 void MDialog_ShowText(wxWindow *parent,
-                      const wxChar *title,
-                      const wxChar *text,
+                      const wxString& title,
+                      const wxString& text,
                       const char *configPath)
 {
    // show the dialog modelessly because otherwise we wouldn't be able to show
