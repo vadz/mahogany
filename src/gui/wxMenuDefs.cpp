@@ -302,7 +302,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , wxITEM_NORMAL },
    { WXMENU_FOLDER_WHENCE,    gettext_noop("&Where is filter..."), gettext_noop("Find the filters which move messages to this folder")               , wxITEM_NORMAL },
-   { WXMENU_FOLDER_SPAM_CONFIG, gettext_noop("Spam fi&lters..."), gettext_noop("Set the options spam filters options"), wxITEM_NORMAL },
+   { WXMENU_FOLDER_SPAM_CONFIG, gettext_noop("Spam fi&lters..."), gettext_noop("Set the spam filters options"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , wxITEM_NORMAL },
 
