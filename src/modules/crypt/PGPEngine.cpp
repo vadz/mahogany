@@ -311,7 +311,7 @@ PGPEngine::ExecCommand(const String& options,
    messageOut.clear();
    char bufOut[4096];
 
-   wxCharBuffer bufIn(messageIn.To8BitData());
+   wxCharBuffer bufIn(messageIn.ToUTF8());
    size_t lenIn = strlen(bufIn);
    const char *ptrIn = bufIn;
 
@@ -334,7 +334,7 @@ PGPEngine::ExecCommand(const String& options,
             // leave space for terminating NUL
             bufOut[out->Read(bufOut, WXSIZEOF(bufOut) - 1).LastRead()] = '\0';
 
-            messageOut += wxString::From8BitData(bufOut);
+            messageOut += wxString::FromUTF8(bufOut);
          }
       }
 
