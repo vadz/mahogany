@@ -187,7 +187,7 @@ protected:
                              const String& param,
                              String *result);
    virtual const char *GetOptionPageIconName() const { return "dspam"; }
-   virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
+   virtual SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
                                              Profile *profile) const;
 
    // get the context creating it on demand
@@ -254,7 +254,7 @@ class DspamOptionsPage : public SpamOptionsPage
 {
 public:
    DspamOptionsPage(DspamFilter *filter,
-                    wxNotebook *parent,
+                    MBookCtrl *parent,
                     const wxString& title,
                     Profile *profile,
                     FieldInfoArray aFields,
@@ -561,7 +561,7 @@ enum
 };
 
 SpamOptionsPage *
-DspamFilter::CreateOptionPage(wxListOrNoteBook *notebook,
+DspamFilter::CreateOptionPage(MBookCtrl *notebook,
                               Profile *profile) const
 {
    static const wxOptionsPage::FieldInfo s_fields[] =

@@ -23,7 +23,7 @@
 
 #include "MModule.h"
 
-#include "gui/listbook.h"
+#include "gui/MBookCtrl.h"
 
 class Message;
 class SpamOptionsPage;
@@ -254,7 +254,7 @@ protected:
                      Inc/DecRef() it)
       @return pointer to the page (which will be deleted by the caller) ot NULL
     */
-   virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
+   virtual SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
                                              Profile *profile) const;
 
    /**

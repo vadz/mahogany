@@ -33,7 +33,7 @@
 class SpamOptionsPage : public wxOptionsPageDynamic
 {
 public:
-   SpamOptionsPage(wxNotebook *parent, Profile *profile)
+   SpamOptionsPage(MBookCtrl *parent, Profile *profile)
       : wxOptionsPageDynamic(parent)
    {
    }

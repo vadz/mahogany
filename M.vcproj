@@ -1984,6 +1984,9 @@
 				RelativePath=".\include\MAtExit.h">
 			</File>
 			<File
+				RelativePath=".\include\gui\MBookCtrl.h">
+			</File>
+			<File
 				RelativePath=".\include\Mcallbacks.h">
 			</File>
 			<File

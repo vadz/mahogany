@@ -67,7 +67,7 @@ protected:
                              const String& param,
                              String *result);
    virtual const char *GetOptionPageIconName() const { return "serverspam"; }
-   virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
+   virtual SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
                                              Profile *profile) const;
 
 private:
@@ -86,7 +86,7 @@ class ServerSideOptionsPage : public SpamOptionsPage
 {
 public:
    ServerSideOptionsPage(const ServerSideFilter *filter,
-                         wxNotebook *parent,
+                         MBookCtrl *parent,
                          Profile *profile);
 
 private:
@@ -198,7 +198,7 @@ ServerSideFilter::DoCheckIfSpam(const Profile *profile,
 // ----------------------------------------------------------------------------
 
 SpamOptionsPage *
-ServerSideFilter::CreateOptionPage(wxListOrNoteBook *notebook,
+ServerSideFilter::CreateOptionPage(MBookCtrl *notebook,
                                    Profile *profile) const
 {
    return new ServerSideOptionsPage(this, notebook, profile);
@@ -224,7 +224,7 @@ enum
 };
 
 ServerSideOptionsPage::ServerSideOptionsPage(const ServerSideFilter *filter,
-                                             wxListOrNoteBook *notebook,
+                                             MBookCtrl *notebook,
                                              Profile *profile)
       : SpamOptionsPage(notebook, profile)
 {

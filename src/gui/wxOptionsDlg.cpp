@@ -940,7 +940,7 @@ private:
 
 IMPLEMENT_ABSTRACT_CLASS(wxGlobalOptionsDialog, wxOptionsEditDialog)
 
-BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
+BEGIN_EVENT_TABLE(wxOptionsPage, MBookCtrlPageBase)
    // any change should make us dirty
    EVT_CHECKBOX(-1, wxOptionsPage::OnControlChange)
    EVT_RADIOBOX(-1, wxOptionsPage::OnControlChange)
@@ -2433,12 +2433,12 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
                              ConfigValuesArray aDefaults,
                              size_t nFirst,
                              size_t nLast,
-                             wxNotebook *notebook,
+                             MBookCtrl *notebook,
                              const wxString& title,
                              Profile *profile,
                              int helpId,
                              int image)
-             : wxNotebookPageBase(notebook)
+             : MBookCtrlPageBase(notebook)
 {
    Create(aFields, aDefaults, nFirst, nLast, notebook, title,
           profile, helpId, image);
@@ -2449,7 +2449,7 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
                            ConfigValuesArray aDefaults,
                            size_t nFirst,
                            size_t nLast,
-                           wxNotebook *notebook,
+                           MBookCtrl *notebook,
                            const wxString& title,
                            Profile *profile,
                            int helpId,
@@ -2497,7 +2497,7 @@ wxOptionsPage::~wxOptionsPage()
 
 bool wxOptionsPage::Show(bool show)
 {
-   if ( !wxNotebookPageBase::Show(show) )
+   if ( !MBookCtrlPageBase::Show(show) )
       return false;
 
    if ( show && m_aControls.IsEmpty() )
@@ -3425,7 +3425,7 @@ void wxOptionsPage::SetProfile(Profile *profile)
 // wxOptionsPageDynamic
 // ----------------------------------------------------------------------------
 
-wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
+wxOptionsPageDynamic::wxOptionsPageDynamic(MBookCtrl *parent,
                                            const wxString& title,
                                            Profile *profile,
                                            FieldInfoArray aFields,
@@ -3442,7 +3442,7 @@ wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
 }
 
 bool
-wxOptionsPageDynamic::Create(wxNotebook *parent,
+wxOptionsPageDynamic::Create(MBookCtrl *parent,
                              const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
@@ -3470,7 +3470,7 @@ wxOptionsPageDynamic::Create(wxNotebook *parent,
 // wxOptionsPageStandard
 // ----------------------------------------------------------------------------
 
-wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
+wxOptionsPageStandard::wxOptionsPageStandard(MBookCtrl *notebook,
                                              const wxString& title,
                                              Profile *profile,
                                              int nFirst,
@@ -3487,7 +3487,7 @@ wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
    ASSERT_MSG( nFirst >= -1, _T("bad parameret in wxOptionsPageStandard ctor") );
 }
 
-wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *parent,
+wxOptionsPageStandard::wxOptionsPageStandard(MBookCtrl *parent,
                                              const wxString& title,
                                              Profile *profile,
                                              FieldInfoArray aFields,
@@ -3507,7 +3507,7 @@ wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *parent,
 // wxOptionsPageCompose
 // ----------------------------------------------------------------------------
 
-wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
+wxOptionsPageCompose::wxOptionsPageCompose(MBookCtrl *parent,
                                            Profile *profile)
                     : wxOptionsPageStandard(parent,
                                     _("Compose"),
@@ -3564,7 +3564,7 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
 // wxOptionsPageReply
 // ----------------------------------------------------------------------------
 
-wxOptionsPageReply::wxOptionsPageReply(wxNotebook *parent, Profile *profile)
+wxOptionsPageReply::wxOptionsPageReply(MBookCtrl *parent, Profile *profile)
                   : wxOptionsPageStandard(parent,
                                           _("Reply"),
                                           profile,
@@ -3580,7 +3580,7 @@ wxOptionsPageReply::wxOptionsPageReply(wxNotebook *parent, Profile *profile)
 // wxOptionsPageMessageView
 // ----------------------------------------------------------------------------
 
-wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
+wxOptionsPageMessageView::wxOptionsPageMessageView(MBookCtrl *parent,
                                                    Profile *profile)
    : wxOptionsPageStandard(parent,
                    _("Message View"),
@@ -3696,7 +3696,7 @@ enum
    FolderViewPage_Show_Last
 };
 
-wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
+wxOptionsPageFolderView::wxOptionsPageFolderView(MBookCtrl *parent,
                                                  Profile *profile)
                        : wxOptionsPageStandard(parent,
                                                _("Folder View"),
@@ -3799,7 +3799,7 @@ void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
 // wxOptionsPageFolderTree
 // ----------------------------------------------------------------------------
 
-wxOptionsPageFolderTree::wxOptionsPageFolderTree(wxNotebook *parent,
+wxOptionsPageFolderTree::wxOptionsPageFolderTree(MBookCtrl *parent,
                                                  Profile *profile)
    : wxOptionsPageStandard(parent,
                            _("Folder Tree"),
@@ -3871,7 +3871,7 @@ bool wxOptionsPageFolderTree::DoTransferOptionsFromWindow()
 // wxOptionsPageIdent
 // ----------------------------------------------------------------------------
 
-wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
+wxOptionsPageIdent::wxOptionsPageIdent(MBookCtrl *parent,
                                        Profile *profile)
                   : wxOptionsPageStandard(parent,
                                   _("Identity"),
@@ -3900,7 +3900,7 @@ void wxOptionsPageIdent::OnButton(wxCommandEvent& event)
 // wxOptionsPageNetwork
 // ----------------------------------------------------------------------------
 
-wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
+wxOptionsPageNetwork::wxOptionsPageNetwork(MBookCtrl *parent,
                                            Profile *profile)
                     : wxOptionsPageStandard(parent,
                                     _("Network"),
@@ -4031,7 +4031,7 @@ bool wxOptionsPageNetwork::DoTransferOptionsFromWindow()
 // wxOptionsPageNewMail
 // ----------------------------------------------------------------------------
 
-wxOptionsPageNewMail::wxOptionsPageNewMail(wxNotebook *parent,
+wxOptionsPageNewMail::wxOptionsPageNewMail(MBookCtrl *parent,
                                            Profile *profile)
                     : wxOptionsPageStandard(parent,
                                     _("New Mail"),
@@ -4204,7 +4204,7 @@ void wxOptionsPageNewMail::OnButton(wxCommandEvent& event)
 
 #ifdef USE_PYTHON
 
-wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
+wxOptionsPagePython::wxOptionsPagePython(MBookCtrl *parent,
                                          Profile *profile)
                    : wxOptionsPageStandard(parent,
                                    _("Python"),
@@ -4243,7 +4243,7 @@ bool wxOptionsPagePython::DoTransferOptionsFromWindow()
 // wxOptionsPageAdb
 // ----------------------------------------------------------------------------
 
-wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
+wxOptionsPageAdb::wxOptionsPageAdb(MBookCtrl *parent,
                                     Profile *profile)
                 : wxOptionsPageStandard(parent,
                                 _("Addresses"),
@@ -4319,7 +4319,7 @@ bool wxOptionsPageAdb::DoTransferOptionsFromWindow()
 // wxOptionsPageSync
 // ----------------------------------------------------------------------------
 
-wxOptionsPageSync::wxOptionsPageSync(wxNotebook *parent,
+wxOptionsPageSync::wxOptionsPageSync(MBookCtrl *parent,
                                      Profile *profile)
                  : wxOptionsPageStandard(parent,
                                          _("Synchronize"),
@@ -4506,7 +4506,7 @@ void wxOptionsPageSync::OnButton(wxCommandEvent& event)
 
 #ifdef USE_TEST_PAGE
 
-wxOptionsPageTest::wxOptionsPageTest(wxNotebook *parent,
+wxOptionsPageTest::wxOptionsPageTest(MBookCtrl *parent,
                                      Profile *profile)
                  : wxOptionsPageStandard(parent,
                                          _T("Test page"),
@@ -4522,7 +4522,7 @@ wxOptionsPageTest::wxOptionsPageTest(wxNotebook *parent,
 // wxOptionsPageOthers
 // ----------------------------------------------------------------------------
 
-wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
+wxOptionsPageOthers::wxOptionsPageOthers(MBookCtrl *parent,
                                          Profile *profile)
                    : wxOptionsPageStandard(parent,
                                    _("Miscellaneous"),
@@ -4633,7 +4633,7 @@ bool wxOptionsPageOthers::DoTransferOptionsFromWindow()
 // wxOptionsPageHelpers
 // ----------------------------------------------------------------------------
 
-wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
+wxOptionsPageHelpers::wxOptionsPageHelpers(MBookCtrl *parent,
                                          Profile *profile)
    : wxOptionsPageStandard(parent,
                    _("Helpers"),
@@ -4648,7 +4648,7 @@ wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
 // wxOptionsPageFolders
 // ----------------------------------------------------------------------------
 
-wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
+wxOptionsPageFolders::wxOptionsPageFolders(MBookCtrl *parent,
                                            Profile *profile)
    : wxOptionsPageStandard(parent,
                    _("Folders"),

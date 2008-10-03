@@ -20,7 +20,7 @@
 #       include <wx/dynarray.h>
 #endif // USE_PCH
 
-#include "gui/wxDialogLayout.h"         // for wxNotebookPageBase
+#include "gui/wxDialogLayout.h"         // for MBookCtrlPageBase
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 WX_DEFINE_ARRAY_INT(bool, ArrayBool);
@@ -81,7 +81,7 @@ typedef const ConfigValueDefault *ConfigValuesArray;
 // listboxes and sub dialogs are currently supported)
 // -----------------------------------------------------------------------------
 
-class wxOptionsPage : public wxNotebookPageBase
+class wxOptionsPage : public MBookCtrlPageBase
 {
 public:
    // FieldType and FieldFlags are stored in one 'int', so the bits should be
@@ -141,7 +141,7 @@ public:
    // almost default ctor: this just takes the parent notebook
    //
    // you'll need to call Create() later
-   wxOptionsPage(wxNotebook *parent) : wxNotebookPageBase(parent) { }
+   wxOptionsPage(MBookCtrl *parent) : MBookCtrlPageBase(parent) { }
 
    // initialize this page and add it to the notebook (with the image refering
    // to the notebook's imagelist)
@@ -149,7 +149,7 @@ public:
                ConfigValuesArray aDefaults,
                size_t nFirst,
                size_t nLast,
-               wxNotebook *notebook,
+               MBookCtrl *notebook,
                const wxString& title,
                Profile *profile,
                int helpId = -1,
@@ -159,7 +159,7 @@ public:
    wxOptionsPage(FieldInfoArray aFields,
                  ConfigValuesArray aDefaults,
                  size_t nFirst, size_t nLast,
-                 wxNotebook *parent,
+                 MBookCtrl *parent,
                  const wxString& title,
                  Profile *profile,
                  int helpID = -1,
@@ -334,7 +334,7 @@ class wxOptionsPageStandard : public wxOptionsPage
 public:
    // ctor will create the controls corresponding to the fields from nFirst to
    // nLast in ms_aFields
-   wxOptionsPageStandard(wxNotebook *parent,
+   wxOptionsPageStandard(MBookCtrl *parent,
                          const wxString& title,
                          Profile *profile,
                          int nFirst,
@@ -356,7 +356,7 @@ public:
 
 protected:
    // ctor for pages created via static New()
-   wxOptionsPageStandard(wxNotebook *parent,
+   wxOptionsPageStandard(MBookCtrl *parent,
                          const wxString& title,
                          Profile *profile,
                          FieldInfoArray aFields,
@@ -379,10 +379,10 @@ class wxOptionsPageDynamic : public wxOptionsPage
 {
 public:
    // if you use this ctor, you must use Create() later
-   wxOptionsPageDynamic(wxNotebook *parent) : wxOptionsPage(parent) { }
+   wxOptionsPageDynamic(MBookCtrl *parent) : wxOptionsPage(parent) { }
 
    // the aFields array contains the controls descriptions
-   bool Create(wxNotebook *parent,
+   bool Create(MBookCtrl *parent,
                const wxString& title,
                Profile *profile,
                FieldInfoArray aFields,
@@ -393,7 +393,7 @@ public:
                int image = -1);
 
    // ctor doing all at once
-   wxOptionsPageDynamic(wxNotebook *parent,
+   wxOptionsPageDynamic(MBookCtrl *parent,
                         const wxString& title,
                         Profile *profile,
                         FieldInfoArray aFields,
@@ -404,7 +404,7 @@ public:
                         int image = -1);
 
    // for wxOptionsPageDesc usage
-   static wxOptionsPage *New(wxNotebook *parent,
+   static wxOptionsPage *New(MBookCtrl *parent,
                              const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
@@ -436,7 +436,7 @@ public:
    // type instead of generic wxOptionsPageDynamic
    typedef wxOptionsPage *(*NewFunc_t)
                            (
-                              wxNotebook *parent,
+                              MBookCtrl *parent,
                               const wxString& title,
                               Profile *profile,
                               wxOptionsPage::FieldInfoArray aFields,
@@ -473,7 +473,7 @@ public:
    }
 
    // create a page from this description
-   wxOptionsPage *New(wxNotebook *parent, Profile *profile, int image) const
+   wxOptionsPage *New(MBookCtrl *parent, Profile *profile, int image) const
    {
       return (*m_pfnNew)
              (
@@ -514,7 +514,7 @@ private:
 class wxOptionsPageIdent : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageIdent(wxNotebook *parent, Profile *profile);
+   wxOptionsPageIdent(MBookCtrl *parent, Profile *profile);
 
    void OnButton(wxCommandEvent&);
 
@@ -527,10 +527,10 @@ private:
 class wxOptionsPageNetwork : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageNetwork(wxNotebook *parent, Profile *profile);
+   wxOptionsPageNetwork(MBookCtrl *parent, Profile *profile);
 
    // for wxOptionsPageDesc
-   static wxOptionsPage *New(wxNotebook *parent,
+   static wxOptionsPage *New(MBookCtrl *parent,
                              const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
@@ -551,7 +551,7 @@ protected:
 
 private:
    // ctor for New()
-   wxOptionsPageNetwork(wxNotebook *parent,
+   wxOptionsPageNetwork(MBookCtrl *parent,
                         const wxString& title,
                         Profile *profile,
                         FieldInfoArray aFields,
@@ -587,7 +587,7 @@ private:
 class wxOptionsPageNewMail : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageNewMail(wxNotebook *parent, Profile *profile);
+   wxOptionsPageNewMail(MBookCtrl *parent, Profile *profile);
    virtual ~wxOptionsPageNewMail();
 
    void OnButton(wxCommandEvent&);
@@ -618,12 +618,12 @@ private:
 class wxOptionsPageCompose : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageCompose(wxNotebook *parent, Profile *profile);
+   wxOptionsPageCompose(MBookCtrl *parent, Profile *profile);
 
    void OnButton(wxCommandEvent& event);
 
    // for wxOptionsPageDesc
-   static wxOptionsPage *New(wxNotebook *parent,
+   static wxOptionsPage *New(MBookCtrl *parent,
                              const wxString& title,
                              Profile *profile,
                              FieldInfoArray aFields,
@@ -640,7 +640,7 @@ public:
 
 private:
    // ctor for New()
-   wxOptionsPageCompose(wxNotebook *parent,
+   wxOptionsPageCompose(MBookCtrl *parent,
                         const wxString& title,
                         Profile *profile,
                         FieldInfoArray aFields,
@@ -664,7 +664,7 @@ private:
 class wxOptionsPageReply : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageReply(wxNotebook *parent, Profile *profile);
+   wxOptionsPageReply(MBookCtrl *parent, Profile *profile);
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageReply)
@@ -674,7 +674,7 @@ private:
 class wxOptionsPageMessageView : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageMessageView(wxNotebook *parent, Profile *profile);
+   wxOptionsPageMessageView(MBookCtrl *parent, Profile *profile);
 
    void OnButton(wxCommandEvent&);
 
@@ -697,7 +697,7 @@ private:
 class wxOptionsPageFolderView : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageFolderView(wxNotebook *parent, Profile *profile);
+   wxOptionsPageFolderView(MBookCtrl *parent, Profile *profile);
 
 protected:
    virtual bool DoTransferOptionsToWindow();
@@ -714,7 +714,7 @@ private:
 class wxOptionsPageFolderTree : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageFolderTree(wxNotebook *parent, Profile *profile);
+   wxOptionsPageFolderTree(MBookCtrl *parent, Profile *profile);
 
 protected:
    virtual bool DoTransferOptionsToWindow();
@@ -731,7 +731,7 @@ private:
 class wxOptionsPageFolders : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageFolders(wxNotebook *parent, Profile *profile);
+   wxOptionsPageFolders(MBookCtrl *parent, Profile *profile);
 
 protected:
    virtual bool DoTransferOptionsToWindow();
@@ -752,7 +752,7 @@ private:
 class wxOptionsPagePython : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPagePython(wxNotebook *parent, Profile *profile);
+   wxOptionsPagePython(MBookCtrl *parent, Profile *profile);
 
    virtual bool DoTransferOptionsFromWindow();
 
@@ -766,7 +766,7 @@ private:
 class wxOptionsPageAdb : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageAdb(wxNotebook *parent, Profile *profile);
+   wxOptionsPageAdb(MBookCtrl *parent, Profile *profile);
 
 protected:
    virtual bool DoTransferOptionsToWindow();
@@ -781,7 +781,7 @@ private:
 class wxOptionsPageHelpers : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageHelpers(wxNotebook *parent, Profile *profile);
+   wxOptionsPageHelpers(MBookCtrl *parent, Profile *profile);
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageHelpers)
@@ -791,7 +791,7 @@ private:
 class wxOptionsPageSync : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageSync(wxNotebook *parent, Profile *profile);
+   wxOptionsPageSync(MBookCtrl *parent, Profile *profile);
 
 protected:
    virtual bool DoTransferOptionsToWindow();
@@ -818,7 +818,7 @@ private:
 class wxOptionsPageOthers : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageOthers(wxNotebook *parent, Profile *profile);
+   wxOptionsPageOthers(MBookCtrl *parent, Profile *profile);
 
 protected:
    virtual bool DoTransferOptionsToWindow();
@@ -844,7 +844,7 @@ private:
 class wxOptionsPageTest : public wxOptionsPageStandard
 {
 public:
-   wxOptionsPageTest(wxNotebook *parent, Profile *profile);
+   wxOptionsPageTest(MBookCtrl *parent, Profile *profile);
 };
 
 #endif // USE_TEST_PAGE

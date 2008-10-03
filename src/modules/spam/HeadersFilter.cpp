@@ -225,7 +225,7 @@ protected:
                              const String& param,
                              String *result);
    virtual const char *GetOptionPageIconName() const { return "spam"; }
-   virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
+   virtual SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
                                              Profile *profile) const;
 
 
@@ -410,7 +410,7 @@ public:
 class HeadersOptionsPage : public SpamOptionsPage
 {
 public:
-   HeadersOptionsPage(wxListOrNoteBook *notebook, Profile *profile);
+   HeadersOptionsPage(MBookCtrl *notebook, Profile *profile);
 
 private:
    ConfigValueDefault *GetConfigValues();
@@ -1239,7 +1239,7 @@ HeadersFilter::DoCheckIfSpam(const Profile *profile,
 // ----------------------------------------------------------------------------
 
 SpamOptionsPage *
-HeadersFilter::CreateOptionPage(wxListOrNoteBook *notebook,
+HeadersFilter::CreateOptionPage(MBookCtrl *notebook,
                                 Profile *profile) const
 {
    return new HeadersOptionsPage(notebook, profile);
@@ -1271,7 +1271,7 @@ const size_t
    HeadersOptionsPage::ms_count = WXSIZEOF(HeadersOptionsPage::ms_members);
 
 
-HeadersOptionsPage::HeadersOptionsPage(wxListOrNoteBook *notebook,
+HeadersOptionsPage::HeadersOptionsPage(MBookCtrl *notebook,
                                        Profile *profile)
                   : SpamOptionsPage(notebook, profile)
 {

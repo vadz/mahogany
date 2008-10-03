@@ -126,11 +126,11 @@ BEGIN_EVENT_TABLE(wxEnhancedPanel, wxPanel)
    EVT_SIZE(wxEnhancedPanel::OnSize)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxNotebookPageBase, wxEnhancedPanel)
-   EVT_TEXT    (-1, wxNotebookPageBase::OnChange)
-   EVT_CHECKBOX(-1, wxNotebookPageBase::OnChange)
-   EVT_RADIOBOX(-1, wxNotebookPageBase::OnChange)
-   EVT_COMBOBOX(-1, wxNotebookPageBase::OnChange)
+BEGIN_EVENT_TABLE(MBookCtrlPageBase, wxEnhancedPanel)
+   EVT_TEXT    (-1, MBookCtrlPageBase::OnChange)
+   EVT_CHECKBOX(-1, MBookCtrlPageBase::OnChange)
+   EVT_RADIOBOX(-1, MBookCtrlPageBase::OnChange)
+   EVT_COMBOBOX(-1, MBookCtrlPageBase::OnChange)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxManuallyLaidOutDialog, wxDialog)
@@ -586,7 +586,7 @@ bool wxNotebookWithImages::ShouldShowIcons()
 wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
                                            wxWindow *parent,
                                            const char *aszImages[])
-                    : wxPNotebook(configPath, parent, -1)
+                    : MPBookCtrl(configPath, parent, -1)
 {
    if ( ShouldShowIcons() )
    {
@@ -1111,10 +1111,10 @@ void wxEnhancedPanel::EnableListBox(wxListBox *control, bool bEnable)
 }
 
 // ----------------------------------------------------------------------------
-// wxNotebookPageBase
+// MBookCtrlPageBase
 // ----------------------------------------------------------------------------
 
-void wxNotebookPageBase::OnChange(wxCommandEvent& /* event */)
+void MBookCtrlPageBase::OnChange(wxCommandEvent& /* event */)
 {
    wxOptionsEditDialog *dlg = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
    if ( dlg )

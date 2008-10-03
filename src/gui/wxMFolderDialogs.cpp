@@ -279,10 +279,10 @@ private:
 // HACK: the 3rd argument to the ctor tells us whether we're creating a new
 //       folder (if it's !NULL) or just showing properties of an existing one.
 //       Our UI behaves slightly differently in these 2 cases.
-class wxFolderPropertiesPage : public wxNotebookPageBase
+class wxFolderPropertiesPage : public MBookCtrlPageBase
 {
 public:
-   wxFolderPropertiesPage(wxNotebook *notebook,
+   wxFolderPropertiesPage(MBookCtrl *notebook,
                           Profile *profile,
                           wxFolderCreateDialog *dlg = NULL);
 
@@ -431,7 +431,7 @@ protected:
    void EnableControlsForFileFolder(MFolderType folderType);
 
    /// the parent notebook control
-   wxNotebook *m_notebook;
+   MBookCtrl *m_notebook;
 
    /// the profile we use to read our settings from/write them to
    Profile *m_profile;
@@ -583,7 +583,7 @@ BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxOptionsEditDialog)
    EVT_UPDATE_UI(wxID_APPLY, wxFolderCreateDialog::OnUpdateButton)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
+BEGIN_EVENT_TABLE(wxFolderPropertiesPage, MBookCtrlPageBase)
    EVT_RADIOBOX(-1, wxFolderPropertiesPage::OnRadioBox)
    EVT_CHECKBOX(-1, wxFolderPropertiesPage::OnCheckBox)
    EVT_COMBOBOX(-1, wxFolderPropertiesPage::OnComboBox)
@@ -966,10 +966,10 @@ bool wxFolderPropertiesDialog::TransferDataFromWindow()
 // wxFolderPropertiesPage
 // ----------------------------------------------------------------------------
 
-wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
+wxFolderPropertiesPage::wxFolderPropertiesPage(MBookCtrl *notebook,
                                                Profile *profile,
                                                wxFolderCreateDialog *dlg)
-                      : wxNotebookPageBase(notebook)
+                      : MBookCtrlPageBase(notebook)
 {
    // add us to the notebook
    int image = FolderCreatePage_Folder;

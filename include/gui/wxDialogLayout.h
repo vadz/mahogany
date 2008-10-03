@@ -25,34 +25,9 @@
 #include <wx/persctrl.h>   // needed for wxPNotebook
 
 #include "gui/wxMDialogs.h"
+#include "gui/MBookCtrl.h"
+
 #include "MEvent.h"
-
-// use wxListbook instead of wxNotebook if available
-#if wxUSE_LISTBOOK
-   #define wxNotebook wxListbook
-   #define wxPNotebook wxPListbook
-   #define wxNotebookEvent wxListbookEvent
-
-   #undef wxNotebookEventHandler
-   #define wxNotebookEventHandler wxListbookEventHandler
-
-   #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED
-   #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING
-
-   #undef EVT_NOTEBOOK_PAGE_CHANGED
-   #define EVT_NOTEBOOK_PAGE_CHANGED EVT_LISTBOOK_PAGE_CHANGED
-   #undef EVT_NOTEBOOK_PAGE_CHANGING
-   #define EVT_NOTEBOOK_PAGE_CHANGING EVT_LISTBOOK_PAGE_CHANGING
-
-   #undef wxNB_TOP
-   #define wxNB_TOP wxLB_TOP
-   #undef wxNB_BOTTOM
-   #define wxNB_BOTTOM wxLB_BOTTOM
-   #undef wxNB_LEFT
-   #define wxNB_LEFT wxLB_LEFT
-   #undef wxNB_RIGHT
-   #define wxNB_RIGHT wxLB_RIGHT
-#endif // wxUSE_LISTBOOK
 
 // -----------------------------------------------------------------------------
 // forward declarations
@@ -344,7 +319,7 @@ protected:
 
 
    // the notebook occupying the main part of the dialog
-   wxPNotebook *m_notebook;
+   MPBookCtrl *m_notebook;
 
 private:
    // implement base class pure virtual in terms of our existing function for
@@ -668,10 +643,10 @@ private:
 // showing the controls in a row (text fields with labels for example).
 // ----------------------------------------------------------------------------
 
-class wxNotebookPageBase : public wxEnhancedPanel
+class MBookCtrlPageBase : public wxEnhancedPanel
 {
 public:
-   wxNotebookPageBase(wxNotebook *parent) : wxEnhancedPanel(parent) { }
+   MBookCtrlPageBase(MBookCtrl *parent) : wxEnhancedPanel(parent) { }
 
 protected:
    // callbacks which will set the parent's dirty flag whenever
@@ -681,14 +656,14 @@ protected:
 
 private:
    DECLARE_EVENT_TABLE()
-   DECLARE_NO_COPY_CLASS(wxNotebookPageBase)
+   DECLARE_NO_COPY_CLASS(MBookCtrlPageBase)
 };
 
 // ----------------------------------------------------------------------------
 // a notebook with images
 // ----------------------------------------------------------------------------
 
-class wxNotebookWithImages : public wxPNotebook
+class wxNotebookWithImages : public MPBookCtrl
 {
 public:
    // configPath is used to store the last active page, aszImages is the NULL

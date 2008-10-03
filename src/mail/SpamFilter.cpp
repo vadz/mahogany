@@ -133,9 +133,9 @@ public:
 
    virtual void CreateNotebook(wxPanel *panel)
    {
-      m_notebook = new wxPNotebook(_T("SpamOptions"), panel);
-      Connect(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED,
-               wxNotebookEventHandler(SpamOptionsDialog::OnPageChanged));
+      m_notebook = new MPBookCtrl(_T("SpamOptions"), panel);
+      Connect(M_EVT_BOOK_PAGE_CHANGED,
+               MBookEventHandler(SpamOptionsDialog::OnPageChanged));
 
       if ( m_imagelist )
          m_notebook->AssignImageList(m_imagelist);
@@ -665,7 +665,7 @@ void SpamFilter::UnloadAll()
 // ----------------------------------------------------------------------------
 
 SpamOptionsPage *
-SpamFilter::CreateOptionPage(wxListOrNoteBook * /* notebook */,
+SpamFilter::CreateOptionPage(MBookCtrl * /* notebook */,
                              Profile * /* profile */) const
 {
    return NULL;
