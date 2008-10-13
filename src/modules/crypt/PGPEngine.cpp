@@ -180,7 +180,7 @@ private:
 
 IMPLEMENT_CRYPTO_ENGINE(PGPEngine,
                         _("PGP/GPG crypto engine"),
-                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
+                        "(c) 2002-2008 Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // PGPEngine: running the external tool
@@ -190,7 +190,7 @@ IMPLEMENT_CRYPTO_ENGINE(PGPEngine,
    The format of "gnupg --status-fd" output is described in the DETAILS file of
    gnupg distribution, see
 
-   http://cvs.gnupg.org/cgi-bin/viewcvs.cgi/gnupg/doc/DETAILS?rev=HEAD
+   http://cvs.gnupg.org/cgi-bin/viewcvs.cgi/trunk/doc/DETAILS?rev=4820&root=GnuPG
  */
 
 class PGPProcess : public wxProcess
@@ -346,7 +346,16 @@ PGPEngine::ExecCommand(const String& options,
          const size_t lenChunk = in->LastWrite();
 
          lenIn -= lenChunk;
-         ptrIn += lenChunk;
+         if ( !lenIn )
+         {
+            // we don't have anything more to write, so close the stream
+            process.CloseOutput();
+            in = NULL;
+         }
+         else
+         {
+            ptrIn += lenChunk;
+         }
       }
 
       if ( err->GetLastError() == wxSTREAM_EOF )
@@ -359,7 +368,7 @@ PGPEngine::ExecCommand(const String& options,
 
 #ifdef DEBUG
          // In debug mode, log everything
-         if (log)
+         if ( log )
             log->AddMessage(line);
 #endif // DEBUG
 
@@ -476,6 +485,12 @@ PGPEngine::ExecCommand(const String& options,
                       code == _T("GET_LINE") ||
                       code == _T("GET_HIDDEN") )
             {
+               if ( !in )
+               {
+                  wxLogError(_("Unexpected PGP request \"%s\"."), code);
+                  break;
+               }
+
                // give gpg whatever it's asking for, otherwise we'd deadlock!
                if ( code == _T("GET_HIDDEN") )
                {
@@ -484,12 +499,12 @@ PGPEngine::ExecCommand(const String& options,
                      // we're being asked for a passphrase
                      const String passNL = pass + wxTextFile::GetEOL();
 
-                     wxWX2MBbuf buf(passNL.mb_str());
+                     const wxWX2MBbuf buf(passNL.ToUTF8());
                      const size_t len = strlen(buf);
                      in->Write(buf, len);
                      if ( in->LastWrite() != len )
                      {
-                        wxLogSysError("Failed to communicate with PGP: ");
+                        wxLogSysError(_("Failed to pass pass phrase to PGP: "));
                      }
                   }
                   else
@@ -623,16 +638,11 @@ PGPEngine::ExecCommand(const String& options,
                   wxLogError(_("Failed to sign message: %s"), err.c_str());
                }
             }
-            else if ( code == _T("BEGIN_SIGNING") ||
-                      code == _T("PLAINTEXT") )
+            else if ( code == _T("BEGIN_SIGNING") )
             {
-               // these codes indicate that we don't need to send anything more
-               // to GPG, check that we did send everything
+               // this indicates that we don't need to send anything more to
+               // GPG, check that we did send everything
                ASSERT_MSG( !lenIn, "should have sent everything by now" );
-
-               // and close the input stream as we have nothing more to send
-               process.CloseOutput();
-               in = NULL;
             }
             else if ( code == _T("ENC_TO") ||
                       code == _T("BEGIN_DECRYPTION") ||
@@ -641,7 +651,8 @@ PGPEngine::ExecCommand(const String& options,
                       code == _T("GOT_IT") ||
                       code == _T("SIGEXPIRED") || // we will give a warning
                       code == _T("KEYEXPIRED") || // when we get EXPKEYSIG
-                      code == _T("PLAINTEXT_LENGTH") || // not sure about this
+                      code == _T("PLAINTEXT") ||
+                      code == _T("PLAINTEXT_LENGTH") ||
                       code == _T("IMPORT_OK") ||
                       code == _T("IMPORT_RES") )
             {
