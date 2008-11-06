@@ -366,11 +366,9 @@ PGPEngine::ExecCommand(const String& options,
       {
          String line = errText.ReadLine();
 
-#ifdef DEBUG
-         // In debug mode, log everything
+         // Log all GPG messages, this is useful for diagnosing problems
          if ( log )
             log->AddMessage(line);
-#endif // DEBUG
 
          if ( line.StartsWith(_T("[GNUPG:] "), &line) )
          {
