@@ -308,6 +308,12 @@ PGPEngine::ExecCommand(const String& options,
    String user,
           pass;
 
+   // the arrays of keys for which this message is encrypted and the number of
+   // them for which we do _not_ have the private key -- if this number is
+   // equal to the number of array elements it means that we have none of them
+   wxArrayString keysEnc;
+   size_t keysNoPrivate = 0;
+
    messageOut.clear();
    char bufOut[4096];
 
@@ -370,6 +376,31 @@ PGPEngine::ExecCommand(const String& options,
          if ( log )
             log->AddMessage(line);
 
+         /*
+            Some typical message sequences:
+
+            + For signed messages:
+               - SIG_ID
+               - GOODSIG
+               - VALIDSIG
+               - TRUST_UNDEFINED
+
+            + For encrypted messages:
+               - ENC_TO
+               - USERID_HINT
+               - NEED_PASSPHRASE (only if the key needs it, of course, this
+                 will be the last message if the user doesn't enter a valid
+                 pass phrase)
+               - GET_HIDDEN
+               - GOT_IT
+               - GOOD_PASSPHRASE
+               - BEGIN_DECRYPTION
+               - PLAINTEXT
+               - DECRYPTION_OKAY
+               - GOODMDC
+               - END_DECRYPTION
+
+          */
          if ( line.StartsWith(_T("[GNUPG:] "), &line) )
          {
             String code;
@@ -540,8 +571,12 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code == _T("NO_SECKEY") )
             {
-               wxLogWarning(_("Secret key needed to decrypt this message is "
-                              "not available"));
+               // it's ok if we have no private key for some of the keys used
+               // to encrypt this message, we need to have only one private key
+               // to be able to decrypt it, so just remember the keys which we
+               // may use to decrypt this message for now and only log an error
+               // if we don't have any of them when decryption starts
+               keysNoPrivate++;
             }
             else if ( code == _T("SIG_CREATED") )
             {
@@ -642,9 +677,26 @@ PGPEngine::ExecCommand(const String& options,
                // GPG, check that we did send everything
                ASSERT_MSG( !lenIn, "should have sent everything by now" );
             }
-            else if ( code == _T("ENC_TO") ||
-                      code == _T("BEGIN_DECRYPTION") ||
-                      code == _T("END_DECRYPTION") ||
+            else if ( code == _T("ENC_TO") )
+            {
+               keysEnc.push_back(pc);
+            }
+            else if ( code == _T("BEGIN_DECRYPTION") )
+            {
+               if ( !keysEnc.empty() &&
+                        keysNoPrivate == keysEnc.size() )
+               {
+                  wxString keys = keysEnc.front();
+                  for ( size_t n = 1; n < keysNoPrivate - 1; n++ )
+                     keys << _(" or ") << keysEnc[n];
+                  if ( keysNoPrivate > 1 )
+                     keys += keysEnc[keysNoPrivate - 1];
+
+                  wxLogWarning(_("No secret key which can decrypt this message "
+                                 "(%s) is available."), keys.c_str());
+               }
+            }
+            else if ( code == _T("END_DECRYPTION") ||
                       code == _T("GOODMDC") ||     // what does it mean?
                       code == _T("GOT_IT") ||
                       code == _T("SIGEXPIRED") || // we will give a warning
