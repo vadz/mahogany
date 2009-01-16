@@ -3,7 +3,7 @@ WX_CONFIG := /usr/local/src/build/wx-gtkud/wx-config
 top_builddir := /home/zeitlin/build/M-gtkud
 top_srcdir := ../..
 
-CXXFLAGS := -I$(top_srcdir)/include `$(WX_CONFIG) --cxxflags`
+CXXFLAGS := -I$(top_srcdir)/include `$(WX_CONFIG) --cxxflags` -g
 
 all: decode
 
