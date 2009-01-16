@@ -82,6 +82,7 @@ extern "C"
    M_PY_WRAPPER_DEF(PyErr_Restore);
    //M_PY_WRAPPER_DEF(PyErr_SetNone);
    M_PY_WRAPPER_DEF(PyErr_SetString);
+   M_PY_WRAPPER_DEF(PyErr_SetObject);
    M_PY_WRAPPER_DEF(PyErr_Format);
 
    // objects
@@ -101,6 +102,7 @@ extern "C"
    M_PY_WRAPPER_DEF(PyObject_Str);
    M_PY_WRAPPER_DEF(PyCObject_Import);
    M_PY_WRAPPER_DEF(PyCObject_FromVoidPtr);
+   M_PY_WRAPPER_DEF(PyCObject_AsVoidPtr);
    M_PY_WRAPPER_DEF(_PyObject_GetDictPtr);
 
    // instances
@@ -116,10 +118,16 @@ extern "C"
    M_PY_WRAPPER_DEF(PyLong_FromVoidPtr);
    M_PY_WRAPPER_DEF(PyLong_AsLong);
    M_PY_WRAPPER_DEF(PyLong_AsUnsignedLong);
+   M_PY_WRAPPER_DEF(PyLong_AsDouble);
    M_PY_VAR_DEF(PyInt_Type);
    M_PY_VAR_DEF(PyLong_Type);
    M_PY_VAR_DEF(_Py_TrueStruct);
    M_PY_VAR_DEF(_Py_ZeroStruct);
+
+   // floats
+   M_PY_VAR_DEF(PyFloat_Type);
+   M_PY_WRAPPER_DEF(PyFloat_FromDouble);
+   M_PY_WRAPPER_DEF(PyFloat_AsDouble);
 
    // strings
    M_PY_WRAPPER_DEF(PyString_AsString);
@@ -158,6 +166,7 @@ extern "C"
    M_PY_WRAPPER_DEF(PyEval_SaveThread);
    M_PY_WRAPPER_DEF(PyList_GetItem);
    M_PY_WRAPPER_DEF(PyList_New);
+   M_PY_WRAPPER_DEF(PyList_Append);
    M_PY_WRAPPER_DEF(PyList_SetItem);
    M_PY_WRAPPER_DEF(PyList_Size);
    M_PY_VAR_DEF(PyList_Type);
@@ -170,7 +179,6 @@ extern "C"
    M_PY_WRAPPER_DEF(Py_FindMethod);
    M_PY_WRAPPER_DEF(Py_InitModule4);
    M_PY_WRAPPER_DEF(PyEval_CallObjectWithKeywords);
-   M_PY_WRAPPER_DEF(PyFloat_FromDouble);
    M_PY_WRAPPER_DEF(PyImport_AddModule);
    M_PY_WRAPPER_DEF(PyImport_GetModuleDict);
    M_PY_WRAPPER_DEF(PyImport_ReloadModule);
@@ -244,6 +252,7 @@ static struct PythonFunc
    PYTHON_SYMBOL(PyErr_Occurred)
    PYTHON_SYMBOL(PyErr_Restore)
    PYTHON_SYMBOL(PyErr_SetString)
+   PYTHON_SYMBOL(PyErr_SetObject)
    PYTHON_SYMBOL(PyErr_Format)
 
    // objects
@@ -263,6 +272,7 @@ static struct PythonFunc
    PYTHON_SYMBOL(PyObject_Str)
    PYTHON_SYMBOL(PyCObject_Import)
    PYTHON_SYMBOL(PyCObject_FromVoidPtr)
+   PYTHON_SYMBOL(PyCObject_AsVoidPtr)
    PYTHON_SYMBOL(_PyObject_GetDictPtr)
 
    // instances
@@ -278,10 +288,16 @@ static struct PythonFunc
    PYTHON_SYMBOL(PyLong_FromVoidPtr)
    PYTHON_SYMBOL(PyLong_AsLong)
    PYTHON_SYMBOL(PyLong_AsUnsignedLong)
+   PYTHON_SYMBOL(PyLong_AsDouble)
    PYTHON_SYMBOL(PyInt_Type)
    PYTHON_SYMBOL(PyLong_Type)
    PYTHON_SYMBOL(_Py_TrueStruct)
    PYTHON_SYMBOL(_Py_ZeroStruct)
+
+   // floats
+   PYTHON_SYMBOL(PyFloat_Type)
+   PYTHON_SYMBOL(PyFloat_FromDouble)
+   PYTHON_SYMBOL(PyFloat_AsDouble)
 
    // strings
    PYTHON_SYMBOL(PyString_AsString)
@@ -352,7 +368,6 @@ static struct PythonFunc
    PYTHON_SYMBOL(PyExc_ValueError)
    PYTHON_SYMBOL(PyExc_ZeroDivisionError)
 
-   PYTHON_SYMBOL(PyFloat_FromDouble)
    PYTHON_SYMBOL(PyImport_AddModule)
    PYTHON_SYMBOL(PyImport_GetModuleDict)
    PYTHON_SYMBOL(PyImport_ReloadModule)

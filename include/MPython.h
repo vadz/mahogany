@@ -104,6 +104,7 @@ extern "C"
    M_PY_WRAPPER_DECL(void , PyErr_Restore, (PyObject *, PyObject *, PyObject *));
    //M_PY_WRAPPER_DECL(void , PyErr_SetNone, (PyObject *));
    M_PY_WRAPPER_DECL(void , PyErr_SetString, (PyObject *, const char *));
+   M_PY_WRAPPER_DECL(void , PyErr_SetObject, (PyObject *, PyObject *));
    M_PY_WRAPPER_DECL(PyObject *, PyErr_Format, (PyObject *, const char *, ...));
 
    // objects
@@ -123,6 +124,7 @@ extern "C"
    M_PY_WRAPPER_DECL(PyObject *, PyObject_Str, (PyObject *));
    M_PY_WRAPPER_DECL(void *, PyCObject_Import, (char *module_name, char *cobject_name));
    M_PY_WRAPPER_DECL(PyObject *, PyCObject_FromVoidPtr, (void *cobj, void (*destruct)(void*)));
+   M_PY_WRAPPER_DECL(void *, PyCObject_AsVoidPtr, (PyObject *));
    M_PY_WRAPPER_DECL(PyObject **, _PyObject_GetDictPtr, (PyObject *));
 
    // instances
@@ -138,10 +140,16 @@ extern "C"
    M_PY_WRAPPER_DECL(PyObject *, PyLong_FromVoidPtr, (void *));
    M_PY_WRAPPER_DECL(long , PyLong_AsLong, (PyObject *));
    M_PY_WRAPPER_DECL(unsigned long , PyLong_AsUnsignedLong, (PyObject *));
+   M_PY_WRAPPER_DECL(double, PyLong_AsDouble, (PyObject *));
    M_PY_VAR_DECL(PyTypeObject *, PyInt_Type);
    M_PY_VAR_DECL(PyTypeObject *, PyLong_Type);
    M_PY_VAR_DECL(PyIntObject *, _Py_TrueStruct);
    M_PY_VAR_DECL(PyIntObject *, _Py_ZeroStruct);
+
+   // floats
+   M_PY_VAR_DECL(PyTypeObject *, PyFloat_Type);
+   M_PY_WRAPPER_DECL(PyObject *, PyFloat_FromDouble, (double));
+   M_PY_WRAPPER_DECL(double, PyFloat_AsDouble, (PyObject *));
 
    // strings
    M_PY_WRAPPER_DECL(char *, PyString_AsString, (PyObject *));
@@ -180,9 +188,10 @@ extern "C"
    M_PY_WRAPPER_DECL(PyThreadState*, PyEval_SaveThread, (void));
    M_PY_WRAPPER_DECL(PyObject*, PyList_GetItem, (PyObject *, int));
    M_PY_WRAPPER_DECL(PyObject*, PyList_New, (int size));
+   M_PY_WRAPPER_DECL(int, PyList_Append, (PyObject *, PyObject *));
    M_PY_WRAPPER_DECL(int, PyList_SetItem, (PyObject *, int, PyObject *));
    M_PY_WRAPPER_DECL(int, PyList_Size, (PyObject *));
-   M_PY_VAR_DECL(PyTypeObject* , PyList_Type);
+   M_PY_VAR_DECL(PyTypeObject *, PyList_Type);
    M_PY_WRAPPER_DECL(PyObject*, PyImport_ImportModule, (const char *));
    M_PY_WRAPPER_DECL(PyObject*, PyModule_GetDict, (PyObject *));
    M_PY_WRAPPER_DECL(int, PyModule_AddObject, (PyObject *, char *, PyObject *));
@@ -192,7 +201,6 @@ extern "C"
    M_PY_WRAPPER_DECL(PyObject*, Py_FindMethod, (PyMethodDef[], PyObject *, char *));
    M_PY_WRAPPER_DECL(PyObject*, Py_InitModule4, (char *, PyMethodDef *, char *, PyObject *, int));
    M_PY_WRAPPER_DECL(PyObject *, PyEval_CallObjectWithKeywords, (PyObject *, PyObject *, PyObject *));
-   M_PY_WRAPPER_DECL(PyObject *, PyFloat_FromDouble, (double));
    M_PY_WRAPPER_DECL(PyObject *, PyImport_AddModule, (char *name));
    M_PY_WRAPPER_DECL(PyObject *, PyImport_GetModuleDict, (void));
    M_PY_WRAPPER_DECL(PyObject *, PyImport_ReloadModule, (PyObject *));
@@ -247,6 +255,7 @@ extern "C"
 #define PyErr_Occurred M_PyErr_Occurred
 #define PyErr_Restore M_PyErr_Restore
 #define PyErr_SetString M_PyErr_SetString
+#define PyErr_SetObject M_PyErr_SetObject
 #define PyErr_Format M_PyErr_Format
 
 // objects
@@ -271,6 +280,7 @@ extern "C"
 #define PyObject_Str M_PyObject_Str
 #define PyCObject_Import M_PyCObject_Import
 #define PyCObject_FromVoidPtr M_PyCObject_FromVoidPtr
+#define PyCObject_AsVoidPtr M_PyCObject_AsVoidPtr
 #define _PyObject_GetDictPtr M__PyObject_GetDictPtr
 
 // instances
@@ -286,10 +296,16 @@ extern "C"
 #define PyLong_FromVoidPtr M_PyLong_FromVoidPtr
 #define PyLong_AsLong M_PyLong_AsLong
 #define PyLong_AsUnsignedLong M_PyLong_AsUnsignedLong
+#define PyLong_AsDouble (*M_PyLong_AsDouble)
 #define PyInt_Type (*M_PyInt_Type)
 #define PyLong_Type (*M_PyLong_Type)
 #define _Py_TrueStruct (*M__Py_TrueStruct)
 #define _Py_ZeroStruct (*M__Py_ZeroStruct)
+
+// floats
+#define PyFloat_Type (*M_PyFloat_Type)
+#define PyFloat_FromDouble M_PyFloat_FromDouble
+#define PyFloat_AsDouble (*M_PyFloat_AsDouble)
 
 // strings
 #define PyString_AsString M_PyString_AsString
@@ -307,6 +323,12 @@ extern "C"
 #define PyTuple_GetItem M_PyTuple_GetItem
 #define PyTuple_SetItem M_PyTuple_SetItem
 #define PyTuple_Type (*M_PyTuple_Type)
+
+// lists
+#define PyList_Type (*M_PyList_Type)
+#define PyList_New M_PyList_New
+#define PyList_SetItem M_PyList_SetItem
+#define PyList_Append M_PyList_Append
 
 // dicts
 #define PyDict_GetItem M_PyDict_GetItem
@@ -339,7 +361,6 @@ extern "C"
 #define PyModule_AddObject M_PyModule_AddObject
 #define PyType_Type (*M_PyType_Type)
 #define PyEval_CallObjectWithKeywords M_PyEval_CallObjectWithKeywords
-#define PyFloat_FromDouble M_PyFloat_FromDouble
 #define PyImport_AddModule M_PyImport_AddModule
 #define PyImport_GetModuleDict M_PyImport_GetModuleDict
 #define PyImport_ReloadModule M_PyImport_ReloadModule
