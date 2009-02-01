@@ -716,7 +716,7 @@ void wxBareBonesEditorNotebook::OnAttachFile(wxCommandEvent& /* event */)
    // emulate a menu command
    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, WXMENU_COMPOSE_INSERTFILE);
 
-   GetParent()->ProcessEvent(event);
+   GetParent()->GetEventHandler()->ProcessEvent(event);
 }
 
 void wxBareBonesEditorNotebook::OnRemoveAllAttach(wxCommandEvent& /* event */)

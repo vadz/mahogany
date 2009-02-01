@@ -2213,7 +2213,7 @@ SimulateSelectionEvent(wxControlWithItems *ctrl, wxEventType evtType, int sel)
         event.SetClientData(ctrl->GetClientObject(sel));
     event.SetString(ctrl->GetString(sel));
     event.SetEventObject(ctrl);
-    (void)ctrl->ProcessEvent(event);
+    (void)ctrl->GetEventHandler()->ProcessEvent(event);
 }
 
 /* vi: set ts=4 sw=4: */
