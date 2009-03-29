@@ -609,7 +609,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
 
    // ask for the name of the ADB to import data in
    wxString adbname, ext;
-   wxSplitPath(filename, NULL, &adbname, &ext);
+   wxFileName::SplitPath(filename, NULL, &adbname, &ext);
    if ( !adbname )
    {
       // this means that the file starts with '.' in which case just take the

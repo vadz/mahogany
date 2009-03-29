@@ -292,8 +292,7 @@ UUDecodeFilter::DoProcess(String& text,
 
       // get a mimeType from the extention
       String mimeType;
-      String ext;
-      wxSplitPath(fileName, NULL, NULL, &ext);
+      String ext = wxFileName(fileName).GetExt();
       if ( !ext.empty() )
       {
          wxFileType *

@@ -425,7 +425,7 @@ wxLayoutObjectIcon::Write(wxString &ostr)
 {
    /* Exports icon through a temporary file. */
 
-   wxString file = wxGetTempFileName(_T("wxloexport"));
+   wxString file = wxFileName::CreateTempFileName(_T("wxloexport"));
 
    ostr << (int) WXLO_TYPE_ICON << '\n'
         << file << '\n';

@@ -1224,10 +1224,8 @@ wxFolderPropertiesPage::OnChange(wxCommandEvent& event)
          // set the file name as the default folder name
          if ( objEvent == m_path )
          {
-            wxString name, fullname = m_path->GetValue();
-            wxSplitPath(fullname, NULL, &name, NULL);
-
-            if ( !fullname )
+            wxString fullname = m_path->GetValue();
+            if ( fullname.empty() )
             {
                // path has become empty (again), so allow setting it
                // automatically from the folder name
@@ -1240,7 +1238,7 @@ wxFolderPropertiesPage::OnChange(wxCommandEvent& event)
                m_userModifiedPath = true;
             }
 
-            SetFolderName(name);
+            SetFolderName(wxFileName(fullname).GetName());
          }
          break;
 

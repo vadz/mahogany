@@ -2016,7 +2016,7 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
         wxString filename = dialog->GetPath();
         if ( !filename.empty() && config ) {
             wxString path, name, ext;
-            wxSplitPath(filename, &path, &name, &ext);
+            wxFileName::SplitPath(filename, &path, &name, &ext);
 
             if( ext.Length() )
                name << '.' << ext;

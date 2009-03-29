@@ -197,8 +197,7 @@ static ComposerList gs_listOfAllComposers;
 // its extension)
 static wxString GetMimeTypeFromFilename(const wxString& filename)
 {
-   wxString strExt;
-   wxSplitPath(filename, NULL, NULL, &strExt);
+   wxString strExt = wxFileName(filename).GetExt();
 
    wxString strMimeType;
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
@@ -3926,8 +3925,7 @@ wxComposeView::DoInsertAttachment(EditorContentPart *mc, const wxChar *mimetype)
 {
    mc->SetMimeType(mimetype);
 
-   String ext;
-   wxSplitPath(mc->GetFileName(), NULL, NULL, &ext);
+   String ext = wxFileName(mc->GetFileName()).GetExt();
 
    wxIconManager *iconManager = mApplication->GetIconManager();
    wxIcon icon = iconManager->GetIconFromMimeType(mimetype, ext);

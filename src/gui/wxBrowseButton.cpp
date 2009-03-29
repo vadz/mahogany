@@ -150,7 +150,7 @@ void wxFileBrowseButton::DoBrowse()
 {
    // get the last position
    wxString strLastDir, strLastFile, strLastExt, strPath = GetText();
-   wxSplitPath(strPath, &strLastDir, &strLastFile, &strLastExt);
+   wxFileName::SplitPath(strPath, &strLastDir, &strLastFile, &strLastExt);
 
    long style = m_open ? wxFD_OPEN : wxFD_SAVE | wxFD_OVERWRITE_PROMPT;
    if ( m_existingOnly )

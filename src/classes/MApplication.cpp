@@ -1117,7 +1117,7 @@ MAppBase::InitDirectories()
       if ( ::GetModuleFileName(NULL, wxStringBuffer(path, MAX_PATH), MAX_PATH) )
       {
          // get just the directory
-         wxSplitPath(path, &m_globalDir, NULL, NULL);
+         m_globalDir = wxFileName(path).GetPath();
       }
 #else
       #error "Don't know how to find program directory on this platform!"

@@ -407,7 +407,7 @@ extern bool InitPythonDll()
 #if defined(OS_WIN) && defined(DEBUG)
       // we must use debug version of Python DLL
       wxString path, name, ext;
-      wxSplitPath(pathDLL, &path, &name, &ext);
+      wxFileName::SplitPath(pathDLL, &path, &name, &ext);
       if ( name.Right(2).Lower() != _T("_d") )
          name += _T("_d");
       pathDLL = path + wxFILE_SEP_PATH + name + wxFILE_SEP_EXT + ext;

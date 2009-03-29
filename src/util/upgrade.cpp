@@ -3671,12 +3671,13 @@ bool RetrieveRemoteConfigSettings(bool confirm)
 
    msgText = msgText.Mid( msgText.Find(M_SYNCMAIL_CONFIGSTART) +
                           wxStrlen( M_SYNCMAIL_CONFIGSTART) );
-   wxString filename = wxGetTempFileName(_T("MTemp"));
-   wxFile tmpfile(filename, wxFile::write);
+   wxFile tmpfile;
+   wxString filename = wxFileName::CreateTempFileName("MTemp", &tmpfile);
    tmpfile.Write(msgText, msgText.Length());
    tmpfile.Close();
 
-   wxFileConfig fc(wxEmptyString, wxEmptyString, filename, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+   wxFileConfig fc(wxEmptyString, wxEmptyString, filename, wxEmptyString,
+                   wxCONFIG_USE_LOCAL_FILE);
 
    bool rc = true;
 
@@ -3841,7 +3842,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       mf->ExpungeMessages();
    }
 
-   wxString filename = wxGetTempFileName(_T("MTemp"));
+   wxString filename = wxFileName::CreateTempFileName(_T("MTemp"));
    wxFileConfig fc(wxEmptyString, wxEmptyString, filename, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
 
    bool rc = true;

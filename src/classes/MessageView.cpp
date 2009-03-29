@@ -3201,8 +3201,8 @@ void MessageView::MimeOpenAsMessage(const MimePart *mimepart)
    msg->DecRef();
 #else // 1
    bool ok = false;
-   wxString filename;
-   if ( wxGetTempFileName("Mtemp", filename) )
+   wxString filename = wxFileName::CreateTempFileName("Mtemp");
+   if ( !filename.empty() )
    {
       if ( MimeSaveAsMessage(mimepart, filename) )
       {
@@ -3278,8 +3278,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       // extension.
       if ( !filenameOrig.empty() )
       {
-         wxString ext;
-         wxSplitPath(filenameOrig, NULL, NULL, &ext);
+         wxString ext = wxFileName(filenameOrig).GetExt();
 
          if ( !ext.empty() )
             fileType = mimeManager.GetFileTypeFromExtension(ext);
@@ -3303,8 +3302,8 @@ MessageView::MimeHandle(const MimePart *mimepart)
       return;
    }
 
-   String filename;
-   if ( !wxGetTempFileName("Mtemp", filename) )
+   String filename = wxFileName::CreateTempFileName("Mtemp");
+   if ( filename.empty() )
    {
       wxLogError(_("Failed to open the attachment."));
 
@@ -3312,8 +3311,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       return;
    }
 
-   wxString ext;
-   wxSplitPath(filenameOrig, NULL, NULL, &ext);
+   wxString ext = wxFileName(filenameOrig).GetExt();
 
    // get the standard extension for such files if there is no real one
    if ( fileType != NULL && ext.empty() )
@@ -3329,7 +3327,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    // extensions of the input file (case in point: WinZip), so try to choose a
    // correct one
    wxString path, name, extOld;
-   wxSplitPath(filename, &path, &name, &extOld);
+   wxFileName::SplitPath(filename, &path, &name, &extOld);
    if ( extOld != ext )
    {
       // Windows creates the temp file even if we didn't use it yet
@@ -3460,10 +3458,9 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
    wxFileType *fileType = NULL;
    fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
 
-   String filename = wxGetTempFileName("Mtemp");
+   String filename = wxFileName::CreateTempFileName("Mtemp");
 
-   wxString ext;
-   wxSplitPath(filenameOrig, NULL, NULL, &ext);
+   wxString ext = wxFileName(filenameOrig).GetExt();
    // get the standard extension for such files if there is no real one
    if ( fileType != NULL && !ext )
    {
@@ -3478,7 +3475,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
    // extensions of the input file (case in point: WinZip), so try to choose a
    // correct one
    wxString path, name, extOld;
-   wxSplitPath(filename, &path, &name, &extOld);
+   wxFileName::SplitPath(filename, &path, &name, &extOld);
    if ( extOld != ext )
    {
       // Windows creates the temp file even if we didn't use it yet
@@ -3550,7 +3547,7 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
       filename = mimepart->GetFilename();
 
       wxString path, name, ext;
-      wxSplitPath(filename, &path, &name, &ext);
+      wxFileName::SplitPath(filename, &path, &name, &ext);
 
       filename = wxPSaveFileSelector
                  (

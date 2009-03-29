@@ -321,8 +321,8 @@ void wxMIMETreeDialog::SaveMessages(size_t count, const MimePart **parts)
    }
 
    // copy them to a temp file
-   wxString filename;
-   if ( !wxGetTempFileName(_T("Mtemp"), filename) )
+   wxString filename = wxFileName::CreateTempFileName("Mtemp");
+   if ( filename.empty() )
    {
       wxLogError(_("Failed to save messages to temporary file."));
 

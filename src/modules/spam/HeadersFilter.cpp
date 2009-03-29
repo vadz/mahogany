@@ -625,8 +625,7 @@ static bool IsExeFilename(const String& filename)
    if ( filename.empty() )
       return false;
 
-   String ext;
-   wxSplitPath(filename, NULL, NULL, &ext);
+   const String ext = wxFileName(filename).GetExt();
 
    // FIXME: make configurable
    static wxSortedArrayString extsExe;

@@ -1081,8 +1081,7 @@ wxMApp::OnInit()
             ::GetModuleFileName(NULL, wxStringBuffer(strPath, MAX_PATH), MAX_PATH);
 
             // get just the path
-            wxString strDir;
-            wxSplitPath(strPath, &strDir, NULL, NULL);
+            wxString strDir = wxFileName(strPath).GetPath();
 
             // a special hack: when running M from the build dir, we really
             // want to look in the top level directory

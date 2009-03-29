@@ -1067,8 +1067,7 @@ bool MFolderDialog::TransferDataFromWindow()
    {
       // the name of the folder can't contain '/' and such, so take just the
       // name, not the full name as the folder name
-      wxString name;
-      wxSplitPath(m_FileName, NULL, &name, NULL);
+      wxString name = wxFileName(m_FileName).GetName();
 
       SafeDecRef(m_folder);
       m_folder = MFolder::CreateTempFile(name, m_FileName, 0);

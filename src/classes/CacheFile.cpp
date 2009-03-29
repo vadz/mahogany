@@ -113,8 +113,7 @@ bool CacheFile::Save()
 {
    String filename = GetFileName();
 
-   String dirname;
-   wxSplitPath(filename, &dirname, NULL, NULL);
+   String dirname = wxFileName(filename).GetPath();
 
    if ( !wxDirExists(dirname) )
    {
