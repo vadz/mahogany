@@ -20,6 +20,13 @@ extern "C"
 #     define cc_not not
 #  endif //M_LOGICAL_OP_NAMES
 
+#  ifdef OS_WIN
+      // if windows.h had been already included it defined ERROR which c-client
+      // redefines, avoid warnings about it (we don't really care about Windows
+      // constant, we don't use it)
+   #undef ERROR
+#endif // OS_WIN
+
 #  include <stdio.h>
 #  include <mail.h>
 #  include <osdep.h>

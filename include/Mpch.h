@@ -24,11 +24,11 @@
 #  undef USE_IPC  // it's in conflict with a standard Windows constant
 #endif   //Windows
 
-#include "Mcclient.h"
-
 #include <wx/wx.h>
 #include <wx/config.h>
 #include <wx/help.h>
+
+#include "Mcclient.h"
 
 #include "Mcommon.h"
 
