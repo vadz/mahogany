@@ -43,6 +43,7 @@
 
 #include "wx/artprov.h"
 #include "wx/config.h"
+#include "wx/filename.h"
 #include "wx/statline.h"
 
 #include "wx/tokenzr.h"
