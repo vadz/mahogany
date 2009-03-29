@@ -113,9 +113,19 @@ bool AdbVCardExporter::DoExportEntry(const AdbEntry& entry,
 
    wxDateTime dt;
    entry.GetField(AdbField_Birthday, &val);
-   if ( !!val && dt.ParseDate(val) )
+   if ( !val.empty() )
    {
-      vcard.SetBirthDay(dt);
+#if wxCHECK_VERSION(2, 9, 0)
+      wxString::const_iterator end;
+      if ( dt.ParseDate(val, &end) && end == val.end() )
+#else // wx < 2.9.0
+      const char *p = dt.ParseDate(val);
+      if ( p && !*p )
+#endif // wx 2.9.0/2.8.x
+         vcard.SetBirthDay(dt);
+      else
+         wxLogWarning(_("Failed to export birthday string \"%s\" as date."),
+                      val);
    }
 
    COPY_ADB_TO_VCARD(Comments, Comment);
