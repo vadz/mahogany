@@ -526,9 +526,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_CP1256, gettext_noop("Windows Arabic (CP 125&6)"), "", wxITEM_RADIO },
    { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 125&7)"), "", wxITEM_RADIO },
    { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), "", wxITEM_RADIO },
-#ifdef wxFONTENCODING_ISO2022_JP
    { WXMENU_LANG_ISO2022JP, gettext_noop("&Japanese (ISO-2022-JP)"), "", wxITEM_RADIO },
-#endif
    { WXMENU_LANG_SJIS, gettext_noop("Japanese (Shift&-JIS)"), "", wxITEM_RADIO },
    { WXMENU_LANG_GB2312, gettext_noop("Chinese Si&mplified (GB2312)"), "", wxITEM_RADIO },
    { WXMENU_LANG_BIG5, gettext_noop("Chinese &Traditional (Big5)"), "", wxITEM_RADIO },
@@ -908,11 +906,9 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          id = WXMENU_LANG_KOI8;
          break;
 
-#ifdef wxFONTENCODING_ISO2022_JP
       case wxFONTENCODING_ISO2022_JP:
          id = WXMENU_LANG_ISO2022JP;
          break;
-#endif
 
       case wxFONTENCODING_SHIFT_JIS:
          id = WXMENU_LANG_SJIS;
@@ -972,9 +968,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       WXMENU_LANG_CP1256,
       WXMENU_LANG_CP1257,
       WXMENU_LANG_KOI8,
-#ifdef wxFONTENCODING_ISO2022_JP
       WXMENU_LANG_ISO2022JP,
-#endif
       WXMENU_LANG_SJIS,
       WXMENU_LANG_GB2312,
       WXMENU_LANG_BIG5,
@@ -1040,11 +1034,9 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
          encoding = wxFONTENCODING_KOI8;
          break;
 
-#ifdef wxFONTENCODING_ISO2022_JP
       case WXMENU_LANG_ISO2022JP:
          encoding = wxFONTENCODING_ISO2022_JP;
          break;
-#endif
 
       case WXMENU_LANG_SJIS:
          encoding = wxFONTENCODING_SHIFT_JIS;
