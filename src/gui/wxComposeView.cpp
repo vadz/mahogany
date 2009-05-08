@@ -4424,6 +4424,117 @@ wxComposeView::IsReadyToSend() const
    return true;
 }
 
+wxCharBuffer
+wxComposeView::EncodeText(const wxString& text,
+                          wxFontEncoding *encodingPartPtr,
+                          int flags) const
+{
+   wxCHECK_MSG( encodingPartPtr, wxCharBuffer(), "NULL encoding argument" );
+   wxFontEncoding& encodingPart = *encodingPartPtr;
+
+   if ( encodingPart == wxFONTENCODING_SYSTEM )
+      encodingPart = wxLocale::GetSystemEncoding();
+
+   // empty text doesn't need any conversion whatsoever and we consider that
+   // conversion fails below if it returns empty string as result which is only
+   // true if the original text is non-empty in the first place so get rid of
+   // this case from the very beginning
+   if ( text.empty() )
+      return wxCharBuffer("");
+
+   wxCharBuffer textBuf;
+
+   // the part may be written either in the same encoding as chosen in the
+   // "Language" menu or in a different -- but hopefully compatible -- one, in
+   // which case we need to translate it
+   if ( m_encoding != wxFONTENCODING_SYSTEM &&
+          encodingPart != m_encoding )
+   {
+      // try converting this part to the message encoding
+      wxCSConv convPart(encodingPart);
+      wxWCharBuffer wtext(convPart.cMB2WC(text));
+
+      bool ok = wtext.length() != 0;
+
+      if ( ok )
+      {
+         wxCSConv convMsg(m_encoding);
+         textBuf = wxCharBuffer(convMsg.cWC2MB(wtext));
+         ok = textBuf.length() != 0;
+      }
+
+      if ( !ok )
+      {
+         if ( (flags & Interactive) && !m_okToConvertOnSend )
+         {
+            if ( !MDialog_YesNoDialog
+                  (
+                     wxString::Format
+                     (
+                        _("Text of this message can't be converted "
+                          "to the encoding \"%s\", would you like "
+                          " to send it in encoding \"%s\" instead?"),
+                        wxFontMapper::GetEncodingName(m_encoding).c_str(),
+                        wxFontMapper::GetEncodingName(encodingPart).c_str()
+                     ),
+                     this,
+                     MDIALOG_YESNOTITLE,
+                     M_DLG_YES_DEFAULT,
+                     M_MSGBOX_SEND_DIFF_ENCODING
+                  ) )
+            {
+               return wxCharBuffer();
+            }
+
+            // don't ask again for this message
+            m_okToConvertOnSend = true;
+         }
+         //else: don't ask, convert by default
+      }
+      else // successfully converted to our encoding, just use it
+      {
+         encodingPart = m_encoding;
+      }
+   }
+
+   if ( !textBuf )
+   {
+      textBuf = text.mb_str(wxCSConv(encodingPart));
+      if ( !textBuf.length() )
+      {
+         if ( flags & Interactive )
+         {
+            if ( !MDialog_YesNoDialog
+                  (
+                     wxString::Format
+                     (
+                        _("Text of this message can't be converted "
+                          "to the encoding \"%s\", would you like "
+                          "to send it in UTF-8 instead?"),
+                        wxFontMapper::
+                           GetEncodingName(encodingPart).c_str()
+                     ),
+                     this,
+                     MDIALOG_YESNOTITLE,
+                     M_DLG_YES_DEFAULT,
+                     M_MSGBOX_SEND_DIFF_ENCODING
+                  ) )
+            {
+               return wxCharBuffer();
+            }
+         }
+
+         encodingPart = wxFONTENCODING_UTF8;
+         textBuf = text.utf8_str();
+
+         // everything is convertible to UTF-8
+         ASSERT_MSG( textBuf.length(), "conversion to UTF-8 shouldn't fail" );
+      }
+   }
+
+   return textBuf;
+}
+
 SendMessage *
 wxComposeView::BuildMessage(int flags) const
 {
@@ -4457,8 +4568,6 @@ wxComposeView::BuildMessage(int flags) const
    // compose the body
    // ----------------
 
-   wxFontEncoding encodingMsg = m_encoding;
-
    // if we find a part which we can't process (probably because it's an
    // attachment and the corresponding file doesn't exist or can't be read) we
    // still continue with building the message as we want to give the user the
@@ -4474,110 +4583,20 @@ wxComposeView::BuildMessage(int flags) const
       {
          case EditorContentPart::Type_Text:
             {
-               // the part may be written either in the same encoding as chosen
-               // in the "Language" menu or in a different -- but hopefully
-               // compatible -- one, in which case we need to translate it
-               wxCharBuffer textBuf;
-
-               const wxString& text = part->GetText();
-
                wxFontEncoding encodingPart = part->GetEncoding();
-               if ( encodingPart == wxFONTENCODING_SYSTEM )
-                  encodingPart = wxLocale::GetSystemEncoding();
-
-               if ( encodingMsg != wxFONTENCODING_SYSTEM &&
-                      encodingPart != encodingMsg )
-               {
-                  // try converting this part to the message encoding
-                  wxCSConv convPart(encodingPart);
-                  wxWCharBuffer wtext(convPart.cMB2WC(text));
-
-                  bool ok = wtext.data() != NULL;
-
-                  if ( ok )
-                  {
-                     wxCSConv convMsg(encodingMsg);
-                     textBuf = wxCharBuffer(convMsg.cWC2MB(wtext));
-                     ok = textBuf.data() != NULL;
-                  }
-
-                  if ( !ok )
-                  {
-                     if ( (flags & Interactive) && !m_okToConvertOnSend )
-                     {
-                        if ( !MDialog_YesNoDialog
-                              (
-                                 wxString::Format
-                                 (
-                                    _("Text of this message can't be converted "
-                                      "to the encoding \"%s\", would you like "
-                                      " to send it in encoding \"%s\" instead?"),
-                                    wxFontMapper::GetEncodingName(encodingMsg).c_str(),
-                                    wxFontMapper::GetEncodingName(encodingPart).c_str()
-                                 ),
-                                 this,
-                                 MDIALOG_YESNOTITLE,
-                                 M_DLG_YES_DEFAULT,
-                                 M_MSGBOX_SEND_DIFF_ENCODING
-                              ) )
-                        {
-                           // send aborted
-                           part->DecRef();
-                           return NULL;
-                        }
-
-                        // don't ask again for this message
-                        m_okToConvertOnSend = true;
-                     }
-                     //else: don't ask, convert by default
-                  }
-                  else // successfully converted to encodingMsg
-                  {
-                     encodingPart = encodingMsg;
-                  }
-               }
-
+               wxCharBuffer
+                  textBuf = EncodeText(part->GetText(), &encodingPart, flags);
                if ( !textBuf )
                {
-                  textBuf = text.mb_str(wxCSConv(encodingPart));
-                  if ( !textBuf )
-                  {
-                     if ( flags & Interactive )
-                     {
-                        if ( !MDialog_YesNoDialog
-                              (
-                                 wxString::Format
-                                 (
-                                    _("Text of this message can't be converted "
-                                      "to the encoding \"%s\", would you like "
-                                      "to send it in UTF-8 instead?"),
-                                    wxFontMapper::
-                                       GetEncodingName(encodingPart).c_str()
-                                 ),
-                                 this,
-                                 MDIALOG_YESNOTITLE,
-                                 M_DLG_YES_DEFAULT,
-                                 M_MSGBOX_SEND_DIFF_ENCODING
-                              ) )
-                        {
-                           // send aborted
-                           part->DecRef();
-                           return NULL;
-                        }
-                     }
-
-                     encodingPart = wxFONTENCODING_UTF8;
-                     textBuf = text.utf8_str();
-
-                     // everything is convertible to UTF-8
-                     ASSERT_MSG( textBuf, "conversion to UTF-8 shouldn't fail" );
-                  }
+                  // send aborted
+                  part->DecRef();
+                  return NULL;
                }
 
                msg->AddPart(
                               MimeType::TEXT,
                               textBuf,
-                              strlen(textBuf),
+                              textBuf.length(),
                               _T("PLAIN"),
                               _T("INLINE"),  // disposition
                               NULL,          // disposition parameters
@@ -4714,9 +4733,9 @@ wxComposeView::BuildMessage(int flags) const
    // setup the headers
    // -----------------
 
-   if ( encodingMsg != wxFONTENCODING_DEFAULT )
+   if ( m_encoding != wxFONTENCODING_DEFAULT )
    {
-      msg->SetHeaderEncoding(encodingMsg);
+      msg->SetHeaderEncoding(m_encoding);
    }
 
    // first the standard ones

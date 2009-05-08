@@ -440,6 +440,19 @@ protected:
    */
    SendMessage *BuildDraftMessage(int flags = Interactive) const;
 
+   // determines the encoding to use for representing the given Unicode text as
+   // char string and returns it appropriately encoded; also updating the
+   // encoding if we couldn't have used it
+   //
+   // may return NULL buffer only if the user cancelled the required
+   // transcoding
+   //
+   // flags have the same meaning as for BuildMessage but can only be 0 or
+   // Interactive in this function
+   wxCharBuffer EncodeText(const wxString& text,
+                           wxFontEncoding *encoding,
+                           int flags) const;
+
 
    /// Destructor
    ~wxComposeView();
