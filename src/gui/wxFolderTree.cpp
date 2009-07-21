@@ -1135,7 +1135,7 @@ bool wxFolderTree::OnRename(MFolder *folder,
 
    if ( rc )
    {
-      wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+      wxLogStatus(wxGetTopLevelParent(m_tree),
                   _("Successfully renamed folder '%s'."),
                   folder->GetFullName().c_str());
    }
@@ -1174,7 +1174,7 @@ bool wxFolderTree::OnMove(MFolder *folder,
    rc = folder->Move(newParent);
    if ( rc )
    {
-      wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+      wxLogStatus(wxGetTopLevelParent(m_tree),
                   _("Successfully moved folder '%s' to '%s'."),
                   folder->GetFullName().c_str(), newParent->GetFullName().c_str());
    }
@@ -1240,7 +1240,7 @@ void wxFolderTree::OnUpdate(MFolder *folder)
       }
       else
       {
-         wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+         wxLogStatus(wxGetTopLevelParent(m_tree),
                      _("Updated status of the folder '%s'"),
                      folder->GetFullName().c_str());
       }
@@ -1257,7 +1257,7 @@ void wxFolderTree::OnUpdate(MFolder *folder)
       }
       else
       {
-         wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+         wxLogStatus(wxGetTopLevelParent(m_tree),
                      _("Updated status of %d folders."),
                      nUpdated);
       }
@@ -1270,7 +1270,7 @@ bool wxFolderTree::OnClose(MFolder *folder)
    // connection as well ("don't linger")
    (void)MailFolder::CloseFolder(folder, false /* don't linger */);
 
-   wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+   wxLogStatus(wxGetTopLevelParent(m_tree),
                _("Folder '%s' closed."),
                folder->GetFullName().c_str());
 
