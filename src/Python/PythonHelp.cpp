@@ -293,7 +293,11 @@ PythonStringFunction(const String& func,
       if ( !value || PyArg_Parse(rc, "s", &p) )
       {
          if ( value )
-            *value = p;
+         {
+            // just as we pass all strings to Python in UTF-8, assume that all
+            // returned strings are in UTF-8 too
+            *value = wxString::FromUTF8(p);
+         }
 
          // everything ok, skip error messages below
          return true;
