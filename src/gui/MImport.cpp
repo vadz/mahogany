@@ -141,14 +141,23 @@ public:
 
    virtual ~wxImportDialogLog() { delete wxLog::SetActiveTarget(m_logOld); }
 
+#if wxCHECK_VERSION(2,9,1)
+   virtual void DoLogRecord(wxLogLevel WXUNUSED(level),
+                            const wxString& szString,
+                            const wxLogRecordInfo& info)
+   {
+      time_t t = info.timestamp;
+#else // wx < 2.9.1
    virtual void DoLogString(const wxChar *szString, time_t t)
    {
+#endif
       m_dialog->GetLogListBox()->Append(
             wxString::Format(_T("%s:\t%s"),
                              wxDateTime(t).FormatTime().c_str(),
                              szString)
          );
    }
+   //} just to balance parenthesis
 
 private:
    wxImportDialog *m_dialog;
