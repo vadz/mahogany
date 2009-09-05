@@ -128,19 +128,23 @@
 #   endif
 #endif
 
-// make sure that wxWin and M settings are in sync: although in theory it
-// should be possible to use mismatching settings, in practice this more often
-// doesn't work than does, so please don't do it unless you really know what
-// you're doing
-#ifdef DEBUG
-#   ifndef __WXDEBUG__
-#      error "Please use debug version of wxWindows with debug Mahogany build."
-#   endif
-#else // Release
-#   ifdef __WXDEBUG__
-#      error "Please don't use debug version of wxWindows with non-debug Mahogany build."
-#   endif
-#endif // Debug/Release
+// M debug mode is closely related to wx2 debug mode and so debug build of wx
+// must be used with debug build of M and release build of wx with the release
+// one
+//
+// but in wx3 (actually already 2.9.1) there is no more distinction between
+// debug and release build so this check shouldn't be done
+#if !wxCHECK_VERSION(2, 9, 1)
+#  ifdef DEBUG
+#     ifndef __WXDEBUG__
+#        error "Please use debug version of wxWindows with debug Mahogany build."
+#     endif
+#  else // Release
+#     ifdef __WXDEBUG__
+#        error "Please don't use debug version of wxWindows with non-debug Mahogany build."
+#     endif
+#  endif // Debug/Release
+#endif // wx < 2.9.1
 
 // ----------------------------------------------------------------------------
 // miscellaneous other stuff
