@@ -62,9 +62,19 @@ extern const MOption MP_SSL_DLL_SSL;
 // starting from 0.9.7g OpenSSL has discovered const correctness (better late
 // than never)
 #if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x0090707fL)
-   #define ssl_const const
+   #define ssl_const1 const
 #else
-   #define ssl_const
+   #define ssl_const1
+#endif
+// OpenSSL 1.0.0-beta3
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x10000003L)
+   #define ssl_const2 const
+   #define ssl_STACK _STACK
+   #define sk_value_t void *
+#else
+   #define ssl_const2
+   #define ssl_STACK STACK
+   #define sk_value_t char *
 #endif
 
 /* This is our interface to the library and auth_ssl.c in c-client
@@ -110,19 +120,19 @@ SSL_DEF_VOID( SSL_set_read_ahead, (SSL *s, int yes), (s, yes) );
 SSL_DEF( int,  SSL_connect, (SSL *s), (s) );
 SSL_DEF( int,  SSL_read, (SSL *s,ssl_data_t buf,int num), (s, buf, num) );
 SSL_DEF( int,  SSL_write, (SSL *s,const ssl_data_t buf,int num), (s, buf, num) );
-SSL_DEF( int,  SSL_pending, (ssl_const SSL *s), (s) );
+SSL_DEF( int,  SSL_pending, (ssl_const1 SSL *s), (s) );
 SSL_DEF( int,  SSL_library_init, (void ), () );
 SSL_DEF_VOID( SSL_load_error_strings, (void ), () );
-SSL_DEF( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth), (meth) );
-SSL_DEF( const char *, SSL_CIPHER_get_name, (ssl_const SSL_CIPHER *c), (c) );
-SSL_DEF( int, SSL_CIPHER_get_bits, (ssl_const SSL_CIPHER *c, int *alg_bits), (c,alg_bits) );
-SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(ssl_const SSL *s), (s) );
-SSL_DEF( int, SSL_get_fd, (ssl_const SSL *s), (s) );
+SSL_DEF( SSL_CTX *,SSL_CTX_new, (ssl_const2 SSL_METHOD *meth), (meth) );
+SSL_DEF( const char *, SSL_CIPHER_get_name, (ssl_const1 SSL_CIPHER *c), (c) );
+SSL_DEF( int, SSL_CIPHER_get_bits, (ssl_const1 SSL_CIPHER *c, int *alg_bits), (c,alg_bits) );
+SSL_DEF( ssl_const2 SSL_CIPHER *, SSL_get_current_cipher ,(ssl_const1 SSL *s), (s) );
+SSL_DEF( int, SSL_get_fd, (ssl_const1 SSL *s), (s) );
 SSL_DEF( int, SSL_set_fd, (SSL *s, int fd), (s, fd) );
-SSL_DEF( int, SSL_get_error, (ssl_const SSL *s, int ret_code), (s, ret_code) );
-SSL_DEF( X509 *, SSL_get_peer_certificate, (ssl_const SSL *s), (s) );
-SSL_DEF( int, sk_num, (const STACK *s), (s) );
-SSL_DEF( char *, sk_value, (const STACK *s, int n), (s, n) );
+SSL_DEF( int, SSL_get_error, (ssl_const1 SSL *s, int ret_code), (s, ret_code) );
+SSL_DEF( X509 *, SSL_get_peer_certificate, (ssl_const1 SSL *s), (s) );
+SSL_DEF( int, sk_num, (const ssl_STACK *s), (s) );
+SSL_DEF( sk_value_t, sk_value, (const ssl_STACK *s, int n), (s, n) );
 
 SSL_DEF_VOID( RAND_seed, (const void *buf,int num), (buf, num) );
 SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
@@ -134,11 +144,11 @@ SSL_DEF( int, SSL_CTX_load_verify_locations, (SSL_CTX *ctx, const char *CAfile, 
 SSL_DEF( int, SSL_CTX_set_default_verify_paths, (SSL_CTX *ctx), (ctx) );
 SSL_DEF_VOID( SSL_set_bio, (SSL *s, BIO *rbio,BIO *wbio), (s,rbio,wbio) );
 SSL_DEF_VOID( SSL_set_connect_state, (SSL *s), (s) );
-SSL_DEF( int, SSL_state, (ssl_const SSL *ssl), (ssl) );
+SSL_DEF( int, SSL_state, (ssl_const1 SSL *ssl), (ssl) );
 SSL_DEF( long,    SSL_ctrl, (SSL *ssl,int cmd, long larg, ssl_parg parg), (ssl,cmd,larg,parg) );
 SSL_DEF_VOID( ERR_load_crypto_strings, (void), () );
-SSL_DEF( SSL_METHOD *,TLSv1_server_method, (void), () );
-SSL_DEF( SSL_METHOD *,SSLv23_server_method, (void), () );
+SSL_DEF( ssl_const2 SSL_METHOD *,TLSv1_server_method, (void), () );
+SSL_DEF( ssl_const2 SSL_METHOD *,SSLv23_server_method, (void), () );
 SSL_DEF( int, SSL_CTX_set_cipher_list, (SSL_CTX *ctx,const char *str), (ctx,str) );
 SSL_DEF( int, SSL_CTX_use_certificate_chain_file, (SSL_CTX *ctx, const char *file), (ctx,file) );
 SSL_DEF( int, SSL_CTX_use_RSAPrivateKey_file, (SSL_CTX *ctx, const char *file, int type), (ctx,file,type) );
@@ -156,8 +166,8 @@ SSL_DEF( int, SSL_CTX_use_certificate, (SSL_CTX *ctx, X509 *x), (ctx, x) );
 SSL_DEF( int, SSL_CTX_use_PrivateKey, (SSL_CTX *ctx, EVP_PKEY *pk), (ctx, pk) );
 SSL_DEF_VOID( SSL_CTX_free, (SSL_CTX *ctx), (ctx) );
 SSL_DEF( RSA *, RSA_generate_key, (int bits, unsigned long e,void (*cb)(int,int,void *),void *cb_arg), (bits,e,cb,cb_arg) );
-SSL_DEF(SSL_METHOD *, TLSv1_client_method, (void), () );
-SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void), () );
+SSL_DEF(ssl_const2 SSL_METHOD *, TLSv1_client_method, (void), () );
+SSL_DEF(ssl_const2 SSL_METHOD *, SSLv23_client_method, (void), () );
 SSL_DEF_VOID( EVP_PKEY_free, (EVP_PKEY *pk), (pk) );
 SSL_DEF( X509 *, PEM_read_bio_X509, (BIO *bp, X509 **x, pem_password_cb *cb, void *u), (bp, x, cb, u) );
 SSL_DEF( EVP_PKEY *, PEM_read_bio_PrivateKey, (BIO *bp, EVP_PKEY **x, pem_password_cb *cb, void *u), (bp, x, cb, u) );
