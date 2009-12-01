@@ -52,7 +52,10 @@ Python/%.o Python/%.py: %.i
 	$(create_cpp)
 	mv -f $*.py .src/Python/$*.py-swig
 
-swig-update: $(patsubst %.i,.src/Python/%.cpp-swig,$(IFILES))
+.src/Python/Mswigpyrun.h:
+	$(SWIG) -python -external-runtime $@
+
+swig-update: $(patsubst %.i,.src/Python/%.cpp-swig,$(IFILES)) .src/Python/Mswigpyrun.h
 
 else # !SWIG
 
