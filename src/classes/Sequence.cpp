@@ -207,7 +207,7 @@ void Sequence::GetBounds(UIdType *nMin, UIdType *nMax) const
 UIdType Sequence::GetNumberAt(size_t& pos) const
 {
    UIdType n = 0;
-   while ( isdigit(m_seq[pos]) )
+   while ( pos < m_seq.length() && isdigit(m_seq[pos]) )
    {
       n *= 10;
       n += m_seq[pos++] - '0';
