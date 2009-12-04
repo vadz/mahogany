@@ -42,7 +42,17 @@
    #undef _POSIX_C_SOURCE
 #endif
 
+// and under Windows for this symbol which is defined in wx/defs.h
+#ifdef HAVE_SSIZE_T
+   #define HAVE_SSIZE_T_DEFINED_BY_WX
+   #undef HAVE_SSIZE_T
+#endif
+
 #include <Python.h>
+
+#if !defined(HAVE_SSIZE_T) && defined(HAVE_SSIZE_T_DEFINED_BY_WX)
+   #define HAVE_SSIZE_T
+#endif
 
 #if defined(POSIX_C_SOURCE_WAS_DEFINED) && !defined(_POSIX_C_SOURCE)
    #define _POSIX_C_SOURCE POSIX_C_SOURCE_WAS_DEFINED
