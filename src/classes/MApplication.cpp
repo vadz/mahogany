@@ -58,6 +58,7 @@
 
 #include <wx/mimetype.h>      // wxMimeTypesManager
 #include <wx/confbase.h>        // for wxConfigBase
+#include <wx/stdpaths.h>
 
 #include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
 
@@ -66,10 +67,6 @@
 #endif // OS_MAC
 
 #ifdef OS_WIN
-   #include <shlobj.h>
-   #include <wx/msw/winundef.h>
-
-   #include <wx/dynlib.h>
 #ifdef __WINE__
    // it includes wrapwin.h which includes windows.h which defines SendMessage under Windows
    #undef SendMessage
@@ -989,53 +986,15 @@ MAppBase::InitDirectories()
    // if still not given, try to find a good default one ourselves
    if ( m_localDir.empty() )
    {
+      // for historical reasons, we use Mahogany for the base directory name
+      // under Windows but M under Unix, hence we can't use GetUserDataDir()
+      // which would use the same one under both systems
+      m_localDir = wxStandardPaths::Get().GetUserConfigDir();
+
 #ifdef OS_WIN
-      // normally we store the user files under APPDATA directory which is
-      // something like "C:\Documents and Settings\username\Application Data"
-
-      // suppress errors if shell32.dll can't be loaded or if it doesn't have
-      // SHGetSpecialFolderPath (as is the case on Windows 95)
-      {
-         wxLogNull noLog;
-
-         wxDynamicLibrary dllShell32(_T("shell32.dll"));
-         if ( dllShell32.IsLoaded() )
-         {
-            typedef BOOL
-               (WINAPI *SHGetSpecialFolderPathA_t)(HWND, LPTSTR, int, BOOL);
-
-            wxDYNLIB_FUNCTION(SHGetSpecialFolderPathA_t,
-                              SHGetSpecialFolderPathA,
-                              dllShell32);
-
-            if ( pfnSHGetSpecialFolderPathA )
-            {
-               String pathAppData;
-               if ( pfnSHGetSpecialFolderPathA
-                       (
-                        NULL,                                  // owner hwnd
-                        wxStringBuffer(pathAppData, MAX_PATH), // [out] buffer
-                        CSIDL_APPDATA,                         // which to get
-                        FALSE                                  // don't create
-                       ) )
-               {
-                  m_localDir = pathAppData + _T("\\Mahogany");
-               }
-            }
-         }
-      }
-
-      // but if we couldn't determine APPDATA directory...
-      if ( m_localDir.empty() )
-      {
-         // ... store the files in the program directory itself and in this
-         // case use the users name in the subdirectory part to still try to
-         // make it possible for several users to use the same installation
-         m_localDir = wxGetHomeDir() + _T('\\') + wxGetUserName();
-      }
-
+      m_localDir += "\\Mahogany";
 #elif defined(OS_UNIX)
-      m_localDir = wxGetHomeDir() + _T("/.M");
+      m_localDir += "/.M";
 #else
       #error "Don't know where to put per-user Mahogany files on this system"
 #endif // OS_WIN
