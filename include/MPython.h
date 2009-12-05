@@ -387,6 +387,9 @@ extern "C"
 #define PyImport_AddModule M_PyImport_AddModule
 #define PyImport_GetModuleDict M_PyImport_GetModuleDict
 #define PyImport_ReloadModule M_PyImport_ReloadModule
+// PyRun_String is already a macro in 2.6 but, surprisingly, the DLL still
+// exports it as a function too and using it seems to work fine...
+#undef PyRun_String
 #define PyRun_String M_PyRun_String
 #define PyOS_snprintf M_PyOS_snprintf
 
