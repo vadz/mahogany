@@ -48,7 +48,20 @@
    #undef HAVE_SSIZE_T
 #endif
 
+// we don't want to use Python debug DLL even if we're compiled in debug
+// ourselves, so make sure _DEBUG is undefined so that Python.h doesn't
+// reference any symbols only available in the debug build of Python
+#ifdef _DEBUG
+   #define MAHOGANY_DEBUG_WAS_DEFINED
+   #undef _DEBUG
+#endif
+
 #include <Python.h>
+
+#ifdef MAHOGANY_DEBUG_WAS_DEFINED
+   #undef MAHOGANY_DEBUG_WAS_DEFINED
+   #define _DEBUG
+#endif
 
 #if !defined(HAVE_SSIZE_T) && defined(HAVE_SSIZE_T_DEFINED_BY_WX)
    #define HAVE_SSIZE_T

@@ -44,20 +44,35 @@ extern const MOption MP_PYTHONDLL;
 // local functions
 // ----------------------------------------------------------------------------
 
-// define the function to return the name of the Python library
-inline String GetPythonDllBaseName(const String& version)
+namespace
 {
-   String
+
+// return the full name of the Python library with the given version
+inline String GetPythonDllBaseName(int major, int minor)
+{
 #if defined(OS_WIN)
-      basename = _T("python");
+   String basename = wxString::Format("python%d%d", major, minor);
+
+   // we used to append "_d" to the base name here in debug build of M to
+   // ensure that Python DLL we load uses the same CRT version as we do
+   //
+   // however it finally doesn't seem necessary to require this and we can
+   // always the release version of Python DLL, even when building M itself in
+   // debug, if we just #undef _DEBUG prior to including Python.h (as we now
+   // do)
+   //
+   // this seems to work with at least Python 2.6 (compiled with VC9) and we
+   // may always restore the basename += "_d"; line if we find any problems
 #elif defined(OS_UNIX)
-      basename = _T("libpython");
+   String basename = wxString::Format("libpython%d.%d", major, minor);
 #else
-    #error "Unknown Python library naming convention under this OS"
+   #error "Unknown Python library naming convention under this OS"
 #endif // OS
 
-   return basename + version;
+   return basename;
 }
+
+} // anonymous namespace
 
 // ----------------------------------------------------------------------------
 // global data
@@ -199,7 +214,9 @@ extern "C"
    M_PY_VAR_DEF(_PyWeakref_ProxyType);
 
    // variables
+#ifdef Py_REF_DEBUG
    M_PY_VAR_DEF(_Py_RefTotal);
+#endif // Py_REF_DEBUG
    M_PY_VAR_DEF(_Py_NoneStruct);
    M_PY_VAR_DEF(_Py_NotImplementedStruct);
 
@@ -387,32 +404,30 @@ extern bool InitPythonDll()
 {
    CHECK( !gs_dllPython, true, _T("shouldn't be called more than once") );
 
-   // load the library
-   static const wxChar *versions[] =
+   // supported Python versions: probably not all of them (still) work,
+   // currently only 2.[45] under Linux and 2.6 under Windows are really known
+   // to work
+   static const struct PythonVersion
    {
-#ifdef OS_WIN
-      _T("24"), _T("23"), _T("22"), _T("20"), _T("15")
-#elif defined(OS_UNIX)
-      _T("2.4"), _T("2.3"), _T("2.2"), _T("2.0"), _T("1.5")
-#else
-    #error "Unknown Python library naming convention under this OS"
-#endif
+      int major,
+          minor;
+   } pythonVersions[] =
+   {
+      { 1, 5 },
+      { 2, 0 },
+      { 2, 2 },
+      { 2, 4 },
+      { 2, 5 },
+      { 2, 6 },
    };
 
+   // load the library
    wxDynamicLibrary dllPython;
 
    String pathDLL = READ_APPCONFIG(MP_PYTHONDLL);
    if ( !pathDLL.empty() )
    {
-#if defined(OS_WIN) && defined(DEBUG)
-      // we must use debug version of Python DLL
-      wxString path, name, ext;
-      wxFileName::SplitPath(pathDLL, &path, &name, &ext);
-      if ( name.Right(2).Lower() != _T("_d") )
-         name += _T("_d");
-      pathDLL = path + wxFILE_SEP_PATH + name + wxFILE_SEP_EXT + ext;
-#endif // Win debug
-
+      // directly use the Python DLL configured by the user
       dllPython.Load(pathDLL);
    }
    else // try to find the DLL ourselves
@@ -420,65 +435,65 @@ extern bool InitPythonDll()
       // don't give errors about missing DLL here
       wxLogNull noLog;
 
-      // try all supported versions
-      for ( size_t nVer = 0; nVer < WXSIZEOF(versions); nVer++ )
-      {
-         String name = GetPythonDllBaseName(versions[nVer]);
-         const String ext = wxDynamicLibrary::GetDllExt();
+      const String ext = wxDynamicLibrary::GetDllExt();
 
-#if defined(OS_WIN) && defined(DEBUG)
-         // debug version of M should only use debug Python version under
-         // Windows, otherwise the CRTs they use mismatch and bad things happen
-         name += _T("_d");
-#endif // Win debug
+      // try all supported versions starting with the most recent one
+      for ( size_t nVer = WXSIZEOF(pythonVersions); nVer > 0; nVer-- )
+      {
+         const PythonVersion& ver = pythonVersions[nVer - 1];
+         String name = GetPythonDllBaseName(ver.major, ver.minor);
 
          if ( dllPython.Load(name + ext) )
             break;
       }
    }
 
-   if ( dllPython.IsLoaded() )
+   if ( !dllPython.IsLoaded() )
    {
-      // load all functions
-      void *funcptr;
-      PythonFunc *pf = pythonFuncs;
-      while ( pf->ptr )
-      {
-         if ( pf->nameAlt )
-         {
-            // try alt name and fail silently if it is not found
-            wxLogNull noLog;
+      if ( pathDLL.empty() )
+         wxLogError(_("No suitable Python DLL could be found."));
+      else
+         wxLogError(_("Python DLL \"%s\" couldn't be loaded."), pathDLL);
 
-            funcptr = dllPython.GetSymbol(pf->nameAlt);
-         }
-         else
-         {
-            funcptr = NULL;
-         }
-
-         if ( !funcptr )
-         {
-            funcptr = dllPython.GetSymbol(pf->name);
-         }
-
-         if ( !funcptr )
-         {
-            // error message is already given by GetSymbol()
-            FreePythonDll();
-
-            break;
-         }
-
-         *(pf++->ptr) = (PYTHON_PROC)funcptr;
-      }
-
-      if ( !pf->ptr )
-      {
-         gs_dllPython = dllPython.Detach();
-      }
+      return false;
    }
 
-   return gs_dllPython != NULL;
+   // load all functions
+   void *funcptr;
+   PythonFunc *pf = pythonFuncs;
+   while ( pf->ptr )
+   {
+      if ( pf->nameAlt )
+      {
+         // try alt name and fail silently if it is not found
+         wxLogNull noLog;
+
+         funcptr = dllPython.GetSymbol(pf->nameAlt);
+      }
+      else
+      {
+         funcptr = NULL;
+      }
+
+      if ( !funcptr )
+      {
+         funcptr = dllPython.GetSymbol(pf->name);
+      }
+
+      if ( !funcptr )
+      {
+         // error message is already given by GetSymbol()
+         FreePythonDll();
+
+         return false;
+      }
+
+      *(pf++->ptr) = (PYTHON_PROC)funcptr;
+   }
+
+   gs_dllPython = dllPython.Detach();
+
+   return true;
 }
 
 extern void FreePythonDll()
