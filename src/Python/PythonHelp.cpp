@@ -454,9 +454,7 @@ String PythonGetErrorMessage()
    Py_XDECREF(argsTB);
    Py_XDECREF(obResult);
 
-   /* Restore the exception state */
    String errString;
-   PyErr_Restore(exc_typ, exc_val, exc_tb);
    if(result)
       errString = result;
    free(result);
