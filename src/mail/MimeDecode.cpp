@@ -159,6 +159,10 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
    String out,
           space;
+   // we can't define a valid "last" iterator below for empty string
+   if ( in.empty() )
+      return String();
+
    out.reserve(in.length());
    for ( wxString::const_iterator p = in.begin(),
                                 end = in.end(),
