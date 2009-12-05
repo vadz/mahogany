@@ -69,6 +69,13 @@ private:
    /// finish the current range, return true if we had any
    bool DoFlush();
 
+   /// get char at the given position in m_seq returning '\0' for out of range
+   /// indices
+   char GetCharAt(size_t pos) const
+   {
+      return pos == m_seq.length() ? '\0' : m_seq[pos];
+   }
+
    /// get the number at given position and increment it to the pos after it
    UIdType GetNumberAt(size_t& pos) const;
 

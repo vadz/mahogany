@@ -207,7 +207,7 @@ void Sequence::GetBounds(UIdType *nMin, UIdType *nMax) const
 UIdType Sequence::GetNumberAt(size_t& pos) const
 {
    UIdType n = 0;
-   while ( pos < m_seq.length() && isdigit(m_seq[pos]) )
+   while ( isdigit(GetCharAt(pos)) )
    {
       n *= 10;
       n += m_seq[pos++] - '0';
@@ -227,7 +227,7 @@ UIdType Sequence::GetFirst(size_t& cookie) const
 
 UIdType Sequence::GetNext(UIdType n, size_t& cookie) const
 {
-   switch ( (wxChar)m_seq[cookie] )
+   switch ( GetCharAt(cookie) )
    {
       case ':':
          // we're inside a range, check if we didn't exhaust it
@@ -241,10 +241,10 @@ UIdType Sequence::GetNext(UIdType n, size_t& cookie) const
             cookie = pos;
          }
 
-         if ( m_seq[cookie] != '\0' )
+         if ( GetCharAt(cookie) != '\0' )
          {
             // nothing else can follow the end of the range
-            ASSERT_MSG( m_seq[cookie] == ',', _T("bad sequence string format") );
+            ASSERT_MSG( GetCharAt(cookie) == ',', "bad sequence string format" );
 
             cookie++;
 
