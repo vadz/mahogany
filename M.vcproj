@@ -1,145 +1,66 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9.00"
 	Name="M"
 	ProjectGUID="{1515C8EB-5C72-43DF-9D3A-0703F155F268}"
 	RootNamespace="M"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="debug_ansi"
-			IntermediateDirectory="debug_ansi"
-			ConfigurationType="1"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB"
-				MinimalRebuild="TRUE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="Mpch.h"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="3"
-				CompileAs="0"
-				DisableSpecificWarnings="4100"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
-				OutputFile="$(OutDir)/M.exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
-				GenerateDebugInformation="TRUE"
-				SubSystem="2"
-				StackReserveSize="10000000"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="include,$(wxwin)/include"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="release_ansi"
-			IntermediateDirectory="release_ansi"
-			ConfigurationType="1"
-			CharacterSet="0">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB"
-				RuntimeLibrary="2"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="Mpch.h"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="3"
-				CompileAs="0"
-				DisableSpecificWarnings="4100"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
-				OutputFile="$(OutDir)/M.exe"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
-				GenerateDebugInformation="TRUE"
-				GenerateMapFile="TRUE"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="include,$(wxwin)/include"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Unicode Release|Win32"
 			OutputDirectory="release"
 			IntermediateDirectory="release"
 			ConfigurationType="1"
-			CharacterSet="0">
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_UNICODE;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="3"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="Mpch.h"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="FALSE"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 				CompileAs="0"
-				DisableSpecificWarnings="4100"/>
+				DisableSpecificWarnings="4100"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="include,$(wxwin)/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
@@ -148,57 +69,85 @@
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
 				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="TRUE"
-				GenerateMapFile="TRUE"
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="include,$(wxwin)/include"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
-			Name="Unicode Debug|Win32"
+			Name="Debug|Win32"
 			OutputDirectory="debug"
 			IntermediateDirectory="debug"
 			ConfigurationType="1"
-			CharacterSet="2">
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_UNICODE;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="3"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="Mpch.h"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="FALSE"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 				CompileAs="0"
-				DisableSpecificWarnings="4100"/>
+				DisableSpecificWarnings="4100"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="include,$(wxwin)/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
@@ -206,31 +155,34 @@
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
 				IgnoreDefaultLibraryNames=""
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				StackReserveSize="10000000"
-				TargetMachine="1"/>
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="include,$(wxwin)/include"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -239,1643 +191,1444 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<Filter
 				Name="classes"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\classes\CacheFile.cpp">
+					RelativePath=".\src\classes\CacheFile.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\ComposeTemplate.cpp">
+					RelativePath=".\src\classes\ComposeTemplate.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\ConfigSource.cpp">
+					RelativePath=".\src\classes\ConfigSource.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\ConfigSourcesAll.cpp">
+					RelativePath=".\src\classes\ConfigSourcesAll.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\FolderMonitor.cpp">
+					RelativePath=".\src\classes\FolderMonitor.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\FolderView.cpp">
+					RelativePath=".\src\classes\FolderView.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\kbList.cpp">
+					RelativePath=".\src\classes\kbList.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\ListReceiver.cpp">
+					RelativePath=".\src\classes\ListReceiver.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MApplication.cpp">
+					RelativePath=".\src\classes\MApplication.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MessageTemplate.cpp">
+					RelativePath=".\src\classes\MessageTemplate.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MessageView.cpp">
+					RelativePath=".\src\classes\MessageView.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MEvent.cpp">
+					RelativePath=".\src\classes\MEvent.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MFilter.cpp">
+					RelativePath=".\src\classes\MFilter.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MFolder.cpp">
+					RelativePath=".\src\classes\MFolder.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MModule.cpp">
+					RelativePath=".\src\classes\MModule.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\MObject.cpp">
+					RelativePath=".\src\classes\MObject.cpp"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="1"/>
+							UsePrecompiledHeader="1"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="1"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="1"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="1"/>
+							UsePrecompiledHeader="1"
+						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\src\classes\Moptions.cpp">
+					RelativePath=".\src\classes\Moptions.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\Mpers.cpp">
+					RelativePath=".\src\classes\Mpers.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\PathFinder.cpp">
+					RelativePath=".\src\classes\PathFinder.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\PGPClickInfo.cpp">
+					RelativePath=".\src\classes\PGPClickInfo.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\Profile.cpp">
+					RelativePath=".\src\classes\Profile.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\QuotedText.cpp">
+					RelativePath=".\src\classes\QuotedText.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\Sequence.cpp">
+					RelativePath=".\src\classes\Sequence.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\classes\XFace.cpp">
+					RelativePath=".\src\classes\XFace.cpp"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="SYSV32"/>
+							PreprocessorDefinitions="SYSV32"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="SYSV32"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="SYSV32"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="SYSV32"/>
+							PreprocessorDefinitions="SYSV32"
+						/>
 					</FileConfiguration>
 				</File>
 			</Filter>
 			<Filter
 				Name="gui"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\gui\AddressExpander.cpp">
+					RelativePath=".\src\gui\AddressExpander.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\ClickAtt.cpp">
+					RelativePath=".\src\gui\ClickAtt.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\ClickURL.cpp">
+					RelativePath=".\src\gui\ClickURL.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\ConfigSourceChoice.cpp">
+					RelativePath=".\src\gui\ConfigSourceChoice.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\Mdnd.cpp">
+					RelativePath=".\src\gui\Mdnd.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\MImport.cpp">
+					RelativePath=".\src\gui\MImport.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxAttachDialog.cpp">
+					RelativePath=".\src\gui\wxAttachDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxBrowseButton.cpp">
+					RelativePath=".\src\gui\wxBrowseButton.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxColumnsDlg.cpp">
+					RelativePath=".\src\gui\wxColumnsDlg.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxComposeView.cpp">
+					RelativePath=".\src\gui\wxComposeView.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxDialogLayout.cpp">
+					RelativePath=".\src\gui\wxDialogLayout.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxFiltersDialog.cpp">
+					RelativePath=".\src\gui\wxFiltersDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxFolderMenu.cpp">
+					RelativePath=".\src\gui\wxFolderMenu.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxFolderTree.cpp">
+					RelativePath=".\src\gui\wxFolderTree.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxFolderView.cpp">
+					RelativePath=".\src\gui\wxFolderView.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxHeadersDialogs.cpp">
+					RelativePath=".\src\gui\wxHeadersDialogs.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxIconManager.cpp">
+					RelativePath=".\src\gui\wxIconManager.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMainFrame.cpp">
+					RelativePath=".\src\gui\wxMainFrame.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMApp.cpp">
+					RelativePath=".\src\gui\wxMApp.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMDialogs.cpp">
+					RelativePath=".\src\gui\wxMDialogs.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMenuDefs.cpp">
+					RelativePath=".\src\gui\wxMenuDefs.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMessageView.cpp">
+					RelativePath=".\src\gui\wxMessageView.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMFolderDialogs.cpp">
+					RelativePath=".\src\gui\wxMFolderDialogs.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMFrame.cpp">
+					RelativePath=".\src\gui\wxMFrame.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMGuiUtils.cpp">
+					RelativePath=".\src\gui\wxMGuiUtils.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMimeDialog.cpp">
+					RelativePath=".\src\gui\wxMimeDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMIMETreeDialog.cpp">
+					RelativePath=".\src\gui\wxMIMETreeDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxModulesDlg.cpp">
+					RelativePath=".\src\gui\wxModulesDlg.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMsgCmdProc.cpp">
+					RelativePath=".\src\gui\wxMsgCmdProc.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxMSplash.cpp">
+					RelativePath=".\src\gui\wxMSplash.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxOptionsDlg.cpp">
+					RelativePath=".\src\gui\wxOptionsDlg.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxRenameDialog.cpp">
+					RelativePath=".\src\gui\wxRenameDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxSearchDialog.cpp">
+					RelativePath=".\src\gui\wxSearchDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxSortDialog.cpp">
+					RelativePath=".\src\gui\wxSortDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxSubfoldersDialog.cpp">
+					RelativePath=".\src\gui\wxSubfoldersDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxTemplateDialog.cpp">
+					RelativePath=".\src\gui\wxTemplateDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxTextDialog.cpp">
+					RelativePath=".\src\gui\wxTextDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxThrDialog.cpp">
+					RelativePath=".\src\gui\wxThrDialog.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\gui\wxWizards.cpp">
+					RelativePath=".\src\gui\wxWizards.cpp"
+					>
 				</File>
 				<Filter
 					Name="layout"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\gui\wxllist.cpp">
+						RelativePath=".\src\gui\wxllist.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\gui\wxlparser.cpp">
+						RelativePath=".\src\gui\wxlparser.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\gui\wxlwindow.cpp">
+						RelativePath=".\src\gui\wxlwindow.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="wx"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\wx\generic\persctrl.cpp">
+						RelativePath=".\src\wx\generic\persctrl.cpp"
+						>
 						<FileConfiguration
-							Name="Debug|Win32">
+							Name="Release|Win32"
+							>
 							<Tool
 								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="3"
-								PrecompiledHeaderThrough="wx/wxprec.h"/>
+								UsePrecompiledHeader="0"
+							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release|Win32">
+							Name="Debug|Win32"
+							>
 							<Tool
 								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="0"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="0"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="3"
-								PrecompiledHeaderThrough="wx/wxprec.h"/>
+								UsePrecompiledHeader="2"
+								PrecompiledHeaderThrough="wx/wxprec.h"
+							/>
 						</FileConfiguration>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="mail"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\mail\Address.cpp">
+					RelativePath=".\src\mail\Address.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\AddressCC.cpp">
+					RelativePath=".\src\mail\AddressCC.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\ASMailFolder.cpp">
+					RelativePath=".\src\mail\ASMailFolder.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\FolderType.cpp">
+					RelativePath=".\src\mail\FolderType.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\HeaderInfoImpl.cpp">
+					RelativePath=".\src\mail\HeaderInfoImpl.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\HeaderIterator.cpp">
+					RelativePath=".\src\mail\HeaderIterator.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\LogCircle.cpp">
+					RelativePath=".\src\mail\LogCircle.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MailFolder.cpp">
+					RelativePath=".\src\mail\MailFolder.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MailFolderCC.cpp">
+					RelativePath=".\src\mail\MailFolderCC.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MailFolderCmn.cpp">
+					RelativePath=".\src\mail\MailFolderCmn.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MailMH.cpp">
+					RelativePath=".\src\mail\MailMH.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\Message.cpp">
+					RelativePath=".\src\mail\Message.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MessageCC.cpp">
+					RelativePath=".\src\mail\MessageCC.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MFCache.cpp">
+					RelativePath=".\src\mail\MFCache.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MFDriver.cpp">
+					RelativePath=".\src\mail\MFDriver.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MFPool.cpp">
+					RelativePath=".\src\mail\MFPool.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MFui.cpp">
+					RelativePath=".\src\mail\MFui.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MimeDecode.cpp">
+					RelativePath=".\src\mail\MimeDecode.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MimePartCC.cpp">
+					RelativePath=".\src\mail\MimePartCC.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MimePartCCBase.cpp">
+					RelativePath=".\src\mail\MimePartCCBase.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MimePartVirtual.cpp">
+					RelativePath=".\src\mail\MimePartVirtual.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\MimeType.cpp">
+					RelativePath=".\src\mail\MimeType.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\Pop3.cpp">
+					RelativePath=".\src\mail\Pop3.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\SendMessageCC.cpp">
+					RelativePath=".\src\mail\SendMessageCC.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\Sorting.cpp">
+					RelativePath=".\src\mail\Sorting.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\SpamFilter.cpp">
+					RelativePath=".\src\mail\SpamFilter.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\Threading.cpp">
+					RelativePath=".\src\mail\Threading.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\ThreadJWZ.cpp">
+					RelativePath=".\src\mail\ThreadJWZ.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\VFolder.cpp">
+					RelativePath=".\src\mail\VFolder.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\mail\VMessage.cpp">
+					RelativePath=".\src\mail\VMessage.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="adb"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\adb\AdbDialogs.cpp">
+					RelativePath=".\src\adb\AdbDialogs.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\AdbEntry.cpp">
+					RelativePath=".\src\adb\AdbEntry.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\AdbExport.cpp">
+					RelativePath=".\src\adb\AdbExport.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\AdbFrame.cpp">
+					RelativePath=".\src\adb\AdbFrame.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\AdbImport.cpp">
+					RelativePath=".\src\adb\AdbImport.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\AdbManager.cpp">
+					RelativePath=".\src\adb\AdbManager.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\AdbModule.cpp">
+					RelativePath=".\src\adb\AdbModule.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\AdbProvider.cpp">
+					RelativePath=".\src\adb\AdbProvider.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\adb\Collect.cpp">
+					RelativePath=".\src\adb\Collect.cpp"
+					>
 				</File>
 				<Filter
 					Name="providers"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\adb\ProvBbdb.cpp">
-						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
+						RelativePath=".\src\adb\ProvBbdb.cpp"
+						>
 						<FileConfiguration
 							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Release|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath=".\src\adb\ProvDummy.cpp">
-					</File>
-					<File
-						RelativePath=".\src\adb\ProvFC.cpp">
-					</File>
-					<File
-						RelativePath=".\src\adb\ProvLine.cpp">
 						<FileConfiguration
 							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Release|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\src\adb\ProvPalm.cpp">
-						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
+						RelativePath=".\src\adb\ProvDummy.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\adb\ProvFC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\adb\ProvLine.cpp"
+						>
 						<FileConfiguration
 							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Unicode Release|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32"
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\src\adb\ProvPasswd.cpp">
-						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
+						RelativePath=".\src\adb\ProvPalm.cpp"
+						>
 						<FileConfiguration
 							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Unicode Release|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32"
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\src\adb\ProvPasswd.cpp"
+						>
+						<FileConfiguration
+							Name="Release|Win32"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Unicode Debug|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32"
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
 					Name="impexp"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\adb\ExportPalm.cpp">
+						RelativePath=".\src\adb\ExportPalm.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\adb\ExportText.cpp">
+						RelativePath=".\src\adb\ExportText.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\adb\ExportVCard.cpp">
+						RelativePath=".\src\adb\ExportVCard.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\adb\ImportEudora.cpp">
+						RelativePath=".\src\adb\ImportEudora.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\adb\ImportMailrc.cpp">
-						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Release|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath=".\src\adb\ImportPine.cpp">
-					</File>
-					<File
-						RelativePath=".\src\adb\ImportText.cpp">
-					</File>
-					<File
-						RelativePath=".\src\adb\ImportVCard.cpp">
-					</File>
-					<File
-						RelativePath=".\src\adb\ImportXFMail.cpp">
-						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="TRUE">
-							<Tool
-								Name="VCCLCompilerTool"/>
-						</FileConfiguration>
+						RelativePath=".\src\adb\ImportMailrc.cpp"
+						>
 						<FileConfiguration
 							Name="Release|Win32"
-							ExcludedFromBuild="TRUE">
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Unicode Release|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32"
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\src\adb\ImportPine.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\adb\ImportText.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\adb\ImportVCard.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\adb\ImportXFMail.cpp"
+						>
+						<FileConfiguration
+							Name="Release|Win32"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Unicode Debug|Win32"
-							ExcludedFromBuild="TRUE">
+							Name="Debug|Win32"
+							ExcludedFromBuild="true"
+							>
 							<Tool
-								Name="VCCLCompilerTool"/>
+								Name="VCCLCompilerTool"
+							/>
 						</FileConfiguration>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="interfaces"
-				Filter="">
+				>
 				<File
-					RelativePath=".\include\MInterface.mid">
+					RelativePath=".\include\MInterface.mid"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
-"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)&#x0D;&#x0A;"
 							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
-							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
+							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
-"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)&#x0D;&#x0A;"
 							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
-							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32">
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
-"
-							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
-							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32">
-						<Tool
-							Name="VCCustomBuildTool"
-							Description="Creating MInterface.h and .cpp"
-							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)
-"
-							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
-							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"/>
+							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"
+						/>
 					</FileConfiguration>
 				</File>
 				<Filter
 					Name="python"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\Python\InitPython.cpp">
+						RelativePath=".\src\Python\InitPython.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\Python\PythonDll.cpp">
+						RelativePath=".\src\Python\PythonDll.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\Python\PythonHelp.cpp">
+						RelativePath=".\src\Python\PythonHelp.cpp"
+						>
 					</File>
 					<Filter
 						Name="SWIG output"
-						Filter="">
+						>
 						<File
-							RelativePath=".\src\Python\HeaderInfo_swig.cpp">
+							RelativePath=".\src\Python\HeaderInfo_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MailFolder_swig.cpp">
+							RelativePath=".\src\Python\MailFolder_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MDialogs_swig.cpp">
+							RelativePath=".\src\Python\MDialogs_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\Message_swig.cpp">
+							RelativePath=".\src\Python\Message_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MimePart_swig.cpp">
+							RelativePath=".\src\Python\MimePart_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MimeType_swig.cpp">
+							RelativePath=".\src\Python\MimeType_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\SendMessage_swig.cpp">
+							RelativePath=".\src\Python\SendMessage_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\swiglib_swig.cpp">
+							RelativePath=".\src\Python\swiglib_swig.cpp"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
 									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
+									WarningLevel="1"
+								/>
 							</FileConfiguration>
 						</File>
 					</Filter>
 					<Filter
 						Name="SWIG precompiled output"
-						Filter="">
+						>
 						<File
-							RelativePath=".\src\Python\HeaderInfo.cpp-swig">
+							RelativePath=".\src\Python\HeaderInfo.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MailFolder.cpp-swig">
+							RelativePath=".\src\Python\MailFolder.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MDialogs.cpp-swig">
+							RelativePath=".\src\Python\MDialogs.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\Message.cpp-swig">
+							RelativePath=".\src\Python\Message.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MimePart.cpp-swig">
+							RelativePath=".\src\Python\MimePart.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\MimeType.cpp-swig">
+							RelativePath=".\src\Python\MimeType.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\SendMessage.cpp-swig">
+							RelativePath=".\src\Python\SendMessage.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 						<File
-							RelativePath=".\src\Python\swiglib.cpp-swig">
+							RelativePath=".\src\Python\swiglib.cpp-swig"
+							>
 							<FileConfiguration
-								Name="Debug|Win32">
+								Name="Release|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 							<FileConfiguration
-								Name="Release|Win32">
+								Name="Debug|Win32"
+								>
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Release|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Unicode Debug|Win32">
-								<Tool
-									Name="VCCustomBuildTool"
-									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
-"
-									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
 							</FileConfiguration>
 						</File>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="SWIG input"
-					Filter="">
+					>
 					<File
-						RelativePath=".\include\interface\HeaderInfo.i">
+						RelativePath=".\include\interface\HeaderInfo.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\MailFolder.i">
+						RelativePath=".\include\interface\MailFolder.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\MDialogs.i">
+						RelativePath=".\include\interface\MDialogs.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\Message.i">
+						RelativePath=".\include\interface\Message.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\MimePart.i">
+						RelativePath=".\include\interface\MimePart.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\MimeType.i">
+						RelativePath=".\include\interface\MimeType.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\SendMessage.i">
+						RelativePath=".\include\interface\SendMessage.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\swigcmn.i">
+						RelativePath=".\include\interface\swigcmn.i"
+						>
 					</File>
 					<File
-						RelativePath=".\include\interface\swiglib.i">
+						RelativePath=".\include\interface\swiglib.i"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="util"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\util\ColourNames.cpp">
+					RelativePath=".\src\util\ColourNames.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\util\matchurl.cpp">
+					RelativePath=".\src\util\matchurl.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\util\ssl.cpp">
+					RelativePath=".\src\util\ssl.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\util\strutil.cpp">
+					RelativePath=".\src\util\strutil.cpp"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="lib/imap/src"/>
+							AdditionalIncludeDirectories="lib/imap/src"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="lib/imap/src"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="lib/imap/src"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="lib/imap/src"/>
+							AdditionalIncludeDirectories="lib/imap/src"
+						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\src\util\sysutil.cpp">
+					RelativePath=".\src\util\sysutil.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\src\util\twofish2.c">
+					RelativePath=".\src\util\twofish2.c"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
+							WarningLevel="0"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							WarningLevel="0"/>
+							WarningLevel="0"
+						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\src\util\upgrade.cpp">
+					RelativePath=".\src\util\upgrade.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="modules"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\modules\Calendar.cpp">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
+					RelativePath=".\src\modules\Calendar.cpp"
+					>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
+						ExcludedFromBuild="true"
+						>
 						<Tool
-							Name="VCCLCompilerTool"/>
+							Name="VCCLCompilerTool"
+						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\src\modules\Filters.cpp">
-				</File>
-				<File
-					RelativePath=".\src\modules\Mdummy.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
+						ExcludedFromBuild="true"
+						>
 						<Tool
-							Name="VCCLCompilerTool"/>
+							Name="VCCLCompilerTool"
+						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\src\modules\Filters.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\modules\Mdummy.cpp"
+					>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
+						ExcludedFromBuild="true"
+						>
 						<Tool
-							Name="VCCLCompilerTool"/>
+							Name="VCCLCompilerTool"
+						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\src\modules\Migrate.cpp">
-				</File>
-				<File
-					RelativePath=".\src\modules\PalmOS.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
+						ExcludedFromBuild="true"
+						>
 						<Tool
-							Name="VCCLCompilerTool"/>
+							Name="VCCLCompilerTool"
+						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\src\modules\Migrate.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\modules\PalmOS.cpp"
+					>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
+						ExcludedFromBuild="true"
+						>
 						<Tool
-							Name="VCCLCompilerTool"/>
+							Name="VCCLCompilerTool"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Unicode Release|Win32"
-						ExcludedFromBuild="TRUE">
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
 						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
+							Name="VCCLCompilerTool"
+						/>
 					</FileConfiguration>
 				</File>
 				<Filter
 					Name="viewflt"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\modules\viewflt\PGP.cpp">
+						RelativePath=".\src\modules\viewflt\PGP.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\viewflt\QuoteURL.cpp">
+						RelativePath=".\src\modules\viewflt\QuoteURL.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\viewflt\Rot13.cpp">
+						RelativePath=".\src\modules\viewflt\Rot13.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\viewflt\Signature.cpp">
+						RelativePath=".\src\modules\viewflt\Signature.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\viewflt\TextMarkup.cpp">
+						RelativePath=".\src\modules\viewflt\TextMarkup.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\viewflt\Trailer.cpp">
+						RelativePath=".\src\modules\viewflt\Trailer.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\viewflt\UUDecode.cpp">
+						RelativePath=".\src\modules\viewflt\UUDecode.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="viewers"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\modules\HtmlViewer.cpp">
+						RelativePath=".\src\modules\HtmlViewer.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\LayoutViewer.cpp">
+						RelativePath=".\src\modules\LayoutViewer.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\TextViewer.cpp">
+						RelativePath=".\src\modules\TextViewer.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="editors"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\modules\BareBonesEditor.cpp">
+						RelativePath=".\src\modules\BareBonesEditor.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\LayoutEditor.cpp">
+						RelativePath=".\src\modules\LayoutEditor.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="importers"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\modules\NetscapeImporter.cpp">
+						RelativePath=".\src\modules\NetscapeImporter.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\PineImport.cpp">
+						RelativePath=".\src\modules\PineImport.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\XFMailImport.cpp">
+						RelativePath=".\src\modules\XFMailImport.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="crypt"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\modules\crypt\PGPEngine.cpp">
+						RelativePath=".\src\modules\crypt\PGPEngine.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="spam"
-					Filter="">
+					>
 					<File
-						RelativePath=".\src\modules\spam\DspamFilter.cpp">
+						RelativePath=".\src\modules\spam\DspamFilter.cpp"
+						>
 						<FileConfiguration
-							Name="Debug|Win32">
+							Name="Release|Win32"
+							>
 							<Tool
 								Name="VCCLCompilerTool"
 								AdditionalIncludeDirectories="lib/dspam/src"
-								PreprocessorDefinitions="HAVE_CONFIG_H"/>
+								PreprocessorDefinitions="HAVE_CONFIG_H"
+							/>
 						</FileConfiguration>
 						<FileConfiguration
-							Name="Release|Win32">
+							Name="Debug|Win32"
+							>
 							<Tool
 								Name="VCCLCompilerTool"
 								AdditionalIncludeDirectories="lib/dspam/src"
-								PreprocessorDefinitions="HAVE_CONFIG_H"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories="lib/dspam/src"
-								PreprocessorDefinitions="HAVE_CONFIG_H"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Unicode Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories="lib/dspam/src"
-								PreprocessorDefinitions="HAVE_CONFIG_H"/>
+								PreprocessorDefinitions="HAVE_CONFIG_H"
+							/>
 						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\src\modules\spam\HeadersFilter.cpp">
+						RelativePath=".\src\modules\spam\HeadersFilter.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\src\modules\spam\ServerSideFilter.cpp">
+						RelativePath=".\src\modules\spam\ServerSideFilter.cpp"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="vcard"
-				Filter="">
+				>
 				<File
-					RelativePath=".\src\wx\common\vcard.cpp">
+					RelativePath=".\src\wx\common\vcard.cpp"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\src\wx\generic\vcarddlg.cpp">
+					RelativePath=".\src\wx\generic\vcarddlg.cpp"
+					>
 					<FileConfiguration
-						Name="Debug|Win32">
+						Name="Release|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32">
+						Name="Debug|Win32"
+						>
 						<Tool
 							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Unicode Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							PrecompiledHeaderThrough="wx/wxprec.h"/>
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
 					</FileConfiguration>
 				</File>
 			</Filter>
@@ -1883,358 +1636,462 @@
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath=".\include\Address.h">
+				RelativePath=".\include\Address.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\AddressCC.h">
+				RelativePath=".\include\AddressCC.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\gui\AddressExpander.h">
+				RelativePath=".\include\gui\AddressExpander.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ASMailFolder.h">
+				RelativePath=".\include\ASMailFolder.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\AttachDialog.h">
+				RelativePath=".\include\AttachDialog.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\CacheFile.h">
+				RelativePath=".\include\CacheFile.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ClickAtt.h">
+				RelativePath=".\include\ClickAtt.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ClickInfo.h">
+				RelativePath=".\include\ClickInfo.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ClickURL.h">
+				RelativePath=".\include\ClickURL.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\CmdLineOpts.h">
+				RelativePath=".\include\CmdLineOpts.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Collect.h">
+				RelativePath=".\include\Collect.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Composer.h">
+				RelativePath=".\include\Composer.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ConfigPrivate.h">
+				RelativePath=".\include\ConfigPrivate.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ConfigSource.h">
+				RelativePath=".\include\ConfigSource.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ConfigSourceLocal.h">
+				RelativePath=".\include\ConfigSourceLocal.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ConfigSourcesAll.h">
+				RelativePath=".\include\ConfigSourcesAll.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\FolderMonitor.h">
+				RelativePath=".\include\FolderMonitor.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\FolderType.h">
+				RelativePath=".\include\FolderType.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\FolderView.h">
+				RelativePath=".\include\FolderView.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\guidef.h">
+				RelativePath=".\include\guidef.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\HeaderInfo.h">
+				RelativePath=".\include\HeaderInfo.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\HeaderInfoImpl.h">
+				RelativePath=".\include\HeaderInfoImpl.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\HeadersDialogs.h">
+				RelativePath=".\include\HeadersDialogs.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\InitPython.h">
+				RelativePath=".\include\InitPython.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\kbList.h">
+				RelativePath=".\include\kbList.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ListReceiver.h">
+				RelativePath=".\include\ListReceiver.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\lists.h">
+				RelativePath=".\include\lists.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\LogCircle.h">
+				RelativePath=".\include\LogCircle.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MailFolder.h">
+				RelativePath=".\include\MailFolder.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MailFolderCC.h">
+				RelativePath=".\include\MailFolderCC.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MailFolderCmn.h">
+				RelativePath=".\include\MailFolderCmn.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MApplication.h">
+				RelativePath=".\include\MApplication.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MAtExit.h">
+				RelativePath=".\include\MAtExit.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\gui\MBookCtrl.h">
+				RelativePath=".\include\gui\MBookCtrl.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mcallbacks.h">
+				RelativePath=".\include\Mcallbacks.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mcclient.h">
+				RelativePath=".\include\Mcclient.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mcommon.h">
+				RelativePath=".\include\Mcommon.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mconfig.h">
+				RelativePath=".\include\Mconfig.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mdefaults.h">
+				RelativePath=".\include\Mdefaults.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MDialogs.h">
+				RelativePath=".\include\MDialogs.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mdnd.h">
+				RelativePath=".\include\Mdnd.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Merror.h">
+				RelativePath=".\include\Merror.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Message.h">
+				RelativePath=".\include\Message.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MessageCC.h">
+				RelativePath=".\include\MessageCC.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MessageEditor.h">
+				RelativePath=".\include\MessageEditor.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MessageTemplate.h">
+				RelativePath=".\include\MessageTemplate.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MessageView.h">
+				RelativePath=".\include\MessageView.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MessageViewer.h">
+				RelativePath=".\include\MessageViewer.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MEvent.h">
+				RelativePath=".\include\MEvent.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFCache.h">
+				RelativePath=".\include\MFCache.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFilter.h">
+				RelativePath=".\include\MFilter.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFolder.h">
+				RelativePath=".\include\MFolder.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFolderDialogs.h">
+				RelativePath=".\include\MFolderDialogs.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFPrivate.h">
+				RelativePath=".\include\MFPrivate.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFrame.h">
+				RelativePath=".\include\MFrame.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFStatus.h">
+				RelativePath=".\include\MFStatus.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MFui.h">
+				RelativePath=".\include\MFui.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MGuiApp.h">
+				RelativePath=".\include\MGuiApp.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MHelp.h">
+				RelativePath=".\include\MHelp.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MimeDialog.h">
+				RelativePath=".\include\MimeDialog.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MimePart.h">
+				RelativePath=".\include\MimePart.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MimePartCC.h">
+				RelativePath=".\include\MimePartCC.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MIMETreeDialog.h">
+				RelativePath=".\include\MIMETreeDialog.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MimeType.h">
+				RelativePath=".\include\MimeType.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MImport.h">
+				RelativePath=".\include\MImport.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MInterface.h">
+				RelativePath=".\include\MInterface.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\miscutil.h">
+				RelativePath=".\include\miscutil.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MLogFrame.h">
+				RelativePath=".\include\MLogFrame.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MMainFrame.h">
+				RelativePath=".\include\MMainFrame.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MModule.h">
+				RelativePath=".\include\MModule.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MObject.h">
+				RelativePath=".\include\MObject.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Moptions.h">
+				RelativePath=".\include\Moptions.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mpch.h">
+				RelativePath=".\include\Mpch.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mpers.h">
+				RelativePath=".\include\Mpers.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MpersIds.h">
+				RelativePath=".\include\MpersIds.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MPython.h">
+				RelativePath=".\include\MPython.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MScripts.h">
+				RelativePath=".\include\MScripts.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MSearch.h">
+				RelativePath=".\include\MSearch.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MsgCmdProc.h">
+				RelativePath=".\include\MsgCmdProc.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mswig.h">
+				RelativePath=".\include\Mswig.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MTextStyle.h">
+				RelativePath=".\include\MTextStyle.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\MThread.h">
+				RelativePath=".\include\MThread.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Munix.h">
+				RelativePath=".\include\Munix.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mupgrade.h">
+				RelativePath=".\include\Mupgrade.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mversion.h">
+				RelativePath=".\include\Mversion.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Mwin.h">
+				RelativePath=".\include\Mwin.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\PathFinder.h">
+				RelativePath=".\include\PathFinder.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\PGPClickInfo.h">
+				RelativePath=".\include\PGPClickInfo.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\pointers.h">
+				RelativePath=".\include\pointers.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Profile.h">
+				RelativePath=".\include\Profile.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\PythonHelp.h">
+				RelativePath=".\include\PythonHelp.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\QuotedText.h">
+				RelativePath=".\include\QuotedText.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\SendMessage.h">
+				RelativePath=".\include\SendMessage.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\SendMessageCC.h">
+				RelativePath=".\include\SendMessageCC.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Sequence.h">
+				RelativePath=".\include\Sequence.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Sorting.h">
+				RelativePath=".\include\Sorting.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\SpamFilter.h">
+				RelativePath=".\include\SpamFilter.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\strutil.h">
+				RelativePath=".\include\strutil.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\sysutil.h">
+				RelativePath=".\include\sysutil.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\TemplateDialog.h">
+				RelativePath=".\include\TemplateDialog.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\Threading.h">
+				RelativePath=".\include\Threading.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\UIdArray.h">
+				RelativePath=".\include\UIdArray.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\ViewFilter.h">
+				RelativePath=".\include\ViewFilter.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\gui\wxllist.h">
+				RelativePath=".\include\gui\wxllist.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\gui\wxlparser.h">
+				RelativePath=".\include\gui\wxlparser.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\gui\wxlwindow.h">
+				RelativePath=".\include\gui\wxlwindow.h"
+				>
 			</File>
 			<File
-				RelativePath=".\include\XFace.h">
+				RelativePath=".\include\XFace.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
 			<File
-				RelativePath=".\res\M.rc">
+				RelativePath=".\res\M.rc"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCResourceCompilerTool"
-						AdditionalIncludeDirectories=""/>
+						PreprocessorDefinitions="WX_MSC_FULL_VER=150030729"
+						AdditionalIncludeDirectories=""
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCResourceCompilerTool"
-						AdditionalIncludeDirectories=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Release|Win32">
-					<Tool
-						Name="VCResourceCompilerTool"
-						AdditionalIncludeDirectories=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unicode Debug|Win32">
-					<Tool
-						Name="VCResourceCompilerTool"
-						AdditionalIncludeDirectories=""/>
+						PreprocessorDefinitions="WX_MSC_FULL_VER=150030729"
+						AdditionalIncludeDirectories=""
+					/>
 				</FileConfiguration>
 			</File>
 		</Filter>

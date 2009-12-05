@@ -3,19 +3,19 @@ Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
 Modified by:	Nerijus Baliunas <nerijus@users.sf.net> (cygwin part)
-Last modified:	2008-03-04
+Last modified:	2009-12-05
 Version:	the information in this file applies to the svn sources
 
 0. Requirements
 ---------------
 
 a) a compiler: currently, the supported compilers for building Mahogany are
-   MS Visual C++ 7.1 and cygwin. Previous versions of Visual C++ (5/6/7.0)
-   could probably be used as well but the project files haven't been updated
-   for them since quite some time and so this definitely won't work out of
-   the box but require some effort from your part. Later versions of VC++ (VC8,
-   a.k.a. 2005, and VC9 a.k.a. 2008) should work as well but you need to import
-   the projects which are only available in VC7 versions currently.
+   MS Visual C++ 9 (a.k.a. Visual Studio 2008) and cygwin. Previous versions
+   of Visual C++ (7.1/2005) could probably be used as well but the last
+   version of the project/solution for VC 7.1 was in svn r7575 and you would
+   need to check it out manually and possible update, i.e. there is no
+   guarantee that it is going to work out of the box and probably will require
+   some effort from your part.
 
    If you are interested in building using another compiler (mingw32, BC++)
    please contact us and we will try to help you.
@@ -39,30 +39,32 @@ a) wxWidgets
    Mahogany depends on wxWidgets and prior to compiling Mahogany you need to
 build the wxMSW library.
 
-   Currently Mahogany requires wxWidgets sources from svn (it is possible to
-build against wx 2.8 but the project files have been modified to be used with
-svn wx version so you'd need to use an older version of them to build with 2.8,
-please contact me if you really need to do this). When wx 2.9.0 is release it
-will be possible to use it too.
+   Mahogany requires wxWidgets 2.9 (building with 2.8 should still be possible
+but the project files would need to be modified). The latest 2.9.x release
+should be used.
 
    Before building Mahogany you will need to build wxWidgets. To do it, you
-should open build/msw/wx_vc7.sln in wxWidgets directory and build all projects
+should open build/msw/wx_vc9.sln in wxWidgets directory and build all projects
 in it. You may use extra\scripts\wxmsw_setup.h file instead of the standard
 setup.h when building if you want to disable all the features not needed by
 Mahogany but doing this is optional and you should revert to the standard
 wx/setup.h if using wxmsw_setup.h results in errors (it is not always up to
 date...).
 
+   Finally, set wxwin environment variable to the location of wxWidgets
+sources before opening M.sln as it uses it to find wxWidgets headers and
+libraries.
+
 
 b) Python
 ---------
 
    If you want to build Mahogany with an embedded Python interpreter, you need
-to download the source distribution of Python from http://www.python.org/,
-built it using the provided project file (in versions up to 2.3.3 it is for
-VC++ 6 but can be imported without problems in VC++ 7.x) in PCbuild
-subdirectory and add the path to include subdirectory to your global VC++
-settings.
+to have Python 2.6 installed (alternatively, you may build any Python from
+sources using VC 9 but Python 2.6 is built with this compiler out of the box
+which explains why using it is the best). You also need to add the path to
+include subdirectory of your Python installation to the "Include files" list
+in "Tools|Options|Projects and Solutions|VC++ Directories".
 
    Otherwise you may simply remove or comment out the line #defining USE_PYTHON
 in include/config_nt.h to disable embedded Python. You will also have to
@@ -73,24 +75,18 @@ from build.
 c) Build process
 ----------------
 
-   Before loading M.sln file, you will need to open it in your favourite text
-editor and do a global search of replace of "L:\wxWidgets" with the path where
-your wxWidgets installation is. You also must have "wxwin" environment variable
-set to point to the same location (as per wxWidgets installation instructions).
-
-   After this you can open the solution file M.sln in Visual C++ IDE. Here is a
-brief description of various projects in the solution:
+   Simply open the solution file M.sln in Visual C++ IDE. Here is a brief
+description of various projects in the solution:
 
 * M - the main Mahogany project
 * imap - the mail routines support library
 * compface - the library for X-Face handling
 * versit - vCard library
 * dspam - the spam filtering library
-* base, core, ... - wxWidgets projects
 
-   Finally, just build everything. Before running M.exe, copy the file
-versit.dll produced when building versit project into the root Mahogany
-directory (or elsewhere in your PATH).
+   Just build everything. Before running M.exe, copy the file versit.dll
+produced when building versit project into the root Mahogany directory (or
+elsewhere in your PATH).
 
    If you encounter any problems with Mahogany (e.g. crashes...), please build
 the debug configuration and run it under debugger, this often provides valuable

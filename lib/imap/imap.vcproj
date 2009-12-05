@@ -1,165 +1,165 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9.00"
 	Name="imap"
 	ProjectGUID="{457cfec8-5c3f-4c7e-98a6-b65e1de22682}"
 	RootNamespace="imap"
-	SccProjectName=""
-	SccLocalPath="">
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="debug"
 			IntermediateDirectory="debug"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="src\c-client,src\osdep\nt,src\charset"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;CHUNKSIZE=65536"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;CHUNKSIZE=65536;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\debug\imap.pch"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 				CompileAs="1"
-				DisableSpecificWarnings="4273"/>
+				DisableSpecificWarnings="4273"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile=".\debug\imap.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				OutputFile=".\debug\imap.lib"
+				SuppressStartupBanner="true"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="release"
 			IntermediateDirectory="release"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="src\c-client,src\osdep\nt,src\charset"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;CHUNKSIZE=65536"
-				StringPooling="TRUE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;CHUNKSIZE=65536;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\release\imap.pch"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 				CompileAs="1"
-				DisableSpecificWarnings="4273"/>
+				DisableSpecificWarnings="4273"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile=".\release\imap.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Debug Purify|Win32"
-			OutputDirectory="DebugPurify"
-			IntermediateDirectory="DebugPurify"
-			ConfigurationType="4"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="src\c-client,src\osdep\nt,src\charset"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;CHUNKSIZE=65536"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\debug\imap.pch"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="1"
-				DisableSpecificWarnings="4273"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\debug\imap.lib"
-				SuppressStartupBanner="TRUE"/>
+				OutputFile=".\release\imap.lib"
+				SuppressStartupBanner="true"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -167,141 +167,151 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+			>
 			<File
-				RelativePath="src\osdep\nt\dummynt.c">
+				RelativePath="src\osdep\nt\dummynt.c"
+				>
 			</File>
 			<File
-				RelativePath="src\osdep\nt\fdstring.c">
+				RelativePath="src\osdep\nt\fdstring.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\flstring.c">
+				RelativePath="src\c-client\flstring.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\imap4r1.c">
+				RelativePath="src\c-client\imap4r1.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\mail.c">
+				RelativePath="src\c-client\mail.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\osdep\nt\mbxnt.c">
+				RelativePath=".\src\osdep\nt\mbxnt.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\osdep\nt\mhnt.c">
+				RelativePath=".\src\osdep\nt\mhnt.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\misc.c">
+				RelativePath="src\c-client\misc.c"
+				>
 			</File>
 			<File
-				RelativePath="src\osdep\nt\mtxnt.c">
+				RelativePath="src\osdep\nt\mtxnt.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\netmsg.c">
+				RelativePath="src\c-client\netmsg.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\newsrc.c">
+				RelativePath="src\c-client\newsrc.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\nntp.c">
+				RelativePath="src\c-client\nntp.c"
+				>
 			</File>
 			<File
-				RelativePath="src\osdep\nt\os_nt.c">
+				RelativePath="src\osdep\nt\os_nt.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\pop3.c">
+				RelativePath="src\c-client\pop3.c"
+				>
 			</File>
 			<File
-				RelativePath="src\osdep\nt\pseudo.c">
+				RelativePath="src\osdep\nt\pseudo.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\rfc822.c">
+				RelativePath="src\c-client\rfc822.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\smanager.c">
+				RelativePath="src\c-client\smanager.c"
+				>
 			</File>
 			<File
-				RelativePath="src\c-client\smtp.c">
+				RelativePath="src\c-client\smtp.c"
+				>
 			</File>
 			<File
-				RelativePath="src\osdep\nt\tenexnt.c">
+				RelativePath="src\osdep\nt\tenexnt.c"
+				>
 			</File>
 			<File
-				RelativePath="src\osdep\nt\unixnt.c">
+				RelativePath="src\osdep\nt\unixnt.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\c-client\utf8.c">
+				RelativePath=".\src\c-client\utf8.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\c-client\utf8aux.c">
+				RelativePath=".\src\c-client\utf8aux.c"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
+			Filter="h;hpp;hxx;hm;inl"
+			>
 			<File
-				RelativePath=".\src\osdep\nt\ip4_nt.c">
+				RelativePath=".\src\osdep\nt\ip4_nt.c"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Creating ip_nt.c..."
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(InputDir)&quot;\ip_nt.c
-"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(InputDir)&quot;\ip_nt.c&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(InputPath)&quot;"
-						Outputs="&quot;$(InputDir)&quot;\ip_nt.c"/>
+						Outputs="&quot;$(InputDir)&quot;\ip_nt.c"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Creating ip_nt.c..."
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(InputDir)&quot;\ip_nt.c
-"
+						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(InputDir)&quot;\ip_nt.c&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(InputPath)&quot;"
-						Outputs="&quot;$(InputDir)&quot;\ip_nt.c"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Creating ip_nt.c..."
-						CommandLine="copy &quot;$(InputPath)&quot; &quot;$(InputDir)&quot;\ip_nt.c
-"
-						AdditionalDependencies="&quot;$(InputPath)&quot;"
-						Outputs="&quot;$(InputDir)&quot;\ip_nt.c"/>
+						Outputs="&quot;$(InputDir)&quot;\ip_nt.c"
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="osdep.h">
+				RelativePath="osdep.h"
+				>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Creating osdep.h..."
-						CommandLine="copy &quot;$(InputDir)&quot;\src\osdep\nt\os_nt.h &quot;$(InputDir)&quot;\src\osdep\nt\osdep.h
-"
+						CommandLine="copy &quot;$(InputDir)&quot;\src\osdep\nt\os_nt.h &quot;$(InputDir)&quot;\src\osdep\nt\osdep.h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputDir)\src\osdep\nt\os_nt.h"
-						Outputs="&quot;$(InputDir)&quot;\src\osdep\nt\osdep.h"/>
+						Outputs="&quot;$(InputDir)&quot;\src\osdep\nt\osdep.h"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Creating osdep.h..."
-						CommandLine="copy &quot;$(InputDir)&quot;\src\osdep\nt\os_nt.h &quot;$(InputDir)&quot;\src\osdep\nt\osdep.h
-"
+						CommandLine="copy &quot;$(InputDir)&quot;\src\osdep\nt\os_nt.h &quot;$(InputDir)&quot;\src\osdep\nt\osdep.h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputDir)\src\osdep\nt\os_nt.h"
-						Outputs="&quot;$(InputDir)&quot;\src\osdep\nt\osdep.h"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Purify|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Creating osdep.h..."
-						CommandLine="copy &quot;$(InputDir)&quot;\src\osdep\nt\os_nt.h &quot;$(InputDir)&quot;\src\osdep\nt\osdep.h
-"
-						AdditionalDependencies="$(InputDir)\src\osdep\nt\os_nt.h"
-						Outputs="&quot;$(InputDir)&quot;\src\osdep\nt\osdep.h"/>
+						Outputs="&quot;$(InputDir)&quot;\src\osdep\nt\osdep.h"
+					/>
 				</FileConfiguration>
 			</File>
 		</Filter>

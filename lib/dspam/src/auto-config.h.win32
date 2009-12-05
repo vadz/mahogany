@@ -19,6 +19,21 @@
 #endif
 
 #ifdef _MSC_VER
+  #if _MSC_VER >= 1500
+    /*
+       avoid warnings whenever we use any standard C string functions
+       or any POSIX names
+     */
+    #define _CRT_SECURE_NO_WARNINGS
+    #define _CRT_NONSTDC_NO_WARNINGS
+
+    /*
+       we need to include it before redefining vsnprintf below or we get
+       warnings because stdio.h defines it itself with MSVC 9
+     */
+    #include <stdio.h>
+  #endif
+
   #define inline _inline
   #define snprintf _snprintf
   #define strcasecmp _stricmp

@@ -1,165 +1,165 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="9.00"
 	Name="dspam"
 	ProjectGUID="{62156246-DCEA-4713-95E0-C01F595F1A20}"
 	RootNamespace="dspam"
-	SccProjectName=""
-	SccLocalPath="">
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="debug"
 			IntermediateDirectory="debug"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="src"
 				PreprocessorDefinitions="HAVE_CONFIG_H;_DEBUG"
-				ExceptionHandling="FALSE"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="debug\dspam.pch"
 				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="1"/>
+				CompileAs="1"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="debug\dspam.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				OutputFile="debug\dspam.lib"
+				SuppressStartupBanner="true"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="release"
 			IntermediateDirectory="release"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="src"
 				PreprocessorDefinitions="HAVE_CONFIG_H;NDEBUG"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
+				StringPooling="true"
+				ExceptionHandling="0"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="release\dspam.pch"
 				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="1"/>
+				CompileAs="1"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="release\dspam.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Debug Purify|Win32"
-			OutputDirectory="debugpurify"
-			IntermediateDirectory="debugpurify"
-			ConfigurationType="4"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="src"
-				PreprocessorDefinitions="HAVE_CONFIG_H;_DEBUG"
-				ExceptionHandling="FALSE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="debug\dspam.pch"
-				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="1"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="debugpurify\dspam.lib"
-				SuppressStartupBanner="TRUE"/>
+				OutputFile="release\dspam.lib"
+				SuppressStartupBanner="true"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -167,121 +167,144 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+			>
 			<File
-				RelativePath="src\base64.c">
+				RelativePath="src\base64.c"
+				>
 			</File>
 			<File
-				RelativePath="src\bnr.c">
+				RelativePath="src\bnr.c"
+				>
 			</File>
 			<File
-				RelativePath="src\buffer.c">
+				RelativePath="src\buffer.c"
+				>
 			</File>
 			<File
-				RelativePath="src\config_shared.c">
+				RelativePath="src\config_shared.c"
+				>
 			</File>
 			<File
-				RelativePath="src\decode.c">
+				RelativePath="src\decode.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\diction.c">
+				RelativePath=".\src\diction.c"
+				>
 			</File>
 			<File
-				RelativePath="src\error.c">
+				RelativePath="src\error.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\hash.c">
+				RelativePath=".\src\hash.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\hash_drv.c">
+				RelativePath=".\src\hash_drv.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\heap.c">
+				RelativePath=".\src\heap.c"
+				>
 			</File>
 			<File
-				RelativePath="src\libdspam.c">
+				RelativePath="src\libdspam.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\list.c">
+				RelativePath=".\src\list.c"
+				>
 			</File>
 			<File
-				RelativePath="src\nodetree.c">
+				RelativePath="src\nodetree.c"
+				>
 			</File>
 			<File
-				RelativePath="src\pref.c">
+				RelativePath="src\pref.c"
+				>
 			</File>
 			<File
-				RelativePath="src\read_config.c">
+				RelativePath="src\read_config.c"
+				>
 			</File>
 			<File
-				RelativePath=".\src\tokenizer.c">
+				RelativePath=".\src\tokenizer.c"
+				>
 			</File>
 			<File
-				RelativePath="src\util.c">
+				RelativePath="src\util.c"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
+			Filter="h;hpp;hxx;hm;inl"
+			>
 			<File
-				RelativePath="src\auto-config.h">
+				RelativePath="src\auto-config.h"
+				>
 			</File>
 			<File
-				RelativePath="src\buffer.h">
+				RelativePath="src\buffer.h"
+				>
 			</File>
 			<File
-				RelativePath=".\src\config.h">
+				RelativePath=".\src\config.h"
+				>
 			</File>
 			<File
-				RelativePath="src\decode.h">
+				RelativePath="src\decode.h"
+				>
 			</File>
 			<File
-				RelativePath="src\error.h">
+				RelativePath="src\error.h"
+				>
 			</File>
 			<File
-				RelativePath="src\lht.h">
+				RelativePath="src\lht.h"
+				>
 			</File>
 			<File
-				RelativePath="src\libdspam.h">
+				RelativePath="src\libdspam.h"
+				>
 			</File>
 			<File
-				RelativePath="src\libdspam_objects.h">
+				RelativePath="src\libdspam_objects.h"
+				>
 			</File>
 			<File
-				RelativePath="src\nodetree.h">
+				RelativePath="src\nodetree.h"
+				>
 			</File>
 			<File
-				RelativePath="src\storage_driver.h">
+				RelativePath="src\storage_driver.h"
+				>
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\src\auto-config.h.win32">
+			RelativePath=".\src\auto-config.h.win32"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Creating auto-config.h"
-					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h
-"
-					Outputs="$(InputDir)\auto-config.h"/>
+					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h&#x0D;&#x0A;"
+					Outputs="$(InputDir)\auto-config.h"
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Creating auto-config.h"
-					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h
-"
-					Outputs="$(InputDir)\auto-config.h"/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug Purify|Win32">
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="Creating auto-config.h"
-					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h
-"
-					Outputs="$(InputDir)\auto-config.h"/>
+					CommandLine="copy $(InputPath) $(InputDir)\auto-config.h&#x0D;&#x0A;"
+					Outputs="$(InputDir)\auto-config.h"
+				/>
 			</FileConfiguration>
 		</File>
 	</Files>

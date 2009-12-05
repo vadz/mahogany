@@ -14,6 +14,17 @@
 #ifndef MCONFIG_H
 #define MCONFIG_H
 
+#ifdef _MSC_VER
+   // avoid warnings whenever we use POSIX functions (mostly strdup() but also
+   // a couple of others) -- maybe we should avoid them but for now just
+   // disabling the warning is simpler (notice that we must do it before
+   // including anything else as it will be too late afterwards because
+   // wx/defs.h already includes some standard headers)
+#  ifndef _CRT_NONSTDC_NO_WARNINGS
+#     define _CRT_NONSTDC_NO_WARNINGS
+#  endif
+#endif // _MSC_VER
+
 #include  "config.h"
 #include  <wx/defs.h>
 
