@@ -72,18 +72,18 @@ IsPythonInitialized()
 extern bool
 InitPython(void)
 {
-   // first check if Python is available
-#ifdef USE_PYTHON_DYNAMIC
-   if ( !InitPythonDll() )
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
    {
-      wxLogError(_("Python dynamic library couldn't be found."));
-
-      return false;
+      // it is not an error to have it disabled
+      return true;
    }
-#endif // USE_PYTHON_DYNAMIC
 
-   // set PYTHONPATH correctly to find our modules and scripts
-   String pythonPathNew = _T("PYTHONPATH=");
+   // set PYTHONPATH correctly to find our modules and scripts: this must be
+   // done before loading the Python DLL below because its copy of CRT (which
+   // may be different from ours when using VC9) will initialize its _environ
+   // array from Win32 process environment when the DLL is loaded, so we must
+   // update the environment before this happens
+   String pythonPathNew;
 
    String path = READ_APPCONFIG(MP_PYTHONPATH);
    const bool didntHavePath = path.empty();
@@ -124,20 +124,27 @@ InitPython(void)
    pythonPathNew += path;
 
    // also keep the old path but after our directories
-   const char *pythonPathOld = getenv("PYTHONPATH");
-   if ( pythonPathOld )
+   wxString pythonPathOld;
+   if ( wxGetEnv("PYTHONPATH", &pythonPathOld) )
    {
       pythonPathNew << PATH_SEPARATOR << pythonPathOld;
    }
 
-   // on some systems putenv() takes "char *" so give it non-const pointer
-   putenv(pythonPathNew.char_str());
-
-   if ( !READ_APPCONFIG(MP_USEPYTHON) )
+   if ( !wxSetEnv("PYTHONPATH", pythonPathNew) )
    {
-      // it is not an error to have it disabled
-      return true;
+      wxLogWarning(_("Setting PYTHONPATH to \"%s\" failed, loading some "
+                     "Python modules might not work."), pythonPathNew);
    }
+
+   // check if Python is available at all if we load it during run-time
+#ifdef USE_PYTHON_DYNAMIC
+   if ( !InitPythonDll() )
+   {
+      wxLogError(_("Python dynamic library couldn't be loaded."));
+
+      return false;
+   }
+#endif // USE_PYTHON_DYNAMIC
 
    // initialise the interpreter -- this we do always, just to avoid problems
    Py_Initialize();
@@ -184,7 +191,7 @@ InitPython(void)
 
    if ( rc && didntHavePath )
    {
-      // rememember the path
+      // remember the path
       mApplication->GetProfile()->writeEntry(MP_PYTHONPATH, path);
    }
 
