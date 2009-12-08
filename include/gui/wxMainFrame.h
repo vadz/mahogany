@@ -68,10 +68,8 @@ public:
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
 #ifdef wxHAS_POWER_EVENTS
-   void OnPowerSuspending(wxPowerEvent& event);
    void OnPowerSuspended(wxPowerEvent& event);
-   void OnPowerSuspendCancel(wxPowerEvent& event) { DoResume(); }
-   void OnPowerResume(wxPowerEvent&) { DoResume(); }
+   void OnPowerResume(wxPowerEvent& event);
 #endif // wxHAS_POWER_EVENTS
 
 
@@ -128,9 +126,6 @@ protected:
 
 
 #ifdef wxHAS_POWER_EVENTS
-   /// Reopen the folders closed when we suspended
-   void DoResume();
-
    // the list of folders automatically closed when we suspended or NULL
    MFolderList *m_foldersToReopen;
 

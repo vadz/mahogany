@@ -565,9 +565,7 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
    EVT_CHOICE(IDC_IDENT_COMBO, wxMainFrame::OnIdentChange)
 
 #ifdef wxHAS_POWER_EVENTS
-   EVT_POWER_SUSPENDING(wxMainFrame::OnPowerSuspending)
    EVT_POWER_SUSPENDED(wxMainFrame::OnPowerSuspended)
-   EVT_POWER_SUSPEND_CANCEL(wxMainFrame::OnPowerSuspendCancel)
    EVT_POWER_RESUME(wxMainFrame::OnPowerResume)
 #endif // wxHAS_POWER_EVENTS
 END_EVENT_TABLE()
@@ -1130,7 +1128,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
 #ifdef wxHAS_POWER_EVENTS
 
-void wxMainFrame::OnPowerSuspending(wxPowerEvent& event)
+void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
 {
    ASSERT_MSG( !m_foldersToReopen, _T("didn't resume from last suspend?") );
 
@@ -1139,31 +1137,27 @@ void wxMainFrame::OnPowerSuspending(wxPowerEvent& event)
    int nClosed = MailFolder::CloseAll(m_foldersToReopen);
    if ( nClosed < 0 )
    {
-      DoResume();
-
-      wxLogError(_("The system cannot be suspended because some folders "
-                   "are still opened."));
-      event.Veto();
+      wxLogWarning(_("Failed to gracefully close some opened folders on "
+                     "system suspend."));
    }
    else if ( nClosed )
    {
       wxLogStatus(_("Closed %lu folders which will be reopened on resume."),
                   (unsigned long)m_foldersToReopen->size());
    }
-   else // no open folders
+
+   if ( nClosed <= 0 )
    {
+      // we don't need it finally
       delete m_foldersToReopen;
       m_foldersToReopen = NULL;
    }
-}
 
-void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
-{
-   // save all options
+   // save all options just in case
    Profile::FlushAll();
 }
 
-void wxMainFrame::DoResume()
+void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
 {
    if ( !m_foldersToReopen )
       return;
@@ -1173,7 +1167,7 @@ void wxMainFrame::DoResume()
    MFolderList *foldersToReopen = m_foldersToReopen;
    m_foldersToReopen = NULL;
 
-   wxLogStatus(_("Reopening %lu folders"),
+   wxLogStatus(_("Reopening %lu folders on system resume"),
                (unsigned long)foldersToReopen->size());
 
    for ( MFolderList::iterator i = foldersToReopen->begin();
