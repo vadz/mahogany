@@ -1073,7 +1073,7 @@ MailFolder::ReplyMessage(Message *msg,
       msg->GetDecodedHeaderLine(_T("To"), to);
 
       String from;
-      if ( ContainsOwnAddress(to, profile, OwnAddress_From, &from) )
+      if ( ContainsOwnAddress(to, profile, &from) )
       {
          // check if the personal name is missing
          AddressList_obj addrFrom(from);

@@ -205,34 +205,18 @@ extern bool operator==(const AddressList_obj& addrList1,
 
 #endif // M_DONT_DEFINE_ADDRESS
 
-
-/// Values for ContainsOwnAddress() last parameter
-enum OwnAddressKind
-{
-   /// The addresses the user uses for "From:"
-   OwnAddress_From,
-
-   /// The addresses which can reach this user (this includes MLs, ...)
-   OwnAddress_To,
-
-   /// End of enum marker
-   OwnAddress_Max
-};
-
 /**
    Check whether the given string contains at least one of our own addresses.
 
-   Check if the given address apepars in list of our own addresses, as defined
-   by kind parameter.
+   Check if the given address is one of our own addresses.
 
    @param str the address to check
    @param profile to get the own addresses from
-   @param kind of the "own" addresses to check
    @param own the address which did match, if any
+   @return true if this is one of our own addresses or false otherwise
  */
 extern bool ContainsOwnAddress(const String& str,
                                Profile *profile,
-                               OwnAddressKind kind = OwnAddress_To,
                                String *own = NULL);
 
 #endif // _ADDRESS_H_

@@ -430,10 +430,7 @@ operator==(const AddressList_obj& addrList1, const AddressList_obj& addrList2)
 // ----------------------------------------------------------------------------
 
 bool
-ContainsOwnAddress(const String& str,
-                   Profile *profile,
-                   OwnAddressKind kind,
-                   String *own)
+ContainsOwnAddress(const String& str, Profile *profile, String *own)
 {
    // get the list of our own addresses
    String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
@@ -444,16 +441,6 @@ ContainsOwnAddress(const String& str,
    }
 
    wxArrayString addresses = strutil_restore_array(returnAddrs);
-
-   if ( kind == OwnAddress_To )
-   {
-      // if we're interested in "own receipient" addresses, add the mailing
-      // list addresses because we normally do get mail from them
-      wxArrayString addressesML = strutil_restore_array(
-                                    READ_CONFIG(profile, MP_LIST_ADDRESSES)
-                                  );
-      WX_APPEND_ARRAY(addresses, addressesML);
-   }
 
    return Address::IsInList(addresses, str, own);
 }
