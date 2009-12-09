@@ -1401,11 +1401,20 @@ void wxPTreeCtrl::SetConfigPath(const wxString& path)
 void wxPTreeCtrl::OnSize(wxSizeEvent& event)
 {
     if ( m_bFirstTime ) {
-        // reset the flag first as the calls to Expand() below may generate in
-        // other OnSize()s
-        m_bFirstTime = FALSE;
+        // we get size events while we're (still) adding the root item under at
+        // least Windows 7, but we can't do anything at this moment yet because
+        // no other items exist in the tree so ignore any size events until we
+        // have something to restore
+        wxTreeItemId idRoot = GetRootItem();
+        wxTreeItemIdValue cookie;
+        if ( idRoot.IsOk() && GetFirstChild(idRoot, cookie).IsOk() )
+        {
+            // reset the flag first as the calls to Expand() below may generate
+            // in other OnSize()s
+            m_bFirstTime = FALSE;
 
-        RestoreExpandedBranches();
+            RestoreExpandedBranches();
+        }
     }
 
     // important things may be done in the base class version!
