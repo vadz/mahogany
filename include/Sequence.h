@@ -73,7 +73,7 @@ private:
    /// indices
    char GetCharAt(size_t pos) const
    {
-      return pos == m_seq.length() ? '\0' : m_seq[pos];
+      return pos == m_seq.length() ? '\0' : static_cast<char>(m_seq[pos]);
    }
 
    /// get the number at given position and increment it to the pos after it

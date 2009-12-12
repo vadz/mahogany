@@ -303,7 +303,11 @@ public:
 
 protected:
    const char Char(void) const
-      { return m_Position == m_Input.length() ? '\0' : m_Input[m_Position]; }
+   {
+      return m_Position == m_Input.length()
+               ? '\0'
+               : static_cast<char>(m_Input[m_Position]);
+   }
    void EatWhiteSpace(void)
       { while(isspace(Char())) m_Position++; }
    const char CharInc(void)
