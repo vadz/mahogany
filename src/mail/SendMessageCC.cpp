@@ -2112,12 +2112,7 @@ SendMessageCC::WriteToFolder(String const &name)
    }
 
    String str;
-   if ( !WriteToString(str) )
-      return false;
-
-   mf->AppendMessage(str);
-
-   return true;
+   return WriteToString(str) && mf->AppendMessage(str);
 }
 
 // ----------------------------------------------------------------------------
