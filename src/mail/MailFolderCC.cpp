@@ -1327,6 +1327,11 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
 
       case MF_FILE:
          spec = strutil_expandfoldername(name, type);
+#ifdef OS_WIN
+         // c-client refuses paths with slashes in them under Windows so make
+         // sure we use backslashes only even if the config file had slashes
+         spec.Replace("/", "\\");
+#endif // OS_WIN
          break;
 
       case MF_MH:
