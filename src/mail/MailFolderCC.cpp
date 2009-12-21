@@ -3245,10 +3245,13 @@ MailFolderCC::DoSearch(struct search_program *pgm, int flags) const
    if ( !mail_search_full(m_MailStream, cset, pgm, flags) )
    {
       // some (broken) servers return "NO" in reply to "SEARCH" command, retry
-      // using local search in this case
-      if ( !mail_search_full(m_MailStream, cset, pgm,
-                             flags | SE_FREE | SE_NOSERVER) )
+      // using local search in this case (but not if we lost connection to the
+      // mailbox in the search above)
+      if ( !m_MailStream || !mail_search_full(m_MailStream, cset, pgm,
+                                              flags | SE_FREE | SE_NOSERVER) )
       {
+         mail_free_searchpgm(&pgm);
+
          delete m_SearchMessagesFound;
          self->m_SearchMessagesFound = NULL;
 
