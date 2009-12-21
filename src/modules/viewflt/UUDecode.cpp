@@ -303,7 +303,7 @@ UUDecodeFilter::DoProcess(String& text,
                     "Content-Disposition: attachment; filename=\"" +
                     fileName + "\"\r\n");
 
-      // get a mimeType from the extention
+      // get a mimeType from the extension
       String mimeType;
       String ext = wxFileName(fileName).GetExt();
       if ( !ext.empty() )
@@ -350,8 +350,15 @@ UUDecodeFilter::DoProcess(String& text,
 
          // create and process the virtual part containing uudecoded contents
          MimePartVirtual * const mimepart = new MimePartVirtual(virtData);
-         m_msgView->AddVirtualMimePart(mimepart);
-         m_msgView->ShowPart(mimepart);
+         if ( mimepart->IsOk() )
+         {
+            m_msgView->AddVirtualMimePart(mimepart);
+            m_msgView->ShowPart(mimepart);
+         }
+         else
+         {
+            delete mimepart;
+         }
 
          nextToOutput =
          start = endOfEncodedStream;
