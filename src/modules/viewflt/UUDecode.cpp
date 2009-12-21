@@ -135,14 +135,18 @@ int UUdecodeLine(const wxChar *input, char *output, const wxChar **endOfLine)
 
 bool
 UUdecodeFile(const wxChar *input,
-             wxMemoryBuffer& output,
+             wxCharBuffer& output,
              const wxChar **endOfEncodedStream)
 {
    static const size_t allocationSize = 10000;
 
-   size_t totalAllocatedBytes = 0;
+   size_t
+      totalAllocatedBytes,
+      outputDataLen;
 
-   size_t totalDecodedBytes = 0;
+   totalAllocatedBytes =
+   outputDataLen = output.length();
+
    int decodedBytesInLine;
    const wxChar *startOfLine = input;
    const wxChar *endOfLine = 0; // init not needed
@@ -151,17 +155,24 @@ UUdecodeFile(const wxChar *input,
                UUdecodeLine(startOfLine, buffer, &endOfLine)) > 0 )
    {
       // We've just decoded a line
-      totalDecodedBytes += decodedBytesInLine;
-      if ( output.GetDataLen() + decodedBytesInLine >= totalAllocatedBytes )
+      if ( outputDataLen + decodedBytesInLine >= totalAllocatedBytes )
       {
          totalAllocatedBytes += allocationSize;
-         output.GetWriteBuf(totalAllocatedBytes);
+
+         if ( !output.extend(totalAllocatedBytes) )
+         {
+            wxLogError(_("Out of memory decoding uuencoded text."));
+            return false;
+         }
       }
 
-      output.AppendData(buffer, decodedBytesInLine);
+      strncpy(output.data() + outputDataLen, buffer, decodedBytesInLine);
+      outputDataLen += decodedBytesInLine;
 
-      ASSERT_MSG( endOfLine[0] == '\r', "Line has no '\\r' at the end!" );
-      ASSERT_MSG( endOfLine[1] == '\n', "Line has no '\\n' at the end!" );
+      if ( endOfLine[0] != '\r' )
+         wxLogWarning(_("Uuencoded Line has no '\\r' at the end!"));
+      if ( endOfLine[1] != '\n' )
+         wxLogWarning(_("Uuencoded line has no '\\n' at the end!"));
 
       startOfLine = endOfLine + lenEOL;
    }
@@ -171,6 +182,8 @@ UUdecodeFile(const wxChar *input,
       wxLogWarning(_("Invalid character in uuencoded text."));
       return false;
    }
+
+   output.shrink(outputDataLen);
 
    *endOfEncodedStream = endOfLine;
 
@@ -282,7 +295,7 @@ UUDecodeFilter::DoProcess(String& text,
 
 
       // buffer with the entire virtual part contents
-      wxMemoryBuffer virtData;
+      wxCharBuffer virtData;
 
       // start with the header for the uudecoded virtual part
       String header("Mime-Version: 1.0\r\n"
@@ -308,7 +321,7 @@ UUDecodeFilter::DoProcess(String& text,
       header += "; name=\"" + fileName + "\"\r\n";
       header += "\r\n"; // blank line separating the header from body
 
-      virtData.AppendData(header.ToAscii(), header.length());
+      virtData = header.ToAscii();
 
       const wxChar *endOfEncodedStream = NULL;
       bool ok = UUdecodeFile(start_data, virtData, &endOfEncodedStream);

@@ -32,8 +32,11 @@ public:
       Construct a MIME part from the entire part text (body + header).
 
       Use IsOk() to check if parsing the buffer succeeded.
+
+      Notice that @a msgText must be in canonical RFC 822 format, in particular
+      use CR LF as line separators.
     */
-   MimePartVirtual(const wxMemoryBuffer& msgText);
+   MimePartVirtual(const wxCharBuffer& msgText);
 
    /**
       Construct a nested MIME part.
@@ -71,7 +74,7 @@ private:
 
 
    // the entire text of the message, only non empty for the top level part
-   wxMemoryBuffer m_msgText;
+   const wxCharBuffer m_msgText;
 
    // pointer to the start of headers of this part
    const char *m_pStart;

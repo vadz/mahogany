@@ -2589,11 +2589,16 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
          {
             pgpInfo = new PGPInfoGoodMsg(this);
 
-            wxMemoryBuffer buf;
-            buf.AppendData(decryptedData.To8BitData(), decryptedData.length());
-            MimePartVirtual *mpv = new MimePartVirtual(buf);
+            // notice that decryptedData may use just LFs and not CR LF as line
+            // separators, e.g. this is often (always?) the case with PGP
+            // messages created under Unix systems, but c-client functions used
+            // in MimePartVirtual do expect a message in canonical format so we
+            // must ensure that we do have CR LFs
+            MimePartVirtual *mpv = new
+               MimePartVirtual(strutil_enforceCRLF(decryptedData).To8BitData());
             if ( mpv->IsOk() )
             {
+
                AddVirtualMimePart(mpv);
                ProcessPart(mpv);
                break;
