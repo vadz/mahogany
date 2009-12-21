@@ -2586,16 +2586,24 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
    switch ( status )
    {
       case MCryptoEngine::OK:
-         pgpInfo = new PGPInfoGoodMsg(this);
-
          {
+            pgpInfo = new PGPInfoGoodMsg(this);
+
             wxMemoryBuffer buf;
             buf.AppendData(decryptedData.To8BitData(), decryptedData.length());
             MimePartVirtual *mpv = new MimePartVirtual(buf);
-            AddVirtualMimePart(mpv);
-            ProcessPart(mpv);
+            if ( mpv->IsOk() )
+            {
+               AddVirtualMimePart(mpv);
+               ProcessPart(mpv);
+               break;
+            }
+
+            // failed to create the virtual MIME part representing it
+            delete mpv;
+            delete pgpInfo;
          }
-         break;
+         // fall through
 
       default:
          wxLogError(_("Decrypting the PGP message failed."));

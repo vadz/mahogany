@@ -30,6 +30,8 @@ class MimePartVirtual : public MimePartCCBase
 public:
    /**
       Construct a MIME part from the entire part text (body + header).
+
+      Use IsOk() to check if parsing the buffer succeeded.
     */
    MimePartVirtual(const wxMemoryBuffer& msgText);
 
@@ -49,6 +51,13 @@ public:
                    const char *pHeader);
 
    virtual ~MimePartVirtual();
+
+   /**
+      Check if the part was successfully initialized.
+
+      If it wasn't, it can't be used and must be deleted.
+    */
+   bool IsOk() const { return m_env && m_body; }
 
    virtual const void *GetRawContent(unsigned long *len = NULL) const;
    virtual String GetHeaders() const;
