@@ -536,6 +536,8 @@ String
 strutil_enforceCRLF(String const &in)
 {
    String out;
+   out.reserve(in.length());
+
    const wxChar *cptr = in.c_str();
    bool has_cr =  false;
 
@@ -575,6 +577,8 @@ String
 strutil_enforceLF(String const &in)
 {
    String out;
+   out.reserve(in.length());
+
    size_t cursor = 0;
    
    while ( cursor < in.size() )
