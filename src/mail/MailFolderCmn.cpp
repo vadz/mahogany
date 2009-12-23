@@ -2066,7 +2066,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                message += '.';
             }
 
-            LOGMESSAGE((M_LOG_WINONLY, message));
+            LOGMESSAGE((M_LOG_WINONLY, "%s", message));
          }
       }
    //else: new mail reported by the Python code
