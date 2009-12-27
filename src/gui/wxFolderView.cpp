@@ -4477,16 +4477,27 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
                 View, Group reply (== followup), List reply, Next match
             */
             static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHGLN");
-            static const wxString keycodes(wxGetTranslation(keycodes_en));
+            static wxString keycodes;
+            if ( keycodes.empty() )
+            {
+               keycodes = wxGetTranslation(keycodes_en);
+               if ( keycodes.length() != strlen(keycodes_en) )
+               {
+                  wxLogWarning(_("Incorrect translation of key codes string, "
+                                 "must have the same number of letters as the "
+                                 "original string."));
+
+                  // use the original English string as we can't trust the
+                  // translation
+                  keycodes = keycodes_en;
+               }
+            }
 
             long keyOrig = key;
-            key = toupper(key);
 
-            int idx = 0;
-            for ( ; keycodes[idx] && keycodes[idx] != (char)key; idx++ )
-               ;
+            const size_t idx = keycodes.find(static_cast<char>(toupper(key)));
 
-            key = keycodes[idx] ? keycodes_en[idx] : 0;
+            key = idx != wxString::npos ? keycodes_en[idx] : 0;
 
             if ( key == 'N' && islower(keyOrig) )
             {
