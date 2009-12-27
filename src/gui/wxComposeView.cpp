@@ -193,9 +193,12 @@ static ComposerList gs_listOfAllComposers;
 // private functions
 // ----------------------------------------------------------------------------
 
+namespace
+{
+
 // return the string containing the full mime type for the given filename (uses
 // its extension)
-static wxString GetMimeTypeFromFilename(const wxString& filename)
+wxString GetMimeTypeFromFilename(const wxString& filename)
 {
    wxString strExt = wxFileName(filename).GetExt();
 
@@ -253,6 +256,50 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
 
    return strMimeType;
 }
+
+/**
+    Return clipboard contents if it looks like an email address.
+
+    This function allows us to do something smart if the user had just selected
+    an email address. Currently we pre-fill the composer recipient with the
+    selected address in this case but it might be useful elsewhere in the
+    future in which case it should be extracted in a public header.
+
+    @return
+      An email address string or empty string if clipboard contents doesn't
+      look like an email address.
+ */
+String TryToGetAddressFromClipboard()
+{
+   wxClipboardLocker clipboardLock;
+   if ( !clipboardLock )
+      return String();
+
+   wxTextDataObject data;
+   if ( !wxTheClipboard->GetData(data) )
+      return String();
+
+   const wxString s = data.GetText();
+   if ( s.empty() )
+      return String();
+
+   // this is simplistic but good enough for our needs
+   #define RE_EMAIL "[a-z0-9._%+-]+@([a-z0-9-]{2,}\\.)+[a-z]{2,3}"
+
+   // the alternatives correspond to: "Foo Bar <foo@bar.org>", "<foo@bar.org>"
+   // and just "foo@bar.org"
+   wxRegEx re("^(.+ ){,4}<" RE_EMAIL ">|<" RE_EMAIL ">|" RE_EMAIL "$",
+              wxRE_EXTENDED | wxRE_ICASE);
+
+   // notice the use of flags: we don't want to match a line with an email
+   // address in it in the middle string, the entire text should match
+   if ( !re.Matches(s, wxRE_NOTBOL | wxRE_NOTEOL) )
+      return String();
+
+   return s;
+}
+
+} // anonymous namespace
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -2366,7 +2413,24 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    // it does, we need a separate option for this because it's definitely
    // inconvenient by default)
    if ( m_kind == Message_New )
+   {
       AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
+
+      // if the user selected something that looks like an email address before
+      // opening the composer, chances are that he intended to use this address
+      // as a recipient so pre-fill the main control with this text but also
+      // preselect it to make it possible to easily overwrite it if we guessed
+      // wrong
+      const String address = TryToGetAddressFromClipboard();
+      if ( !address.empty() )
+      {
+         wxTextCtrl * const text = m_rcptMain->GetText();
+         CHECK_RET( text, "must have the main recipient text control" );
+
+         text->SetValue(address);
+         text->SelectAll();
+      }
+   }
 }
 
 void
