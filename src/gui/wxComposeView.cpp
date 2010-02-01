@@ -1926,6 +1926,8 @@ wxComposeView::wxComposeView(const String &name,
                              wxWindow *parent)
              : wxMFrame(name, parent)
 {
+   SetIcon(ICON("ComposeFrame"));
+
    gs_listOfAllComposers.push_back(this);
 
    m_mode = mode;

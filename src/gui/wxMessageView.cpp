@@ -427,6 +427,8 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
                                        UIdType uid)
                   : wxMFrame(_("Mahogany: Message View"), parent)
 {
+   SetIcon(ICON("MsgViewFrame"));
+
    m_eventAsync = MEventManager::Register(*this, MEventId_ASFolderResult);
 
    Profile_obj profile(Profile::CreateTemp(asmf->GetProfile()));

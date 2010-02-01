@@ -31,7 +31,7 @@ aaa		ICON	"Micon.ico"
 
 // global icons
 Micon		ICON	"Micon.ico"
-MLogFrame	ICON	"MLogIcon.ico"
+MLogFrame	ICON	"logframe.ico"
 mahogany	BITMAP	"mahogany.bmp"
 background	BITMAP	"background.bmp"
 adbimport	BITMAP	"adbimport.bmp"
@@ -45,12 +45,13 @@ ssllogo		BITMAP	"ssllogo.bmp"
 PythonPowered	BITMAP	"pythonpower.bmp"
 #endif
 
-// frame icons (32x32)
-MFrame		ICON	"Mframe.ico"
-MainFrame	ICON	"Mframe.ico"
+// frame icons (mostly 48x48 currently, need larger versions too)
+MFrame		ICON	"frame.ico"
+MainFrame	ICON	"frame.ico"
 MFrameNewMail	ICON	"frame_new.ico"
 MainFrameNewMail ICON	"frame_new.ico"
-//ComposeFrame	ICON	"compose.ico"
+ComposeFrame	ICON	"composeframe.ico"
+MsgViewFrame	ICON	"msgviewframe.ico"
 Adbedit 	ICON	"adbedit.ico"
 
 // MIME icons (32x32)
