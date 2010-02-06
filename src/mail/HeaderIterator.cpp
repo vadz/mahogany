@@ -80,7 +80,7 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
             // skip '\n' too
             m_pcCurrent++;
 
-            // look what have we got in the last which just ended
+            // look what have we got in the line which just ended
             if ( inName )
             {
                // we still haven't seen the colon
@@ -104,13 +104,6 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
             }
             else // we have a valid header name in this line
             {
-               if ( m_str.empty() )
-               {
-                  // suspicious...
-                  wxLogDebug(_T("Empty line in \"%s\" header value?"),
-                             name->c_str());
-               }
-
                // this header may continue on the next line if it begins
                // with a space or tab - check if it does
                m_pcCurrent++;
