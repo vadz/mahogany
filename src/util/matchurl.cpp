@@ -814,7 +814,7 @@ strutil_findurl(String& str, String& url)
    int len;
    int pos = s_detector.FindURL(str, len);
 
-   if ( !len )
+   if ( pos == String::npos )
    {
       // no URLs found
       str.swap(before);
