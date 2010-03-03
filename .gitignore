@@ -4,11 +4,14 @@ include/MInterface.h
 include/config.h
 lib/compface/Debug/
 lib/compface/Release/
+lib/compface/x64/
 lib/dspam/debug/
 lib/dspam/release/
+lib/dspam/x64/
 lib/dspam/src/auto-config.h
 lib/imap/debug/
 lib/imap/release/
+lib/imap/x64/
 lib/imap/src/osdep/nt/ip_nt.c
 lib/imap/src/osdep/nt/osdep.h
 release/
@@ -22,6 +25,7 @@ src/Python/SendMessage_swig.cpp
 src/Python/swiglib_swig.cpp
 src/wx/vcard/Debug/
 src/wx/vcard/Release/
+src/wx/vcard/x64/
 src/wx/vcard/vcc.c
 tags
-
+x64/

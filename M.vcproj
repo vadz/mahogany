@@ -12,6 +12,9 @@
 		<Platform
 			Name="Win32"
 		/>
+		<Platform
+			Name="x64"
+		/>
 	</Platforms>
 	<ToolFiles>
 	</ToolFiles>
@@ -63,7 +66,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/release/imap.lib lib/compface/release/compface.lib lib/dspam/release/dspam.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				AdditionalDependencies="lib/imap/$(IntDir)/imap.lib lib/compface/$(IntDir)/compface.lib lib/dspam/$(IntDir)/dspam.lib src\wx\vcard\$(IntDir)\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="1"
@@ -150,7 +153,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lib/imap/debug/imap.lib lib/compface/debug/compface.lib lib/dspam/debug/dspam.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				AdditionalDependencies="lib/imap/$(IntDir)/imap.lib lib/compface/$(IntDir)/compface.lib lib/dspam/$(IntDir)/dspam.lib src\wx\vcard\$(IntDir)\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
@@ -161,6 +164,176 @@
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_UNICODE;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="Mpch.h"
+				WarningLevel="4"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				CompileAs="0"
+				DisableSpecificWarnings="4100"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="include,$(wxwin)/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="lib/imap/$(IntDir)/imap.lib lib/compface/$(IntDir)/compface.lib lib/dspam/$(IntDir)/dspam.lib src\wx\vcard\$(IntDir)\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				ShowProgress="0"
+				OutputFile="$(OutDir)/M.exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(wxwin)\lib\vc_amd64_lib"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				GenerateMapFile="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="include;&quot;$(wxwin)/include/msvc&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_UNICODE;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="Mpch.h"
+				WarningLevel="4"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				CompileAs="0"
+				DisableSpecificWarnings="4100"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="include,$(wxwin)/include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="lib/imap/$(IntDir)/imap.lib lib/compface/$(IntDir)/compface.lib lib/dspam/$(IntDir)/dspam.lib src\wx\vcard\$(IntDir)\versit.lib winmm.lib comctl32.lib rpcrt4.lib ws2_32.lib"
+				OutputFile="$(OutDir)/M.exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(wxwin)\lib\vc_amd64_lib"
+				IgnoreDefaultLibraryNames=""
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				StackReserveSize="10000000"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -275,6 +448,22 @@
 							UsePrecompiledHeader="1"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\classes\Moptions.cpp"
@@ -317,6 +506,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PreprocessorDefinitions="SYSV32"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PreprocessorDefinitions="SYSV32"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -523,6 +728,23 @@
 								PrecompiledHeaderThrough="wx/wxprec.h"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="2"
+								PrecompiledHeaderThrough="wx/wxprec.h"
+							/>
+						</FileConfiguration>
 					</File>
 				</Filter>
 			</Filter>
@@ -711,6 +933,22 @@
 								Name="VCCLCompilerTool"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\src\adb\ProvDummy.cpp"
@@ -739,6 +977,22 @@
 								Name="VCCLCompilerTool"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\src\adb\ProvPalm.cpp"
@@ -759,6 +1013,22 @@
 								Name="VCCLCompilerTool"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\src\adb\ProvPasswd.cpp"
@@ -773,6 +1043,22 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Debug|Win32"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
 							ExcludedFromBuild="true"
 							>
 							<Tool
@@ -819,6 +1105,22 @@
 								Name="VCCLCompilerTool"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\src\adb\ImportPine.cpp"
@@ -851,6 +1153,22 @@
 								Name="VCCLCompilerTool"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
 					</File>
 				</Filter>
 			</Filter>
@@ -873,6 +1191,28 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Creating MInterface.h and .cpp"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)&#x0D;&#x0A;"
+							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
+							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Creating MInterface.h and .cpp"
+							CommandLine="extra\scripts\m4.bat $(InputDir) $(InputDir)&#x0D;&#x0A;"
+							AdditionalDependencies="$(InputDir)/MInterface.mid;$(InputDir)/MInterface.cpp.m4;$(InputDir)/MInterface.h.m4;$(InputDir)/mid2cpp.m4;$(InputDir)/mid2h.m4"
+							Outputs="$(InputDir)/MInterface.cpp;$(InputDir)/MInterface.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCustomBuildTool"
@@ -924,6 +1264,28 @@
 									WarningLevel="1"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\MailFolder_swig.cpp"
@@ -940,6 +1302,28 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
 								>
 								<Tool
 									Name="VCCLCompilerTool"
@@ -972,6 +1356,28 @@
 									WarningLevel="1"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\Message_swig.cpp"
@@ -988,6 +1394,28 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
 								>
 								<Tool
 									Name="VCCLCompilerTool"
@@ -1020,6 +1448,28 @@
 									WarningLevel="1"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\MimeType_swig.cpp"
@@ -1036,6 +1486,28 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
 								>
 								<Tool
 									Name="VCCLCompilerTool"
@@ -1068,6 +1540,28 @@
 									WarningLevel="1"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\swiglib_swig.cpp"
@@ -1084,6 +1578,28 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
+									UsePrecompiledHeader="0"
+									WarningLevel="1"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								ExcludedFromBuild="true"
 								>
 								<Tool
 									Name="VCCLCompilerTool"
@@ -1120,6 +1636,26 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\MailFolder.cpp-swig"
@@ -1136,6 +1672,26 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
 								>
 								<Tool
 									Name="VCCustomBuildTool"
@@ -1168,6 +1724,26 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\Message.cpp-swig"
@@ -1184,6 +1760,26 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
 								>
 								<Tool
 									Name="VCCustomBuildTool"
@@ -1216,6 +1812,26 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\MimeType.cpp-swig"
@@ -1232,6 +1848,26 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
 								>
 								<Tool
 									Name="VCCustomBuildTool"
@@ -1264,6 +1900,26 @@
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\src\Python\swiglib.cpp-swig"
@@ -1280,6 +1936,26 @@
 							</FileConfiguration>
 							<FileConfiguration
 								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description="Updating SWIG-generated sources"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp&#x0D;&#x0A;"
+									Outputs="$(InputDir)\$(InputName)_swig.cpp"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
 								>
 								<Tool
 									Name="VCCustomBuildTool"
@@ -1366,6 +2042,22 @@
 							AdditionalIncludeDirectories="lib/imap/src"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="lib/imap/src"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="lib/imap/src"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\util\sysutil.cpp"
@@ -1385,6 +2077,24 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							WarningLevel="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							WarningLevel="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1420,6 +2130,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\modules\Filters.cpp"
@@ -1444,6 +2170,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\modules\Migrate.cpp"
@@ -1462,6 +2204,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1577,6 +2335,24 @@
 								PreprocessorDefinitions="HAVE_CONFIG_H"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								AdditionalIncludeDirectories="lib/dspam/src"
+								PreprocessorDefinitions="HAVE_CONFIG_H"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								AdditionalIncludeDirectories="lib/dspam/src"
+								PreprocessorDefinitions="HAVE_CONFIG_H"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\src\modules\spam\HeadersFilter.cpp"
@@ -1610,6 +2386,22 @@
 							PrecompiledHeaderThrough="wx/wxprec.h"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\wx\generic\vcarddlg.cpp"
@@ -1624,6 +2416,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PrecompiledHeaderThrough="wx/wxprec.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2086,6 +2894,24 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="WX_MSC_FULL_VER=150030729"
+						AdditionalIncludeDirectories=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions="WX_MSC_FULL_VER=150030729"
+						AdditionalIncludeDirectories=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCResourceCompilerTool"
