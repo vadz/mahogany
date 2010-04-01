@@ -351,7 +351,6 @@ BusyIndicator::BusyIndicator(bool nonInteractive,
    if ( m_frame && READ_CONFIG(mf->GetProfile(), MP_SHOWBUSY_DURING_SORT) )
    {
       m_progInfo = new MProgressInfo(m_frame, m_msgInitial);
-      wxYield();
    }
    else // busy indicator disabled
    {

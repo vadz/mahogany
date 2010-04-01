@@ -2872,15 +2872,13 @@ void MProgressInfo::SetLabel(const wxString& label)
    m_labelText->SetLabel(label);
 
    // update the frame
-   wxYieldIfNeeded();
+   m_frame->Refresh();
+   m_frame->Update();
 }
 
 void MProgressInfo::SetValue(size_t numDone)
 {
-   m_labelValue->SetLabel(wxString::Format(_("%u done"), numDone));
-
-   // update the frame
-   wxYieldIfNeeded();
+   SetLabel(wxString::Format(_("%u done"), numDone));
 }
 
 MProgressInfo::~MProgressInfo()
