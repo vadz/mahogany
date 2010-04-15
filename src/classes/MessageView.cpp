@@ -1927,13 +1927,15 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
 {
    // as we're going to need its contents, we'll have to download it: check if
    // it is not too big before doing this
-   if ( !CheckMessagePartSize(mimepart) )
+   if ( CheckMessagePartSize(mimepart) )
    {
-      // don't download this part
-      return;
+      ShowText(mimepart->GetTextContent(), mimepart->GetTextEncoding());
    }
-
-   ShowText(mimepart->GetTextContent(), mimepart->GetTextEncoding());
+   else // part too big to be shown inline
+   {
+      // display it as an attachment instead
+      ShowAttachment(mimepart);
+   }
 }
 
 void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
@@ -3884,11 +3886,11 @@ MessageView::CheckMessageOrPartSize(unsigned long size, bool part) const
    //else: big message, ask
 
    wxString msg;
-   msg.Printf(_("The selected message%s is %u Kbytes long which is "
-                "more than the current threshold of %d Kbytes.\n"
+   msg.Printf(_("The selected %s is %lu KiB long which is "
+                "more than the current threshold of %lu KiB for inline display.\n"
                 "\n"
-                "Do you still want to download it?"),
-              part ? _(" part") : "", size, maxSize);
+                "Do you still want to download it and show it inline?"),
+              part ? _("message part") : _("message"), size, maxSize);
 
    return MDialog_YesNoDialog(msg, GetParentFrame());
 }
