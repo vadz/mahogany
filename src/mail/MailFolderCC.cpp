@@ -2838,6 +2838,11 @@ MailFolderCC::AppendMessage(const String& msg)
 bool
 MailFolderCC::AppendMessage(const Message& msg)
 {
+   // TODO-OPT: This implementation is extremely inefficient for IMAP as it
+   //           downloads the message text and then uploads it to the server
+   //           back again, we ought to use mail_copy() instead of
+   //           mail_append() here!
+
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::AppendMessage(Message)"),
               GetName().c_str());
 
