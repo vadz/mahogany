@@ -290,7 +290,6 @@ class wxColorBrowseButton : public wxTextBrowseButton
 {
 public:
    wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent);
-   virtual ~wxColorBrowseButton();
 
    // get the colour chosen
    wxColour GetColor() const { return m_color; }
@@ -308,22 +307,10 @@ private:
    void UpdateColor();
 
    // update the button colour to match the text control contents
-   void UpdateColorFromText();
-
-   // notify us that the associated text control was deleted
-   void OnTextDelete();
+   void OnTextChanged(wxCommandEvent& event);
 
    // the current colour (may be invalid if none)
    wxColour m_color;
-
-   // do we still have a valid text control?
-   bool m_hasText;
-
-   // the custom event handler for the associated text control
-   class wxColorTextEvtHandler *m_evtHandlerText;
-
-   // it calls our UpdateColorFromText() and OnTextDelete()
-   friend class wxColorTextEvtHandler;
 
    // abstract because we have no default ctor
    DECLARE_ABSTRACT_CLASS(wxColorBrowseButton)

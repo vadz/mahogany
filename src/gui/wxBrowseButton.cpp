@@ -87,39 +87,6 @@ private:
    DECLARE_NO_COPY_CLASS(wxIconSelectionDialog)
 };
 
-// notify the wxColorBrowseButton about changes to its associated text
-// control
-class wxColorTextEvtHandler : public wxEvtHandler
-{
-public:
-   wxColorTextEvtHandler(wxColorBrowseButton *btn)
-   {
-      m_btn = btn;
-   }
-
-protected:
-   void OnText(wxCommandEvent& event)
-   {
-      m_btn->UpdateColorFromText();
-
-      event.Skip();
-   }
-
-   void OnDestroy(wxWindowDestroyEvent& event)
-   {
-      event.Skip();
-
-      // delete ourselves as this is the only place where we can do it
-      m_btn->OnTextDelete();
-   }
-
-private:
-   wxColorBrowseButton *m_btn;
-
-   DECLARE_EVENT_TABLE()
-   DECLARE_NO_COPY_CLASS(wxColorTextEvtHandler)
-};
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -135,11 +102,6 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxIconSelectionDialog, wxManuallyLaidOutDialog)
    EVT_UPDATE_UI(wxID_OK, wxIconSelectionDialog::OnUpdateUI)
    EVT_LIST_ITEM_SELECTED(-1, wxIconSelectionDialog::OnIconSelected)
-END_EVENT_TABLE()
-
-BEGIN_EVENT_TABLE(wxColorTextEvtHandler, wxEvtHandler)
-   EVT_TEXT(-1, wxColorTextEvtHandler::OnText)
-   EVT_WINDOW_DESTROY(wxColorTextEvtHandler::OnDestroy)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -265,33 +227,13 @@ IMPLEMENT_ABSTRACT_CLASS(wxColorBrowseButton, wxButton)
 wxColorBrowseButton::wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
                    : wxTextBrowseButton(text, parent, _("Choose colour"))
 {
-   m_hasText = TRUE;
-
-   m_evtHandlerText = new wxColorTextEvtHandler(this);
-   GetWindow()->PushEventHandler(m_evtHandlerText);
-}
-
-wxColorBrowseButton::~wxColorBrowseButton()
-{
-   // the order of control deletion is undetermined, so handle both cases
-   if ( m_hasText )
-   {
-      // we're deleted before the associated control
-      GetWindow()->PopEventHandler(TRUE /* delete it */);
-   }
-   else
-   {
-      // the text control had been already deleted so the links in the event
-      // handler chain are broken but m_evtHandlerText still has m_text as next
-      // handler - reset it to avoid crashing in ~wxColorTextEvtHandler
-      m_evtHandlerText->SetNextHandler(NULL);
-      delete m_evtHandlerText;
-   }
-}
-
-void wxColorBrowseButton::OnTextDelete()
-{
-   m_hasText = FALSE;
+   GetWindow()->Connect
+                (
+                  wxEVT_COMMAND_TEXT_UPDATED,
+                  wxCommandEventHandler(wxColorBrowseButton::OnTextChanged),
+                  NULL,
+                  this
+                );
 }
 
 void wxColorBrowseButton::DoBrowse()
@@ -346,7 +288,7 @@ void wxColorBrowseButton::SetValue(const wxString& text)
    SetText(nameCol);
 }
 
-void wxColorBrowseButton::UpdateColorFromText()
+void wxColorBrowseButton::OnTextChanged(wxCommandEvent& WXUNUSED(event))
 {
    if ( ParseColourString(GetText(), &m_color) )
    {
