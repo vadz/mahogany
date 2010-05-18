@@ -28,13 +28,6 @@ enum
 
 typedef int MWizardPageId;
 
-
-enum MWizardType
-{
-   MWizardType_CreateFolder,
-   MWizardType_ImportFolders
-};
-
 /**
   The MWizard is a very simple to use Wizard class. Each wizard uses a
   set of pages (can be shared across wizards) and knows on which page
@@ -45,8 +38,7 @@ enum MWizardType
 class MWizard : public wxWizard
 {
 public:
-   MWizard(MWizardType type,
-           int numPages,
+   MWizard(int numPages,
            const wxString &title,
            const wxBitmap * bitmap = NULL,
            wxWindow *parent = NULL)
@@ -58,8 +50,6 @@ public:
                           : *bitmap),
          m_numPages(numPages)
       {
-         m_Type = type;
-
          m_WizardPages = new wxWizardPage *[numPages];
          memset(m_WizardPages, 0, numPages*sizeof(wxWizardPage *));
       }
@@ -68,11 +58,6 @@ public:
    {
       delete [] m_WizardPages;
    }
-
-   /** Returns a numeric type for the Wizard to allow pages to change
-       their behaviour for different Wizards. No deeper meaning.
-   */
-   MWizardType GetType(void) const { return m_Type; }
 
    MWizardPageId GetFirstPageId() const { return 0; }
    MWizardPageId GetLastPageId() const { return m_numPages - 1; }
@@ -109,7 +94,6 @@ private:
 
    const int m_numPages;
 
-   MWizardType m_Type;
    wxWizardPage **m_WizardPages;
 
    DECLARE_NO_COPY_CLASS(MWizard)

@@ -107,10 +107,7 @@ class CreateFolderWizard : public MWizard
 public:
    CreateFolderWizard(MFolder *parentFolder,
                       wxWindow *parent = NULL)
-      : MWizard( MWizardType_CreateFolder,
-                 MWizard_CreateFolder_Max,
-                 _("Create a new folder"),
-                 NULL, parent)
+      : MWizard(MWizard_CreateFolder_Max, _("Create a new folder"), NULL, parent)
       {
          m_wantsDialog = false;
          m_ParentFolder = parentFolder;

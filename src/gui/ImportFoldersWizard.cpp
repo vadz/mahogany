@@ -57,9 +57,7 @@ class ImportFoldersWizard : public MWizard
 {
 public:
    ImportFoldersWizard()
-      : MWizard( MWizardType_ImportFolders,
-                 MWizard_ImportFolders_Max,
-                 _("Import existing mail folders"))
+      : MWizard(MWizard_ImportFolders_Max, _("Import existing mail folders"))
       {
       }
 
