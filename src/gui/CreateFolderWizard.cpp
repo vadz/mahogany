@@ -48,9 +48,37 @@ extern const MOption MP_USE_FOLDER_CREATE_WIZARD;
 extern const MPersMsgBox *M_MSGBOX_SAVE_PWD;
 extern const MPersMsgBox *M_MSGBOX_USE_FOLDER_CREATE_WIZARD;
 
-// ============================================================================
-// CreateFolderWizard and its pages
-// ============================================================================
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+namespace
+{
+
+enum
+{
+   MWizard_CreateFolder_Welcome,     // say hello
+   MWizard_CreateFolder_Type,
+
+   MWizard_CreateFolder_File,
+   MWizard_CreateFolder_MH,
+   MWizard_CreateFolder_Imap,
+   MWizard_CreateFolder_Pop3,
+
+   // the new mail page is displayed only for the folder types <= than this one
+   MWizard_CreateFolder_LastNewMail = MWizard_CreateFolder_Pop3,
+
+   MWizard_CreateFolder_Nntp,
+   MWizard_CreateFolder_News,
+   MWizard_CreateFolder_Group,
+
+   MWizard_CreateFolder_NewMail,    // should we monitor this folder?
+   MWizard_CreateFolder_Final,      // say that everything is ok
+   MWizard_CreateFolder_FirstType  = MWizard_CreateFolder_File,
+   MWizard_CreateFolder_LastType = MWizard_CreateFolder_Group,
+
+   MWizard_CreateFolder_Max
+};
 
 enum FolderEntryType
 {
@@ -64,6 +92,12 @@ enum FolderEntryType
    FOLDERTYPE_MAX
 };
 
+} // anonymous namespace
+
+// ============================================================================
+// CreateFolderWizard and its pages
+// ============================================================================
+
 // ----------------------------------------------------------------------------
 // CreateFolderWizard
 // ----------------------------------------------------------------------------
@@ -74,8 +108,7 @@ public:
    CreateFolderWizard(MFolder *parentFolder,
                       wxWindow *parent = NULL)
       : MWizard( MWizardType_CreateFolder,
-                 MWizard_CreateFolder_First,
-                 MWizard_CreateFolder_Last,
+                 MWizard_CreateFolder_Max,
                  _("Create a new folder"),
                  NULL, parent)
       {

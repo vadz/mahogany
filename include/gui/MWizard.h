@@ -23,33 +23,6 @@
 // ids for install wizard pages
 enum
 {
-   MWizard_CreateFolder_First,
-   MWizard_CreateFolder_Welcome = MWizard_CreateFolder_First,     // say hello
-   MWizard_CreateFolder_Type,
-
-   MWizard_CreateFolder_File,
-   MWizard_CreateFolder_MH,
-   MWizard_CreateFolder_Imap,
-   MWizard_CreateFolder_Pop3,
-
-   // the new mail page is displayed only for the folder types <= than this one
-   MWizard_CreateFolder_LastNewMail = MWizard_CreateFolder_Pop3,
-
-   MWizard_CreateFolder_Nntp,
-   MWizard_CreateFolder_News,
-   MWizard_CreateFolder_Group,
-
-   MWizard_CreateFolder_NewMail,    // should we monitor this folder?
-   MWizard_CreateFolder_Final,      // say that everything is ok
-   MWizard_CreateFolder_FirstType  = MWizard_CreateFolder_File,
-   MWizard_CreateFolder_LastType = MWizard_CreateFolder_Group,
-   MWizard_CreateFolder_Last = MWizard_CreateFolder_Final,
-
-   MWizard_ImportFolders_First,
-   MWizard_ImportFolders_Choice = MWizard_ImportFolders_First,
-   MWizard_ImportFolders_MH,
-   MWizard_ImportFolders_Last = MWizard_ImportFolders_MH,
-
    MWizard_PageNone = -1            // illegal value
 };
 
@@ -73,8 +46,7 @@ class MWizard : public wxWizard
 {
 public:
    MWizard(MWizardType type,
-           MWizardPageId first,
-           MWizardPageId last,
+           int numPages,
            const wxString &title,
            const wxBitmap * bitmap = NULL,
            wxWindow *parent = NULL)
@@ -83,13 +55,11 @@ public:
                   // Borland C++ - go figure
                   !bitmap ? mApplication->GetIconManager()->
                               GetBitmap(_T("install_welcome"))
-                          : *bitmap)
+                          : *bitmap),
+         m_numPages(numPages)
       {
          m_Type = type;
-         m_First = first;
-         m_Last = last;
 
-         const int numPages = m_Last - m_First + 1;
          m_WizardPages = new wxWizardPage *[numPages];
          memset(m_WizardPages, 0, numPages*sizeof(wxWizardPage *));
       }
@@ -104,8 +74,8 @@ public:
    */
    MWizardType GetType(void) const { return m_Type; }
 
-   MWizardPageId GetFirstPageId(void) const { return m_First; }
-   MWizardPageId GetLastPageId(void) const { return m_Last; }
+   MWizardPageId GetFirstPageId() const { return 0; }
+   MWizardPageId GetLastPageId() const { return m_numPages - 1; }
 
    virtual bool Run()
    {
@@ -120,7 +90,7 @@ public:
       if ( id == GetLastPageId()+1 || id == MWizard_PageNone)
          return NULL;
 
-      CHECK( id >= m_First && id <= m_Last, NULL, "page index out of range" );
+      CHECK( id >= 0 && id < m_numPages, NULL, "page index out of range" );
 
       const int ofs = id - GetFirstPageId();
       if ( !m_WizardPages[ofs] )
@@ -137,9 +107,10 @@ private:
    /// Must be overridden in the derived classes to actually create pages.
    virtual wxWizardPage *DoCreatePage(MWizardPageId id) = 0;
 
+   const int m_numPages;
+
    MWizardType m_Type;
    wxWizardPage **m_WizardPages;
-   MWizardPageId m_First, m_Last;
 
    DECLARE_NO_COPY_CLASS(MWizard)
 };

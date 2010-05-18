@@ -34,6 +34,22 @@
 #include "gui/MWizard.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+namespace
+{
+
+enum
+{
+   MWizard_ImportFolders_Choice,
+   MWizard_ImportFolders_MH,
+   MWizard_ImportFolders_Max
+};
+
+} // anonymous namespace
+
+// ----------------------------------------------------------------------------
 // ImportFoldersWizard: propose to import existing folders
 // ----------------------------------------------------------------------------
 
@@ -42,8 +58,7 @@ class ImportFoldersWizard : public MWizard
 public:
    ImportFoldersWizard()
       : MWizard( MWizardType_ImportFolders,
-                 MWizard_ImportFolders_First,
-                 MWizard_ImportFolders_Last,
+                 MWizard_ImportFolders_Max,
                  _("Import existing mail folders"))
       {
       }
