@@ -550,6 +550,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\gui\CreateFolderWizard.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\gui\ImportFoldersWizard.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\gui\Mdnd.cpp"
 					>
 				</File>
@@ -683,10 +691,6 @@
 				</File>
 				<File
 					RelativePath=".\src\gui\wxThrDialog.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\gui\wxWizards.cpp"
 					>
 				</File>
 				<Filter

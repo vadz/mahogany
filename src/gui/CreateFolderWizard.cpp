@@ -1,12 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M
-// File name:   wizards.cpp - various GUI wizards
-// Purpose:
-// Author:      Karsten Ballüder (ballueder@gmx.net)
-// Modified by:
-// Created:     2000
-// CVS-ID:      $Id$
-// Copyright:   (c) 2000-2002 M-Team
+// File name:   src/gui/CreateFolderWizard.cpp
+// Purpose:     Implementation of the folder creation wizard.
+// Author:      Vadim Zeitlin <vz-mahogany@zeitlins.org>
+// Created:     2010-05-18 (extracted from src/gui/wxWizards.cpp)
+// Copyright:   (c) 2000-2010 Vadim Zeitlin
 // License:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -21,34 +19,13 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
-   #include "strutil.h"
-   #include "Mdefaults.h"
-   #include "MApplication.h"
-   #include "guidef.h"
-   #include "gui/wxIconManager.h"
-
-   // under Mac it may happen that wx is built with PCH but we -- without and
-   // hence don't include wx/wxprec.h while wx/wizard.h relies on it being
-   // included when WX_PRECOMP is on
-   #ifdef WX_PRECOMP
-      #include "wx/dialog.h"
-      #include "wx/panel.h"
-   #endif
-
-   #include <wx/stattext.h>        // for wxStaticText
 #endif // USE_PCH
 
+#include "MailFolderCC.h"
 #include "Mpers.h"
 
-#include "MailFolderCC.h"
-#include "MFolder.h"
-
-#include <wx/sizer.h>
-#include <wx/wizard.h>
-
+#include "gui/MWizard.h"
 #include "gui/wxBrowseButton.h"
-#include "gui/wxDialogLayout.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -70,415 +47,6 @@ extern const MOption MP_USE_FOLDER_CREATE_WIZARD;
 
 extern const MPersMsgBox *M_MSGBOX_SAVE_PWD;
 extern const MPersMsgBox *M_MSGBOX_USE_FOLDER_CREATE_WIZARD;
-
-// ----------------------------------------------------------------------------
-// global vars and functions
-// ----------------------------------------------------------------------------
-
-/**
-  The MWizard is a very simple to use Wizard class. Each wizard uses a
-  set of pages (can be shared across wizards) and knows on which page
-  to start and finish. The decision which page is next/previous is
-  handled by the page which can query the Wizard for a numeric id to
-  know what kind of wizard is running it.
- */
-
-// ids for install wizard pages
-enum MWizardPageId
-{
-   MWizard_CreateFolder_First,
-   MWizard_CreateFolder_Welcome = MWizard_CreateFolder_First,     // say hello
-   MWizard_CreateFolder_Type,
-
-   MWizard_CreateFolder_File,
-   MWizard_CreateFolder_MH,
-   MWizard_CreateFolder_Imap,
-   MWizard_CreateFolder_Pop3,
-
-   // the new mail page is displayed only for the folder types <= than this one
-   MWizard_CreateFolder_LastNewMail = MWizard_CreateFolder_Pop3,
-
-   MWizard_CreateFolder_Nntp,
-   MWizard_CreateFolder_News,
-   MWizard_CreateFolder_Group,
-
-   MWizard_CreateFolder_NewMail,    // should we monitor this folder?
-   MWizard_CreateFolder_Final,      // say that everything is ok
-   MWizard_CreateFolder_FirstType  = MWizard_CreateFolder_File,
-   MWizard_CreateFolder_LastType = MWizard_CreateFolder_Group,
-   MWizard_CreateFolder_Last = MWizard_CreateFolder_Final,
-
-   MWizard_ImportFolders_First,
-   MWizard_ImportFolders_Choice = MWizard_ImportFolders_First,
-   MWizard_ImportFolders_MH,
-   MWizard_ImportFolders_Last = MWizard_ImportFolders_MH,
-
-   MWizard_PagesMax,                // the number of pages
-
-   MWizard_PageNone = -1            // illegal value
-};
-
-
-enum MWizardType
-{
-   MWizardType_CreateFolder,
-   MWizardType_ImportFolders
-};
-
-class MWizard : public wxWizard
-{
-public:
-   MWizard(MWizardType type,
-           MWizardPageId first,
-           MWizardPageId last,
-           const wxString &title,
-           const wxBitmap * bitmap = NULL,
-           wxWindow *parent = NULL)
-      : wxWizard( parent, -1, title,
-                  // using bitmap before '?' results in a compile error with
-                  // Borland C++ - go figure
-                  !bitmap ? mApplication->GetIconManager()->
-                              GetBitmap(_T("install_welcome"))
-                          : *bitmap)
-      {
-         m_Type = type;
-         m_First = first;
-         m_Last = last;
-         // NULL the pages array
-         memset(m_WizardPages, 0, sizeof(m_WizardPages));
-      }
-
-   /** Returns a numeric type for the Wizard to allow pages to change
-       their behaviour for different Wizards. No deeper meaning.
-   */
-   MWizardType GetType(void) const { return m_Type; }
-
-   MWizardPageId GetFirstPageId(void) const { return m_First; }
-   MWizardPageId GetLastPageId(void) const { return m_Last; }
-   bool Run(void);
-   class MWizardPage * GetPageById(MWizardPageId id);
-
-private:
-   MWizardType m_Type;
-   class MWizardPage * m_WizardPages[MWizard_PagesMax];
-   MWizardPageId m_First, m_Last;
-
-   DECLARE_NO_COPY_CLASS(MWizard)
-};
-
-
-// ----------------------------------------------------------------------------
-// private classes
-// ----------------------------------------------------------------------------
-
-// the base class for our wizards pages: it allows to return page ids (and not
-// the pointers themselves) from GetPrev/Next and processes [Cancel] in a
-// standard way an provides other useful functions for the derived classes
-
-class MWizardPage : public wxWizardPage
-{
-public:
-   MWizardPage(MWizard *wizard, MWizardPageId id)
-      : wxWizardPage(wizard)
-      {
-         m_id = id;
-         m_Wizard = wizard;
-      }
-
-    /* These are two wxWindows wxWizard functions that we must override
-    */
-   virtual wxWizardPage *GetPrev() const { return GetPageById(GetPreviousPageId()); }
-   virtual wxWizardPage *GetNext() const { return GetPageById(GetNextPageId()); }
-
-   /// Override these two in derived classes if needed:
-   virtual MWizardPageId GetNextPageId() const;
-   virtual MWizardPageId GetPreviousPageId() const;
-
-   MWizardPageId GetPageId() const { return m_id; }
-   virtual MWizard * GetWizard() const { return (MWizard *)m_Wizard; }
-
-   void OnWizardCancel(wxWizardEvent& event);
-
-protected:
-   wxWizardPage *GetPageById(MWizardPageId id) const
-      { return GetWizard()->GetPageById(id); }
-
-   // set the label of the next button depending on whether we're going to
-   // advance to the next page or if this is the last one
-   void SetNextButtonLabel(bool isLast);
-
-   // creates an "enhanced panel" for placing controls into under the static
-   // text (explanation)
-   wxEnhancedPanel *CreateEnhancedPanel(wxStaticText *text);
-
-private:
-   // id of this page
-   MWizardPageId m_id;
-   // the wizard
-   MWizard *m_Wizard;
-
-   DECLARE_EVENT_TABLE()
-   DECLARE_NO_COPY_CLASS(MWizardPage)
-};
-
-BEGIN_EVENT_TABLE(MWizardPage, wxWizardPage)
-   EVT_WIZARD_CANCEL(-1, MWizardPage::OnWizardCancel)
-END_EVENT_TABLE()
-
-
-MWizardPageId
-MWizardPage::GetPreviousPageId(void) const
-{
-   return  GetPageId() > GetWizard()->GetFirstPageId() ?
-      (MWizardPageId) (GetPageId()-1) : GetWizard()->GetFirstPageId();
-}
-
-MWizardPageId
-MWizardPage::GetNextPageId(void) const
-{
-   return GetPageId() < m_Wizard->GetLastPageId() ?
-      (MWizardPageId) (GetPageId()+1)
-      : m_Wizard->GetLastPageId();
-}
-
-void MWizardPage::OnWizardCancel(wxWizardEvent& event)
-{
-   if ( !MDialog_YesNoDialog(_("Do you really want to abort the wizard?")) )
-   {
-      // not confirmed
-      event.Veto();
-   }
-}
-
-wxEnhancedPanel *MWizardPage::CreateEnhancedPanel(wxStaticText *text)
-{
-   wxSize sizeLabel = text->GetSize();
-//   wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
-   wxSize sizePage = ((wxWizard *)GetParent())->GetClientSize();
-   wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
-
-   wxEnhancedPanel *panel = new wxEnhancedPanel(this, false /* no scrolling */);
-   panel->SetSize(0, y, sizePage.x, sizePage.y - y);
-
-   panel->SetAutoLayout(true);
-
-   return panel;
-}
-
-void MWizardPage::SetNextButtonLabel(bool isLast)
-{
-   wxButton * const
-      btn = wxDynamicCast(GetParent()->FindWindow(wxID_FORWARD), wxButton);
-   if ( btn )
-   {
-      btn->SetLabel(isLast ? _("&Finish") : _("&Next >"));
-   }
-}
-
-
-bool
-MWizard::Run()
-{
-   wxWizardPage * const pageFirst = GetPageById(GetFirstPageId());
-   GetPageAreaSizer()->Add(pageFirst);
-
-   return RunWizard(pageFirst);
-}
-
-// ----------------------------------------------------------------------------
-// ImportFoldersWizard: propose to import existing folders
-// ----------------------------------------------------------------------------
-
-class ImportFoldersWizard : public MWizard
-{
-public:
-   ImportFoldersWizard()
-      : MWizard( MWizardType_ImportFolders,
-                 MWizard_ImportFolders_First,
-                 MWizard_ImportFolders_Last,
-                 _("Import existing mail folders"))
-      {
-      }
-
-   struct Params
-   {
-      // MH params
-      String pathRootMH;
-      bool takeAllMH;
-
-      // what to do?
-      bool importMH;
-
-      // def ctor
-      Params()
-      {
-         importMH = false;
-      }
-   };
-
-   Params& GetParams() { return m_params; }
-
-private:
-   Params m_params;
-
-   DECLARE_NO_COPY_CLASS(ImportFoldersWizard)
-};
-
-// MWizard_ImportFolders_ChoicePage
-// ----------------------------------------------------------------------------
-
-// first page: propose all folders we can import to the user
-class MWizard_ImportFolders_ChoicePage : public MWizardPage
-{
-public:
-   MWizard_ImportFolders_ChoicePage(MWizard *wizard);
-
-   virtual MWizardPageId GetPreviousPageId() const { return MWizard_PageNone; }
-   virtual MWizardPageId GetNextPageId() const;
-
-   void OnCheckBox(wxCommandEvent& event);
-
-private:
-   wxCheckBox *m_checkMH;
-
-   DECLARE_EVENT_TABLE()
-   DECLARE_NO_COPY_CLASS(MWizard_ImportFolders_ChoicePage)
-};
-
-BEGIN_EVENT_TABLE(MWizard_ImportFolders_ChoicePage, MWizardPage)
-   EVT_CHECKBOX(-1, MWizard_ImportFolders_ChoicePage::OnCheckBox)
-END_EVENT_TABLE()
-
-MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wizard)
-                             : MWizardPage(wizard,
-                                           MWizard_ImportFolders_Choice)
-{
-   m_checkMH = NULL;
-
-   bool hasMH = false,
-        hasSomethingToImport = false;
-
-   if ( MailFolderCC::ExistsMH() )
-   {
-      hasMH = true;
-      hasSomethingToImport = true;
-   }
-
-   wxString msgText;
-   if ( hasSomethingToImport )
-   {
-      msgText = _("Please choose what would you like to do.");
-   }
-   else
-   {
-      msgText = _("Mahogany didn't find any folders to import on this system.");
-   }
-
-   wxStaticText *msg = new wxStaticText(this, -1, msgText);
-
-   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
-   wxArrayString labels;
-   if ( hasMH )
-   {
-      labels.Add(_("Import MH folders"));
-   }
-
-   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
-
-   maxwidth += 10;
-
-   if ( hasMH )
-   {
-      m_checkMH = panel->CreateCheckBox(labels[0], maxwidth, NULL);
-
-      // by default, import them all
-      m_checkMH->SetValue(true);
-   }
-
-   panel->Layout();
-}
-
-MWizardPageId MWizard_ImportFolders_ChoicePage::GetNextPageId() const
-{
-   if ( m_checkMH && m_checkMH->GetValue() )
-      return MWizard_ImportFolders_MH;
-
-   //else if ( m_check && m_check->GetValue() ) ...
-
-   return MWizard_PageNone;
-}
-
-void MWizard_ImportFolders_ChoicePage::OnCheckBox(wxCommandEvent&)
-{
-   SetNextButtonLabel(GetNextPageId() == MWizard_PageNone);
-}
-
-// MWizard_ImportFolders_MHPage
-// ----------------------------------------------------------------------------
-
-// first page: propose all folders we can import to the user
-class MWizard_ImportFolders_MHPage : public MWizardPage
-{
-public:
-   MWizard_ImportFolders_MHPage(MWizard *wizard);
-
-   virtual MWizardPageId GetPreviousPageId() const
-      { return MWizard_ImportFolders_Choice; }
-   virtual MWizardPageId GetNextPageId() const
-      { return MWizard_PageNone; }
-
-   virtual bool TransferDataFromWindow();
-
-private:
-   wxTextCtrl *m_textTop;
-   wxCheckBox *m_checkAll;
-
-   DECLARE_NO_COPY_CLASS(MWizard_ImportFolders_MHPage)
-};
-
-MWizard_ImportFolders_MHPage::MWizard_ImportFolders_MHPage(MWizard *wizard)
-                         : MWizardPage(wizard, MWizard_ImportFolders_MH)
-{
-   wxStaticText *msg = new wxStaticText(this, -1, _(
-            "You may import either just the top level MH folder and\n"
-            "later create manually all or some of its subfolders using\n"
-            "the popup menu in the folder tree or import all existing\n"
-            "MH subfolders at once.\n"
-            "\n"
-            "Don't change the default location of the top of MH tree\n"
-            "(the MH root) unless you really know what you are doing."
-      ));
-
-   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
-   wxArrayString labels;
-   labels.Add(_("MH root"));
-   labels.Add(_("Import all"));
-
-   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
-
-   maxwidth += 5;
-
-   m_textTop = panel->CreateDirEntry(labels[0], maxwidth, NULL);
-   m_checkAll = panel->CreateCheckBox(labels[1], maxwidth, m_textTop);
-
-   // init controls
-   m_textTop->SetValue(MailFolderCC::InitializeMH());
-   m_checkAll->SetValue(true);
-
-   panel->Layout();
-}
-
-bool MWizard_ImportFolders_MHPage::TransferDataFromWindow()
-{
-   ImportFoldersWizard::Params& params =
-      ((ImportFoldersWizard *)GetWizard())->GetParams();
-
-   params.importMH = true;
-   params.takeAllMH = m_checkAll->GetValue();
-   params.pathRootMH = m_textTop->GetValue();
-
-   return true;
-}
 
 // ============================================================================
 // CreateFolderWizard and its pages
@@ -508,7 +76,7 @@ public:
       : MWizard( MWizardType_CreateFolder,
                  MWizard_CreateFolder_First,
                  MWizard_CreateFolder_Last,
-                 _("Create a Mailbox Entry"),
+                 _("Create a new folder"),
                  NULL, parent)
       {
          m_wantsDialog = false;
@@ -569,6 +137,9 @@ protected:
 
    // does the user want to use dialog instead of wizard?
    bool m_wantsDialog;
+
+private:
+   virtual wxWizardPage *DoCreatePage(MWizardPageId id);
 
    DECLARE_NO_COPY_CLASS(CreateFolderWizard)
 };
@@ -1428,48 +999,32 @@ MWizardPageId MWizard_CreateFolder_FinalPage::GetPreviousPageId() const
 }
 
 // ============================================================================
-// implementation
+// CreateFolderWizard implementation
 // ============================================================================
 
-
-MWizardPage *
-MWizard::GetPageById(MWizardPageId id)
+wxWizardPage *CreateFolderWizard::DoCreatePage(MWizardPageId id)
 {
-   if ( id == GetLastPageId()+1 || id == MWizard_PageNone)
-      return (MWizardPage *)NULL;
-
-   if ( !m_WizardPages[id-GetFirstPageId()] )
-   {
 #define CREATE_PAGE(pid) \
-      case MWizard_##pid: \
-         m_WizardPages[MWizard_##pid-GetFirstPageId()] = \
-            new MWizard_##pid##Page(this); \
-         break
+   case MWizard_##pid: \
+      return new MWizard_##pid##Page(this); \
 
-      switch ( id )
-      {
-         CREATE_PAGE(CreateFolder_Welcome);
-         CREATE_PAGE(CreateFolder_Type);
-         CREATE_PAGE(CreateFolder_NewMail);
-         CREATE_PAGE(CreateFolder_Final);
-         CREATE_PAGE(CreateFolder_File);
-         CREATE_PAGE(CreateFolder_MH);
-         CREATE_PAGE(CreateFolder_Imap);
-         CREATE_PAGE(CreateFolder_Pop3);
-         CREATE_PAGE(CreateFolder_Nntp);
-         CREATE_PAGE(CreateFolder_News);
-         CREATE_PAGE(CreateFolder_Group);
-
-         CREATE_PAGE(ImportFolders_Choice);
-         CREATE_PAGE(ImportFolders_MH);
-
-      case MWizard_PageNone:
-      case MWizard_PagesMax:
-         ASSERT_MSG(0, _T("illegal MWizard PageId"));
-      }
-#undef CREATE_PAGE
+   switch ( id )
+   {
+      CREATE_PAGE(CreateFolder_Welcome);
+      CREATE_PAGE(CreateFolder_Type);
+      CREATE_PAGE(CreateFolder_NewMail);
+      CREATE_PAGE(CreateFolder_Final);
+      CREATE_PAGE(CreateFolder_File);
+      CREATE_PAGE(CreateFolder_MH);
+      CREATE_PAGE(CreateFolder_Imap);
+      CREATE_PAGE(CreateFolder_Pop3);
+      CREATE_PAGE(CreateFolder_Nntp);
+      CREATE_PAGE(CreateFolder_News);
+      CREATE_PAGE(CreateFolder_Group);
    }
-   return m_WizardPages[id-GetFirstPageId()];
+#undef CREATE_PAGE
+
+   return NULL;
 }
 
 
@@ -1583,17 +1138,3 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
    return newfolder;
 }
 
-void RunImportFoldersWizard()
-{
-   ImportFoldersWizard *wizard = new ImportFoldersWizard();
-   if ( wizard->Run() )
-   {
-      const ImportFoldersWizard::Params& params = wizard->GetParams();
-      if ( params.importMH )
-      {
-         MailFolderCC::ImportFoldersMH(params.pathRootMH, params.takeAllMH);
-      }
-   }
-
-   delete wizard;
-}
