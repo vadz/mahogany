@@ -844,7 +844,7 @@ public:
          m_Rule = fd.GetProgram();
       }
 
-      m_dirty = true;
+      DoWrite();
    }
 
    virtual Profile *GetProfile() const
@@ -886,38 +886,37 @@ protected:
             // use the GUI settings if no rule
             m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, "");
          }
-
-         m_dirty = false;
       }
+
+   void DoWrite()
+   {
+      InvalidateFilter(this);
+
+      // write the values to the profile
+      m_Profile->writeEntry(MP_FILTER_NAME, m_Name);
+      if ( m_Settings )
+      {
+         // if we have matching dialog settings, we prefer to
+         // write them as they are more compact in the config file
+         m_Profile->writeEntry(MP_FILTER_GUIDESC,
+                               m_Settings->WriteSettings());
+      }
+      else
+      {
+         if ( m_Profile->HasEntry(MP_FILTER_GUIDESC) )
+         {
+            (void) m_Profile->DeleteEntry(MP_FILTER_GUIDESC);
+         }
+
+         m_Profile->writeEntry(MP_FILTER_RULE, m_Rule);
+      }
+   }
 
    virtual ~MFilterFromProfile()
-      {
-         if ( m_dirty )
-         {
-            InvalidateFilter(this);
-
-            // write the values to the profile
-            m_Profile->writeEntry(MP_FILTER_NAME, m_Name);
-            if ( m_Settings )
-            {
-               // if we have matching dialog settings, we prefer to
-               // write them as they are more compact in the config file
-               m_Profile->writeEntry(MP_FILTER_GUIDESC,
-                                     m_Settings->WriteSettings());
-            }
-            else
-            {
-               if ( m_Profile->HasEntry(MP_FILTER_GUIDESC) )
-               {
-                  (void) m_Profile->DeleteEntry(MP_FILTER_GUIDESC);
-               }
-
-               m_Profile->writeEntry(MP_FILTER_RULE, m_Rule);
-            }
-         }
-         SafeDecRef(m_Settings);
-         m_Profile->DecRef();
-      }
+   {
+      SafeDecRef(m_Settings);
+      m_Profile->DecRef();
+   }
 
 private:
    void UpdateSettings(void)
