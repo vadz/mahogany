@@ -288,12 +288,10 @@ String TryToGetAddressFromClipboard()
 
    // the alternatives correspond to: "Foo Bar <foo@bar.org>", "<foo@bar.org>"
    // and just "foo@bar.org"
-   wxRegEx re("^(.+ ){,4}<" RE_EMAIL ">|<" RE_EMAIL ">|" RE_EMAIL "$",
+   wxRegEx re("^(([^ ]+ ){1,4}<" RE_EMAIL ">|<" RE_EMAIL ">|" RE_EMAIL ")$",
               wxRE_EXTENDED | wxRE_ICASE);
 
-   // notice the use of flags: we don't want to match a line with an email
-   // address in it in the middle string, the entire text should match
-   if ( !re.Matches(s, wxRE_NOTBOL | wxRE_NOTEOL) )
+   if ( !re.Matches(s) )
       return String();
 
    return s;
