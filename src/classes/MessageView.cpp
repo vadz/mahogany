@@ -3976,25 +3976,23 @@ String MessageView::GetText() const
 {
    // return selection if we have any and if the option to reply to selected
    // text hasn't been disabled by the user
-   String text;
    if ( READ_CONFIG(GetProfile(), MP_REPLY_QUOTE_SELECTION) )
    {
-      text = m_viewer->GetSelection();
+      const String text = m_viewer->GetSelection();
+      if ( !text.empty() )
+         return text;
    }
-
-   // test for m_textBody is important to avoid problems in the code below
-   if ( !text.empty() || m_textBody.empty() )
-      return text;
 
    // trim trailing empty lines, it is annoying to have to delete them manually
    // when replying
-   wxString::const_iterator p = m_textBody.end() - 1;
-   while ( *p == '\r' || *p == '\n' )
-      p--;
+   wxString textBody = m_textBody;
+   wxString::reverse_iterator p = textBody.rbegin();
+   while ( p != textBody.rend() && (*p == '\r' || *p == '\n') )
+      ++p;
 
-   const_cast<String &>(m_textBody).erase(p - m_textBody.begin() + 1);
+   textBody.erase(p.base(), textBody.end());
 
-   return m_textBody;
+   return textBody;
 }
 
 // ----------------------------------------------------------------------------
