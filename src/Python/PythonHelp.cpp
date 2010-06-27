@@ -49,6 +49,10 @@
 // Unicode data directly but UTF-8 should work without problems too)
 #define PYTHON_STR(s) ((const char *)(s).utf8_str())
 
+// another helper macro to simply cast a (usually literal) string to non-const
+// char* as some Python functions are not const-correct
+#define PYTHON_CCAST(s) const_cast<char *>(s)
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -220,7 +224,7 @@ PythonFunction(const char *func,
       PyObject *object = SWIG_Python_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
 
       // and do call the function
-      M_PyObject rc(PyObject_CallFunction(function, "O", object));
+      M_PyObject rc(PyObject_CallFunction(function, PYTHON_CCAST("O"), object));
 
       // translate result back to C
       if ( PyArg_Parse(rc, const_cast<char *>(resultfmt), result) )
@@ -264,17 +268,21 @@ PythonStringFunction(const String& func,
             break;
 
          case 1:
-            rc = PyObject_CallFunction(function, "s", PYTHON_STR(arguments[0]));
+            rc = PyObject_CallFunction(function,
+                                       PYTHON_CCAST("s"),
+                                       PYTHON_STR(arguments[0]));
             break;
 
          case 2:
-            rc = PyObject_CallFunction(function, "ss",
+            rc = PyObject_CallFunction(function,
+                                       PYTHON_CCAST("ss"),
                                        PYTHON_STR(arguments[0]),
                                        PYTHON_STR(arguments[1]));
             break;
 
          case 3:
-            rc = PyObject_CallFunction(function, "sss",
+            rc = PyObject_CallFunction(function,
+                                       PYTHON_CCAST("sss"),
                                        PYTHON_STR(arguments[0]),
                                        PYTHON_STR(arguments[1]),
                                        PYTHON_STR(arguments[2]));
@@ -399,7 +407,7 @@ String PythonGetErrorMessage()
 #define GPEM_ERROR(what) {errorMsg = "<Error getting traceback - " what ">";goto done;}
 
    char *result = NULL;
-   char *errorMsg = NULL;
+   const char *errorMsg = NULL;
    PyObject *modStringIO = NULL;
    PyObject *modTB = NULL;
    PyObject *obFuncStringIO = NULL;

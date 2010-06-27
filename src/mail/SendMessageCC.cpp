@@ -53,6 +53,7 @@
 
 #include "SendMessage.h"
 #include "SendMessageCC.h"
+#include "Mcclient.h"
 
 #include "XFace.h"
 #include "gui/wxMDialogs.h"
@@ -922,7 +923,7 @@ SendMessageCC::SetFcc(const String& fcc)
       }
 
       // ignore the leading slash, if any: the user may specify it, but it
-      // shouldn't be passed to MFolder 
+      // shouldn't be passed to MFolder
       if ( folderName[0u] == '/' )
          folderName.erase(0, 1);
 
@@ -1120,7 +1121,7 @@ SendMessageCC::Sign()
       const size_t n = log.GetMessageCount();
       String err = n == 0 ? String(_("no error information available"))
                           : log.GetMessage(n - 1);
-      
+
       ERRORMESSAGE((_("Signing the message failed: %s"), err.c_str()));
 
       return false;
@@ -1230,7 +1231,7 @@ SendMessageCC::Build(bool forStorage)
          // contents (which is highly undesirable!)
          RemoveHeaderEntry("X-BCC");
       }
-      
+
       char tmpbuf[MAILTMPLEN];
       rfc822_date (tmpbuf);
       m_Envelope->date = (unsigned char *)cpystr(tmpbuf);
@@ -1851,7 +1852,7 @@ SendMessageCC::Send(int flags)
             }
 #endif // USE_OWN_CCLIENT
 
-            stream = smtp_open(hostlist, options);
+            stream = smtp_open_full(NIL, hostlist, CONST_CCAST("smtp"), NIL, options);
 
 #ifdef USE_OWN_CCLIENT
             // don't leave any dangling pointers
@@ -1868,14 +1869,14 @@ SendMessageCC::Send(int flags)
                     "Trying to open connection to NNTP server \"%s\"",
                     m_ServerHost.c_str());
 
-         stream = nntp_open(hostlist, options);
+         stream = nntp_open_full(NIL, hostlist, CONST_CCAST("nntp"), NIL, options);
          break;
 
 #ifdef OS_UNIX
          case Prot_Sendmail:
          {
             String lfOnly;
-            
+
             // We gotta translate CRLF to LF, because string generated
             // by c-client has network newlines (CRLF) and sendmail pipe
             // must have Unix newlines (LF). Maybe WriteToString could do
@@ -1956,7 +1957,7 @@ SendMessageCC::Send(int flags)
       switch ( m_Protocol )
       {
          case Prot_SMTP:
-            success = smtp_mail(stream, "MAIL", m_Envelope, GetBody()) != NIL;
+            success = smtp_mail(stream, CONST_CCAST("MAIL"), m_Envelope, GetBody()) != NIL;
             reply = wxString::From8BitData(stream->reply);
             smtp_close (stream);
             break;
@@ -2214,7 +2215,7 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
   // cclient omits bcc, but we need it sometimes
   if ( ms_outputBcc )
   {
-     rfc822_address_line(&headers, "Bcc", env, env->bcc);
+     rfc822_address_line(&headers, CONST_CCAST("Bcc"), env, env->bcc);
   }
 
   // and add all other additional custom headers at the end

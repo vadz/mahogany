@@ -35,6 +35,7 @@
 #include "MimePartCC.h"
 
 #include "SendMessage.h"
+#include "Mcclient.h"
 
 #include "HeaderInfo.h"
 
@@ -878,10 +879,10 @@ CclientParseMessage(const char *msgText,
    bodycptr += 4; // skip 2 EOLs
 
    STRING str;
-   INIT(&str, mail_string, const_cast<char *>(bodycptr), strlen(bodycptr));
+   INIT(&str, mail_string, CONST_CCAST(bodycptr), strlen(bodycptr));
    rfc822_parse_msg(ppEnv, ppBody,
-                    const_cast<char *>(msgText), headerLen,
-                    &str, "", 0);
+                    CONST_CCAST(msgText), headerLen,
+                    &str, CONST_CCAST(""), 0);
 
    if ( pHdrLen )
       *pHdrLen = headerLen;

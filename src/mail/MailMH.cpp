@@ -38,6 +38,7 @@
 #include "ASMailFolder.h"
 #include "MFolder.h"
 #include "MEvent.h"
+#include "Mcclient.h"
 
 #include <wx/dir.h>
 #include <wx/filefn.h>
@@ -219,7 +220,7 @@ MailFolder::InitializeMH()
 
       // force cclient to init the MH driver
       char tmp[MAILTMPLEN];
-      if ( !mh_isvalid("#MHINBOX", tmp, TRUE /* syn only check */) )
+      if ( !mh_isvalid(CONST_CCAST("#MHINBOX"), tmp, TRUE /* syn only check */) )
       {
          wxLogError(_("Sorry, support for MH folders is disabled."));
       }

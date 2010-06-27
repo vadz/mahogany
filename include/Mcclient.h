@@ -88,6 +88,26 @@ CclientParseMessage(const char *msgText,
 
 
 /**
+   A helper macro to cast away constness from strings passed to c-client.
+
+   C-client functions are not const correct and using them with literal strings
+   results in gcc warnings about "deprecated conversion from string constant to
+   char*" so use this function to suppress it. It also has the advantage of
+   working with wxCharBuffer, i.e. can be used as @code CONST_CCAST(s.mb_str())
+   @endcode with Unicode build of wx in which mb_str() doesn't return a char*
+   directly.
+
+   Hopefully one day c-client will be updated to work with const char strings
+   making all this stuff unnecessary, removing it will be then simple as you
+   could just grep for CONST_CCAST instead of examining all casts in the
+   sources.
+ */
+inline char *CONST_CCAST(const char *p)
+{
+   return const_cast<char *>(p);
+}
+
+/**
    Cast a signed char string to unsigned char.
 
    c-client wants unsigned char strings while we work with char pointers

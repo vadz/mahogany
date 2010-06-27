@@ -70,8 +70,13 @@ $(LIBRARY): $(OSDEP) $(wildcard c-client/*.c) $(wildcard c-client/*.h)
 
 # we don't want to call ssl_onceonlyinit() from linkage.c, instead we do it
 # ourselves later (the first time SSL is needed)
+#
+# we also remove the call to mail_versioncheck() which we don't need because we
+# always use c-client statically so it's useless for us and, to add insult to
+# injury, this function takes a non-const char* and so gcc warns when it's
+# called with a literal string as c-client does it
 $(LINKAGE): c-client/linkage.c
-	grep -v ssl_onceonlyinit $< > $@
+	grep -v ssl_onceonlyinit $< | grep -v mail_versioncheck > $@
 
 c-client/linkage.c: $(OSDEP)
 	@true

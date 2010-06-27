@@ -283,14 +283,6 @@ extern "C"
 // trivial wrappers around mail_open() and mail_create() which want non
 // const "char *" (ugh)
 
-// this function accepts either "const char *" (in ANSI build) or wxCharBuffer
-// (in Unicode) allowing us to at least avoid having to write horrors like
-// "(char *)(const char *)s.ToAscii()"
-static inline char *CONST_CCAST(const char *p)
-{
-   return const_cast<char *>(p);
-}
-
 static inline
 MAILSTREAM *
 MailOpen(MAILSTREAM *stream, const String& mailbox, long options = 0)
@@ -3874,7 +3866,7 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
          // sorts all the messages [it's just a pleasure to use this library]
          SEARCHPGM *pgmSrch = mail_newsearchpgm();
          MsgnoType *results = mail_sort(m_MailStream,
-                                        "US-ASCII",
+                                        CONST_CCAST("US-ASCII"),
                                         pgmSrch,
                                         pgmSort,
                                         SE_FREE | SO_FREE);
@@ -3962,7 +3954,7 @@ static void ThreadMessagesHelper(THREADNODE *thr,
    }
 }
 
-static bool MailStreamHasThreader(MAILSTREAM *stream, char *thrName)
+static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 {
    CHECK( stream, false, _T("MailStreamHasThreader: folder is closed") );
 
@@ -3970,7 +3962,8 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, char *thrName)
 
    THREADER *thr;
    for ( thr = imapCap->threader;
-         thr && compare_cstring(UCHAR_CAST(thr->name), UCHAR_CAST(thrName));
+         thr && compare_cstring(UCHAR_CAST(thr->name),
+                                UCHAR_CAST(CONST_CCAST(thrName)));
          thr = thr->next )
       ;
 
@@ -4003,7 +3996,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
    if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
         READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD) )
    {
-      /* const */ char *threadingAlgo = NULL;
+      const char *threadingAlgo = NULL;
 
       // it does, but maybe we want only threading by references (best) and it
       // only provides dumb threading by subject?
@@ -4049,7 +4042,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
          thrData->m_root = mail_thread
                            (
                             m_MailStream,
-                            threadingAlgo,
+                            CONST_CCAST(threadingAlgo),
                             NULL,                // default charset
                             mail_newsearchpgm(), // thread all messages
                             SE_FREE
@@ -5418,7 +5411,8 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       // now mark them all as deleted (we don't need notifications about the
       // status change so save a *lot* of bandwidth by using ST_SILENT)
-      mail_flag(stream, seq.char_str(), "\\DELETED", ST_SET | ST_SILENT);
+      mail_flag(stream, seq.char_str(), CONST_CCAST("\\DELETED"),
+                ST_SET | ST_SILENT);
 
       // and expunge
       if ( mf )
