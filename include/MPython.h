@@ -36,11 +36,17 @@
    #endif // USE_PYTHON_DYNAMIC
 #endif // OS_WIN
 
-// under Unix we get annoying messages about redefinition of this...
-#ifdef _POSIX_C_SOURCE
-   #define POSIX_C_SOURCE_WAS_DEFINED _POSIX_C_SOURCE
-   #undef _POSIX_C_SOURCE
-#endif
+// under Linux we get annoying messages about redefinition of these symbols
+// which are defined by the standard headers already included above
+#ifdef __LINUX__
+   #ifdef _POSIX_C_SOURCE
+      #undef _POSIX_C_SOURCE
+   #endif
+
+   #ifdef _XOPEN_SOURCE
+      #undef _XOPEN_SOURCE
+   #endif
+#endif // __LINUX__
 
 // and under Windows for this symbol which is defined in wx/defs.h
 #ifdef HAVE_SSIZE_T
@@ -67,8 +73,9 @@
    #define HAVE_SSIZE_T
 #endif
 
-#if defined(POSIX_C_SOURCE_WAS_DEFINED) && !defined(_POSIX_C_SOURCE)
-   #define _POSIX_C_SOURCE POSIX_C_SOURCE_WAS_DEFINED
+#ifdef __LINUX__
+   // Just include a standard header again to get the correct values back.
+   #include <features.h>
 #endif
 
 #ifdef USE_PYTHON_DYNAMIC
