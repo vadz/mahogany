@@ -2800,8 +2800,8 @@ FilterRuleApply::CreateProgressDialog()
                (
                   wxString::Format
                   (
-                     _("Filtering %u messages in folder \"%s\":"),
-                     m_msgs.GetCount(),
+                     _("Filtering %lu messages in folder \"%s\":"),
+                     static_cast<unsigned long>(m_msgs.GetCount()),
                      m_parent->m_MailFolder->GetName().c_str()
                   ),
                   // make the message wide enough to show filtering messages

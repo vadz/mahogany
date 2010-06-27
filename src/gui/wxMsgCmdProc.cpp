@@ -1327,12 +1327,12 @@ MsgCmdProcImpl::ToggleMessagesFlag(const UIdArray& messages,
 void
 MsgCmdProcImpl::MarkRead(const UIdArray& selections, bool read)
 {
-   size_t count = selections.GetCount();
+   const unsigned long count = selections.GetCount();
 
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
                                    (
-                                       _("Marking %d message(s) as %s..."),
+                                       _("Marking %lu message(s) as %s..."),
                                        count, (read ? "read" : "unread")
                                    ));
 
@@ -1363,12 +1363,13 @@ MsgCmdProcImpl::SaveMessagesToFolder(const UIdArray& selections,
       folder->IncRef(); // to match DecRef() below
    }
 
+   const unsigned long count = selections.GetCount();
+
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
                                    (
-                                       _("Saving %d message(s) to '%s'..."),
-                                       selections.GetCount(),
-                                       folder->GetFullName().c_str()
+                                       _("Saving %lu message(s) to '%s'..."),
+                                       count, folder->GetFullName().c_str()
                                    ));
 
    Ticket t = m_asmf->
@@ -1401,11 +1402,13 @@ MsgCmdProcImpl::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
 Ticket
 MsgCmdProcImpl::SaveMessagesToFile(const UIdArray& selections)
 {
+   const unsigned long count = selections.GetCount();
+
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
                                    (
-                                       _("Saving %d message(s) to file..."),
-                                       selections.GetCount()
+                                       _("Saving %lu message(s) to file..."),
+                                       count
                                    ));
 
    Ticket t = m_asmf->SaveMessagesToFile(&selections, GetFrame(), this);
@@ -1619,12 +1622,12 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
 void
 MsgCmdProcImpl::ApplyFilters(const UIdArray& selections)
 {
-   size_t count = selections.GetCount();
+   const unsigned long count = selections.GetCount();
 
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
                                    (
-                                      _("Applying filter rules to %u message(s)..."),
+                                      _("Applying filter rules to %lu message(s)..."),
                                       count
                                    ));
 
@@ -1633,7 +1636,7 @@ MsgCmdProcImpl::ApplyFilters(const UIdArray& selections)
    {
       status->SetSuccessMsg(wxString::Format
                             (
-                              _("Applied filters to %u message(s), "
+                              _("Applied filters to %lu message(s), "
                               "see log window for details."),
                               count
                             ));

@@ -178,7 +178,8 @@ wxDragResult MMessagesDropTarget::OnMsgDrop(wxCoord x, wxCoord y,
    msgCmdProc->ProcessCommand(WXMENU_MSG_DROP_TO_FOLDER, messages, folder);
 
    // it's ok even if m_frame is NULL
-   wxLogStatus(GetFrame(), _("%u message(s) dropped."), messages.GetCount());
+   const unsigned long count = messages.GetCount();
+   wxLogStatus(GetFrame(), _("%lu message(s) dropped."), count);
    m_where->Refresh();
 
    return def;
