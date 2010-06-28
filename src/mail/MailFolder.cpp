@@ -446,9 +446,10 @@ bool MailFolder::CanExit(String * /* which */)
 static String
 ExtractListPostAddress(const String& listPostHeader)
 {
-   // the format of List-Post is described in the RFC 2369 but basicly
-   // it's an address-like field except that it may also have a special
-   // value "NO" if posting to this list is prohibited
+   // the format of List-Post is described in the RFC 2369 but basically
+   // it's a sequence of comma-separated URLs each of which is enclosed in <>
+   // and it it may also have a special value "NO" if posting to this list is
+   // prohibited
 
    // FIXME: it would be nice to use c-client functions for parsing instead
 
@@ -463,10 +464,26 @@ ExtractListPostAddress(const String& listPostHeader)
                // start of an URL, get it
                if ( wxStrncmp(++p, _T("mailto:"), MAILTO_LEN) != 0 )
                {
-                  wxLogDebug(_T("Unknown URL scheme in List-Post (%s)"),
-                             listPostHeader.c_str());
+                  if ( wxStrncmp(p, _T("http:"), 5) != 0 )
+                  {
+                     wxLogDebug(_T("Unknown URL scheme in List-Post (%s)"),
+                                listPostHeader.c_str());
+                  }
+
+                  p = wxStrchr(p, _T('>'));
+                  if ( p && *++p == ',' )
+                  {
+                     // skip the URL with non-mail schema, we're not interested
+                     // in it at all
+                     continue;
+                  }
+
+                  // looks like the header is malformed or there is nothing
+                  // after this non-mail URL, in any case we can't extract
+                  // anything useful from it
                   return wxEmptyString;
                }
+               //else: got a mailto URL
 
                String listPostAddress;
                for ( p += MAILTO_LEN; *p && *p != '>'; p++ )
@@ -502,6 +519,11 @@ ExtractListPostAddress(const String& listPostHeader)
                // so that p++ in the loop sets it at '\0' during next iteration
                p--;
             }
+            break;
+
+         case ' ':
+         case '\t':
+            // white space is insignificant in this header
             break;
 
          case 'N':
