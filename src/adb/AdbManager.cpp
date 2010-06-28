@@ -378,7 +378,9 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
   }
   else {
     if ( frame )
+    {
       wxLogStatus(frame, _("No matches for '%s'."), what.c_str());
+    }
   }
 
   return !results.IsEmpty();

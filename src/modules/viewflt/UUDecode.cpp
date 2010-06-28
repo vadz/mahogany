@@ -170,9 +170,13 @@ UUdecodeFile(const wxChar *input,
       outputDataLen += decodedBytesInLine;
 
       if ( endOfLine[0] != '\r' )
+      {
          wxLogWarning(_("Uuencoded Line has no '\\r' at the end!"));
-      if ( endOfLine[1] != '\n' )
+      }
+      else if ( endOfLine[1] != '\n' )
+      {
          wxLogWarning(_("Uuencoded line has no '\\n' at the end!"));
+      }
 
       startOfLine = endOfLine + lenEOL;
    }

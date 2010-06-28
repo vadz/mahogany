@@ -1004,8 +1004,10 @@ bool MNetscapeImporter::ImportSettings()
   wxString filename = g_GlobalPrefDir + DIR_SEPARATOR + g_PrefFile;
 
   if ( ! ImportSettingsFromFileIfExists(filename) )
+  {
    wxLogMessage(_("Couldn't import the global preferences file: %s."),
              filename.c_str());
+  }
 
   // user own preference files
   // entries here will override the global settings

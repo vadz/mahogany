@@ -676,8 +676,10 @@ MAppBase::OnShutDown()
 
       // Try to store our remotely synchronised configuration settings
       if(! SaveRemoteConfigSettings() )
+      {
          wxLogError(_("Synchronised configuration information could not "
                       "be stored remotely."));
+      }
 
       // don't want events any more
       if ( m_eventOptChangeReg )

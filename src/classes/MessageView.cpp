@@ -4051,7 +4051,9 @@ MessageView::LaunchProcess(const String& command,
       delete process;
 
       if ( !errormsg.empty() )
+      {
          wxLogError("%s.", errormsg.c_str());
+      }
 
       return false;
    }

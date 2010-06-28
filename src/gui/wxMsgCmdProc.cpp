@@ -936,7 +936,9 @@ void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
       }
 
       if ( !flagsOk )
+      {
          wxLogWarning(_("Failed to preserve the message flags"));
+      }
    }
 
    // finally delete the old one

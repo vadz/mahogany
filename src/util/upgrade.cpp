@@ -2762,7 +2762,9 @@ UpgradeFrom065()
       return false;
 
    if ( !config->DeleteGroup(_T("/M")) )
+   {
       wxLogDebug(_T("Old data was left in [M] config section."));
+   }
 
 
    // the folder-specific message box settings must be changed as well as
@@ -3554,7 +3556,7 @@ void SetupMinimalConfig(void)
 
    if( strutil_isempty(READ_APPCONFIG(MP_NNTPHOST)) )
    {
-      wxChar *cptr = wxGetenv(_T("NNTPSERVER"));
+      const wxChar *cptr = wxGetenv(_T("NNTPSERVER"));
       if(!cptr || !*cptr)
         cptr = _T("news");
       profile->writeEntry(MP_NNTPHOST, cptr);
@@ -3562,7 +3564,7 @@ void SetupMinimalConfig(void)
 
    if( strutil_isempty(READ_APPCONFIG(MP_SMTPHOST)) )
    {
-      wxChar *cptr = wxGetenv(_T("SMTPSERVER"));
+      const wxChar *cptr = wxGetenv(_T("SMTPSERVER"));
       if(!cptr || !*cptr)
         cptr = _T("localhost");
       profile->writeEntry(MP_SMTPHOST, cptr);
@@ -3570,13 +3572,13 @@ void SetupMinimalConfig(void)
 
    if( strutil_isempty(READ_APPCONFIG(MP_POPHOST)) )
    {
-      wxChar *cptr = wxGetenv(_T("POPSERVER"));
+      const wxChar *cptr = wxGetenv(_T("POPSERVER"));
       if(cptr && *cptr)
          profile->writeEntry(MP_POPHOST, cptr);
    }
    if( strutil_isempty(READ_APPCONFIG(MP_IMAPHOST)) )
    {
-      wxChar *cptr = wxGetenv(_T("IMAPSERVER"));
+      const wxChar *cptr = wxGetenv(_T("IMAPSERVER"));
       if(cptr && *cptr)
          profile->writeEntry(MP_IMAPHOST, cptr);
    }
@@ -3987,7 +3989,9 @@ CheckConfiguration(void)
    }
 
    if ( !RetrieveRemoteConfigSettings() )
+   {
       wxLogError(_("Remote configuration information could not be retrieved."));
+   }
 
    return true;
 }

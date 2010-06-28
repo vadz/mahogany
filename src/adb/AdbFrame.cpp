@@ -1532,7 +1532,9 @@ void wxAdbEditFrame::RestoreSettings1()
   m_astrProviders = astrProviders;
 
   if ( !bAllAdbOk )
+  {
     wxLogWarning(_("Not all address books could be reopened."));
+  }
 }
 
 void wxAdbEditFrame::RestoreSettings2()
@@ -1563,7 +1565,9 @@ void wxAdbEditFrame::RestoreSettings2()
 
   // don't give the message if some address books are missing
   if ( !bAllBranchesOk )
+  {
     wxLogWarning(_("Not all tree branches could be reopened."));
+  }
 
   // select the element which had the selection last time
   if ( !m_strSelection.IsEmpty() )

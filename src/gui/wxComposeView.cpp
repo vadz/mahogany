@@ -5331,7 +5331,9 @@ SendMessage *wxComposeView::BuildDraftMessage(int flags) const
    if ( !msg )
    {
       if ( flags & Interactive )
+      {
          wxLogError(_("Failed to create the message to save."));
+      }
 
       return NULL;
    }

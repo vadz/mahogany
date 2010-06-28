@@ -488,7 +488,9 @@ BbdbEntry::ReadListOfVectors(String *string)
    while(!slist->empty());
 
    if(! ReadToken(')', string))
+   {
       wxLogWarning(_("Bbdb::ReadListOfVectors expected ')', found '%s'"), string->c_str());
+   }
 
    return vlist;
 }
@@ -726,8 +728,10 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    }while(! (file.eof() || file.fail()));
    LOGMESSAGE((M_LOG_WINONLY, _("BBDB: read %d entries."), entries_read));
    if(ignored > 0)
+   {
       wxLogWarning(_("BBDB: ignored %d entries with neither first nor last names."),
                    ignored);
+   }
    MEndBusyCursor();
 }
 
