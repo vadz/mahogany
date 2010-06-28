@@ -1413,7 +1413,8 @@ const wxPrintData *wxMApp::GetPrintData()
 
       dataPS->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
       dataPS->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
-      m_PrintData->SetOrientation(READ_APPCONFIG(MP_PRINT_ORIENTATION));
+      m_PrintData->SetOrientation((wxPrintOrientation)(long)
+                                    READ_APPCONFIG(MP_PRINT_ORIENTATION));
       m_PrintData->SetPrintMode((wxPrintMode)(long)READ_APPCONFIG(MP_PRINT_MODE));
       m_PrintData->SetPaperId((wxPaperSize)(long)READ_APPCONFIG(MP_PRINT_PAPER));
       m_PrintData->SetFilename(READ_APPCONFIG(MP_PRINT_FILE));
