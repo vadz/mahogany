@@ -57,7 +57,7 @@ private:
 
 #undef DECL_OR_DEF
 #define DECL_OR_DEF(name) \
-   extern const MPersMsgBox *M_MSGBOX_##name = &M_MSGBOX_OBJ_##name
+   const MPersMsgBox *M_MSGBOX_##name = &M_MSGBOX_OBJ_##name
 #include "MpersIds.h"
 
 // the order of the entries in this array must match the order of the
