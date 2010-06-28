@@ -2806,7 +2806,15 @@ FilterRuleApply::CreateProgressDialog()
                   ),
                   // make the message wide enough to show filtering messages
                   // and tall enough for 4 lines that we use for them
-                  _("Preparing to filter the messages, please wait ...\n\n\n"),
+                  wxString::Format
+                  (
+                     "%s\n    %s%s\n    %s%s\n",
+                     _("Preparing to filter the messages, please wait ..."),
+                     _("From: "),
+                     wxString(120, '.'),
+                     _("Subject: "),
+                     wxString(120, '.')
+                  ),
                   2*m_msgs.GetCount(),
                   frame
                );
