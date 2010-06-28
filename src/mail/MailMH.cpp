@@ -228,7 +228,8 @@ MailFolder::InitializeMH()
       {
          // retrieve the MH path (notice that we don't always find it ourself
          // as sometimes it's found only by the call to mh_isvalid)
-         gs_MHRootDir = (wxChar *)mail_parameters(NULL, GET_MHPATH, &tmp);
+         gs_MHRootDir = static_cast<char *>(
+                           mail_parameters(NULL, GET_MHPATH, &tmp));
 
          // the path should have a trailing [back]slash
          if ( !!gs_MHRootDir && !wxIsPathSeparator(gs_MHRootDir.Last()) )
