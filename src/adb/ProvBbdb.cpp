@@ -48,6 +48,7 @@
 
 // wxWindows
 #include <wx/file.h>
+#include <wx/filename.h>
 
 #if wxUSE_IOSTREAMH
 #  include <fstream.h>                  // for ifstream
@@ -979,7 +980,7 @@ BbdbBook::BbdbBook(const String& name)
 
    m_strFileName = name;
 
-   wxSplitPath(m_strFileName, NULL, &m_strName, NULL);
+   wxFileName::SplitPath(m_strFileName, NULL, &m_strName, NULL);
 
    m_strDesc << m_strName << _(" (Emacs BBDB addressbook)");
 
