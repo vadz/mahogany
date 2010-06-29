@@ -280,24 +280,43 @@ extern "C"
 #endif
 };
 
-// trivial wrappers around mail_open() and mail_create() which want non
-// const "char *" (ugh)
+namespace
+{
 
-static inline
+String gs_lastMailSpec;
+
+// wrappers around mail_open() and mail_create() taking String and remembering
+// the spec of the mailbox being opened
+inline
 MAILSTREAM *
 MailOpen(MAILSTREAM *stream, const String& mailbox, long options = 0)
 {
    if ( mm_show_debug )
       options |= OP_DEBUG;
 
-   return mail_open(stream, CONST_CCAST(mailbox.ToAscii()), options);
+   gs_lastMailSpec = mailbox;
+
+   MAILSTREAM * const
+      s = mail_open(stream, CONST_CCAST(mailbox.ToAscii()), options);
+
+   gs_lastMailSpec.clear();
+
+   return s;
 }
 
-static inline
+inline
 long MailCreate(MAILSTREAM *stream, const String& mailbox)
 {
-   return mail_create(stream, CONST_CCAST(mailbox.ToAscii()));
+   gs_lastMailSpec = mailbox;
+
+   long rc = mail_create(stream, CONST_CCAST(mailbox.ToAscii()));
+
+   gs_lastMailSpec.clear();
+
+   return rc;
 }
+
+} // anonymous namespace
 
 // ============================================================================
 // private classes
@@ -4921,9 +4940,39 @@ MailFolderCC::mm_notify(MAILSTREAM * stream, const String& str, long errflg)
 void
 MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
 {
-   GetLogCircle().Add(str);
+   if ( str == "SECURITY PROBLEM: insecure server advertised AUTH=PLAIN" )
+   {
+      // This message is generally useful but it is also given in a common case
+      // of using IMAP via ssh tunnel in which case it's perfectly fine to use
+      // AUTH=PLAIN without SSL/TLS. So check if the server is localhost which
+      // normally indicates that a tunnel is used and suppress the message in
+      // this case.
 
-   if ( str.StartsWith(_T("SELECT failed")) )
+      String server;
+      if ( mf )
+      {
+         // Extract just the server name, i.e. before the (optional) port part.
+         server = mf->m_mfolder->GetServer().BeforeFirst(':');
+      }
+      else if ( !gs_lastMailSpec.empty() )
+      {
+         // Parse c-client spec which if of the form {host[:port]/more}
+         if ( gs_lastMailSpec[0u] == '{' )
+         {
+            size_t posStop = gs_lastMailSpec.find(':');
+            if ( posStop == String::npos )
+               posStop = gs_lastMailSpec.find('/');
+
+            if ( posStop != String::npos )
+               server = gs_lastMailSpec.substr(1, posStop - 1);
+         }
+      }
+
+      if ( server.CmpNoCase("localhost") == 0 || server == "127.0.0.1" )
+         return;
+   }
+
+   if ( str.StartsWith("SELECT failed") )
    {
       // send this to the debug window anyhow, but don't show it to the user
       // as this message can only result from trying to open a folder which
@@ -4932,6 +4981,8 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
 
       return;
    }
+
+   GetLogCircle().Add(str);
 
    if ( errflg == 0 && !mm_show_debug )
    {
