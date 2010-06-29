@@ -16,7 +16,6 @@
 #include "FolderType.h"    // for strutil_expandfoldername
 #include "pointers.h"
 
-class kbStringList;
 class Profile;
 class wxRegEx;
 

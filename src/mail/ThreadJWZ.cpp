@@ -35,10 +35,9 @@
    #include "Threading.h"
 
    #include "Mcclient.h"         // for hash_table
-
-   #include "kbList.h"
 #endif // USE_PCH
 
+#include "strlist.h"
 #include "HeaderInfo.h"
 
 #if wxUSE_REGEX
@@ -376,7 +375,7 @@ public:
    void setChild(Threadable* x) { m_child = x; }
 
    String messageThreadID() const;
-   kbStringList *messageThreadReferences() const;
+   StringList messageThreadReferences() const;
 
 #if defined(JWZ_USE_REGEX)
    String getSimplifiedSubject(wxRegEx *replyRemover,
@@ -493,7 +492,7 @@ String Threadable::messageThreadID() const
 // Computing the list of references to use
 // --------------------------------------------------------------------
 
-kbStringList *Threadable::messageThreadReferences() const
+StringList Threadable::messageThreadReferences() const
 {
    // To build a seemingly correct list of references would be
    // quite easy if the References header could be trusted blindly.
@@ -513,7 +512,7 @@ kbStringList *Threadable::messageThreadReferences() const
    //
    // Each reference consists in a <...@...> form. The remaining is removed.
 
-   kbStringList *tmp = new kbStringList;
+   StringList tmp;
    String refs = m_hi->GetReferences() + m_hi->GetInReplyTo();
    if (refs.empty())
       return tmp;
@@ -549,21 +548,20 @@ kbStringList *Threadable::messageThreadReferences() const
          if (current == '>')
          {
             // We found a reference
-            String *ref = new String(refs.Mid(start, i+1-start));
+            String ref(refs.Mid(start, i+1-start));
             // In case of duplicated reference we keep the last one:
             // It is important that In-Reply-To is the last reference
             // in the list.
-            kbStringList::iterator i;
-            for (i = tmp->begin(); i != tmp->end(); i++)
+            StringList::iterator i;
+            for (i = tmp.begin(); i != tmp.end(); i++)
             {
-               String *previous = *i;
-               if (*previous == *ref)
+               if (*i == ref)
                {
-                  tmp->erase(i);
+                  tmp.erase(i);
                   break;
                }
             }
-            tmp->push_back(ref);
+            tmp.push_back(ref.ToStdString());
             state = notInRef;
          }
       }
@@ -1281,17 +1279,16 @@ void Threader::buildContainer(Threadable *th)
    // leaf. So the last reference is the direct parent of the current
    // message
    ThreadContainer *parentRefCont = 0;
-   kbStringList *refs = th->messageThreadReferences();
-   kbStringList::iterator i;
-   for (i = refs->begin(); i != refs->end(); i++)
+   StringList refs = th->messageThreadReferences();
+   for ( StringList::iterator i = refs.begin(); i != refs.end(); i++)
    {
-      String *ref = *i;
-      ThreadContainer *refCont = lookUp(m_idTable, *ref);
+      String ref = *i;
+      ThreadContainer *refCont = lookUp(m_idTable, ref);
       if (refCont == 0)
       {
          // No container with this id. Create one.
          refCont = new ThreadContainer();
-         add(m_idTable, *ref, refCont);
+         add(m_idTable, ref, refCont);
       }
 
       // If one container was found during last iteration, it must
@@ -1369,8 +1366,6 @@ void Threader::buildContainer(Threadable *th)
       container->setNext(parentRefCont->getChild());
       parentRefCont->setChild(container);
    }
-
-   delete refs;
 }
 
 

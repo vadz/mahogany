@@ -21,7 +21,6 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 #  include "Profile.h"
-#  include "kbList.h"
 #  include "MApplication.h"
 #  include "Mcclient.h"
 #  include "Mdefaults.h"

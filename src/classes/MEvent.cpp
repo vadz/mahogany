@@ -21,7 +21,6 @@
 
 #ifndef  USE_PCH
 #   include "Mcommon.h"
-#   include "kbList.h"
 #   include "guidef.h"
 #   include "Profile.h"
 #   include "MApplication.h"
@@ -34,6 +33,8 @@
 #include "MEvent.h"
 #include "MailFolder.h"
 #include "HeaderInfo.h"
+
+#include <list>
 
 // ----------------------------------------------------------------------------
 // private types
@@ -68,7 +69,7 @@ static MEventManager gs_eventManager;
 static MEventReceiverInfoArray gs_receivers;
 
 
-KBLIST_DEFINE(MEventList, MEventData);
+typedef std::list<MEventData *> MEventList;
 
 /// the list of pending events
 static MEventList gs_EventList;
@@ -135,10 +136,10 @@ MEventManager::ForceDispatchPending(void)
 
    MEventLocker mutex;
 
-   MEventData *dataptr = NULL;
    while ( !gs_EventList.empty() )
    {
-      dataptr = gs_EventList.pop_front();
+      MEventData * const dataptr = gs_EventList.front();
+      gs_EventList.pop_front();
 
       // Dispatch is safe and might cause new events:
       mutex.Unlock();

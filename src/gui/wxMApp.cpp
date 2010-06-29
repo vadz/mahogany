@@ -25,7 +25,6 @@
 #  include "Mcommon.h"
 #  include "gui/wxMApp.h"
 #  include "strutil.h"
-#  include "kbList.h"
 #  include "MHelp.h"
 #  include "gui/wxIconManager.h"
 #  include "Mdefaults.h"
@@ -100,6 +99,8 @@
 #else
    #define UNUSED_IF_WIN(arg) arg
 #endif
+
+#include <list>
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -325,13 +326,7 @@ static MailCollectionTimer *gs_timerMailCollection = NULL;
 // the timer for auto going into away mode: may be NULL
 static AwayTimer *gs_timerAway = NULL;
 
-struct MModuleEntry
-{
-   MModuleEntry(MModule *m) { m_Module = m; }
-   MModule *m_Module;
-};
-
-KBLIST_DEFINE(ModulesList, MModuleEntry);
+typedef std::list<MModule *> ModulesList;
 
 // a list of modules loaded at startup:
 static ModulesList gs_GlobalModulesList;
@@ -1682,7 +1677,7 @@ wxMApp::LoadModules(void)
       else
       {
          // remember it so we can decref it before exiting
-         gs_GlobalModulesList.push_back(new MModuleEntry(module));
+         gs_GlobalModulesList.push_back(module);
 #ifdef DEBUG
          LOGMESSAGE((M_LOG_WINONLY,
                    _T("Successfully loaded module:\nName: %s\nDescr: %s\nVersion: %s\n"),
@@ -1702,7 +1697,7 @@ wxMApp::InitModules(void)
          i != gs_GlobalModulesList.end();
          ++i )
    {
-      MModule *module = (**i).m_Module;
+      MModule * const module = *i;
       if ( module->Entry(MMOD_FUNC_INIT) != 0 )
       {
          // TODO: propose to disable this module?
@@ -1719,7 +1714,7 @@ wxMApp::UnloadModules(void)
          i != gs_GlobalModulesList.end();
          ++i )
    {
-      (**i).m_Module->DecRef();
+      (*i)->DecRef();
    }
 }
 

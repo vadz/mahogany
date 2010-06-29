@@ -25,7 +25,6 @@
 #  include "MHelp.h"
 #  include "strutil.h"
 #  include "Mdefaults.h"
-#  include "kbList.h"
 #  include "guidef.h"
 #  include "MApplication.h"
 #  include "Profile.h"

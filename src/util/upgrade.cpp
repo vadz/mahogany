@@ -37,6 +37,7 @@
 #include "SendMessage.h"
 #include "MFolder.h"
 #include "Message.h"
+#include "strlist.h"
 
 #include <wx/file.h>                   // for wxFile
 #include <wx/fileconf.h>
@@ -2092,7 +2093,7 @@ UpgradeFrom010()
       rc = false;
 
    Profile_obj p(wxEmptyString);
-   kbStringList
+   StringList
       folders;
    String
       group, pw, tmp;
@@ -2127,12 +2128,12 @@ UpgradeFrom010()
       if(p->readEntry(tmp, GetNumericDefault(MP_PROFILE_TYPE)) ==
             1 /* Profile::PT_FolderProfile */ )
       {
-         folders.push_back(new String(group));
+         folders.push_back(group.ToStdString());
       }
    }
-   for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
+   for(StringList::iterator i = folders.begin(); i != folders.end();i++)
    {
-      group = **i;
+      group = *i;
 
       Profile_obj profile(group);
       if( READ_CONFIG(profile, MP_FOLDER_TYPE) !=

@@ -12,7 +12,10 @@
 
 #include "lists.h"
 
-/* backward compatibility; derive kbList from M_LIST */
+/*
+    DO NOT USE ANYTHING FROM THIS FILE, IT EXISTS FOR BACKWARDS COMPATIBILITY
+    ONLY AND WILL BE REMOVED IN THE FUTURE.
+ */
 
 /* In the long run, we will be converting to STL, so this macro will
    be going away.  It has some features that aren't supported by STL
@@ -120,11 +123,5 @@ public: \
             erase(begin()); \
       } \
 }
-
-#ifdef MCONFIG_H
-/// define the most commonly used list type once:
-KBLIST_DEFINE(kbStringList, String);
-#endif
-//@}
 
 #endif // KBLIST_H

@@ -10,12 +10,12 @@
 #define WXICONMANAGER_H
 
 #ifndef USE_PCH
-#  include "kbList.h"
-
 #  include <wx/icon.h>
 #endif  //USE_PCH
 
 #include <wx/image.h>
+
+#include <list>
 
 // under Windows we can use resources as "normal" windows programs do or we can
 // use XPMs as under Unix
@@ -42,10 +42,9 @@ struct  IconData
 {
   String  iconName;
   wxIcon  iconRef;
-public:
 };
 
-KBLIST_DEFINE(IconDataList, IconData);
+typedef std::list<IconData> IconDataList;
 
 class wxIconManager
 {
@@ -54,11 +53,6 @@ public:
        @param sub_dir if not empty a favourite subdirectory to use for the icons
     */
    wxIconManager(wxString sub_dir = wxEmptyString);
-
-   /** Destructor
-       writes back all entries
-   */
-   ~wxIconManager();
 
    /** Tells the IconManager to use a different sub-directory.
        @param sub_dir if not empty a favourite subdirectory to use for the icons
@@ -123,7 +117,7 @@ private:
    /** A list of all known icons.
        @see IconData
    */
-   IconDataList *m_iconList;
+   IconDataList m_iconList;
 
    /// An Icon to return for unknown lookup strings.
    wxIcon m_unknownIcon;

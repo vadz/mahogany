@@ -20,7 +20,6 @@
 #  include "strutil.h"
 #  include "sysutil.h"
 #  include "MApplication.h"
-#  include "kbList.h"
 #endif //USE_PCH
 
 #include <ctype.h>
@@ -33,12 +32,16 @@
 #include <pi-address.h>
 #include "MModule.h"
 
+#include <list>
+
 // fwd decl
 class PalmEntry;
 class PalmEntryGroup;
-class PalmGroupList;
 class PalmBook;
 class PalmDataProvider;
+
+typedef std::list<PalmEntry *> PalmEntryList;
+typedef std::list<PalmEntryGroup *> PalmGroupList;
 
 // our AdbEntryData implementation
 class PalmEntry : public AdbEntryStoredInMemory
@@ -70,8 +73,6 @@ private:
 
   GCC_DTOR_WARN_OFF
 };
-
-KBLIST_DEFINE(PalmEntryList, PalmEntry);
 
 // our AdbEntryGroup implementation
 class PalmEntryGroup : public AdbEntryGroupCommon
@@ -134,8 +135,6 @@ PalmEntry::IsReadOnly() const
    return m_pGroup->IsReadOnly();
 }
 
-
-KBLIST_DEFINE(PalmGroupList, PalmEntryGroup);
 
 // our AdbBook implementation
 class PalmBook : public AdbBook

@@ -25,7 +25,6 @@
 #  include "strutil.h"
 #  include "sysutil.h"
 #  include "MApplication.h"
-#  include "kbList.h"
 #endif //USE_PCH
 
 #include <ctype.h>
@@ -132,8 +131,8 @@ bool PalmEntry::Save()
 PalmEntryGroup::PalmEntryGroup(void)
 {
    m_strName = "Palm ADB";
-   m_entries = new PalmEntryList(false);
-   m_groups  = new PalmGroupList(false);
+   m_entries = new PalmEntryList;
+   m_groups  = new PalmGroupList;
 }
 
 PalmEntryGroup::PalmEntryGroup(PalmEntryGroup *pParent,
@@ -143,8 +142,8 @@ PalmEntryGroup::PalmEntryGroup(PalmEntryGroup *pParent,
 {
   m_pParent = pParent;
   m_strName = strName;
-  m_entries = new PalmEntryList(false);
-  m_groups  = new PalmGroupList(false);
+  m_entries = new PalmEntryList;
+  m_groups  = new PalmGroupList;
 
   if ( bNew ) {
     // ??

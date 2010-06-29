@@ -4829,11 +4829,11 @@ wxComposeView::BuildMessage(int flags) const
 
    // add any additional header lines: first for this time only and then also
    // the headers stored in the profile
-   kbStringList::iterator i = m_extraHeadersNames.begin();
-   kbStringList::iterator j = m_extraHeadersValues.begin();
+   StringList::const_iterator i = m_extraHeadersNames.begin();
+   StringList::const_iterator j = m_extraHeadersValues.begin();
    for ( ; i != m_extraHeadersNames.end(); ++i, ++j )
    {
-      msg->AddHeaderEntry(**i, **j);
+      msg->AddHeaderEntry(*i, *j);
    }
 
    wxArrayString headerNames, headerValues;
@@ -4997,13 +4997,13 @@ void
 wxComposeView::AddHeaderEntry(const String& name, const String& value)
 {
    // first check if we don't already have a header with this name
-   const kbStringList::iterator end = m_extraHeadersNames.end();
-   for ( kbStringList::iterator i = m_extraHeadersNames.begin(),
+   const StringList::iterator end = m_extraHeadersNames.end();
+   for ( StringList::iterator i = m_extraHeadersNames.begin(),
                                 j = m_extraHeadersValues.begin();
          i != end;
          ++i, ++j )
    {
-      if ( **i == name )
+      if ( *i == name )
       {
          if ( value.empty() )
          {
@@ -5013,15 +5013,15 @@ wxComposeView::AddHeaderEntry(const String& name, const String& value)
          }
          else // modify the existing header
          {
-            **j = value;
+            *j = value;
          }
          return;
       }
    }
 
    // if we didn't find it, add a new one
-   m_extraHeadersNames.push_back(new String(name));
-   m_extraHeadersValues.push_back(new String(value));
+   m_extraHeadersNames.push_back(MIME::EncodeHeader(name).data());
+   m_extraHeadersValues.push_back(MIME::EncodeHeader(value).data());
 }
 
 bool wxComposeView::IsPGPSigningEnabled() const
@@ -5036,11 +5036,11 @@ void wxComposeView::TogglePGPSigning()
 
 bool wxComposeView::IsInReplyTo() const
 {
-   kbStringList::iterator i,
-                          end = m_extraHeadersNames.end();
+   StringList::const_iterator i,
+                              end = m_extraHeadersNames.end();
    for ( i = m_extraHeadersNames.begin(); i != end; ++i )
    {
-      if ( **i == _T("In-Reply-To") )
+      if ( *i == "In-Reply-To" )
          return true;
    }
 
@@ -5049,18 +5049,18 @@ bool wxComposeView::IsInReplyTo() const
 
 bool wxComposeView::ConfigureInReplyTo()
 {
-   kbStringList::iterator end = m_extraHeadersNames.end();
-   kbStringList::iterator i, j;
+   StringList::iterator end = m_extraHeadersNames.end();
+   StringList::iterator i, j;
    for ( i = m_extraHeadersNames.begin(),
          j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
    {
-      if ( **i == _T("In-Reply-To") )
+      if ( *i == "In-Reply-To" )
          break;
    }
 
    String messageId;
    if ( i != end )
-      messageId = **j;
+      messageId = *j;
 
    String messageIdNew = messageId;
    if ( !ConfigureInReplyToHeader(&messageIdNew, this) ||
@@ -5077,9 +5077,9 @@ bool wxComposeView::ConfigureInReplyTo()
             end = m_extraHeadersNames.end(),
             j = m_extraHeadersValues.begin() ; i != end; ++i, ++j )
       {
-         if ( **i == _T("References") )
+         if ( *i == "References" )
          {
-            String ref = **j;
+            String ref = *j;
             ref.Trim(true).Trim(false);
 
             if ( ref == messageId )
@@ -5104,7 +5104,7 @@ bool wxComposeView::ConfigureInReplyTo()
                   // remove this message id with all preceding space
                   ref.erase(pos - n, n + messageId.length());
 
-                  **j = ref;
+                  *j = ref;
                }
             }
             break;
@@ -5119,7 +5119,7 @@ bool wxComposeView::ConfigureInReplyTo()
       }
       else // just modify existing value
       {
-         **j = messageIdNew;
+         *j = messageIdNew;
       }
 
       // and add to references
@@ -5127,9 +5127,9 @@ bool wxComposeView::ConfigureInReplyTo()
             end = m_extraHeadersNames.begin(),
             j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
       {
-         if ( **i == _T("References") )
+         if ( *i == "References" )
          {
-            String ref = **j;
+            String ref = *j;
 
             // if we had a message id already, replace the old one with the
             // new one
@@ -5146,7 +5146,7 @@ bool wxComposeView::ConfigureInReplyTo()
                ref += messageIdNew;
             }
 
-            **j = ref;
+            *j = ref;
 
             break;
          }

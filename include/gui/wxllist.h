@@ -10,10 +10,6 @@
 #ifndef WXLLIST_H
 #define WXLLIST_H
 
-#ifndef USE_PCH
-#  include   "kbList.h"
-#endif // USE_PCH
-
 #include   <wx/print.h>
 #include   <wx/printdlg.h>
 #include   <wx/generic/printps.h>
@@ -30,6 +26,8 @@
 #else // for Mahogany only
 #   include "MObject.h"
 #endif
+
+#include   "kbList.h"
 
 // use the wxWindows caret class instead of home grown cursor whenever possible
 #ifdef __WXMSW__

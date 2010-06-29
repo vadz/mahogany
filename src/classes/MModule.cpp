@@ -22,7 +22,6 @@
 #   include "Mcommon.h"
 #   include "MApplication.h"
 #   include "strutil.h"
-#   include "kbList.h"
 
 #   include "Mdefaults.h"
 #endif // USE_PCH
@@ -37,6 +36,8 @@
 #undef SendMessage
 #endif // __WINE__
 #include <wx/textfile.h>        // for wxTextFile
+
+#include <list>
 
 // ----------------------------------------------------------------------------
 // Implementation of the MInterface
@@ -107,7 +108,7 @@ struct MModuleListEntry
 };
 
 /// A list of all loaded modules.
-KBLIST_DEFINE(MModuleList, MModuleListEntry);
+typedef std::list<MModuleListEntry> MModuleList;
 
 /// The actual list of all loaded modules.
 static MModuleList *gs_MModuleList = NULL;
@@ -174,8 +175,8 @@ void MAppBase::RemoveModule(MModuleCommon *module)
       MModuleList::iterator i;
       for ( i = gs_MModuleList->begin(); i != gs_MModuleList->end(); )
       {
-         MModuleListEntry *entry = *i;
-         if( entry->m_Module == module )
+         MModuleListEntry& entry = *i;
+         if( entry.m_Module == module )
             i = gs_MModuleList->erase(i);
          else
             ++i;
@@ -202,8 +203,8 @@ void MModule_Cleanup(void)
       {
          MModuleList::iterator i = j;
          ++j;
-         if( (**i).m_Module )
-            (**i).m_Module->DecRef();
+         if( i->m_Module )
+            i->m_Module->DecRef();
       }
 
       delete gs_MModuleList;
@@ -220,23 +221,23 @@ MModule *FindModule(const String & name)
    for(i = GetMModuleList()->begin();
        i != GetMModuleList()->end();
        i++)
-      if( (**i).m_Name == name )
+      if( i->m_Name == name )
       {
 #ifdef USE_MODULES_STATIC
          int errorCode = 0; //for now we ignore it
          // on-the-fly initialisation for static modules:
-         if( (**i).m_Module == NULL )
+         if( i->m_Module == NULL )
          {
             // initialise the module:
-            (**i).m_Module = (*((**i).m_InitFunc))(
+            i->m_Module = (*(i->m_InitFunc))(
                M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
                &gs_MInterface, &errorCode);
          }
 #endif // USE_MODULES_STATIC
-         if( (**i).m_Module )
-            (**i).m_Module->IncRef();
+         if( i->m_Module )
+            i->m_Module->IncRef();
 
-         return (**i).m_Module;
+         return i->m_Module;
       }
    return NULL; // not found
 }
@@ -250,13 +251,13 @@ void MModule_AddStaticModule(const char *Name,
                              const char *Version,
                             MModule_InitModuleFuncType initFunc)
 {
-   MModuleListEntry *me = new MModuleListEntry;
-   me->m_Name = Name;
-   me->m_Version = Version;
-   me->m_Description = Description;
-   me->m_Interface = Interface;
-   me->m_Module = NULL;
-   me->m_InitFunc = initFunc;
+   MModuleListEntry me;
+   me.m_Name = Name;
+   me.m_Version = Version;
+   me.m_Description = Description;
+   me.m_Interface = Interface;
+   me.m_Module = NULL;
+   me.m_InitFunc = initFunc;
    GetMModuleList()->push_back(me);
 }
 #else // !USE_MODULES_STATIC
@@ -311,7 +312,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
                                               MMODULE_INTERFACE_PROP);
       else
          me->m_Interface = name;
-      GetMModuleList()->push_back(me);
+      GetMModuleList()->push_back(*me);
    }
    else
    {
@@ -535,26 +536,26 @@ DoListLoadedModules(bool listall = false, const String& interfaceName = wxEmptyS
          i++ )
 #ifdef USE_MODULES_STATIC
    {
-      MModuleListEntry *me = *i;
+      MModuleListEntry& me = *i;
 
       // we have unloaded modules in the list, ignore them unless listall is
       // TRUE
-      if ( (listall || me->m_Module) &&
-           (interfaceName.empty() || me->m_Interface == interfaceName) )
+      if ( (listall || me.m_Module) &&
+           (interfaceName.empty() || me.m_Interface == interfaceName) )
       {
          // also ignore the modules excluded by user
-         if ( !listall || modulesBlacklist.Index(me->m_Name) == wxNOT_FOUND )
+         if ( !listall || modulesBlacklist.Index(me.m_Name) == wxNOT_FOUND )
          {
             MModuleListingEntryImpl
                entry
                (
-                  me->m_Name, // module name
-                  me->m_Interface,
-                  me->m_Description,
+                  me.m_Name, // module name
+                  me.m_Interface,
+                  me.m_Description,
                   wxEmptyString, // long description
-                  String(me->m_Version) + _(" (builtin)"),
+                  String(me.m_Version) + _(" (builtin)"),
                   _T("mahogany-developers@lists.sourceforge.net"),
-                  me->m_Module
+                  me.m_Module
                );
 
             (*listing)[count++] = entry;
@@ -563,7 +564,7 @@ DoListLoadedModules(bool listall = false, const String& interfaceName = wxEmptyS
    }
 #else // !USE_MODULES_STATIC
    {
-      MModule *m = (**i).m_Module;
+      MModule *m = i->m_Module;
       if ( !m )
       {
          FAIL_MSG( _T("module should be loaded") );
@@ -605,7 +606,7 @@ MModule::ListAvailableModules(const String& interfaceName)
 #ifdef USE_MODULES_STATIC
    return DoListLoadedModules(true, interfaceName);
 #else // !USE_MODULES_STATIC
-   kbStringList modules;
+   wxArrayString modules;
 
    wxArrayString dirs = BuildListOfModulesDirs();
    size_t nDirs = dirs.GetCount();
@@ -648,7 +649,7 @@ MModule::ListAvailableModules(const String& interfaceName)
             {
                moduleNames.Add(basename);
 
-               modules.push_back(new wxString(filename));
+               modules.push_back(filename);
             }
 
             filename = wxFindNextFile();
@@ -660,11 +661,12 @@ MModule::ListAvailableModules(const String& interfaceName)
    const wxArrayString modulesBlacklist(GetBlacklistedModules());
 
    MModuleListingImpl *listing = MModuleListingImpl::Create(modules.size());
-   kbStringList::iterator it;
    size_t count = 0;
-   for(it = modules.begin(); it != modules.end(); it ++)
+   for( wxArrayString::const_iterator it = modules.begin();
+        it != modules.end();
+        ++it )
    {
-      filename = **it;
+      filename = *it;
 
       wxDynamicLibrary dll(filename);
       MModule_GetModulePropFuncType

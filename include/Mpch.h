@@ -32,7 +32,6 @@
 
 #include "Mcommon.h"
 
-#include "kbList.h"
 #include "guidef.h"
 
 #include "strutil.h"

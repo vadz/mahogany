@@ -19,12 +19,13 @@
 
 #ifndef USE_PCH
 #  include "gui/wxMFrame.h"
-#  include "kbList.h"
 #endif // USE_PCH
 
 #include "Composer.h"         // for Composer
 
 #include "MessageEditor.h"    // for MessageEditor::InsertMode enum
+
+#include "strlist.h"
 
 // ----------------------------------------------------------------------------
 // forward declarations
@@ -458,10 +459,10 @@ protected:
    ~wxComposeView();
 
    /// A list of all extra headers to add to header.
-   kbStringList m_extraHeadersNames;
+   StringList m_extraHeadersNames;
 
    /// A list of values corresponding to the names above.
-   kbStringList m_extraHeadersValues;
+   StringList m_extraHeadersValues;
 
 private:
    // implement base class pure virtual methods

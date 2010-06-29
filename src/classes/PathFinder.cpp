@@ -16,7 +16,6 @@
 
 #ifndef   USE_PCH
 #  include  "Mcommon.h"
-#  include   "kbList.h"
 #endif // USE_PCH
 
 #if defined(OS_WIN) && !defined(__WINE__) // cygwin and mingw
@@ -35,15 +34,14 @@
 
 PathFinder::PathFinder(const String & ipathlist, bool recursive)
 {
-   pathList = new kbStringList(FALSE);
    AddPaths(ipathlist,recursive);
 }
 
 void
 PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
 {
-   wxChar *work = new wxChar[ipathlist.length()+1];
-   wxChar   *found, *save_ptr;
+   char *work = new char[ipathlist.length()+1];
+   char   *found, *save_ptr;
    String   tmp;
    String   subdirList = wxEmptyString;
 
@@ -54,9 +52,9 @@ PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
    while(found)
    {
       if(prepend)
-         pathList->push_front(new String(found));
+         pathList.push_front(found);
       else
-         pathList->push_back(new String(found));
+         pathList.push_back(found);
       if(recursive && IsDir(found))   // look for subdirectories
       {
          tmp = String(found) + ANYFILE;
@@ -83,14 +81,14 @@ String
 PathFinder::Find(const String & filename, bool *found,
                  int mode) const
 {
-   kbStringList::iterator i;
+   StringList::const_iterator i;
    String   work;
    int   result;
 
    MOcheck();
-   for(i = pathList->begin(); i != pathList->end(); i++)
+   for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *(*i) + DIR_SEPARATOR + filename;
+      work = *i + DIR_SEPARATOR + filename;
       result = wxAccess(work.c_str(),mode);
       if(result == 0)
       {
@@ -107,14 +105,14 @@ String
 PathFinder::FindFile(const String & filename, bool *found,
                      int mode) const
 {
-   kbStringList::iterator i;
+   StringList::const_iterator i;
    String   work;
    int   result;
 
    MOcheck();
-   for(i = pathList->begin(); i != pathList->end(); i++)
+   for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *(*i) + DIR_SEPARATOR + filename;
+      work = *i + DIR_SEPARATOR + filename;
       result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsFile(work))
       {
@@ -131,14 +129,14 @@ String
 PathFinder::FindDir(const String & filename, bool *found,
                     int mode) const
 {
-   kbStringList::iterator i;
+   StringList::const_iterator i;
    String   work;
    int   result;
 
    MOcheck();
-   for(i = pathList->begin(); i != pathList->end(); i++)
+   for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *(*i) + DIR_SEPARATOR + filename;
+      work = *i + DIR_SEPARATOR + filename;
       result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsDir(work))
       {
@@ -155,19 +153,19 @@ String
 PathFinder::FindDirFile(const String & filename, bool *found,
                         int mode) const
 {
-   kbStringList::iterator i;
+   StringList::const_iterator i;
    String   work;
    int   result;
 
    MOcheck();
-   for(i = pathList->begin(); i != pathList->end(); i++)
+   for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *(*i) + DIR_SEPARATOR + filename;
+      work = *i + DIR_SEPARATOR + filename;
       result = wxAccess(work.c_str(),mode);
-      if(result == 0 && IsFile(work) && IsDir(*(*i)))
+      if(result == 0 && IsFile(work) && IsDir(*i))
       {
          if(found)   *found = true;
-         return *(*i);
+         return *i;
       }
    }
    if(found)
@@ -187,19 +185,5 @@ bool
 PathFinder::IsFile(const String & pathname)
 {
    return wxFile::Exists(pathname);
-}
-
-
-PathFinder::~PathFinder()
-{
-   kbStringList::iterator i;
-
-   MOcheck();
-   for ( i = pathList->begin(); i != pathList->end(); i++ ) {
-      String *data = *i;
-      delete data;
-   }
-
-   delete pathList;
 }
 

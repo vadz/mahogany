@@ -378,8 +378,6 @@ wxIconManager::FreeImage(char **cpptr)
 // ----------------------------------------------------------------------------
 wxIconManager::wxIconManager(wxString sub_dir)
 {
-   m_iconList = new IconDataList;
-
    const String localDir(mApplication->GetLocalDir());
 
    m_GlobalDir = mApplication->GetDataDir();
@@ -405,11 +403,6 @@ wxIconManager::wxIconManager(wxString sub_dir)
 }
 
 
-wxIconManager::~wxIconManager()
-{
-   delete m_iconList;
-}
-
 void
 wxIconManager::SetSubDirectory(wxString subDir)
 {
@@ -418,8 +411,7 @@ wxIconManager::SetSubDirectory(wxString subDir)
    {
       /* If we change the directory, we should also discard all old icons
          to get the maximum effect. */
-      delete m_iconList;
-      m_iconList = new IconDataList();
+      m_iconList.clear();
 
       if ( subDir.empty() )
       {
@@ -477,13 +469,14 @@ wxIconManager::GetBitmap(const String& bmpName)
 
 bool wxIconManager::FindInCache(const String& iconName, wxIcon *icon) const
 {
-   IconDataList::iterator i;
-   for ( i = m_iconList->begin(); i != m_iconList->end(); i++ )
+   for ( IconDataList::const_iterator i = m_iconList.begin();
+         i != m_iconList.end();
+         ++i )
    {
-      if (wxStrcmp((*i)->iconName.c_str(), iconName.c_str()) == 0 )
+      if (i->iconName == iconName)
       {
          wxLogTrace(wxTraceIconLoading, _T("... icon was in the cache."));
-         *icon = (*i)->iconRef;
+         *icon = i->iconRef;
 
          return true;
       }
@@ -541,8 +534,6 @@ wxIconManager::GetIcon(const String &iconNameOrig)
          pf.AddPaths(m_LocalDir+m_SubDir, false, true);
       }
 
-      IconData *id;
-
       String name;
       for ( int ext = 0; wxIconManagerFileExtensions[ext]; ext++ )
       {
@@ -572,12 +563,12 @@ wxIconManager::GetIcon(const String &iconNameOrig)
 
             if ( icon.Ok() )
             {
-               id = new IconData;
-               id->iconRef = icon;
-               id->iconName = iconName;
+               IconData  id;
+               id.iconRef = icon;
+               id.iconName = iconName;
                wxLogTrace(wxTraceIconLoading, _T("... icon found in '%s'"),
                           name.c_str());
-               m_iconList->push_front(id);
+               m_iconList.push_front(id);
                return icon;
             }
          }
@@ -659,12 +650,11 @@ wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
    if ( icon.Ok() )
    {
       // only loaded icons should be added to the list
-      IconData *id = new IconData;
+      IconData id;
 
-      id->iconName = iconName;
-      strutil_tolower(id->iconName);
-      id->iconRef  = icon;
-      m_iconList->push_front(id);
+      id.iconName = iconName.Lower();
+      id.iconRef  = icon;
+      m_iconList.push_front(id);
    }
 }
 

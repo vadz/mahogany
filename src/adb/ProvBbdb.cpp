@@ -31,7 +31,6 @@
 #  include "MApplication.h"
 #  include "strutil.h"
 #  include "sysutil.h"
-#  include "kbList.h"                   // for KBLIST_DEFINE
 #  include "Mdefaults.h"
 #  include "guidef.h"
 
@@ -55,6 +54,8 @@
 #else
 #  include <fstream>                    // for ifstream
 #endif
+
+#include "strlist.h"
 
 class MOption;
 
@@ -111,8 +112,8 @@ class BbdbEntryGroup;
 class BbdbBook;
 class BbdbDataProvider;
 
-KBLIST_DEFINE(kbStringListList, kbStringList);
-KBLIST_DEFINE(kbStringListListList, kbStringListList);
+typedef std::list<StringList> StringListList;
+typedef std::list<StringListList> StringListListList;
 
 // our AdbEntryData implementation
 class BbdbEntry : public AdbEntryStoredInMemory
@@ -138,9 +139,9 @@ public:
    //@{
    enum FieldTypes { Field_String, Field_Integer};
    static const String ReadString(String *string, bool *success = NULL);
-   static kbStringList *ReadListOfStrings(String *string, bool *success = NULL);
-   static kbStringListList *ReadVector(String *string);
-   static kbStringListListList *ReadListOfVectors(String *string);
+   static StringList ReadListOfStrings(String *string, bool *success = NULL);
+   static StringListList ReadVector(String *string);
+   static StringListListList ReadListOfVectors(String *string);
 
    static void WriteString(ostream &out, String const &string);
 
@@ -162,7 +163,7 @@ String BbdbEntry::m_AnonymousName;
 bool BbdbEntry::m_EnforceUnique;
 
 
-KBLIST_DEFINE(BbdbEntryList, BbdbEntry);
+typedef std::list<BbdbEntry *> BbdbEntryList;
 
 // our AdbEntryGroup implementation
 class BbdbEntryGroup : public AdbEntryGroupCommon
@@ -432,10 +433,10 @@ BbdbEntry::WriteString(ostream &out, String const &string)
    out << "\" ";
 }
 
-kbStringList *
+StringList
 BbdbEntry::ReadListOfStrings(String *string, bool *mysuccess)
 {
-   kbStringList *list = new kbStringList;
+   StringList list;
    String        str;
    bool success;
    if(mysuccess) *mysuccess = false;
@@ -444,7 +445,7 @@ BbdbEntry::ReadListOfStrings(String *string, bool *mysuccess)
    {
       str = ReadString(string, &success); // single string
       if(success)
-         list->push_back(new String(str));
+         list.push_back(str.ToStdString());
       else
          success = ReadNil(string);
       if(mysuccess) *mysuccess = success;
@@ -459,7 +460,7 @@ BbdbEntry::ReadListOfStrings(String *string, bool *mysuccess)
          break;
       str = ReadString(string, &success);
       if(success)
-         list->push_back(new String(str));
+         list.push_back(str.ToStdString());
       else
          break;
    }
@@ -467,11 +468,11 @@ BbdbEntry::ReadListOfStrings(String *string, bool *mysuccess)
    return list;
 }
 
-kbStringListListList *
+StringListListList
 BbdbEntry::ReadListOfVectors(String *string)
 {
-   kbStringListListList *vlist = new kbStringListListList;
-   kbStringListList     *slist;
+   StringListListList vlist;
+   StringListList     slist;
 
    String        str;
 
@@ -484,9 +485,9 @@ BbdbEntry::ReadListOfVectors(String *string)
    do
    {
       slist = ReadVector(string);
-      vlist->push_back(slist);
+      vlist.push_back(slist);
    }
-   while(!slist->empty());
+   while(!slist.empty());
 
    if(! ReadToken(')', string))
    {
@@ -496,11 +497,10 @@ BbdbEntry::ReadListOfVectors(String *string)
    return vlist;
 }
 
-kbStringListList *
+StringListList
 BbdbEntry::ReadVector(String *string)
 {
-   kbStringListList * ll = new kbStringListList;
-   kbStringList *l;
+   StringListList ll;
    bool success;
 
    if(! ReadToken('[', string))
@@ -509,7 +509,7 @@ BbdbEntry::ReadVector(String *string)
    {
       if(ReadToken(']', string))
          break;
-      ll->push_back(l = ReadListOfStrings(string, &success));
+      ll.push_back(ReadListOfStrings(string, &success));
    }while(success);
    return ll;
 }
@@ -566,49 +566,47 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
    e->SetField(AdbField_FirstName, first_name);
    e->SetField(AdbField_FamilyName, last_name);
 
-   delete  ReadListOfStrings(line); // kbStringList
+   ReadListOfStrings(line);
 
    e->SetField(AdbField_Organization, ReadString(line));
 
-   kbStringListListList *phonelist = e->ReadListOfVectors(line);
+   StringListListList phonelist = e->ReadListOfVectors(line);
    {
       // each vector contains of one-element lists of numbers
-      kbStringListListList::iterator i;
-      kbStringListList *ll;
-      kbStringListList::iterator j;
-      kbStringList::iterator k;
+      StringListListList::iterator i;
+      StringListList::iterator j;
+      StringList::iterator k;
       String str;
       int count;
-      for(count = 0, i = phonelist->begin(); i != phonelist->end() && count < 2;
+      for(count = 0, i = phonelist.begin(); i != phonelist.end() && count < 2;
           i++, count++)
       {
-         ll = *i; // each phone number has a list of strings for itself
+         // each phone number has a list of strings for itself
+         StringListList& ll = *i;
          str = wxEmptyString;
-         j = ll->begin(); j++; // skip description
-         for(; j != ll->end(); j++)
+         j = ll.begin(); j++; // skip description
+         for(; j != ll.end(); j++)
          {
-            k = (**j).begin(); // the entries are lists with one string each
-            if(k != (**j).end())
-               str << **k << ' ';
+            k = j->begin(); // the entries are lists with one string each
+            if(k != j->end())
+               str << *k << ' ';
          }
          str = str.Left(str.Length()-1);
          e->SetField(count == 0 ? AdbField_H_Phone : AdbField_O_Phone, str);
       }
    }
-   delete phonelist;
 
 #define ADDRFIELD(x) (field + (AdbField_H_##x - AdbField_H_AddrPageFirst))
-   kbStringListListList *addresses = e->ReadListOfVectors(line);
+   StringListListList addresses = e->ReadListOfVectors(line);
    {
       // each vector contains of one-element lists of numbers
-      kbStringListListList::iterator i;
-      kbStringListList *ll;
-      kbStringListList::iterator j;
-      kbStringList::iterator k;
+      StringListListList::iterator i;
+      StringListList::iterator j;
+      StringList::iterator k;
       String str;
       int count, count2;
       size_t field;
-      for(count = 0, i = addresses->begin(); i != addresses->end() && count < 2;
+      for(count = 0, i = addresses.begin(); i != addresses.end() && count < 2;
           i++, count++)
       {
          if(count == 0)
@@ -616,15 +614,16 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
          else
             field = AdbField_O_AddrPageFirst;
 
-         ll = *i; // each address number has a list of strings for itself
+         // each address number has a list of strings for itself
+         StringListList& ll = *i;
          str = wxEmptyString;
-         j = ll->begin(); j++; // skip description
-         for(count2 = 1; j != ll->end(); j++,count2++)
+         j = ll.begin(); j++; // skip description
+         for(count2 = 1; j != ll.end(); j++,count2++)
          {
-            k = (**j).begin(); // the entries are lists with one string each
+            k = j->begin(); // the entries are lists with one string each
             str = wxEmptyString;
-            for(;k != (**j).end(); k++)
-               str << **k << ' ';
+            for(;k != j->end(); k++)
+               str << *k << ' ';
             str = str.Left(str.Length()-1);
             switch(count2)
             {
@@ -642,16 +641,13 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
       }
    }
 
-   delete addresses;
-
-   kbStringList *mail_addresses = e->ReadListOfStrings(line);
-   kbStringList::iterator i = mail_addresses->begin();
-   if(i != mail_addresses->end())
-      e->SetField(AdbField_EMail, **i);
+   StringList mail_addresses = e->ReadListOfStrings(line);
+   StringList::iterator i = mail_addresses.begin();
+   if(i != mail_addresses.end())
+      e->SetField(AdbField_EMail, *i);
    i++;
-   for(; i != mail_addresses->end(); i++)
-      e->AddEMail(**i);
-   delete mail_addresses;
+   for(; i != mail_addresses.end(); i++)
+      e->AddEMail(*i);
 
    e->ClearDirty();
    return e;

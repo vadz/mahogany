@@ -13,15 +13,17 @@
 
 #include "MObject.h"
 
+#include "strlist.h"
+
 /**@name PathFinder class for finding files */
 //@{
 
 #if defined(OS_UNIX) || defined(__CYGWIN__)
 /// define a delimiter for separating paths
-#  define   PATHFINDER_DELIMITER _T(":")
+#  define   PATHFINDER_DELIMITER ":"
 #  include  <unistd.h>  // for R_OK
 #elif   defined(OS_WIN)
-#  define   PATHFINDER_DELIMITER _T(";")
+#  define   PATHFINDER_DELIMITER ";"
 #  define  R_OK                  4       // access() mode
 #endif
 
@@ -38,11 +40,6 @@ public:
       @param recursive if true, add all subdirectories
    */
    PathFinder(const String & ipathlist = M_EMPTYSTRING, bool recursive = false);
-
-   /**
-      Destructor.
-   */
-   ~PathFinder();
 
    /**
       Adds the pathlist to the list of paths.
@@ -110,7 +107,8 @@ public:
    static bool IsFile(const String & pathname);
 private:
    /// the list of absolute paths
-   class kbStringList *pathList;
+   StringList pathList;
+
    MOBJECT_NAME(PathFinder)
 };
 
