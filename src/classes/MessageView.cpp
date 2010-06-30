@@ -4063,7 +4063,12 @@ MessageView::LaunchProcess(const String& command,
       ProcessInfo *procInfo = new ProcessInfo(process, pid, errormsg);
 
       m_processes.Add(procInfo);
-      m_tempFiles.Add(filename);
+
+      // The file name may be empty if no temporary files are used by this
+      // command (this is the case e.g. when opening an URL in a browser) and
+      // we won't need to delete it later in this case.
+      if ( !filename.empty() )
+         m_tempFiles.Add(filename);
    }
 
    return true;
