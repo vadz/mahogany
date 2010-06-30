@@ -1640,8 +1640,12 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
-   // don't process events until we're fully initialized
-   if( !HasFolder() || !m_FolderView->m_MessagePreview )
+   // don't process events until we're fully initialized and also if we're
+   // already in progress of doing something as indicated by "allow background
+   // processing" flag being off: otherwise we could reenter c-client code with
+   // fatal consequences
+   if( !HasFolder() || !m_FolderView->m_MessagePreview
+         || !mApplication->AllowBgProcessing() )
    {
       // can't process any commands now
       event.Skip();
