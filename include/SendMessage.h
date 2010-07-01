@@ -18,7 +18,8 @@
 #endif // USE_PCH
 
 #include "MimePart.h"
-#include "MObject.h"
+
+#include <wx/scopedptr.h>
 
 class Message;
 class Profile;
@@ -274,8 +275,8 @@ public:
    virtual ~SendMessage();
 };
 
-// SendMessage_obj is a smart reference to SendMessage
-DECLARE_AUTOPTR_NO_REF(SendMessage);
+/// SendMessage_obj is a smart pointer to SendMessage.
+typedef wxScopedPtr<SendMessage> SendMessage_obj;
 
 #endif // SENDMESSAGE_H
 

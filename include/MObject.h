@@ -304,18 +304,6 @@ private:
       operator classname *() const { return m_ptr; }        \
    END_DECLARE_AUTOPTR()
 
-// same thing for non ref counted pointers
-#define BEGIN_DECLARE_AUTOPTR_NO_REF(classname)             \
-   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                 \
-   public:                                                  \
-      ~classname##_obj() { delete m_ptr; }                  \
-      operator bool() const { return m_ptr != NULL; }
-
-// declare an class which is an auto ptr to the given MObjectRC-derived type
-#define DECLARE_AUTOPTR_NO_REF(classname)                   \
-   BEGIN_DECLARE_AUTOPTR_NO_REF(classname)                  \
-   END_DECLARE_AUTOPTR()
-
 // ----------------------------------------------------------------------------
 // utility functions
 // ----------------------------------------------------------------------------

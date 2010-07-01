@@ -4861,7 +4861,7 @@ wxComposeView::BuildMessage(int flags) const
    }
 
    // the caller is responsible for deleting the object
-   return msg.Detach();
+   return msg.release();
 }
 
 bool
@@ -4902,7 +4902,7 @@ wxComposeView::Send(SendMode mode)
          (MModule_Calendar *) MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
       if(calmod)
       {
-         success = calmod->ScheduleMessage(msg.Get());
+         success = calmod->ScheduleMessage(msg.get());
          calmod->DecRef();
       }
       else
@@ -5366,7 +5366,7 @@ SendMessage *wxComposeView::BuildDraftMessage(int flags) const
    // also save the Fcc header contents because it's not a "real" header
    msg->AddHeaderEntry(_T("FCC"), GetRecipients(Recipient_Fcc));
 
-   return msg.Detach();
+   return msg.release();
 }
 
 // from upgrade.cpp, this forward decl will disappear once we move it somewhere

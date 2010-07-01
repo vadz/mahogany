@@ -23,7 +23,6 @@ class MObjectRC { };
 
 #define DECLARE_AUTOPTR(x)
 #define DECLARE_AUTOPTR_WITH_CONVERSION(x)
-#define DECLARE_AUTOPTR_NO_REF(x)
 
 #ifndef PY_SSIZE_T_MAX
     typedef int Py_ssize_t;
