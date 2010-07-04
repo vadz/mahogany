@@ -411,12 +411,6 @@ private:
    /// The following is also called by SendMessageCC for ESMTP authentication
    static void SetLoginData(const String &user, const String &pw);
 
-   /// for POP/IMAP boxes, this holds the user id for the callback
-   static String MF_user;
-
-   /// for POP/IMAP boxes, this holds the password for the callback
-   static String MF_pwd;
-
    /// do we have login/password?
    bool HasLogin() const { return !m_login.empty() && !m_password.empty(); }
 

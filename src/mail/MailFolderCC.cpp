@@ -112,6 +112,8 @@ extern "C"
    #include <wx/datetime.h>
 #endif
 
+#include <wx/tls.h>
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -1558,16 +1560,30 @@ int GetMsgStatus(const MESSAGECACHE *elt)
 // MailFolderCC auth info
 // ----------------------------------------------------------------------------
 
-// login data
-String MailFolderCC::MF_user;
-String MailFolderCC::MF_pwd;
+namespace
+{
+
+// Per-thread login data.
+//
+// Notice that this must be a POD so we can't use string objects here. We use
+// fixed-size buffers because this is what c-client uses internally anyhow.
+struct LoginData
+{
+   char user[MAILTMPLEN];
+   char pwd[MAILTMPLEN];
+};
+
+wxTLS_TYPE(LoginData) gs_loginData;
+
+} // anonymous namespace
 
 /* static */
 void
 MailFolderCC::SetLoginData(const String &user, const String &pw)
 {
-   MailFolderCC::MF_user = user;
-   MailFolderCC::MF_pwd = pw;
+   LoginData& ld = wxTLS_VALUE(gs_loginData);
+   wxStrlcpy(ld.user, wxSafeConvertWX2MB(user), sizeof(ld.user));
+   wxStrlcpy(ld.pwd, wxSafeConvertWX2MB(pw), sizeof(ld.pwd));
 }
 
 // ----------------------------------------------------------------------------
@@ -5060,16 +5076,18 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
                        char *pwd,
                        long /* trial */)
 {
-   // normally this shouldn't happen
-   ASSERT_MSG( !MF_user.empty(), _T("no username in mm_login()?") );
+   LoginData& ld = wxTLS_VALUE(gs_loginData);
 
-   strcpy(user, wxSafeConvertWX2MB(MF_user));
-   strcpy(pwd, wxSafeConvertWX2MB(MF_pwd));
+   // normally this shouldn't happen
+   CHECK_RET( ld.user[0] != '\0', "no username in mm_login()?" );
+
+   strcpy(user, ld.user);
+   strcpy(pwd, ld.pwd);
 
    // they are used once only, don't keep them or they could be reused for
    // another folder somehow
-   MF_user.clear();
-   MF_pwd.clear();
+   ld.user[0] =
+   ld.pwd[0] = '\0';
 }
 
 /* static */
