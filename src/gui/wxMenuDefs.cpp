@@ -735,7 +735,7 @@ void CreateMToolbar(wxFrame *parent, wxFrameId frameId)
    int flags = READ_APPCONFIG(MP_TBARIMAGES);
    flags++;
 
-   long style = wxTB_HORIZONTAL | wxTB_FLAT | wxTB_DOCKABLE | wxTB_TEXT;
+   long style = wxTB_HORIZONTAL | wxTB_FLAT | wxTB_DOCKABLE;
    if ( !(flags & TbarShow_Icons) )
       style |= wxTB_NOICONS;
 
