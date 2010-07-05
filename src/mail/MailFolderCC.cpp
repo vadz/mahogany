@@ -115,37 +115,6 @@ extern "C"
 #include <wx/tls.h>
 
 // ----------------------------------------------------------------------------
-// macros
-// ----------------------------------------------------------------------------
-
-/**
-  @name checking folder macros
-
-  check if the folder is still available and give an error message if it isn't
-  (the message must contain a %s which is replaced by the folder name)
- */
-
-//@{
-
-/// and return
-#define CHECK_DEAD(msg) \
-   if ( m_MailStream == NIL ) \
-   { \
-      ERRORMESSAGE((_(msg), GetName().c_str()));\
-      return;\
-   }
-
-/// and return the given value
-#define CHECK_DEAD_RC(msg, rc) \
-   if ( m_MailStream == NIL )\
-   { \
-      ERRORMESSAGE((_(msg), GetName().c_str()));\
-      return rc; \
-   }
-
-//@}
-
-// ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
 
@@ -2816,6 +2785,17 @@ MailFolderCC::UnLock(void) const
    ((MailFolderCC *)this)->m_mutexExclLock.Unlock();
 }
 
+bool
+MailFolderCC::CheckConnection() const
+{
+   if ( m_MailStream )
+      return true;
+
+   wxLogError(_("Connection to folder '%s' was lost."), GetName());
+
+   return false;
+}
+
 // ----------------------------------------------------------------------------
 // Adding and removing (expunging) messages
 // ----------------------------------------------------------------------------
@@ -2841,25 +2821,26 @@ MailFolderCC::AppendMessage(const String& msg)
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::AppendMessage(string)"),
               GetName().c_str());
 
-   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
-
-   wxCharBuffer msgbuf(msg.To8BitData());
-   CHECK( msgbuf, false, "message contains non-ASCII characters" );
-
-   STRING str;
-   INIT(&str, mail_string, msgbuf.data(), msg.length());
-
-   if ( !mail_append(m_MailStream, m_ImapSpec.char_str(), &str) )
+   if ( CheckConnection() )
    {
-      wxLogError(_("Failed to save message to the folder '%s'"),
-                 GetName().c_str());
+      wxCharBuffer msgbuf(msg.To8BitData());
+      CHECK( msgbuf, false, "message contains non-ASCII characters" );
 
-      return false;
+      STRING str;
+      INIT(&str, mail_string, msgbuf.data(), msg.length());
+
+      if ( mail_append(m_MailStream, m_ImapSpec.char_str(), &str) )
+      {
+         UpdateAfterAppend();
+
+         return true;
+      }
    }
 
-   UpdateAfterAppend();
+   wxLogError(_("Failed to save message to the folder '%s'"),
+              GetName().c_str());
 
-   return true;
+   return false;
 }
 
 bool
@@ -2896,41 +2877,41 @@ MailFolderCC::AppendMessage(const Message& msg)
 
    String flags = GetImapFlags(msg.GetStatus());
 
-   // keep the char buffer alive until after mail_append_full() returns
-   wxCharBuffer tmpbuf(tmp.To8BitData());
-   CHECK( tmpbuf, false, "message contains non-ASCII characters" );
-
-   STRING str;
-   INIT(&str, mail_string, tmpbuf.data(), tmp.length());
-
-   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
-
-   if ( !mail_append_full(m_MailStream,
-                          m_ImapSpec.char_str(),
-                          flags.char_str(),
-                          dateptr,
-                          &str) )
+   if ( CheckConnection() )
    {
-      // useful to know which message exactly we failed to copy
-      wxLogError(_("Message details: subject '%s', from '%s'"),
-                 msg.Subject().c_str(), msg.From().c_str());
+      // keep the char buffer alive until after mail_append_full() returns
+      wxCharBuffer tmpbuf(tmp.To8BitData());
+      CHECK( tmpbuf, false, "message contains non-ASCII characters" );
 
-      wxLogError(_("Failed to save message to the folder '%s'"),
-                 GetName().c_str());
+      STRING str;
+      INIT(&str, mail_string, tmpbuf.data(), tmp.length());
 
-      return false;
+      if ( mail_append_full(m_MailStream,
+                             m_ImapSpec.char_str(),
+                             flags.char_str(),
+                             dateptr,
+                             &str) )
+      {
+         UpdateAfterAppend();
+
+         return true;
+      }
    }
 
-   UpdateAfterAppend();
+   // useful to know which message exactly we failed to copy
+   wxLogError(_("Message details: subject '%s', from '%s'"),
+              msg.Subject().c_str(), msg.From().c_str());
 
-   return true;
+   wxLogError(_("Failed to save message to the folder '%s'"),
+              GetName().c_str());
+
+   return false;
 }
 
 bool
 MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 {
    CHECK( folder, false, _T("SaveMessages() needs a valid folder pointer") );
-   CHECK_DEAD_RC( "Can't save messages to closed folder '%s'", false );
 
    size_t count = selections->Count();
    CHECK( count, true, _T("SaveMessages(): nothing to save") );
@@ -2962,6 +2943,14 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
          // been done yet
          if ( CreateIfNeeded(folder) )
          {
+            if ( !CheckConnection() )
+            {
+               wxLogError(_("Failed to save messages to closed folder '%s'"),
+                          GetName());
+
+               return false;
+            }
+
             String sequence = BuildSequence(*selections);
             String pathDst = GetPathFromImapSpec(specDst);
             if ( mail_copy_full(m_MailStream,
@@ -3101,15 +3090,17 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ExpungeMessages()"),
+              GetName().c_str());
+
+   if ( !PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
-      wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ExpungeMessages()"),
-                 GetName().c_str());
+      // forbidden by callback
+      return;
+   }
 
-      CHECK_DEAD("Cannot expunge messages from closed folder '%s'.");
-
-      mail_expunge(m_MailStream);
-
+   if ( CheckConnection() && mail_expunge(m_MailStream) )
+   {
       // for some types of folders (IMAP) mm_exists() is called from
       // mail_expunge() but for the others (POP) it isn't and we have to call
       // it ourselves: check is based on the fact that m_expungeData is
@@ -3118,6 +3109,11 @@ MailFolderCC::ExpungeMessages(void)
       {
          RequestUpdateAfterExpunge();
       }
+   }
+   else
+   {
+      wxLogError(_("Failed to expunge deleted messages from folder '%s'."),
+                 GetName());
    }
 }
 
@@ -3230,7 +3226,12 @@ MailFolderCC::GetMsgnoFromUID(UIdType uid) const
 Message *
 MailFolderCC::GetMessage(unsigned long uid) const
 {
-   CHECK_DEAD_RC("Cannot access closed folder '%s'.", NULL);
+   if ( !CheckConnection() )
+   {
+      wxLogError(_("Failed to retrieve message from folder '%s'."),
+                 GetName());
+      return NULL;
+   }
 
    HeaderInfoList_obj headers(GetHeaders());
    CHECK( headers, NULL, _T("GetMessage: failed to get headers") );
@@ -3534,8 +3535,6 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
                               int flag,
                               bool set)
 {
-   CHECK_DEAD_RC("Cannot access closed folder '%s'.", false);
-
    if ( !CanSetFlag(flag) )
    {
       ERRORMESSAGE((_("Impossible to set this flag for the folder '%s'."),
@@ -3547,6 +3546,9 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
    String flags = GetImapFlags(flag);
 
    const String sequence = seq.GetString();
+
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SetFlags(%s) = %s"),
+              GetName().c_str(), sequence.c_str(), flags.c_str());
 
    // let a Python callback veto the flag change
 #if 0
@@ -3563,10 +3565,13 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
       if ( kind == SEQ_UID )
          opFlags |= ST_UID;
 
-      CHECK( m_MailStream, 0, _T("SetSequenceFlag: folder is closed") );
+      if ( !CheckConnection() )
+      {
+         wxLogError(_("Failed to update message flags in folder '%s'."),
+                    GetName());
 
-      wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SetFlags(%s) = %s"),
-                 GetName().c_str(), sequence.c_str(), flags.c_str());
+         return false;
+      }
 
       mail_flag(m_MailStream, sequence.char_str(), flags.char_str(), opFlags);
    }
@@ -5217,7 +5222,11 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
                           UserData ud,
                           Ticket ticket)
 {
-   CHECK_DEAD("Cannot list subfolders of the closed folder '%s'.");
+   if ( !CheckConnection() )
+   {
+      wxLogError(_("Cannot list subfolders of folder '%s'."), GetName());
+      return;
+   }
 
    CHECK_RET( asmf, _T("no ASMailFolder in ListFolders") );
 

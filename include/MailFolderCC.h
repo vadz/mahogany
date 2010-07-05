@@ -295,6 +295,18 @@ private:
    /// Close the folder
    virtual void Close(bool mayLinger = true);
 
+   /**
+       Check if we still have a connection to the folder.
+
+       c-client may close the mail stream if it detects connection loss in some
+       other, even unrelated, operation, so we need to check that our stream is
+       still opened before using it.
+
+       This function will return true if the stream is alive or false and log
+       an error message if connection to it was lost.
+    */
+   bool CheckConnection() const;
+
    //@}
 
    /** @name Message counting */
