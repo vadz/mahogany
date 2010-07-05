@@ -16,7 +16,7 @@
 #include "HeaderInfo.h"
 %}
 
-%import "swigcmn.i"
+%include "swigcmn.i"
 
 %include "HeaderInfo.h"
 

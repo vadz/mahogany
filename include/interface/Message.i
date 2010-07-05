@@ -16,7 +16,7 @@
 #include "Message.h"
 %}
 
-%import "swigcmn.i"
+%include "swigcmn.i"
 
 %include "Message.h"
 

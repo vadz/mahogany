@@ -16,7 +16,7 @@
 #include "MimePart.h"
 %}
 
-%import "swigcmn.i"
+%include "swigcmn.i"
 
 %include "MimePart.h"
 

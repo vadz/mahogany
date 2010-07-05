@@ -13,7 +13,12 @@
 // we don't want to export MObjectRC (it doesn't provide anything except
 // reference counting which any self respecting script language already has
 // anyhow), so just pretend it is empty for SWIG
-class MObjectRC { };
+class MObjectRC
+{
+   // we still need to tell SWIG that its dtor is private to prevent it from
+   // generating wrappers for it
+   ~MObjectRC();
+};
 
 // SWIG can't deal with the macros below -- no big deal, we don't need to
 // export them anyhow, so just hide them from SWIG

@@ -16,6 +16,6 @@
 #include "SendMessage.h"
 %}
 
-%import "swigcmn.i"
+%include "swigcmn.i"
 
 %include "SendMessage.h"

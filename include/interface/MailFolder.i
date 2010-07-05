@@ -20,7 +20,7 @@
 #define Params MailFolder::Params
 %}
 
-%import "swigcmn.i"
+%include "swigcmn.i"
 
 %include "MailFolder.h"
 
