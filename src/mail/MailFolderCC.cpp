@@ -2930,7 +2930,7 @@ bool
 MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 {
    CHECK( folder, false, _T("SaveMessages() needs a valid folder pointer") );
-   CHECK_DEAD_RC( "SaveMessages(): folder is closed", false );
+   CHECK_DEAD_RC( "Can't save messages to closed folder '%s'", false );
 
    size_t count = selections->Count();
    CHECK( count, true, _T("SaveMessages(): nothing to save") );
@@ -3101,14 +3101,12 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   CHECK_DEAD("Cannot expunge messages from closed folder '%s'.");
-
    if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
       wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ExpungeMessages()"),
                  GetName().c_str());
 
-      CHECK_DEAD("ExpungeMessages(): folder closed");
+      CHECK_DEAD("Cannot expunge messages from closed folder '%s'.");
 
       mail_expunge(m_MailStream);
 
@@ -5219,7 +5217,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
                           UserData ud,
                           Ticket ticket)
 {
-   CHECK_DEAD("Cannot list subfolder of the closed folder '%s'.");
+   CHECK_DEAD("Cannot list subfolders of the closed folder '%s'.");
 
    CHECK_RET( asmf, _T("no ASMailFolder in ListFolders") );
 
