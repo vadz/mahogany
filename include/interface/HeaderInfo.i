@@ -18,5 +18,6 @@
 
 %include "swigcmn.i"
 
+%ignore HeaderInfoList::operator[];
 %include "HeaderInfo.h"
 

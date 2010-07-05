@@ -18,5 +18,6 @@
 
 %include "swigcmn.i"
 
+%ignore MimeType::operator=;
 %include "MimeType.h"
 
