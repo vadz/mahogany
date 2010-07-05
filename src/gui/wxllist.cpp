@@ -1528,7 +1528,6 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    {
       xpos = objectCursorPos + (xpos - objectCursorPos - breakpos -
                                 ((xpos > breakpos) ? 1 : 0 ));
-      wxASSERT(xpos >= 0);
       llist->MoveCursorTo( wxPoint( xpos, m_Next->GetLineNumber()) );
    }
    return TRUE; // we wrapped the line

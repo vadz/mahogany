@@ -242,12 +242,10 @@ Profile *MailFolderVirt::GetProfile() const
 
 MailFolderVirt::Msg *MailFolderVirt::GetMsgFromMsgno(MsgnoType msgno) const
 {
-   msgno--;
-
-   CHECK( 0 <= msgno && msgno < GetMsgCount(), NULL,
+   CHECK( 1 <= msgno && msgno <= GetMsgCount(), NULL,
           _T("invalid msgno in MailFolderVirt") );
 
-   return m_messages[(size_t)msgno];
+   return m_messages[msgno - 1];
 }
 
 MailFolderVirt::Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const

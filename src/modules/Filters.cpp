@@ -302,7 +302,7 @@ public:
    }
 
 protected:
-   const char Char(void) const
+   char Char(void) const
    {
       return m_Position == m_Input.length()
                ? '\0'
@@ -310,7 +310,7 @@ protected:
    }
    void EatWhiteSpace(void)
       { while(isspace(Char())) m_Position++; }
-   const char CharInc(void)
+   char CharInc(void)
       { return m_Input[m_Position++]; }
    String CharLeft(void)
       { return m_Input.Left(m_Position); }
@@ -377,7 +377,10 @@ public:
 
    // suppress Purify warnings about UMRs
 #ifdef DEBUG
-   Value(const Value& val) : m_Type(val.m_Type), m_String(val.m_String)
+   Value(const Value& val)
+      : MObject(val),
+        m_Type(val.m_Type),
+        m_String(val.m_String)
    {
       m_abort = val.m_abort;
 

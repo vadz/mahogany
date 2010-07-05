@@ -416,7 +416,7 @@ Threadable::~Threadable()
 
 
 void Threadable::destroy() {
-   static size_t depth = 0;
+   static int depth = 0;
    CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in Threadable::destroy()"));
    if (m_child != 0)
    {
@@ -866,7 +866,7 @@ bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
 
 void ThreadContainer::flush(size_t &threadedIndex, size_t indent, bool indentIfDummyNode)
 {
-   static size_t depth = 0;
+   static int depth = 0;
    CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in ThreadContainer::flush()"));
    CHECK_RET(m_threadable != 0, _T("No threadable in ThreadContainer::flush()"));
    m_threadable->setChild(m_child == 0 ? 0 : m_child->getThreadable());
@@ -896,7 +896,7 @@ void ThreadContainer::flush(size_t &threadedIndex, size_t indent, bool indentIfD
 
 void ThreadContainer::destroy()
 {
-   static size_t depth = 0;
+   static int depth = 0;
    CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in ThreadContainer::destroy()"));
    if (m_child != 0)
    {
@@ -1165,7 +1165,6 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    //  - Build their parent/child relations
    for (th = threadableRoot; th != 0; th = th->getNext())
    {
-      VERIFY(th->getIndex() >= 0, _T("Negative index in Threader::thread()"));
       VERIFY(th->getIndex() < thCount, _T("Too big in Threader::thread()"));
       // As things are now, dummy messages won't get past the algorithm
       // and won't be displayed. Thus we should not get them back when
@@ -1675,7 +1674,7 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
                                  ThreadContainer *parent,
                                  bool recursive)
 {
-   static size_t depth = 0;
+   static int depth = 0;
    ASSERT_MSG(depth < MAX_THREAD_DEPTH, _T("Deep recursion in Threader::collectSubjects()"));
    size_t count = 0;
    ThreadContainer *c;
@@ -1754,7 +1753,7 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
 
 void Threader::breakThreads(ThreadContainer* c)
 {
-   static size_t depth = 0;
+   static int depth = 0;
    CHECK_RET(depth < MAX_THREAD_DEPTH, _T("Deep recursion in Threader::breakThreads()"));
 
    // Dummies should have been built

@@ -937,9 +937,10 @@ MessageTemplateKind wxAllTemplatesDialog::GetKindLastEdited()
 {
    wxConfigBase *config = wxConfigBase::Get();
 
+   const long kindDefault = MessageTemplate_Reply;
    long kindLastEdited = config ? config->Read(GetEditKindPath(),
-                                                   (long)MessageTemplate_Reply)
-                                : MessageTemplate_Reply;
+                                                   kindDefault)
+                                : kindDefault;
    if ( kindLastEdited < 0 || kindLastEdited >= MessageTemplate_Max )
    {
       wxLogDebug(_T("Corrupted TemplateEditKind entry in config."));
