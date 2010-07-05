@@ -39,6 +39,24 @@ class SendMessage
 {
 public:
    /**
+       Possible return values of PrepareForSending().
+    */
+   enum Result
+   {
+      /// Message sending was cancelled by user.
+      Result_Cancelled = -1,
+
+      /// Message was successfully prepared for sending.
+      Result_Prepared,
+
+      /// Message was queued in the outbox and doesn't need to be sent.
+      Result_Queued,
+
+      /// An error occurred while preparing the message for sending.
+      Result_Error
+   };
+
+   /**
      Flags for SendOrQueue()
     */
    enum
@@ -254,13 +272,61 @@ public:
    */
    virtual bool WriteToFolder(const String &foldername) = 0;
 
+   /**
+      Prepares the message for sending.
+
+      This method must be called in the main thread context as it may perform
+      GUI operations, e.g. ask the user to confirm message sending.
+
+      After calling this method successfully, SendNow() may be called from
+      another thread to avoid blocking the main thread while the sending (or
+      saving of the message in the outbox) takes place.
+
+      @param flags Combination of NeverQueue and Silent or 0 (default).
+      @param outbox If non-NULL, filled with the name of the folder where the
+         message was queued for later sending if the function returns
+         Result_Queued.
+      @return One of Result enum elements. Notice that SendNow() should only be
+         called if this method returns @c Result_Prepared.
+    */
+   virtual Result PrepareForSending(int flags = 0, String *outbox = NULL) = 0;
+
+   /**
+       Do send the message.
+
+       This method sends a message previously prepared by PrepareForSending()
+       and may be called from a background thread.
+
+       @param errGeneral Filled with the general error message which should be
+         presented to the user if an error occurs.
+       @param errDetailed Filled with details of the error message on error.
+       @return True if the message was successfully sent, false if it wasn't.
+    */
+   virtual bool SendNow(String *errGeneral, String *errDetailed) = 0;
+
+   /**
+       Post-processing after sending the message to be done in the main thread.
+
+       Currently this function copies the message to the folders in its FCC
+       list because opening the folders from another thread doesn't work. In
+       the future this should become possible and this method might disappear
+       entirely then.
+    */
+   virtual void AfterSending() = 0;
+
    /** Sends the message or stores it in the outbox queue, depending
        on profile settings.
+
+       This method simply calls both PrepareForSending() and SendNow(). As
+       it calls PrepareForSending(), it may be used from the main thread
+       only. And as it calls SendNow() from the main thread, it may block the
+       UI for a relatively long time while the message is being sent so its use
+       is not recommended.
 
        @param flags is the combination of NeverQueue and Silent or 0
        @return true on success
    */
-   virtual bool SendOrQueue(int flags = 0) = 0;
+   bool SendOrQueue(int flags = 0);
 
    /**
      A simple wrapper for WriteToString(): this writes the message contents

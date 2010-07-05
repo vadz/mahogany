@@ -36,6 +36,7 @@ class wxRcptExtraControl;
 class wxComposeView;
 class wxEnhancedPanel;
 class SendMessage;
+class SendThreadResult;
 class MessageEditor;
 
 class IsReplyButton;
@@ -229,12 +230,16 @@ public:
    bool AutoSave();
 
    /**
-     Send the message.
+     Start sending the message.
+
+     This function assembles the message and passes it to a background thread
+     for sending. The thread will later post an event which will result in
+     OnSendResult() being called. Until then the window will be disabled to
+     prevent the user from editing a message which is in process of being sent.
 
      @param mode when to send it
-     @return true if successful, false if message was not ready to be sent
    */
-   bool Send(SendMode mode = SendMode_Default);
+   void Send(SendMode mode = SendMode_Default);
 
    /** wxWindows callbacks
    */
@@ -509,6 +514,28 @@ private:
    /// get the options (for MessageEditor)
    const Options& GetOptions() const { return m_options; }
 
+   /**
+       Called with the result of sending the message.
+
+       This method may be called directly from our own Send() or from
+       OnSendThreadDone() event handler when it receives a notification from
+       the background sending thread.
+
+       @param res The object containing information about whether the message
+         sending succeeded or failed.
+    */
+   //@{
+   void OnSendResult(const SendThreadResult& res);
+   //@}
+
+   /**
+       Event handler for background sending thread.
+
+       Simply forwards to OnSendResult().
+    */
+   void OnSendThreadDone(wxThreadEvent& evt);
+
+
    /// the profile (never NULL)
    Profile *m_Profile;
 
@@ -577,8 +604,8 @@ private:
    /// New article, reply/follow-up or forward?
    MessageKind m_kind;
 
-   /// Are we sending the message?
-   bool m_sending;
+   /// Non-NULL if we're in process of sending the message.
+   SendMessage *m_msgBeingSent;
 
    /// Have we been modified since the last save?
    bool m_isModified;
@@ -641,6 +668,10 @@ private:
 
    /// true if the user asked to close this window (do not launch the composer)
    bool       m_closing;
+
+   /// true if we should close the window after successfully sending message
+   bool       m_closeAfterSending;
+
    //@}
 
 private:

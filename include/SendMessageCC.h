@@ -97,7 +97,9 @@ public:
 
    virtual bool WriteToFolder(const String &foldername);
 
-   virtual bool SendOrQueue(int flags = 0);
+   virtual Result PrepareForSending(int flags = 0, String *outbox = NULL);
+   virtual bool SendNow(String *errGeneral, String *errDetailed);
+   virtual void AfterSending();
 
    virtual void Preview(String *text = NULL);
 
@@ -128,13 +130,6 @@ protected:
    void InitFromMsg(const Message *message, const wxArrayInt *partsToOmit);
 
    //@}
-
-   /** Sends the message.
-
-       @param flags are the same as for SendOrQueue()
-       @return true on success
-   */
-   bool Send(int flags);
 
    /// set sender address fields
    void SetupFromAddresses();
@@ -184,6 +179,21 @@ protected:
       @return true if ok, false if the user cancelled the password dialog
     */
    bool GetPassword(String& password) const;
+
+   /**
+       Preview message before sending it if necessary.
+
+       If the appropriate option is set, this function will show show the
+       message preview and also ask the user to confirm sending it if
+       necessary.
+
+       Normally this doesn't do anything at all as default value for both
+       options is false.
+
+       @return true if it's ok to continue with sending the message or false if
+         it was cancelled by user.
+    */
+   bool PreviewBeforeSending();
 
 private:
    /** @name Description of the message being sent */

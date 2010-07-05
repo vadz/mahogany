@@ -297,6 +297,49 @@ bool SendMessage::Bounce(const String& address,
    return true;
 }
 
+bool SendMessage::SendOrQueue(int flags)
+{
+   const Result res = PrepareForSending(flags);
+   switch ( res )
+   {
+      case Result_Cancelled:
+         mApplication->SetLastError(M_ERROR_CANCEL);
+         return false;
+
+      case Result_Prepared:
+         {
+            String
+               errGeneral,
+               errDetailed;
+
+            if ( !SendNow(&errGeneral, &errDetailed) )
+            {
+               // log the detailed error first so that the general error
+               // message appears first to the user
+               if ( !errDetailed.empty() )
+               {
+                  wxLogError("%s", errDetailed);
+               }
+               wxLogError("%s", errGeneral);
+               return false;
+            }
+            else
+            {
+               AfterSending();
+            }
+         }
+         break;
+
+      case Result_Queued:
+         break;
+
+      case Result_Error:
+         return false;
+   }
+
+   return true;
+}
+
 SendMessage::~SendMessage()
 {
 }
@@ -358,6 +401,16 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    }
 
    m_Protocol = protocol;
+
+#ifndef OS_UNIX
+   // For non-unix systems we make sure that no-one tries to run
+   // Sendmail which is unix specific. This could happen if someone
+   // imports a configuration from a remote server or something like
+   // this, so we play it safe and map all sendmail calls to SMTP
+   // instead:
+   if(m_Protocol == Prot_Sendmail)
+      m_Protocol = Prot_SMTP;
+#endif // !OS_UNIX
 
    switch ( m_Protocol )
    {
@@ -1590,8 +1643,8 @@ void SendMessageCC::EnableSigning(const String& user)
 // SendMessageCC sending
 // ----------------------------------------------------------------------------
 
-bool
-SendMessageCC::SendOrQueue(int flags)
+SendMessage::Result
+SendMessageCC::PrepareForSending(int flags, String *outbox)
 {
    // send directly either if we're told to do it (e.g. when sending the
    // messages already from Outbox) or if there is no Outbox configured at all
@@ -1622,54 +1675,74 @@ SendMessageCC::SendOrQueue(int flags)
                M_MSGBOX_SEND_OFFLINE
             ) )
       {
-         return false;
+         return Result_Cancelled;
       }
    }
 #endif // USE_DIALUP
 
    // prepare the message for sending or queuing
    if ( !Build(!send) )
-      return false;
+      return Result_Error;
 
-   // then either send or queue it
-   bool success;
    if ( send )
    {
-      success = Send(flags);
+      if ( !PreviewBeforeSending() )
+         return Result_Cancelled;
 
-      if ( success )
+      if ( !m_UserName.empty() )
       {
-         // save it in the local folders, if any
-         for ( StringList::iterator i = m_FccList.begin();
-               i != m_FccList.end();
-               i++ )
-         {
-            wxLogTrace(TRACE_SEND, "FCCing message to %s", (*i)->c_str());
-
-            WriteToFolder(**i);
-         }
+         // we need to ask the user for password now if we need to do it as we
+         // can't use UI later (possibly from another thread)
+         String password;
+         if ( !GetPassword(password) )
+            return Result_Cancelled;
       }
+
+      return Result_Prepared;
    }
-   else // store in outbox
+   else // don't send the message now, queue it for later
    {
-      WriteToFolder(m_OutboxName);
+      // we just need to queue it, so do it immediately as saving the message to
+      // outbox shouldn't take a long time
+      if ( !WriteToFolder(m_OutboxName) )
+         return Result_Error;
 
       // increment counter in statusbar immediately
       mApplication->UpdateOutboxStatus();
 
-      // and also show what we have done with the message
-      wxString msg;
-      if(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail)
-         msg.Printf(_("Message queued in '%s'."), m_OutboxName.c_str());
-      else
-         msg.Printf(_("Article queued in '%s'."), m_OutboxName.c_str());
+      if ( outbox )
+         *outbox = m_OutboxName;
 
-      STATUSMESSAGE((msg));
+      return Result_Queued;
+   }
+}
 
-      success = true;
+bool
+SendMessageCC::PreviewBeforeSending()
+{
+   // preview message being sent if asked for it
+   bool confirmSend;
+   if ( READ_CONFIG(m_profile, MP_PREVIEW_SEND) )
+   {
+      Preview();
+
+      // if we preview it, we want to confirm it too
+      confirmSend = true;
+   }
+   else
+   {
+      confirmSend = READ_CONFIG_BOOL(m_profile, MP_CONFIRM_SEND);
    }
 
-   return success;
+   if ( confirmSend )
+   {
+      if ( !MDialog_YesNoDialog(_("Send this message?"), m_frame) )
+      {
+         return false;
+      }
+   }
+
+   return true;
 }
 
 void SendMessageCC::Preview(String *text)
@@ -1685,8 +1758,11 @@ void SendMessageCC::Preview(String *text)
 }
 
 bool
-SendMessageCC::Send(int flags)
+SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
 {
+   CHECK( errGeneral && errDetailed, false,
+            "must have valid error strings pointers" );
+
    ASSERT_MSG( m_wasBuilt, "Build() must have been called!" );
 
    if ( !MailFolder::Init() )
@@ -1694,20 +1770,7 @@ SendMessageCC::Send(int flags)
 
    MCclientLocker locker;
 
-#ifndef OS_UNIX
-   // For non-unix systems we make sure that no-one tries to run
-   // Sendmail which is unix specific. This could happen if someone
-   // imports a configuration from a remote server or something like
-   // this, so we play it safe and map all sendmail calls to SMTP
-   // instead:
-   if(m_Protocol == Prot_Sendmail)
-      m_Protocol = Prot_SMTP;
-#endif // !OS_UNIX
-
    SENDSTREAM *stream = NIL;
-
-   // SMTP/NNTP server reply
-   String reply;
 
    // construct the server string for c-client
    String server = m_ServerHost;
@@ -1720,9 +1783,7 @@ SendMessageCC::Send(int flags)
       String password;
       if ( !GetPassword(password) )
       {
-         mApplication->SetLastError(M_ERROR_CANCEL);
-
-         return false;
+         FAIL_MSG( "should have a stored password here" );
       }
 
       MailFolderCC::SetLoginData(m_UserName, password);
@@ -1760,7 +1821,8 @@ SendMessageCC::Send(int flags)
          {
             if ( useSSL != SSLSupport_TLSIfAvailable )
             {
-               ERRORMESSAGE(("SSL support is unavailable; try disabling SSL/TLS."));
+               *errGeneral = _("SSL support is unavailable; "
+                               "try disabling SSL/TLS.");
 
                return false;
             }
@@ -1800,30 +1862,6 @@ SendMessageCC::Send(int flags)
    char *hostlist[2];
    hostlist[0] = (char *)serverAsCharBuf.data();
    hostlist[1] = NIL;
-
-   // preview message being sent if asked for it
-   bool confirmSend;
-   if ( READ_CONFIG(m_profile, MP_PREVIEW_SEND) )
-   {
-      Preview();
-
-      // if we preview it, we want to confirm it too
-      confirmSend = true;
-   }
-   else
-   {
-      confirmSend = READ_CONFIG_BOOL(m_profile, MP_CONFIRM_SEND);
-   }
-
-   if ( confirmSend )
-   {
-      if ( !MDialog_YesNoDialog(_("Send this message?"), m_frame) )
-      {
-         mApplication->SetLastError(M_ERROR_CANCEL);
-
-         return false;
-      }
-   }
 
    int options = READ_CONFIG(m_profile, MP_DEBUG_CCLIENT) ? SOP_DEBUG : 0;
 
@@ -1901,8 +1939,8 @@ SendMessageCC::Send(int flags)
                   int rc = system(m_SendmailCmd + " < " + filename);
                   if ( WEXITSTATUS(rc) != 0 )
                   {
-                     ERRORMESSAGE((_("Failed to execute local MTA \"%s\""),
-                                   m_SendmailCmd.c_str()));
+                     errDetailed->Printf(_("Failed to execute local MTA \"%s\""),
+                                         m_SendmailCmd.c_str());
                   }
                   else
                   {
@@ -1911,32 +1949,22 @@ SendMessageCC::Send(int flags)
                }
                else
                {
-                  ERRORMESSAGE((_("Failed to write to temporary file \"%s\""),
-                                filename.c_str()));
+                  errDetailed->Printf(_("Failed to write to temporary file \"%s\""),
+                                      filename.c_str());
                }
             }
             else
             {
-               ERRORMESSAGE((_("Failed to get a temporary file name")));
+               *errDetailed = _("Failed to get a temporary file name");
             }
 
-            if ( success )
+            if ( !success )
             {
-               if ( !(flags & Silent) )
-               {
-                  MDialog_Message(_("Message sent."),
-                                  m_frame, // parent window
-                                  MDIALOG_MSGTITLE,
-                                  "MailSentMessage");
-               }
-            }
-            else
-            {
-               ERRORMESSAGE((_("Failed to send message via local MTA, maybe "
+               *errGeneral = _("Failed to send message via local MTA, maybe "
                                "it's not configured correctly?\n"
                                "\n"
                                "Please try using an SMTP server if you are not "
-                               " sure.")));
+                               "sure.");
             }
 
             return success;
@@ -1957,14 +1985,15 @@ SendMessageCC::Send(int flags)
       switch ( m_Protocol )
       {
          case Prot_SMTP:
-            success = smtp_mail(stream, CONST_CCAST("MAIL"), m_Envelope, GetBody()) != NIL;
-            reply = wxString::From8BitData(stream->reply);
+            success = smtp_mail(stream, CONST_CCAST("MAIL"),
+                                m_Envelope, GetBody()) != NIL;
+            *errDetailed = wxString::From8BitData(stream->reply);
             smtp_close (stream);
             break;
 
          case Prot_NNTP:
             success = nntp_mail(stream, m_Envelope, GetBody()) != NIL;
-            reply = wxString::From8BitData(stream->reply);
+            *errDetailed = wxString::From8BitData(stream->reply);
             nntp_close (stream);
             break;
 
@@ -1976,50 +2005,45 @@ SendMessageCC::Send(int flags)
       }
 
       if ( success )
-      {
-         if ( !(flags & Silent) )
-         {
-            MDialog_Message(m_Protocol == Prot_SMTP ? _("Message sent.")
-                                                    : _("Article posted."),
-                            m_frame, // parent window
-                            MDIALOG_MSGTITLE,
-                            "MailSentMessage");
-         }
-
          return true;
-      }
-      //else: failed to send/post
    }
    //else: error in opening stream
 
    MLogCircle& log = MailFolder::GetLogCircle();
-   if ( !reply.empty() )
+   if ( !errDetailed->empty() )
    {
-      log.Add(reply);
-
-      // always show the server reply but do it first so it's not the top most
-      // message show
-      ERRORMESSAGE(("%s", reply.c_str()));
+      log.Add(*errDetailed);
    }
 
    // give the general error message anyhow
-   String err = m_Protocol == Prot_SMTP ? _("Failed to send the message")
-                                        : _("Failed to post the article");
+   *errGeneral = m_Protocol == Prot_SMTP ? _("Failed to send the message")
+                                         : _("Failed to post the article");
 
    // and then try to give more details about what happened
    const String explanation = log.GuessError();
    if ( explanation.empty() )
    {
-      err += ".";
+      *errGeneral += ".";
    }
    else // have explanation
    {
-      err += ":\n\n" + explanation;
+      *errGeneral += ":\n\n" + explanation;
    }
 
-   ERRORMESSAGE(("%s", err.c_str()));
-
    return false;
+}
+
+void
+SendMessageCC::AfterSending()
+{
+   for ( StringList::iterator i = m_FccList.begin();
+         i != m_FccList.end();
+         i++ )
+   {
+      wxLogTrace(TRACE_SEND, "FCCing message to %s", (*i)->c_str());
+
+      WriteToFolder(**i);
+   }
 }
 
 // ----------------------------------------------------------------------------

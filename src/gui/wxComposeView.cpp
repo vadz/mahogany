@@ -181,6 +181,13 @@ extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
 // separate multiple addresses with commas
 #define CANONIC_ADDRESS_SEPARATOR   _T(", ")
 
+/// Ids for events sent by background threads we use.
+enum
+{
+   /// Message sending thread terminated.
+   SendThread_Done = 1
+};
+
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -302,6 +309,127 @@ String TryToGetAddressFromClipboard()
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
+
+/**
+    Information returned from message sending thread.
+ */
+class SendThreadResult
+{
+public:
+   /**
+       Create an object indicating successful message sending.
+    */
+   SendThreadResult()
+   {
+      success = true;
+   }
+
+   /**
+       Create an object indicating a failure to send the message.
+
+       This ctor is intentionally not explicit to allow easily calling
+       OnSendResult() with a (error) string instead of this object.
+
+       @param err The error message. If it's not empty, the object represents a
+         failure. Otherwise it's a successful result.
+    */
+   SendThreadResult(const wxString& err)
+      : errGeneral(err)
+   {
+      success = errGeneral.empty();
+   }
+
+   // default copy ctor, assignment operator and dtor are ok
+
+   /**
+       True if message was successfully sent or queued for later posting.
+
+       If it is false, an error occurred or sending of the message was
+       cancelled.
+    */
+   bool success;
+
+   /**
+       If not empty, the message was queued in this outbox.
+
+       Otherwise it was sent directly.
+    */
+   wxString outbox;
+
+   /**
+       General error message if sending the message failed.
+
+       It may be empty even if @c success is false if sending the message was
+       simply cancelled.
+    */
+   wxString errGeneral;
+
+   /**
+       Detailed error message.
+
+       This message is not always available but should be shown to the user if
+       it is as it may contain detailed information about the error necessary
+       for debugging it.
+    */
+   wxString errDetailed;
+};
+
+// ----------------------------------------------------------------------------
+// SendThread: background thread for sending the message
+// ----------------------------------------------------------------------------
+
+class SendThread : public wxThread
+{
+public:
+   /**
+       Creates the thread object for sending the specified message.
+
+       The thread is associated with the given wxComposeView object which will
+       be notified about its success or failure by posting a wxThreadEvent to
+       it.
+
+       The ctor just initializes the thread object but doesn't create a new
+       thread of execution, use the base class Run() method to really start the
+       thread.
+
+       @param composer The composer window to notify about the result of the
+         operation. We assume that the composer remains opened (and hence this
+         object valid) for as long as this thread is running, so the composer
+         must refuse to close before we terminate.
+       @param msg The message to send. This object should also have a lifetime
+         longer than that of this object.
+    */
+   SendThread(wxComposeView& composer, SendMessage& msg)
+      : m_composer(composer),
+        m_msg(msg)
+   {
+   }
+
+protected:
+   /// The thread entry function.
+   virtual void *Entry()
+   {
+      SendThreadResult res;
+      if ( !m_msg.SendNow(&res.errGeneral, &res.errDetailed) )
+         res.success = false;
+
+      wxThreadEvent evt;
+      evt.SetId(SendThread_Done);
+      evt.SetPayload(res);
+
+      wxQueueEvent(&m_composer, evt.Clone());
+
+      return NULL;
+   }
+
+private:
+   wxComposeView& m_composer;
+   SendMessage& m_msg;
+
+   SendMessage::Result m_result;
+
+   wxDECLARE_NO_COPY_CLASS(SendThread);
+};
 
 /*
    A wxRcptControl allows to enter one or several recipient addresses but they
@@ -914,6 +1042,9 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
 
    // identity combo notification
    EVT_CHOICE(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
+
+   // sending thread notification
+   EVT_THREAD(SendThread_Done, wxComposeView::OnSendThreadDone)
 
    EVT_IDLE(wxComposeView::OnIdle)
 END_EVENT_TABLE()
@@ -1933,11 +2064,13 @@ wxComposeView::wxComposeView(const String &name,
    m_pidEditor = 0;
    m_procExtEdit = NULL;
    m_alreadyExtEdited =
-   m_sending =
+   m_closeAfterSending =
    m_closing = false;
    m_customTemplate = false;
    m_OriginalMessage = NULL;
    m_DraftMessage = NULL;
+
+   m_msgBeingSent = NULL;
 
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
@@ -2006,6 +2139,15 @@ void wxComposeView::SetDraft(Message *msg)
 
 wxComposeView::~wxComposeView()
 {
+   if ( m_msgBeingSent )
+   {
+      FAIL_MSG( "shouldn't be in process of sending a message yet" );
+
+      // at least avoid the memory leaks
+      delete m_msgBeingSent;
+      m_msgBeingSent = NULL;
+   }
+
    delete m_rcptMain;
    WX_CLEAR_ARRAY(m_rcptExtra);
 
@@ -3419,10 +3561,21 @@ wxComposeView::CanClose() const
    String msg;
    const MPersMsgBox *persMsgBox = NULL;
 
-   // we can't close while the external editor is running (I think it will
-   // lead to a nice crash later)
-   if ( m_procExtEdit )
+   if ( m_msgBeingSent )
    {
+      // we can't close the window while we're still in process of sending a
+      // message
+      //
+      // TODO: allow cancelling the sending thread
+      wxLogError(_("Please wait until the message is sent."));
+
+      canClose = false;
+   }
+   else if ( m_procExtEdit )
+   {
+      // we can't close while the external editor is running
+      //
+      // TODO: allow doing it and just delete the editor temporary file later?
       wxLogError(_("Please terminate the external editor (PID %d) before "
                    "closing this window."), m_pidEditor);
 
@@ -3512,6 +3665,11 @@ wxComposeView::OnMenuCommand(int id)
       case WXMENU_COMPOSE_SEND_LATER:
          if ( IsReadyToSend() )
          {
+            // By default we close the window after sending the message that
+            // was edited in it but the user can explicitly choose to keep the
+            // window opened
+            m_closeAfterSending = id != WXMENU_COMPOSE_SEND_KEEP_OPEN;
+
             SendMode mode;
             if ( id == WXMENU_COMPOSE_SEND_LATER )
                mode = SendMode_Later;
@@ -3520,14 +3678,7 @@ wxComposeView::OnMenuCommand(int id)
             else
                mode = SendMode_Default;
 
-            if ( Send(mode) )
-            {
-               if ( id != WXMENU_COMPOSE_SEND_KEEP_OPEN )
-               {
-                  Close();
-               }
-               //else: sending failed, don't close the window
-            }
+            Send(mode);
          }
          break;
 
@@ -3743,7 +3894,7 @@ bool wxComposeView::OnFirstTimeFocus()
 
    // it may happen that the message is sent before the composer gets focus,
    // avoid starting the external editor by this time!
-   if ( m_sending )
+   if ( m_msgBeingSent )
       return true;
 
    // and it may also happen that the user asked for closing the composer when
@@ -4864,54 +5015,54 @@ wxComposeView::BuildMessage(int flags) const
    return msg.release();
 }
 
-bool
+void
 wxComposeView::Send(SendMode mode)
 {
-   CHECK( !m_sending, false, _T("wxComposeView::Send() reentered") );
+   CHECK_RET( !m_msgBeingSent, _T("wxComposeView::Send() reentered") );
 
-   m_sending = true;
-   class ResetVar
-   {
-   public:
-      ResetVar(bool *flag) : m_flag(flag) { }
-      ~ResetVar() { *m_flag = false; }
-
-   private:
-      bool *m_flag;
-   } reset(&m_sending);
-
-   MBusyCursor bc;
-   wxLogStatus(this, m_mode == Mode_News ? _("Posting message")
-                                         : _("Sending message..."));
-   Disable();
-   wxON_BLOCK_EXIT_OBJ1(*this, wxWindow::Enable, true);
-
-   SendMessage_obj msg(BuildMessage());
-   if ( !msg )
+   m_msgBeingSent = BuildMessage();
+   if ( !m_msgBeingSent )
    {
       wxLogError(_("Failed to create the message to send."));
 
-      return false;
+      return;
    }
 
+   // Set a flag indicating that we're sending the message and update the UI
+   // accordingly. Notice that this flag is reset, and UI restored, only by
+   // OnSendResult() so the code below must either call it directly before
+   // returning or arrange for it to be called at some later time.
+   wxLogStatus(this, m_mode == Mode_News ? _("Posting message")
+                                         : _("Sending message..."));
+   Disable();
+
+   // Set the busy cursor only while we prepare the message for sending, we
+   // don't want to leave it on while the message is being sent in the
+   // background (unlike the window which is left disabled during all this
+   // time).
+   MBusyCursor bc;
+
    // and now do send the message
-   bool success;
    if ( mode == SendMode_Later )
    {
+      wxString err;
+
       MModule_Calendar *calmod =
          (MModule_Calendar *) MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
       if(calmod)
       {
-         success = calmod->ScheduleMessage(msg.get());
+         if ( !calmod->ScheduleMessage(m_msgBeingSent) )
+            err = _("Failed to schedule message for later delivery.");
+
          calmod->DecRef();
       }
       else
       {
-         wxLogError(_("Cannot schedule message for sending later because "
-                      "the calendar module is not available."));
-
-         success = false;
+         err = _("Cannot schedule message for sending later because "
+                 "the calendar module is not available.");
       }
+
+      OnSendResult(err);
    }
    else
    {
@@ -4919,11 +5070,68 @@ wxComposeView::Send(SendMode mode)
       if ( mode == SendMode_Now )
          flags |= SendMessage::NeverQueue;
 
-      success = msg->SendOrQueue(flags);
-   }
+      SendThreadResult res;
+      switch ( m_msgBeingSent->PrepareForSending(flags, &res.outbox) )
+      {
+         case SendMessage::Result_Prepared:
+            {
+               wxScopedPtr<SendThread>
+                  thr(new SendThread(*this, *m_msgBeingSent));
+               if ( thr->Create() == wxTHREAD_NO_ERROR &&
+                     thr->Run() == wxTHREAD_NO_ERROR )
+               {
+                  // thread was successfully started and will delete itself
+                  // later, so don't delete it here ourselves
+                  thr.release();
 
-   if ( success )
+                  // it will also call OnSendResult() later, when it's done, so
+                  // return and skip calling it below
+                  return;
+               }
+
+               res = _("Failed to launch the message sending worker thread.");
+            }
+            break;
+
+         case SendMessage::Result_Queued:
+            // message was just queued for sending later, we don't need to do
+            // anything else
+            break;
+
+         case SendMessage::Result_Cancelled:
+            // sending was cancelled, indicate failure but without giving any
+            // error message which is useless in this case
+            res.success = false;
+            break;
+
+         case SendMessage::Result_Error:
+            res = _("Failed to prepare the message for sending.");
+            break;
+      }
+
+      OnSendResult(res);
+   }
+}
+
+void wxComposeView::OnSendResult(const SendThreadResult& res)
+{
+   ASSERT_MSG( m_msgBeingSent, "should be in process of sending a message" );
+
+   Enable();
+
+   if ( res.success )
+      m_msgBeingSent->AfterSending();
+   delete m_msgBeingSent;
+   m_msgBeingSent = NULL;
+
+   if ( res.success )
    {
+      // FIXME: remove this and possibly replace with an info bar.
+      MDialog_Message(_("Message sent."),
+                      this, // parent window
+                      MDIALOG_MSGTITLE,
+                      "MailSentMessage");
+
       if ( READ_CONFIG(m_Profile, MP_AUTOCOLLECT_OUTGOING) )
       {
          // remember the addresses we sent mail to
@@ -4947,50 +5155,81 @@ wxComposeView::Send(SendMode mode)
       }
 
       ResetDirty();
-      mApplication->UpdateOutboxStatus();
 
-      // show the recipients of the message
+      // show what we have done with the message
+
       String s;
       if ( m_mode == Mode_News )
       {
-         s.Printf(_("Message has been posted to %s"),
-                  GetRecipients(Recipient_Newsgroup).c_str());
+         if ( res.outbox.empty() )
+         {
+            s.Printf(_("Message has been posted to %s"),
+                     GetRecipients(Recipient_Newsgroup).c_str());
+         }
+         else
+         {
+            s.Printf(_("Article queued in '%s'."), res.outbox);
+         }
       }
       else // email message
       {
-         // NB: don't show BCC as the message might be saved in the log file
-         s.Printf(_("Message has been sent to %s"),
-                  GetRecipients(Recipient_To).c_str());
+         if ( res.outbox.empty() )
+         {
+            // NB: don't show BCC as the message might be saved in the log file
+            s.Printf(_("Message has been sent to %s"),
+                     GetRecipients(Recipient_To).c_str());
 
-         String rcptCC = GetRecipients(Recipient_Cc);
-         if ( !rcptCC.empty() )
-         {
-            s += String::Format(_(" (with courtesy copy sent to %s)"),
-                                rcptCC.c_str());
+            String rcptCC = GetRecipients(Recipient_Cc);
+            if ( !rcptCC.empty() )
+            {
+               s += String::Format(_(" (with courtesy copy sent to %s)"),
+                                   rcptCC.c_str());
+            }
+            else // no CC
+            {
+               s += '.';
+            }
          }
-         else // no CC
+         else
          {
-            s += '.';
+            s.Printf(_("Message queued in '%s'."), res.outbox);
          }
       }
 
       // avoid crashes if the message has any stray '%'s
       wxLogStatus(this, _T("%s"), s.c_str());
+
+      // we can now safely remove the draft message, if any
+      DeleteDraft();
+
+      // and close the window with this message unless we were explicitly asked
+      // to keep it opened
+      if ( m_closeAfterSending )
+         Close();
    }
    else // message not sent
    {
-      // message error already given by SendOrQueue()
+      if ( !res.errGeneral.empty() )
+      {
+         if ( !res.errDetailed.empty() )
+         {
+            wxLogError("%s", res.errDetailed);
+         }
+         //else: no detailed error message, this doesn't carry any particular
+         //      meaning unlike the absence of the general error message
+
+         wxLogError("%s", res.errGeneral);
+      }
+      //else: message sending must have been cancelled, no need to tell the
+      //      user about it
 
       wxLogStatus(this, _("Message was not sent."));
    }
+}
 
-   if ( !success )
-      return false;
-
-   // we can now safely remove the draft message, if any
-   DeleteDraft();
-
-   return true;
+void wxComposeView::OnSendThreadDone(wxThreadEvent& evt)
+{
+   OnSendResult(evt.GetPayload<SendThreadResult>());
 }
 
 void
