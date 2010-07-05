@@ -263,19 +263,6 @@ case "$GXX" in yes)
 	case "$m_cv_gxx_exceptions" in yes)
 		CXXFLAGS="$CXXFLAGS -fno-exceptions"
 	esac
-
-	dnl the same for RTTI - we don't use it neither
-	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
-		m_cv_gxx_rtti,
-		[echo 'void f(){}' >conftest.cc
-		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
-		'')	m_cv_gxx_rtti=yes ;;
-		*)	m_cv_gxx_rtti=no ;;
-		esac
-		rm -f conftest*])
-	case "$m_cv_gxx_rtti" in yes)
-		CXXFLAGS="$CXXFLAGS -fno-rtti"
-	esac
 esac
 
 dnl check whether the C++ supports the new logical operator names
