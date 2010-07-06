@@ -601,8 +601,7 @@ private:
    bool GetFolderFromProfile();
 
    // remember the old values for the settings in these variables
-   long m_nIncomingDelay,
-        m_nPingDelay;
+   long m_nIncomingDelayOld;
 
    bool m_collectOld,
         m_monitorOld;

@@ -357,7 +357,6 @@ public:
    {
       Timer_Autosave,
       Timer_PollIncoming,
-      Timer_PingFolder,
       Timer_Away,
       Timer_Max
    };

@@ -4040,8 +4040,7 @@ wxOptionsPageNewMail::wxOptionsPageNewMail(MBookCtrl *parent,
                                     ConfigField_NewMailLast,
                                     MH_OPAGE_NEWMAIL)
 {
-   m_nIncomingDelay =
-   m_nPingDelay = -1;
+   m_nIncomingDelayOld = -1;
 
    m_folder = NULL;
 }
@@ -4097,8 +4096,7 @@ bool wxOptionsPageNewMail::DoTransferOptionsToWindow()
    }
    //else: happens when editing the global settings
 
-   m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
-   m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
+   m_nIncomingDelayOld = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
 
    return wxOptionsPage::DoTransferOptionsToWindow();
 }
@@ -4158,26 +4156,18 @@ bool wxOptionsPageNewMail::DoTransferOptionsFromWindow()
 
    if ( rc )
    {
-      long nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY),
-           nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
+      long nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
 
-      if ( nIncomingDelay != m_nIncomingDelay )
+      if ( nIncomingDelay != m_nIncomingDelayOld )
       {
          wxLogTrace(_T("timer"), _T("Restarting timer for polling incoming folders"));
 
          rc = mApplication->RestartTimer(MAppBase::Timer_PollIncoming);
       }
 
-      if ( rc && (nPingDelay != m_nPingDelay) )
-      {
-         wxLogTrace(_T("timer"), _T("Restarting timer for pinging folders"));
-
-         rc = mApplication->RestartTimer(MAppBase::Timer_PingFolder);
-      }
-
       if ( !rc )
       {
-         wxLogError(_("Failed to restart the timers, please change the "
+         wxLogError(_("Failed to restart polling timer, please change the "
                       "delay to a valid value."));
       }
    }

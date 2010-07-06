@@ -1752,11 +1752,6 @@ bool wxMApp::StartTimer(Timer timer)
          }
          break;
 
-      case Timer_PingFolder:
-         // TODO - just sending an event "restart timer" which all folders
-         //        would be subscribed too should be enough
-         return true;
-
       case Timer_Away:
          delay = READ_APPCONFIG(MP_AWAY_AUTO_ENTER);
          if ( delay )
@@ -1771,8 +1766,7 @@ bool wxMApp::StartTimer(Timer timer)
          break;
 
       case Timer_Max:
-      default:
-         wxFAIL_MSG(_T("attempt to start an unknown timer"));
+         wxFAIL_MSG("invalid global timer id");
    }
 
    // timer not started
@@ -1791,10 +1785,6 @@ bool wxMApp::StopTimer(Timer timer)
       case Timer_PollIncoming:
          if ( gs_timerMailCollection )
             gs_timerMailCollection->Stop();
-         break;
-
-      case Timer_PingFolder:
-         // TODO!!!
          break;
 
       case Timer_Away:
