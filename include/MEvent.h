@@ -49,8 +49,6 @@ enum MEventId
    MEventId_ASFolderResult = 800,
    /// MEventOptionsChangeData - the program options changed
    MEventId_OptionsChange,
-   /// MEventPing - causes folders to ping themselves
-   MEventId_Ping,
    /// MEventNewADB - causes the ADB editor to update itself
    MEventId_NewADB,
    /// MEventData (no special data) - notifies everybody that the app closes
@@ -116,13 +114,6 @@ public:
 
 private:
    MailFolder *m_Folder;
-};
-
-/// MEventPingData - the event asking the folders to ping
-class MEventPingData : public MEventData
-{
-public:
-   MEventPingData() : MEventData( MEventId_Ping ) {}
 };
 
 /// MEventNewADBData - the event telling ADB editor to refresh

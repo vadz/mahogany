@@ -248,8 +248,7 @@ public:
 private:
    MailFolderCmn *m_Mf;
 
-   void *m_MEventCookie,
-        *m_MEventPingCookie;
+   void *m_MEventCookie;
 };
 
 // ----------------------------------------------------------------------------
@@ -2332,24 +2331,16 @@ MfCmnEventReceiver::MfCmnEventReceiver(MailFolderCmn *mf)
 
    m_MEventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
    ASSERT_MSG( m_MEventCookie, _T("can't reg folder with event manager"));
-
-   m_MEventPingCookie = MEventManager::Register(*this, MEventId_Ping);
-   ASSERT_MSG( m_MEventPingCookie, _T("can't reg folder with event manager"));
 }
 
 MfCmnEventReceiver::~MfCmnEventReceiver()
 {
    MEventManager::Deregister(m_MEventCookie);
-   MEventManager::Deregister(m_MEventPingCookie);
 }
 
 bool MfCmnEventReceiver::OnMEvent(MEventData& event)
 {
-   if ( event.GetId() == MEventId_Ping )
-   {
-      m_Mf->Ping();
-   }
-   else // options change
+   if ( event.GetId() == MEventId_OptionsChange )
    {
       // do update - but only if this event is for us
       MEventOptionsChangeData& data = (MEventOptionsChangeData&)event;
