@@ -52,7 +52,7 @@ extern const MOption MP_MSGS_SORTBY;
 */
 static const char *sortCriteria[] =
 {
-   gettext_noop("Arrival order"),
+   gettext_noop("Natural order"),
    gettext_noop("Date"),
    gettext_noop("Subject"),
    gettext_noop("Author"),
@@ -114,12 +114,13 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                                                _("Message sorting"),
                                                _T("MessageSortingDialog"))
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("&Sort messages by"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&Sort criteria"), FALSE,
                                              MH_DIALOG_SORTING);
 
-   wxClientDC dc(this);
-   dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-   wxCoord width, widthMax = 0;
+   const wxCoord
+      labelWidthMax = GetMaxLabelWidth(wxArrayString(NUM_LABELS, labels), this);
+
+   wxCoord widthMax = 7*wBtn;
 
    // see the comment near sortCriteria definition
    ASSERT_MSG( NUM_CRITERIA < 16, _T("too many sort criteria") );
@@ -127,34 +128,29 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    // should have enough space for them in a long
    ASSERT_MSG( NUM_SORTLEVELS < 8, _T("too many sort levels") );
 
-   size_t n;
-   for ( n = 0; n < NUM_LABELS; n++ )
-   {
-      dc.GetTextExtent(labels[n], &width, NULL);
-      if ( width > widthMax ) widthMax = width;
-   }
-
    wxLayoutConstraints *c;
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->top.SameAs(box, wxTop, 5*LAYOUT_Y_MARGIN);
    c->height.AsIs();
 
    wxStaticText *msg = new wxStaticText
                            (
                               this,
                               -1,
-                              _("\"Arrival order\" sorting order means that "
-                                "the messages are not sorted at all. Please\n"
-                                "note that using any other sorting method may "
-                                "slow down the program significantly,\n"
+                              _("\"Natural order\" sorting order means that "
+                                "the messages are not sorted at all.\n"
+                                "Please note that using any other sorting "
+                                "method may be significantly slower,\n"
                                 "especially for remote folders without "
                                 "server-side sorting support.")
                            );
    msg->SetConstraints(c);
+   if ( msg->GetSize().x > widthMax )
+      widthMax = msg->GetSize().x;
 
-   for( n = 0; n < NUM_SORTLEVELS; n++)
+   for( unsigned n = 0; n < NUM_SORTLEVELS; n++)
    {
       wxStaticText *txt = new wxStaticText(this, -1,
                                            n < NUM_LABELS
@@ -162,9 +158,9 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                                            : wxGetTranslation(labels[NUM_LABELS-1]));
       c = new wxLayoutConstraints;
       c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-      c->width.Absolute(widthMax);
+      c->width.Absolute(labelWidthMax);
       if ( n == 0 )
-         c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
+         c->top.Below(msg, 5*LAYOUT_Y_MARGIN);
       else
          c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
       c->height.AsIs();
@@ -200,17 +196,19 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
              (
                this,
                -1,
-               _("Some IMAP servers support server side sorting. It may "
-                 "be much faster to use it in this\n"
-                 "case as it avoids having to download all messages just "
-                 "to sort them.")
+               _("If IMAP server supports server side sorting, it is "
+                 "usually much faster to use it.\n"
+                 "Only uncheck the checkbox below if server sorting "
+                 "is buggy or unusually slow.")
              );
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(m_Choices[n - 1], 2*LAYOUT_Y_MARGIN);
+   c->top.Below(m_Choices[NUM_SORTLEVELS - 1], 5*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    msg->SetConstraints(c);
+   if ( msg->GetSize().x > widthMax )
+      widthMax = msg->GetSize().x;
 
    m_checkUseServerSort = new wxCheckBox
                               (
@@ -226,7 +224,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    c->height.AsIs();
    m_checkUseServerSort->SetConstraints(c);
 
-   SetDefaultSize(7*wBtn, 18*hBtn);
+   SetDefaultSize(widthMax + 4*LAYOUT_X_MARGIN, 15*hBtn);
 
    m_wasChanged = false;
 }
