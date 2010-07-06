@@ -77,7 +77,6 @@
 extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
 extern const MOption MP_FOLDER_CLOSE_DELAY;
 extern const MOption MP_MOVE_NEWMAIL;
-extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_FOLDER;
 extern const MOption MP_NEWMAIL_PLAY_SOUND;
@@ -1344,8 +1343,6 @@ MailFolderCmn::RequestUpdate()
 
 MailFolderCmn::MFCmnOptions::MFCmnOptions()
 {
-   m_ReSortOnChange = false;
-
    m_UpdateInterval = 0;
 }
 
@@ -1353,7 +1350,6 @@ bool MailFolderCmn::MFCmnOptions::operator!=(const MFCmnOptions& other) const
 {
    return m_SortParams != other.m_SortParams ||
           m_ThrParams != other.m_ThrParams ||
-          m_ReSortOnChange != other.m_ReSortOnChange ||
           m_UpdateInterval != other.m_UpdateInterval;
 }
 
@@ -1430,7 +1426,6 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 
    config.m_SortParams.Read(profile);
    config.m_ThrParams.Read(profile);
-   config.m_ReSortOnChange = READ_CONFIG_BOOL(profile, MP_MSGS_RESORT_ON_CHANGE);
    config.m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
 }
 

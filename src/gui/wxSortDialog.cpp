@@ -38,7 +38,6 @@
 // options we use
 // ----------------------------------------------------------------------------
 
-extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_MSGS_SORTBY;
 
@@ -89,16 +88,13 @@ protected:
    wxChoice    *m_Choices[NUM_CRITERIA];     // sort by what?
    wxCheckBox  *m_Checkboxes[NUM_CRITERIA];  // reverse sort order?
 
-   wxCheckBox  *m_checkReSortOnChange;       // resort on msg status change?
-
    wxCheckBox  *m_checkUseServerSort;        // use server side sorting?
 
    // dirty flag
    bool         m_wasChanged;
 
    // the dialog data
-   bool         m_ReSortOnChange,
-                m_UseServerSort;
+   bool         m_UseServerSort;
    long         m_SortOrder;
 
    DECLARE_NO_COPY_CLASS(wxMessageSortingDialog)
@@ -230,30 +226,6 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    c->height.AsIs();
    m_checkUseServerSort->SetConstraints(c);
 
-   msg = new wxStaticText
-             (
-               this,
-               -1,
-               _("When sorting by status, check the checkbox below to "
-                 "re-sort all messages when the\n"
-                 "status of one of them changes. Please note that it "
-                 "may be quite slow for big folders.")
-             );
-   c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(m_checkUseServerSort, 4*LAYOUT_Y_MARGIN);
-   c->height.AsIs();
-   msg->SetConstraints(c);
-
-   m_checkReSortOnChange = new wxCheckBox(this, -1, _("Re-sort on status change"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
-   c->height.AsIs();
-   m_checkReSortOnChange->SetConstraints(c);
-
    SetDefaultSize(7*wBtn, 18*hBtn);
 
    m_wasChanged = false;
@@ -265,7 +237,6 @@ bool wxMessageSortingDialog::TransferDataToWindow()
 
    // remmeber the initial values
    m_SortOrder = sortOrder;
-   m_ReSortOnChange = READ_CONFIG_BOOL(GetProfile(), MP_MSGS_RESORT_ON_CHANGE);
    m_UseServerSort = READ_CONFIG_BOOL(GetProfile(), MP_MSGS_SERVER_SORT);
 
    /* Sort order is stored as 4 bits per hierarchy:
@@ -290,7 +261,6 @@ bool wxMessageSortingDialog::TransferDataToWindow()
    }
 
    m_checkUseServerSort->SetValue(m_UseServerSort);
-   m_checkReSortOnChange->SetValue(m_ReSortOnChange);
 
    return TRUE;
 }
@@ -331,14 +301,6 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
       m_wasChanged = true;
 
       GetProfile()->writeEntry(MP_MSGS_SERVER_SORT, m_UseServerSort);
-   }
-
-   if ( m_checkReSortOnChange->GetValue() != m_ReSortOnChange )
-   {
-      m_ReSortOnChange = !m_ReSortOnChange;
-      m_wasChanged = true;
-
-      GetProfile()->writeEntry(MP_MSGS_RESORT_ON_CHANGE, m_ReSortOnChange);
    }
 
    return TRUE;

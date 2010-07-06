@@ -135,7 +135,6 @@ MP_MAX_MESSAGE_SIZE	MaxMsgSize	100l
 MP_MBOXDIR	FolderDir	M_EMPTYSTRING
 MP_MIMETYPES	MimeTypes	"mime.types"
 MP_MODULES	Modules	"Filters"
-MP_MSGS_RESORT_ON_CHANGE	ReSortMessagesOnChange	0l
 MP_MSGS_SEARCH_ARG	SearchArgument	"foo"
 MP_MSGS_SEARCH_CRIT	SearchCriterium	0l
 MP_MSGS_SORTBY	SortMessagesBy	55l

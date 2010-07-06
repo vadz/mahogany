@@ -337,7 +337,6 @@ extern const MOption MP_CHECK_ATTACHMENTS_REGEX;
 // sorting/threading
 extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_MSGS_SORTBY;
-extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 
 extern const MOption MP_MSGS_USE_THREADING;
 extern const MOption MP_MSGS_SERVER_THREAD;
@@ -1087,8 +1086,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGS_SERVER_SORT_NAME    "SortOnServer"
 /// sort criterium for folder listing
 #define MP_MSGS_SORTBY_NAME         "SortMessagesBy"
-/// re-sort messages on status change?
-#define MP_MSGS_RESORT_ON_CHANGE_NAME         "ReSortMessagesOnChange"
 /// use threading
 #define MP_MSGS_USE_THREADING_NAME  "ThreadMessages"
 /// use server side threading?
@@ -2070,8 +2067,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGS_SERVER_SORT_DEFVAL    1L
 /// sort criterium for folder listing (== MSO_NONE)
 #define MP_MSGS_SORTBY_DEFVAL         0L
-/// re-sort messages on status change?
-#define MP_MSGS_RESORT_ON_CHANGE_DEFVAL 0L
 /// use threading
 #define MP_MSGS_USE_THREADING_DEFVAL  1L
 /// use server side threading?

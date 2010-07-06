@@ -234,9 +234,6 @@ protected:
       /// how do we thread the messages
       ThreadParams m_ThrParams;
 
-      /// do we want to resort messages on a status change? [NOT IMPL'D]
-      bool m_ReSortOnChange;
-
       /// Timer update interval for checking folder content
       int m_UpdateInterval;
    } m_Config;
