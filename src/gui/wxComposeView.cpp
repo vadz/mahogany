@@ -5149,8 +5149,21 @@ void wxComposeView::OnSendResult(const SendThreadResult& res)
          MailFolder *mf = m_OriginalMessage->GetFolder();
          if(mf)
          {
-            mf->SetMessageFlag(m_OriginalMessage->GetUId(),
-                               MailFolder::MSG_STAT_ANSWERED, true);
+            if ( !mf->IsOpened() )
+            {
+               // we could have lost connection while composing the reply
+               //
+               // TODO: try to reopen the folder
+               wxLogWarning(_("Failed to mark the original message as "
+                              "answered because the folder \"%s\" containing "
+                              "it was closed in the meanwhile."),
+                            mf->GetName());
+            }
+            else
+            {
+               mf->SetMessageFlag(m_OriginalMessage->GetUId(),
+                                  MailFolder::MSG_STAT_ANSWERED, true);
+            }
          }
       }
 
