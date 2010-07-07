@@ -214,17 +214,47 @@ class ProcessInfo
 public:
    ProcessInfo(wxProcess *process,
                int pid,
-               const String& errormsg)
-      : m_errormsg(errormsg)
+               const String& errormsg,
+               const String& filename)
+      : m_errormsg(errormsg),
+        m_filename(filename)
    {
-      ASSERT_MSG( process && pid, "invalid process in ProcessInfo" );
+      ASSERT_MSG( process, "must have valid process in ProcessInfo ctor" );
+      ASSERT_MSG( pid, "must have valid PID in ProcessInfo ctor" );
+      ASSERT_MSG( !filename.empty(),
+                  "must have non empty file name in ProcessInfo ctor" );
 
       m_process = process;
       m_pid = pid;
    }
 
+   /**
+       Remove the temporary file used by the corresponding child process.
+
+       This is normally called by dtor but can be called explicitly before
+       destroying the object to check the return value which will be false only
+       if we failed to delete the file.
+    */
+   bool RemoveTempFile()
+   {
+      bool rc = true;
+      if ( !m_filename.empty() && wxRemove(m_filename) != 0 )
+      {
+         wxLogSysError(_("Failed to delete temporary file \"%s\""),
+                       m_filename);
+         rc = false;
+      }
+
+      // In any case, don't try to delete it again from dtor.
+      m_filename.clear();
+
+      return rc;
+   }
+
    ~ProcessInfo()
    {
+      RemoveTempFile();
+
       delete m_process;
    }
 
@@ -234,12 +264,9 @@ public:
    // get the error message
    const String& GetErrorMsg() const { return m_errormsg; }
 
-   // don't delete wxProcess object (must be called before destroying this
-   // object if the external process is still running)
-   void Detach() { m_process->Detach(); m_process = NULL; }
-
 private:
    String         m_errormsg; // error message to give if launch failed
+   String         m_filename; // temporary file to delete after child exit
    wxProcess     *m_process;  // wxWindows process info
    int            m_pid;      // pid of the process
 };
@@ -4044,8 +4071,15 @@ MessageView::LaunchProcess(const String& command,
                _("Calling external viewer '%s'"),
                command.c_str());
 
-   wxProcess *process = new wxProcess(GetEventHandlerForProcess());
-   int pid = wxExecute(command, false, process);
+   // If we pass a (temporary) file as parameter to the command, we want to
+   // monitor the child process termination to be able to remove the file as
+   // soon as it's not needed any more. However if we don't use any temporary
+   // file, we have no reason to bother with book-keeping and can just launch
+   // the process and forget about it.
+   wxProcess *process = filename.empty()
+                           ? NULL
+                           : new wxProcess(GetEventHandlerForProcess());
+   int pid = wxExecute(command, wxEXEC_ASYNC, process);
    if ( !pid )
    {
       delete process;
@@ -4058,17 +4092,9 @@ MessageView::LaunchProcess(const String& command,
       return false;
    }
 
-   if ( pid != -1 )
+   if ( process )
    {
-      ProcessInfo *procInfo = new ProcessInfo(process, pid, errormsg);
-
-      m_processes.Add(procInfo);
-
-      // The file name may be empty if no temporary files are used by this
-      // command (this is the case e.g. when opening an URL in a browser) and
-      // we won't need to delete it later in this case.
-      if ( !filename.empty() )
-         m_tempFiles.Add(filename);
+      m_processes.Add(new ProcessInfo(process, pid, errormsg, filename));
    }
 
    return true;
@@ -4109,41 +4135,27 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
 
 void MessageView::DetachAllProcesses()
 {
-   size_t n;
+   bool removedAll = true;
 
    // delete all process info objects, we don't need notifications about
    // process termination any more
    const size_t procCount = m_processes.GetCount();
-   for ( n = 0; n < procCount; n++ )
+   for ( size_t n = 0; n < procCount; n++ )
    {
       ProcessInfo *info = m_processes[n];
-      info->Detach();
+
+      if ( !info->RemoveTempFile() )
+         removedAll = false;
 
       delete info;
    }
 
    m_processes.Empty();
 
-
-   // also delete the temporary files used by them
-   bool closedAll = true;
-   const size_t tmpCount = m_tempFiles.GetCount();
-   for ( n = 0; n < tmpCount; n++ )
-   {
-      const wxString& fn = m_tempFiles[n];
-      if ( wxRemove(fn) != 0 )
-      {
-         wxLogSysError(_("Failed to delete file \"%s\""), fn.c_str());
-         closedAll = false;
-      }
-   }
-
-   if ( !closedAll )
+   if ( !removedAll )
    {
       wxLogWarning(_("Some of the temporary files couldn't have been removed."));
    }
-
-   m_tempFiles.Empty();
 }
 
 // ----------------------------------------------------------------------------
