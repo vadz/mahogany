@@ -331,9 +331,6 @@ private:
 
    // it uses our ctor
    friend class SendMessage;
-
-   // give it access to m_headerNames nad m_headerValues
-   friend class Rfc822OutputRedirector;
 };
 
 #endif // _SENDMESSAGECC_H

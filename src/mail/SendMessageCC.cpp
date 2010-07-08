@@ -188,29 +188,62 @@ PARAMETER *CreateBodyParameter(const char *name, const char *value)
 // private classes
 // ----------------------------------------------------------------------------
 
-// an object of this class temporarily redirects cclient rfc822_output to our
-// function abd restores the old function in its dtor
-//
-// this class is effectively a singleton as it locks a mutex in its ctor to
-// prevent us from trying to send more than one message at once (bad things
-// will happen inside cclient if we do)
+/**
+   Redirect c-client RFC 822 output to our own function.
+
+   An object of this class temporarily redirects c-client rfc822_output to our
+   function and restores the old function in its dtor.
+
+   This class uses a mutex internally to ensure that only single instance of it
+   is used at any time because replacing c-client RFC 822 output pointer is not
+   MT-safe. So using it from the main thread may
+ */
 class Rfc822OutputRedirector
 {
 public:
-   // the ctor may redirect rfc822 output to write bcc as well or to not do
-   // it, it is important to get it right or BCC might be sent as a message
-   // header and be seen by the recipient!
-   Rfc822OutputRedirector(bool outputBcc, SendMessageCC *msg);
+   /**
+       Flags for ctor.
+    */
+   enum
+   {
+      /// Output BCC too. If off, BCC header is not written.
+      AddBcc = 1
+   };
+
+   /**
+       Starts redirecting c-client RFC 822 output.
+
+       Until this object is destroyed, c-client rfc822_output() function will
+       use this object to format the message so it will add the extra headers
+       specified here and, if necessary, include BCC headers in output.
+
+       Ctor will block if another Rfc822OutputRedirector is already in use.
+
+       @param extraHeadersNames NUL-terminated array of names of extra headers
+         to add to the normal output.
+       @param extraHeadersValues NUL-terminated array of values of extra
+         headers, must have the same number of elements as @a extraHeadersNames.
+       @param flags May include AddBcc flag to include BCC header in output, by
+         default it is not included to avoid leaking information about BCC
+         recipients.
+    */
+   Rfc822OutputRedirector(const char **extraHeadersNames,
+                          const char **extraHeadersValues,
+                          int flags = 0);
+
+   /**
+       Dtor restores the original c-client output function.
+    */
    ~Rfc822OutputRedirector();
 
+private:
    static long FullRfc822Output(char *, ENVELOPE *, BODY *,
                                 soutr_t, void *, long);
 
-private:
-   void SetHeaders(const char **names, const char **values);
+   // the old output routine, we remember it in ctor and restore in dtor
+   void *m_oldRfc822Output;
 
-   // the old output routine
-   static void *ms_oldRfc822Output;
+   // The following variables are static as they're used by FullRfc822Output():
 
    // should we output BCC?
    static bool ms_outputBcc;
@@ -1980,7 +2013,7 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
    bool success;
    if ( stream )
    {
-      Rfc822OutputRedirector redirect(false /* no bcc */, this);
+      Rfc822OutputRedirector redirect(m_headerNames, m_headerValues);
 
       switch ( m_Protocol )
       {
@@ -2061,7 +2094,8 @@ bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
    char headers[16*1024];
 
    // install our output routine temporarily
-   Rfc822OutputRedirector redirect(true /* with bcc */, this);
+   Rfc822OutputRedirector redirect(m_headerNames, m_headerValues,
+                                   Rfc822OutputRedirector::AddBcc);
 
    return rfc822_output(headers, m_Envelope, GetBody(),
                         writer, where, NIL) != NIL;
@@ -2170,36 +2204,32 @@ static long write_str_output(void *stream, char *string)
 
 bool Rfc822OutputRedirector::ms_outputBcc = false;
 
-void *Rfc822OutputRedirector::ms_oldRfc822Output = NULL;
-
 const char **Rfc822OutputRedirector::ms_HeaderNames = NULL;
 const char **Rfc822OutputRedirector::ms_HeaderValues = NULL;
 
 MMutex Rfc822OutputRedirector::ms_mutexExtraHeaders;
 
-Rfc822OutputRedirector::Rfc822OutputRedirector(bool outputBcc,
-                                               SendMessageCC *msg)
+Rfc822OutputRedirector::Rfc822OutputRedirector(const char **extraHeadersNames,
+                                               const char **extraHeadersValues,
+                                               int flags)
 {
    ms_mutexExtraHeaders.Lock();
 
-   ms_outputBcc = outputBcc;
-   ms_oldRfc822Output = mail_parameters(NULL, GET_RFC822OUTPUT, NULL);
+   ms_outputBcc = (flags & AddBcc) != 0;
+   ms_HeaderNames = extraHeadersNames;
+   ms_HeaderValues = extraHeadersValues;
+
+   m_oldRfc822Output = mail_parameters(NULL, GET_RFC822OUTPUT, NULL);
    (void)mail_parameters(NULL, SET_RFC822OUTPUT, (void *)FullRfc822Output);
-
-   SetHeaders(msg->m_headerNames, msg->m_headerValues);
-}
-
-void Rfc822OutputRedirector::SetHeaders(const char **names, const char **values)
-{
-   ms_HeaderNames = names;
-   ms_HeaderValues = values;
 }
 
 Rfc822OutputRedirector::~Rfc822OutputRedirector()
 {
-   (void)mail_parameters(NULL, SET_RFC822OUTPUT, ms_oldRfc822Output);
+   (void)mail_parameters(NULL, SET_RFC822OUTPUT, m_oldRfc822Output);
 
-   SetHeaders(NULL, NULL);
+   // Avoid leaving dangling pointers.
+   ms_HeaderNames = NULL;
+   ms_HeaderValues = NULL;
 
    ms_mutexExtraHeaders.Unlock();
 }
@@ -2248,9 +2278,9 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
      for ( size_t n = 0; ms_HeaderNames[n]; n++ )
      {
         rfc822_header_line(&headers,
-                           (char *)ms_HeaderNames[n],
+                           const_cast<char *>(ms_HeaderNames[n]),
                            env,
-                           (char *)ms_HeaderValues[n]);
+                           const_cast<char *>(ms_HeaderValues[n]));
      }
   }
 
