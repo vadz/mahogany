@@ -253,7 +253,7 @@ private:
    static const char **ms_HeaderValues;
 
    // and a mutex to protect them
-   static MMutex ms_mutexExtraHeaders;
+   static MTMutex ms_mutexExtraHeaders;
 };
 
 // ============================================================================
@@ -2207,7 +2207,7 @@ bool Rfc822OutputRedirector::ms_outputBcc = false;
 const char **Rfc822OutputRedirector::ms_HeaderNames = NULL;
 const char **Rfc822OutputRedirector::ms_HeaderValues = NULL;
 
-MMutex Rfc822OutputRedirector::ms_mutexExtraHeaders;
+MTMutex Rfc822OutputRedirector::ms_mutexExtraHeaders;
 
 Rfc822OutputRedirector::Rfc822OutputRedirector(const char **extraHeadersNames,
                                                const char **extraHeadersValues,
