@@ -206,6 +206,9 @@ enum ConfigFields
 #endif // platform
 #endif // USE_DIALUP
 
+   ConfigField_NetworkUpdateHelp,
+   ConfigField_NetworkUpdateInterval,
+
    ConfigField_TimeoutInfo,
    ConfigField_OpenTimeout,
 #ifdef USE_TCP_TIMEOUTS
@@ -243,8 +246,7 @@ enum ConfigFields
    ConfigField_NewMailNotifyDetailsThreshold,
    ConfigField_NewMailNewOnlyIfUnseenHelp,
    ConfigField_NewMailNewOnlyIfUnseen,
-   ConfigField_NewMailUpdateHelp,
-   ConfigField_NewMailUpdateInterval,
+   ConfigField_NewMailMonitorIntervalDefaultHelp,
    ConfigField_NewMailMonitorIntervalDefault,
    ConfigField_NewMailMonitorHelp,
    ConfigField_NewMailMonitor,
@@ -1173,6 +1175,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // platform
 #endif // USE_DIALUP
 
+   { gettext_noop("Some folders will be automatically closed by the server\n"
+                  "for inactivity after a (usually long) timeout.\n"
+                  "To prevent this from happening Mahogany can keep alive\n"
+                  "the connection by checking the folder periodically.\n"
+                  "\n"
+                  "Default value should be fine for most IMAP servers, set\n"
+                  "it to lower value if your folders still get closed or\n"
+                  "to 0 if your server never closes inactive connections\n"
+                  "and keeping the connection alive is unnecessary." ),
+                                                   Field_Message, -1 },
+   { gettext_noop("&Keep alive interval in seconds"), Field_Number, -1 },
+
    { gettext_noop("\n"
                   "The following timeout values are used for TCP connections to\n"
                   "remote mail or news servers.\n"
@@ -1204,7 +1218,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Please note that the details of new mail handling must be\n"
                   "set separately for each folder, you should select a folder\n"
                   "in the tree and choose the \"Properties\" command from the\n"
-                  "\"Folder\" menu to do this."),  Field_Message |
+                  "\"Folder\" menu to do this. The options here are just the\n"
+                  "default values for the fields in that dialog.\n\n"),
+                                                   Field_Message |
                                                    Field_AppWide, -1 },
 
    { gettext_noop("Mahogany processes the new mail in several steps:\n"
@@ -1272,16 +1288,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "to all messages appearing in the folder, even already read ones."), Field_Message, -1 },
    { gettext_noop("New messages must be &unread"), Field_Bool, -1 },
 
-   { gettext_noop("The first setting below specifies how often should Mahogany\n"
-                  "update the currently opened folders while the second one\n"
-                  "specifies the default polling interval for the folders which\n"
+   { gettext_noop("This is the default polling interval for the folders that\n"
                   "are monitored permanently (even when they are not opened).\n"
-                  "You can configure a folder to be monitored in its properties dialog."),
+                  "It doesn't have any effect unless the folder is marked as\n"
+                  "being monitored in its properties dialog."),
                                                    Field_Message |
                                                    Field_AppWide, -1 },
-   { gettext_noop("&Ping folder interval in seconds"), Field_Number |
-                                                       Field_AppWide, -1 },
-   { gettext_noop("Pol&ling interval in seconds"), Field_Number |
+   { gettext_noop("Default pol&ling interval in seconds"), Field_Number |
                                                    Field_AppWide, -1 },
 
    { gettext_noop("If you check the checkbox below, Mahogany will always monitor\n"
@@ -2009,6 +2022,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // platform
 #endif // USE_DIALUP
 
+   CONFIG_NONE(), // MP_UPDATEINTERVAL help
+   CONFIG_ENTRY(MP_UPDATEINTERVAL),
+
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_TCP_OPENTIMEOUT),
 #ifdef USE_TCP_TIMEOUTS
@@ -2051,7 +2067,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NEWMAIL_UNSEEN),
 
    CONFIG_NONE(), // update help
-   CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
    CONFIG_NONE(), // monitor help
    CONFIG_NONE(), // monitor folder (MF_FLAGS_MONITOR)

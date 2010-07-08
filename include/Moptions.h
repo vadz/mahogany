@@ -1758,7 +1758,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// comment
 #define   MP_FOLDER_COMMENT_DEFVAL      ""
 /// update interval for folders in seconds
-#define   MP_UPDATEINTERVAL_DEFVAL      60
+#define   MP_UPDATEINTERVAL_DEFVAL      (25*60)
 /// close of folders delayed by
 #define MP_FOLDER_CLOSE_DELAY_DEFVAL    0L
 /// close of network connection delayed by
