@@ -125,7 +125,6 @@ extern const MOption MP_HELPFRAME_YPOS;
 extern const MOption MP_MODULES;
 extern const MOption MP_NET_OFF_COMMAND;
 extern const MOption MP_NET_ON_COMMAND;
-extern const MOption MP_POLLINCOMINGDELAY;
 extern const MOption MP_PRINT_BOTTOMMARGIN_X;
 extern const MOption MP_PRINT_BOTTOMMARGIN_Y;
 extern const MOption MP_PRINT_COLOUR;
