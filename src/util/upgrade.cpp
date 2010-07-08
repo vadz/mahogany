@@ -38,6 +38,7 @@
 #include "MFolder.h"
 #include "Message.h"
 #include "strlist.h"
+#include "ConfigSourcesAll.h"
 
 #include <wx/file.h>                   // for wxFile
 #include <wx/fileconf.h>
@@ -2806,9 +2807,13 @@ UpgradeFrom065()
 static bool
 UpgradeFrom066()
 {
-   // just purge the unnecessary MP_PGP_GET_PUBKEY and M_MSGBOX_GET_PGP_PUBKEY
+   // purge the unnecessary MP_PGP_GET_PUBKEY and M_MSGBOX_GET_PGP_PUBKEY
    mApplication->GetProfile()->DeleteEntry("PGPGetPubKey");
    wxPMessageBoxEnable("GetPGPPubKey");
+
+   // also remove the listbook settings section as we use wx persistent
+   // controls support now and so these settings are not used any more
+   AllConfigSources::Get().DeleteGroup("/Settings/ListbookPages");
 
    return true;
 }
