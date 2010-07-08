@@ -58,12 +58,6 @@ extern void CleanupFilterCache();
 MMODULE_CLEANUP(CleanupFilterCache)
 
 // ----------------------------------------------------------------------------
-// options we use here
-// ----------------------------------------------------------------------------
-
-extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
-
-// ----------------------------------------------------------------------------
 // global variables
 // ----------------------------------------------------------------------------
 
@@ -476,7 +470,6 @@ private:
    void CreateProgressDialog();
    bool GetMessage();
    void GetSenderSubject(String& from, String& subject, bool full);
-   bool TreatAsJunk();
    String CreditsCommon();
    String CreditsForDialog();
    String CreditsForStatusBar();
@@ -2940,16 +2933,6 @@ void FilterRuleApply::GetSenderSubject(String& from, String& subject, bool full)
    }
 }
 
-bool FilterRuleApply::TreatAsJunk()
-{
-   if ( m_parent->m_copiedTo.empty() )
-      return false;
-   RefCounter<MFolder> folder(MFolder::Get(m_parent->m_copiedTo));
-   CHECK( folder, false, _T("Copied to null folder?") );
-   RefCounter<Profile> profile(folder->GetProfile());
-   return READ_CONFIG_BOOL(profile.get(),MP_TREAT_AS_JUNK_MAIL_FOLDER);
-}
-
 String FilterRuleApply::CreditsCommon()
 {
    String common(_("Filtering message"));
@@ -2974,15 +2957,12 @@ String FilterRuleApply::CreditsForDialog()
       textPD = CreditsCommon();
 
       // make multiline label for the progress dialog
-      if( !TreatAsJunk() )
-      {
-         String from;
-         String subject;
-         GetSenderSubject(from, subject, true /* full */);
+      String from;
+      String subject;
+      GetSenderSubject(from, subject, true /* full */);
 
-         textPD << _T("\n    ") << _("From: ") << from
-                << _T("\n    ") << _("Subject: ") << subject;
-      }
+      textPD << _T("\n    ") << _("From: ") << from
+             << _T("\n    ") << _("Subject: ") << subject;
    }
 
    return textPD;
@@ -2992,38 +2972,35 @@ String FilterRuleApply::CreditsForStatusBar()
 {
    String textLog = CreditsCommon();
 
-   if( !TreatAsJunk() )
+   String from;
+   String subject;
+   GetSenderSubject(from, subject, false /* short */);
+
+   textLog << _T(" (");
+
+   if ( !from.empty() )
    {
-      String from;
-      String subject;
-      GetSenderSubject(from, subject, false /* short */);
-
-      textLog << _T(" (");
-
-      if ( !from.empty() )
-      {
-         textLog << _("from ") << from << ' ';
-      }
-
-      if ( !subject.empty() )
-      {
-         // the length of status bar text is limited under Windows and, anyhow,
-         // status bar is not that wide so truncate subjects to something
-         // reasonable
-         if ( subject.length() > 40 )
-         {
-            subject = subject.Left(18) + _T("...") + subject.Right(18);
-         }
-
-         textLog << _("about '") << subject << '\'';
-      }
-      else
-      {
-         textLog << _("without subject");
-      }
-
-      textLog << ')';
+      textLog << _("from ") << from << ' ';
    }
+
+   if ( !subject.empty() )
+   {
+      // the length of status bar text is limited under Windows and, anyhow,
+      // status bar is not that wide so truncate subjects to something
+      // reasonable
+      if ( subject.length() > 40 )
+      {
+         subject = subject.Left(18) + _T("...") + subject.Right(18);
+      }
+
+      textLog << _("about '") << subject << '\'';
+   }
+   else
+   {
+      textLog << _("without subject");
+   }
+
+   textLog << ')';
 
    return textLog;
 }
