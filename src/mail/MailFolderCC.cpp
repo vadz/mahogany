@@ -5013,11 +5013,7 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
    String msg = _("Mail log");
    if( mf )
       msg << _T(" (") << mf->GetName() << _T(')');
-   msg << _T(": ") << str
-#ifdef DEBUG
-       << _(", error level: ") << strutil_ultoa(errflg)
-#endif
-      ;
+   msg << _T(": ") << str;
 
    wxLogLevel loglevel;
    switch ( errflg )
