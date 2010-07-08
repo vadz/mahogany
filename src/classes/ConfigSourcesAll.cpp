@@ -466,7 +466,7 @@ AllConfigSources::Write(const String& path,
       {
          config = *i;
          if ( config->HasEntry(fullpath) ||
-               !(fullpathUnsusp.empty() && config->HasEntry(fullpathUnsusp)) )
+               (!fullpathUnsusp.empty() && config->HasEntry(fullpathUnsusp)) )
          {
             // write to this one to overwrite the existing entry
             break;
