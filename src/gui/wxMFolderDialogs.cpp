@@ -72,6 +72,8 @@
 #  include <wx/stattext.h>      // for wxStaticText
 #endif // USE_PCH
 
+#include <wx/persist/bookctrl.h>
+
 #include "MFolderDialogs.h"
 #include "MFolder.h"
 #include "MailFolder.h"
@@ -2670,7 +2672,6 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
                                                wxFolderCreateDialog *dlg)
                       : wxNotebookWithImages
                         (
-                         _T("FolderCreateNotebook"),
                          parent,
                          s_aszImages
                         )
@@ -2695,6 +2696,8 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
 #ifdef USE_PYTHON
    (void)new wxOptionsPagePython(this, profile);
 #endif // USE_PYTHON
+
+   wxPersistentRegisterAndRestore(this, "FolderCreateNotebook");
 }
 
 // ----------------------------------------------------------------------------

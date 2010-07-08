@@ -583,10 +583,9 @@ bool wxNotebookWithImages::ShouldShowIcons()
    return (int)READ_APPCONFIG(MP_TBARIMAGES) + 1 != TbarShow_Text;
 }
 
-wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
-                                           wxWindow *parent,
+wxNotebookWithImages::wxNotebookWithImages(wxWindow *parent,
                                            const char *aszImages[])
-                    : MPBookCtrl(configPath, parent, -1)
+                    : MBookCtrl(parent, -1)
 {
    if ( ShouldShowIcons() )
    {

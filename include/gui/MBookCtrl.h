@@ -26,9 +26,6 @@
    class WXDLLIMPEXP_FWD_CORE wxListbook;
    typedef wxListbook MBookCtrl;
 
-   class wxPListbook;
-   typedef wxPListbook MPBookCtrl;
-
    #define M_EVT_BOOK_PAGE_CHANGED wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED
 
    #define MBookEvent wxListbookEvent
@@ -36,9 +33,6 @@
 #else
    class WXDLLIMPEXP_FWD_CORE wxNotebook;
    typedef wxNotebook MBookCtrl;
-
-   class wxPNotebook;
-   typedef wxPNotebook MPBookCtrl;
 
    #define M_EVT_BOOK_PAGE_CHANGED wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED
 

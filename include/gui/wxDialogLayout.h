@@ -319,7 +319,7 @@ protected:
 
 
    // the notebook occupying the main part of the dialog
-   MPBookCtrl *m_notebook;
+   MBookCtrl *m_notebook;
 
 private:
    // implement base class pure virtual in terms of our existing function for
@@ -663,14 +663,12 @@ private:
 // a notebook with images
 // ----------------------------------------------------------------------------
 
-class wxNotebookWithImages : public MPBookCtrl
+class wxNotebookWithImages : public MBookCtrl
 {
 public:
-   // configPath is used to store the last active page, aszImages is the NULL
-   // terminated array of the icon names (image size should be 32x32)
-   wxNotebookWithImages(const wxString& configPath,
-                        wxWindow *parent,
-                        const char *aszImages[]);
+   // aszImages is the NULL terminated array of the icon names (image size
+   // should be 32x32)
+   wxNotebookWithImages(wxWindow *parent, const char *aszImages[]);
 
    virtual ~wxNotebookWithImages();
 

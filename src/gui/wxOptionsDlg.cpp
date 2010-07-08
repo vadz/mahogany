@@ -44,6 +44,7 @@
 
 #include <wx/confbase.h>
 #include <wx/grid.h>
+#include <wx/persist/bookctrl.h>
 
 #if defined(OS_WIN) && defined(USE_DIALUP)
 #  include <wx/dialup.h>          // for wxDialUpManager
@@ -4800,7 +4801,6 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
                           Profile *profile
                          )
                        : wxNotebookWithImages(
-                                              configForNotebook,
                                               parent,
                                               GetImagesArray(nPages, pageDesc)
                                              )
@@ -4811,7 +4811,6 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
    else
       profile = Profile::CreateProfile(wxEmptyString);
 
-
    for ( size_t n = 0; n < nPages; n++ )
    {
       // the page ctor will add it to the notebook
@@ -4819,6 +4818,8 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
       wxOptionsPage *page = desc.New(this, profile, n);
       page->Layout();
    }
+
+   wxPersistentRegisterAndRestore(this, configForNotebook);
 
    profile->DecRef();
 }
@@ -4878,7 +4879,7 @@ wxCOMPILE_TIME_ASSERT(
 
 // create the control and add pages too
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
-                 : wxNotebookWithImages(_T("OptionsNotebook"), parent, ms_aszImages)
+                 : wxNotebookWithImages(parent, ms_aszImages)
 {
    Profile_obj profile(GetProfile());
 
@@ -4902,6 +4903,8 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPageTest(this, profile);
 #endif // USE_TEST_PAGE
    new wxOptionsPageOthers(this, profile);
+
+   wxPersistentRegisterAndRestore(this, "OptionsNotebook");
 }
 
 // ----------------------------------------------------------------------------

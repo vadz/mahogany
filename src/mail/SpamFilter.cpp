@@ -30,6 +30,7 @@
 #endif // USE_PCH
 
 #include <wx/imaglist.h>
+#include <wx/persist/bookctrl.h>
 
 #include "MAtExit.h"
 
@@ -133,7 +134,7 @@ public:
 
    virtual void CreateNotebook(wxPanel *panel)
    {
-      m_notebook = new MPBookCtrl(_T("SpamOptions"), panel);
+      m_notebook = new MBookCtrl(panel, wxID_ANY);
       Connect(M_EVT_BOOK_PAGE_CHANGED,
                MBookEventHandler(SpamOptionsDialog::OnPageChanged));
 
@@ -151,6 +152,8 @@ public:
 
          p->CreateOptionPage(m_notebook, m_profile);
       }
+
+      wxPersistentRegisterAndRestore(m_notebook, "SpamOptions");
    }
 
    virtual bool TransferDataFromWindow()
