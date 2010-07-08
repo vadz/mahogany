@@ -216,9 +216,6 @@ static bool mm_disable_flags = false;
 /// show cclient debug output (accessed from
 static bool mm_show_debug = false;
 
-/// loglevel for cclient error messages:
-static int cc_loglevel = wxLOG_Error;
-
 /// the cclient mail folder driver name
 static const char *CCLIENT_DRIVER_NAME = "cclient";
 
@@ -796,22 +793,6 @@ private:
 // temporarily disable callbacks and errors from cclient
 class CCAllDisabler : public CCCallbackDisabler, public CCErrorDisabler
 {
-};
-
-// temporarily change cclient log level for all messages
-class CCLogLevelSetter
-{
-public:
-   CCLogLevelSetter(int level)
-   {
-      m_level = cc_loglevel;
-      cc_loglevel = level;
-   }
-
-   ~CCLogLevelSetter() { cc_loglevel = m_level; }
-
-private:
-   int m_level;
 };
 
 // temporarily set the given as the default folder to use for cclient
@@ -5032,9 +5013,7 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
          // fall through
 
       case ERROR:
-         // usually just wxLOG_Error but may be set to something else to
-         // temporarily suppress the errors
-         loglevel = cc_loglevel;
+         loglevel = wxLOG_Error;
          break;
 
       case PARSE:
