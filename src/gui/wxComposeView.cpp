@@ -3678,6 +3678,15 @@ wxComposeView::OnMenuCommand(int id)
             else
                mode = SendMode_Default;
 
+            // Save the composer contents before sending it: this is really
+            // just a workaround for the design deficiency of c-client which
+            // prevents us from both sending the message and saving it in the
+            // same time from multiple threads (because both of these actions
+            // need to instantiate Rfc822OutputRedirector in SendMessageCC.cpp)
+            // but it could be argued that it makes sense as like this we'll
+            // never lose the final version of the message.
+            AutoSave();
+
             Send(mode);
          }
          break;
