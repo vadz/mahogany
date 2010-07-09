@@ -15,6 +15,8 @@
 
 #include "MailFolder.h"
 
+#include "MThread.h"
+
 // ----------------------------------------------------------------------------
 // MFDriver
 // ----------------------------------------------------------------------------
@@ -117,9 +119,23 @@ public:
     */
    //@{
 
-   /// initialize the driver, return TRUE if ok
+   /**
+       Initialize the driver, implicitly called by all the other methods.
+
+       This function is MT-safe and can be concurrently called from multiple
+       threads. Only one of them will actually initialize the driver (we
+       currently suppose that it doesn't matter which one) and all subsequent
+       calls will simply return true immediately.
+    */
    bool Initialize()
-      { return m_initialized ? true : (m_initialized = (*m_init)()); }
+   {
+      MutexLocker<MTMutex> lock(m_mutexInit);
+
+      if ( !m_initialized )
+         m_initialized = (*m_init)();
+
+      return true;
+   }
 
    /// return a new folder object, arguments are the same as for MF::OpenFolder
    MailFolder *OpenFolder(const MFolder *folder,
@@ -175,6 +191,9 @@ private:
 
    /// the name of this driver
    const char *m_name;
+
+   /// mutex protecting Initialize()
+   MTMutex m_mutexInit;
 
    /// has the driver been initialized successfully?
    bool m_initialized;
