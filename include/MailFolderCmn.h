@@ -219,13 +219,18 @@ protected:
    //@{
    struct MFCmnOptions
    {
-      MFCmnOptions();
-
-      bool operator!=(const MFCmnOptions& other) const;
+      MFCmnOptions() { m_UpdateInterval = 0; }
 
       bool operator==(const MFCmnOptions& other) const
       {
-         return !(*this != other);
+         return m_SortParams != other.m_SortParams ||
+                m_ThrParams != other.m_ThrParams ||
+                m_UpdateInterval != other.m_UpdateInterval;
+      }
+
+      bool operator!=(const MFCmnOptions& other) const
+      {
+         return !(*this == other);
       }
 
       /// how to sort the list of messages

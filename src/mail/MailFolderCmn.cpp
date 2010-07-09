@@ -1338,22 +1338,6 @@ MailFolderCmn::RequestUpdate()
 }
 
 // ----------------------------------------------------------------------------
-// MFCmnOptions
-// ----------------------------------------------------------------------------
-
-MailFolderCmn::MFCmnOptions::MFCmnOptions()
-{
-   m_UpdateInterval = 0;
-}
-
-bool MailFolderCmn::MFCmnOptions::operator!=(const MFCmnOptions& other) const
-{
-   return m_SortParams != other.m_SortParams ||
-          m_ThrParams != other.m_ThrParams ||
-          m_UpdateInterval != other.m_UpdateInterval;
-}
-
-// ----------------------------------------------------------------------------
 // MailFolderCmn options handling
 // ----------------------------------------------------------------------------
 
