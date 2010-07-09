@@ -344,34 +344,5 @@ private:
    friend class MfCloseEntry;
 };
 
-class FilterNewMailContext
-{
-public:
-   FilterNewMailContext(RefCounter<FilterRule> rule)
-   {
-      if( !m_instance )
-      {
-         m_instance = this;
-         m_rule = rule;
-      }
-   }
-   ~FilterNewMailContext()
-   {
-      if( m_instance == this )
-      {
-         m_instance = NULL;
-         m_rule.reset();
-      }
-   }
-
-   static bool IsInStack() { return m_instance != NULL; }
-   static RefCounter<FilterRule> GetFilter() { return m_instance->m_rule; }
-
-private:
-   RefCounter<FilterRule> m_rule;
-   
-   static FilterNewMailContext *m_instance;
-};
-
 #endif // MAILFOLDERCMN_H
 

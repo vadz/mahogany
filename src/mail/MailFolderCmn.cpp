@@ -1577,9 +1577,6 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(%lu msgs)"),
               GetName().c_str(), (unsigned long)uidsNew.GetCount());
 
-   // Shut up some messages down in OverviewData::UpdateProgress
-   FilterNewMailContext context(RefCounter<FilterRule>::convert(filterRule));
-
    // we're almost surely going to look at all new messages, so pre-cache them
    // all at once
    CacheLastMessages(uidsNew.GetCount());
@@ -2389,5 +2386,3 @@ void MailFolderCmnCleanup()
 }
 
 static MFSubSystem gs_subsysCmn(MailFolderCmnInit, MailFolderCmnCleanup);
-
-FilterNewMailContext *FilterNewMailContext::m_instance;
