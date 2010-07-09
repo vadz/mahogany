@@ -243,9 +243,6 @@ protected:
       int m_UpdateInterval;
    } m_Config;
 
-   /// Use the new options from m_Config
-   virtual void DoUpdate();
-
    /// Update m_Config info from profile.
    void UpdateConfig(void);
 
@@ -261,9 +258,6 @@ protected:
 
    /// our listing or NULL if not created yet
    HeaderInfoList *m_headers;
-
-   /// a timer to prevent folder from closing
-   class MailFolderKeepAliveTimer *m_keepAliveTimer;
 
    /** @name Mail folder events data */
    //@{
@@ -331,6 +325,26 @@ private:
                              const UIdArray *uidsNew,
                              MsgnoType countNew,
                              MailFolder *mf);
+
+   /**
+       @name Keep alive stuff.
+    */
+   //@{
+
+   /// Read the keep alive interval from config.
+   void ReadKeepAliveInterval(MFCmnOptions& config);
+
+   /// Update the state of keep alive timer.
+   void UpdateKeepAliveTimer();
+
+   /// a timer to prevent folder from closing, initially NULL
+   class MailFolderKeepAliveTimer *m_keepAliveTimer;
+
+   /// true if the folder should be prevented from closing because of inactivity
+   bool m_shouldKeepAlive;
+
+   //@}
+
 
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;

@@ -211,8 +211,16 @@ public:
    /** @name Opening folders */
    //@{
    /**
-     Open the specified mail folder. May create the folder if it doesn't exist
-     yet.
+     Open the specified mail folder.
+
+     May create the folder if it doesn't exist yet.
+
+     Notice that the behaviour of the folder is quite different in interactive
+     (when it has a non-NULL @a frame) and not-interactive modes. Notably the
+     folder won't be kept alive and won't support sorting/threading when opened
+     non-interactively because this is only necessary for the folders shown to
+     the user. So make sure to provide a non-NULL @a frame argument if you do
+     intend to present the folder contents to the user.
 
      @param mfolder the MFolder object identifying the folder to use
      @param openmode the mode for opening the folder, read/write by default

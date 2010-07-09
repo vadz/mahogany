@@ -602,6 +602,7 @@ MailFolderCmn::MailFolderCmn()
    m_headers = NULL;
 
    m_frame = NULL;
+   m_shouldKeepAlive = false;
 
    m_statusChangeData = NULL;
    m_expungeData = NULL;
@@ -1370,7 +1371,8 @@ MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind /* kind */)
 
       m_Config = config;
 
-      DoUpdate();
+      if ( config.m_UpdateInterval != m_Config.m_UpdateInterval )
+         UpdateKeepAliveTimer();
 
       if ( listingChanged )
       {
@@ -1385,12 +1387,25 @@ MailFolderCmn::UpdateConfig(void)
 {
    ReadConfig(m_Config);
 
-   DoUpdate();
+   // The timer interval might have changed.
+   UpdateKeepAliveTimer();
 }
 
 void
-MailFolderCmn::DoUpdate()
+MailFolderCmn::UpdateKeepAliveTimer()
 {
+   if ( !m_shouldKeepAlive )
+   {
+      // This folder doesn't need to be kept alive because it's opened for
+      // non-interactive use anyhow.
+
+      // Just a sanity check, it doesn't make sense to have this timer in this
+      // case.
+      ASSERT( !m_keepAliveTimer );
+
+      return;
+   }
+
    int interval = m_Config.m_UpdateInterval * 1000;
    if ( interval )
    {
@@ -1414,12 +1429,19 @@ MailFolderCmn::DoUpdate()
    }
    else // interval == 0, keep alive disabled
    {
+      // Don't delete the keep alive timer here, we might have a timer event
+      // already pending for it and deleting it before it can handle it would
+      // result in a crash. Also, if we had a timer before it's likely that we
+      // may need it again so keep the timer but just don't use it for now.
       if ( m_keepAliveTimer )
-      {
-         delete m_keepAliveTimer;
-         m_keepAliveTimer = NULL;
-      }
+         m_keepAliveTimer->Stop();
    }
+}
+
+void
+MailFolderCmn::ReadKeepAliveInterval(MFCmnOptions& config)
+{
+   config.m_UpdateInterval = READ_CONFIG(GetProfile(), MP_UPDATEINTERVAL);
 }
 
 void
@@ -1429,7 +1451,9 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 
    config.m_SortParams.Read(profile);
    config.m_ThrParams.Read(profile);
-   config.m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
+
+   if ( m_shouldKeepAlive )
+      ReadKeepAliveInterval(config);
 }
 
 // ----------------------------------------------------------------------------
@@ -2313,6 +2337,25 @@ wxFrame *MailFolderCmn::SetInteractiveFrame(wxFrame *frame)
 {
    wxFrame *frameOld = m_frame;
    m_frame = frame;
+
+   // If we're being associated with a frame, it means that we'll be used
+   // interactively so keep the folder alive to prevent it from closing before
+   // the users eyes, however even if we're unassociated from it in the future
+   // we still keep the flag set to true as the user may return to this folder
+   // in the UI and doesn't expect it to close because of inactivity in the
+   // meanwhile
+   if ( m_frame != NULL && !m_shouldKeepAlive )
+   {
+      m_shouldKeepAlive = true;
+
+      // This wasn't done before because m_shouldKeepAlive was false, so read
+      // the keep alive interval from config now.
+      ReadKeepAliveInterval(m_Config);
+
+      // And start the timer if needed.
+      UpdateKeepAliveTimer();
+   }
+
    return frameOld;
 }
 
