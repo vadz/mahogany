@@ -2407,10 +2407,9 @@ bool MfCmnEventReceiver::OnMEvent(MEventData& event)
 
 bool MailFolderCmnInit()
 {
-   if ( !gs_MailFolderCloser )
-   {
-      gs_MailFolderCloser = new MfCloser;
-   }
+   ASSERT_MSG( !gs_MailFolderCloser, "shouldn't be called more than once" );
+
+   gs_MailFolderCloser = new MfCloser;
 
    return true;
 }

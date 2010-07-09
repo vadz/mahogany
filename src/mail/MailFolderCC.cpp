@@ -170,7 +170,19 @@ extern const MPersMsgBox *M_MSGBOX_NO_NET_PING_ANYWAY;
 extern void Pop3_SaveFlags(const String& folderName, MAILSTREAM *stream);
 extern void Pop3_RestoreFlags(const String& folderName, MAILSTREAM *stream);
 
-bool MailFolderCCInit();
+/**
+    Trivial wrapper for MailFolderCC::CClientInit().
+
+    We only have this function because we can declare just it a friend in
+    MailFolderCC instead of making MFDriver itself our friend.
+ */
+bool MailFolderCCInit()
+{
+   MailFolderCC::CClientInit();
+
+   return true;
+}
+
 void MailFolderCCCleanup();
 
 // ----------------------------------------------------------------------------
@@ -221,8 +233,9 @@ static bool mm_disable_flags = false;
 /// show cclient debug output (accessed from
 static bool mm_show_debug = false;
 
-/// the cclient mail folder driver name
-static const char *CCLIENT_DRIVER_NAME = "cclient";
+/// the cclient mail folder driver name (also used in SendMessageCC.cpp, hence
+/// extern)
+const char *CCLIENT_DRIVER_NAME = "cclient";
 
 /// our mail folder factory object
 static MFDriver gs_driverCC
@@ -4717,13 +4730,6 @@ CCStreamCleaner::~CCStreamCleaner()
 // functions used by MailFolder initialization/shutdown code
 // ----------------------------------------------------------------------------
 
-bool MailFolderCCInit(void)
-{
-   MailFolderCC::CClientInit();
-
-   return true;
-}
-
 void MailFolderCCCleanup(void)
 {
    ServerInfoEntryCC::DeleteAll();
@@ -4744,7 +4750,7 @@ void MailFolderCCCleanup(void)
 #endif // USE_DIALUP
 }
 
-static MFSubSystem gs_subsysCC(MailFolderCCInit, MailFolderCCCleanup);
+static MFSubSystem gs_subsysCC(NULL, MailFolderCCCleanup);
 
 // ----------------------------------------------------------------------------
 // Some news spool support (TODO: move out from here)

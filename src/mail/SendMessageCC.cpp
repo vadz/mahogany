@@ -39,6 +39,7 @@
 #include "AddressCC.h"
 #include "Message.h"
 #include "MFolder.h"
+#include "mail/Driver.h"
 
 #ifdef OS_UNIX
 #  include "sysutil.h"
@@ -1798,7 +1799,10 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
 
    ASSERT_MSG( m_wasBuilt, "Build() must have been called!" );
 
-   if ( !MailFolder::Init() )
+   // we need to initialize c-client if it hadn't been done yet
+   extern const char *CCLIENT_DRIVER_NAME;
+   MFDriver * const driverCC = MFDriver::Get(CCLIENT_DRIVER_NAME);
+   if ( !driverCC || !driverCC->Initialize() )
       return false;
 
    SENDSTREAM *stream = NIL;

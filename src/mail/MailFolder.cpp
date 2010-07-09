@@ -37,6 +37,7 @@
 
 #include "Sequence.h"
 #include "LogCircle.h"
+#include "MThread.h"
 
 #include "MFPrivate.h"
 #include "mail/Driver.h"
@@ -95,10 +96,27 @@ MFSubSystem *MFSubSystem::ms_initilizers = NULL;
 // MailFolder initialization and shutdown
 // ----------------------------------------------------------------------------
 
+namespace
+{
+   // This mutex protects gs_mfInitDone below.
+   MTMutex gs_mfInitMutex;
+
+   // Becomes true once the mail subsystem is successfully initialized.
+   bool gs_mfInitDone = false;
+}
+
 /* static */
 bool
 MailFolder::Init()
 {
+   // This function can be called from any thread that opens a mail folder or
+   // sends a message so we need to protect gs_mfInitDone from concurrent access
+   // from different threads.
+   MutexLocker<MTMutex> lock(gs_mfInitMutex);
+
+   if ( gs_mfInitDone )
+      return true;
+
    for ( MFSubSystem *subsys = MFSubSystem::GetFirst();
          subsys;
          subsys = subsys->GetNext() )
@@ -111,6 +129,8 @@ MailFolder::Init()
       }
    }
 
+   gs_mfInitDone = true;
+
    return true;
 }
 
@@ -118,6 +138,15 @@ MailFolder::Init()
 void
 MailFolder::CleanUp()
 {
+   // Notice that unlike Init() above we're only called from the main thread at
+   // shutdown so there is no need to use a mutex here.
+   if ( !gs_mfInitDone )
+      return;
+
+   // This shouldn't matter but reset it just in case we ever support more than
+   // one init/shutdown cycle.
+   gs_mfInitDone = false;
+
    ServerInfoEntry::DeleteAll();
    MFPool::DeleteAll();
 
