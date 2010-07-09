@@ -147,9 +147,6 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
 
    c = new wxLayoutConstraints;
 
-#if wxCHECK_VERSION(2, 9, 0)
-   // in wx 2.8 wxTextEntry doesn't exist and hence wxPTextEntry doesn't derive
-   // from it and this wouldn't compile
    wxFileBrowseButton *btnBrowse = new wxFileBrowseButton(m_txtCommand, this);
 
    c->centreY.SameAs(m_labelCommand, wxCentreY);
@@ -160,9 +157,6 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
 
    c = new wxLayoutConstraints;
    c->right.SameAs(btnBrowse, wxLeft, LAYOUT_X_MARGIN);
-#else // wx < 2.9
-   c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
-#endif // wx 2.9/2.8
    c->centreY.SameAs(m_labelCommand, wxCentreY);
    c->left.RightOf(m_labelCommand, LAYOUT_X_MARGIN);
    c->height.AsIs();

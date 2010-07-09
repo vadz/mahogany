@@ -269,7 +269,6 @@ protected:
       return DoWrite(ld);
    }
 
-#if wxCHECK_VERSION(2, 9, 0)
    virtual bool DoReadBinary(const wxString& key, wxMemoryBuffer* buf) const
    {
       FAIL_MSG( "binary data unsupported" );
@@ -281,7 +280,6 @@ protected:
       FAIL_MSG( "binary data unsupported" );
       return false;
    }
-#endif // wx 2.9.0
 
 private:
    AllConfigSources& m_configSources;

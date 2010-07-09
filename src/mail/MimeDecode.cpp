@@ -37,20 +37,6 @@ static inline unsigned char *UCHAR_CCAST(const char *s)
    return reinterpret_cast<unsigned char *>(const_cast<char *>(s));
 }
 
-// hide differences between wxString::FromAscii() in 2.8 and 2.9
-static inline String FromAscii(const char *p, size_t len)
-{
-   wxUnusedVar(len); // unused only with 2.8
-
-   return wxString::FromAscii
-                    (
-                        p
-#if wxCHECK_VERSION(2, 9, 0)
-                        , len
-#endif
-                    );
-}
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -328,7 +314,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
                {
                   // CharsetToEncoding() returns this for US-ASCII but
                   // wxCSConv() doesn't accept it
-                  textDecoded = FromAscii(ctext, len);
+                  textDecoded = wxString::FromAscii(ctext, len);
                }
                else // real conversion needed
                {
@@ -558,7 +544,7 @@ EncodeText(const String& in,
       }
 
       // put into string as we might want to do some more replacements...
-      String encword(FromAscii(CHAR_CAST(textEnc), lenEnc));
+      String encword(wxString::FromAscii(CHAR_CAST(textEnc), lenEnc));
 
       // hack: rfc822_8bit() doesn't encode spaces normally but we must
       // do it inside the headers

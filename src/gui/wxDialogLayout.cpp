@@ -240,17 +240,6 @@ wxStaticText *CreateMessageForControl(wxWindow *parent,
 
    pLabel->MoveBeforeInTabOrder(control);
 
-   // we don't use ids to find controls with wx 2.9+
-#if !wxCHECK_VERSION(2, 9, 0)
-   // we have to make sure that the control id follows the label id as the code
-   // elsewhere relies on this
-   int idLabel = pLabel->GetId();
-   ASSERT_MSG( control->GetId() == wxWindow::PrevControlId(idLabel),
-               _T("control should have been created right before") );
-   pLabel->SetId(control->GetId());
-   control->SetId(idLabel);
-#endif // wx < 2.9
-
    return pLabel;
 }
 
@@ -450,13 +439,7 @@ CreateFileEntry(wxWindow *parent,
 static
 void EnableWindowLabel(wxWindow *parent, wxWindow *control, bool bEnable)
 {
-#if wxCHECK_VERSION(2, 9, 0)
    wxWindow *win = control->GetPrevSibling();
-#else // wx 2.8
-   // NB: we assume that the control ids are consecutive
-   long id = wxWindow::PrevControlId(control->GetId());
-   wxWindow *win = parent->FindWindow(id);
-#endif // wx 2.9/2.8
 
    if ( win == NULL ) {
       wxFAIL_MSG(_T("can't find label for the text entry zone"));
@@ -480,13 +463,7 @@ void EnableTextWithLabel(wxWindow *parent, wxTextCtrl *control, bool bEnable)
 
 void EnableTextWithButton(wxWindow *parent, wxTextCtrl *control, bool bEnable)
 {
-#if wxCHECK_VERSION(2, 9, 0)
    wxWindow *win = control->GetNextSibling();
-#else // wx 2.8
-   // NB: we assume that the control ids are consecutive
-   long id = wxWindow::NextControlId(control->GetId());
-   wxWindow *win = parent->FindWindow(id);
-#endif // wx 2.9/2.8
 
    if ( win == NULL ) {
       wxFAIL_MSG(_T("can't find browse button for the text entry zone"));
@@ -1070,12 +1047,7 @@ void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
 
 wxStaticText *wxEnhancedPanel::GetLabelForControl(wxControl *control)
 {
-#if wxCHECK_VERSION(2, 9, 0)
    wxWindow *win = control->GetPrevSibling();
-#else // wx 2.8
-   long id = wxWindow::PrevControlId(control->GetId());
-   wxWindow *win = FindWindow(id);
-#endif // wx 2.9/2.8
 
    return wxDynamicCast(win, wxStaticText);
 }

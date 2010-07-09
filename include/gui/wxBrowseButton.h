@@ -19,10 +19,6 @@
 #   include <wx/textctrl.h>
 #endif // USE_PCH
 
-#if wxCHECK_VERSION(2, 9, 0)
-   #define wxHAS_TEXT_ENTRY
-#endif
-
 // forward declaration
 class MFolder;
 class WXDLLIMPEXP_FWD_CORE wxStaticBitmap;
@@ -90,12 +86,9 @@ public:
       : wxBrowseButton(parent, tooltip)
    {
       m_text = text;
-#ifdef wxHAS_TEXT_ENTRY
       m_textWin = text;
-#endif // wxHAS_TEXT_ENTRY
    }
 
-#ifdef wxHAS_TEXT_ENTRY
    wxTextBrowseButton(wxComboBox *text,
                       wxWindow *parent,
                       const wxString& tooltip)
@@ -104,7 +97,6 @@ public:
       m_text = text;
       m_textWin = text;
    }
-#endif // wxHAS_TEXT_ENTRY
 
    // enable/disable associated text control with us
    virtual bool Enable(bool enable)
@@ -112,11 +104,7 @@ public:
       if ( !wxButton::Enable(enable) )
          return false;
 
-#ifdef wxHAS_TEXT_ENTRY
       m_textWin->Enable(enable);
-#else // !wxHAS_TEXT_ENTRY
-      m_text->Enable(enable);
-#endif // wxHAS_TEXT_ENTRY/!wxHAS_TEXT_ENTRY
 
       return wxButton::Enable(enable);
    }
@@ -128,20 +116,12 @@ public:
    // get the associated control
    wxWindow *GetWindow() const
    {
-#ifdef wxHAS_TEXT_ENTRY
       return m_textWin;
-#else // !wxHAS_TEXT_ENTRY
-      return m_text;
-#endif // wxHAS_TEXT_ENTRY/!wxHAS_TEXT_ENTRY
    }
 
 private:
-#ifdef wxHAS_TEXT_ENTRY
    wxTextEntry *m_text;
    wxWindow *m_textWin;
-#else // !wxHAS_TEXT_ENTRY
-   wxTextCtrl *m_text;
-#endif // wxHAS_TEXT_ENTRY/!wxHAS_TEXT_ENTRY
 
    DECLARE_NO_COPY_CLASS(wxTextBrowseButton)
 };
@@ -171,7 +151,6 @@ public:
       m_existingOnly = existingOnly;
    }
 
-#ifdef wxHAS_TEXT_ENTRY
    wxFileBrowseButton(wxComboBox *combo, wxWindow *parent,
                       bool open = true, bool existingOnly = true)
       : wxTextBrowseButton(combo, parent, _("Browse for the file"))
@@ -179,7 +158,6 @@ public:
       m_open = open;
       m_existingOnly = existingOnly;
    }
-#endif // wxHAS_TEXT_ENTRY
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file

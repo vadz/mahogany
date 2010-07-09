@@ -129,8 +129,8 @@
 // wxWindows stuff
 // ----------------------------------------------------------------------------
 
-#if !wxCHECK_VERSION(2, 7, 2)
-#  error "This version of Mahogany requires wxWindows 2.7.2 or higher."
+#if !wxCHECK_VERSION(2, 9, 1)
+#  error "This version of Mahogany requires wxWindows 2.9.1 or higher."
 #endif
 
 #ifdef USE_THREADS
@@ -138,24 +138,6 @@
 #      error "Mahogany's thread support requires a wxWindows with threads compiled in!"
 #   endif
 #endif
-
-// M debug mode is closely related to wx2 debug mode and so debug build of wx
-// must be used with debug build of M and release build of wx with the release
-// one
-//
-// but in wx3 (actually already 2.9.1) there is no more distinction between
-// debug and release build so this check shouldn't be done
-#if !wxCHECK_VERSION(2, 9, 1)
-#  ifdef DEBUG
-#     ifndef __WXDEBUG__
-#        error "Please use debug version of wxWindows with debug Mahogany build."
-#     endif
-#  else // Release
-#     ifdef __WXDEBUG__
-#        error "Please don't use debug version of wxWindows with non-debug Mahogany build."
-#     endif
-#  endif // Debug/Release
-#endif // wx < 2.9.1
 
 // ----------------------------------------------------------------------------
 // miscellaneous other stuff

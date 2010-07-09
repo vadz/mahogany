@@ -1098,15 +1098,8 @@ void HtmlViewer::InsertRawContents(const String& data)
       BodyTagHandler(const String& text)
       {
          // by default, take all
-#if wxCHECK_VERSION(2, 9, 0)
          m_begin = text.begin();
          m_end = text.end();
-#else // wx <= 2.8
-         m_begin = 0;
-         m_end = String::npos;
-
-         wxUnusedVar(text);
-#endif // wx 2.9+/2.8-
       }
 
       virtual wxString GetSupportedTags() { return "BODY"; }
@@ -1114,29 +1107,20 @@ void HtmlViewer::InsertRawContents(const String& data)
       {
          // "end 1" is the position just before the closing tag while "end 2"
          // is after the tag, as we don't need the tag itself, use the former
-#if wxCHECK_VERSION(2, 9, 0)
          m_begin = tag.GetBeginIter();
          m_end = tag.GetEndIter1();
-#else // wx <= 2.8
-         m_begin = tag.GetBeginPos();
-         m_end = tag.GetEndPos1();
-#endif // wx 2.9+/2.8-
 
          return false;
       }
 
-#if wxCHECK_VERSION(2, 9, 0)
-      typedef wxString::const_iterator IndexType;
-#else // wx <= 2.8
-      typedef size_t IndexType;
-#endif // wx 2.9+/2.8-
+      typedef wxString::const_iterator IterType;
 
-      IndexType GetBegin() const { return m_begin; }
-      IndexType GetEnd() const { return m_end; }
+      IterType GetBegin() const { return m_begin; }
+      IterType GetEnd() const { return m_end; }
 
    private:
-      IndexType m_begin,
-                m_end;
+      IterType m_begin,
+               m_end;
    };
 
    class BodyParser : public wxHtmlParser
@@ -1146,11 +1130,7 @@ void HtmlViewer::InsertRawContents(const String& data)
 
       // provide stubs for base class pure virtual methods which we don't use
       virtual wxObject* GetProduct() { return NULL; }
-#if wxCHECK_VERSION(2, 9, 0)
       virtual void AddText(const wxString& WXUNUSED(txt)) { }
-#else // wx <= 2.8
-      virtual void AddText(const char *WXUNUSED(txt)) { }
-#endif // wx 2.9+/2.8-
    };
 
    BodyTagHandler *handler = new BodyTagHandler(data);
@@ -1158,11 +1138,7 @@ void HtmlViewer::InsertRawContents(const String& data)
    parser.AddTagHandler(handler);
    parser.Parse(data);
 
-#if wxCHECK_VERSION(2, 9, 0)
    m_htmlText += wxString(handler->GetBegin(), handler->GetEnd());
-#else // wx <= 2.8
-   m_htmlText += data.substr(handler->GetBegin(), handler->GetEnd());
-#endif // wx 2.9+/2.8-
 
    // set the flag for EndBody
    m_hasHtmlContents = true;

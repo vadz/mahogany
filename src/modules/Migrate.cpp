@@ -1738,11 +1738,7 @@ void MigrateWizardProgressPage::DoMigration()
 
 void MigrateWizardProgressPage::OnShow(wxShowEvent& event)
 {
-#if wxCHECK_VERSION(2, 9, 0)
    if ( event.IsShown() )
-#else
-   if ( event.GetShow() )
-#endif
    {
       wxCommandEvent eventOk(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
       wxPostEvent(this, eventOk);
