@@ -168,7 +168,7 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
    // before trying to open it
    bool userEnteredPwd = false;
    String login, password;
-   if ( !GetAuthInfoForFolder(folder, login, password, &userEnteredPwd) )
+   if ( !GetAuthInfoForFolder(folder, login, password, frame, &userEnteredPwd) )
    {
       // can't continue without login/password
       return NULL;
@@ -1385,6 +1385,7 @@ MailFolder::ProposeSavePassword(MailFolder *mf,
 bool MailFolder::GetAuthInfoForFolder(const MFolder *mfolder,
                                       String& login,
                                       String& password,
+                                      wxFrame *parent,
                                       bool *userEnteredPwd)
 {
    if ( !mfolder->NeedsLogin() )
@@ -1405,12 +1406,22 @@ bool MailFolder::GetAuthInfoForFolder(const MFolder *mfolder,
          return true;
       }
 
-      // we don't have password for this folder, ask the user about it
-      if ( !MDialog_GetPassword(mfolder->GetFullName(), &login, &password) )
+      // we don't have password for this folder, ask the user about it if we
+      // have a valid window (otherwise we're not in an interactive mode)
+      bool hasPassword = false;
+      const wxString name = mfolder->GetFullName();
+      if ( parent )
       {
-         ERRORMESSAGE((_("Cannot access this folder without a password.")));
+         if ( MDialog_GetPassword(name, &login, &password, parent) )
+            hasPassword = true;
+         else
+            mApplication->SetLastError(M_ERROR_CANCEL);
+      }
 
-         mApplication->SetLastError(M_ERROR_CANCEL);
+      if ( !hasPassword )
+      {
+         ERRORMESSAGE((_("Cannot access folder \"%s\" without a password."),
+                       name));
 
          return false;
       }

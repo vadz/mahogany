@@ -360,12 +360,15 @@ private:
       had to be created but its creation failed.
 
       @param folder to create/open
+      @param parent parent window for the password prompt dialog in interactive
+         mode or NULL
       @param pStream will be filled with a valid stream if not NULL and
                      if we indeed created the folder (and will be NULL if we
                      didn't do anything)
       @return false if the folder couldn't be created
    */
    static bool CreateIfNeeded(const MFolder *folder,
+                              wxFrame *parent,
                               MAILSTREAM **pStream = NULL);
 
    /// just do mail_ping() on the opened folder, return TRUE if ok

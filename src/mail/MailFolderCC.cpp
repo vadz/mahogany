@@ -1616,7 +1616,10 @@ MailFolderCC::~MailFolderCC()
 // ----------------------------------------------------------------------------
 
 /* static */
-bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
+bool
+MailFolderCC::CreateIfNeeded(const MFolder *folder,
+                             wxFrame *parent,
+                             MAILSTREAM **pStream)
 {
    if ( pStream )
       *pStream = NULL;
@@ -1630,7 +1633,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    String imapspec = MailFolder::GetImapSpec(folder);
 
    String login, password;
-   if ( !GetAuthInfoForFolder(folder, login, password) )
+   if ( !GetAuthInfoForFolder(folder, login, password, parent) )
    {
       // can't continue without login/password
       return false;
@@ -1990,7 +1993,8 @@ MailFolderCC::Open(OpenMode openmode)
 
    // get the login/password to use (if we don't have them yet)
    if ( !HasLogin() &&
-           !GetAuthInfoForFolder(m_mfolder, m_login, m_password) )
+           !GetAuthInfoForFolder(m_mfolder, m_login, m_password,
+                                 GetInteractiveFrame()) )
    {
       // can't open without login/password
       return false;
@@ -2035,7 +2039,9 @@ MailFolderCC::Open(OpenMode openmode)
             {
                // check if this is the first time we're opening this folder: in
                // this case, try creating it first
-               if ( !CreateIfNeeded(m_mfolder, &m_MailStream) )
+               if ( !CreateIfNeeded(m_mfolder,
+                                    GetInteractiveFrame(),
+                                    &m_MailStream) )
                {
                   // CreateIfNeeded() returns false only if the folder couldn't
                   // be opened at all, no need to retry again
@@ -2615,7 +2621,11 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
       login = folder->GetLogin();
       password = folder->GetPassword();
 
-      if ( !GetAuthInfoForFolder(folder, login, password ) )
+      // We don't have any valid window here but currently we're always called
+      // in response to a user action so pass a non-NULL window parameter to
+      // let GetAuthInfoForFolder() ask the user for password if necessary.
+      if ( !GetAuthInfoForFolder(folder, login, password,
+                                 mApplication->TopLevelFrame()) )
       {
          return false;
       }
@@ -2914,7 +2924,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       {
          // before trying to copy messages to this folder, create it if hadn't
          // been done yet
-         if ( CreateIfNeeded(folder) )
+         if ( CreateIfNeeded(folder, GetInteractiveFrame()) )
          {
             if ( !CheckConnection() )
             {
@@ -3718,8 +3728,14 @@ int MailFolderCC::GetFlags(void) const
 /* static */ bool
 MailFolderCC::SetLoginDataIfNeeded(const MFolder *mfolder, String *loginOut)
 {
+   // We use top level application window here because this function is only
+   // called from interactive methods and so we can ask the user for a password
+   // from here but it would be better to modify all the functions which call
+   // us to take a wxWindow parameter instead.
+
    String login, password;
-   if ( !GetAuthInfoForFolder(mfolder, login, password ) )
+   if ( !GetAuthInfoForFolder(mfolder, login, password,
+                              mApplication->TopLevelFrame()) )
    {
       return false;
    }

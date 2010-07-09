@@ -1000,6 +1000,8 @@ protected:
      @param mfolder the folder we need auth info for
      @param login the variable containing username
      @param password the variable containing password
+     @param parent the parent window for the password dialog, if it is NULL the
+        dialog won't be shown at all
      @param userEnteredPwd a pointer to a variable (may be NULL) that is set to
         true if password was entered
      @return true if the password is either not needed or was entered
@@ -1007,6 +1009,7 @@ protected:
    static bool GetAuthInfoForFolder(const MFolder *mfolder,
                                     String& login,
                                     String& password,
+                                    wxFrame *parent,
                                     bool *userEnteredPwd = NULL);
 
    /**
