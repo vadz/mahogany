@@ -1989,8 +1989,8 @@ MailFolderCC::Open(OpenMode openmode)
    //else: not a file based folder, no locking problems
 
    // get the login/password to use (if we don't have them yet)
-   if ( NeedsAuthInfo() &&
-        !GetAuthInfoForFolder(m_mfolder, m_login, m_password) )
+   if ( !HasLogin() &&
+           !GetAuthInfoForFolder(m_mfolder, m_login, m_password) )
    {
       // can't open without login/password
       return false;
@@ -3713,11 +3713,6 @@ MFolderType MailFolderCC::GetType(void) const
 int MailFolderCC::GetFlags(void) const
 {
    return m_mfolder->GetFlags();
-}
-
-bool MailFolderCC::NeedsAuthInfo() const
-{
-   return !HasLogin() && m_mfolder->NeedsLogin();
 }
 
 /* static */ bool
