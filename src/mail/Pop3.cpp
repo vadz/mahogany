@@ -226,13 +226,12 @@ bool PopFlagsCacheFile::DoSave(wxTempFile& file)
 static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
 {
 #ifdef USE_OWN_CCLIENT
-   if ( !pop3_send(stream, "UIDL", NIL) )
+   if ( !pop3_send(stream, CONST_CCAST("UIDL"), NIL) )
    {
       // TODO: don't use it the next time
       return false;
    }
 
-   String uidl;
    uidls.Alloc(stream->nmsgs);
 
    NETSTREAM *netstream = pop3_getnetstream(stream);
@@ -270,9 +269,8 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
       {
          // RFC says 70 characters max, but avoid buffer overflows just in case
          unsigned long msgno;
-         bool ok =
-            sscanf(t, "%lu %s", &msgno, uidl.GetWriteBuf(strlen(t) + 1)) == 2;
-         uidl.UngetWriteBuf();
+         wxCharBuffer buf(strlen(t));
+         bool ok = sscanf(t, "%lu %s", &msgno, buf.data()) == 2;
 
          if ( ok )
          {
@@ -281,11 +279,14 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
             ok = msgno == uidls.GetCount() + 1;
          }
 
+         wxString uidl;
          if ( !ok )
          {
             wxLogDebug(_T("Unexpected line in UIDL response (%s) skipped."), t);
-
-            uidl.clear();
+         }
+         else
+         {
+            uidl = buf;
          }
 
          uidls.Add(uidl);
