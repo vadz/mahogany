@@ -252,16 +252,17 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// MailFolderTimer: a timer class to regularly ping the mailfolder
+// MailFolderKeepAliveTimer: a timer class to regularly ping the folder to prevent it
+// from closing.
 // ----------------------------------------------------------------------------
 
-class MailFolderTimer : public wxTimer
+class MailFolderKeepAliveTimer : public wxTimer
 {
 public:
    /** constructor
        @param mf the mailfolder to query on timeout
    */
-   MailFolderTimer(MailFolderCmn *mf)
+   MailFolderKeepAliveTimer(MailFolderCmn *mf)
    {
       m_mf = mf;
    }
@@ -273,7 +274,7 @@ protected:
    /// the mailfolder to update
    MailFolderCmn *m_mf;
 
-   DECLARE_NO_COPY_CLASS(MailFolderTimer)
+   DECLARE_NO_COPY_CLASS(MailFolderKeepAliveTimer)
 };
 
 // ----------------------------------------------------------------------------
@@ -288,10 +289,10 @@ static MfCloser *gs_MailFolderCloser = NULL;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// MailFolderTimer
+// MailFolderKeepAliveTimer
 // ----------------------------------------------------------------------------
 
-void MailFolderTimer::Notify(void)
+void MailFolderKeepAliveTimer::Notify(void)
 {
    if ( mApplication->AllowBgProcessing() && !m_mf->IsLocked() )
    {
@@ -497,8 +498,8 @@ void MailFolderCmn::Close(bool /* mayLinger */)
       m_headers = NULL;
    }
 
-   if ( m_Timer )
-      m_Timer->Stop();
+   if ( m_keepAliveTimer )
+      m_keepAliveTimer->Stop();
 }
 
 bool
@@ -594,7 +595,7 @@ MailFolderCmn::RealDecRef()
 
 MailFolderCmn::MailFolderCmn()
 {
-   m_Timer = new MailFolderTimer(this);
+   m_keepAliveTimer = NULL;
 
    m_suspendUpdates = 0;
 
@@ -634,7 +635,7 @@ MailFolderCmn::~MailFolderCmn()
    }
 
 
-   delete m_Timer;
+   delete m_keepAliveTimer;
    delete m_MEventReceiver;
 }
 
@@ -1407,13 +1408,32 @@ void
 MailFolderCmn::DoUpdate()
 {
    int interval = m_Config.m_UpdateInterval * 1000;
-   if ( interval != m_Timer->GetInterval() )
+   if ( interval )
    {
-      m_Timer->Stop();
-
-      if ( interval > 0 ) // interval of zero == disable ping timer
+      int intervalOld;
+      if ( !m_keepAliveTimer )
       {
-         m_Timer->Start(interval, TRUE /* one shot */);
+         intervalOld = 0;
+         m_keepAliveTimer = new MailFolderKeepAliveTimer(this);
+      }
+      else // we already have a running keep alive timer
+      {
+         intervalOld = m_keepAliveTimer->GetInterval();
+      }
+
+      if ( interval != intervalOld )
+      {
+         // restart the timer with the new interval
+         m_keepAliveTimer->Stop();
+         m_keepAliveTimer->Start(interval, true /* one shot */);
+      }
+   }
+   else // interval == 0, keep alive disabled
+   {
+      if ( m_keepAliveTimer )
+      {
+         delete m_keepAliveTimer;
+         m_keepAliveTimer = NULL;
       }
    }
 }

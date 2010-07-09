@@ -257,8 +257,8 @@ protected:
    /// our listing or NULL if not created yet
    HeaderInfoList *m_headers;
 
-   /// a timer to update information
-   class MailFolderTimer *m_Timer;
+   /// a timer to prevent folder from closing
+   class MailFolderKeepAliveTimer *m_keepAliveTimer;
 
    /** @name Mail folder events data */
    //@{
