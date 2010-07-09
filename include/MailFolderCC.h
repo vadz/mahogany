@@ -551,9 +551,6 @@ private:
        */
    //@{
 
-   /// a pointer to the object to use as default if lookup fails
-   static MailFolderCC *ms_StreamListDefaultObj;
-
    /// lookup object in map by its stream
    static MailFolderCC *LookupObject(const MAILSTREAM *stream);
 
@@ -584,7 +581,6 @@ private:
    friend bool MailFolderCCInit();
    friend void MailFolderCCCleanup();
 
-   friend class CCDefaultFolder;
    friend class SendMessageCC;
 
 public:

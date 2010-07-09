@@ -1806,8 +1806,6 @@ wxMApp::ThrEnterLeave(bool /* enter */, SectionId /*what*/ , bool /*testing */)
 
 #else
 
-// this mutex must be acquired before any call to a critical c-client function
-static wxMutex gs_CclientMutex;
 // this mutex must be acquired before any call to MEvent code
 static wxMutex gs_MEventMutex;
 
@@ -1828,27 +1826,18 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what, bool
       else
          wxMutexGuiLeave();
       return;
-      break;
    case MEVENT:
       which = &gs_MEventMutex;
       break;
-   case CCLIENT:
-      which = &gs_CclientMutex;
-      break;
-   default:
-      FAIL_MSG(_T("unsupported mutex id"));
    }
-   ASSERT(which);
+   CHECK_RET(which, "unknown global mutex");
    if(enter)
    {
-      ASSERT(which->IsLocked() == FALSE);
       which->Lock();
    }
    else
    {
-      ASSERT(which->IsLocked() || testing);
-      if(which->IsLocked())
-         which->Unlock();
+      which->Unlock();
    }
 }
 

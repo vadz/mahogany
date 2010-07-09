@@ -1801,8 +1801,6 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
    if ( !MailFolder::Init() )
       return false;
 
-   MCclientLocker locker;
-
    SENDSTREAM *stream = NIL;
 
    // construct the server string for c-client

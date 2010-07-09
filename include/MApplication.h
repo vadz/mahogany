@@ -399,9 +399,7 @@ public:
       /// Un/Lock the GUI
       GUI,
       /// The event subsystem:
-      MEVENT,     // if changed, change wxMApp.cpp, too!
-      /// UnLock the critical c-client code
-      CCLIENT
+      MEVENT      // if changed, change wxMApp.cpp, too!
    };
    virtual void ThrEnter(SectionId what) = 0;
    /** leave thread, unlock
@@ -646,13 +644,6 @@ class MEventLocker : public MMutexLocker
 {
 public:
    MEventLocker() : MMutexLocker(MAppBase::MEVENT) {};
-};
-
-/// lock the Cclient critical sections
-class MCclientLocker : public MMutexLocker
-{
-public:
-   MCclientLocker() : MMutexLocker(MAppBase::CCLIENT) {};
 };
 
 // NB: these functions are implemented in upgrade.cpp

@@ -190,6 +190,11 @@ typedef void (*mm_status_handler)(MAILSTREAM *stream,
 // globals
 // ----------------------------------------------------------------------------
 
+/// default folder for c-client callbacks
+static wxTLS_TYPE(MailFolderCC *) tls_ccCallbackDefaultObj;
+
+#define gs_ccCallbackDefaultObj wxTLS_VALUE(tls_ccCallbackDefaultObj)
+
 /// object used to reflect some events back to MailFolderCC
 static class CCEventReflector *gs_CCEventReflector = NULL;
 
@@ -792,16 +797,21 @@ class CCAllDisabler : public CCCallbackDisabler, public CCErrorDisabler
 class CCDefaultFolder
 {
 public:
-   CCDefaultFolder(MailFolderCC *mf)
+   CCDefaultFolder(MailFolderCC *mf) :
+      m_oldDefaultObj(gs_ccCallbackDefaultObj)
    {
-      m_mfOld = MailFolderCC::ms_StreamListDefaultObj;
-      MailFolderCC::ms_StreamListDefaultObj = mf;
+      gs_ccCallbackDefaultObj = mf;
    }
 
-   ~CCDefaultFolder() { MailFolderCC::ms_StreamListDefaultObj = m_mfOld; }
+   ~CCDefaultFolder()
+   {
+      gs_ccCallbackDefaultObj = m_oldDefaultObj;
+   }
 
 private:
-   MailFolderCC *m_mfOld;
+   MailFolderCC * const m_oldDefaultObj;
+
+   wxDECLARE_NO_COPY_CLASS(CCDefaultFolder);
 };
 
 // temporarily pause a global timer
@@ -1866,18 +1876,17 @@ MailFolderCC::CheckForFileLock()
    String file;
 
    MFolderType folderType = GetType();
-   if( folderType == MF_FILE )
+   if ( folderType == MF_FILE )
+   {
       file = m_ImapSpec;
-#ifdef OS_UNIX
+   }
    else if ( folderType == MF_INBOX )
    {
       // get INBOX path name
-      MCclientLocker lock;
       file = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
       if(file.empty()) // another c-client stupidity
          file = (char *) sysinbox();
    }
-#endif // OS_UNIX
    else
    {
       FAIL_MSG( _T("shouldn't be called for not file based folders!") );
@@ -2016,10 +2025,8 @@ MailFolderCC::Open(OpenMode openmode)
    // simple and fix it when/if we find the problems with the current approach
    MEventManager::ForceDispatchPending();
 
-   // lock cclient inside this block
+   // start a new block to keep CCDefaultFolder scope as small as possible
    {
-      MCclientLocker lock;
-
       // Make sure that all events to unknown folder go to us
       CCDefaultFolder def(this);
 
@@ -2086,7 +2093,7 @@ MailFolderCC::Open(OpenMode openmode)
 
          m_MailStream = MailOpen(stream, m_ImapSpec, ccOptions);
       }
-   } // end of cclient lock block
+   } // end of CCDefaultFolder scope
 
    // for some folders (notably the IMAP ones), mail_open() will return a not
    // NULL pointer but set halfopen flag if it couldn't be SELECTed - as we
@@ -2373,8 +2380,6 @@ MailFolderCC::UpdateTimeoutValues(void)
 
 bool MailFolderCC::ms_CClientInitialisedFlag = false;
 
-MailFolderCC *MailFolderCC::ms_StreamListDefaultObj = NULL;
-
 // this function should normally always return a non NULL folder
 /* static */
 MailFolderCC *
@@ -2400,9 +2405,9 @@ MailFolderCC::LookupObject(const MAILSTREAM *stream)
       }
    }
 
-   if ( ms_StreamListDefaultObj )
+   if ( gs_ccCallbackDefaultObj )
    {
-      return ms_StreamListDefaultObj;
+      return gs_ccCallbackDefaultObj;
    }
 
    // unfortunately, c-client seems to allocate the temp private streams fairly
@@ -5516,8 +5521,6 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
    }
 
    String mboxpath = MailFolder::GetImapSpec(mfolder, login);
-
-   MCclientLocker lock;
 
    wxLogTrace(TRACE_MF_CALLS,
               _T("MailFolderCC::DeleteFolder(%s)"), mboxpath.c_str());
