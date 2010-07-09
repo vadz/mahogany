@@ -2391,8 +2391,6 @@ MailFolderCC::UpdateTimeoutValues(void)
 // Working with the list of all open mailboxes
 // ----------------------------------------------------------------------------
 
-bool MailFolderCC::ms_CClientInitialisedFlag = false;
-
 // this function should normally always return a non NULL folder
 /* static */
 MailFolderCC *
@@ -4613,9 +4611,6 @@ void MailFolderCC::OnNewMail()
 void
 MailFolderCC::CClientInit(void)
 {
-   if(ms_CClientInitialisedFlag == true)
-      return;
-
    // link in all drivers (SSL is initialized later, when it is needed for the
    // first time)
 #if defined(OS_WIN) && !defined(__CYGWIN__)
@@ -4673,8 +4668,6 @@ MailFolderCC::CClientInit(void)
       wxLogError(_("Cannot set signal handler for SIGPIPE."));
    }
 #endif // OS_UNIX
-
-   ms_CClientInitialisedFlag = true;
 
 #ifdef USE_DIALUP
    ASSERT(gs_CCStreamCleaner == NULL);

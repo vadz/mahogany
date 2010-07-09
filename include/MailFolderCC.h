@@ -214,9 +214,6 @@ public:
 
    virtual char GetFolderDelimiter() const;
 
-   /// return TRUE if CClient lib had been initialized
-   static bool IsInitialized() { return ms_CClientInitialisedFlag; }
-
    // unused for now
 #if 0
    /**
@@ -436,14 +433,8 @@ private:
 
    //@}
 
-   /** @name c-client initialization */
-   //@{
-   /// has c-client library been initialised?
-   static bool ms_CClientInitialisedFlag;
-
    /// initialise c-client library
    static void CClientInit(void);
-   //@}
 
    /** @name Mail folder parameters */
    //@{
