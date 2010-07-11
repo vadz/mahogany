@@ -36,6 +36,7 @@
 #  include "MApplication.h"
 #  include "Mdefaults.h"
 
+#  include <wx/datetime.h>
 #  include <wx/filedlg.h>
 #  include <wx/timer.h>                   // for wxTimer
 #endif // USE_PCH
@@ -102,17 +103,31 @@ extern const MOption MP_USE_TRASH_FOLDER;
 // trace mask for mail folder closing
 #define TRACE_MF_CLOSE _T("mfclose")
 
+// trace mask for keep alive timer
+#define TRACE_MF_KEEPALIVE "mfkeepalive"
+
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
-static long GetProgressThreshold(Profile *profile)
+namespace
+{
+
+long GetProgressThreshold(Profile *profile)
 {
    if ( !profile )
       return GetNumericDefault(MP_FOLDERPROGRESS_THRESHOLD);
 
    return READ_CONFIG(profile, MP_FOLDERPROGRESS_THRESHOLD);
 }
+
+/// Return a timestamp string including milliseconds.
+wxString TimestampWithMS()
+{
+   return wxDateTime::UNow().Format("%Y-%m-%d %H:%M:%S:%l");
+}
+
+} // anonymous namespace
 
 // ----------------------------------------------------------------------------
 // mailfolder closing helper classes
@@ -294,6 +309,11 @@ static MfCloser *gs_MailFolderCloser = NULL;
 
 void MailFolderKeepAliveTimer::Notify(void)
 {
+   wxLogTrace(TRACE_MF_KEEPALIVE,
+              "Keep alive timer triggered for \"%s\" at %s",
+              m_mf->GetName(),
+              TimestampWithMS());
+
    if ( mApplication->AllowBgProcessing() && !m_mf->IsLocked() )
    {
       // don't ping the mailbox which we maintain artificially alive, otherwise
@@ -307,15 +327,23 @@ void MailFolderKeepAliveTimer::Notify(void)
          // don't show any dialogs when doing background checks
          NonInteractiveLock noInter(m_mf, false /* !interactive */);
 
-         m_mf->Ping();
+         wxLogTrace(TRACE_MF_KEEPALIVE,
+                    "Pinging \"%s\" to keep it alive", m_mf->GetName());
 
-         // restart the timer after Ping() has completed: this ensures that
-         // we're not going to ping the folder too often if accessing it took a
-         // lot of time (i.e. if Ping() takes longer than our timer interval,
-         // we'd keep pinging all the time and never do anything else)
-         Start();
+         m_mf->Ping();
       }
    }
+
+   // Restart the timer only after Ping() has completed: this ensures that
+   // we're not going to ping the folder too often if accessing it took a
+   // lot of time (i.e. if Ping() takes longer than our timer interval,
+   // we'd keep pinging all the time and never do anything else).
+   wxLogTrace(TRACE_MF_KEEPALIVE,
+              "Restarting keep alive timer for \"%s\" at %s",
+              m_mf->GetName(),
+              TimestampWithMS());
+
+   Start();
 }
 
 // ----------------------------------------------------------------------------
@@ -1423,7 +1451,13 @@ MailFolderCmn::UpdateKeepAliveTimer()
       if ( interval != intervalOld )
       {
          // restart the timer with the new interval
-         m_keepAliveTimer->Stop();
+         wxLogTrace(TRACE_MF_KEEPALIVE,
+                    "Starting keep alive timer for \"%s\" with interval %dms "
+                    "at %s",
+                    GetName(),
+                    interval,
+                    TimestampWithMS());
+
          m_keepAliveTimer->Start(interval, true /* one shot */);
       }
    }
@@ -1434,7 +1468,14 @@ MailFolderCmn::UpdateKeepAliveTimer()
       // result in a crash. Also, if we had a timer before it's likely that we
       // may need it again so keep the timer but just don't use it for now.
       if ( m_keepAliveTimer )
+      {
+         wxLogTrace(TRACE_MF_KEEPALIVE,
+                    "Stopping keep alive timer for \"%s\" at %s",
+                    GetName(),
+                    TimestampWithMS());
+
          m_keepAliveTimer->Stop();
+      }
    }
 }
 
