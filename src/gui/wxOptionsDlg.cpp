@@ -322,8 +322,9 @@ enum ConfigFields
    ConfigField_FolderProgressHelpText,
    ConfigField_FolderProgressThreshold,
    ConfigField_ShowBusyInfo,
-   ConfigField_CloseDelay_HelpText,
+   ConfigField_CloseDelayHelpText,
    ConfigField_FolderCloseDelay,
+   ConfigField_ConnCloseDelayHelpText,
    ConfigField_ConnCloseDelay,
    ConfigField_OutboxHelp,
    ConfigField_UseOutbox,
@@ -1430,14 +1431,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Show bus&y dialog while sorting/threading"), Field_Bool, -1},
    { gettext_noop("\n"
                   "Mahogany may keep the folder open after closing it\n"
-                  "for some time to make reopening the same folder faster.\n"
-                  "It also can close the folder but keep the connection to\n"
-                  "the server alive for some time to make it faster to open\n"
-                  "other folders on the same server.\n"
-                  "\n"
-                  "Note that the first option is ignored for POP3 folders and\n"
-                  "the second one is only used for IMAP and NNTP servers."), Field_Message, -1 },
+                  "for some time to make reopening the same folder faster,\n"
+                  "this is mostly useful if the server takes a long time to\n"
+                  "open it. Notice that if you want to keep the folder open\n"
+                  "permanently you need to set the appropriate flag in the\n"
+                  "\"Access\" page of the folder properties dialog.\n"),
+                                                   Field_Message, -1 },
    { gettext_noop("&Keep folder open for (seconds)"), Field_Number, -1},
+
+   { gettext_noop("\n"
+                  "Mahogany can also close the folder but keep the connection to\n"
+                  "the server alive for some time to make it faster to open\n"
+                  "other folders on the same server."), Field_Message, -1 },
    { gettext_noop("Keep &connection alive for (seconds)"), Field_Number, -1},
 
    { gettext_noop("\nThe outgoing messages may be sent out immediately\n"
@@ -2135,8 +2140,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    CONFIG_ENTRY(MP_SHOWBUSY_DURING_SORT),
-   CONFIG_NONE(), // keep alive help
+   CONFIG_NONE(), // folder close delay help
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
+   CONFIG_NONE(), // connection keep alive delay help
    CONFIG_ENTRY(MP_CONN_CLOSE_DELAY),
    CONFIG_NONE(), // outbox help
    CONFIG_ENTRY(MP_USE_OUTBOX),
