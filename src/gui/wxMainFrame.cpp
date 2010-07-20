@@ -65,6 +65,7 @@ enum
 {
    WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1,
    WXMENU_DEBUG_SHOW_LICENCE,
+   WXMENU_DEBUG_TRACE,
    WXMENU_DEBUG_TOGGLE_LOG,
    WXMENU_DEBUG_CRASH
 };
@@ -635,6 +636,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    wxMenu *menuDebug = new wxMenu;
    menuDebug->Append(WXMENU_DEBUG_WIZARD, _T("Run install &wizard..."));
    menuDebug->Append(WXMENU_DEBUG_SHOW_LICENCE, _T("Show &licence dialog..."));
+   menuDebug->Append(WXMENU_DEBUG_TRACE, "Add/remove &trace mask...");
    menuDebug->AppendCheckItem(WXMENU_DEBUG_TOGGLE_LOG,
                               _T("Toggle &debug logging\tCtrl-Alt-D"));
    menuDebug->Append(WXMENU_DEBUG_CRASH, _T("Provoke a c&rash"));
@@ -1099,6 +1101,34 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
          case WXMENU_DEBUG_SHOW_LICENCE:
             ShowLicenseDialog(this);
+            break;
+
+         case WXMENU_DEBUG_TRACE:
+            {
+               wxString mask;
+               if ( MInputBox
+                    (
+                     &mask,
+                     "Modify tracing mask",
+                     "Enter trace mask to enable it or enter it precede "
+                     "by \"-\" to disable it if currently enabled.",
+                     this,
+                     "DebugTraceMask"
+                    ) && !mask.empty() )
+               {
+                  if ( mask[0] == '-' )
+                  {
+                     mask.erase(0, 1);
+                     wxLogTrace(mask, "Tracing disabled for \"%s\"", mask);
+                     wxLog::RemoveTraceMask(mask);
+                  }
+                  else
+                  {
+                     wxLog::AddTraceMask(mask);
+                     wxLogTrace(mask, "Tracing enabled for \"%s\"", mask);
+                  }
+               }
+            }
             break;
 
          case WXMENU_DEBUG_TOGGLE_LOG:
