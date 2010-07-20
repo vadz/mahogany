@@ -784,6 +784,76 @@ public:
    bool m_old;
 };
 
+/**
+    Temporarily redirect c-client error messages to the given string.
+
+    Normally c-client errors are shown to the user, calling this function sends
+    them to the string specified in the ctor of the redirector object instead.
+
+    This class is MT-safe in the sense that c-client logs for threads other
+    than the one using it won't be affected.
+ */
+class CCErrorLogRedirector
+{
+public:
+   /**
+       Redirect c-client error messages to the provided string during this
+       object lifetime.
+    */
+   CCErrorLogRedirector(String& errmsg)
+      : m_errmsg(errmsg)
+   {
+      m_oldRedirector = wxTLS_VALUE(ms_activeRedirector);
+      wxTLS_VALUE(ms_activeRedirector) = this;
+   }
+
+   /**
+       Dtor terminates the redirection of c-client error messages.
+    */
+   ~CCErrorLogRedirector()
+   {
+      wxTLS_VALUE(ms_activeRedirector) = m_oldRedirector;
+   }
+
+   /**
+       Check if redirection is active.
+
+       Return true if the message was redirected (and so doesn't need to be
+       handled normally) or false if no active CCErrorLogRedirector object
+       exists.
+    */
+   static bool IsRedirected(const String& errmsg)
+   {
+      CCErrorLogRedirector * const
+         redirector = wxTLS_VALUE(ms_activeRedirector);
+
+      if ( !redirector )
+         return false;
+
+      redirector->Log(errmsg);
+
+      return true;
+   }
+
+private:
+   void Log(const String& errmsg)
+   {
+      if ( !m_errmsg.empty() )
+         m_errmsg += '\n';
+
+      m_errmsg += errmsg;
+   }
+
+   static wxTLS_TYPE(CCErrorLogRedirector *) ms_activeRedirector;
+
+   String& m_errmsg;
+   CCErrorLogRedirector *m_oldRedirector;
+
+   wxDECLARE_NO_COPY_CLASS(CCErrorLogRedirector);
+};
+
+wxTLS_TYPE(CCErrorLogRedirector *) CCErrorLogRedirector::ms_activeRedirector;
+
 // temporarily disable error messages from cclient
 class CCErrorDisabler
 {
@@ -2928,6 +2998,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       folder.
    */
    bool didServerSideCopy = false;
+   String serverErrMsg;
    if ( GetType() == MF_IMAP && folder->GetType() == MF_IMAP )
    {
       // they're both IMAP but do they live on the same server?
@@ -2952,6 +3023,8 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 
             String sequence = BuildSequence(*selections);
             String pathDst = GetPathFromImapSpec(specDst);
+
+            CCErrorLogRedirector redirectErrors(serverErrMsg);
             if ( mail_copy_full(m_MailStream,
                                 sequence.char_str(),
                                 pathDst.char_str(),
@@ -2963,10 +3036,11 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
             {
                // don't give an error as it is not fatal and there is no way to
                // disable it, but still log it
-               wxLogMessage(_("Server side copy from '%s' to '%s' failed, "
-                              "trying inefficient append now."),
-                            GetName().c_str(),
-                            folder->GetName().c_str());
+               wxLogStatus(_("Server side copy from '%s' to '%s' failed (%s), "
+                             "trying inefficient append now."),
+                            GetName(),
+                            folder->GetName(),
+                            serverErrMsg);
             }
          }
       }
@@ -2975,7 +3049,20 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    if ( !didServerSideCopy )
    {
       // use the inefficient retrieve-append way
-      return MailFolderCmn::SaveMessages(selections, folder);
+      if ( MailFolderCmn::SaveMessages(selections, folder) )
+         return true;
+
+      // if we failed to copy the message on server above also show the
+      // server-side error message as it might contain valuable information
+      // about why exactly did this fail
+      if ( !serverErrMsg.empty() )
+      {
+         wxLogError(_("Server failed to perform the copy: %s"), serverErrMsg);
+      }
+
+      wxLogError(_("Failed to copy from '%s' to '%s'."),
+                 GetName(),
+                 folder->GetName());
    }
 
    String nameDst = folder->GetFullName();
@@ -4998,11 +5085,6 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
       return;
    }
 
-   String msg = _("Mail log");
-   if( mf )
-      msg << _T(" (") << mf->GetName() << _T(')');
-   msg << _T(": ") << str;
-
    wxLogLevel loglevel;
    switch ( errflg )
    {
@@ -5020,6 +5102,9 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
          // fall through
 
       case ERROR:
+         if ( CCErrorLogRedirector::IsRedirected(str) )
+            return;
+
          loglevel = wxLOG_Error;
          break;
 
@@ -5028,7 +5113,12 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
          break;
    }
 
-   wxLogGeneric(loglevel, "%s", msg.c_str());
+   String msg = _("Mail log");
+   if( mf )
+      msg << " (" << mf->GetName() << ')';
+   msg << ": %s";
+
+   wxLogGeneric(loglevel, msg, str);
 }
 
 /** log a debugging message
