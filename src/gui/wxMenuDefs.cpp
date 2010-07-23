@@ -500,7 +500,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // language
 
    // the available accelerators for this menu:
-   // 9QVXZ
+   // QVXZ
    { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), "", wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), "", wxITEM_RADIO },
@@ -530,6 +530,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_SJIS, gettext_noop("Japanese (Shift&-JIS)"), "", wxITEM_RADIO },
    { WXMENU_LANG_GB2312, gettext_noop("Chinese Si&mplified (GB2312)"), "", wxITEM_RADIO },
    { WXMENU_LANG_BIG5, gettext_noop("Chinese &Traditional (Big5)"), "", wxITEM_RADIO },
+   { WXMENU_LANG_KOREAN, gettext_noop("Korean (CP &949/EUC-KR)"), "", wxITEM_RADIO },
    { WXMENU_LANG_UTF7, gettext_noop("Uni&code (UTF-7)"), "", wxITEM_RADIO },
    { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), "", wxITEM_RADIO },
    { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
@@ -922,6 +923,10 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          id = WXMENU_LANG_BIG5;
          break;
 
+      case wxFONTENCODING_CP949:
+         id = WXMENU_LANG_KOREAN;
+         break;
+
       case wxFONTENCODING_UTF7:
          id = WXMENU_LANG_UTF7;
          break;
@@ -972,6 +977,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       WXMENU_LANG_SJIS,
       WXMENU_LANG_GB2312,
       WXMENU_LANG_BIG5,
+      WXMENU_LANG_KOREAN,
       WXMENU_LANG_UTF7,
       WXMENU_LANG_UTF8,
    };
@@ -1048,6 +1054,10 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
 
       case WXMENU_LANG_BIG5:
          encoding = wxFONTENCODING_BIG5;
+         break;
+
+      case WXMENU_LANG_KOREAN:
+         encoding = wxFONTENCODING_CP949;
          break;
 
       case WXMENU_LANG_UTF7:
