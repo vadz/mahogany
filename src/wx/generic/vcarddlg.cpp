@@ -794,7 +794,7 @@ bool wxVCardAddressDialog::TransferDataFromWindow()
 // our public API
 // ----------------------------------------------------------------------------
 
-extern bool WXDLLMAYEXP wxEditVCard(wxVCard *vcard)
+extern bool wxEditVCard(wxVCard *vcard)
 {
     wxCHECK_MSG( vcard, FALSE, _T("NULL vCard not allowed in wxEditVCard") );
 
@@ -802,7 +802,7 @@ extern bool WXDLLMAYEXP wxEditVCard(wxVCard *vcard)
     return dlg.ShowModal() == wxID_OK;
 }
 
-extern wxVCard * WXDLLEXPORT wxCreateVCard()
+extern wxVCard *wxCreateVCard()
 {
     wxVCard *vcard = new wxVCard;
     if ( wxEditVCard(vcard) )

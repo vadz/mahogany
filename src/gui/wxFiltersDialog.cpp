@@ -48,7 +48,7 @@
 #include "gui/wxFiltersDialog.h"
 #include "gui/wxSelectionDlg.h"
 
-class WXDLLEXPORT wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here

@@ -16,7 +16,7 @@
 class MessageView;
 class MimePart;
 
-class WXDLLEXPORT wxFrame;
+class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 /**
    Show the dialog showing all MIME parts to user.
