@@ -36,6 +36,7 @@
 #undef SendMessage
 #endif // __WINE__
 #include <wx/textfile.h>        // for wxTextFile
+#include <wx/filename.h>
 
 #include <list>
 
@@ -633,7 +634,7 @@ MModule::ListAvailableModules(const String& interfaceName)
    // base names of the modules we had already seen in this array
    wxArrayString moduleNames;
 
-   wxString pathname, filename, basename;
+   wxString pathname, filename;
    for( size_t i = 0; i < nDirs ; i++ )
    {
       pathname = dirs[i];
@@ -644,7 +645,7 @@ MModule::ListAvailableModules(const String& interfaceName)
          filename = wxFindFirstFile(pathname);
          while ( filename.length() )
          {
-            wxSplitPath(filename, NULL, &basename, NULL);
+            const wxString basename = wxFileName(filename).GetName();
             if ( moduleNames.Index(basename) == wxNOT_FOUND )
             {
                moduleNames.Add(basename);
@@ -713,8 +714,7 @@ MModule::ListAvailableModules(const String& interfaceName)
 
          // use the file name, not MMODULE_NAME_PROP, so that we can
          // LoadModule() it later
-         String name;
-         wxSplitPath(filename, NULL, &name, NULL);
+         const String name = wxFileName(filename).GetName();
          MModuleListingEntryImpl entry(
             name,
             interfaceModule,
