@@ -3126,7 +3126,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          wxTreeItemId idToReopen;
          if ( ShowHiddenFolders() != m_showHidden )
          {
-            // reexpend the entire tree
+            // reexpand the entire tree
             idToReopen = GetRootItem();
          }
          else if ( !m_showHidden )  // if we show all, nothing can change!
@@ -3390,18 +3390,61 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
       return;
    }
 
-   // next find the folder in the tree
+   // now find the folder in the tree
    wxTreeItemId item = GetTreeItemFromName(folderName);
    if ( !item.IsOk() )
    {
-      // it can happen it the folder is hidden but otherwise we should have it
-      ASSERT_MSG( folder->GetFlags() & MF_FLAGS_HIDDEN,
-                  _T("update folder not in the tree?") );
+      wxCHECK_RET( !m_showHidden, "all folders should be shown in the tree" );
 
-      return;
+      // the item must be currently hidden and in this case we want to show it
+      // because its status change could have only happened because a new mail
+      // was filtered into it and the user should be able to see it
+
+      // find the hidden ancestor of this folder in the tree: normally it must
+      // have one (possibly itself) if GetTreeItemFromName() didn't find it
+      MFolder_obj hiddenAncestor(folderName);
+      while ( !(hiddenAncestor->GetFlags() & MF_FLAGS_HIDDEN) )
+      {
+         hiddenAncestor.Set(hiddenAncestor->GetParent());
+         if ( !hiddenAncestor )
+         {
+            wxLogTrace(M_TRACE_MFSTATUS,
+                       "Ignoring status update for unknown folder \"%s\"",
+                       folderName);
+            return;
+         }
+      }
+
+      // show this hidden ancestor
+      hiddenAncestor->ResetFlags(MF_FLAGS_HIDDEN);
+
+      // and reexpand its parent branch to actually show it in the tree
+      wxTreeItemId idParent;
+      MFolder_obj visibleParent(hiddenAncestor->GetParent());
+      if ( visibleParent )
+         idParent = GetTreeItemFromName(visibleParent->GetFullName());
+
+      if ( !idParent.IsOk() )
+      {
+         // this can currently happen if the parent of a hidden folder is
+         // hidden itself and we don't handle this properly -- but this should
+         // be quite rare so hopefully it's not very important, just let the
+         // user deal with this
+         wxLogWarning(_("Failed to show folder \"%s\" in the tree, "
+                        "please show all hidden folder to see its status."),
+                      folderName);
+         return;
+      }
+
+      ReopenBranch(idParent);
+
+      // finally look for the item again, we should find it this time
+      item = GetTreeItemFromName(folderName);
+      wxCHECK_RET( item.IsOk(),
+                   "previously hidden item should now be in the tree" );
    }
 
-   // do update the status of the item in the tree
+   // and do update its status
    wxFolderTreeNode *node = GetFolderTreeNode(item);
    node->SetStatus(this, status);
 
