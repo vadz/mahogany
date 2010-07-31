@@ -2315,9 +2315,6 @@ void wxFolderTreeImpl::GoToHomeFolder()
 
 void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
 {
-   // someone clicked the tree, so the user must be back
-   mApplication->UpdateAwayMode();
-
    MFolder *folder = m_sink->GetSelection();
 
    if ( !folder )
@@ -2699,9 +2696,6 @@ void wxFolderTreeImpl::OnTreeEndDrag(wxTreeEvent& event)
 // add all subfolders of the folder being expanded
 void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 {
-   // someone clicked the tree, so the user must be back
-   mApplication->UpdateAwayMode();
-
    ASSERT_MSG( event.GetEventObject() == this, _T("got other treectrls event?") );
 
    wxTreeItemId itemId = event.GetItem();
@@ -2790,9 +2784,6 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 
 void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 {
-   // someone clicked the tree, so the user must be back
-   mApplication->UpdateAwayMode();
-
    ASSERT_MSG( event.GetEventObject() == this, _T("got other treectrls event?") );
 
    wxTreeItemId itemId = event.GetItem();
@@ -2909,9 +2900,6 @@ void wxFolderTreeImpl::OnMiddleDown(wxMouseEvent& event)
 
 void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 {
-   // someone clicked in the tree, so the user must be back
-   mApplication->UpdateAwayMode();
-
    if ( !ProcessMenuCommand(event.GetId()) )
       event.Skip();
 }
@@ -3019,9 +3007,6 @@ void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
 
 void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
 {
-  // someone typed into the tree, so the user must be back
-  mApplication->UpdateAwayMode();
-
   switch ( event.GetKeyCode() ) {
     case WXK_DELETE:
       DoFolderDelete(event.ShiftDown());

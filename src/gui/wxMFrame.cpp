@@ -156,8 +156,7 @@ private:
 IMPLEMENT_ABSTRACT_CLASS(wxMFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
-   EVT_MENU(-1,    wxMFrame::OnCommandEvent)
-   EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
+   EVT_MENU(wxID_ANY, wxMFrame::OnCommandEvent)
    EVT_CLOSE(wxMFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
@@ -1152,10 +1151,6 @@ wxMFrame::OnCloseWindow(wxCloseEvent& event)
 void
 wxMFrame::OnCommandEvent(wxCommandEvent &event)
 {
-   // if there was a menu command, the user must be back so check if we don't
-   // have to exit from away mode
-   mApplication->UpdateAwayMode();
-
    OnMenuCommand(event.GetId());
 }
 

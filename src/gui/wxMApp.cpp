@@ -608,19 +608,32 @@ wxMApp::OnIdle(wxIdleEvent &event)
 
 int wxMApp::FilterEvent(wxEvent& event)
 {
+   const wxEventType evtType = event.GetEventType();
+
+   // any user-generated events exit the "away" mode or reset the timer which
+   // triggers it (test for the minimal number of events here, e.g. there is no
+   // need to check wxEVT_KEY_UP as it's always preceded by wxEVT_KEY_DOWN
+   // anyhow and the time difference between them is usually not significant)
+   if ( evtType == wxEVT_KEY_DOWN ||
+          evtType == wxEVT_MOTION ||
+            evtType == wxEVT_LEFT_DOWN || evtType == wxEVT_RIGHT_DOWN ||
+              evtType == wxEVT_COMMAND_MENU_SELECTED )
+   {
+      UpdateAwayMode();
+   }
+   
    // quickly bail out if we're not inside c-client currently
    if ( AllowBgProcessing() )
       return -1;
 
-   if ( event.GetEventType() == wxEVT_COMMAND_MENU_SELECTED ||
-         event.GetEventType() == wxEVT_CHAR )
+   if ( evtType == wxEVT_COMMAND_MENU_SELECTED || evtType == wxEVT_CHAR )
    {
       // these events are dangerous to handle now as they can result in another
       // call to c-client being made so just ignore them
       return false;
    }
 
-   if ( event.GetEventType() == wxEVT_TIMER )
+   if ( evtType == wxEVT_TIMER )
    {
       // this one should also be ignored right now as we could call to c-client
       // from its handler too, but there is an added complication: if it was a

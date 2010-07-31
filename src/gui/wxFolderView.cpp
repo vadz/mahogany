@@ -1799,8 +1799,6 @@ void wxFolderListCtrl::OnContextMenu(wxContextMenuEvent& event)
 // Event handler for the mouse event "list item has been double clicked"
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
-   mApplication->UpdateAwayMode();
-
    if ( !HasFolder() )
       return;
 
@@ -1902,8 +1900,6 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 // Event handler for the keyboard event Enter
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
-   mApplication->UpdateAwayMode();
-
    long item = event.m_itemIndex;
    if ( IsPreviewed(item) )
    {
@@ -2036,8 +2032,6 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
 void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 {
-   mApplication->UpdateAwayMode();
-
    // get the column which was clicked
    wxFolderListColumn col = GetColumnByIndex(m_columns, event.GetColumn());
    wxCHECK_RET( col != WXFLC_NONE, _T("should have a valid column") );
@@ -2167,8 +2161,6 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 
 void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
 {
-   mApplication->UpdateAwayMode();
-
    switch ( event.GetKeyCode() )
    {
       case WXK_UP:
