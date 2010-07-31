@@ -80,6 +80,10 @@
 
 #ifdef USE_PYTHON_DYNAMIC
 
+#if PY_VERSION_HEX < 0x02050000 && !defined(PY_SSIZE_T_MIN)
+typedef int Py_ssize_t;
+#endif
+
 // this function must be called before using any Python functions, it if
 // returns FALSE they can't be used
 extern bool InitPythonDll();
@@ -183,7 +187,7 @@ extern "C"
 
    // strings
    M_PY_WRAPPER_DECL(char *, PyString_AsString, (PyObject *));
-   M_PY_WRAPPER_DECL(int , PyString_AsStringAndSize, (PyObject *, char **, int *));
+   M_PY_WRAPPER_DECL(int , PyString_AsStringAndSize, (PyObject *, char **, Py_ssize_t *));
    M_PY_WRAPPER_DECL(void, PyString_ConcatAndDel, (PyObject **, PyObject *));
    M_PY_WRAPPER_DECL(PyObject *, PyString_Format, (PyObject *, PyObject *));
    M_PY_WRAPPER_DECL(PyObject *, PyString_FromString, (const char *));
@@ -429,7 +433,13 @@ extern "C"
 #define Py_InitModule4TraceRefs M_Py_InitModule4
 #define M_Py_InitModule4TraceRefs M_Py_InitModule4
 #else
+// Another complication: under 64 bit systems Python uses a different name to
+// avoid loading 32 bit modules into 64 bit interpreter
+#if SIZEOF_SIZE_T != SIZEOF_INT
+#define Py_InitModule4_64 M_Py_InitModule4
+#else
 #define Py_InitModule4 M_Py_InitModule4
+#endif
 #endif
 
 #endif // USE_PYTHON_DYNAMIC

@@ -249,13 +249,11 @@ extern "C"
     #define PYTHON_PROC void *
 #endif
 
-#define PYTHON_SYMBOL(func) { #func, NULL, (PYTHON_PROC *)&M_ ## func },
-#define PYTHON_FUNC_ALT(func, alt) { #func, #alt, (PYTHON_PROC *)&M_ ## func },
+#define PYTHON_SYMBOL(func) { #func, (PYTHON_PROC *)&M_ ## func },
 
 static struct PythonFunc
 {
-    const char *name;       // normal function name
-    const char *nameAlt;    // alternative name for Debug build
+    const char *name;       // function name
     PYTHON_PROC *ptr;       // function pointer
 } pythonFuncs[] =
 {
@@ -349,7 +347,6 @@ static struct PythonFunc
    PYTHON_SYMBOL(_Py_NoneStruct)
    PYTHON_SYMBOL(_Py_NotImplementedStruct)
    PYTHON_SYMBOL(PyCFunction_Type)
-   PYTHON_FUNC_ALT(Py_InitModule4, Py_InitModule4TraceRefs)
    PYTHON_SYMBOL(Py_BuildValue)
    PYTHON_SYMBOL(Py_VaBuildValue)
 #ifdef Py_REF_DEBUG
@@ -390,6 +387,20 @@ static struct PythonFunc
    PYTHON_SYMBOL(PyImport_ReloadModule)
    PYTHON_SYMBOL(PyRun_String)
    PYTHON_SYMBOL(PyType_IsSubtype)
+
+   // special case of Py_InitModule() which has different names in different
+   // Python builds
+   { 
+#ifdef Py_TRACE_REFS
+      "Py_InitModule4TraceRefs",
+#elif SIZEOF_SIZE_T != SIZEOF_INT
+      "Py_InitModule4_64",
+#else
+      "Py_InitModule4",
+#endif
+     (PYTHON_PROC *)&M_Py_InitModule4
+   },
+
    { "", NULL }
 };
 
@@ -459,26 +470,10 @@ extern bool InitPythonDll()
    }
 
    // load all functions
-   void *funcptr;
    PythonFunc *pf = pythonFuncs;
    while ( pf->ptr )
    {
-      if ( pf->nameAlt )
-      {
-         // try alt name and fail silently if it is not found
-         wxLogNull noLog;
-
-         funcptr = dllPython.GetSymbol(pf->nameAlt);
-      }
-      else
-      {
-         funcptr = NULL;
-      }
-
-      if ( !funcptr )
-      {
-         funcptr = dllPython.GetSymbol(pf->name);
-      }
+      void *funcptr = dllPython.GetSymbol(pf->name);
 
       if ( !funcptr )
       {
