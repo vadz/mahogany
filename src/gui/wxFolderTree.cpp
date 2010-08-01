@@ -425,6 +425,7 @@ protected:
    void DoFolderCreate();
    void DoFolderRename();
    void DoFolderMove();
+   void DoFolderHide();
    void DoFolderDelete(bool removeOnly = true);
    void DoFolderClear();
    void DoFolderClose();
@@ -483,6 +484,7 @@ private:
          Open,
          View,
          New,
+         Hide = WXMENU_FOLDER_HIDE,
          Remove = WXMENU_FOLDER_REMOVE,
          Delete = WXMENU_FOLDER_DELETE,
          Rename = WXMENU_FOLDER_RENAME,
@@ -491,7 +493,7 @@ private:
          Update = WXMENU_FOLDER_UPDATE,
          BrowseSub = WXMENU_FOLDER_BROWSESUB,
          Properties = WXMENU_FOLDER_PROP,
-         ShowHidden
+         ShowHidden // this is used for the root folder only
       };
 
       FolderMenu(bool isRoot)
@@ -507,6 +509,7 @@ private:
          Append(New, _("Create &new folder..."));
          if ( !isRoot )
          {
+            Append(Hide, _("&Hide folder"));
             Append(Remove, _("&Remove from tree"));
             Append(Delete, _("&Delete folder"));
          }
@@ -858,8 +861,9 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 
    if ( menu->FindItem(WXMENU_FOLDER_REMOVE) )
    {
-      // root folder can't be removed
+      // root folder can't be removed nor hidden
       menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
+      menu->Enable(WXMENU_FOLDER_HIDE, !isRoot);
 
       // NB: if Remove is there, Delete and Close are too and vice versa, so we
       //     don't call FindItem() to check for this, but we should if it ever
@@ -2076,6 +2080,44 @@ void wxFolderTreeImpl::DoFolderMove()
    }
 }
 
+void wxFolderTreeImpl::DoFolderHide()
+{
+   MFolder_obj folder(m_sink->GetSelection());
+   if ( !folder )
+   {
+      wxLogError(_("Please select the folder to hide."));
+
+      return;
+   }
+
+   folder->AddFlags(MF_FLAGS_HIDDEN);
+
+   if ( m_showHidden )
+   {
+      // it's difficult to explain why the folder is still shown even though it
+      // just had been hidden in a short message, try to do our best...
+      wxLogStatus(GetFrame(this),
+                  _("Folder \"%s\" will not be shown when hidden folders are "
+                    "not shown any more."),
+                  folder->GetName());
+   }
+   else // not showing hidden folders
+   {
+      MFolder_obj parent(folder->GetParent());
+      CHECK_RET( parent, "couldn't have hidden the root folder" );
+
+      wxTreeItemId idParent = GetTreeItemFromName(parent->GetFullName());
+      CHECK_RET( idParent.IsOk(), "should have tree item for folder parent" );
+
+      ReopenBranch(idParent);
+
+      wxLogStatus(GetFrame(this),
+                  _("Folder \"%s\" was hidden, right click the root folder "
+                    "to show all hidden folders again."),
+                   folder->GetName());
+   }
+}
+
 void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
 {
    MFolder *folder = m_sink->GetSelection();
@@ -2926,6 +2968,10 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
 
       case WXMENU_FOLDER_CLEAR:
          DoFolderClear();
+         break;
+
+      case FolderMenu::Hide:
+         DoFolderHide();
          break;
 
       case FolderMenu::Remove:
