@@ -198,6 +198,7 @@ extern "C"
    M_PY_WRAPPER_DEF(PyImport_GetModuleDict);
    M_PY_WRAPPER_DEF(PyImport_ReloadModule);
    M_PY_WRAPPER_DEF(PyRun_String);
+   M_PY_WRAPPER_DEF(PyRun_SimpleStringFlags);
 
    M_PY_WRAPPER_DEF(PyType_IsSubtype);
    M_PY_WRAPPER_DEF(_Py_NegativeRefcount);
@@ -386,6 +387,7 @@ static struct PythonFunc
    PYTHON_SYMBOL(PyImport_GetModuleDict)
    PYTHON_SYMBOL(PyImport_ReloadModule)
    PYTHON_SYMBOL(PyRun_String)
+   PYTHON_SYMBOL(PyRun_SimpleStringFlags)
    PYTHON_SYMBOL(PyType_IsSubtype)
 
    // special case of Py_InitModule() which has different names in different

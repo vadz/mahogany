@@ -45,12 +45,15 @@ extern "C"
    void init_SendMessage();
 }
 
+namespace
+{
+
 // had Python been initialized? (MT ok as only used by the main thread)
-static bool gs_isPythonInitialized = false;
+bool gs_isPythonInitialized = false;
 
 // returns true if no error, false if a Python error occured. In the last case
 // an appropriate error message is logged.
-static bool CheckPyError()
+bool CheckPyError()
 {
    if ( PyErr_Occurred() )
    {
@@ -63,32 +66,13 @@ static bool CheckPyError()
    return true;
 }
 
-extern bool
-IsPythonInitialized()
+void SetPythonPath()
 {
-   return gs_isPythonInitialized;
-}
-
-extern bool
-InitPython(void)
-{
-   if ( !READ_APPCONFIG(MP_USEPYTHON) )
-   {
-      // it is not an error to have it disabled
-      return true;
-   }
-
-   // set PYTHONPATH correctly to find our modules and scripts: this must be
-   // done before loading the Python DLL below because its copy of CRT (which
-   // may be different from ours when using VC9) will initialize its _environ
-   // array from Win32 process environment when the DLL is loaded, so we must
-   // update the environment before this happens
-   String pythonPathNew;
-
    String path = READ_APPCONFIG(MP_PYTHONPATH);
-   const bool didntHavePath = path.empty();
-   if ( didntHavePath )
+   if ( path.empty() )
    {
+      // construct a reasonable default path
+
       // first, use user files
       String localdir = mApplication->GetLocalDir();
       if ( !localdir.empty() )
@@ -117,23 +101,39 @@ InitPython(void)
 #ifdef M_TOP_SOURCEDIR
       path << PATH_SEPARATOR << M_TOP_SOURCEDIR << _T("/src/Python/Scripts");
 #endif // M_TOP_SOURCEDIR
+
+      // remember the path to avoid having to construct it again the next time
+      mApplication->GetProfile()->writeEntry(MP_PYTHONPATH, path);
    }
 
-   wxLogTrace(_T("Python"), "Adding \"%s\" to PYTHONPATH", path.c_str());
+   wxLogTrace("Python", "Prepending \"%s\" to sys.path", path);
 
-   pythonPathNew += path;
+   PyRun_SimpleString
+   (
+      wxString::Format
+      (
+         "import sys\n"
+         "sys.path[:0]='%s'.split('%c')\n",
+         path, PATH_SEPARATOR
+      )
+   );
+}
 
-   // also keep the old path but after our directories
-   wxString pythonPathOld;
-   if ( wxGetEnv("PYTHONPATH", &pythonPathOld) )
+} // anonymous namespace
+
+extern bool
+IsPythonInitialized()
+{
+   return gs_isPythonInitialized;
+}
+
+extern bool
+InitPython(void)
+{
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
    {
-      pythonPathNew << PATH_SEPARATOR << pythonPathOld;
-   }
-
-   if ( !wxSetEnv("PYTHONPATH", pythonPathNew) )
-   {
-      wxLogWarning(_("Setting PYTHONPATH to \"%s\" failed, loading some "
-                     "Python modules might not work."), pythonPathNew);
+      // it is not an error to have it disabled
+      return true;
    }
 
    // check if Python is available at all if we load it during run-time
@@ -149,6 +149,10 @@ InitPython(void)
    // initialise the interpreter -- this we do always, just to avoid problems
    Py_Initialize();
    gs_isPythonInitialized = true;
+
+
+   // set up the module loading path so that our modules would be found
+   SetPythonPath();
 
    // initialise the modules
    init_HeaderInfo();
@@ -187,12 +191,6 @@ InitPython(void)
          }
          //else: no Init() function, ignore it
       }
-   }
-
-   if ( rc && didntHavePath )
-   {
-      // remember the path
-      mApplication->GetProfile()->writeEntry(MP_PYTHONPATH, path);
    }
 
    return rc;

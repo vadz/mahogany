@@ -239,6 +239,7 @@ extern "C"
    M_PY_WRAPPER_DECL(PyObject *, PyImport_GetModuleDict, (void));
    M_PY_WRAPPER_DECL(PyObject *, PyImport_ReloadModule, (PyObject *));
    M_PY_WRAPPER_DECL(PyObject *, PyRun_String, (const char *, int, PyObject *, PyObject *));
+   M_PY_WRAPPER_DECL(int, PyRun_SimpleStringFlags, (const char *, PyCompilerFlags *));
    M_PY_WRAPPER_DECL(int, PyOS_snprintf, (char *str, size_t size, const char *format, ...));
 
    M_PY_WRAPPER_DECL(int , PyType_IsSubtype, (PyTypeObject *, PyTypeObject *));
@@ -402,6 +403,7 @@ extern "C"
 // exports it as a function too and using it seems to work fine...
 #undef PyRun_String
 #define PyRun_String M_PyRun_String
+#define PyRun_SimpleStringFlags M_PyRun_SimpleStringFlags
 #define PyOS_snprintf M_PyOS_snprintf
 
 // exception objects
