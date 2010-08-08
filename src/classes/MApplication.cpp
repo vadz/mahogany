@@ -750,9 +750,11 @@ MAppBase::OnShutDown()
       // leak as memory is allocated only once but still
 #if defined(OS_WIN) && defined(DEBUG) && !defined(__CYGWIN__)
       // clean up after cclient (order is important as sysinbox() uses the
-      // username)
+      // username) and myusername() may allocate the home directory if it
+      // hadn't been done yet
       free(sysinbox());
-      free(myusername_full(NULL));
+      free(myhomedir());
+      free(myusername());
 #endif // OS_WIN
 
 #ifdef USE_PYTHON

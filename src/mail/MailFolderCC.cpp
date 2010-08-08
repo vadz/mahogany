@@ -4712,13 +4712,6 @@ MailFolderCC::CClientInit(void)
 #endif
       (void *) myusername();
 
-#ifdef OS_WIN
-   // cclient extra initialization under Windows: use the home directory of the
-   // user (the programs directory by default) as HOME
-   wxString home;
-   mail_parameters(NULL, SET_HOMEDIR, (void *)wxGetHomeDir(&home));
-#endif // OS_WIN
-
    // 1 try is enough, the default (3) is too slow: notice that this only sets
    // the number of trials for SMTP and not for the mailbox drivers for which
    // we have to set this separately!
@@ -4816,10 +4809,7 @@ void MailFolderCCCleanup(void)
 
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
-   //
-   // NB: do not reverse the ordering: GET_NEWSRC may need GET_HOMEDIR
    free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
-   free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
 
 #ifdef USE_DIALUP
    if ( gs_CCStreamCleaner )
