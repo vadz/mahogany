@@ -35,6 +35,8 @@
 #include "UIdArray.h"
 #include "Address.h"
 
+#include "pointers.h"
+
 #include "gui/wxMDialogs.h"         // for MProgressInfo
 
 // ----------------------------------------------------------------------------
@@ -1483,7 +1485,7 @@ void HeaderInfoListImpl::BuildTables()
    // this also makes sense because the server side sorting/threading seems to
    // be much faster the subsequent times (the server probably keeps some data
    // alive) but the first time it's really slow
-   BusyIndicator *busy = NULL;
+   scoped_ptr<BusyIndicator> busy;
 
    // no tables, check if we need them
 
@@ -1496,7 +1498,7 @@ void HeaderInfoListImpl::BuildTables()
       if ( busy )
          busy->SetLabel(msg, m_sizeTables);
       else
-         busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_sizeTables);
+         busy.reset(new BusyIndicator(!m_firstSort, m_mf, msg, m_sizeTables));
 
       if ( !Sort() )
          busy->Fail(_("Sorting failed!"));
@@ -1512,7 +1514,7 @@ void HeaderInfoListImpl::BuildTables()
          if ( busy )
             busy->SetLabel(msg, m_sizeTables);
          else
-            busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_sizeTables);
+            busy.reset(new BusyIndicator(!m_firstSort, m_mf, msg, m_sizeTables));
 
          if ( !Thread() )
             busy->Fail(_("Threading failed!"));
@@ -1546,8 +1548,6 @@ void HeaderInfoListImpl::BuildTables()
    {
       BuildPosTable();
    }
-
-   delete busy;
 
    // first sorting/threading done
    m_firstSort = false;
