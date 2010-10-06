@@ -475,7 +475,7 @@ inline bool HeaderInfoListImpl::MustRebuildTables() const
    // if the tables exist but are out of date, i.e. we got some new messages
    // since they were built we have to rebuild them -- as we do if they don't
    // exist at all yet
-   if ( !HasTransTable() || m_sizeTables < m_count || m_mustRebuildTables )
+   if ( !HasTransTable() || m_mustRebuildTables )
    {
       ((HeaderInfoListImpl *)this)->FreeSortAndThreadData(); // const_cast
 
@@ -621,10 +621,8 @@ MsgnoType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 
 MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
 {
-   if ( MustRebuildTables() )
-   {
-      ((HeaderInfoListImpl *)this)->BuildTables(); // const_cast
-   }
+   if ( !const_cast<HeaderInfoListImpl *>(this)->RebuildTablesIfNecessary() )
+      return MSGNO_ILLEGAL;
 
    if ( m_reverseOrder )
    {
@@ -662,9 +660,10 @@ MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
    CHECK( n < m_count, INDEX_ILLEGAL, _T("invalid index in GetPosFromIdx") );
 
    // calculate the table on the fly if needed
-   if ( MustRebuildTables() )
+   if ( !const_cast<HeaderInfoListImpl *>(this)->RebuildTablesIfNecessary() )
    {
-      ((HeaderInfoListImpl *)this)->BuildTables(); // const_cast
+      // We must have lost connection.
+      return INDEX_ILLEGAL;
    }
 
    return GetOldPosFromIdx(n);
@@ -1093,9 +1092,12 @@ void HeaderInfoListImpl::OnAdd(MsgnoType countNew)
          break BuildTables()
 
       So instead we just leave m_sizeTables unchanged and we will invalidate
-      the sort/thread data only when/if needed, i.e. if we notice that it is
-      different from m_count
+      the sort/thread data only when we need it next. Of course, for this to
+      work the code should always check for m_mustRebuildTables or call
+      MustRebuildTables() before using them.
     */
+
+   m_mustRebuildTables = true;
 
    m_count = countNew;
 
@@ -1466,13 +1468,13 @@ void HeaderInfoListImpl::BuildTables()
    // what is it inverse for?
    ASSERT_MSG( !m_tablePos, _T("shouldn't have inverse table neither!") );
 
-   // we are rebuilding them, so reset the flag
-   m_mustRebuildTables = false;
-
    // we are going to have the valid tables for that many messages only:
    // m_count may change under our feet from inside Sort() and/or Thread() if
    // we use server-side sorting/threading!
    m_sizeTables = m_count;
+
+   // we are rebuilding them, so reset the flag
+   m_mustRebuildTables = false;
 
    // note that we only show any interactive dialogs during the first
    // sorting/threading because I didn't find any simple way to suppress them
@@ -1502,6 +1504,15 @@ void HeaderInfoListImpl::BuildTables()
 
       if ( !Sort() )
          busy->Fail(_("Sorting failed!"));
+
+      if ( m_mustRebuildTables )
+      {
+         // This means that the folder changed (e.g. we got new messages) while
+         // it was sorted, so we need to resort. Most importantly, do not call
+         // Thread() as the size of the currently allocated tables is not big
+         // enough any more.
+         return;
+      }
    }
 
    if ( IsThreading() )
@@ -1518,6 +1529,13 @@ void HeaderInfoListImpl::BuildTables()
 
          if ( !Thread() )
             busy->Fail(_("Threading failed!"));
+
+         if ( m_mustRebuildTables )
+         {
+            // As above, this means that the folder changed while threading, so
+            // we need to redo everything taking the new messages into account.
+            return;
+         }
       }
 
       // we could have failed to rebuild them above
@@ -1553,6 +1571,24 @@ void HeaderInfoListImpl::BuildTables()
    m_firstSort = false;
 
    CHECK_TABLES();
+}
+
+bool HeaderInfoListImpl::RebuildTablesIfNecessary()
+{
+   // We may need to build the tables many times because they need to be
+   // rebuilt if the folder contents changes while we sort/thread it and this
+   // can happen from MailFolder::Sort() and Thread() methods called by us here
+   // when using server-side sort/threading.
+   //
+   // We probably should impose some limit on the number of this loop
+   // iterations as currently we can rebuild forever if new messages keep
+   // coming. OTOH it's not really clear if we can deal with an infinite stream
+   // of incoming messages in any sane way anyhow.
+   while ( MustRebuildTables() )
+      BuildTables();
+
+   // Check if the connection to the folder was lost while we sorted it.
+   return m_count != 0;
 }
 
 MsgnoType *HeaderInfoListImpl::BuildInverseTable(MsgnoType *table) const
@@ -1910,10 +1946,8 @@ void HeaderInfoListImpl::Cache(const Sequence& seq)
 void HeaderInfoListImpl::CachePositions(const Sequence& seq)
 {
    // update the translation tables if necessary
-   if ( MustRebuildTables() )
+   if ( !RebuildTablesIfNecessary() )
    {
-      BuildTables();
-
       // we could lose connection while sorting/threading
       if ( !m_count )
          return;
@@ -1935,7 +1969,14 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
       {
          ASSERT_MSG( pos < m_count, _T("invalid position in the sequence") );
 
-         msgnos.Add(GetMsgnoFromPos(pos));
+         const MsgnoType msgno = GetMsgnoFromPos(pos);
+         if ( msgno == MSGNO_ILLEGAL )
+         {
+            // This is fatal, we must have lost connection.
+            return;
+         }
+
+         msgnos.Add(msgno);
       }
 
       msgnos.Sort(MsgnoCmpFunc);

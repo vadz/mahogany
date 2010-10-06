@@ -101,6 +101,14 @@ private:
    /// allocate a table of m_count MsgnoTypes
    MsgnoType *AllocTable() const;
 
+   /**
+       Build translation tables if necessary.
+
+       @return true if the tables can be used, false if we failed to build them
+               (e.g. because we lost connection while doing server-side sorting)
+    */
+   bool RebuildTablesIfNecessary();
+
    /// build m_tableMsgno/m_tablePos from sort/thread data if not done yet
    void BuildTables();
 
