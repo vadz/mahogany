@@ -1110,8 +1110,8 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                     (
                      &mask,
                      "Modify tracing mask",
-                     "Enter trace mask to enable it or enter it precede "
-                     "by \"-\" to disable it if currently enabled.",
+                     "Enter trace mask to enable it or enter it preceded "
+                     "by \"-\" to disable it if currently enabled:",
                      this,
                      "DebugTraceMask"
                     ) && !mask.empty() )
