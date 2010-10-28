@@ -130,12 +130,12 @@
 // ----------------------------------------------------------------------------
 
 #if !wxCHECK_VERSION(2, 9, 1)
-#  error "This version of Mahogany requires wxWindows 2.9.1 or higher."
+#  error "This version of Mahogany requires wxWidgets 2.9.1 or higher."
 #endif
 
 #ifdef USE_THREADS
 #   if !wxUSE_THREADS
-#      error "Mahogany's thread support requires a wxWindows with threads compiled in!"
+#      error "Mahogany's thread support requires a wxWidgets with threads compiled in!"
 #   endif
 #endif
 
