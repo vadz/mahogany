@@ -1462,7 +1462,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
                {
                   --i;
                }
-               breakpos = (**i).GetLength();
+               breakpos = (**i).GetLength() - 1;
             }
          }
       }while(! foundSpace);
