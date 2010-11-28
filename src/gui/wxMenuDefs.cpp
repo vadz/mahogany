@@ -740,7 +740,8 @@ void CreateMToolbar(wxFrame *parent, wxFrameId frameId)
    long style = wxTB_HORIZONTAL | wxTB_FLAT | wxTB_DOCKABLE;
    if ( !(flags & TbarShow_Icons) )
       style |= wxTB_NOICONS;
-
+   if ( flags == TbarShow_Both )
+      style |= wxTB_TEXT;
    wxToolBar *toolbar = parent->CreateToolBar(style);
 
 #ifdef __WXMSW__
