@@ -82,6 +82,7 @@ extern const MOption MP_FVIEW_AUTONEXT_UNREAD_FOLDER;
 extern const MOption MP_MAINFOLDER;
 extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_REOPENLASTFOLDER;
+extern const MOption MP_WAIT_NETWORK_AFTER_RESUME;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -97,6 +98,44 @@ extern const MPersMsgBox *M_MSGBOX_CONT_UPDATE_AFTER_ERROR;
 // update the status of all folders under the given one in the folder tree,
 // returns the number of the folders updated or -1 on error
 extern int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent);
+
+#ifdef OS_WIN
+
+// For now this is only defined under Windows but maybe we can find some way to
+// do it elsewhere too later (but this would only be useful if/when wx
+// implements resume events generation for the other platforms).
+#define CAN_CHECK_NETWORK_STATE
+
+#include <wx/dynlib.h>
+
+// Check if we have network connection at all. This is a bit vague but seems to
+// do roughly what we need here, i.e. if this function returns false we have
+// really no chance of connecting to the remote servers while it might work if
+// it returns true.
+static bool IsNetworkAvailable()
+{
+   static wxDynamicLibrary s_dllWinINet("wininet", wxDL_QUIET);
+   if ( !s_dllWinINet.IsLoaded() )
+   {
+      // If we can't check for it, it's better to assume that it is available
+      // immediately than never returning true at all.
+      return true;
+   }
+
+   typedef BOOL (WINAPI *InternetGetConnectedState_t)(LPDWORD, DWORD);
+   static InternetGetConnectedState_t
+      wxDL_INIT_FUNC(s_pfn, InternetGetConnectedState, s_dllWinINet);
+   if ( !s_pfnInternetGetConnectedState )
+   {
+      // As above.
+      return true;
+   }
+
+   DWORD flags;
+   return (*s_pfnInternetGetConnectedState)(&flags, 0) == TRUE;
+}
+
+#endif // OS_WIN
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -1200,11 +1239,38 @@ void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
    wxLogStatus(_("Reopening %lu folders on system resume"),
                (unsigned long)foldersToReopen->size());
 
+#ifdef CAN_CHECK_NETWORK_STATE
+   bool checkedNetwork = false;
+#endif // CAN_CHECK_NETWORK_STATE
    for ( MFolderList::iterator i = foldersToReopen->begin();
          i != foldersToReopen->end();
          ++i )
    {
       MFolder *folder = *i;
+
+#ifdef CAN_CHECK_NETWORK_STATE
+      if ( !checkedNetwork && folder->NeedsNetwork() )
+      {
+         // We can get a resume event before the system got reconnected so stay
+         // here for a few seconds to give it a chance to do it as otherwise
+         // reopening the remote folders after resume would always fail.
+         const long resumeTimeout = READ_APPCONFIG(MP_WAIT_NETWORK_AFTER_RESUME);
+         for ( int n = 0; n < resumeTimeout/2; n++ )
+         {
+            if ( IsNetworkAvailable() )
+            {
+               wxLogDebug("Network is available.");
+               break;
+            }
+
+            wxLogDebug("Network is still not available, sleeping.");
+            wxMilliSleep(500);
+         }
+
+         checkedNetwork = true;
+      }
+#endif // CAN_CHECK_NETWORK_STATE
+
       if ( folder->GetFullName() == m_folderToReopenHere )
       {
          OpenFolder(folder);

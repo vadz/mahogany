@@ -88,6 +88,7 @@ extern const MOption MP_SHOWCONSOLE;
 extern const MOption MP_DONTOPENSTARTUP;
 extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_REOPENLASTFOLDER;
+extern const MOption MP_WAIT_NETWORK_AFTER_RESUME;
 extern const MOption MP_MAINFOLDER;
 extern const MOption MP_PYTHONPATH;
 extern const MOption MP_PYTHONDLL;
@@ -591,6 +592,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_OPENFOLDERS_NAME         "OpenFolders"
 /// reopen the last opened folder in the main frame
 #define   MP_REOPENLASTFOLDER_NAME "ReopenLastFolder"
+/// wait for network after resume for that many seconds
+#define   MP_WAIT_NETWORK_AFTER_RESUME_NAME "WaitNetAfterResume"
 /// name of folder to open in mainframe
 #define   MP_MAINFOLDER_NAME          "MainFolder"
 /// path for Python
@@ -1442,6 +1445,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_OPENFOLDERS_DEFVAL      ""
 /// reopen the last opened folder in the main frame
 #define   MP_REOPENLASTFOLDER_DEFVAL 1
+/// wait for network after resume for that many seconds
+#define   MP_WAIT_NETWORK_AFTER_RESUME_DEFVAL 10
 /// name of folder to open in mainframe
 #define   MP_MAINFOLDER_DEFVAL        ""
 /// path for Python
