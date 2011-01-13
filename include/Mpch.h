@@ -57,6 +57,16 @@
 #include "MHelp.h"
 #include "gui/wxMIds.h"
 
+#if defined(DEBUG) && defined(_MSC_VER)
+   // Redefine global operator new to use the overloaded version which records
+   // the allocation location in the source, this makes finding the leaks
+   // reported by MSVC CRT much easier.
+   //
+   // Notice that this must be done after including the standard headers which
+   // sometimes redefine operator new themselves.
+   #include <wx/msw/msvcrt.h>
+#endif
+
 #endif  //USE_PCH
 
 #endif  //MPCH_H
