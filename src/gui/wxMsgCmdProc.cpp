@@ -1430,7 +1430,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
    CHECK_RET( mf, _T("message preview without folder?") );
 
    // extract all addresses from the selected messages to this array
-   wxSortedArrayString addressesSorted;
+   wxArrayString addressesSorted;
    size_t count = selections.GetCount();
 
    MProgressDialog *dlg;
@@ -1477,6 +1477,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
 
    delete dlg;
 
+   addressesSorted.Sort();
    wxArrayString addresses = strutil_uniq_array(addressesSorted);
    if ( !addresses.IsEmpty() )
    {

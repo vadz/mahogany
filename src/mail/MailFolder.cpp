@@ -649,8 +649,9 @@ InitRecipients(Composer *cv,
    bool fromMyself = false;
 
    // first try Reply-To
-   wxSortedArrayString replyToAddresses;
+   wxArrayString replyToAddresses;
    size_t countReplyTo = msg->GetAddresses(MAT_REPLYTO, replyToAddresses);
+   replyToAddresses.Sort();
 
    size_t n, count; // loop variables
 
@@ -736,7 +737,7 @@ InitRecipients(Composer *cv,
    }
 
    // now get all other addresses
-   wxSortedArrayString otherAddresses;
+   wxArrayString otherAddresses;
 
    if ( replyKind == MailFolder::REPLY_LIST )
    {
@@ -774,6 +775,8 @@ InitRecipients(Composer *cv,
       // FIXME: as above, we lose the original encoding here
       otherAddresses[n] = MIME::DecodeHeader(otherAddresses[n]);
    }
+
+   otherAddresses.Sort();
 
    // remove duplicates
    wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);
