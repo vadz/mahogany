@@ -2519,7 +2519,7 @@ bool wxOptionsPage::Show(bool show)
    if ( !MBookCtrlPageBase::Show(show) )
       return false;
 
-   if ( show && m_aControls.IsEmpty() )
+   if ( show && m_aControls.empty() )
    {
 #ifdef PROFILE_OPTIONS_DLG
       wxStopWatch sw;
@@ -2630,8 +2630,8 @@ void wxOptionsPage::CreateControls()
            (!isFolderDialog && (flags & Field_NotApp)) )
       {
          // skip this one
-         m_aControls.Add(NULL);
-         m_aDirtyFlags.Add(false);
+         m_aControls.push_back(NULL);
+         m_aDirtyFlags.push_back(false);
 
          continue;
       }
@@ -2714,14 +2714,14 @@ void wxOptionsPage::CreateControls()
       if ( !isFolderDialog )
       {
          if ( flags & Field_Vital )
-            m_aVitalControls.Add(last);
+            m_aVitalControls.push_back(last);
 
          if ( flags & Field_Restart )
-            m_aRestartControls.Add(last);
+            m_aRestartControls.push_back(last);
       }
 
-      m_aControls.Add(last);
-      m_aDirtyFlags.Add(false);
+      m_aControls.push_back(last);
+      m_aDirtyFlags.push_back(false);
    }
 }
 
@@ -2795,7 +2795,7 @@ void wxOptionsPage::OnControlChange(wxCommandEvent& event)
 
 void wxOptionsPage::UpdateUI()
 {
-   if ( m_aControls.IsEmpty() )
+   if ( m_aControls.empty() )
       return;
 
    for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
@@ -2927,7 +2927,7 @@ void wxOptionsPage::UpdateUI()
 // read the data from config
 bool wxOptionsPage::TransferDataToWindow()
 {
-   if ( m_aControls.IsEmpty() )
+   if ( m_aControls.empty() )
    {
       // we're not created yet, will do this later
       return true;
@@ -3134,7 +3134,7 @@ bool wxOptionsPage::DoTransferOptionsToWindow()
 // write the data to config
 bool wxOptionsPage::TransferDataFromWindow()
 {
-   if ( m_aControls.IsEmpty() )
+   if ( m_aControls.empty() )
    {
       // we must have been never shown so no data could have been modified
       return true;
