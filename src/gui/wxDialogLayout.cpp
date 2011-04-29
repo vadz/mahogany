@@ -644,7 +644,8 @@ void wxEnhancedPanel::RefreshScrollbar(const wxSize& size)
 {
    // find the total height of this panel
    int height = 0;
-   for ( wxWindowList::Node *node = GetCanvas()->GetChildren().GetFirst();
+   for ( wxWindowList::compatibility_iterator
+            node = GetCanvas()->GetChildren().GetFirst();
          node;
          node = node->GetNext() )
    {

@@ -847,7 +847,8 @@ wxMApp::CanClose() const
 
    if ( okToClose )
    {
-      wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
+      wxWindowList::compatibility_iterator
+         node = wxTopLevelWindows.GetFirst();
       while ( node && okToClose )
       {
          wxWindow *win = node->GetData();
