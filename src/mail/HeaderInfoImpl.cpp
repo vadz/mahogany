@@ -589,7 +589,7 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
       self->ExpandToMakeIndexValid(n);
 
       // alloc space for new header
-      m_headers[n] = new HeaderInfo;
+      const_cast<HeaderInfoListImpl *>(this)->m_headers[n] = new HeaderInfo;
 
       // get header info for the new header
       Sequence seq;
