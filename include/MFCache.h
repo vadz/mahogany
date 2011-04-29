@@ -94,7 +94,7 @@ protected:
 
 private:
    // the names of the folders we have cached status for
-   wxArrayString m_folderNames;
+   wxSortedArrayString m_folderNames;
 
    // the data for the folders above
    MfStatusArray m_folderData;

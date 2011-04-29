@@ -89,7 +89,6 @@ void MfStatusCache::CleanUp()
 }
 
 MfStatusCache::MfStatusCache()
-             : m_folderNames(TRUE /* auto sorted array */)
 {
    Load();
 
