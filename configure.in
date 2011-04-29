@@ -746,7 +746,7 @@ dnl Check for Python headers first: we need this for both dynamic and static
 dnl linking
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-	for ver in 2.5 2.4 2.3 2.2 2.1 2.0 1.5; do
+	for ver in 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.5; do
 	    M_CHECK_MYHEADER_VER(
 		Python.h,
 		$ver,

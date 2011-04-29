@@ -3742,7 +3742,7 @@ PYTHON_VER=
 
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-	for ver in 2.5 2.4 2.3 2.2 2.1 2.0 1.5; do
+	for ver in 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.5; do
 	     m_safe=`echo "Python.h_$ver" | sed 'y%./+-%__p_%'`
     echo $ac_n "checking for Python.h ($ver)""... $ac_c" 1>&6
 echo "configure:3749: checking for Python.h ($ver)" >&5
