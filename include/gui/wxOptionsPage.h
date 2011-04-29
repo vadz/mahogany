@@ -23,7 +23,11 @@
 #include "gui/wxDialogLayout.h"         // for MBookCtrlPageBase
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
-WX_DEFINE_ARRAY_INT(bool, ArrayBool);
+
+// We can't use WX_DEFINE_ARRAY_INT(bool) as this doesn't compile when using
+// STL containers because of the differences between std::vector<bool>
+// specialization and the generic template class, so use array of ints instead.
+typedef wxArrayInt ArrayBool;
 
 class MFolder;
 
@@ -243,10 +247,10 @@ protected:
 
    // get the dirty flag for the control with index n
    bool IsDirty(size_t n) const
-      { return m_aDirtyFlags[n- m_nFirst]; }
+      { return m_aDirtyFlags[n - m_nFirst] != 0; }
 
    // reset the dirty flag for the control with index n
-   void ClearDirty(size_t n) const
+   void ClearDirty(size_t n)
       { m_aDirtyFlags[n - m_nFirst] = false; }
 
    // type safe access to the control text
