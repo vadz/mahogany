@@ -498,7 +498,7 @@ private:
                   _T("folder cache corrupted") );
    }
 
-   static wxArrayString ms_aFolderNames;
+   static wxSortedArrayString ms_aFolderNames;
    static wxArrayFolder ms_aFolders;
 };
 
@@ -1273,7 +1273,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
 // MFolderCache implementation
 // -----------------------------------------------------------------------------
 
-wxArrayString MFolderCache::ms_aFolderNames(true /* auto sort */);
+wxSortedArrayString MFolderCache::ms_aFolderNames;
 wxArrayFolder MFolderCache::ms_aFolders;
 
 MFolder *MFolderCache::Get(const String& name)

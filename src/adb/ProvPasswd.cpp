@@ -338,7 +338,7 @@ size_t PasswdEntryGroup::GetEntryNames(wxArrayString& names) const
       ((PasswdEntryGroup *)this)->ReadPasswdDb(); // const_cast
    }
 
-   names = m_names;
+   names.assign(m_names.begin(), m_names.end());
 
    return names.Count();
 }
