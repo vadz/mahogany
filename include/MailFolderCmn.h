@@ -223,9 +223,9 @@ protected:
 
       bool operator==(const MFCmnOptions& other) const
       {
-         return m_SortParams != other.m_SortParams ||
-                m_ThrParams != other.m_ThrParams ||
-                m_UpdateInterval != other.m_UpdateInterval;
+         return m_SortParams == other.m_SortParams &&
+                m_ThrParams == other.m_ThrParams &&
+                m_UpdateInterval == other.m_UpdateInterval;
       }
 
       bool operator!=(const MFCmnOptions& other) const
