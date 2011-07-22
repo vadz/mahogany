@@ -1411,6 +1411,8 @@ wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
    m_profileForButtons = NULL;
 
    m_lastBtn = MEventOptionsChangeData::Invalid;
+
+   m_wasInitialized = false;
 }
 
 // transfer the data to/from notebook pages
@@ -1418,6 +1420,9 @@ wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
 
 bool wxOptionsEditDialog::TransferDataToWindow()
 {
+   // It is now safe for pages TransferDataToWindow() to do their real work.
+   m_wasInitialized = true;
+
    const int count = m_notebook->GetPageCount();
    for ( int nPage = 0; nPage < count; nPage++ ) {
       wxWindow *page = m_notebook->GetPage(nPage);

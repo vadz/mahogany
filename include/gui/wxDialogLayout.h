@@ -303,6 +303,11 @@ public:
    // disable or reenable Ok and Apply buttons
    virtual void EnableButtons(bool enable);
 
+   // Check whether TransferDataToWindow() had been already called, this is
+   // used [only] by wxOptionsPage to determine whether it's already safe to
+   // initialize its own data.
+   bool WasInitialized() const { return m_wasInitialized; }
+
 protected:
    // clear the dirty flag
    virtual void ResetDirty()
@@ -349,6 +354,10 @@ private:
    // flags
    bool m_bTest,            // test new settings?
         m_bRestartWarning;  // changes will take effect after restart
+
+   // Initially false and set to true only in our TransferDataToWindow(),
+   // indicates that our sub-pages can transfer data to the GUI.
+   bool m_wasInitialized;
 
 
    DECLARE_ABSTRACT_CLASS(wxOptionsEditDialog)

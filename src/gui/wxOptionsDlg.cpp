@@ -2514,10 +2514,19 @@ wxOptionsPage::~wxOptionsPage()
    SafeDecRef(m_Profile);
 }
 
+// We override Show() to fill in the page contents on demand as creating all
+// the controls in the entire book control just takes too long. Unfortunately
+// there is currently no better way to do this but maybe wxWidgets can provide
+// some events (e.g. PRE_PAGE_SELECTED or something like this) to allow doing
+// it in a simpler way in the future.
 bool wxOptionsPage::Show(bool show)
 {
-   if ( !MBookCtrlPageBase::Show(show) )
-      return false;
+   // Ignore the return value of the base class method, we need to call
+   // CreateControls() below even if Show() is called on the already shown
+   // page because it happens for the first page created: it's created already
+   // shown, yet Show() is still called on it when it's added to the book
+   // control and this is when we must fill it in.
+   const bool rc = MBookCtrlPageBase::Show(show);
 
    if ( show && m_aControls.empty() )
    {
@@ -2529,16 +2538,23 @@ bool wxOptionsPage::Show(bool show)
 
       Layout();
 
-      TransferDataToWindow();
+      // This is a rather ugly hack meant to prevent TransferDataToWindow()
+      // from being called when the first page is shown as this happens before
+      // its profile is set and so we don't have the data to transfer yet.
+      wxOptionsEditDialog *dialog = GetOptionsDialog();
+      if ( dialog && dialog->WasInitialized() )
+      {
+         TransferDataToWindow();
 
-      UpdateUI();
+         UpdateUI();
+      }
 
 #ifdef PROFILE_OPTIONS_DLG
       wxLogStatus(_T("Options page created in %ldms"), sw.Time());
 #endif
    }
 
-   return true;
+   return rc;
 }
 
 String wxOptionsPage::GetFolderName() const
