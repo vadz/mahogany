@@ -2128,10 +2128,19 @@ wxFolderPropertiesPage::SetDefaultValues()
    const int flags = folder->GetFlags();
    m_originalIsHiddenValue = (flags & MF_FLAGS_HIDDEN) != 0;
 
-   // do not inherit MF_FLAGS_KEEPOPEN by default, it's typically set only for
-   // a few important folders and shouldn't be propagated to all of their
-   // children
-   m_keepOpen->SetValue(false);
+   if ( IsCreating() )
+   {
+      // do not inherit MF_FLAGS_KEEPOPEN by default, it's typically set only
+      // for a few important folders and shouldn't be propagated to all of
+      // their children
+      m_keepOpen->SetValue(false);
+   }
+   else
+   {
+      // do accurately reflect the current value of the flag when viewing
+      // properties of an existing folder
+      m_keepOpen->SetValue((flags & MF_FLAGS_KEEPOPEN) != 0);
+   }
 
 #ifdef USE_LOCAL_CHECKBOX
    m_originalIsLocalValue = (flags & MF_FLAGS_ISLOCAL) != 0;
