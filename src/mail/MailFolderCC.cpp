@@ -3063,6 +3063,8 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       wxLogError(_("Failed to copy from '%s' to '%s'."),
                  GetName(),
                  folder->GetName());
+
+      return false;
    }
 
    String nameDst = folder->GetFullName();
