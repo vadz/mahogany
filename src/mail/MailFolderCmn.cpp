@@ -527,7 +527,13 @@ void MailFolderCmn::Close(bool /* mayLinger */)
    }
 
    if ( m_keepAliveTimer )
+   {
+      wxLogTrace(TRACE_MF_KEEPALIVE,
+                 "Keep alive timer for \"%s\" stopped on folder close at %s",
+                 GetName(),
+                 TimestampWithMS());
       m_keepAliveTimer->Stop();
+   }
 }
 
 bool

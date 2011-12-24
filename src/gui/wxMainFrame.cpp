@@ -55,6 +55,10 @@
 // view in the frame - with current wxGTK it doesn't work at all, so disabling
 #undef HAS_DYNAMIC_MENU_SUPPORT
 
+#ifdef DEBUG
+   #include "mail/FolderPool.h"
+#endif // DEBUG
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -67,7 +71,12 @@ enum
    WXMENU_DEBUG_SHOW_LICENCE,
    WXMENU_DEBUG_TRACE,
    WXMENU_DEBUG_TOGGLE_LOG,
-   WXMENU_DEBUG_CRASH
+   WXMENU_DEBUG_CRASH,
+#ifdef wxHAS_POWER_EVENTS
+   WXMENU_DEBUG_SUSPEND,
+   WXMENU_DEBUG_RESUME,
+#endif // wxHAS_POWER_EVENTS
+   WXMENU_DEBUG_VIEW_OPENED
 };
 
 #endif // DEBUG
@@ -679,6 +688,14 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    menuDebug->AppendCheckItem(WXMENU_DEBUG_TOGGLE_LOG,
                               _T("Toggle &debug logging\tCtrl-Alt-D"));
    menuDebug->Append(WXMENU_DEBUG_CRASH, _T("Provoke a c&rash"));
+#ifdef wxHAS_POWER_EVENTS
+   menuDebug->AppendSeparator();
+   menuDebug->Append(WXMENU_DEBUG_SUSPEND, "Simulate &suspend");
+   menuDebug->Append(WXMENU_DEBUG_RESUME, "Simulate &resume");
+#endif // wxHAS_POWER_EVENTS
+   menuDebug->AppendSeparator();
+   menuDebug->Append(WXMENU_DEBUG_VIEW_OPENED, "View &opened folders");
+
    GetMenuBar()->Append(menuDebug, _T("&Debug"));
 #endif // debug
 
@@ -1178,6 +1195,57 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
          case WXMENU_DEBUG_CRASH:
             *(char *)17 = '!';
+            break;
+
+#ifdef wxHAS_POWER_EVENTS
+         case WXMENU_DEBUG_SUSPEND:
+            {
+               wxPowerEvent dummyEvent;
+               OnPowerSuspended(dummyEvent);
+            }
+            break;
+
+         case WXMENU_DEBUG_RESUME:
+            {
+               wxPowerEvent dummyEvent;
+               OnPowerResume(dummyEvent);
+            }
+            break;
+#endif // wxHAS_POWER_EVENTS
+
+         case WXMENU_DEBUG_VIEW_OPENED:
+            {
+               wxArrayString folderNames;
+
+               MFPool::Cookie cookie;
+               MFolder *folder = NULL;
+               for ( MailFolder *mf = MFPool::GetFirst(cookie, NULL, &folder);
+                     mf;
+                     mf = MFPool::GetNext(cookie, NULL, &folder) )
+               {
+                  folderNames.push_back(folder->GetFullName());
+
+                  folder->DecRef();
+                  mf->DecRef();
+               }
+
+               if ( folderNames.empty() )
+               {
+                  wxLogMessage("No folders are currently opened.");
+               }
+               else
+               {
+                  const unsigned count = folderNames.size();
+                  wxString msg;
+                  msg.Printf("The following %u folders are opened:", count);
+                  for ( unsigned n = 0; n < count; n++ )
+                  {
+                     msg << "\n    " << folderNames[n];
+                  }
+
+                  wxLogMessage("%s", msg);
+               }
+            }
             break;
 
          default:
