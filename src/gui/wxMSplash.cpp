@@ -167,10 +167,14 @@ private:
 };
 
 AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
-           : wxWindow(parent, -1, wxDefaultPosition,
-                      wxSize(bmp.GetWidth(), 2*bmp.GetHeight()))
 {
-   const wxSize sizeBmp(bmp.GetWidth(), bmp.GetHeight());
+   // Use fall back size if the splash screen image is not available because
+   // otherwise the entire window would be too small.
+   const wxSize sizeBmp(bmp.IsOk() ? bmp.GetSize() : wxSize(400, 300));
+
+   wxWindow::Create(parent, -1, wxDefaultPosition,
+                    wxSize(sizeBmp.x, 2*sizeBmp.y));
+
    wxStaticBitmap *top = new wxStaticBitmap(this, wxID_ANY, bmp,
                                             wxPoint(0, 0), sizeBmp);
    wxHtmlWindow *bottom = new wxHtmlWindow(this, wxID_ANY,
