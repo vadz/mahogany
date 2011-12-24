@@ -63,7 +63,12 @@
    // reported by MSVC CRT much easier.
    //
    // Notice that this must be done after including the standard headers which
-   // sometimes redefine operator new themselves.
+   // sometimes redefine operator new themselves and, worse, map and set can't
+   // be included after doing this as it redefines some of the identifiers used
+   // in them, so include them from here proactively.
+   #include <map>
+   #include <set>
+
    #include <wx/msw/msvcrt.h>
 #endif
 
