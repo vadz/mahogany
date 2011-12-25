@@ -634,9 +634,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_searchData = NULL;
    m_FolderTree = NULL;
    m_FolderView = NULL;
-#ifdef wxHAS_POWER_EVENTS
-   m_foldersToReopen = NULL;
-#endif // wxHAS_POWER_EVENTS
 
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
@@ -1258,27 +1255,35 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
 void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
 {
-   ASSERT_MSG( !m_foldersToReopen, _T("didn't resume from last suspend?") );
+   ASSERT_MSG( m_foldersToResume.empty(), "didn't resume from last suspend?" );
 
-   m_folderToReopenHere = m_folderName;
-   m_foldersToReopen = new MFolderList;
-   int nClosed = MailFolder::CloseAll(m_foldersToReopen);
-   if ( nClosed < 0 )
+   MFPool::Cookie cookie;
+   for ( MailFolder *mf = MFPool::GetFirst(cookie); mf; mf = MFPool::GetNext(cookie) )
    {
-      wxLogWarning(_("Failed to gracefully close some opened folders on "
-                     "system suspend."));
+      MailFolder_obj mfObj(mf);
+
+      // We only need to reopen the folders that the user is working with and
+      // those that need to be constantly monitored.
+      if ( mf->GetInteractiveFrame() || (mf->GetFlags() & MF_FLAGS_MONITOR))
+      {
+         if ( mf->Suspend() )
+         {
+            // Pass ownership to the list of folders to resume.
+            m_foldersToResume.push_back(mfObj.Detach());
+         }
+         //else: this (probably local) folder will survive resume.
+      }
+      else
+      {
+         // All the others can be simply closed.
+         mf->Close(false /* don't linger */);
+      }
    }
-   else if ( nClosed )
+
+   if ( !m_foldersToResume.empty() )
    {
       wxLogStatus(_("Closed %lu folders which will be reopened on resume."),
-                  (unsigned long)m_foldersToReopen->size());
-   }
-
-   if ( nClosed <= 0 )
-   {
-      // we don't need it finally
-      delete m_foldersToReopen;
-      m_foldersToReopen = NULL;
+                  (unsigned long)m_foldersToResume.size());
    }
 
    // save all options just in case
@@ -1287,28 +1292,28 @@ void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
 
 void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
 {
-   if ( !m_foldersToReopen )
+   if ( m_foldersToResume.empty() )
       return;
 
    // copy to a temporary variable to avoid problems in case we get several
    // resume messages (currently happens under Windows sometimes)
-   MFolderList *foldersToReopen = m_foldersToReopen;
-   m_foldersToReopen = NULL;
+   MailFolders foldersToResume;
+   foldersToResume.swap(m_foldersToResume);
 
    wxLogStatus(_("Reopening %lu folders on system resume"),
-               (unsigned long)foldersToReopen->size());
+               (unsigned long)foldersToResume.size());
 
 #ifdef CAN_CHECK_NETWORK_STATE
    bool checkedNetwork = false;
 #endif // CAN_CHECK_NETWORK_STATE
-   for ( MFolderList::iterator i = foldersToReopen->begin();
-         i != foldersToReopen->end();
+   for ( MailFolders::iterator i = foldersToResume.begin();
+         i != foldersToResume.end();
          ++i )
    {
-      MFolder *folder = *i;
+      MailFolder* const mf = *i;
 
 #ifdef CAN_CHECK_NETWORK_STATE
-      if ( !checkedNetwork && folder->NeedsNetwork() )
+      if ( !checkedNetwork && mf->NeedsNetwork() )
       {
          // We can get a resume event before the system got reconnected so stay
          // here for a few seconds to give it a chance to do it as otherwise
@@ -1330,35 +1335,22 @@ void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
       }
 #endif // CAN_CHECK_NETWORK_STATE
 
-      if ( folder->GetFullName() == m_folderToReopenHere )
+      if ( !mf->Resume() )
       {
-         OpenFolder(folder);
+         ERRORMESSAGE((_("Failed to reopen folder \"%s\" after resuming from sleep."),
+                      mf->GetName()));
       }
-      else // a folder opened elsewhere
+      else
       {
-         // only reopen it this folder should be permanently opened,
-         // otherwise it will be reopened from the folder view which uses it
-         if ( folder->GetFlags() & MF_FLAGS_KEEPOPEN )
-         {
-            MailFolder *mf = MailFolder::OpenFolder(folder);
-            if ( !mf )
-            {
-               ERRORMESSAGE((_("Failed to reopen folder \"%s\""),
-                             folder->GetFullName().c_str()));
-            }
-            else
-            {
-               // it won't be really closed but will be kept open in the
-               // background
-               mf->DecRef();
-            }
-         }
+         // Notify everybody about the folder reopening. This is an abuse of
+         // this event as there are not necessarily any real updates but it's
+         // the simplest way to make all folder listings in all the existing
+         // folder views to refresh.
+         MEventManager::Send(new MEventFolderUpdateData(mf));
       }
+
+      mf->DecRef();
    }
-
-   delete foldersToReopen;
-
-   m_folderToReopenHere.clear();
 }
 
 #endif // wxHAS_POWER_EVENTS

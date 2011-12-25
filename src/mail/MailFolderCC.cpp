@@ -2407,6 +2407,34 @@ MailFolderCC::ForceClose()
 }
 
 // ----------------------------------------------------------------------------
+// MailFolderCC suspending and resuming
+// ----------------------------------------------------------------------------
+
+bool MailFolderCC::Suspend()
+{
+   if ( !NeedsNetwork() )
+      return false;
+
+   Close(false /* don't linger */);
+
+   return true;
+}
+
+bool MailFolderCC::Resume()
+{
+   ASSERT_MSG( !IsOpened(), "reopening already open folder?" );
+
+   if ( !Open() )
+      return false;
+
+   // This is done from MailFolder::OpenFolder() for the newly opened folders
+   // but MailFolderCmn::Close() undoes it, so we need to redo it here.
+   MFPool::Add(MFDriver::Get(m_mfolder->GetClass()), this, m_mfolder, m_login);
+
+   return MailFolderCmn::Resume();
+}
+
+// ----------------------------------------------------------------------------
 // MailFolderCC timeouts
 // ----------------------------------------------------------------------------
 

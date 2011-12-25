@@ -20,9 +20,19 @@
 #  include <wx/dynarray.h>
 #endif // USE_PCH
 
+#include <set>
+
 class MailFolderVirt : public MailFolderCmn
 {
 public:
+   /** @name Suspending and resuming */
+   //@{
+
+   virtual bool Suspend();
+   virtual bool Resume();
+
+   //@}
+
    /** @name Accessors */
    //@{
 
@@ -186,6 +196,13 @@ protected:
 
    /// the array of messages in the folder
    MsgArray m_messages;
+
+   /// All physical folders our messages belong to.
+   typedef std::set<MailFolder*> MailFoldersSet;
+   MailFoldersSet m_underlyingMFs;
+
+   /// Set of folders that should be resumed, possibly NULL.
+   MailFoldersSet m_foldersToResume;
 
    //@}
 

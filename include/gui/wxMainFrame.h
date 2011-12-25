@@ -23,8 +23,10 @@
 
 #include <wx/power.h>
 
+#include <vector>
+
+class MailFolder;
 class MFolder;
-class MFolderList;
 class wxFolderView;
 class wxFolderTree;
 
@@ -126,11 +128,9 @@ protected:
 
 
 #ifdef wxHAS_POWER_EVENTS
-   // the list of folders automatically closed when we suspended or NULL
-   MFolderList *m_foldersToReopen;
-
-   // the name of the folder which was opened in the main frame
-   String m_folderToReopenHere;
+   // the list of folders which were opened when we were suspended
+   typedef std::vector<MailFolder*> MailFolders;
+   MailFolders m_foldersToResume;
 #endif // wxHAS_POWER_EVENTS
 
 private:

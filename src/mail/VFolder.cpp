@@ -168,6 +168,51 @@ MailFolderVirt::GetFullImapSpec(const MFolder *folder,
 }
 
 // ----------------------------------------------------------------------------
+// Opening and closing
+// ----------------------------------------------------------------------------
+
+bool MailFolderVirt::Suspend()
+{
+   ASSERT_MSG( m_foldersToResume.empty(),
+               "suspending twice without intervening Resume()?" );
+
+   for ( MailFoldersSet::const_iterator i = m_underlyingMFs.begin();
+         i != m_underlyingMFs.end();
+         ++i )
+   {
+      if ( (*i)->Suspend() )
+         m_foldersToResume.insert(*i);
+   }
+
+   // We only need to be resumed if we suspended anything.
+   return !m_foldersToResume.empty();
+}
+
+bool MailFolderVirt::Resume()
+{
+   MailFoldersSet foldersToResume;
+   foldersToResume.swap(m_foldersToResume);
+
+   bool rc = false;
+   for ( MailFoldersSet::const_iterator i = foldersToResume.begin();
+         i != foldersToResume.end();
+         ++i )
+   {
+      if ( (*i)->Resume() )
+         rc = true;
+
+      // Continue reopening the folders in any case, if at least one of them
+      // was reopened it's already partially successful as we will at least be
+      // able to provide access to the messages from it.
+   }
+
+   if ( !MailFolderCmn::Resume() )
+      rc = false;
+
+   return rc;
+}
+
+// ----------------------------------------------------------------------------
 // trivial MailFolderVirt accessors
 // ----------------------------------------------------------------------------
 
@@ -267,6 +312,8 @@ MailFolderVirt::Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const
 void MailFolderVirt::AddMsg(MailFolderVirt::Msg *msg)
 {
    CHECK_RET( msg, _T("NULL Msg in MailFolderVirt?") );
+
+   m_underlyingMFs.insert(msg->mf);
 
    m_messages.Add(msg);
 }

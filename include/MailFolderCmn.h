@@ -43,6 +43,9 @@ DECLARE_REF_COUNTER(FilterRule)
 class MailFolderCmn : public MailFolder
 {
 public:
+   /// remove the folder from our "closer" list
+   virtual void Close(bool mayLinger = true);
+
    /// do status caching and call DoCountMessages() to do the real work
    virtual bool CountAllMessages(MailFolderStatus *status) const;
 
@@ -170,6 +173,8 @@ public:
    virtual void ResumeUpdates();
    virtual void RequestUpdate();
 
+   virtual bool Resume();
+
    /** @name Delayed folder closing
 
        We may want to keep alive the folder for a while instead of closing it
@@ -185,9 +190,6 @@ private:
    //@}
 
 protected:
-   /// remove the folder from our "closer" list
-   virtual void Close(bool mayLinger = true);
-
    /// is updating currently suspended?
    bool IsUpdateSuspended() const { return m_suspendUpdates != 0; }
 

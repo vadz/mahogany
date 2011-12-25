@@ -343,7 +343,7 @@ void MailFolderKeepAliveTimer::Notify(void)
               m_mf->GetName(),
               TimestampWithMS());
 
-   Start();
+   Start(-1, true /* one shot */);
 }
 
 // ----------------------------------------------------------------------------
@@ -534,6 +534,22 @@ void MailFolderCmn::Close(bool /* mayLinger */)
                  TimestampWithMS());
       m_keepAliveTimer->Stop();
    }
+}
+
+bool MailFolderCmn::Resume()
+{
+   if ( m_keepAliveTimer )
+   {
+      // restart the timer that we stopped in Close()
+      wxLogTrace(TRACE_MF_KEEPALIVE,
+                 "Restarting keep alive timer for \"%s\" at %s",
+                 GetName(),
+                 TimestampWithMS());
+
+      m_keepAliveTimer->Start(-1 /* same interval */, true /* one shot */);
+   }
+
+   return true;
 }
 
 bool

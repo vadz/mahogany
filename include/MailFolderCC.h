@@ -79,6 +79,11 @@ public:
    */
    static bool CanExit(String *which);
 
+   virtual void Close(bool mayLinger = true);
+
+   virtual bool Suspend();
+   virtual bool Resume();
+
    virtual bool IsOpened(void) const { return m_MailStream != NULL; }
 
    virtual bool IsReadOnly(void) const;
@@ -288,9 +293,6 @@ private:
 
    /// check (and delete if requested) for the lock on this file folder
    bool CheckForFileLock();
-
-   /// Close the folder
-   virtual void Close(bool mayLinger = true);
 
    /**
        Check if we still have a connection to the folder.

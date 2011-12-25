@@ -251,12 +251,41 @@ public:
    static bool CloseFolder(const MFolder *mfolder, bool mayLinger = true);
 
    /**
+      Close the folder.
+
+      If mayLinger parameter is true (default), we can keep the network
+      connection so that it could be reused later. If it is false, the
+      connection should be closed as well.
+    */
+   virtual void Close(bool mayLinger = true) = 0;
+
+   /**
      Check the folder status without opening it (if possible).
 
      @param frame if not NULL, some feedback is given
      @return true if ok, false if an error occured
     */
    static bool CheckFolder(const MFolder *mfolder, wxFrame *frame = NULL);
+
+   /**
+       Suspend the folder by temporarily closing it.
+
+       This is called when the system is entering the sleep state to close all
+       network connections. Resume() is called after wake up to reopen them.
+
+       @return true if the folder was suspended and Resume() should be called,
+         false if there is no need to suspend this folder (e.g. it's a local
+         file) -- notice that this doesn't indicate an error
+    */
+   virtual bool Suspend() = 0;
+
+   /**
+       Reopen the folder after it was suspended.
+
+       Tries to reopen the method with the same parameters that were used when
+       it had been first opened by OpenFolder().
+    */
+   virtual bool Resume() = 0;
 
    //@}
 
@@ -976,15 +1005,6 @@ public:
    //@}
 
 protected:
-   /**
-      Close the folder.
-
-      If mayLinger parameter is true (default), we can keep the network
-      connection so that it could be reused later. If it is false, the
-      connection should be closed as well.
-    */
-   virtual void Close(bool mayLinger = true) = 0;
-
    /**
      Check if the network connectivity is up if the given folder requires it
 
