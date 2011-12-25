@@ -1308,7 +1308,7 @@ wxControl *wxProfileSettingsEditDialog::CreateControlsBelow(wxPanel *panel)
    return m_chcSources;
 }
 
-void wxProfileSettingsEditDialog::CreateAllControls()
+void wxProfileSettingsEditDialog::CreateAllControls(int flags)
 {
    wxLayoutConstraints *c;
 
@@ -1367,10 +1367,13 @@ void wxProfileSettingsEditDialog::CreateAllControls()
    c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
    m_btnHelp->SetConstraints(c);
 
+   // "OK" and "Cancel" are always shown but "Apply" is optional.
+   int numButtons = flags & ProfileEdit_WithApply ? 3 : 2;
+
    m_btnOk = new wxButton(panel, wxID_OK, _("OK"));
    m_btnOk->SetDefault();
    c = new wxLayoutConstraints;
-   c->left.SameAs(panel, wxRight, -3*(LAYOUT_X_MARGIN + wBtn));
+   c->left.SameAs(panel, wxRight, -numButtons*(LAYOUT_X_MARGIN + wBtn));
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
    c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
@@ -1378,19 +1381,26 @@ void wxProfileSettingsEditDialog::CreateAllControls()
 
    wxButton *btn = new wxButton(panel, wxID_CANCEL, _("Cancel"));
    c = new wxLayoutConstraints;
-   c->left.SameAs(panel, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
+   c->left.SameAs(panel, wxRight, -(numButtons - 1)*(LAYOUT_X_MARGIN + wBtn));
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
    c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
    btn->SetConstraints(c);
 
-   m_btnApply = new wxButton(panel, wxID_APPLY, _("&Apply"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(panel, wxRight, -(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
-   m_btnApply->SetConstraints(c);
+   if ( flags & ProfileEdit_WithApply )
+   {
+      m_btnApply = new wxButton(panel, wxID_APPLY, _("&Apply"));
+      c = new wxLayoutConstraints;
+      c->left.SameAs(panel, wxRight, -(LAYOUT_X_MARGIN + wBtn));
+      c->width.Absolute(wBtn);
+      c->height.Absolute(hBtn);
+      c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
+      m_btnApply->SetConstraints(c);
+   }
+   else
+   {
+      m_btnApply = NULL;
+   }
 
    // set dialog size (FIXME these are more or less arbitrary numbers)
    SetDefaultSize(6*wBtn, 27*hBtn, TRUE /* set as min size too */);

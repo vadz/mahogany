@@ -2382,7 +2382,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    // the dialog
    m_action = NULL;
 
-   CreateAllControls();
+   CreateAllControls(ProfileEdit_WithoutApply);
 
    SetDefaultSize(8*wBtn, 13*hBtn);
 

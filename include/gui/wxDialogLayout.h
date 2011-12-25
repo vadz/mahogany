@@ -215,7 +215,12 @@ protected:
    // must call this from the derived class ctor to create the main window and
    // the standard Ok/Cancel/Apply buttons, calls CreateControlsAbove/Below()
    // and CreateMainWindow() which may be overridden in the derived classes
-   void CreateAllControls();
+   enum
+   {
+      ProfileEdit_WithoutApply = 0,
+      ProfileEdit_WithApply = 1,
+   };
+   void CreateAllControls(int flags = ProfileEdit_WithApply);
 
    // call this after creating a new profile (as is done by the folder creation
    // dialog which only creates the profile when the folder itself is being
