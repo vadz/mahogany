@@ -2559,6 +2559,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
 wxQuickFilterDialog::~wxQuickFilterDialog()
 {
    m_folder->DecRef();
+   delete m_action;
 }
 
 void wxQuickFilterDialog::OnText(wxCommandEvent& event)
