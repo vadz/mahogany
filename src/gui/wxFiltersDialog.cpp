@@ -2421,7 +2421,13 @@ wxWindow *wxQuickFilterDialog::CreateMainWindow(wxPanel *panel)
 
    for ( size_t n = 0; n < Filter_Max; n++ )
    {
+      // Notice that we should create the controls in the correct, i.e.
+      // corresponding to TAB navigation, order, so create the checkbox first,
+      // even if it's more convenient to set the constraints for the text
+      // control first.
+      m_check[n] = new wxCheckBox(panel, -1, labels[n]);
       m_text[n] = new wxTextCtrl(panel, -1, text[n]);
+
       c = new wxLayoutConstraints;
 
       if ( n == 0 )
@@ -2441,7 +2447,6 @@ wxWindow *wxQuickFilterDialog::CreateMainWindow(wxPanel *panel)
       c->height.AsIs();
       m_text[n]->SetConstraints(c);
 
-      m_check[n] = new wxCheckBox(panel, -1, labels[n]);
       c = new wxLayoutConstraints;
       c->centreY.SameAs(m_text[n], wxCentreY);
       c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
