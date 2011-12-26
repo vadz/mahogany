@@ -796,8 +796,13 @@ wxMainFrame::OpenFolder(MFolder *pFolder, bool readonly)
 
       m_folderName.clear();
    }
-   else // select the folder on screen as well
+   else // folder opened successfully
    {
+      // Associate it with this frame to e.g. let it use our status bar for any
+      // messages.
+      MailFolder_obj(m_FolderView->GetMailFolder())->SetInteractiveFrame(this);
+
+      // Select the folder in the tree as well.
       m_FolderTree->SelectFolder(folder);
    }
 
