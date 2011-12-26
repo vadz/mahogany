@@ -73,6 +73,11 @@ skip them unless you're updating from a very old version of Mahogany.
          the new options in the composer options page (\ref{ComposePage}).
    \item Added ``Remove attachments'' command which can be used to strip the
          unwanted attachments from a message in a local or IMAP folder.
+   \item Made the ``Quick filter'' dialog more useful by allowing to specify
+         a folder that doesn't exist yet in it. Moreover, the new folder can
+         be configured to use the recipient and sender corresponding to the
+         rule itself, e.g. the default recipient can be set up to be the same
+         as the sender address tested by the rule.
    \item Added the possibility to treat different addresses as equivalent,
          this is useful to avoid sending duplicate replies to the different
          addresses of the same person, for example.

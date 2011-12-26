@@ -61,6 +61,20 @@ enum FolderCreatePage
 extern MFolder* AskUserToCreateFolder(wxWindow* parent, MFolder* parentFolder);
 
 /**
+    Try to create a folder with the given name, asking the user only if needed.
+
+    If the required parameter of the new folder can be deduced automatically
+    from its path, the folder is created without user intervention. If this
+    can't be done, AskUserToCreateFolder() is used.
+
+    @param parent The window to use as the parent for the various dialogs.
+    @param fullname The full name of the folder to create.
+    @return The new folder to be DecRef()'d by called or NULL.
+ */
+extern
+MFolder* TryToCreateFolderOrAskUser(wxWindow* parent, const String& fullname);
+
+/**
   Shows folder creation dialog, returns a pointer to created folder or NULL.
 
   Use AskUserToCreateFolder() unless it's really the folder creation dialog and

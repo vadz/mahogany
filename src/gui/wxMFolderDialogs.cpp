@@ -2763,6 +2763,48 @@ MFolder* AskUserToCreateFolder(wxWindow *parent, MFolder* parentFolder)
    return newfolder;
 }
 
+MFolder* TryToCreateFolderOrAskUser(wxWindow* parent, const String& fullname)
+{
+   // First, determine the new folder parent.
+   wxString name;
+   wxString path = fullname.BeforeLast('/', &name);
+   MFolder_obj parentFolder(path);
+   if ( parentFolder )
+   {
+      // We could support automatic creation of folders of other types too but
+      // it's not very useful for MF_NNTP (for which it's simple) and it's not
+      // simple for MF_FILE (for which it could be useful) so don't bother.
+      if ( parentFolder->GetType() == MF_IMAP )
+      {
+         MFolder* const newFolder = MFolder::Create(fullname, MF_IMAP);
+         if ( newFolder )
+         {
+            // Set the path correctly for the new folder.
+            String fullpath = parentFolder->GetPath();
+            fullpath = MailFolder::GetLogicalMailboxName(fullpath);
+            fullpath += MailFolder::GetFolderDelimiter(parentFolder);
+            fullpath += name;
+
+            newFolder->SetPath(name);
+
+            // Notify all observers about the new folder creation.
+            MEventManager::Send(
+               new MEventFolderTreeChangeData(
+                  fullname,
+                  MEventFolderTreeChangeData::Create
+               )
+            );
+
+            return newFolder;
+         }
+      }
+   }
+   //else: We could try to find an existing parent of the parent and so on but
+   //      this doesn't seem very useful in practice so just give up.
+
+   return AskUserToCreateFolder(parent, parentFolder);
+}
+
 bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
 {
    wxFolderPropertiesDialog dlg(parent, folder);

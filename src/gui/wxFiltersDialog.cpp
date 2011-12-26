@@ -39,6 +39,7 @@
 #include "MFilter.h"
 #include "MFolder.h"
 #include "MailFolder.h"
+#include "MFolderDialogs.h"
 #include "MModule.h"
 #include "SpamFilter.h"
 
@@ -51,11 +52,19 @@
 class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_COMPOSE_TO;
+extern const MOption MP_FROM_ADDRESS;
+
+// ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_FILTER_NOT_USED_YET;
 extern const MPersMsgBox *M_MSGBOX_FILTER_CONFIRM_OVERWRITE;
+extern const MPersMsgBox *M_MSGBOX_FILTER_CREATE_TARGET;
 extern const MPersMsgBox *M_MSGBOX_FILTER_REPLACE;
 
 // ---------------------------------------------------------------------------
@@ -944,6 +953,19 @@ public:
          m_Argument->SetValue(argument);
    }
 
+   /**
+       Validate the user-entered action.
+
+       Currently this just checks that the folder entered by the user exists
+       and proposes to create it if it doesn't. Does nothing for the actions
+       not using folders.
+
+       If this method return false, the action shouldn't be used, i.e. the
+       filter creation should be cancelled.
+    */
+   bool Validate();
+
+
    /// get the action
    MFDialogAction GetAction() const
       { return MFDialogAction_fromSelect(m_Type->GetSelection()); }
@@ -1118,6 +1140,56 @@ OneActionControl::LayoutControls(wxWindow **last,
    *last = m_Argument;
 }
 
+bool OneActionControl::Validate()
+{
+   if ( FilterActionUsesFolder(GetAction()) )
+   {
+      const wxString folderName = GetArgument();
+      MFolder_obj folder(folderName);
+      if ( !folder.IsOk() )
+      {
+         switch ( MDialog_YesNoCancel
+                  (
+                     wxString::Format
+                     (
+                        _("The folder \"%s\" specified by the filter action "
+                          "doesn't exist, would you like to create it now?"),
+                        folderName
+                     ),
+                     m_Parent,
+                     _("Filter target folder doesn't exist"),
+                     M_DLG_YES_DEFAULT,
+                     M_MSGBOX_FILTER_CREATE_TARGET
+                 ) )
+         {
+            case MDlg_Cancel:
+               // Don't use this filter target at all.
+               return false;
+
+            case MDlg_Yes:
+               // Create the new folder with the given name.
+               if ( !MFolder_obj(
+                        TryToCreateFolderOrAskUser(m_Parent, folderName)
+                     ) )
+               {
+                  return false;
+               }
+               break;
+
+            default:
+               FAIL_MSG( "Unexpected MDialog_YesNoCancel() return value" );
+               // fall through
+
+            case MDlg_No:
+               // Nothing to do, keep the inexistent target folder, presumably
+               // they're going to create it later.
+               break;
+         }
+      }
+   }
+
+   return true;
+}
 
 /*
   Contains several lines of "OneCritControl" and "OneActionControl":
@@ -2338,9 +2410,34 @@ protected:
                 FilterControl which);
 
 private:
+   // Handlers for m_checkSetRecipient and m_checkSetSender.
+   void OnSetRecipientCheck(wxCommandEvent& event);
+   void OnSetSenderCheck(wxCommandEvent& event);
+
+   // And the common part of their implementations.
+   void DoUpdateTextOnCheck(wxTextCtrl* textCopyFrom, wxTextCtrl* textCopyTo);
+
+   // This handler is for updating all controls depending on whether the action
+   // uses a target.
+   void OnUpdateDepOnTargetFolder(wxUpdateUIEvent& event);
+
+   // And these two are for the target- and checkbox-depending text controls.
+   void OnUpdateTextRecipient(wxUpdateUIEvent& event);
+   void OnUpdateTextSender(wxUpdateUIEvent& event);
+
+   // The common implementation of the two above handlers.
+   void DoUpdateTextFromCheckbox(wxCheckBox* checkbox, wxUpdateUIEvent& event);
+
+
    // GUI controls
    wxCheckBox *m_check[Filter_Max];
    wxTextCtrl *m_text[Filter_Max];
+
+   wxCheckBox* m_checkSetRecipient;
+   wxTextCtrl* m_textRecipient;
+
+   wxCheckBox* m_checkSetSender;
+   wxTextCtrl* m_textSender;
 
    OneActionControl *m_action;
 
@@ -2384,7 +2481,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    CreateAllControls(ProfileEdit_WithoutApply);
 
-   SetDefaultSize(8*wBtn, 13*hBtn);
+   SetDefaultSize(8*wBtn, 16*hBtn);
 
    DoUpdateUI();
 }
@@ -2468,6 +2565,81 @@ wxWindow *wxQuickFilterDialog::CreateMainWindow(wxPanel *panel)
    wxWindow *last = msg;
    m_action->LayoutControls(&last, 2*LAYOUT_X_MARGIN, 3*LAYOUT_X_MARGIN);
 
+
+   msg = new wxStaticText(panel, wxID_ANY,
+                          _("Additionally, configure the folder "
+                            "chosen above to:"));
+   c = new wxLayoutConstraints;
+   c->top.Below(last, 4*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   msg->SetConstraints(c);
+
+   msg->Bind(wxEVT_UPDATE_UI,
+      &wxQuickFilterDialog::OnUpdateDepOnTargetFolder, this
+   );
+
+   labels.Clear();
+   labels.Add(_("use the following recipient by default:"));
+   labels.Add(_("use the following return address:"));
+   widthMax = GetMaxLabelWidth(labels, panel) + 4*LAYOUT_X_MARGIN;
+
+   m_checkSetRecipient = new wxCheckBox(panel, wxID_ANY, labels[0]);
+   m_textRecipient = new wxTextCtrl(panel, wxID_ANY);
+
+   m_checkSetSender = new wxCheckBox(panel, wxID_ANY, labels[1]);
+   m_textSender = new wxTextCtrl(panel, wxID_ANY);
+
+   c = new wxLayoutConstraints;
+   c->top.Below(msg, LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(box, wxLeft,
+                  2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   m_textRecipient->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(m_textRecipient, wxCentreY);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   m_checkSetRecipient->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->top.Below(m_textRecipient, LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(box, wxLeft,
+                  2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   m_textSender->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(m_textSender, wxCentreY);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   m_checkSetSender->SetConstraints(c);
+
+   m_checkSetRecipient->Bind(wxEVT_UPDATE_UI,
+      &wxQuickFilterDialog::OnUpdateDepOnTargetFolder, this
+   );
+   m_checkSetRecipient->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
+      &wxQuickFilterDialog::OnSetRecipientCheck, this
+   );
+   m_textRecipient->Bind(wxEVT_UPDATE_UI,
+      &wxQuickFilterDialog::OnUpdateTextRecipient, this
+   );
+   m_checkSetSender->Bind(wxEVT_UPDATE_UI,
+      &wxQuickFilterDialog::OnUpdateDepOnTargetFolder, this
+   );
+   m_checkSetSender->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
+      &wxQuickFilterDialog::OnSetSenderCheck, this
+   );
+   m_textSender->Bind(wxEVT_UPDATE_UI,
+      &wxQuickFilterDialog::OnUpdateTextSender, this
+   );
+
    return box;
 }
 
@@ -2523,6 +2695,9 @@ bool wxQuickFilterDialog::TransferDataToWindow()
 
 bool wxQuickFilterDialog::TransferDataFromWindow()
 {
+   if ( !m_action->Validate() )
+      return false;
+
    // construct the object we use to initialize the filter
    MFDialogSettings *settings = NULL;
    String name = _("quick filter ");
@@ -2535,7 +2710,9 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
    CHECK( settings, false,
           _T("the [Ok] button not supposed to be enabled in this case") );
 
-   settings->SetAction(m_action->GetAction(), m_action->GetArgument());
+   const MFDialogAction action = m_action->GetAction();
+   const wxString arg = m_action->GetArgument();
+   settings->SetAction(action, arg);
 
    MFilter_obj filter(name);
    MFilterDesc fd;
@@ -2558,6 +2735,29 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
    // other (presumably more generic) filters
    m_folder->PrependFilter(name);
 
+
+   // Also update the folder options if requested:
+   if ( FilterActionUsesFolder(action) )
+   {
+      wxString recipient;
+      if ( m_checkSetRecipient->IsChecked() )
+         recipient = m_textRecipient->GetValue();
+
+      wxString sender;
+      if ( m_checkSetSender->IsChecked() )
+         sender = m_textSender->GetValue();
+
+      if ( !recipient.empty() || !sender.empty() )
+      {
+         Profile_obj profileTargetFolder(arg);
+
+         if ( !recipient.empty() )
+            profileTargetFolder->writeEntry(MP_COMPOSE_TO, recipient);
+         if ( !sender.empty() )
+            profileTargetFolder->writeEntry(MP_FROM_ADDRESS, sender);
+      }
+   }
+
    return true;
 }
 
@@ -2565,6 +2765,28 @@ wxQuickFilterDialog::~wxQuickFilterDialog()
 {
    m_folder->DecRef();
    delete m_action;
+}
+
+void wxQuickFilterDialog::OnUpdateDepOnTargetFolder(wxUpdateUIEvent& event)
+{
+   event.Enable( FilterActionUsesFolder(m_action->GetAction()) );
+}
+
+void
+wxQuickFilterDialog::DoUpdateTextFromCheckbox(wxCheckBox* checkbox,
+                                              wxUpdateUIEvent& event)
+{
+   event.Enable( checkbox->IsThisEnabled() && checkbox->IsChecked() );
+}
+
+void wxQuickFilterDialog::OnUpdateTextRecipient(wxUpdateUIEvent& event)
+{
+   DoUpdateTextFromCheckbox(m_checkSetRecipient, event);
+}
+
+void wxQuickFilterDialog::OnUpdateTextSender(wxUpdateUIEvent& event)
+{
+   DoUpdateTextFromCheckbox(m_checkSetSender, event);
 }
 
 void wxQuickFilterDialog::OnText(wxCommandEvent& event)
@@ -2590,6 +2812,29 @@ void wxQuickFilterDialog::OnText(wxCommandEvent& event)
    }
 
    // some other button, e.g. the browse button of the folder entry: ignore it
+}
+
+void wxQuickFilterDialog::OnSetRecipientCheck(wxCommandEvent&)
+{
+   DoUpdateTextOnCheck(m_text[Filter_From], m_textRecipient);
+}
+
+void wxQuickFilterDialog::OnSetSenderCheck(wxCommandEvent& event)
+{
+   DoUpdateTextOnCheck(m_text[Filter_To], m_textSender);
+}
+
+void
+wxQuickFilterDialog::DoUpdateTextOnCheck(wxTextCtrl* textCopyFrom,
+                                         wxTextCtrl* textCopyTo)
+{
+   // To make life easier for the user, copy the value of the control that is
+   // likely to be used as a default for the new folder when the corresponding
+   // checkbox is clicked.
+
+   // Don't overwrite the user entry, if any.
+   if ( textCopyTo->IsEmpty() )
+      textCopyTo->SetValue(textCopyFrom->GetValue());
 }
 
 void wxQuickFilterDialog::OnUpdateOk(wxUpdateUIEvent& event)

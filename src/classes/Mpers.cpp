@@ -138,6 +138,7 @@ static const struct
    { "ExplainGlobalPasswd",      gettext_noop("show explanation before asking for global password") },
    { "FilterNotUsedYet",         gettext_noop("warn that newly created filter is unused") },
    { "FilterOverwrite",          gettext_noop("ask confirmation before overwriting a filter with another one") },
+   { "FilterCreateTarget",       gettext_noop("propose to create filter target folder if it doesn't exist") },
    { "ImportUnderRoot",          gettext_noop("ask where do you want to import folders") },
    { "MoveExpungeConfirm",       gettext_noop("confirm expunging messages after moving") },
    { "ApplyQuickFilter",         gettext_noop("propose to apply quick filter after creation") },

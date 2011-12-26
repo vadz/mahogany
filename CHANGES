@@ -9,6 +9,7 @@
 Release 0.68 'Cynthia' September xx, 2010
 -----------------------------------------
 
+2011-12-26 VZ: Allow to create and configure new folders in "Quick filter".
 2010-08-01 VZ: Show hidden folders if new mail arrives into them.
 2010-07-05 VZ: Send messages from a separate background thread.
 2009-12-27 VZ: Pre-fill composer recipient with address from clipboard if any.
