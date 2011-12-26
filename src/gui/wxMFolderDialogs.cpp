@@ -2746,6 +2746,23 @@ MFolder *ShowFolderCreateDialog(wxWindow *parent,
    return DoShowFolderDialog(dlg, page);
 }
 
+MFolder* AskUserToCreateFolder(wxWindow *parent, MFolder* parentFolder)
+{
+   bool wantsDialog;
+   MFolder* newfolder = RunCreateFolderWizard(&wantsDialog,
+                                              parentFolder,
+                                              parent);
+   if ( wantsDialog )
+   {
+      // user wants to use the dialog directly instead of the wizard
+      newfolder = ShowFolderCreateDialog(parent,
+                                         FolderCreatePage_Default,
+                                         parentFolder);
+   }
+
+   return newfolder;
+}
+
 bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
 {
    wxFolderPropertiesDialog dlg(parent, folder);

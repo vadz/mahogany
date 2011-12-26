@@ -52,7 +52,19 @@ enum FolderCreatePage
 // -----------------------------------------------------------------------------
 
 /**
-  shows folder creation dialog, returns a pointer to created folder or NULL.
+    Proposes to create a new folder with the given parent folder.
+
+    @param parent The window to use as the parent for the various dialogs.
+    @param parentFolder The folder under which the new one should be created.
+    @return The new folder to be DecRef()'d by called or NULL.
+ */
+extern MFolder* AskUserToCreateFolder(wxWindow* parent, MFolder* parentFolder);
+
+/**
+  Shows folder creation dialog, returns a pointer to created folder or NULL.
+
+  Use AskUserToCreateFolder() unless it's really the folder creation dialog and
+  not a higher level wizard that must be used.
 
   @param parentFolder is the default parent folder or NULL
   @return the returned folder object must be DecRef()d by the caller (if !NULL)

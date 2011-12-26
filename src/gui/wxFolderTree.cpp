@@ -1013,13 +1013,7 @@ MFolder *wxFolderTree::OnCreate(MFolder *parent)
 {
    wxWindow *winTop = ((wxMApp *)mApplication)->GetTopWindow();
 
-   bool wantsDialog;
-   MFolder *newfolder = RunCreateFolderWizard(&wantsDialog, parent, winTop);
-   if ( wantsDialog )
-   {
-      // users wants to use the dialog directly instead of the wizard
-      newfolder = ShowFolderCreateDialog(winTop, FolderCreatePage_Default, parent);
-   }
+   MFolder* const newfolder = AskUserToCreateFolder(winTop, parent);
 
    if ( parent )
       parent->DecRef();
