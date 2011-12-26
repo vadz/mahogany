@@ -1133,17 +1133,35 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
 void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
                                              bool setAsMinimalSizeToo)
 {
-   if ( !LastSizeRestored() || setAsMinimalSizeToo )
+   // First of all, adjust the height before using it below to be not bigger
+   // than screen size as some of our dialogs may be quite tall.
+   int heightScreen = (9*wxGetDisplaySize().y) / 10;
+   if ( height > heightScreen )
    {
-      int heightScreen = (9*wxGetDisplaySize().y) / 10;
-      if ( height > heightScreen )
+      // don't create dialogs taller than the screen
+      height = heightScreen;
+   }
+
+   // Normally the previously size used the last time should be used in
+   // preference to the default size passed to this function.
+   bool useActualSize = LastSizeRestored();
+
+   // However there is an exception: if the dialog has become bigger, requiring
+   // a larger minimal size, in a later version of M, we don't want to show it
+   // using the previously saved too small size as it wouldn't allow to show it
+   // correctly.
+   if ( useActualSize && setAsMinimalSizeToo )
+   {
+      const wxSize size = GetClientSize();
+      if ( size.x < width || size.y < height )
       {
-         // don't create dialogs taller than the screen
-         height = heightScreen;
+         // Still try to preserve at least one user-set dimension, if possible.
+         SetClientSize(size.x < width ? width : size.x,
+                       size.y < height ? height : size.y);
       }
    }
 
-   if ( !LastSizeRestored() )
+   if ( !useActualSize )
    {
       SetClientSize(width, height);
 
