@@ -124,7 +124,7 @@ long GetProgressThreshold(Profile *profile)
 /// Return a timestamp string including milliseconds.
 wxString TimestampWithMS()
 {
-   return wxDateTime::UNow().Format("%Y-%m-%d %H:%M:%S:%l");
+   return wxDateTime::UNow().Format("%Y-%m-%d %H:%M:%S.%l");
 }
 
 } // anonymous namespace
