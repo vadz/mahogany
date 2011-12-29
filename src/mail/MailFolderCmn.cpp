@@ -651,7 +651,7 @@ MailFolderCmn::~MailFolderCmn()
    ASSERT_MSG( !m_suspendUpdates,
                _T("mismatch between Suspend/ResumeUpdates()") );
 
-   ASSERT_MSG( !MFPool::Remove(this), _T("folder shouldn't be left in the pool!") );
+   ASSERT_MSG( !m_headers, _T("folder destroyed without being closed?") );
 
    // this must have been cleared by SendMsgStatusChangeEvent() call earlier
    if ( m_statusChangeData )
