@@ -1156,7 +1156,7 @@ GetFilterForFolder(const MFolder *folder)
    }
 
    // compile the filter rule into the real filter
-   FilterRule *filterRule = filterModule->GetFilter(filterString);
+   FilterRule *filterRule = filterModule->GetFilter(filterString.utf8_str());
 
    // filterRule holds a reference to the filterModule if it was successfully
    // been created, otherwise we don't need filterModule anyhow

@@ -206,7 +206,7 @@ public:
    // implement the base class pure virtual
    virtual int Apply(MailFolder *folder, UIdArray& msgs);
 
-   static FilterRule * Create(const String &filterrule,
+   static FilterRule * Create(const char* filterrule,
                               MInterface *minterface,
                               MModule_Filters *mod)
       { return new FilterRuleImpl(filterrule, minterface, mod); }
@@ -215,13 +215,13 @@ public:
 #endif
 
 protected:
-   FilterRuleImpl(const String &filterrule,
+   FilterRuleImpl(const char* filterrule,
                   MInterface *minterface,
                   MModule_Filters *fmodule);
    ~FilterRuleImpl();
 
 public:
-   const SyntaxNode * Parse(const String &);
+   const SyntaxNode * Parse(const std::string &);
    const SyntaxNode * ParseProgram(void);
    const SyntaxNode * ParseFilters(void);
    const SyntaxNode * ParseIfElse(void);
@@ -300,22 +300,22 @@ protected:
    {
       return m_Position == m_Input.length()
                ? '\0'
-               : static_cast<char>(m_Input[m_Position]);
+               : m_Input[m_Position];
    }
    void EatWhiteSpace(void)
       { while(isspace(Char())) m_Position++; }
    char CharInc(void)
       { return m_Input[m_Position++]; }
-   String CharLeft(void)
-      { return m_Input.Left(m_Position); }
-   String CharMid(void)
-      { return m_Input.Mid(m_Position); }
+   std::string CharLeft(void)
+      { return std::string(m_Input, 0, m_Position); }
+   std::string CharMid(void)
+      { return std::string(m_Input, m_Position); }
 
 private:
    MModule_Filters *m_FilterModule;
    MInterface *m_MInterface;
 
-   String m_Input;
+   std::string m_Input;
    Token token;              // current token
    size_t m_Position;        // seek offset of current token
    size_t m_Peek;            // seek offset of next token
@@ -1065,11 +1065,9 @@ FilterRuleImpl::Error(const String &error)
 {
    MOcheck();
    unsigned long pos = GetPos();
-   String before, after, tmp;
-   before = m_Input.Left(pos);
-   after = m_Input.Mid(pos);
+   String tmp;
    tmp.Printf(_("Parse error at input position %lu:\n  %s\n%s<error> %s"),
-              pos, error.c_str(), before.c_str(), after.c_str());
+              pos, error.c_str(), CharLeft().c_str(), CharMid().c_str());
 
    // FIXME: this should be wxLogError() call as otherwise we get several
    //        message boxes for each error instead of only one combining all
@@ -1229,13 +1227,13 @@ FilterRuleImpl::Rewind(size_t pos)
    m_Position = pos;
 }
 
-static void PreProcessInput(String *input)
+static void PreProcessInput(std::string *input)
 {
    bool modified = false;
    String output;
-   while(input->Length() && input->c_str()[0] == '@')
+   while(input->length() && input->c_str()[0] == '@')
    {
-      const wxChar *cptr = input->c_str()+1;
+      const char *cptr = input->c_str()+1;
       String filename;
       while(*cptr && *cptr != '\n' && *cptr != '\r')
          filename += *cptr++;
@@ -1265,13 +1263,13 @@ static void PreProcessInput(String *input)
    if(modified)
    {
       *input = output;
-      if(input->Length())
+      if(input->length())
          PreProcessInput(input);
    }
 }
 
 const SyntaxNode *
-FilterRuleImpl::Parse(const String &input)
+FilterRuleImpl::Parse(const std::string &input)
 {
    MOcheck();
    /* Here we handle the one special occasion of input being @filename
@@ -2597,7 +2595,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
    return rc;
 }
 
-FilterRuleImpl::FilterRuleImpl(const String &filterrule,
+FilterRuleImpl::FilterRuleImpl(const char* filterrule,
                                MInterface *minterface,
                                MModule_Filters *mod)
               : m_FilterModule(mod),
@@ -3199,7 +3197,7 @@ class MModule_FiltersImpl : public MModule_Filters
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
    */
-   virtual FilterRule * GetFilter(const String &filterrule) const;
+   virtual FilterRule * GetFilter(const char* filterrule) const;
    DEFAULT_ENTRY_FUNC
 protected:
    MModule_FiltersImpl()
@@ -3224,7 +3222,7 @@ MMODULE_BEGIN_IMPLEMENT(MModule_FiltersImpl,
 MMODULE_END_IMPLEMENT(MModule_FiltersImpl)
 
 FilterRule *
-MModule_FiltersImpl::GetFilter(const String &filterrule) const
+MModule_FiltersImpl::GetFilter(const char* filterrule) const
 {
    return FilterRuleImpl::Create(filterrule, m_MInterface,
                                  (MModule_FiltersImpl *) this);

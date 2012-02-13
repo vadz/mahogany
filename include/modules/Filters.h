@@ -29,7 +29,7 @@ public:
      @param filterrule the text of the filter program
      @return a filter rule on success or NULL on error
    */
-   virtual FilterRule * GetFilter(const String &filterrule) const = 0;
+   virtual FilterRule * GetFilter(const char* filterrule) const = 0;
 
    /** To easily obtain a filter module: */
    static MModule_Filters *GetModule(void)
