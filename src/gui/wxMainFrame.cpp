@@ -55,9 +55,7 @@
 // view in the frame - with current wxGTK it doesn't work at all, so disabling
 #undef HAS_DYNAMIC_MENU_SUPPORT
 
-#ifdef DEBUG
-   #include "mail/FolderPool.h"
-#endif // DEBUG
+#include "mail/FolderPool.h"
 
 // ----------------------------------------------------------------------------
 // constants
