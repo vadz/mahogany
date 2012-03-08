@@ -306,7 +306,7 @@ PGPFilter::DoProcess(String& text,
                // beginNext points to the end of BEGIN line, go forward to the
                // end of the headers (signalled by an empty line i.e. 2 EOLs)
                beginNext = wxStrstr(beginNext, _T("\r\n\r\n"));
-               if ( beginNext )
+               if ( beginNext && beginNext < endNext )
                {
                   // endNext currently points to the end of END PGP SIGNATURE
                   // line, rewind to the PGP_BEGIN_SIG line
@@ -346,6 +346,11 @@ PGPFilter::DoProcess(String& text,
                      ASSERT_MSG( pc[1] == '\r',
                                   _T("line doesn't end in\"\\r\\n\"?") );
                   }
+               }
+               else
+               {
+                  wxLogWarning(_("Blank line separating header "
+                                 "from body in PGP message not found."));
                }
             }
          }
