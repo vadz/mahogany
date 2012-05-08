@@ -2481,8 +2481,10 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    // the dialog
    m_action = NULL;
 
-   CreateAllControls(ProfileEdit_WithoutApply);
+   CreateAllControls(ProfileEdit_WithoutApply | ProfileEdit_NoDefSize);
 
+   // Set the size ourselves, we want this dialog to be wider but less tall
+   // than the default profile settings dialog.
    SetDefaultSize(8*wBtn, 16*hBtn);
 
    DoUpdateUI();

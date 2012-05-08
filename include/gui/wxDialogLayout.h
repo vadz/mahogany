@@ -219,6 +219,7 @@ protected:
    {
       ProfileEdit_WithoutApply = 0,
       ProfileEdit_WithApply = 1,
+      ProfileEdit_NoDefSize = 2
    };
    void CreateAllControls(int flags = ProfileEdit_WithApply);
 
