@@ -36,6 +36,7 @@
 #   include <wx/statbox.h>
 #endif // USE_PCH
 
+#include "Address.h"
 #include "MFilter.h"
 #include "MFolder.h"
 #include "MailFolder.h"
@@ -57,6 +58,7 @@ class WXDLLIMPEXP_FWD_CORE wxWindow;
 
 extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_PERSONALNAME;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -2754,7 +2756,26 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
          if ( !recipient.empty() )
             profileTargetFolder->writeEntry(MP_COMPOSE_TO, recipient);
          if ( !sender.empty() )
-            profileTargetFolder->writeEntry(MP_FROM_ADDRESS, sender);
+         {
+            AddressList_obj addrList(sender);
+            Address* const addr = addrList->GetFirst();
+            if ( !addr )
+            {
+               wxLogError(_("Please correct the invalid sender address."));
+               return false;
+            }
+
+            if ( addrList->HasNext(addr) )
+            {
+               wxLogWarning(_("Only a single sender address can be specified "
+                              "here, \"%s\" will be used and the rest of "
+                              "the sender string will be ignored."),
+                            addr->GetAddress().c_str());
+            }
+
+            profileTargetFolder->writeEntry(MP_FROM_ADDRESS, addr->GetEMail());
+            profileTargetFolder->writeEntry(MP_PERSONALNAME, addr->GetName());
+         }
       }
    }
 
