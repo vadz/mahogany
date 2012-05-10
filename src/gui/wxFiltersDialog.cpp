@@ -2775,8 +2775,13 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
                             addr->GetAddress().c_str());
             }
 
-            profileTargetFolder->writeEntry(MP_FROM_ADDRESS, addr->GetEMail());
-            profileTargetFolder->writeEntry(MP_PERSONALNAME, addr->GetName());
+            const String& email = addr->GetEMail();
+            if ( !email.empty() )
+               profileTargetFolder->writeEntry(MP_FROM_ADDRESS, email);
+
+            const String& name = addr->GetName();
+            if ( !name.empty() )
+               profileTargetFolder->writeEntry(MP_PERSONALNAME, name);
          }
       }
    }
