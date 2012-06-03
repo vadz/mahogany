@@ -48,9 +48,10 @@ public:
       training the spam filter.
 
       @param msg the spam message
+      @return true if successfully reclassified, false on error
     */
-   static void ClassifyAsSpam(const Message& msg)
-      { Reclassify(msg, true); }
+   static bool ClassifyAsSpam(const Message& msg)
+      { return Reclassify(msg, true); }
 
    /**
       Mark the message as non-spam.
@@ -59,9 +60,10 @@ public:
       i.e. for reclassifying a false positive.
 
       @param msg the ham (i.e. non-spam) message
+      @return true if successfully reclassified, false on error
     */
-   static void ClassifyAsHam(const Message& msg)
-      { Reclassify(msg, false); }
+   static bool ClassifyAsHam(const Message& msg)
+      { return Reclassify(msg, false); }
 
    /**
       Reclassify the message as either spam or ham.
@@ -74,8 +76,9 @@ public:
 
       @param msg the message to reclassify
       @param isSpam if true, reclassify as spam, otherwise as ham
+      @return true if successfully reclassified, false on error
     */
-   static void Reclassify(const Message& msg, bool isSpam);
+   static bool Reclassify(const Message& msg, bool isSpam);
 
    /**
       Train the spam filter using the specified spam or ham message.
@@ -206,7 +209,7 @@ protected:
 
       This is used by the public Reclassify().
     */
-   virtual void DoReclassify(const Profile *profile,
+   virtual bool DoReclassify(const Profile *profile,
                              const Message& msg,
                              bool isSpam) = 0;
 

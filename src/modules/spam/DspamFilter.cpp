@@ -176,7 +176,7 @@ public:
    void Train(wxWindow *parent);
 
 protected:
-   virtual void DoReclassify(const Profile *profile,
+   virtual bool DoReclassify(const Profile *profile,
                              const Message& msg,
                              bool isSpam);
    virtual void DoTrain(const Profile *profile,
@@ -346,13 +346,13 @@ bool DspamFilter::DoProcess(const Message& msg, ContextHandler& handler)
    return true;
 }
 
-void DspamFilter::DoReclassify(const Profile * /* profile */,
+bool DspamFilter::DoReclassify(const Profile * /* profile */,
                                const Message& msg,
                                bool isSpam)
 {
    ClassifyContextHandler handler(ClassifyContextHandler::Reclassify, isSpam);
 
-   DoProcess(msg, handler);
+   return DoProcess(msg, handler);
 }
 
 void DspamFilter::DoTrain(const Profile * /* profile */,

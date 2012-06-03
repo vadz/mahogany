@@ -56,7 +56,7 @@ public:
    ServerSideFilter() { }
 
 protected:
-   virtual void DoReclassify(const Profile *profile,
+   virtual bool DoReclassify(const Profile *profile,
                              const Message& msg,
                              bool isSpam);
    virtual void DoTrain(const Profile *profile,
@@ -101,7 +101,7 @@ private:
 // ServerSideFilter public API implementation
 // ----------------------------------------------------------------------------
 
-void
+bool
 ServerSideFilter::DoReclassify(const Profile *profile,
                                const Message& msg,
                                bool isSpam)
@@ -115,7 +115,7 @@ ServerSideFilter::DoReclassify(const Profile *profile,
                         "reclassify messages as spam by moving them into "
                         "this folder. To classify a message as non-spam it is "
                         "enough to move it out of the junk folder."));
-         return;
+         return false;
       }
 
       String reason; // explanation of why error happened (if it did)
@@ -136,6 +136,7 @@ ServerSideFilter::DoReclassify(const Profile *profile,
       {
          wxLogError(_("Error while reclassifying the message: %s."),
                     reason.c_str());
+         return false;
       }
    }
    else // reclassify by bouncing to some address
@@ -147,11 +148,13 @@ ServerSideFilter::DoReclassify(const Profile *profile,
          wxLogWarning(_("You need to configure either a server-side folder "
                         "containing spam or the address to bounce messages "
                         "to in order to train the server-side spam filter."));
-         return;
+         return false;
       }
 
       SendMessage::Bounce(addr, profile, msg);
    }
+
+   return true;
 }
 
 void

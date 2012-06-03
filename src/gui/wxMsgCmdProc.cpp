@@ -959,6 +959,8 @@ void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
 
    // first mark the messages as spam/ham
    const size_t count = uids.Count();
+   UIdArray uidsReclassified;
+   uidsReclassified.reserve(count);
    for ( size_t i = 0; i < count; i++ )
    {
       Message_obj msg(GetMessage(uids[i]));
@@ -969,19 +971,20 @@ void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
          continue;
       }
 
-      SpamFilter::Reclassify(*msg, isSpam);
+      if ( SpamFilter::Reclassify(*msg, isSpam) )
+         uidsReclassified.push_back(uids[i]);
    }
 
    wxLogStatus(GetFrame(), msg + _("done"));
 
    // second, permanently delete all the spam
-   if ( isSpam && MDialog_YesNoDialog
+   if ( isSpam && !uidsReclassified.empty() && MDialog_YesNoDialog
         (
             String::Format
             (
                _("Do you want to permanently delete the %lu messages "
                  "marked as spam now?"),
-               (unsigned long)count
+               (unsigned long)uidsReclassified.size()
             ),
             GetFrame(),
             MDIALOG_YESNOTITLE,
@@ -992,7 +995,7 @@ void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
       // TODO: make this action configurable (i.e. could be moved to another
       //       folder and it should also be possible to define an action for
       //       ham messages, e.g. move them back to inbox)
-      DeleteAndExpungeMessages(uids);
+      DeleteAndExpungeMessages(uidsReclassified);
    }
 }
 

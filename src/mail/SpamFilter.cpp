@@ -307,19 +307,25 @@ Profile *SpamFilter::GetProfile(const Message& msg)
 // ----------------------------------------------------------------------------
 
 /* static */
-void SpamFilter::Reclassify(const Message& msg, bool isSpam)
+bool SpamFilter::Reclassify(const Message& msg, bool isSpam)
 {
    Profile * const profile = GetProfile(msg);
    if ( !profile )
-      return;
+      return false;
 
    LoadAll();
 
+   bool rc = true;
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
    {
       if ( IsSpamFilterEnabled(profile, p->GetName()) )
-         p->DoReclassify(profile, msg, isSpam);
+      {
+         if ( !p->DoReclassify(profile, msg, isSpam) )
+            rc = false;
+      }
    }
+
+   return rc;
 }
 
 /* static */

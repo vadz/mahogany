@@ -206,11 +206,13 @@ public:
    HeadersFilter() { }
 
 protected:
-   virtual void DoReclassify(const Profile * /* profile */,
+   virtual bool DoReclassify(const Profile * /* profile */,
                              const Message& /* msg */,
                              bool /* isSpam */)
    {
-      // this filter can't be trained
+      // this filter can't be trained but it never really fails, it just
+      // doesn't make sense
+      return true;
    }
 
    virtual void DoTrain(const Profile * /* profile */,
