@@ -2441,12 +2441,12 @@ bool MailFolderCC::Resume()
 void
 MailFolderCC::ApplyTimeoutValues(void)
 {
-   (void) mail_parameters(NIL, SET_OPENTIMEOUT, (void *) m_TcpOpenTimeout);
-   (void) mail_parameters(NIL, SET_READTIMEOUT, (void *) m_TcpReadTimeout);
-   (void) mail_parameters(NIL, SET_WRITETIMEOUT, (void *) m_TcpWriteTimeout);
-   (void) mail_parameters(NIL, SET_CLOSETIMEOUT, (void *) m_TcpCloseTimeout);
-   (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) m_TcpRshTimeout);
-   (void) mail_parameters(NIL, SET_SSHTIMEOUT, (void *) m_TcpSshTimeout);
+   (void) mail_parameters(NIL, SET_OPENTIMEOUT, wxUIntToPtr(m_TcpOpenTimeout));
+   (void) mail_parameters(NIL, SET_READTIMEOUT, wxUIntToPtr(m_TcpReadTimeout));
+   (void) mail_parameters(NIL, SET_WRITETIMEOUT, wxUIntToPtr(m_TcpWriteTimeout));
+   (void) mail_parameters(NIL, SET_CLOSETIMEOUT, wxUIntToPtr(m_TcpCloseTimeout));
+   (void) mail_parameters(NIL, SET_RSHTIMEOUT, wxUIntToPtr(m_TcpRshTimeout));
+   (void) mail_parameters(NIL, SET_SSHTIMEOUT, wxUIntToPtr(m_TcpSshTimeout));
 
    // only set the paths if we do use rsh/ssh
    if ( m_TcpRshTimeout )
@@ -4282,7 +4282,7 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
       lookAhead = m_LookAhead;
    }
 
-   mail_parameters(m_MailStream, SET_LOOKAHEAD, (void *) lookAhead);
+   mail_parameters(m_MailStream, SET_LOOKAHEAD, wxUIntToPtr(lookAhead));
 
    // do fill the listing
    size_t n;
