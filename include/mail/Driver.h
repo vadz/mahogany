@@ -144,7 +144,7 @@ public:
                           MailFolder::OpenMode mode,
                           wxFrame *frame)
       { return Initialize() ? (*m_open)(folder, login,
-                                        password, mode, frame) : false; }
+                                        password, mode, frame) : NULL; }
 
    /// updates the status of a folder
    bool CheckFolder(const MFolder *folder)
