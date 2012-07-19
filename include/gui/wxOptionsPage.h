@@ -126,7 +126,7 @@ public:
    struct FieldInfo
    {
       const char   *label;   // which is shown in the dialog
-      int           flags;   // contains the type and the flags (see above)
+      unsigned      flags;   // contains the type and the flags (see above)
       int           enable;  // enable this field depending on the value of
                              // the "enable" one if != -1 (using negative ids
                              // != -1 negates the condition, i.e. this field is
