@@ -265,15 +265,12 @@ bool wxMessageSortingDialog::TransferDataToWindow()
 
 bool wxMessageSortingDialog::TransferDataFromWindow()
 {
-   bool uses_scoring = false;
    int selection;
    long sortOrder = 0;
    for( int n = NUM_SORTLEVELS-1; n >= 0; n--)
    {
       sortOrder <<= 4;
       selection = 2*m_Choices[n]->GetSelection();
-      if( selection == MSO_SCORE )
-         uses_scoring = true;
 
       if ( m_Checkboxes[n]->GetValue() )
       {

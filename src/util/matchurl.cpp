@@ -323,7 +323,6 @@ KeywordDetectorCell::computeBackArc(KeywordDetectorCell* root,
    ASSERT_MSG(parentBack == 0 || parentBack->_c == '\000',
               _T("logic error in KeywordDetectorCell?"));
 
-   KeywordDetectorCell* back = 0;
    KeywordDetectorCell* current = 0;
    int backLevel = 0;
    if (! parentBack)
@@ -345,7 +344,6 @@ KeywordDetectorCell::computeBackArc(KeywordDetectorCell* root,
    {
       if (current->_c == _c)
       {
-         back = current;
          break;
       }
 

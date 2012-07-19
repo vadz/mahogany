@@ -1580,13 +1580,6 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
       }
    }
 
-   // the index of the envelop headers if we have to show it, -1 otherwise
-   int envelopIndices[EnvelopHeader_Max];
-   for ( n = 0; n < EnvelopHeader_Max; n++ )
-   {
-      envelopIndices[n] = wxNOT_FOUND;
-   }
-
    // a boolean array (in spite of its name) telling us, for each header we
    // show, whether it's present in the envelop or not
    wxArrayInt headerIsEnv;

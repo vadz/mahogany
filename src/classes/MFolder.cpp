@@ -1197,7 +1197,6 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       wxLogError(_("Could not copy profile."));
       return false;
    }
-   bool rc = true;
 
    if ( GetFolderType(GetType()) == MF_IMAP )
    {
@@ -1263,8 +1262,8 @@ bool MFolderFromProfile::Move(MFolder *newParent)
 
    struct MailFolderStatus status;
    MfStatusCache* cache = MfStatusCache::Get();
-   rc = cache->GetStatus(m_folderName, &status);
-   cache->UpdateStatus(newFullName, status);
+   if ( cache->GetStatus(m_folderName, &status) )
+      cache->UpdateStatus(newFullName, status);
 
    return true;
 }

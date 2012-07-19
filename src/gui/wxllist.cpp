@@ -1144,7 +1144,7 @@ wxLayoutLine::Draw(wxDC &dc,
 
    CoordType xpos = 0; // cursorpos, lenght of line
 
-   CoordType from, to, tempto;
+   CoordType from, to;
 
    int highlight = llist->IsSelected(this, &from, &to);
 //   WXLO_DEBUG(("highlight=%d",  highlight ));
@@ -1154,7 +1154,6 @@ wxLayoutLine::Draw(wxDC &dc,
       if (highlight == -1) // partially highlight line
       {
          // parts of the line need highlighting
-         tempto = xpos+(**i).GetLength();
          (**i).Draw(dc, pos, llist, from-xpos, to-xpos);
       }
       else
