@@ -406,26 +406,37 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
    if ( replaceFromWithTo )
    {
       size_t nAdrCount = ownAddresses.GetCount();
-      for ( size_t nAdr = 0; nAdr < nAdrCount; nAdr++ )
+      if ( nAdrCount )
       {
-         if ( Address::Compare(*value, ownAddresses[nAdr]) )
+         AddressList_obj addrList(*value);
+         const Address* const addr = addrList->GetFirst();
+         if ( addr )
          {
-            // sender is the user himself, do the replacement
-            *value = hi->GetTo();
-
-            if ( value->empty() )
+            const String email = addr->GetEMail();
+            for ( size_t nAdr = 0; nAdr < nAdrCount; nAdr++ )
             {
-               // hmm, must be a newsgroup message
-               String ng = hi->GetNewsgroups();
-               if ( !ng.empty() )
+               // Allow the use of wildcards, e.g. to support own addresses of
+               // the form "localpart+*@domain".
+               if ( email.Matches(ownAddresses[nAdr]) )
                {
-                  *value = ng;
-                  return Newsgroup;
-               }
-               //else: weird, both to and newsgroup are empty??
-            }
+                  // sender is the user himself, do the replacement
+                  *value = hi->GetTo();
 
-            return To;
+                  if ( value->empty() )
+                  {
+                     // hmm, must be a newsgroup message
+                     String ng = hi->GetNewsgroups();
+                     if ( !ng.empty() )
+                     {
+                        *value = ng;
+                        return Newsgroup;
+                     }
+                     //else: weird, both to and newsgroup are empty??
+                  }
+
+                  return To;
+               }
+            }
          }
       }
    }
