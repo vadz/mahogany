@@ -262,13 +262,16 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
             }
             else
             {
-#ifdef DEBUG_nerijus
-               wxTheClipboard->UsePrimarySelection();
-               wxTheClipboard->SetData(new wxTextDataObject(m_clickableURL->GetUrl()));
-#endif
-               wxURLDataObject *dobj = new wxURLDataObject;
-               dobj->SetURL(m_clickableURL->GetUrl());
-               wxTheClipboard->SetData(dobj);
+               const wxString url = m_clickableURL->GetUrl();
+
+               wxTheClipboard->SetData(new wxURLDataObject(url));
+
+#ifdef __UNIX__
+               // Different browsers (Firefox and Chromium) use different
+               // selections for pasting URLs, so just copy it to both.
+               wxTheClipboard->UsePrimarySelection(true);
+               wxTheClipboard->SetData(new wxURLDataObject(url));
+#endif // __UNIX__
             }
          }
          break;
