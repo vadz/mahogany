@@ -221,7 +221,7 @@ protected:
    ~FilterRuleImpl();
 
 public:
-   const SyntaxNode * Parse(const std::string &);
+   const SyntaxNode * Parse(const char* filterrule);
    const SyntaxNode * ParseProgram(void);
    const SyntaxNode * ParseFilters(void);
    const SyntaxNode * ParseIfElse(void);
@@ -298,24 +298,22 @@ public:
 protected:
    char Char(void) const
    {
-      return m_Position == m_Input.length()
-               ? '\0'
-               : m_Input[m_Position];
+      return m_Input[m_Position];
    }
    void EatWhiteSpace(void)
       { while(isspace(Char())) m_Position++; }
    char CharInc(void)
       { return m_Input[m_Position++]; }
    std::string CharLeft(void)
-      { return std::string(m_Input, 0, m_Position); }
-   std::string CharMid(void)
       { return std::string(m_Input, m_Position); }
+   std::string CharMid(void)
+      { return std::string(m_Input + m_Position); }
 
 private:
    MModule_Filters *m_FilterModule;
    MInterface *m_MInterface;
 
-   std::string m_Input;
+   const char* m_Input;      // UTF-8 encoded filter program text.
    Token token;              // current token
    size_t m_Position;        // seek offset of current token
    size_t m_Peek;            // seek offset of next token
@@ -1269,14 +1267,24 @@ static void PreProcessInput(std::string *input)
 }
 
 const SyntaxNode *
-FilterRuleImpl::Parse(const std::string &input)
+FilterRuleImpl::Parse(const char* filterrule)
 {
    MOcheck();
    /* Here we handle the one special occasion of input being @filename
       in which case we replace input with the contents of that file.
    */
-   m_Input = input;
-   PreProcessInput(&m_Input);
+   std::string expanded;
+   if ( *filterrule == '@' )
+   {
+      expanded = filterrule;
+      PreProcessInput(&expanded);
+      m_Input = expanded.c_str();
+   }
+   else // Normal case, no need to make a copy of the rule.
+   {
+      m_Input = filterrule;
+   }
+
    Rewind();
 #ifndef TEST
    return ParseProgram();
