@@ -268,8 +268,11 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
                 << "<p>"
                    "<h4>" << _("List of contributors:") << "</h4>"
                    "<p>"
-                   "Karsten Ball\374der, Vadim Zeitlin, Greg Noel,<br>"
-                   "Nerijus Bali\373nas, Xavier Nodet, Vaclav Slavik,<br>"
+                   "Vadim Zeitlin, " <<
+                   wxString::FromUTF8("Karsten Ball\xc3\xbc""der") << ", "
+                   "Greg Noel,<br>" <<
+                   wxString::FromUTF8("Nerijus Bali\xc3\xbbnas") << ", "
+                   "Xavier Nodet, Vaclav Slavik,<br>"
                    "Daniel Seifert, Michele Ravani, Michael A Chase,<br>"
                    "Robert Vazan " << _("and many others") << "<br>"
                    "<br>"
