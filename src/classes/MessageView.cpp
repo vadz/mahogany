@@ -635,6 +635,7 @@ MessageView::Init()
    m_viewer =
    m_viewerOld = NULL;
    m_filters = NULL;
+   m_nullFilter = NULL;
    m_virtualMimeParts = NULL;
    m_cidsInMemory = NULL;
 
@@ -842,9 +843,10 @@ MessageView::InitializeViewFilters()
    CHECK_RET( !m_filters, "InitializeViewFilters() called twice?" );
 
    // always insert the terminating, "do nothing", filter at the end
+   m_nullFilter = new TransparentFilter(this);
    m_filters = new ViewFilterNode
                    (
-                     new TransparentFilter(this),
+                     m_nullFilter,
                      ViewFilter::Priority_Lowest,
                      wxEmptyString,
                      wxEmptyString,
@@ -2034,7 +2036,16 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
       InitializeViewFilters();
    }
 
-   ViewFilter *filter = m_filters->GetFilter();
+   // This is a hack to avoid a problem with some filters (notably the
+   // quoting/URL detection one) taking worse than O(N) time to execute making
+   // them impractical to use for large messages. So we don't use any filters
+   // at all for such "large" messages. A better solution is discussed in #937
+   // but would need significantly more effort.
+   ViewFilter* const
+      filter = CheckMessageOrPartSize(textPart.length(), Check_NonInteractive)
+                  ? m_filters->GetFilter()
+                  : m_nullFilter;
+
    CHECK_RET( filter, "no view filters at all??" );
 
    filter->StartText();
@@ -3891,7 +3902,7 @@ MessageView::ShowMessage(UIdType uid)
 }
 
 bool
-MessageView::CheckMessageOrPartSize(unsigned long size, bool part) const
+MessageView::CheckMessageOrPartSize(unsigned long size, SizeCheck check) const
 {
    unsigned long maxSize = (unsigned long)READ_CONFIG(GetProfile(),
                                                       MP_MAX_MESSAGE_SIZE);
@@ -3903,14 +3914,21 @@ MessageView::CheckMessageOrPartSize(unsigned long size, bool part) const
       // it's ok, don't ask
       return true;
    }
-   //else: big message, ask
+   else // big message
+   {
+      if ( check == Check_NonInteractive )
+         return false;
+   }
 
    wxString msg;
    msg.Printf(_("The selected %s is %lu KiB long which is "
                 "more than the current threshold of %lu KiB for inline display.\n"
                 "\n"
                 "Do you still want to download it and show it inline?"),
-              part ? _("message part") : _("message"), size, maxSize);
+              check == Check_Part
+                  ? _("message part")
+                  : _("message"),
+              size, maxSize);
 
    return MDialog_YesNoDialog(msg, GetParentFrame());
 }
@@ -3921,7 +3939,7 @@ MessageView::CheckMessagePartSize(const MimePart *mimepart) const
    // only check for IMAP here: for POP/NNTP we had already checked it in
    // CheckMessageSize() below and the local folders are fast
    return (m_asyncFolder->GetType() != MF_IMAP) ||
-               CheckMessageOrPartSize(mimepart->GetSize(), true);
+               CheckMessageOrPartSize(mimepart->GetSize(), Check_Part);
 }
 
 bool
@@ -3936,7 +3954,7 @@ MessageView::CheckMessageSize(const Message *message) const
    // 100 bytes (and then, second time, before downloading 2b!)
    MFolderType folderType = m_asyncFolder->GetType();
    return (folderType != MF_POP && folderType != MF_NNTP) ||
-               CheckMessageOrPartSize(message->GetSize(), false);
+               CheckMessageOrPartSize(message->GetSize(), Check_Message);
 }
 
 void

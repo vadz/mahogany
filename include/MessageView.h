@@ -767,13 +767,26 @@ private:
     */
    //@{
 
-   /// ask user if it's ok to download this message/part if size > limit
-   bool CheckMessageOrPartSize(unsigned long size, bool part) const;
+   /// Kind of the check to make.
+   enum SizeCheck
+   {
+      /// Just verify the size, don't ask the user.
+      Check_NonInteractive,
 
-   /// call CheckMessageOrPartSize(true) for IMAP
+      /// Ask the user if part size exceeds the threshold.
+      Check_Part,
+
+      /// Ask the user if the full message size exceeds the threshold.
+      Check_Message
+   };
+
+   /// ask user if it's ok to download this message/part if size > limit
+   bool CheckMessageOrPartSize(unsigned long size, SizeCheck check) const;
+
+   /// call CheckMessageOrPartSize(Check_Part) for IMAP
    bool CheckMessagePartSize(const MimePart *part) const;
 
-   /// call CheckMessageOrPartSize(false) for POP/NNTP
+   /// call CheckMessageOrPartSize(Check_Message) for POP/NNTP
    bool CheckMessageSize(const Message *message) const;
 
    //@}
@@ -906,6 +919,14 @@ private:
 
    /// linked list of the filters
    class ViewFilterNode *m_filters;
+
+   /**
+       The null filter terminating m_filters linked list.
+
+       Notice that it's deleted when m_filters is, there is no need to delete
+       it explicitly.
+    */
+   class TransparentFilter* m_nullFilter;
 
    //@}
 
