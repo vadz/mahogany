@@ -338,6 +338,8 @@ enum ConfigFields
    ConfigField_TrashName,
    ConfigField_DraftsName,
    ConfigField_DraftsAutoDelete,
+   ConfigField_MboxPathHelp,
+   ConfigField_MboxPath,
    ConfigField_FoldersFileFormat,
    ConfigField_CreateInternalMessage,
    ConfigField_StatusFormatHelp,
@@ -1473,6 +1475,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
    { gettext_noop("&Drafts folder name"), Field_Folder, -1 },
    { gettext_noop("Delete drafts &automatically"), Field_Bool, -1 },
+   { gettext_noop("\n"
+                  "Directory used by default for local file folders.\n"
+                  "This can be either an absolute path or a one relative to\n"
+                  "the user data directory."), Field_Message | Field_AppWide, -1 },
+   { gettext_noop("Base mailboxes path"), Field_Dir | Field_AppWide, -1 },
    { gettext_noop("Default format for mailbox files"
                   ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
      Field_Combo | Field_AppWide | Field_Advanced, -1},
@@ -2156,6 +2163,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TRASH_FOLDER),
    CONFIG_ENTRY(MP_DRAFTS_FOLDER),
    CONFIG_ENTRY(MP_DRAFTS_AUTODELETE),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_MBOXDIR),
    CONFIG_ENTRY(MP_FOLDER_FILE_DRIVER),
    CONFIG_ENTRY(MP_CREATE_INTERNAL_MESSAGE),
    CONFIG_NONE(),
