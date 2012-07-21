@@ -1079,8 +1079,8 @@ strutil_expandfoldername(const String &name, MFolderType folderType)
    if ( folderType == MF_FILE )
    {
       String mboxpath = READ_APPCONFIG(MP_MBOXDIR);
-      if ( mboxpath.empty() )
-         mboxpath = mApplication->GetLocalDir();
+      if ( mboxpath.empty() || !strutil_isabsolutepath(mboxpath) )
+         mboxpath = mApplication->GetLocalDir() + DIR_SEPARATOR + mboxpath;
 
       if ( !mboxpath.empty() )
          mboxpath += DIR_SEPARATOR;
