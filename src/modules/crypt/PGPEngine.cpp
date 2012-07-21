@@ -229,12 +229,19 @@ PGPEngine::ExecCommand(const String& options,
    {
       if ( !pgp.empty() )
       {
+         // As we ask for the passphrase ourselves, disable the use of the
+         // agent to avoid duplicate prompts. Alternative solution would be to
+         // check if GPG_AGENT_INFO environment variable is set and not prompt
+         // for the passphrase from Mahogany in this case, but it wouldn't work
+         // if there were "no-use-agent" in gpg.conf while this solution always
+         // works as the command line option overrides the config file one.
          const String
             command = wxString::Format
                       (
-                       _T("%s --status-fd=2 --command-fd 0 --output - -a %s"),
-                       pgp.c_str(),
-                       options.c_str()
+                       "%s --status-fd=2 --command-fd 0 "
+                       "--output - -a --no-use-agent %s",
+                       pgp,
+                       options
                       );
 
          if ( log )
