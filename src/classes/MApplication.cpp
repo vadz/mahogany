@@ -989,18 +989,13 @@ MAppBase::InitDirectories()
    // if still not given, try to find a good default one ourselves
    if ( m_localDir.empty() )
    {
-      // for historical reasons, we use Mahogany for the base directory name
-      // under Windows but M under Unix, hence we can't use GetUserDataDir()
-      // which would use the same one under both systems
-      m_localDir = wxStandardPaths::Get().GetUserConfigDir();
-
-#ifdef OS_WIN
-      m_localDir += "\\Mahogany";
-#elif defined(OS_UNIX)
-      m_localDir += "/.M";
-#else
-      #error "Don't know where to put per-user Mahogany files on this system"
-#endif // OS_WIN
+      // For historical reasons, we use ~/.M as base directory under Unix, so
+      // don't use GetUserDataDir() there as this would return ~/.Mahogany.
+#if defined(OS_UNIX) && !defined(OS_MAC)
+      m_localDir << wxGetHomeDir() << "/.M";
+#else // Windows or OS X
+      m_localDir = wxStandardPaths::Get().GetUserDataDir();
+#endif
 
       // save it for the next runs
       m_profile->writeEntry(MP_USERDIR, m_localDir);
