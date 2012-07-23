@@ -317,7 +317,7 @@ wxMessageView::CreateViewMenu()
 
       // add an accelerator for the viewer
       String desc = descViewers[nViewer];
-      desc << _T("\tShift-Ctrl-") << nViewer + 1;
+      desc << _T("\tCtrl-") << nViewer + 1;
 
       menuView->AppendRadioItem(id, desc);
 
