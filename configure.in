@@ -958,21 +958,14 @@ dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
-dnl check for wxWidgets installation: traditionally, we could only use ANSI
-dnl build
-MIN_WX_VERSION=2.8.4
+dnl check for wxWidgets installation
+MIN_WX_VERSION=2.9.4
 
 dnl notice that libraries option should use correct order, otherwise statically
 dnl linking won't work!
 wxlibs=html,adv,qa,core,xml,net,base
 
-AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[$wxlibs],
-		 [--unicode=no --debug=$debug_option])
-
-dnl but with wx3 we can also use Unicode build
-if test "$wxOK" != 1; then
-    AM_PATH_WXCONFIG(2.9.0, [wxOK=1],[wxOK=0],[$wxlibs], [--debug=$debug_option])
-fi
+AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[$wxlibs], [--debug=$debug_option])
 
 if test "$wxOK" != 1; then
     if test $debug_option = "yes"; then
