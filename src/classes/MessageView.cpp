@@ -2836,7 +2836,7 @@ bool MessageView::StoreMIMEPartData(const MimePart *part, const String& cidOrig)
       cid = cidOrig;
 
    m_cidsInMemory->Add(cid);
-   MIMEFSHandler::AddFile(cid, data, len);
+   MIMEFSHandler::AddFileWithMimeType(cid, data, len, part->GetType().GetFull());
 
    return true;
 }
