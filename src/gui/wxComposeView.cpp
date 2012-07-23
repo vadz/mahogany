@@ -5861,7 +5861,7 @@ bool Composer::RestoreAll()
       return false;
    }
 
-   size_t nResumed = 0;
+   int nResumed = 0;
 
    wxString filename;
    bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
