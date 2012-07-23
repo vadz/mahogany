@@ -42,9 +42,8 @@ public:
    // implement the base class pure virtuals
    virtual String GetLabel() const;
 
-   virtual void OnLeftClick(const wxPoint&) const;
+   virtual void OnLeftClick() const;
    virtual void OnRightClick(const wxPoint& pt) const;
-   virtual void OnDoubleClick(const wxPoint&) const;
 
    // show the details about this PGP info object to the user (menu command)
    void ShowDetails() const;

@@ -33,9 +33,8 @@ public:
    // implement base class pure virtuals
    virtual String GetLabel() const;
 
-   virtual void OnLeftClick(const wxPoint& pt) const;
+   virtual void OnLeftClick() const;
    virtual void OnRightClick(const wxPoint& pt) const;
-   virtual void OnDoubleClick(const wxPoint& pt) const;
 
    // show the popup menu for this window/at this point
    //

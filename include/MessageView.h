@@ -134,9 +134,6 @@ public:
    /// handle the command from the menu, return true if processed
    bool DoMenuCommand(int id);
 
-   /// handle a mouse click in MessageViewer (should be only called by it)
-   void DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt);
-
    /// show the message view contents in the given language
    void SetLanguage(int cmdLang);
 

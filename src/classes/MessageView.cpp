@@ -3767,34 +3767,6 @@ MessageView::DoMenuCommand(int id)
 }
 
 void
-MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
-{
-   // ignore mouse clicks if we're inside wxYield()
-   if ( !mApplication->AllowBgProcessing() )
-      return;
-
-   CHECK_RET( ci, "MessageView::DoMouseCommand(): NULL ClickableInfo" );
-
-   switch ( id )
-   {
-      case WXMENU_LAYOUT_LCLICK:
-         ci->OnLeftClick(pt);
-         break;
-
-      case WXMENU_LAYOUT_RCLICK:
-         ci->OnRightClick(pt);
-         break;
-
-      case WXMENU_LAYOUT_DBLCLICK:
-         ci->OnDoubleClick(pt);
-         break;
-
-      default:
-         FAIL_MSG("unknown mouse action");
-   }
-}
-
-void
 MessageView::SetLanguage(int id)
 {
    wxFontEncoding encoding = GetEncodingFromMenuCommand(id);

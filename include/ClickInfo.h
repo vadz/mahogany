@@ -52,20 +52,25 @@ public:
 
    /**
       @name Processing mouse events
-
-      All functions get the click coordinates in the m_msgView->GetWindow()
-      client coordinates.
     */
    //@{
 
-   /// process left click
-   virtual void OnLeftClick(const wxPoint& pt) const = 0;
+   /**
+       Process left click.
 
-   /// process right click
+       This typically performs the default action associated with the object.
+    */
+   virtual void OnLeftClick() const = 0;
+
+   /**
+       Process right click.
+
+       This typically shows the context menu with all the applicable actions.
+
+       The click coordinates are in the m_msgView->GetWindow() client
+       coordinates.
+    */
    virtual void OnRightClick(const wxPoint& pt) const = 0;
-
-   /// process double (left) click
-   virtual void OnDoubleClick(const wxPoint& pt) const = 0;
 
    //@}
 

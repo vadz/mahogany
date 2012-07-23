@@ -110,12 +110,6 @@ public:
    virtual bool CanInlineImages() const;
    virtual bool CanProcess(const String& mimetype) const;
 
-   // for m_window only
-   void DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
-   {
-      m_msgView->DoMouseCommand(id, ci, pt);
-   }
-
 private:
    // set the text colour
    void SetTextColour(const wxColour& col);
@@ -242,26 +236,20 @@ void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
    LayoutUserData *data = (LayoutUserData *)obj->GetUserData();
    if ( data )
    {
-      int id;
+      ClickableInfo* const ci = data->GetClickableInfo();
       switch ( event.GetId() )
       {
          case WXLOWIN_MENU_RCLICK:
-            id = WXMENU_LAYOUT_RCLICK;
+            ci->OnRightClick(GetClickPosition());
             break;
 
          default:
             FAIL_MSG(_T("unknown mouse action"));
 
          case WXLOWIN_MENU_LCLICK:
-            id = WXMENU_LAYOUT_LCLICK;
-            break;
-
-         case WXLOWIN_MENU_DBLCLICK:
-            id = WXMENU_LAYOUT_DBLCLICK;
+            ci->OnLeftClick();
             break;
       }
-
-      m_viewer->DoMouseCommand(id, data->GetClickableInfo(), GetClickPosition());
    }
 }
 

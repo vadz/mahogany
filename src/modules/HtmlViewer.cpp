@@ -541,14 +541,10 @@ void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
    // left click becomes double click as we want to open the URLs on simple
    // click
    const wxMouseEvent& event = *link.GetEvent();
-   m_viewer->GetMessageView()->DoMouseCommand
-                               (
-                                 event.GetEventType() == wxEVT_LEFT_UP
-                                    ? WXMENU_LAYOUT_DBLCLICK
-                                    : WXMENU_LAYOUT_RCLICK,
-                                 ci,
-                                 event.GetPosition()
-                               );
+   if ( event.GetEventType() == wxEVT_LEFT_UP )
+      ci->OnLeftClick();
+   else
+      ci->OnRightClick(event.GetPosition());
 }
 
 wxHtmlOpeningStatus

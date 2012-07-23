@@ -554,7 +554,7 @@ void ClickableURL::AddToAddressBook() const
 // ClickableURL click handlers
 // ----------------------------------------------------------------------------
 
-void ClickableURL::OnLeftClick(const wxPoint& /* pt */) const
+void ClickableURL::OnLeftClick() const
 {
    if ( IsMail() )
    {
@@ -566,12 +566,6 @@ void ClickableURL::OnLeftClick(const wxPoint& /* pt */) const
                      ? URLOpen_New_Window
                      : URLOpen_Default);
    }
-}
-
-void ClickableURL::OnDoubleClick(const wxPoint& pt) const
-{
-   // no special action for double clicking
-   OnLeftClick(pt);
 }
 
 void ClickableURL::OnRightClick(const wxPoint& pt) const

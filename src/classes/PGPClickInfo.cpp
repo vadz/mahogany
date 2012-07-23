@@ -204,7 +204,7 @@ ClickablePGPInfo::GetLabel() const
 // ----------------------------------------------------------------------------
 
 void
-ClickablePGPInfo::OnLeftClick(const wxPoint&) const
+ClickablePGPInfo::OnLeftClick() const
 {
    ShowDetails();
 }
@@ -215,12 +215,6 @@ ClickablePGPInfo::OnRightClick(const wxPoint& pt) const
    PGPMenu menu(this, m_label);
 
    m_msgView->GetWindow()->PopupMenu(&menu, pt);
-}
-
-void
-ClickablePGPInfo::OnDoubleClick(const wxPoint&) const
-{
-   ShowDetails();
 }
 
 void

@@ -133,12 +133,6 @@ public:
    virtual bool CanInlineImages() const;
    virtual bool CanProcess(const String& mimetype) const;
 
-   // for m_window only
-   void DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
-   {
-      m_msgView->DoMouseCommand(id, ci, pt);
-   }
-
 private:
    // create m_printText if necessary
    void InitPrinting();
@@ -183,17 +177,16 @@ public:
 
    virtual String GetLabel() const { return "Face picture"; }
 
-   virtual void OnLeftClick(const wxPoint& pt) const { DoShow(pt); }
+   virtual void OnLeftClick() const { DoShow(); }
    virtual void OnRightClick(const wxPoint& /* pt */) const { }
-   virtual void OnDoubleClick(const wxPoint& /* pt */) const { }
 
 private:
    class FaceWindow : public wxDialog
    {
    public:
-      FaceWindow(wxWindow *parent, const wxPoint& position, wxBitmap bmp)
+      FaceWindow(wxWindow *parent, const wxBitmap& bmp)
          : wxDialog(parent, wxID_ANY, _("Face picture"),
-                    position, wxDefaultSize,
+                    wxDefaultPosition, wxDefaultSize,
                     wxCAPTION | wxCLOSE_BOX),
            m_bmp(bmp)
       {
@@ -212,9 +205,9 @@ private:
       wxBitmap m_bmp;
    };
 
-   void DoShow(const wxPoint& pt) const
+   void DoShow() const
    {
-      FaceWindow dlg(GetMessageView()->GetWindow(), pt, m_face);
+      FaceWindow dlg(GetMessageView()->GetWindow(), m_face);
       dlg.ShowModal();
    }
 
@@ -409,7 +402,6 @@ BEGIN_EVENT_TABLE(TextViewerWindow, wxTextCtrl)
    EVT_RIGHT_UP(TextViewerWindow::OnMouseEvent)
 #endif
    EVT_LEFT_UP(TextViewerWindow::OnMouseEvent)
-   EVT_LEFT_DCLICK(TextViewerWindow::OnMouseEvent)
 END_EVENT_TABLE()
 
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
@@ -471,9 +463,7 @@ void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
 {
    wxMouseEvent eventMouse = event.GetMouseEvent();
    wxEventType type = eventMouse.GetEventType();
-   if ( type == wxEVT_RIGHT_UP ||
-        type == wxEVT_LEFT_UP ||
-        type == wxEVT_LEFT_DCLICK )
+   if ( type == wxEVT_RIGHT_UP || type == wxEVT_LEFT_UP )
    {
       if ( ProcessMouseEvent(eventMouse, event.GetURLStart()) )
       {
@@ -511,14 +501,13 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
       TextViewerClickable *clickable = m_clickables[n];
       if ( clickable->Inside(pos) )
       {
-         int id;
 #ifdef __WXGTK20__
          if ( event.RightDown() )
 #else
          if ( event.RightUp() )
 #endif
          {
-            id = WXMENU_LAYOUT_RCLICK;
+            clickable->GetClickableInfo()->OnRightClick(event.GetPosition());
          }
          else if ( event.LeftUp() )
          {
@@ -545,17 +534,14 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
             }
 #endif // __WXMSW__
 
-            id = WXMENU_LAYOUT_LCLICK;
+            clickable->GetClickableInfo()->OnLeftClick();
          }
-         else // must be double click, what else?
+         else
          {
-            ASSERT_MSG( event.LeftDClick(), _T("unexpected mouse event") );
+            FAIL_MSG( wxS("unexpected mouse event") );
 
-            id = WXMENU_LAYOUT_DBLCLICK;
+            return false;
          }
-
-         m_viewer->DoMouseCommand(id, clickable->GetClickableInfo(),
-                                  event.GetPosition());
 
          return true;
       }

@@ -166,18 +166,10 @@ String ClickableAttachment::GetLabel() const
 // ClickableAttachment click handlers
 // ----------------------------------------------------------------------------
 
-void ClickableAttachment::OnLeftClick(const wxPoint& pt) const
+void ClickableAttachment::OnLeftClick() const
 {
-   // for now, do the same thing as double click but perhaps the left button
-   // behaviour should be configurable in the future (i.e. either save or open)
-   // so that people don't risk accidentally opening [possibly dangerous]
-   // attachments?
-   OnDoubleClick(pt);
-}
-
-void ClickableAttachment::OnDoubleClick(const wxPoint& /* pt */) const
-{
-   // open the attachment
+   // open the attachment: this is dangerous and should be made configurable
+   // and probably disabled by default, see #670
    m_msgView->MimeHandle(m_mimepart);
 }
 
