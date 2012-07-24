@@ -1358,10 +1358,13 @@ void wxMApp::CleanUpPrintData()
 #if wxUSE_POSTSCRIPT
       wxPrintNativeDataBase * const dataNative = m_PrintData->GetNativeData();
       wxPostScriptPrintNativeData * const dataPS =
-         static_cast<wxPostScriptPrintNativeData *>(dataNative);
+         wxDynamicCast(dataNative, wxPostScriptPrintNativeData);
 
-      m_profile->writeEntry(MP_PRINT_COMMAND, dataPS->GetPrinterCommand());
-      m_profile->writeEntry(MP_PRINT_OPTIONS, dataPS->GetPrinterOptions());
+      if ( dataPS )
+      {
+         m_profile->writeEntry(MP_PRINT_COMMAND, dataPS->GetPrinterCommand());
+         m_profile->writeEntry(MP_PRINT_OPTIONS, dataPS->GetPrinterOptions());
+      }
 #endif // wxUSE_POSTSCRIPT
 
       m_profile->writeEntry(MP_PRINT_ORIENTATION, m_PrintData->GetOrientation());
@@ -1401,22 +1404,26 @@ const wxPrintData *wxMApp::GetPrintData()
 #if wxUSE_POSTSCRIPT && !defined(__WINE__)
       wxPrintNativeDataBase * const dataNative = m_PrintData->GetNativeData();
       wxPostScriptPrintNativeData * const dataPS =
-         static_cast<wxPostScriptPrintNativeData *>(dataNative);
+         wxDynamicCast(dataNative, wxPostScriptPrintNativeData);
 
-      // set AFM path
-      PathFinder pf(mApplication->GetDataDir() + _T("/afm"), false);
-      pf.AddPaths(READ_APPCONFIG_TEXT(MP_AFMPATH), false);
-      pf.AddPaths(mApplication->GetLocalDir(), true);
-
-      bool found;
-      String afmpath = pf.FindDirFile(_T("Cour.afm"), &found);
-      if ( found )
+      if ( dataPS )
       {
-         dataPS->SetFontMetricPath(afmpath);
+         // set AFM path
+         PathFinder pf(mApplication->GetDataDir() + _T("/afm"), false);
+         pf.AddPaths(READ_APPCONFIG_TEXT(MP_AFMPATH), false);
+         pf.AddPaths(mApplication->GetLocalDir(), true);
+
+         bool found;
+         String afmpath = pf.FindDirFile(_T("Cour.afm"), &found);
+         if ( found )
+         {
+            dataPS->SetFontMetricPath(afmpath);
+         }
+
+         dataPS->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
+         dataPS->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
       }
 
-      dataPS->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
-      dataPS->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
       m_PrintData->SetOrientation((wxPrintOrientation)(long)
                                     READ_APPCONFIG(MP_PRINT_ORIENTATION));
       m_PrintData->SetPrintMode((wxPrintMode)(long)READ_APPCONFIG(MP_PRINT_MODE));
