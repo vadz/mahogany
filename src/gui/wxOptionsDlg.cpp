@@ -235,13 +235,15 @@ enum ConfigFields
    ConfigField_NewMailNotifyHelp,
    ConfigField_NewMailNotifyUseCommand,
    ConfigField_NewMailNotifyCommand,
-   ConfigField_NewMailSoundHelp,
+   ConfigField_NewMailSoundSeparator,
    ConfigField_NewMailPlaySound,
    ConfigField_NewMailSoundFile,
 #if defined(OS_UNIX) || defined(__CYGWIN__)
    ConfigField_NewMailSoundProgram,
 #endif // OS_UNIX
+   ConfigField_NewMailNotifySeparator,
    ConfigField_NewMailNotify,
+   ConfigField_NewMailNotifyWindow,
    ConfigField_NewMailNotifyThresholdHelp,
    ConfigField_NewMailNotifyDetailsThreshold,
    ConfigField_NewMailNewOnlyIfUnseenHelp,
@@ -1256,24 +1258,30 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_NotApp,
                                                    ConfigField_NewMailCollect },
 
-   { gettext_noop("When new mail message appears in this folder Mahogany\n"
-                  "may execute an external command and/or show a message "
-                  "about it."),                    Field_Message,    -1 },
+   { gettext_noop("Mahogany may notify you about new email in different ways:\n"
+                  "it can run any command you define, play a sound,\n"
+                  "show a notification window or just print a message in the\n"
+                  "log window.\n"
+                  "\n"
+                  "All or none of the options below may be chosed. If more than\n"
+                  "one is active, they will be applied in order they appear here,\n"
+                  "e.g. you can first run an external program, then play a sound\n"
+                  "from Mahogany itself and then show a notification."
+                  "\n"),                           Field_Message, -1 },
    { gettext_noop("E&xecute new mail command"),    Field_Bool,    -1 },
    { gettext_noop("New mail &command"),            Field_File,
                                                    ConfigField_NewMailNotifyUseCommand },
 
-   { gettext_noop("In addition to running an external program, Mahogany may\n"
-                  "also play a sound when a new message arrives. Leave the\n"
-                  "sound file empty to play the default sound."),
-                                                   Field_Message,    -1 },
+   { "\n",      Field_Message, -1 },
    { gettext_noop("Play a &sound on new mail"),    Field_Bool,    -1 },
    { gettext_noop("Sound &file"),                  Field_File,    ConfigField_NewMailPlaySound },
 #if defined(OS_UNIX) || defined(__CYGWIN__)
    { gettext_noop("&Program to play the sound"),   Field_File,    ConfigField_NewMailPlaySound },
 #endif // OS_UNIX
 
-   { gettext_noop("Show new mail &notification"),  Field_Bool,    -1 },
+   { "\n",      Field_Message, -1 },
+   { gettext_noop("Show new mail in &log window"), Field_Bool,    -1 },
+   { gettext_noop("Also show &notification popup"),Field_Bool,    -1 },
    { gettext_noop("If there are not too many new messages, Mahogany will\n"
                   "show a detailed notification message with the subjects\n"
                   "and senders of all messages. Otherwise it will just\n"
@@ -2071,7 +2079,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NEWMAIL_SOUND_PROGRAM),
 #endif // OS_UNIX
 
+   CONFIG_NONE(), // notify separator
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
+   CONFIG_ENTRY(MP_SHOW_NEWMAILNOTIFICATION),
    CONFIG_NONE(), // details threshold help
    CONFIG_ENTRY(MP_SHOW_NEWMAILINFO),
 

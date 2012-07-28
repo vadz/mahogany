@@ -370,6 +370,7 @@ extern const MOption MP_NEWMAIL_SOUND_FILE;
 #if defined(OS_UNIX) || defined(__CYGWIN__)
 extern const MOption MP_NEWMAIL_SOUND_PROGRAM;
 #endif // OS_UNIX
+extern const MOption MP_SHOW_NEWMAILNOTIFICATION;
 extern const MOption MP_SHOW_NEWMAILMSG;
 extern const MOption MP_SHOW_NEWMAILINFO;
 extern const MOption MP_NEWMAIL_UNSEEN;
@@ -1144,6 +1145,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_NEWMAIL_SOUND_PROGRAM_NAME "NewMailSoundProg"
 #endif // OS_UNIX
 
+/// show a notification for new mail?
+#define   MP_SHOW_NEWMAILNOTIFICATION_NAME "NewMailNotify"
 /// show new mail messages?
 #define   MP_SHOW_NEWMAILMSG_NAME      "ShowNewMail"
 /// show detailed info about how many new mail messages?
@@ -2148,6 +2151,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_NEWMAIL_SOUND_FILE_DEFVAL ""
 #endif // OS_UNIX/!OS_UNIX
 
+/// show a notification for new mail?
+#define   MP_SHOW_NEWMAILNOTIFICATION_DEFVAL      1
 /// show new mail messages?
 #define   MP_SHOW_NEWMAILMSG_DEFVAL      1
 /// show detailed info about how many new mail messages?

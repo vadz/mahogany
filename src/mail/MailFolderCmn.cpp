@@ -70,6 +70,9 @@
 
 #include <wx/datetime.h>
 #include <wx/file.h>
+#include <wx/notifmsg.h>
+
+#include <vector>
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -88,6 +91,7 @@ extern const MOption MP_NEWMAIL_SOUND_PROGRAM;
 extern const MOption MP_SAFE_FILTERS;
 extern const MOption MP_SHOW_NEWMAILINFO;
 extern const MOption MP_SHOW_NEWMAILMSG;
+extern const MOption MP_SHOW_NEWMAILNOTIFICATION;
 extern const MOption MP_TRASH_FOLDER;
 extern const MOption MP_UPDATEINTERVAL;
 extern const MOption MP_USE_NEWMAILCOMMAND;
@@ -1963,6 +1967,25 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
    return true;
 }
 
+namespace
+{
+
+// Helper struct used by ReportNewMail() but which must be declared outside of
+// it in C++03.
+struct NewMailInfo
+{
+   NewMailInfo(const String& from_, const String& subject_) :
+      from(from_), subject(subject_)
+   {
+   }
+
+   String
+      from,
+      subject;
+};
+
+} // anonymous namespace
+
 /*
    The parameters have the following meaning:
 
@@ -2070,13 +2093,12 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                            mApplication->GetProfile()) )
 #endif //USE_PYTHON
       {
-         // step 5: show notification
+         // step 5: show notification message from M itself
          if ( READ_CONFIG(profile, MP_SHOW_NEWMAILMSG) )
          {
-            String message;
-            message.Printf(_("You have received %lu new messages "
-                             "in the folder '%s'"),
-                           countNew, folder->GetFullName().c_str());
+            // Get information about the new mail as we can use it twice below.
+            std::vector<NewMailInfo> infos;
+
 
             // we give the detailed new mail information when there are few new
             // mail messages, otherwise we just give a brief message with their
@@ -2103,35 +2125,14 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
             if ( detailsThreshold == -1 ||
                  countNew < (unsigned long)detailsThreshold )
             {
-               message += ':';
+               infos.reserve(countNew);
 
-               for( unsigned long i = 0; i < countNew; i++)
+               for ( unsigned long i = 0; i < countNew; i++)
                {
-                  Message *msg = mf->GetMessage(uidsNew->Item(i));
+                  Message_obj msg(mf->GetMessage(uidsNew->Item(i)));
                   if ( msg )
                   {
-                     String from = msg->From();
-                     if ( from.empty() )
-                     {
-                        from = _("unknown sender");
-                     }
-
-                     String subject = msg->Subject();
-                     if ( subject.empty() )
-                     {
-                        subject = _("without subject");
-                     }
-                     else
-                     {
-                        String s;
-                        s << _(" about '") << subject << '\'';
-                        subject = s;
-                     }
-
-                     message << '\n'
-                             << _("\tFrom: ") << from << subject;
-
-                     msg->DecRef();
+                     infos.push_back(NewMailInfo(msg->From(), msg->Subject()));
                   }
                   else // no message?
                   {
@@ -2140,6 +2141,86 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                                 uidsNew->Item(i),
                                 folder->GetFullName().c_str());
                   }
+               }
+            }
+
+            // step 5a: show notification window
+            if ( READ_CONFIG(profile, MP_SHOW_NEWMAILNOTIFICATION) )
+            {
+               wxNotificationMessage notification;
+               notification.SetTitle(
+                  countNew == 1
+                     ? String::Format(_("New email in folder \"%s\""),
+                                      folder->GetFullName())
+                     : String::Format(_("%lu new messages in folder \"%s\""),
+                                      countNew, folder->GetFullName())
+               );
+
+               String message;
+               for ( unsigned long i = 0; i < infos.size(); i++)
+               {
+                  const NewMailInfo& info = infos[i];
+
+                  if ( !message.empty() )
+                     message << '\n';
+
+                  AddressList_obj addrList(AddressList::Create(info.from));
+                  if ( Address* addr = addrList->GetFirst() )
+                  {
+                     // Show the sender in user-friendly way.
+                     String sender = addr->GetName();
+                     if ( sender.empty() )
+                        sender = addr->GetEMail();
+                     message << sender << ": ";
+                  }
+
+                  message << '"' << info.subject << '"';
+               }
+
+               notification.SetMessage(message);
+
+#if defined(__WXGTK__) && wxUSE_LIBNOTIFY
+               // Use a more appropriate stock icon under GTK.
+               notification.GTKSetIconName("mail-message-new");
+#endif
+
+               notification.Show();
+            }
+
+            // step 5b: show detailed notification message
+            String message;
+            message.Printf(_("You have received %lu new messages "
+                             "in the folder '%s'"),
+                           countNew, folder->GetFullName().c_str());
+
+            if ( !infos.empty() )
+            {
+               message += ':';
+
+               for ( unsigned long i = 0; i < infos.size(); i++)
+               {
+                  const NewMailInfo& info = infos[i];
+
+                  String from = info.from;
+                  if ( from.empty() )
+                  {
+                     from = _("unknown sender");
+                  }
+
+                  String subject = info.subject;
+                  if ( subject.empty() )
+                  {
+                     subject = _("without subject");
+                  }
+                  else
+                  {
+                     String s;
+                     s << _(" about '") << subject << '\'';
+                     subject = s;
+                  }
+
+                  message << '\n'
+                          << _("\tFrom: ") << from << subject;
                }
             }
             else // too many new messages
