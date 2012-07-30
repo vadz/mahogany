@@ -4680,7 +4680,7 @@ void MailFolderCC::OnNewMail()
                // filtering, just reporting, ...)
                if ( ProcessNewMail(*uidsNew) && uidsNew->IsEmpty() )
                {
-                  // ProcessNewMail() removes all the messages so no need to
+                  // All new messages were already handled, so no need to
                   // notify the GUI
                   shouldNotify = false;
                }

@@ -867,13 +867,8 @@ public:
      filtering it or just reporting it depending on the folder options. It
      removes all messages deleted as results of its actions from uidsNew array.
 
-     If uidsNew is NULL, it means that we detected new mail in the folderDst
-     but we don't know which messages are new - but we still know at least how
-     many of them there are.
-
      @param uidsNew the array containing UIDs of the new messages
      @param folderDst if not NULL, folder where the new messages really are
-     @param countNew the number of new messages if uidsNew == NULL
      @return true if ok, false on error
    */
    virtual bool ProcessNewMail(UIdArray& uidsNew,
