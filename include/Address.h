@@ -124,6 +124,16 @@ public:
                         const String& address,
                         String *match = NULL);
 
+   /**
+       Returns user-friendly address form.
+
+       Returns the personal part of the address if any or the email part
+       otherwise.
+
+       Only the first address of the string passed in is used here.
+    */
+   static String GetDisplayAddress(const String& address);
+
 protected:
    /// must have default ctor because we declare copy ctor private
    Address() { }

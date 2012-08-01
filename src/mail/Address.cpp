@@ -410,6 +410,23 @@ String Address::GetSenderAddress(const Profile *profile)
    return BuildFullForm(READ_CONFIG(profile, MP_PERSONALNAME), email);
 }
 
+/* static */
+String
+Address::GetDisplayAddress(const String& address)
+{
+   String display;
+
+   AddressList_obj addrList(AddressList::Create(address));
+   if ( Address* addr = addrList->GetFirst() )
+   {
+      display = addr->GetName();
+      if ( display.empty() )
+         display = addr->GetEMail();
+   }
+
+   return display;
+}
+
 // ----------------------------------------------------------------------------
 // AddressList
 // ----------------------------------------------------------------------------
