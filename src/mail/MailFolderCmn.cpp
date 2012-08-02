@@ -48,6 +48,7 @@
 
 #include "MSearch.h"
 #include "Message.h"
+#include "NewMailNotifier.h"
 
 #include "MFilter.h"
 #include "modules/Filters.h"
@@ -70,9 +71,6 @@
 
 #include <wx/datetime.h>
 #include <wx/file.h>
-#include <wx/notifmsg.h>
-
-#include <vector>
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -1967,25 +1965,6 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
    return true;
 }
 
-namespace
-{
-
-// Helper struct used by ReportNewMail() but which must be declared outside of
-// it in C++03.
-struct NewMailInfo
-{
-   NewMailInfo(const String& from_, const String& subject_) :
-      from(from_), subject(subject_)
-   {
-   }
-
-   String
-      from,
-      subject;
-};
-
-} // anonymous namespace
-
 /*
    The parameters have the following meaning:
 
@@ -2096,8 +2075,9 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
          // step 5: show notification message from M itself
          if ( READ_CONFIG(profile, MP_SHOW_NEWMAILMSG) )
          {
-            // Get information about the new mail as we can use it twice below.
-            std::vector<NewMailInfo> infos;
+            // Get information about the new mail first, we may need to pass it
+            // to the notifier below.
+            NewMailNotifier::MsgInfos infos;
 
 
             // we give the detailed new mail information when there are few new
@@ -2132,7 +2112,9 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                   Message_obj msg(mf->GetMessage(uidsNew->Item(i)));
                   if ( msg )
                   {
-                     infos.push_back(NewMailInfo(msg->From(), msg->Subject()));
+                     infos.push_back(
+                        NewMailNotifier::MsgInfo(msg->From(), msg->Subject())
+                     );
                   }
                   else // no message?
                   {
@@ -2144,50 +2126,15 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                }
             }
 
-            // step 5a: show notification window
+            // step 5a: queue notification with the notifier
             if ( READ_CONFIG(profile, MP_SHOW_NEWMAILNOTIFICATION) )
             {
-               wxNotificationMessage notification;
-               notification.SetTitle(
-                  countNew == 1
-                     ? String::Format(_("New email in folder \"%s\""),
-                                      folder->GetFullName())
-                     : String::Format(_("%lu new messages in folder \"%s\""),
-                                      countNew, folder->GetFullName())
+               NewMailNotifier::DoForFolder(
+                  folder->GetFullName(), countNew, infos
                );
-
-               String message;
-               for ( unsigned long i = 0; i < infos.size(); i++)
-               {
-                  const NewMailInfo& info = infos[i];
-
-                  if ( !message.empty() )
-                     message << '\n';
-
-                  AddressList_obj addrList(AddressList::Create(info.from));
-                  if ( Address* addr = addrList->GetFirst() )
-                  {
-                     // Show the sender in user-friendly way.
-                     String sender = addr->GetName();
-                     if ( sender.empty() )
-                        sender = addr->GetEMail();
-                     message << sender << ": ";
-                  }
-
-                  message << '"' << info.subject << '"';
-               }
-
-               notification.SetMessage(message);
-
-#if defined(__WXGTK__) && wxUSE_LIBNOTIFY
-               // Use a more appropriate stock icon under GTK.
-               notification.GTKSetIconName("mail-message-new");
-#endif
-
-               notification.Show();
             }
 
-            // step 5b: show detailed notification message
+            // step 5b: show notification message immediately in the log
             String message;
             message.Printf(_("You have received %lu new messages "
                              "in the folder '%s'"),
@@ -2199,7 +2146,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
 
                for ( unsigned long i = 0; i < infos.size(); i++)
                {
-                  const NewMailInfo& info = infos[i];
+                  const NewMailNotifier::MsgInfo& info = infos[i];
 
                   String from = info.from;
                   if ( from.empty() )

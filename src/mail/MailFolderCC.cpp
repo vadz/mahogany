@@ -46,6 +46,7 @@
 #include "MSearch.h"
 #include "LogCircle.h"
 #include "MFui.h"                      // for SizeToString
+#include "NewMailNotifier.h"
 
 #include "AddressCC.h"
 #include "MailFolderCC.h"
@@ -4676,6 +4677,8 @@ void MailFolderCC::OnNewMail()
             HeaderInfoList_obj hil(GetHeaders());
             if ( hil )
             {
+               NewMailNotifier notifier;
+
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
                if ( ProcessNewMail(*uidsNew) && uidsNew->IsEmpty() )

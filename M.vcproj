@@ -477,6 +477,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\classes\NewMailNotifier.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\classes\PathFinder.cpp"
 					>
 				</File>
@@ -2795,6 +2799,10 @@
 			</File>
 			<File
 				RelativePath=".\include\Mwin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\NewMailNotifier.h"
 				>
 			</File>
 			<File
