@@ -2785,7 +2785,7 @@ MFolder* TryToCreateFolderOrAskUser(wxWindow* parent, const String& fullname)
             fullpath += MailFolder::GetFolderDelimiter(parentFolder);
             fullpath += name;
 
-            newFolder->SetPath(name);
+            newFolder->SetPath(fullpath);
 
             // Notify all observers about the new folder creation.
             MEventManager::Send(
