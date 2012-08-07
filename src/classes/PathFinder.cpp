@@ -88,7 +88,7 @@ PathFinder::Find(const String & filename, bool *found,
    MOcheck();
    for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *i + DIR_SEPARATOR + filename;
+      work = *i + String(DIR_SEPARATOR) + filename;
       result = wxAccess(work.c_str(),mode);
       if(result == 0)
       {
@@ -112,7 +112,7 @@ PathFinder::FindFile(const String & filename, bool *found,
    MOcheck();
    for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *i + DIR_SEPARATOR + filename;
+      work = *i + String(DIR_SEPARATOR) + filename;
       result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsFile(work))
       {
@@ -136,7 +136,7 @@ PathFinder::FindDir(const String & filename, bool *found,
    MOcheck();
    for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *i + DIR_SEPARATOR + filename;
+      work = *i + String(DIR_SEPARATOR) + filename;
       result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsDir(work))
       {
@@ -160,7 +160,7 @@ PathFinder::FindDirFile(const String & filename, bool *found,
    MOcheck();
    for(i = pathList.begin(); i != pathList.end(); i++)
    {
-      work = *i + DIR_SEPARATOR + filename;
+      work = *i + String(DIR_SEPARATOR) + filename;
       result = wxAccess(work.c_str(),mode);
       if(result == 0 && IsFile(work) && IsDir(*i))
       {
