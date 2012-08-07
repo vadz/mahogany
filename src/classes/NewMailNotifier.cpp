@@ -172,10 +172,7 @@ void DoNotify(unsigned long numFolders, const FolderNewMailInfo* folders)
       // Compute the total number of new messages and their common prefix, if
       // any.
 
-      // The prefix will include the trailing slash at the end but while we're
-      // determining it, it doesn't contain it, so take care to append to it
-      // when checking if a folder name starts with it to avoid deciding that
-      // a top level "Foobar" folder is under "Foo" parent.
+      // The common prefix of all folders so far, without the trailing slash.
       String commonParent;
       unsigned long totalNew = 0;
       for ( n = 0; n < numFolders; n++ )
@@ -191,7 +188,8 @@ void DoNotify(unsigned long numFolders, const FolderNewMailInfo* folders)
          }
          else if ( !commonParent.empty() )
          {
-            // Find longest common prefix.
+            // Notice that we must append the slash to avoid deciding that a
+            // top level "Foobar" folder is under "Foo" parent.
             while ( !folderName.StartsWith(commonParent + '/') )
             {
                commonParent = commonParent.BeforeLast('/');
@@ -202,12 +200,15 @@ void DoNotify(unsigned long numFolders, const FolderNewMailInfo* folders)
          //else: there is no common parent
       }
 
-      if ( !commonParent.empty() )
-         commonParent += '/';
-
 
       // Concatenate brief summaries for each folder to make the entire message.
       String message;
+
+      // Remove the common prefix inside the loop, if any, with the trailing
+      // slash that is not included into it, hence +1.
+      const size_t commonParentLength = commonParent.empty()
+                                          ? 0
+                                          : commonParent.length() + 1;
       for ( n = 0; n < numFolders; n++ )
       {
          if ( !message.empty() )
@@ -215,7 +216,8 @@ void DoNotify(unsigned long numFolders, const FolderNewMailInfo* folders)
 
          // Show only the unique parts of the folder names.
          String folderName = folders[n].folderName;
-         folderName.erase(0, commonParent.length());
+         if ( commonParentLength )
+            folderName.erase(0, commonParentLength);
 
          message += BuildBriefNotificationMessage(folders[n].infos, folderName);
       }
