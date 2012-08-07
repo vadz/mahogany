@@ -644,7 +644,8 @@ char *mailboxfile (char *dst,char *name)
     else dst = NIL;		/* unknown namespace name */
     break;
   case '\\':			/* absolute path on default drive? */
-    sprintf (dst,"%s%s",homedev,name);
+    if (name[1] == '\\') strcpy(dst,name); /* no, network path */
+    else sprintf (dst,"%s%s",homedev,name);
     break;
   default:			/* any other name */
     if (name[1] == ':') {	/* some other drive? */
