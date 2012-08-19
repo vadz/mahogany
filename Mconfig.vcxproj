@@ -110,21 +110,21 @@
   <ItemGroup>
     <CustomBuild Include="include\config_nt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(FullPath) to config.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if not exist "%(RootDir)%(Directory)"config.h copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)config.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)config.h</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Copying %(FullPath) to config.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if not exist "%(RootDir)%(Directory)"config.h copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)config.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)config.h</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(FullPath) to config.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if not exist "%(RootDir)%(Directory)"config.h copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)config.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)config.h</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Copying %(FullPath) to config.h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if not exist "%(RootDir)%(Directory)"config.h copy "%(FullPath)" "%(RootDir)%(Directory)"config.h
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)config.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)config.h</Outputs>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
