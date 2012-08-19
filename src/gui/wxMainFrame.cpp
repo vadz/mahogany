@@ -1281,8 +1281,13 @@ void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
 
    if ( !m_foldersToResume.empty() )
    {
-      wxLogStatus(_("Closed %lu folders which will be reopened on resume."),
-                  (unsigned long)m_foldersToResume.size());
+      const unsigned numFolders = m_foldersToResume.size();
+      wxLogStatus(
+         wxPLURAL(_("Closed %u folder which will be reopened on resume."),
+                  _("Closed %u folders which will be reopened on resume."),
+                  numFolders),
+         numFolders
+      );
    }
 
    // save all options just in case
@@ -1299,8 +1304,11 @@ void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
    MailFolders foldersToResume;
    foldersToResume.swap(m_foldersToResume);
 
-   wxLogStatus(_("Reopening %lu folders on system resume"),
-               (unsigned long)foldersToResume.size());
+   const unsigned numFolders = foldersToResume.size();
+   wxLogStatus(wxPLURAL(_("Reopening %u folder on system resume"),
+                        _("Reopening %u folders on system resume"),
+                        numFolders),
+               numFolders);
 
 #ifdef CAN_CHECK_NETWORK_STATE
    bool checkedNetwork = false;
