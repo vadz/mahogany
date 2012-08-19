@@ -1,0 +1,972 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\classes">
+      <UniqueIdentifier>{1d1c4295-0ef4-4340-b0fa-1aba79dc8779}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui">
+      <UniqueIdentifier>{34e016c6-67aa-486a-8d45-4e09fbf71702}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\layout">
+      <UniqueIdentifier>{1824ea0f-1263-41fe-a437-f609b7a34b04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\wx">
+      <UniqueIdentifier>{339faa39-cc3c-4fc5-957b-e0e2acf3a516}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mail">
+      <UniqueIdentifier>{ddb4b261-7173-478c-9d5e-57edb286183c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\adb">
+      <UniqueIdentifier>{b3e8714b-4821-4c34-b5e5-f2102c716d44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\adb\providers">
+      <UniqueIdentifier>{2f817153-d351-484a-8044-c2004e820598}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\adb\impexp">
+      <UniqueIdentifier>{3ecfa592-205a-4f3f-aa0c-070c4d079bfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interfaces">
+      <UniqueIdentifier>{6e2996c7-8265-44ab-a993-5bd66552a3ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interfaces\python">
+      <UniqueIdentifier>{d8886058-5c10-4d1e-be9c-4e8d1c84942a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interfaces\python\SWIG output">
+      <UniqueIdentifier>{5862047b-7d9d-4bd1-a375-546c10dc8655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interfaces\python\SWIG precompiled output">
+      <UniqueIdentifier>{1fc263a6-7792-4e42-9b7e-eb78be6ccdc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interfaces\SWIG input">
+      <UniqueIdentifier>{4172c0d9-e3bf-4399-b0c5-63fdc5e0fc2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{74a4b04d-06f7-45d1-94c8-3a00666a350b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\modules">
+      <UniqueIdentifier>{872bb589-4673-4bc7-a45d-bb66cf473232}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\modules\viewflt">
+      <UniqueIdentifier>{03aa9a9f-d1e5-49dc-bc7d-844f98109f86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\modules\viewers">
+      <UniqueIdentifier>{ffb1e933-c76d-4f0c-a232-10d93a749744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\modules\editors">
+      <UniqueIdentifier>{6450f41c-c2bb-4a7f-b972-18589dab6ccf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\modules\importers">
+      <UniqueIdentifier>{ea8e344b-119c-4eb7-9ed0-a0dc9548c25e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\modules\crypt">
+      <UniqueIdentifier>{73c25866-bc13-4db2-88e2-d3749de78b8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\modules\spam">
+      <UniqueIdentifier>{eadae50a-75bd-4c3e-8f70-ef7543342ab2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vcard">
+      <UniqueIdentifier>{215d33b2-cc05-4137-9630-8dbeabec65ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\classes\CacheFile.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\ComposeTemplate.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\ConfigSource.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\ConfigSourcesAll.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\FolderMonitor.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\FolderView.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\kbList.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\ListReceiver.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MApplication.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MessageTemplate.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MessageView.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MEvent.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MFilter.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MFolder.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MModule.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\MObject.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\Moptions.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\Mpers.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\NewMailNotifier.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\PathFinder.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\PGPClickInfo.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\Profile.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\QuotedText.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\Sequence.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\classes\XFace.cpp">
+      <Filter>Source Files\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\AddressExpander.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ClickAtt.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ClickURL.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ConfigSourceChoice.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CreateFolderWizard.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ImportFoldersWizard.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Mdnd.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\MImport.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxAttachDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxBrowseButton.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxColumnsDlg.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxComposeView.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxDialogLayout.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxFiltersDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxFolderMenu.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxFolderTree.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxFolderView.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxHeadersDialogs.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxIconManager.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMainFrame.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMApp.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMDialogs.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMenuDefs.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMessageView.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMFolderDialogs.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMFrame.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMGuiUtils.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMimeDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMIMETreeDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxModulesDlg.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMsgCmdProc.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxMSplash.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxOptionsDlg.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxRenameDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxSearchDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxSortDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxSubfoldersDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxTemplateDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxTextDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxThrDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxllist.cpp">
+      <Filter>Source Files\gui\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxlparser.cpp">
+      <Filter>Source Files\gui\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\wxlwindow.cpp">
+      <Filter>Source Files\gui\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wx\generic\persctrl.cpp">
+      <Filter>Source Files\gui\wx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\Address.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\AddressCC.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\ASMailFolder.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\FolderType.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\HeaderInfoImpl.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\HeaderIterator.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\LogCircle.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MailFolder.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MailFolderCC.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MailFolderCmn.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MailMH.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\Message.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MessageCC.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MFCache.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MFDriver.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MFPool.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MFui.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MimeDecode.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MimePartCC.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MimePartCCBase.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MimePartVirtual.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\MimeType.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\Pop3.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\SendMessageCC.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\Sorting.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\SpamFilter.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\Threading.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\ThreadJWZ.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\VFolder.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mail\VMessage.cpp">
+      <Filter>Source Files\mail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbDialogs.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbEntry.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbExport.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbFrame.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbImport.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbManager.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbModule.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\AdbProvider.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\Collect.cpp">
+      <Filter>Source Files\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvBbdb.cpp">
+      <Filter>Source Files\adb\providers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvDummy.cpp">
+      <Filter>Source Files\adb\providers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvFC.cpp">
+      <Filter>Source Files\adb\providers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvLine.cpp">
+      <Filter>Source Files\adb\providers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvPalm.cpp">
+      <Filter>Source Files\adb\providers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvPasswd.cpp">
+      <Filter>Source Files\adb\providers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ExportPalm.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ExportText.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ExportVCard.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ImportEudora.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ImportMailrc.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ImportPine.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ImportText.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ImportVCard.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\adb\ImportXFMail.cpp">
+      <Filter>Source Files\adb\impexp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\InitPython.cpp">
+      <Filter>Source Files\interfaces\python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\PythonDll.cpp">
+      <Filter>Source Files\interfaces\python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\PythonHelp.cpp">
+      <Filter>Source Files\interfaces\python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\HeaderInfo_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\MailFolder_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\MDialogs_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\Message_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\MimePart_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\MimeType_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\SendMessage_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Python\swiglib_swig.cpp">
+      <Filter>Source Files\interfaces\python\SWIG output</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\ColourNames.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\matchurl.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\ssl.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\strutil.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\sysutil.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\twofish2.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\upgrade.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\Calendar.cpp">
+      <Filter>Source Files\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\Filters.cpp">
+      <Filter>Source Files\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\Mdummy.cpp">
+      <Filter>Source Files\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\Migrate.cpp">
+      <Filter>Source Files\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\PalmOS.cpp">
+      <Filter>Source Files\modules</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\PGP.cpp">
+      <Filter>Source Files\modules\viewflt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\QuoteURL.cpp">
+      <Filter>Source Files\modules\viewflt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\Rot13.cpp">
+      <Filter>Source Files\modules\viewflt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\Signature.cpp">
+      <Filter>Source Files\modules\viewflt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\TextMarkup.cpp">
+      <Filter>Source Files\modules\viewflt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\Trailer.cpp">
+      <Filter>Source Files\modules\viewflt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\UUDecode.cpp">
+      <Filter>Source Files\modules\viewflt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\HtmlViewer.cpp">
+      <Filter>Source Files\modules\viewers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\LayoutViewer.cpp">
+      <Filter>Source Files\modules\viewers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\TextViewer.cpp">
+      <Filter>Source Files\modules\viewers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\BareBonesEditor.cpp">
+      <Filter>Source Files\modules\editors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\LayoutEditor.cpp">
+      <Filter>Source Files\modules\editors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\NetscapeImporter.cpp">
+      <Filter>Source Files\modules\importers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\PineImport.cpp">
+      <Filter>Source Files\modules\importers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\XFMailImport.cpp">
+      <Filter>Source Files\modules\importers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\crypt\PGPEngine.cpp">
+      <Filter>Source Files\modules\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\spam\DspamFilter.cpp">
+      <Filter>Source Files\modules\spam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\spam\HeadersFilter.cpp">
+      <Filter>Source Files\modules\spam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\spam\ServerSideFilter.cpp">
+      <Filter>Source Files\modules\spam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wx\common\vcard.cpp">
+      <Filter>Source Files\vcard</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wx\generic\vcarddlg.cpp">
+      <Filter>Source Files\vcard</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\interface\HeaderInfo.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\MailFolder.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\MDialogs.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\Message.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\MimePart.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\MimeType.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\SendMessage.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\swigcmn.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+    <None Include="include\interface\swiglib.i">
+      <Filter>Source Files\interfaces\SWIG input</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Address.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AddressCC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\AddressExpander.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ASMailFolder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AttachDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CacheFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ClickAtt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ClickInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ClickURL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CmdLineOpts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Collect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Composer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConfigPrivate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConfigSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConfigSourceLocal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConfigSourcesAll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FolderMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FolderType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FolderView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\guidef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HeaderInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HeaderInfoImpl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HeadersDialogs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\InitPython.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\kbList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ListReceiver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lists.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LogCircle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MailFolder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MailFolderCC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MailFolderCmn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MApplication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MAtExit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\MBookCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mcallbacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mcclient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mcommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mdefaults.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MDialogs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mdnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Merror.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MessageCC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MessageEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MessageTemplate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MessageView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MessageViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFolder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFolderDialogs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFPrivate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFStatus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MFui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MGuiApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MHelp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MimeDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MimePart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MimePartCC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MIMETreeDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MimeType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MImport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MLogFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MMainFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Moptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mpch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MpersIds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MPython.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MScripts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MSearch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MsgCmdProc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mswig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MTextStyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Munix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mupgrade.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mversion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mwin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NewMailNotifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PathFinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PGPClickInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pointers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Profile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PythonHelp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\QuotedText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SendMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SendMessageCC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Sequence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Sorting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SpamFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\strutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sysutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TemplateDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Threading.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UIdArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ViewFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\wxllist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\wxlparser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\wxlwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\XFace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\M.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="include\MInterface.mid">
+      <Filter>Source Files\interfaces</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\HeaderInfo.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MailFolder.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MDialogs.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\Message.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MimePart.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MimeType.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\SendMessage.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\swiglib.cpp-swig">
+      <Filter>Source Files\interfaces\python\SWIG precompiled output</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,1533 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug DLL|Win32">
+      <Configuration>Debug DLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug DLL|x64">
+      <Configuration>Debug DLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release DLL|Win32">
+      <Configuration>Release DLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release DLL|x64">
+      <Configuration>Release DLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1515C8EB-5C72-43DF-9D3A-0703F155F268}</ProjectGuid>
+    <RootNamespace>M</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc100_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+    <ClCompile>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;WXUSINGDLL;wxMSVC_VERSION_AUTO;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc100_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_AUTO;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_AUTO;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/Zm110 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_AUTO;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc100_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>10000000</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/Zm110 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;WXUSINGDLL;wxMSVC_VERSION_AUTO;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc100_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>10000000</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_AUTO;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>10000000</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_AUTO;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)M.exe</OutputFile>
+      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>10000000</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\classes\CacheFile.cpp" />
+    <ClCompile Include="src\classes\ComposeTemplate.cpp" />
+    <ClCompile Include="src\classes\ConfigSource.cpp" />
+    <ClCompile Include="src\classes\ConfigSourcesAll.cpp" />
+    <ClCompile Include="src\classes\FolderMonitor.cpp" />
+    <ClCompile Include="src\classes\FolderView.cpp" />
+    <ClCompile Include="src\classes\kbList.cpp" />
+    <ClCompile Include="src\classes\ListReceiver.cpp" />
+    <ClCompile Include="src\classes\MApplication.cpp" />
+    <ClCompile Include="src\classes\MessageTemplate.cpp" />
+    <ClCompile Include="src\classes\MessageView.cpp" />
+    <ClCompile Include="src\classes\MEvent.cpp" />
+    <ClCompile Include="src\classes\MFilter.cpp" />
+    <ClCompile Include="src\classes\MFolder.cpp" />
+    <ClCompile Include="src\classes\MModule.cpp" />
+    <ClCompile Include="src\classes\MObject.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\classes\Moptions.cpp" />
+    <ClCompile Include="src\classes\Mpers.cpp" />
+    <ClCompile Include="src\classes\NewMailNotifier.cpp" />
+    <ClCompile Include="src\classes\PathFinder.cpp" />
+    <ClCompile Include="src\classes\PGPClickInfo.cpp" />
+    <ClCompile Include="src\classes\Profile.cpp" />
+    <ClCompile Include="src\classes\QuotedText.cpp" />
+    <ClCompile Include="src\classes\Sequence.cpp" />
+    <ClCompile Include="src\classes\XFace.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">SYSV32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="src\gui\AddressExpander.cpp" />
+    <ClCompile Include="src\gui\ClickAtt.cpp" />
+    <ClCompile Include="src\gui\ClickURL.cpp" />
+    <ClCompile Include="src\gui\ConfigSourceChoice.cpp" />
+    <ClCompile Include="src\gui\CreateFolderWizard.cpp" />
+    <ClCompile Include="src\gui\ImportFoldersWizard.cpp" />
+    <ClCompile Include="src\gui\Mdnd.cpp" />
+    <ClCompile Include="src\gui\MImport.cpp" />
+    <ClCompile Include="src\gui\wxAttachDialog.cpp" />
+    <ClCompile Include="src\gui\wxBrowseButton.cpp" />
+    <ClCompile Include="src\gui\wxColumnsDlg.cpp" />
+    <ClCompile Include="src\gui\wxComposeView.cpp" />
+    <ClCompile Include="src\gui\wxDialogLayout.cpp" />
+    <ClCompile Include="src\gui\wxFiltersDialog.cpp" />
+    <ClCompile Include="src\gui\wxFolderMenu.cpp" />
+    <ClCompile Include="src\gui\wxFolderTree.cpp" />
+    <ClCompile Include="src\gui\wxFolderView.cpp" />
+    <ClCompile Include="src\gui\wxHeadersDialogs.cpp" />
+    <ClCompile Include="src\gui\wxIconManager.cpp" />
+    <ClCompile Include="src\gui\wxMainFrame.cpp" />
+    <ClCompile Include="src\gui\wxMApp.cpp" />
+    <ClCompile Include="src\gui\wxMDialogs.cpp" />
+    <ClCompile Include="src\gui\wxMenuDefs.cpp" />
+    <ClCompile Include="src\gui\wxMessageView.cpp" />
+    <ClCompile Include="src\gui\wxMFolderDialogs.cpp" />
+    <ClCompile Include="src\gui\wxMFrame.cpp" />
+    <ClCompile Include="src\gui\wxMGuiUtils.cpp" />
+    <ClCompile Include="src\gui\wxMimeDialog.cpp" />
+    <ClCompile Include="src\gui\wxMIMETreeDialog.cpp" />
+    <ClCompile Include="src\gui\wxModulesDlg.cpp" />
+    <ClCompile Include="src\gui\wxMsgCmdProc.cpp" />
+    <ClCompile Include="src\gui\wxMSplash.cpp" />
+    <ClCompile Include="src\gui\wxOptionsDlg.cpp" />
+    <ClCompile Include="src\gui\wxRenameDialog.cpp" />
+    <ClCompile Include="src\gui\wxSearchDialog.cpp" />
+    <ClCompile Include="src\gui\wxSortDialog.cpp" />
+    <ClCompile Include="src\gui\wxSubfoldersDialog.cpp" />
+    <ClCompile Include="src\gui\wxTemplateDialog.cpp" />
+    <ClCompile Include="src\gui\wxTextDialog.cpp" />
+    <ClCompile Include="src\gui\wxThrDialog.cpp" />
+    <ClCompile Include="src\gui\wxllist.cpp" />
+    <ClCompile Include="src\gui\wxlparser.cpp" />
+    <ClCompile Include="src\gui\wxlwindow.cpp" />
+    <ClCompile Include="src\wx\generic\persctrl.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Use</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\mail\Address.cpp" />
+    <ClCompile Include="src\mail\AddressCC.cpp" />
+    <ClCompile Include="src\mail\ASMailFolder.cpp" />
+    <ClCompile Include="src\mail\FolderType.cpp" />
+    <ClCompile Include="src\mail\HeaderInfoImpl.cpp" />
+    <ClCompile Include="src\mail\HeaderIterator.cpp" />
+    <ClCompile Include="src\mail\LogCircle.cpp" />
+    <ClCompile Include="src\mail\MailFolder.cpp" />
+    <ClCompile Include="src\mail\MailFolderCC.cpp" />
+    <ClCompile Include="src\mail\MailFolderCmn.cpp" />
+    <ClCompile Include="src\mail\MailMH.cpp" />
+    <ClCompile Include="src\mail\Message.cpp" />
+    <ClCompile Include="src\mail\MessageCC.cpp" />
+    <ClCompile Include="src\mail\MFCache.cpp" />
+    <ClCompile Include="src\mail\MFDriver.cpp" />
+    <ClCompile Include="src\mail\MFPool.cpp" />
+    <ClCompile Include="src\mail\MFui.cpp" />
+    <ClCompile Include="src\mail\MimeDecode.cpp" />
+    <ClCompile Include="src\mail\MimePartCC.cpp" />
+    <ClCompile Include="src\mail\MimePartCCBase.cpp" />
+    <ClCompile Include="src\mail\MimePartVirtual.cpp" />
+    <ClCompile Include="src\mail\MimeType.cpp" />
+    <ClCompile Include="src\mail\Pop3.cpp" />
+    <ClCompile Include="src\mail\SendMessageCC.cpp" />
+    <ClCompile Include="src\mail\Sorting.cpp" />
+    <ClCompile Include="src\mail\SpamFilter.cpp" />
+    <ClCompile Include="src\mail\Threading.cpp" />
+    <ClCompile Include="src\mail\ThreadJWZ.cpp" />
+    <ClCompile Include="src\mail\VFolder.cpp" />
+    <ClCompile Include="src\mail\VMessage.cpp" />
+    <ClCompile Include="src\adb\AdbDialogs.cpp" />
+    <ClCompile Include="src\adb\AdbEntry.cpp" />
+    <ClCompile Include="src\adb\AdbExport.cpp" />
+    <ClCompile Include="src\adb\AdbFrame.cpp" />
+    <ClCompile Include="src\adb\AdbImport.cpp" />
+    <ClCompile Include="src\adb\AdbManager.cpp" />
+    <ClCompile Include="src\adb\AdbModule.cpp" />
+    <ClCompile Include="src\adb\AdbProvider.cpp" />
+    <ClCompile Include="src\adb\Collect.cpp" />
+    <ClCompile Include="src\adb\ProvBbdb.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvDummy.cpp" />
+    <ClCompile Include="src\adb\ProvFC.cpp" />
+    <ClCompile Include="src\adb\ProvLine.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvPalm.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\adb\ProvPasswd.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\adb\ExportPalm.cpp" />
+    <ClCompile Include="src\adb\ExportText.cpp" />
+    <ClCompile Include="src\adb\ExportVCard.cpp" />
+    <ClCompile Include="src\adb\ImportEudora.cpp" />
+    <ClCompile Include="src\adb\ImportMailrc.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\adb\ImportPine.cpp" />
+    <ClCompile Include="src\adb\ImportText.cpp" />
+    <ClCompile Include="src\adb\ImportVCard.cpp" />
+    <ClCompile Include="src\adb\ImportXFMail.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\Python\InitPython.cpp" />
+    <ClCompile Include="src\Python\PythonDll.cpp" />
+    <ClCompile Include="src\Python\PythonHelp.cpp" />
+    <ClCompile Include="src\Python\HeaderInfo_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\Python\MailFolder_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\Python\MDialogs_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\Python\Message_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\Python\MimePart_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\Python\MimeType_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\Python\SendMessage_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\Python\swiglib_swig.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Level1</WarningLevel>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Level1</WarningLevel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">STATIC_LINKED;SWIG_GLOBAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Level1</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\util\ColourNames.cpp" />
+    <ClCompile Include="src\util\matchurl.cpp" />
+    <ClCompile Include="src\util\ssl.cpp" />
+    <ClCompile Include="src\util\strutil.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">lib/imap/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\util\sysutil.cpp" />
+    <ClCompile Include="src\util\twofish2.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+      </PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="src\util\upgrade.cpp" />
+    <ClCompile Include="src\modules\Calendar.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\modules\Filters.cpp" />
+    <ClCompile Include="src\modules\Mdummy.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\modules\Migrate.cpp" />
+    <ClCompile Include="src\modules\PalmOS.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\modules\viewflt\PGP.cpp" />
+    <ClCompile Include="src\modules\viewflt\QuoteURL.cpp" />
+    <ClCompile Include="src\modules\viewflt\Rot13.cpp" />
+    <ClCompile Include="src\modules\viewflt\Signature.cpp" />
+    <ClCompile Include="src\modules\viewflt\TextMarkup.cpp" />
+    <ClCompile Include="src\modules\viewflt\Trailer.cpp" />
+    <ClCompile Include="src\modules\viewflt\UUDecode.cpp" />
+    <ClCompile Include="src\modules\HtmlViewer.cpp" />
+    <ClCompile Include="src\modules\LayoutViewer.cpp" />
+    <ClCompile Include="src\modules\TextViewer.cpp" />
+    <ClCompile Include="src\modules\BareBonesEditor.cpp" />
+    <ClCompile Include="src\modules\LayoutEditor.cpp" />
+    <ClCompile Include="src\modules\NetscapeImporter.cpp" />
+    <ClCompile Include="src\modules\PineImport.cpp" />
+    <ClCompile Include="src\modules\XFMailImport.cpp" />
+    <ClCompile Include="src\modules\crypt\PGPEngine.cpp" />
+    <ClCompile Include="src\modules\spam\DspamFilter.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">lib/dspam/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="src\modules\spam\HeadersFilter.cpp" />
+    <ClCompile Include="src\modules\spam\ServerSideFilter.cpp" />
+    <ClCompile Include="src\wx\common\vcard.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="src\wx\generic\vcarddlg.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">wx/wxprec.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="include\MInterface.mid">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating MInterface.h and .cpp</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Creating MInterface.h and .cpp</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Creating MInterface.h and .cpp</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Creating MInterface.h and .cpp</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating MInterface.h and .cpp</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Creating MInterface.h and .cpp</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Creating MInterface.h and .cpp</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Creating MInterface.h and .cpp</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">extra\scripts\m4.bat %(RootDir)%(Directory) %(RootDir)%(Directory)
+</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)/MInterface.mid;%(RootDir)%(Directory)/MInterface.cpp.m4;%(RootDir)%(Directory)/MInterface.h.m4;%(RootDir)%(Directory)/mid2cpp.m4;%(RootDir)%(Directory)/mid2h.m4;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)/MInterface.cpp;%(RootDir)%(Directory)/MInterface.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\HeaderInfo.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MailFolder.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MDialogs.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\Message.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MimePart.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\MimeType.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\SendMessage.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="src\Python\swiglib.cpp-swig">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Updating SWIG-generated sources</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">Updating SWIG-generated sources</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">copy %(FullPath) %(RootDir)%(Directory)\%(Filename)_swig.cpp
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(RootDir)%(Directory)\%(Filename)_swig.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <None Include="include\interface\HeaderInfo.i" />
+    <None Include="include\interface\MailFolder.i" />
+    <None Include="include\interface\MDialogs.i" />
+    <None Include="include\interface\Message.i" />
+    <None Include="include\interface\MimePart.i" />
+    <None Include="include\interface\MimeType.i" />
+    <None Include="include\interface\SendMessage.i" />
+    <None Include="include\interface\swigcmn.i" />
+    <None Include="include\interface\swiglib.i" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Address.h" />
+    <ClInclude Include="include\AddressCC.h" />
+    <ClInclude Include="include\gui\AddressExpander.h" />
+    <ClInclude Include="include\ASMailFolder.h" />
+    <ClInclude Include="include\AttachDialog.h" />
+    <ClInclude Include="include\CacheFile.h" />
+    <ClInclude Include="include\ClickAtt.h" />
+    <ClInclude Include="include\ClickInfo.h" />
+    <ClInclude Include="include\ClickURL.h" />
+    <ClInclude Include="include\CmdLineOpts.h" />
+    <ClInclude Include="include\Collect.h" />
+    <ClInclude Include="include\Composer.h" />
+    <ClInclude Include="include\ConfigPrivate.h" />
+    <ClInclude Include="include\ConfigSource.h" />
+    <ClInclude Include="include\ConfigSourceLocal.h" />
+    <ClInclude Include="include\ConfigSourcesAll.h" />
+    <ClInclude Include="include\FolderMonitor.h" />
+    <ClInclude Include="include\FolderType.h" />
+    <ClInclude Include="include\FolderView.h" />
+    <ClInclude Include="include\guidef.h" />
+    <ClInclude Include="include\HeaderInfo.h" />
+    <ClInclude Include="include\HeaderInfoImpl.h" />
+    <ClInclude Include="include\HeadersDialogs.h" />
+    <ClInclude Include="include\InitPython.h" />
+    <ClInclude Include="include\kbList.h" />
+    <ClInclude Include="include\ListReceiver.h" />
+    <ClInclude Include="include\lists.h" />
+    <ClInclude Include="include\LogCircle.h" />
+    <ClInclude Include="include\MailFolder.h" />
+    <ClInclude Include="include\MailFolderCC.h" />
+    <ClInclude Include="include\MailFolderCmn.h" />
+    <ClInclude Include="include\MApplication.h" />
+    <ClInclude Include="include\MAtExit.h" />
+    <ClInclude Include="include\gui\MBookCtrl.h" />
+    <ClInclude Include="include\Mcallbacks.h" />
+    <ClInclude Include="include\Mcclient.h" />
+    <ClInclude Include="include\Mcommon.h" />
+    <ClInclude Include="include\Mconfig.h" />
+    <ClInclude Include="include\Mdefaults.h" />
+    <ClInclude Include="include\MDialogs.h" />
+    <ClInclude Include="include\Mdnd.h" />
+    <ClInclude Include="include\Merror.h" />
+    <ClInclude Include="include\Message.h" />
+    <ClInclude Include="include\MessageCC.h" />
+    <ClInclude Include="include\MessageEditor.h" />
+    <ClInclude Include="include\MessageTemplate.h" />
+    <ClInclude Include="include\MessageView.h" />
+    <ClInclude Include="include\MessageViewer.h" />
+    <ClInclude Include="include\MEvent.h" />
+    <ClInclude Include="include\MFCache.h" />
+    <ClInclude Include="include\MFilter.h" />
+    <ClInclude Include="include\MFolder.h" />
+    <ClInclude Include="include\MFolderDialogs.h" />
+    <ClInclude Include="include\MFPrivate.h" />
+    <ClInclude Include="include\MFrame.h" />
+    <ClInclude Include="include\MFStatus.h" />
+    <ClInclude Include="include\MFui.h" />
+    <ClInclude Include="include\MGuiApp.h" />
+    <ClInclude Include="include\MHelp.h" />
+    <ClInclude Include="include\MimeDialog.h" />
+    <ClInclude Include="include\MimePart.h" />
+    <ClInclude Include="include\MimePartCC.h" />
+    <ClInclude Include="include\MIMETreeDialog.h" />
+    <ClInclude Include="include\MimeType.h" />
+    <ClInclude Include="include\MImport.h" />
+    <ClInclude Include="include\MInterface.h" />
+    <ClInclude Include="include\MLogFrame.h" />
+    <ClInclude Include="include\MMainFrame.h" />
+    <ClInclude Include="include\MModule.h" />
+    <ClInclude Include="include\MObject.h" />
+    <ClInclude Include="include\Moptions.h" />
+    <ClInclude Include="include\Mpch.h" />
+    <ClInclude Include="include\Mpers.h" />
+    <ClInclude Include="include\MpersIds.h" />
+    <ClInclude Include="include\MPython.h" />
+    <ClInclude Include="include\MScripts.h" />
+    <ClInclude Include="include\MSearch.h" />
+    <ClInclude Include="include\MsgCmdProc.h" />
+    <ClInclude Include="include\Mswig.h" />
+    <ClInclude Include="include\MTextStyle.h" />
+    <ClInclude Include="include\MThread.h" />
+    <ClInclude Include="include\Munix.h" />
+    <ClInclude Include="include\Mupgrade.h" />
+    <ClInclude Include="include\Mversion.h" />
+    <ClInclude Include="include\Mwin.h" />
+    <ClInclude Include="include\NewMailNotifier.h" />
+    <ClInclude Include="include\PathFinder.h" />
+    <ClInclude Include="include\PGPClickInfo.h" />
+    <ClInclude Include="include\pointers.h" />
+    <ClInclude Include="include\Profile.h" />
+    <ClInclude Include="include\PythonHelp.h" />
+    <ClInclude Include="include\QuotedText.h" />
+    <ClInclude Include="include\SendMessage.h" />
+    <ClInclude Include="include\SendMessageCC.h" />
+    <ClInclude Include="include\Sequence.h" />
+    <ClInclude Include="include\Sorting.h" />
+    <ClInclude Include="include\SpamFilter.h" />
+    <ClInclude Include="include\strutil.h" />
+    <ClInclude Include="include\sysutil.h" />
+    <ClInclude Include="include\TemplateDialog.h" />
+    <ClInclude Include="include\Threading.h" />
+    <ClInclude Include="include\UIdArray.h" />
+    <ClInclude Include="include\ViewFilter.h" />
+    <ClInclude Include="include\gui\wxllist.h" />
+    <ClInclude Include="include\gui\wxlparser.h" />
+    <ClInclude Include="include\gui\wxlwindow.h" />
+    <ClInclude Include="include\XFace.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\M.rc">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">WX_MSC_FULL_VER=150030729;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="lib\compface\compface.vcxproj">
+      <Project>{0e9f4403-1aa1-4824-a99f-041b1bf18d14}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="lib\dspam\dspam.vcxproj">
+      <Project>{62156246-dcea-4713-95e0-c01f595f1a20}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="lib\imap\imap.vcxproj">
+      <Project>{457cfec8-5c3f-4c7e-98a6-b65e1de22682}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="Mconfig.vcxproj">
+      <Project>{86c1d2c7-c961-4017-88e8-63d0bccbd0d5}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="src\wx\vcard\versit.vcxproj">
+      <Project>{e46c11c7-5924-4f7c-b82e-5beb8856a8bc}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
