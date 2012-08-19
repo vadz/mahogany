@@ -1346,6 +1346,11 @@ void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
       {
          ERRORMESSAGE((_("Failed to reopen folder \"%s\" after resuming from sleep."),
                       mf->GetName()));
+
+         // In case we failed to reopen the folder shown in the main frame,
+         // stop showing its old (pre-suspend) state now.
+         if ( mf->GetName() == m_folderName )
+            m_FolderView->SetFolder(NULL);
       }
       else
       {
