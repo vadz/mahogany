@@ -1489,6 +1489,12 @@ wxMainFrame::~wxMainFrame()
    // any moment
    mApplication->OnMainFrameClose();
 
+   // We need to remove the window from the splitter before removing it to
+   // avoid leaving a dangling pointer in wxSplitterWindow which might be used
+   // if it gets an EVT_SIZE during destruction (this happens with at least
+   // wxMSW 2.9.4 under XP) resulting in a crash.
+   m_splitter->Unsplit(m_FolderTree->GetWindow());
+
    delete m_FolderView;
    delete m_FolderTree;
 
