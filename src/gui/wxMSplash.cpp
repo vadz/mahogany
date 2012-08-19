@@ -170,7 +170,8 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
 {
    // Use fall back size if the splash screen image is not available because
    // otherwise the entire window would be too small.
-   const wxSize sizeBmp(bmp.IsOk() ? bmp.GetSize() : wxSize(400, 300));
+   wxSize sizeBmp = bmp.GetSize();
+   sizeBmp.IncTo(wxSize(400, 300));
 
    wxWindow::Create(parent, -1, wxDefaultPosition,
                     wxSize(sizeBmp.x, 2*sizeBmp.y));
