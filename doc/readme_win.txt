@@ -1,14 +1,12 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: August 1, 2006
-Version: the information in this file applies to version 0.67
+Date: August 20, 2012
+Version: the information in this file applies to version 0.68
 
 0. Requirements
 --------------
 
- a) Any Win32 OS: Mahogany should work on all Win32 systems, i.e.
-    Windows 95/98/ME/NT 4/2000/XP but SSL/TLS might be not supoprted
-    on older systems without Internet Explorer. Mahogany does not
-    run under Windows 3.1.
+ a) Windows XP or later. Mahogany doesn't run under previous Windows
+    versions.
 
  b) You need a POP3 or IMAP4 (recommended, especially for slow
     connection!) server to read e-mail and an SMTP server to send
@@ -17,9 +15,9 @@ Version: the information in this file applies to version 0.67
     if you want to try it out.
 
  c) If you plan to use Python scripting with Mahogany, you need to
-    have Python installed on your system. All Python versions are
-    normally supported but the latest, 2.4.3, is recommended. Please
-    get it from http://www.python.org/.
+    have Python installed on your system. All Python 2 versions are
+    normally supported but 2.6 or 2.7 is recommended. Please get it from
+    http://www.python.org/.
 
 1. Installation
 ---------------
