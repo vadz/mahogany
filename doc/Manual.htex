@@ -35,7 +35,7 @@
 \vfill{}
 
 
-\author{Copyright 1997-2010 by The Mahogany Development Team\\
+\author{Copyright 1997-2012 by The Mahogany Development Team\\
 \vspace{1cm}
 \mailtolink{mahogany-developers@lists.sourceforge.net} \\
 \vspace{1cm}
@@ -78,6 +78,8 @@ skip them unless you're updating from a very old version of Mahogany.
          be configured to use the recipient and sender corresponding to the
          rule itself, e.g. the default recipient can be set up to be the same
          as the sender address tested by the rule.
+   \item Use notification tooltips for new mail. See the ``Also sow
+         notification popup'' option in the ``New Mail'' page.
    \item Added the possibility to treat different addresses as equivalent,
          this is useful to avoid sending duplicate replies to the different
          addresses of the same person, for example.
