@@ -126,7 +126,18 @@ public:
    struct FieldInfo
    {
       const char   *label;   // which is shown in the dialog
-      unsigned      flags;   // contains the type and the flags (see above)
+      // We have a problem with the type of FieldFlags enum elements: MSVC (up
+      // to version 10) treats Field_Global as negative int and warns when
+      // initializing flags with it if it's declared as unsigned. OTOH g++ 4.7
+      // treats all FieldFlags constants as unsigned (why?) and warns when
+      // initializing flags with them if it's defined as int. So there doesn't
+      // seem to be any way to avoid warnings without conditional compilation.
+#ifdef _MSC_VER
+      int
+#else
+      unsigned      
+#endif
+                    flags;   // contains the type and the flags (see above)
       int           enable;  // enable this field depending on the value of
                              // the "enable" one if != -1 (using negative ids
                              // != -1 negates the condition, i.e. this field is
