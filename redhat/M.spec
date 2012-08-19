@@ -62,7 +62,7 @@ CFLAGS="$RPM_OPT_FLAGS" \
 
 #if [ "x%{MAKETARGET}" = "xquartstatic" ]; then
     # be nice and check for existence of static library before starting to build
-    # (see bug http://zeitlin.homeunix.com/cgi-bin/mbugs/show_bug.cgi?id=873)
+    # (see bug http://mahogany.tt-solutions.com/cgi-bin/mbugs/show_bug.cgi?id=873)
 #    libwx=$($(echo @WX_CONFIG_PATH@ | sed `grep WX_CONFIG_PATH config.status`) \
 #                --static --libs | \
 #                    sed 's@^.* \(/.*/libwx_based-[0-9.]\+.a\) .*$@\1@')
