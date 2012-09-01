@@ -145,12 +145,12 @@ public:
       { m_type = TT_Char; m_number = (unsigned)c; }
    void SetOperator(OperatorType oper)
       { m_type = TT_Operator; m_number = oper; }
-   void SetString(String const &s)
-      { m_type = TT_String; m_string = s; }
+   void SetString(std::string const &s)
+      { m_type = TT_String; m_string = wxString::FromUTF8(s.c_str()); }
    void SetNumber(long n)
       { m_type = TT_Number; m_number = n; }
-   void SetIdentifier(String const &s)
-      { m_type = TT_Identifier; m_string = s; }
+   void SetIdentifier(std::string const &s)
+      { m_type = TT_Identifier; m_string = wxString::FromUTF8(s.c_str()); }
    void SetEOF(void)
       { m_type = TT_EOF; }
    void SetInvalid(void)
@@ -1100,7 +1100,7 @@ FilterRuleImpl::Rewind(size_t pos)
    EatWhiteSpace();
    pos = m_Position;
 
-   String tokstr;
+   std::string tokstr;
    if(! Char())
    {
       token.SetEOF();
