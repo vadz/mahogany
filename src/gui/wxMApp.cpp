@@ -395,6 +395,11 @@ bool wxMLogWindow::IsShown() const
 
 bool wxMLogWindow::OnFrameClose(wxFrame *frame)
 {
+   // Don't ask the user anything if the window is being closed during
+   // application shutdown, just exit.
+   if ( mApplication->IsShuttingDown() )
+      return true;
+
    switch ( MDialog_YesNoCancel
             (
                _("Would you like to close the log window only for the rest "
