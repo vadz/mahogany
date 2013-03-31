@@ -4,19 +4,12 @@ $Id$
 
 Here is the rough plan for the future of the M development:
 
-* 0.68:
-
-   + update to latest version of c-client and dspam (use the hash driver
-     instead of sqlite for the latter)
-
 * 0.69:
 
-   + spell checker
-   + implement smart config file synchronization: Mahogany main advantage
-     is its cross-platform nature however it's not very useful if you can't
-     keep the same (but not exactly the same!) options on all machines you use,
-     we must do something about it.
+   + Improve attachment handling UI.
 
+   + Better display of HTML messages and finer control over when to show
+     HTML and when to show text.
 
 * 0.70:
 
@@ -32,14 +25,18 @@ Here is the rough plan for the future of the M development:
         one which could be reused from other places (composer, extract
         addresses dialog, ...) and it should also support multiple selections
 
-   + store ADB on IMAP server and sync it
+   + implement smart config file synchronization: Mahogany main advantage
+     is its cross-platform nature however it's not very useful if you can't
+     keep the same (but not exactly the same!) options on all machines you use,
+     we must do something about it.
+   + also store address books on IMAP server and sync them
    + and/or LDAP support
 
 * 0.75:
 
-   + support for encrypting/signing messages with PGP
+   + support for encrypting (and not only signing) messages with PGP
 
-   + add "Server" entiry: i.e. each remote folder has an associated server
+   + add "Server" entry: i.e. each remote folder has an associated server
      and the servers can be configured in their own dialog. This should include
      IMAP, POP, NNTP but also SMTP
 
