@@ -41,7 +41,7 @@ AppVersion=0.68.0
 
 ; hmm... what's RGB value of mahogany?
 BackColor=$037ebd
-AppCopyright=Copyright © 1997-2006 Vadim Zeitlin and Karsten Ballüder
+AppCopyright=Copyright © 1997-2013 Vadim Zeitlin and Karsten Ballüder
 WizardImageFile=res\wizard.bmp
 WizardSmallImageFile=res\install_small.bmp
 
