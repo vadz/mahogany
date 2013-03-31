@@ -5740,6 +5740,10 @@ void MailFolderCC::EndReading()
 #ifdef USE_READ_PROGRESS
    if ( gs_readProgressInfo )
    {
+      // Ensure that no calls to c-client are done from inside wxProgressDialog
+      // dtor (which calls wxYield and so could dispatch a timer event).
+      MAppCriticalSection cs;
+
       delete gs_readProgressInfo;
       gs_readProgressInfo = NULL;
    }
