@@ -67,7 +67,7 @@ Source: "{#env SystemRoot}\system32\msvcp71.dll"; DestDir: "{app}"
 Source: "{#env SystemRoot}\system32\msvcr71.dll"; DestDir: "{app}"
 
 ; --- misc stuff
-Source: "extra\setup\autocollect.adb"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "extra\setup\autocollect.adb"; DestDir: "{userappdata}\Mahogany"; Flags: onlyifdoesntexist
 Source: "extra\setup\Mahogany.url"; DestDir: "{app}"; Components: misc
 Source: "extra\setup\Bug.url"; DestDir: "{app}"; Components: misc
 
