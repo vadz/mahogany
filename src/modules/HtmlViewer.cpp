@@ -368,16 +368,19 @@ public:
       : m_changerWeight(str),
         m_changerSlant(str)
    {
-      // the order is important:should be the reverse of the order of
-      // destruction of the subobjects
-      if ( font.GetStyle() == wxFONTSTYLE_ITALIC )
+      if ( font.IsOk() )
       {
-         m_changerSlant.DoChange(_T("<i>"), _T("</i>"));
-      }
+         // the order is important: should be the reverse of the order of
+         // destruction of the subobjects
+         if ( font.GetStyle() == wxFONTSTYLE_ITALIC )
+         {
+            m_changerSlant.DoChange(_T("<i>"), _T("</i>"));
+         }
 
-      if ( font.GetWeight() == wxFONTWEIGHT_BOLD )
-      {
-         m_changerWeight.DoChange(_T("<b>"), _T("</b>"));
+         if ( font.GetWeight() == wxFONTWEIGHT_BOLD )
+         {
+            m_changerWeight.DoChange(_T("<b>"), _T("</b>"));
+         }
       }
    }
 
