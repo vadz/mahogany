@@ -73,7 +73,7 @@ CONFIG_FLAGS to contain any extra configure arguments.
 
 d) Win32 binaries
 
-- build the project M.sln in "release with debug info" configuration
+- build the project M_vc10.sln in "Release DLL" configuration
 - save the resulting PDB and MAP files (for crash reports!)
 - build doc/HtmlHlp/Manual.chm
 - run Inno Setup on extra/setup/M.iss

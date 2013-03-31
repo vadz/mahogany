@@ -24,11 +24,8 @@ DefaultGroupName=Mahogany
 AllowRootDirectory=1
 AllowNoIcons=1
 
-SourceDir=P:\Progs\M
-OutputDir=extra\setup\Output
-
-; bzip is smaller than zip even if slightly slower
-Compression=bzip/3
+SourceDir=..\..
+OutputDir=extra\setup
 
 ; TODO: use AppMutex to check whether the program is running
 
@@ -60,11 +57,19 @@ Name: "i18n"; Description: "Translations to other languages"; Types: full
 [Files]
 
 ; --- EXEs and DLLs
-Source: "ReleaseDebug\M.EXE"; DestDir: "{app}";
+Source: "Release\M.exe"; DestDir: "{app}";
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
-Source: "{#env SystemRoot}\system32\msvcp71.dll"; DestDir: "{app}"
-Source: "{#env SystemRoot}\system32\msvcr71.dll"; DestDir: "{app}"
+Source: "{#env SystemRoot}\system32\msvcp100.dll"; DestDir: "{app}"
+Source: "{#env SystemRoot}\system32\msvcr100.dll"; DestDir: "{app}"
+
+Source: "{#env wxwin}\lib\vc100_dll\wxbase294u_vc100.dll"; DestDir: "{app}"
+Source: "{#env wxwin}\lib\vc100_dll\wxbase294u_net_vc100.dll"; DestDir: "{app}"
+Source: "{#env wxwin}\lib\vc100_dll\wxbase294u_xml_vc100.dll"; DestDir: "{app}"
+Source: "{#env wxwin}\lib\vc100_dll\wxmsw294u_adv_vc100.dll"; DestDir: "{app}"
+Source: "{#env wxwin}\lib\vc100_dll\wxmsw294u_core_vc100.dll"; DestDir: "{app}"
+Source: "{#env wxwin}\lib\vc100_dll\wxmsw294u_html_vc100.dll"; DestDir: "{app}"
+Source: "{#env wxwin}\lib\vc100_dll\wxmsw294u_qa_vc100.dll"; DestDir: "{app}"
 
 ; --- misc stuff
 Source: "extra\setup\autocollect.adb"; DestDir: "{userappdata}\Mahogany"; Flags: onlyifdoesntexist
