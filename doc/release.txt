@@ -16,7 +16,7 @@ c) redhat/M.spec
 
 d) extra/setup/M.iss and extra/setup/{post|pre}read.txt
 
-e) "cvs rtag" the files
+e) "git tag" the files
 
 
 2. Updating the files
