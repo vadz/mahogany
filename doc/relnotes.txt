@@ -1,4 +1,4 @@
-Release notes for Mahogany 0.67
+Release notes for Mahogany 0.68
 =====================================================================
 
 0. General
@@ -24,7 +24,7 @@ to /etc/apt/sources.list file of your Ubuntu system to be able to
 
 
  For the other systems, please build the program from sources yourself as
-described in the INSTALL file. . If you are going to do this, you may need to
+described in the INSTALL file. If you are going to do this, you may need to
 download the prebuilt Mdocs.tar.gz file if your system doesn't have all the
 tools needed to build the documentation (LaTeX, makeindex, dvips, ps2pdf
 and latex2html).

@@ -15,10 +15,10 @@
 [Setup]
 ; --- app info
 AppName=Mahogany
-AppVerName=Mahogany 0.67 "Constance"
+AppVerName=Mahogany 0.68 "Cynthia"
 
 ; --- setup compiler params
-OutputBaseFilename=Mahogany-0.67.0
+OutputBaseFilename=Mahogany-0.68.0
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
 AllowRootDirectory=1
@@ -35,7 +35,7 @@ Compression=bzip/3
 ; --- app publisher info (for W2K only)
 AppPublisher=Mahogany Dev-Team
 AppPublisherURL=http://mahogany.sourceforge.net/
-AppVersion=0.67.0
+AppVersion=0.68.0
 
 ; --- appearance parameters
 
