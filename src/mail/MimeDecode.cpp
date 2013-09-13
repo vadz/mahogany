@@ -211,14 +211,25 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          } enc2047 = Encoding_Unknown;
 
          ++p; // skip '?'
-         if ( *(p + 1) == '?' )
+
+         if ( p >= end - 2 )
          {
-            if ( *p == 'B' || *p == 'b' )
-               enc2047 = Encoding_Base64;
-            else if ( *p == 'Q' || *p == 'q' )
-               enc2047 = Encoding_QuotedPrintable;
+            wxLogDebug(wxS("Unterminated quoted word in \"%s\" ignored."), in);
+            out += wxString(encWordStart, end);
+
+            break;
          }
-         //else: multi letter encoding unrecognized
+         else // We have at least 2 more characters in the string.
+         {
+            if ( *(p + 1) == '?' )
+            {
+               if ( *p == 'B' || *p == 'b' )
+                  enc2047 = Encoding_Base64;
+               else if ( *p == 'Q' || *p == 'q' )
+                  enc2047 = Encoding_QuotedPrintable;
+            }
+            //else: multi letter encoding unrecognized
+         }
 
          if ( enc2047 == Encoding_Unknown )
          {
