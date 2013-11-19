@@ -304,9 +304,33 @@ PGPFilter::DoProcess(String& text,
             if ( rc != MCryptoEngine::OK )
             {
                // beginNext points to the end of BEGIN line, go forward to the
-               // end of the headers (signalled by an empty line i.e. 2 EOLs)
-               beginNext = wxStrstr(beginNext, _T("\r\n\r\n"));
-               if ( beginNext && beginNext < endNext )
+               // end of the headers.
+               //
+               // Normally the end of the headers must be signalled by a blank
+               // line, but in practice some implementations, notably Enigmail
+               // used with Thunderbird, put a space in this "empty" line, so
+               // accept any line containing only spaces as indicating the end
+               // of headers.
+               const wxChar* startBody = beginNext;
+               for ( ;; )
+               {
+                  startBody = wxStrstr(startBody, _T("\r\n"));
+                  if ( !startBody || startBody >= endNext )
+                     break; // end of headers not found
+
+                  startBody += 2; // skip "\r\n" we just matched
+                  while ( *startBody == ' ' )
+                     startBody++;
+
+                  if ( startBody[0] == '\r' && startBody[1] == '\n' )
+                  {
+                     // we found the end of the headers
+                     startBody += 2;
+                     break;
+                  }
+               }
+
+               if ( startBody && startBody < endNext )
                {
                   // endNext currently points to the end of END PGP SIGNATURE
                   // line, rewind to the PGP_BEGIN_SIG line
@@ -336,7 +360,7 @@ PGPFilter::DoProcess(String& text,
 
                         if ( pc > start )
                         {
-                           out = String(beginNext + 4, pc - 1);
+                           out = String(startBody, pc - 1);
                         }
 
                         break;
