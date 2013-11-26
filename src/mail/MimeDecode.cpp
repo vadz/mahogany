@@ -177,6 +177,14 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             break;
          }
 
+         if ( csName.empty() )
+         {
+            wxLogDebug("Invalid encoded word \"%s\": missing encoding.", in);
+            out += wxString(encWordStart, end);
+
+            break;
+         }
+
          // pass false to prevent asking the user from here: we can be called
          // during non-interactive operations and popping up a dialog for an
          // unknown charset can be inappropriate
