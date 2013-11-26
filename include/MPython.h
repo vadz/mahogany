@@ -62,7 +62,23 @@
    #undef _DEBUG
 #endif
 
+// Disable warnings about "inconsistent dll linkage" for several functions
+// declared in Python.h without any declspec as they clash with the
+// declarations of these functions when using CRT as a DLL.
+#ifdef CC_MSC
+   #if _MSC_VER >= 1800
+      #pragma warning(push)
+      #pragma warning(disable: 4273)
+   #endif
+#endif
+
 #include <Python.h>
+
+#ifdef CC_MSC
+   #if _MSC_VER >= 1800
+      #pragma warning(pop)
+   #endif
+#endif
 
 #ifdef MAHOGANY_DEBUG_WAS_DEFINED
    #undef MAHOGANY_DEBUG_WAS_DEFINED
