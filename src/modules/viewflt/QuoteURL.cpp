@@ -304,7 +304,8 @@ QuoteURLFilter::DoProcess(String& text,
 
       // and look for all URLs on the current line
       const wxChar *endURL = lineCur;
-      while ( startURL && (lineCur <= startURL && startURL < lineNext) )
+      while ( startURL &&
+               (lineCur <= startURL && (!lineNext || startURL < lineNext)) )
       {
          // insert the text before URL (endURL is the end of previous URL, not
          // this one or the start of line initially)
