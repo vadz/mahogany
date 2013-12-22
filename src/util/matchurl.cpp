@@ -669,17 +669,23 @@ match:
          // URLs are frequently so long that they're spread across multiple
          // lines, so try to see if this might be the case here
          //
-         // first of all: is it at the end of line and can it be continued on
-         // the next one? also check if it's really long enough to be wrapped:
+         // first of all we need to check whether it is at the end of line but
+         // we should allow some trailing spaces
+         const wxChar* q = p;
+         while ( *q == ' ' )
+            q++;
+
+         if ( q[0] != '\r' || q[1] != '\n' )
+            break; // not at the line end
+
+         // also check if it's really long enough to be wrapped:
          // the short URLs normally shouldn't be wrapped
          static const size_t URL_WRAP_LEN = 30; // min len of wrapped URL
-         if ( p[0] != '\r' || p[1] != '\n'
-               || lenURL < URL_WRAP_LEN
-               || !IsURLChar(p[2]) )
-         {
-            // it isn't
-            break;
-         }
+         if ( lenURL < URL_WRAP_LEN )
+            break; // too short
+
+         if ( !IsURLChar(q[2]) )
+            break; // doesn't seem to be continued on the next line
 
          // heuristic text for end of URL detection
          if ( p - start > 5 && !CanBeWrapped(p) )
@@ -688,7 +694,7 @@ match:
             break;
          }
 
-         p += 2; // go to the start of next line
+         p = q + 2; // go to the start of next line
 
          // Check that the beginning of next line is not the start of
          // another URL.
@@ -708,7 +714,7 @@ match:
 
          // check whether the next line starts with a word -- this is a good
          // indication that the URL hasn't wrapped
-         const wxChar *q = p;
+         q = p;
          while ( wxIsalpha(*q) )
             q++;
 
