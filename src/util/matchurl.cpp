@@ -726,6 +726,12 @@ match:
             break;
          }
 
+         // another special case: subsequent dashes are very unusual in URLs
+         // but often used as separator lines, so we assume that they indicate
+         // the end of the URL if we find them on the next line.
+         if ( p[0] == '-' && p[1] == '-' )
+            break;
+
          // it might be a wrapped URL but it might be not: it seems like we
          // get way too many false positives if we suppose that it's always
          // the case... so restrict the wrapped URLs detection to the case
