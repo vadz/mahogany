@@ -1017,9 +1017,8 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    wxMemoryDC dcMem;
    dcMem.SelectObject(*m_bitmap);
    dcMem.SetDeviceOrigin(0,0);
-   dcMem.SetBackground(wxBrush(m_llist->GetDefaultStyleInfo().GetBGColour(),wxSOLID));
-   dcMem.SetPen(wxPen(m_llist->GetDefaultStyleInfo().GetBGColour(),
-                         0,wxTRANSPARENT));
+   dcMem.SetBackground(m_llist->GetDefaultStyleInfo().GetBGColour());
+   dcMem.SetPen(*wxTRANSPARENT_PEN);
    dcMem.SetLogicalFunction(wxCOPY);
    dcMem.Clear();
    WXLO_TIMER_STOP(TmpTimer);

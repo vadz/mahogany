@@ -2631,7 +2631,7 @@ wxLayoutList::Draw(wxDC &dc,
    Layout(dc, bottom);
 
    ApplyStyle(m_DefaultStyleInfo, dc);
-   wxBrush brush(m_CurrentStyleInfo.m_bg, wxSOLID);
+   wxBrush brush(m_CurrentStyleInfo.m_bg);
    dc.SetBrush(brush);
    dc.SetBackgroundMode(wxTRANSPARENT);
 

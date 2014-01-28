@@ -2814,7 +2814,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
                      wxDefaultPosition,
                      wxDefaultSize,
                      wxDEFAULT_FRAME_STYLE |
-                     wxTINY_CAPTION_HORIZ |
+                     wxTINY_CAPTION |
                      (parent ? wxFRAME_FLOAT_ON_PARENT : wxSTAY_ON_TOP)
                  );
 

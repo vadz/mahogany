@@ -390,9 +390,13 @@ public:
    wxFontCacheEntry(int family, int size, int style, int weight,
                     bool underline,
                     wxFontEncoding encoding)
-      : m_Font(size, family,
-               style, weight, underline,
-               wxEmptyString, encoding)
+      : m_Font(size,
+               static_cast<wxFontFamily>(family),
+               static_cast<wxFontStyle>(style),
+               static_cast<wxFontWeight>(weight),
+               underline,
+               wxEmptyString,
+               encoding)
       {
          m_Family = family;
          m_Size = size;

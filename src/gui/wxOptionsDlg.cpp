@@ -5340,32 +5340,32 @@ void wxConfigSourcesDialog::ExchangeRows(int row1, int row2)
 void wxConfigSourcesDialog::OnUpdateButtonUp(wxUpdateUIEvent& event)
 {
    // first row must always remain on top, so row 1 can't be moved up
-   event.Enable( m_sources->GetCursorRow() > 1 );
+   event.Enable( m_sources->GetGridCursorRow() > 1 );
 }
 
 void wxConfigSourcesDialog::OnUpdateButtonDown(wxUpdateUIEvent& event)
 {
    // first row can't be moved down as it can't be moved at all and the last
    // row can't be moved down any more neither
-   const int row = m_sources->GetCursorRow();
+   const int row = m_sources->GetGridCursorRow();
    event.Enable( row > 0 && row < m_sources->GetNumberRows() - 1 );
 }
 
 void wxConfigSourcesDialog::OnUpdateButtonDelete(wxUpdateUIEvent& event)
 {
    // first row can't be deleted, we always have local config
-   event.Enable( m_sources->GetCursorRow() > 0 );
+   event.Enable( m_sources->GetGridCursorRow() > 0 );
 }
 
 void wxConfigSourcesDialog::OnButtonUp(wxCommandEvent& WXUNUSED(event))
 {
-   const int row = m_sources->GetCursorRow();
+   const int row = m_sources->GetGridCursorRow();
    ExchangeRows(row, row - 1);
 }
 
 void wxConfigSourcesDialog::OnButtonDown(wxCommandEvent& WXUNUSED(event))
 {
-   const int row = m_sources->GetCursorRow();
+   const int row = m_sources->GetGridCursorRow();
    ExchangeRows(row, row + 1);
 }
 
@@ -5376,7 +5376,7 @@ void wxConfigSourcesDialog::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
 
 void wxConfigSourcesDialog::OnButtonDelete(wxCommandEvent& WXUNUSED(event))
 {
-   m_sources->DeleteRows(m_sources->GetCursorRow());
+   m_sources->DeleteRows(m_sources->GetGridCursorRow());
 }
 
 // ----------------------------------------------------------------------------
