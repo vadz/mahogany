@@ -87,8 +87,7 @@ class MPersMsgBox;
 #if defined(OS_UNIX) && !defined(__CYGWIN__) && !defined(__WINE__)
    #include <signal.h>
 
-   // wxTYPE_SA_HANDLER is defined by wxWindows configure script in its setup.h
-   extern "C" void sigpipe_handler(wxTYPE_SA_HANDLER)
+   extern "C" void sigpipe_handler(int)
    {
       // do nothing
    }
