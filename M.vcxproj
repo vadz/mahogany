@@ -110,27 +110,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\output\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(Platform)\$(Configuration)\output</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\output\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">$(Platform)\$(Configuration)\output</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\output\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(Platform)\$(Configuration)\output</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\output\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">$(Platform)\$(Configuration)\output</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">true</LinkIncremental>
@@ -155,11 +155,10 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc120_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc120_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -189,11 +188,10 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc120_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc120_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -225,11 +223,10 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -260,11 +257,10 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -296,10 +292,9 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc120_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc120_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>10000000</StackReserveSize>
@@ -329,10 +324,9 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc120_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc120_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>10000000</StackReserveSize>
@@ -364,10 +358,9 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>10000000</StackReserveSize>
@@ -399,10 +392,9 @@
       <AdditionalIncludeDirectories>include;$(wxwin)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lib/imap/$(IntDir)imap.lib;lib/compface/$(IntDir)compface.lib;lib/dspam/$(IntDir)dspam.lib;src\wx\vcard\$(IntDir)versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc_amd64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>10000000</StackReserveSize>
