@@ -4220,11 +4220,16 @@ wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
    mc->SetFile(props.filename);
    mc->SetName(props.name);
 
-   // by default propose to send the images and text parts inline but all the
-   // rest as attachment
-   props.disposition = MimeType(strMimeType).ShouldShowInline()
-                        ? AttachmentProperties::Disposition_Inline
-                        : AttachmentProperties::Disposition_Attachment;
+   // we use almost, but not quite, the same logic here as for viewing MIME
+   // contents: the exception is that while "text" parts are normally shown
+   // inline, we attach them as attachments by default because typically this
+   // is the user intention, otherwise the text would have just been pasted
+   // inline directly
+   const MimeType attachmentMimeType(strMimeType);
+   props.disposition =
+      attachmentMimeType.ShouldShowInline() && !attachmentMimeType.IsText()
+         ? AttachmentProperties::Disposition_Inline
+         : AttachmentProperties::Disposition_Attachment;
    mc->SetDisposition(props.GetDisposition());
 
    // show the attachment properties dialog automatically?
