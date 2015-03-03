@@ -40,6 +40,7 @@
 #include "Message.h"
 #include "MFolder.h"
 #include "mail/Driver.h"
+#include "mail/Header.h"
 
 #ifdef OS_UNIX
 #  include "sysutil.h"
@@ -142,34 +143,6 @@ bool IsAddressHeader(const String& name)
           name == "TO" ||
           name == "CC" ||
           name == "BCC";
-}
-
-// test if we allow this header to be set by user
-//
-// NB: the header name must be in upper case
-inline
-bool HeaderCanBeSetByUser(const String& name)
-{
-   return name != "MIME-VERSION" &&
-          name != "CONTENT-TYPE" &&
-          name != "CONTENT-DISPOSITION" &&
-          name != "CONTENT-TRANSFER-ENCODING" &&
-          name != "MESSAGE-ID";
-}
-
-// check if the header name is valid (as defined in 2.2 of RFC 2822)
-bool IsValidHeaderName(const char *name)
-{
-   if ( !name )
-      return false;
-
-   for ( ; *name; name++ )
-   {
-      if ( *name >= 127 || iscntrl(*name) )
-         return false;
-   }
-
-   return true;
 }
 
 // create a new BODY parameter and initialize it
@@ -1081,7 +1054,7 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
    {
       FAIL_MSG( "Address headers not supported here, use SetFrom() &c!" );
    }
-   else if ( !HeaderCanBeSetByUser(name) )
+   else if ( !HeaderName(name).CanBeSetByUser() )
    {
       ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
                     nameIn.c_str()));
@@ -1341,12 +1314,12 @@ SendMessageCC::Build(bool forStorage)
          i != m_extraHeaders.end();
          ++i )
    {
-      const wxWX2MBbuf name(i->m_name.To8BitData());
-      if ( !IsValidHeaderName(name) )
+      const HeaderName name(i->m_name);
+      const wxString headerErr = name.IsValid();
+      if ( !headerErr.empty() )
       {
-         wxLogError(_("Custom header name \"%s\" is invalid, please use only "
-                      "printable ASCII characters in the header names."),
-                    i->m_name.c_str());
+         wxLogError(_("Custom header name \"%s\" is invalid: %s."),
+                    i->m_name, headerErr);
          return false;
       }
 
@@ -1359,13 +1332,15 @@ SendMessageCC::Build(bool forStorage)
          return false;
       }
 
-      if ( wxStricmp(name, "Reply-To") == 0 )
+      if ( name == "Reply-To" )
          replyToSet = true;
-      else if ( wxStricmp(name, "X-Mailer") == 0 )
+      else if ( name == "X-Mailer" )
          xmailerSet = true;
 
 
-      m_headerNames[h] = strutil_strdup(name);
+      // Conversion to ASCII is safe because HeaderName::IsValid() would have
+      // returned false if we had any non-ASCII characters in the name.
+      m_headerNames[h] = strutil_strdup(i->m_name.ToAscii());
       m_headerValues[h] = strutil_strdup(value);
 
       h++;

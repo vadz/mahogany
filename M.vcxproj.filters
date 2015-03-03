@@ -934,6 +934,9 @@
     <ClInclude Include="include\XFace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\mail\Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\M.rc">

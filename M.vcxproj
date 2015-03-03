@@ -1411,6 +1411,7 @@
     <ClInclude Include="include\MailFolder.h" />
     <ClInclude Include="include\MailFolderCC.h" />
     <ClInclude Include="include\MailFolderCmn.h" />
+    <ClInclude Include="include\mail\Header.h" />
     <ClInclude Include="include\MApplication.h" />
     <ClInclude Include="include\MAtExit.h" />
     <ClInclude Include="include\gui\MBookCtrl.h" />
