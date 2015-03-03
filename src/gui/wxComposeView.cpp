@@ -1907,6 +1907,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
 
    // second, ignore some headers which we always generate ourselves and don't
    // allow the user to override anyhow
+   ignoredHeaders.Add(_T("DATE"));
    ignoredHeaders.Add(_T("MESSAGE-ID"));
    ignoredHeaders.Add(_T("MIME-VERSION"));
    ignoredHeaders.Add(_T("CONTENT-TYPE"));
