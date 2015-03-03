@@ -1323,6 +1323,15 @@ SendMessageCC::Build(bool forStorage)
          return false;
       }
 
+      if ( !name.CanBeSetByUser() )
+      {
+         // We shouldn't be getting such headers at all here, but if we somehow
+         // do, ignore them.
+         wxLogDebug("Ignoring the value of not user-settable header \"%s\"",
+                    i->m_name);
+         continue;
+      }
+
       const wxCharBuffer value(MIME::EncodeHeader(i->m_value));
       if ( !value )
       {
