@@ -3928,8 +3928,20 @@ bool wxComposeView::StartExternalEditor()
 {
    if ( m_procExtEdit )
    {
-      wxLogError(_("External editor is already running (PID %d)"),
-                 m_pidEditor);
+#if wxCHECK_VERSION(3, 1, 0)
+      // Try to switch to the already running editor automatically.
+      if ( m_procExtEdit->Activate() )
+      {
+         wxLogStatus(_("Switch to the already running editor (PID %d)"),
+                     m_pidEditor);
+      }
+      else
+#endif // wx 3.1+
+      {
+         // And fall back to telling the user to do it manually if this failed.
+         wxLogError(_("External editor is already running (PID %d)"),
+                    m_pidEditor);
+      }
 
       // ext editor is running
       return true;
