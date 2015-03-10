@@ -129,8 +129,8 @@
 // wxWindows stuff
 // ----------------------------------------------------------------------------
 
-#if !wxCHECK_VERSION(2, 9, 1)
-#  error "This version of Mahogany requires wxWidgets 2.9.1 or higher."
+#if !wxCHECK_VERSION(3, 0, 0)
+#  error "This version of Mahogany requires wxWidgets 3.0 or higher."
 #endif
 
 #ifdef USE_THREADS
