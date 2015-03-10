@@ -4185,7 +4185,9 @@ wxComposeView::InsertData(void *data,
 
 // insert file data
 void
-wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
+wxComposeView::InsertFile(const wxChar *fileName,
+                          const wxChar *mimetype,
+                          const wxChar *name)
 {
    CHECK_RET( !strutil_isempty(fileName), _T("filename can't be empty") );
 
@@ -4212,7 +4214,10 @@ wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
 
    AttachmentProperties props;
    props.filename = filename;
-   props.name = wxFileNameFromPath(filename);
+   if ( !strutil_isempty(name) )
+      props.name = name;
+   else
+      props.name = wxFileNameFromPath(filename);
    props.mimetype = strMimeType;
    mc->SetFile(props.filename);
    mc->SetName(props.name);

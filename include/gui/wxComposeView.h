@@ -144,8 +144,9 @@ public:
    // implement Composer pure virtuals
    virtual void InitText(Message *msg = NULL, const MessageView *msgview = NULL);
    virtual void Launch();
-   virtual void InsertFile(const wxChar *filename = NULL,
-                           const wxChar *mimetype = NULL);
+   virtual void InsertFile(const wxChar *filename,
+                           const wxChar *mimetype = NULL,
+                           const wxChar *name     = NULL);
 
    virtual void InsertData(void *data,
                            size_t length,

@@ -273,12 +273,13 @@ public:
    virtual void Launch() = 0;
 
    /** insert a file into buffer
-       @param filename file to insert (ask the user if NULL)
+       @param filename file to insert (must be valid)
        @param mimetype mimetype to use (auto detect if NULL)
-       @param num_mimetype numeric mimetype
+       @param name name in the attachment (same as file name if NULL)
     */
-   virtual void InsertFile(const wxChar *filename = NULL,
-                           const wxChar *mimetype = NULL) = 0;
+   virtual void InsertFile(const wxChar *filename,
+                           const wxChar *mimetype = NULL,
+                           const wxChar *name     = NULL) = 0;
 
    /** Insert MIME content data
        @param data pointer to data (we will free() it later)
