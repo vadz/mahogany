@@ -88,6 +88,7 @@
 #include "mail/Header.h"
 #include "mail/MimeDecode.h"
 
+#include "ConfigSourcesAll.h"
 #include "TemplateDialog.h"
 #include "AttachDialog.h"
 #include "MFolder.h"
@@ -4435,17 +4436,63 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
 
 void wxComposeView::LetUserAddAttachment()
 {
+   // Read the name of the directory used the last time. The name of the last
+   // attached file doesn't seem to be important as it would be rarely useful
+   // to attach the same file twice -- but it is common to attach files from
+   // the same directory as the last time.
+   static const char* const SETTINGS_PATH = "/Settings/FilePrompts";
+   static const char* const ATTACHMENT_DIR_KEY = "MsgInsertPath";
+
+   wxConfigBase* const config = AllConfigSources::Get().GetLocalConfig();
+   wxCHECK_RET( config, wxS("no local config?") );
+
+   // Try to use the value specific to the associated folder, falling back to
+   // its parent recursively as usual.
+   const wxString folderPath = m_Profile->GetFolderName();
+   config->SetPath(wxString::Format("%s/%s", SETTINGS_PATH, folderPath));
+
+   wxString dir;
+   for ( ;; )
+   {
+      if ( config->Read(ATTACHMENT_DIR_KEY, &dir) )
+         break;
+
+      if ( config->GetPath() == SETTINGS_PATH )
+         break;
+
+      config->SetPath("..");
+   }
+
+
+   // Now show the dialog to the user.
+   wxFileDialog dialog
+                (
+                  this,
+                  _("Please choose files to insert."),
+                  dir, wxString(),
+                  wxGetTranslation(wxALL_FILES),
+                  wxFD_OPEN | wxFD_MULTIPLE | wxFD_FILE_MUST_EXIST
+                );
+
+   if ( dialog.ShowModal() != wxID_OK )
+   {
+      // Dialog cancelled by user.
+      return;
+   }
+
+   config->Write(wxString::Format
+                           (
+                              "%s/%s/%s",
+                              SETTINGS_PATH, folderPath, ATTACHMENT_DIR_KEY
+                           ),
+                 dialog.GetDirectory());
+
+
+   // Finally do attach the files.
    wxArrayString filenames;
-   size_t nFiles = wxPFilesSelector
-                   (
-                    filenames,
-                    _T("MsgInsert"),
-                    _("Please choose files to insert."),
-                    NULL, _T("dead.letter"), NULL,
-                    wxGetTranslation(wxALL_FILES),
-                    wxFD_OPEN | wxFD_FILE_MUST_EXIST,
-                    this
-                   );
+   dialog.GetPaths(filenames);
+
+   const size_t nFiles = filenames.size();
    for ( size_t n = 0; n < nFiles; n++ )
    {
       InsertFile(filenames[n]);
