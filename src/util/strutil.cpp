@@ -458,39 +458,6 @@ strutil_expandpath(const String &ipath)
       return ipath;
 }
 
-/** Cut off last directory from path and return string before that.
-
-    @param pathname the path in which to go up
-    @param separator the path separator
-    @return the parent directory to the one specified
-*/
-String
-strutil_path_parent(String const &path, wxChar separator)
-{
-   const wxChar *cptr = wxStrrchr(path.c_str(),separator);
-   if(cptr == NULL) // not found
-      return wxEmptyString;
-
-   return path.Left(cptr - path.c_str());
-}
-
-/** Cut off last name from path and return string that (filename).
-
-    @param pathname the path
-    @param separator the path separator
-    @return the parent directory to the one specified
-*/
-String
-strutil_path_filename(String const &path, wxChar separator)
-{
-   const wxChar *cptr = wxStrrchr(path.c_str(),separator);
-   if(cptr == NULL) // not found
-      return wxEmptyString;
-
-   return String(cptr+1);
-}
-
-
 
 bool
 strutil_enforceCRLF(unsigned char *out, size_t outLen, const unsigned char *in)

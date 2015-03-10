@@ -179,30 +179,6 @@ char *strutil_strsep(char **stringp, const char *delim);
 String
 strutil_expandfoldername(const String &name, MFolderType ftype = MF_FILE);
 
-#ifdef OS_UNIX
-#   define STRUTIL_PATH_SEPARATOR '/'
-#else
-#   define STRUTIL_PATH_SEPARATOR '\\'
-#endif
-
-/** Cut off last directory from path and return string before that.
-
-    @param pathname the path in which to go up
-    @param separator the path separator
-    @return the parent directory to the one specified
-*/
-String
-strutil_path_parent(String const &path, wxChar separator = STRUTIL_PATH_SEPARATOR);
-
-/** Cut off last name from path and return string that (filename).
-
-    @param pathname the path
-    @param separator the path separator
-    @return the parent directory to the one specified
-*/
-String
-strutil_path_filename(String const &path, wxChar separator = STRUTIL_PATH_SEPARATOR);
-
 /** Compare 2 filenames and return true if they refer to the same file. Notice
     that the files don't have to exist when this function is called.
 */
