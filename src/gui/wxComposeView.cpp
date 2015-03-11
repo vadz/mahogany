@@ -4434,6 +4434,92 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
    }
 }
 
+namespace
+{
+
+// Helper class taking care of creating an additional text control in
+// wxFileDialog and returning its contents.
+class AttachNamesInFileDialog
+{
+public:
+   explicit AttachNamesInFileDialog(wxFileDialog& dialog)
+   {
+      ms_attachName = this;
+
+      m_text = NULL;
+
+      dialog.SetExtraControlCreator(Create);
+   }
+
+   static wxWindow* Create(wxWindow* parent)
+   {
+      wxCHECK( ms_attachName, NULL );
+
+      return ms_attachName->DoCreate(parent);
+   }
+
+   virtual ~AttachNamesInFileDialog()
+   {
+      ms_attachName = NULL;
+   }
+
+   wxArrayString GetNames() const
+   {
+      return wxSplit(m_names, ' ');
+   }
+
+private:
+   wxWindow *DoCreate(wxWindow* parent)
+   {
+      wxPanel* const panel = new wxPanel(parent);
+
+      // Currently we just use a single text control. This is fine for a single
+      // attachment but not so great for multiple ones (when the user is
+      // supposed to enter space-separated names manually and use backslash to
+      // escape any spaces inside the names), however it's not obvious how
+      // could this be improved as we don't get any notifications about the
+      // change in the number of the selected files from wx.
+
+      wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+
+#ifdef OS_WIN
+      // At least under MSW things look better indented a bit.
+      sizer->AddSpacer(10);
+#endif // OS_WIN
+
+      sizer->Add(new wxStaticText(panel, wxID_ANY,
+                                  "Optional attachment name overriding file name:"),
+                 wxSizerFlags().Centre().Border());
+
+      m_text = new wxTextCtrl(panel, wxID_ANY, wxString(),
+                              wxDefaultPosition,
+                              wxSize(40*panel->GetCharWidth(), -1));
+      m_text->SetHint(_("attachment name in the message"));
+
+      sizer->Add(m_text, wxSizerFlags(1).Centre().Border());
+
+      panel->SetSizerAndFit(sizer);
+
+      // We need to bind to this event to update m_names immediately as m_text
+      // can't be used any more once the dialog is closed.
+      m_text->Bind(wxEVT_TEXT,
+                   [=](wxCommandEvent&) { m_names = m_text->GetValue(); });
+
+      return panel;
+   }
+
+   wxTextCtrl* m_text;
+   wxString m_names;
+
+   // The unique (because we can only be used from the main thread and the file
+   // dialog is not reentrant) object being currently used.
+   static AttachNamesInFileDialog* ms_attachName;
+};
+
+AttachNamesInFileDialog* AttachNamesInFileDialog::ms_attachName = NULL;
+
+} // anonymous namespace
+
 void wxComposeView::LetUserAddAttachment()
 {
    // Read the name of the directory used the last time. The name of the last
@@ -4474,6 +4560,8 @@ void wxComposeView::LetUserAddAttachment()
                   wxFD_OPEN | wxFD_MULTIPLE | wxFD_FILE_MUST_EXIST
                 );
 
+   AttachNamesInFileDialog attachNames(dialog);
+
    if ( dialog.ShowModal() != wxID_OK )
    {
       // Dialog cancelled by user.
@@ -4492,10 +4580,12 @@ void wxComposeView::LetUserAddAttachment()
    wxArrayString filenames;
    dialog.GetPaths(filenames);
 
+   const wxArrayString names = attachNames.GetNames();
+
    const size_t nFiles = filenames.size();
    for ( size_t n = 0; n < nFiles; n++ )
    {
-      InsertFile(filenames[n]);
+      InsertFile(filenames[n], NULL, n < names.size() ? names[n] : wxString());
    }
 }
 
