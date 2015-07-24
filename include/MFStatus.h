@@ -67,7 +67,7 @@ struct MailFolderStatus
 };
 
 /**
-   Formats a message replacing the occurences of the format specifiers with the
+   Formats a message replacing the occurrences of the format specifiers with the
    data. The format specifiers (listed with their meanings) are:
 
       %f          folder name

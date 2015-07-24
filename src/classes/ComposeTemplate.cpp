@@ -1611,7 +1611,7 @@ VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
 
 extern bool TemplateNeedsHeaders(const String& templateValue)
 {
-   // check if there are any occurences of "${message:xxx}" in the template
+   // check if there are any occurrences of "${message:xxx}" in the template
    //
    // TODO: really parse it using a specialized expanded and without any
    //       sink, just checking if message category appears in it

@@ -3166,7 +3166,7 @@ wxComposeView::DoInitText(Message *msgOrig)
 
       if ( m_textToQuote.empty() )
       {
-         // we don't want to quote anything at all, so remove all occurences of
+         // we don't want to quote anything at all, so remove all occurrences of
          // $QUOTE and/or $TEXT templates in the string -- and also remove
          // anything preceding them assuming that it can only be the
          // attribution line which shouldn't be left if we don't quote anything
@@ -3178,7 +3178,7 @@ wxComposeView::DoInitText(Message *msgOrig)
          const wxChar *pcStart = templateValue.c_str();
          for ( const wxChar *pc = pcStart; ; )
          {
-            // find and skip over the next macro occurence
+            // find and skip over the next macro occurrence
             pc = wxStrchr(pc, _T('$'));
             if ( !pc++ )
                break;

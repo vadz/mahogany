@@ -1406,7 +1406,7 @@ wxLayoutWindow::Find(const wxString &needle,
       RequestUpdate();
 
       // advance beyond the end of the current match so that FindAgain() finds
-      // the next occurence (if any), not the same one
+      // the next occurrence (if any), not the same one
       m_llist->MoveCursorHorizontally(1);
 
       return true;

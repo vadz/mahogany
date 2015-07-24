@@ -73,14 +73,14 @@
 
 // XNOFIXME: put this code in strutil.cpp.
 //
-// Removes all occurences of Re: Re[n]: Re(n):
+// Removes all occurrences of Re: Re[n]: Re(n):
 // without considering the case, and remove unneeded
 // spaces (start, end, or multiple consecutive spaces).
 // Reply prefixes are removed only at the start of the
 // string or just after a list prefix (i.e. [ListName]).
 //
 // Returns the resulting string. replyPrefixSeen is set
-// to true if at least one occurence of 'Re: ', 'Re[n]: '
+// to true if at least one occurrence of 'Re: ', 'Re[n]: '
 // or 'Re(n): ' has been removed. It is set to false
 // otherwise.
 //

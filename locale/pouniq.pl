@@ -48,7 +48,7 @@ while (<>) {
         else {                              # end of msgid
             if ( exists $messages{$msgid} ) {
                 $dupFound = 1;
-                printf "Duplicate entry found: msgid = '%s', first occurence " .
+                printf "Duplicate entry found: msgid = '%s', first occurrence " .
                        "at line %d, another at line %d\n",
                        $msgid, $messages{$msgid}, $. - 1;
                 $skip = 1;

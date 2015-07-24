@@ -68,7 +68,7 @@ private:
 
    // find dialog events
 
-   // find next occurence
+   // find next occurrence
    void OnFindDialogNext(wxFindDialogEvent& event);
 
    // find dialog has been closed

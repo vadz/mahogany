@@ -65,7 +65,7 @@ public:
      DecRef()'d by the caller.
 
      We ignore the login parameter if it is empty but using this "feature" is
-     just a sign of bad design and all occurences of this should go away:
+     just a sign of bad design and all occurrences of this should go away:
      unfortunately, currently we don't keep the login used to open the folder
      anywhere so when we want to close the folder later, for example, we don't
      have the login any more and our only hope is that we have only one folder

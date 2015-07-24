@@ -418,7 +418,7 @@ void ClickableURL::OpenInBrowser(int options) const
                   // this is a bit naive but should work as -1 can't appear
                   // elsewhere in the DDE topic, normally
                   if ( ddeCmd.Replace("-1", "0",
-                                      FALSE /* only first occurence */) == 1 )
+                                      FALSE /* only first occurrence */) == 1 )
                   {
                      // and also replace the parameters
                      if ( ddeCmd.Replace("%1", m_url, FALSE) == 1 )

@@ -86,7 +86,7 @@
 
 // FIXME under MSW, this constant is needed to make the thing properly redraw
 //       itself - I don't know where the size calculation error is and I can't
-//       waste time looking for it right now. Search for occurences of
+//       waste time looking for it right now. Search for occurrences of
 //       MSW_CORRECTION to find all the places where I did it.
 #ifdef __WXMSW__
    static const int MSW_CORRECTION = 10;
