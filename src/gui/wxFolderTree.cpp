@@ -220,7 +220,9 @@ public:
 
       // set the "own" status for this folder, this doesn't always change the
       // folder appearance as GetShownStatus() might stay unchanged
-   void SetStatus(wxTreeCtrl *tree, const MailFolderStatus& status);
+   void SetStatus(wxTreeCtrl *tree,
+                  const String& statusFormat,
+                  MailFolderStatus& status);
 
       // translate MailFolder status to tree item status
    static Status GetTreeStatusFromMf(const MailFolderStatus& status);
@@ -245,10 +247,6 @@ protected:
 
       // update the status of the folder shown on screen
    void UpdateShownStatus(wxTreeCtrl *tree, Status statusShownBefore);
-
-   // get the label suffix, i.e. the part which is added to the label in the
-   // tree to show the number of messages in the folder
-   String GetLabelSuffix(const MailFolderStatus& status) const;
 
 private:
    // not implemented
@@ -1333,8 +1331,9 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    // don't bother getting status for which we don't show the status in the
    // tree anyhow
    Profile_obj profile(folder->GetProfile());
+   const String statusFormat = READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT);
    const bool
-      hasStatus = !READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT).empty()
+      hasStatus = !statusFormat.empty()
                      && MfStatusCache::Get()->GetStatus(fullname, &status);
 
    int image = GetFolderIconForDisplay(folder);
@@ -1351,7 +1350,12 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
       if ( hasStatus )
       {
          // show the number of messages in the tree
-         label += GetLabelSuffix(status);
+         label += FormatFolderStatusString
+                  (
+                     statusFormat,
+                     fullname,
+                     &status
+                  );
       }
       //else: no status, don't show anything
 
@@ -1373,33 +1377,13 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    // restore cached status
    if ( hasStatus )
    {
-      SetStatus(tree, status);
+      SetStatus(tree, statusFormat, status);
    }
 }
 
 // ----------------------------------------------------------------------------
 // wxFolderTreeNode status code
 // ----------------------------------------------------------------------------
-
-String wxFolderTreeNode::GetLabelSuffix(const MailFolderStatus& mfStatus) const
-{
-   Profile_obj profile(GetFolder()->GetProfile());
-
-   String fmt = READ_CONFIG(profile, MP_FTREE_FORMAT);
-   if ( fmt.empty() )
-   {
-      // don't bother calling FormatFolderStatusString
-      return fmt;
-   }
-
-   return FormatFolderStatusString
-          (
-            fmt,
-            GetFolder()->GetFullName(),     // name
-            (MailFolderStatus *)&mfStatus,  // const_cast is harmless
-            NULL                            // don't use mail folder
-          );
-}
 
 /* static */
 wxFolderTreeNode::Status
@@ -1516,7 +1500,8 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
 }
 
 void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree,
-                                 const MailFolderStatus& mfStatus)
+                                 const String& statusFormat,
+                                 MailFolderStatus& mfStatus)
 {
    Status status = GetTreeStatusFromMf(mfStatus);
 
@@ -1531,7 +1516,12 @@ void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree,
    //else: status (i.e. colour) didn't change
 
    // change label if we show the number of messages in it
-   String suffix = GetLabelSuffix(mfStatus);
+   const String suffix = FormatFolderStatusString
+                         (
+                           statusFormat,
+                           GetFolder()->GetFullName(),
+                           &mfStatus
+                         );
    if ( !suffix.empty() )
    {
       wxString textOld = tree->GetItemText(GetId()),
@@ -3402,7 +3392,8 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    //     we'd have to rescan the tree completely each time the user does "show
    //     hidden folders in tree"
    Profile_obj profile(folder->GetProfile());
-   if ( READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT).empty() )
+   const String statusFormat = READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT);
+   if ( statusFormat.empty() )
    {
       wxLogTrace(M_TRACE_MFSTATUS,
                  _T("Folder tree: ignoring it because we don't show status"));
@@ -3492,7 +3483,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 
    // and do update its status
    wxFolderTreeNode *node = GetFolderTreeNode(item);
-   node->SetStatus(this, status);
+   node->SetStatus(this, statusFormat, status);
 
    wxLogTrace(M_TRACE_MFSTATUS, _T("Folder tree: updated status for '%s'"),
               folderName.c_str());
