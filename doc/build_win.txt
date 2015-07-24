@@ -2,26 +2,22 @@ File:		build_win.txt
 Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Modified by:	Nerijus Baliunas <nerijus@users.sf.net> (cygwin part)
-Last modified:	2009-12-05
-Version:	the information in this file applies to the svn sources
+Last modified:	2015-07-24
+Version:	the information in this file applies to git master
 
 0. Requirements
 ---------------
 
-a) a compiler: currently, the supported compilers for building Mahogany are
-   MS Visual C++ 9 (a.k.a. Visual Studio 2008) and cygwin. Previous versions
-   of Visual C++ (7.1/2005) could probably be used as well but the last
-   version of the project/solution for VC 7.1 was in svn r7575 and you would
-   need to check it out manually and possible update, i.e. there is no
-   guarantee that it is going to work out of the box and probably will require
-   some effort from your part.
+a) Microsoft Visual C++ compiler: currently, version 2013 is used for building
+   Mahogany. Older versions of Visual C++ (back to 2010) could probably be
+   still used as well but were not recently tested. Newer versions (2015 as of
+   this writing) can almost certainly be used as well.
 
-   If you are interested in building using another compiler (mingw32, BC++)
+   If you are interested in building using another compiler (e.g. mingw32)
    please contact us and we will try to help you.
 
-b) svn client: you need to have daily access to Mahogany (and sometimes
-   wxWidgets) source tree, and the svn is the only way to keep up to date.
+b) Git: you need to have access to Mahogany (and sometimes wxWidgets) source
+   tree.
 
 c) GNU m4 from cygwin tools: this is not an absolute requirement, however you
    will not be able to compile *.mid (Mahogany Interface Description) files if
@@ -39,17 +35,12 @@ a) wxWidgets
    Mahogany depends on wxWidgets and prior to compiling Mahogany you need to
 build the wxMSW library.
 
-   Mahogany requires wxWidgets 2.9 (building with 2.8 should still be possible
-but the project files would need to be modified). The latest 2.9.x release
+   Mahogany requires wxWidgets 3.0 or later. The latest available 3.0.x release
 should be used.
 
    Before building Mahogany you will need to build wxWidgets. To do it, you
-should open build/msw/wx_vc9.sln in wxWidgets directory and build all projects
-in it. You may use extra\scripts\wxmsw_setup.h file instead of the standard
-setup.h when building if you want to disable all the features not needed by
-Mahogany but doing this is optional and you should revert to the standard
-wx/setup.h if using wxmsw_setup.h results in errors (it is not always up to
-date...).
+should open build/msw/wx_vc12.sln in wxWidgets directory and build all projects
+in it.
 
    Finally, set wxwin environment variable to the location of wxWidgets
 sources before opening M.sln as it uses it to find wxWidgets headers and
@@ -60,11 +51,10 @@ b) Python
 ---------
 
    If you want to build Mahogany with an embedded Python interpreter, you need
-to have Python 2.6 installed (alternatively, you may build any Python from
-sources using VC 9 but Python 2.6 is built with this compiler out of the box
-which explains why using it is the best). You also need to add the path to
-include subdirectory of your Python installation to the "Include files" list
-in "Tools|Options|Projects and Solutions|VC++ Directories".
+to have Python 2.6 or 2.7 built with the same compiler you use for building
+Mahogany itself installed. You also need to add the path to include
+subdirectory of your Python installation to the "Include files" list in
+"Tools|Options|Projects and Solutions|VC++ Directories".
 
    Otherwise you may simply remove or comment out the line #defining USE_PYTHON
 in include/config_nt.h to disable embedded Python. You will also have to
@@ -92,60 +82,5 @@ elsewhere in your PATH).
 the debug configuration and run it under debugger, this often provides valuable
 additional information.
 
-
-2. Cygwin
----------
-
-a) Build process
-----------------
-
-g++ 3.x can not compile Mahogany currently, so I used g++ 2.95.3. As compiler
-version should be the same when compiling both wxWidgets and Mahogany, we should
-use g++ 2.95.3 for compiling wxWidgets as well. Just use
-
-cd <path to wxWidgets sources>
-mkdir build.cygwin.gcc295
-cd build.cygwin.gcc295
-CC=gcc-2 CXX=g++-2 ../configure
-make
-make install
-
-cd <path to Mahogany sources>
-mkdir build.cygwin.gcc295
-cd build.cygwin.gcc295
-CC=gcc-2 CXX=g++-2 ../configure --with-modules=static
-make
-make install
-
-in cygwin bash shell.
-
-You can also compile with -mno-cygwin switch, i.e. mingw version. Use
-CC='gcc-2 -mno-cygwin' CXX='g++-2 -mno-cygwin' OSTYPE=mingw ../configure --with-modules=static
-
-
-b) Common problems
-------------------
-
-Linking Mahogany compiled with debug info requires a lot of memory, so please
-disable debugging if you experience out of memory problems.
-
-SSL does not work with cygwin.
-
-IMAP does not work with mingw.
-
-
-3. WINE
--------
-
-Although it's not for building under MS Windows, we'll describe it here.
-
-a) Build process
-----------------
-
-cd <path to Mahogany sources>
-mkdir build.wine
-cd build.wine
-CC=winegcc CXX=wineg++ ../configure --without-python --without-dspam --with-modules=static --disable-dialup --without-ssl
-make
 
 vi: ts=8 sw=3 nolist nocin ai:
