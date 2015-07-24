@@ -1329,7 +1329,13 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    String fullname = folder->GetFullName();
 
    MailFolderStatus status;
-   bool hasStatus = MfStatusCache::Get()->GetStatus(fullname, &status);
+
+   // don't bother getting status for which we don't show the status in the
+   // tree anyhow
+   Profile_obj profile(folder->GetProfile());
+   const bool
+      hasStatus = !READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT).empty()
+                     && MfStatusCache::Get()->GetStatus(fullname, &status);
 
    int image = GetFolderIconForDisplay(folder);
 
