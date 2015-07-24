@@ -5,6 +5,7 @@ include/config.h
 lib/dspam/src/auto-config.h
 lib/imap/src/osdep/nt/ip_nt.c
 lib/imap/src/osdep/nt/osdep.h
+python.vsprops
 release/
 src/Python/HeaderInfo_swig.cpp
 src/Python/MDialogs_swig.cpp
