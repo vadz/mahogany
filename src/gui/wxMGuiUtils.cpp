@@ -121,10 +121,11 @@ CreateFontFromDesc(const String& fontDesc, int fontSize, int fontFamily)
    // given size and family if we have [either of] them
    if ( !font.Ok() && (fontSize != -1 || fontFamily != wxFONTFAMILY_DEFAULT) )
    {
-      if ( fontSize == -1 )
-         fontSize = wxNORMAL_FONT->GetPointSize();
+      wxFontInfo info(fontSize);
+      if ( fontFamily != wxFONTFAMILY_DEFAULT )
+         info.Family(static_cast<wxFontFamily>(fontFamily));
 
-      font = wxFontInfo(fontSize).Family(static_cast<wxFontFamily>(fontFamily));
+      font = wxFont(info);
    }
 
    return font;
