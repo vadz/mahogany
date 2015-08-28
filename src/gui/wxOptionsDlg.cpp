@@ -534,10 +534,7 @@ enum ConfigFields
    ConfigField_HelpersSkip0,
    ConfigField_HelpersHelpBrowser,
    ConfigField_Browser,
-#ifndef OS_WIN    // we don't care about browser kind under Windows
-   ConfigField_BrowserIsNetscape,
-#endif // !Win
-   ConfigField_BrowserInNewWindow,
+   ConfigField_BrowserOther,
 
 #ifdef OS_UNIX
    ConfigField_HelpersSkip1,
@@ -1808,19 +1805,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "Leave it empty to use the system default browser."),
                                                   Field_Message, -1                      },
    { gettext_noop("Open &URLs with"),             Field_File,    -1                      },
-      // we don't care if it is Netscape or not under Windows
-#ifndef OS_WIN
-   { gettext_noop("URL &browser is Netscape"),    Field_Bool,    -1                      },
-#endif // OS_UNIX
-   { gettext_noop("Open browser in new &window"), Field_Bool,
-      // under Unix we can only implement this with Netscape, under Windows it
-      // also works with IE (and presumably others too)
-#ifdef OS_WIN
-                  -1
-#else // Unix
-                  ConfigField_BrowserIsNetscape
-#endif // Win/Unix
-   },
+   { gettext_noop("Another browser"),             Field_File,    -1                      },
 #ifdef OS_UNIX
    { "",                                           Field_Message, -1 },
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
@@ -2350,10 +2335,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BROWSER),
-#ifndef OS_WIN
-   CONFIG_ENTRY(MP_BROWSER_ISNS),
-#endif // OS_WIN
-   CONFIG_ENTRY(MP_BROWSER_INNW),
+   CONFIG_ENTRY(MP_BROWSER_OTHER),
 
 #ifdef OS_UNIX
    CONFIG_NONE(),

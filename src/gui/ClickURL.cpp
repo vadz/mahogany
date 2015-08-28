@@ -65,7 +65,7 @@ enum
 {
    WXMENU_URL_BEGIN,
    WXMENU_URL_OPEN,
-   WXMENU_URL_OPEN_NEW,
+   WXMENU_URL_OPEN_OTHER,
    WXMENU_URL_COMPOSE,
    WXMENU_URL_REPLYTO,
    WXMENU_URL_FORWARDTO,
@@ -107,8 +107,7 @@ private:
 
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_BROWSER;
-extern const MOption MP_BROWSER_INNW;
-extern const MOption MP_BROWSER_ISNS;
+extern const MOption MP_BROWSER_OTHER;
 extern const MOption MP_WHITE_LIST;
 
 // ============================================================================
@@ -157,7 +156,7 @@ UrlPopup::UrlPopup(const ClickableURL *clickableURL)
    else // !mailto
    {
       Append(WXMENU_URL_OPEN, _("&Open"));
-      Append(WXMENU_URL_OPEN_NEW, _("Open in &new window"));
+      Append(WXMENU_URL_OPEN_OTHER, _("Open in &another browser"));
    }
 
    AppendSeparator();
@@ -171,11 +170,11 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
    switch ( id )
    {
       case WXMENU_URL_OPEN:
-      case WXMENU_URL_OPEN_NEW:
+      case WXMENU_URL_OPEN_OTHER:
          m_clickableURL->OpenInBrowser
                         (
                            id == WXMENU_URL_OPEN ? URLOpen_Default
-                                                 : URLOpen_New_Window
+                                                 : URLOpen_Other
                         );
          break;
 
@@ -382,7 +381,7 @@ String ClickableURL::GetLabel() const
 
 void ClickableURL::OpenInBrowser(int options) const
 {
-   bool inNewWindow = (options & URLOpen_New_Window) != 0;
+   bool anotherBrowser = (options & URLOpen_Other) != 0;
 
    wxFrame *frame = m_msgView->GetParentFrame();
    wxLogStatus(frame, _("Opening URL '%s'..."), m_url.c_str());
@@ -394,12 +393,13 @@ void ClickableURL::OpenInBrowser(int options) const
 
    bool bOk = false;
 
-   String browser = READ_CONFIG(GetProfile(), MP_BROWSER);
+   String browser = READ_CONFIG(GetProfile(), anotherBrowser ? MP_BROWSER_OTHER : MP_BROWSER);
    if ( browser.empty() )
    {
 #ifdef OS_WIN
       // ShellExecute() always opens in the same window,
       // so do it manually for new window
+#if 0
       if ( inNewWindow )
       {
          wxRegKey key(wxRegKey::HKCR, m_url.BeforeFirst(':') + "\\shell\\open");
@@ -435,6 +435,7 @@ void ClickableURL::OpenInBrowser(int options) const
             }
          }
       }
+#endif
 
       if ( !command.empty() )
       {
@@ -476,36 +477,6 @@ void ClickableURL::OpenInBrowser(int options) const
    }
    else // browser setting non empty, use it
    {
-#ifdef OS_UNIX
-      if ( READ_CONFIG(GetProfile(), MP_BROWSER_ISNS) ) // try re-loading first
-      {
-         wxString lockfile;
-         wxGetHomeDir(&lockfile);
-         if ( !wxEndsWithPathSeparator(lockfile) )
-            lockfile += DIR_SEPARATOR;
-         lockfile << _T(".netscape") << DIR_SEPARATOR << _T("lock");
-         struct stat statbuf;
-
-         // cannot use wxFileExists here, because it's a link pointing to a
-         // non-existing location!
-         if ( lstat(lockfile.mb_str(), &statbuf) == 0 )
-         {
-            command << browser << _T(" -remote openURL(") << m_url;
-            if ( inNewWindow )
-            {
-               command << _T(",new-window)");
-            }
-            else
-            {
-               command << _T(")");
-            }
-            wxString errmsg;
-            errmsg.Printf(_("Could not launch browser: '%s' failed."),
-                          command.c_str());
-            bOk = m_msgView->LaunchProcess(command, errmsg);
-         }
-      }
-#endif // Unix
       // either not Netscape or Netscape isn't running or we have non-UNIX
       if ( !bOk )
       {
@@ -562,9 +533,7 @@ void ClickableURL::OnLeftClick() const
    }
    else // non mailto URL
    {
-      OpenInBrowser(READ_CONFIG_BOOL(GetProfile(), MP_BROWSER_INNW)
-                     ? URLOpen_New_Window
-                     : URLOpen_Default);
+      OpenInBrowser(URLOpen_Default);
    }
 }
 

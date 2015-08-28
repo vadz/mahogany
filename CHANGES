@@ -9,6 +9,8 @@
 Release 0.68 'Cynthia' September xx, 2010
 -----------------------------------------
 
+2015-08-28 NB: Removed "Browser is Netscape" and "Open in new window" and
+                  added "Open in another browser" instead
 2012-07-28 VZ: Optionally use popup notifications for new mail reporting.
 2012-07-21 VZ: Make it possible to set base mailbox path in the GUI.
 2011-12-26 VZ: Allow to create and configure new folders in "Quick filter".

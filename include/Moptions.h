@@ -357,8 +357,7 @@ extern const MOption MP_MSGS_REMOVE_LIST_PREFIX_BREAKING;
 extern const MOption MP_MSGS_SEARCH_CRIT;
 extern const MOption MP_MSGS_SEARCH_ARG;
 extern const MOption MP_BROWSER;
-extern const MOption MP_BROWSER_ISNS;
-extern const MOption MP_BROWSER_INNW;
+extern const MOption MP_BROWSER_OTHER;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
 extern const MOption MP_PGP_COMMAND;
@@ -1119,10 +1118,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGS_SEARCH_ARG_NAME    "SearchArgument"
 /// open URLs with
 #define   MP_BROWSER_NAME         "Browser"
-/// Browser is netscape variant
-#define   MP_BROWSER_ISNS_NAME    "BrowserIsNetscape"
-/// Open netscape in new window
-#define   MP_BROWSER_INNW_NAME    "BrowserInNewWindow"
+/// another browser
+#define   MP_BROWSER_OTHER_NAME    "BrowserOther"
 /// external editor to use for message composition (use %s for filename)
 #define MP_EXTERNALEDITOR_NAME    "ExternalEditor"
 /// start external editor automatically?
@@ -2101,13 +2098,11 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGS_SEARCH_ARG_DEFVAL   ""
 /// open URLs with
 #ifdef  OS_UNIX
-#  define   MP_BROWSER_DEFVAL         "netscape"
-#  define   MP_BROWSER_ISNS_DEFVAL    1
-#  define   MP_BROWSER_INNW_DEFVAL    1
+#  define   MP_BROWSER_DEFVAL         "firefox"
+#  define   MP_BROWSER_OTHER_DEFVAL   "google-chrome"
 #else  // under Windows, we know better...
 #  define   MP_BROWSER_DEFVAL         ""
-#  define   MP_BROWSER_ISNS_DEFVAL    0L
-#  define   MP_BROWSER_INNW_DEFVAL    1L
+#  define   MP_BROWSER_OTHER_DEFVAL   ""
 #endif // Unix/Win
 
 /// external editor to use for message composition (use %s for filename)

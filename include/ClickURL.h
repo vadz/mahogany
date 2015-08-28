@@ -23,8 +23,8 @@ class Profile;
 /// options for OpenInBrowser() (these are bit masks)
 enum
 {
-   URLOpen_Default    = 0,
-   URLOpen_New_Window = 1
+   URLOpen_Default = 0,
+   URLOpen_Other   = 1
 };
 
 // ----------------------------------------------------------------------------

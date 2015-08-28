@@ -22,9 +22,8 @@ MP_BBDB_GENERATEUNIQUENAMES	BbdbGenerateUniqueNames	0L
 MP_BBDB_IGNOREANONYMOUS	BbdbIgnoreAnonymous	0L
 MP_BBDB_SAVEONEXIT	BbdbSaveOnExit	M_ACTION_PROMPT
 MP_BEACONHOST	BeaconHost	""
-MP_BROWSER	Browser	"netscape" (Unix) or "" (elsewhere)
-MP_BROWSER_ISNS	BrowserIsNetscape	1 (Unix) or 0 (elsewhere)
-MP_BROWSER_INNW	BrowserInNewWindow	1
+MP_BROWSER	Browser	"firefox" (Unix) or "" (elsewhere)
+MP_BROWSER_OTHER	BrowserOther	"google-chrome" (Unix) or "" (elsewhere)
 MP_CHARSET	CharSet	"ISO-8859-1"
 MP_CONFIRM_SEND	ConfigSend	0l
 MP_COMPOSETEMPLATEPATH_GLOBAL	CompooseTemplatePath"
