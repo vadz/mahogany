@@ -943,7 +943,7 @@ long mh_ping (MAILSTREAM *stream)
 	    unlink (LOCAL->buf);/* flush this file */
 	  }
 	  sprintf (tmp,"Message copy to MH mailbox failed: %.80s",
-		   s,strerror (errno));
+		   strerror (errno));
 	  mm_log (tmp,ERROR);
 	  r = 0;		/* stop the snarf in its tracks */
 	}
