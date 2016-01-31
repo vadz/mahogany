@@ -208,53 +208,6 @@ unsigned long unix_crlflen (STRING *s)
   return i;
 }
 
-/* Undoubtably, I'm going to regret these two routines in the future.  I
- * regret them now.  Their purpose is to work around two problems in the
- * VC++ 6.0 C library:
- *  (1) tmpfile() creates the file in the current directory instead of a
- *	temporary directory
- *  (2) tmpfile() and fclose() think that on NT systems, it works to unlink
- *	the file while it's still open, so there's no need for the _tmpfname
- *	hook at fclose().  Unfortunately, that doesn't work in Win2K.
- * I would be delighted to have a better alternative.
- */
-
-#undef fclose			/* use the real fclose() in close_file() */
-
-/* Substitute for Microsoft's tmpfile() that uses the real temporary directory
- * Returns: FILE structure if success, NIL if failure
- */
-
-FILE *create_tempfile (void)
-{
-  FILE *ret = NIL;
-  char *s = _tempnam (getenv ("TEMP"),"msg");
-  if (s) {			/* if got temporary name... */
-				/* open file, and stash name on _tmpfname */
-    if (ret = fopen (s,"w+b")) ret->_tmpfname = s;
-    else fs_give ((void **) &s);/* flush temporary string */
-  }
-  return ret;
-}
-
-
-/* Substitute for Microsoft's fclose() that always flushes _tmpfname
- * Returns: FILE structure if success, NIL if failure
- */
-
-int close_file (FILE *stream)
-{
-  int ret;
-  char *s = stream->_tmpfname;
-  stream->_tmpfname = NIL;	/* just in case fclose() tries to delete it */
-  ret = fclose (stream);	/* close the file */
-  if (s) {			/* was there a _tmpfname? */
-    unlink (s);			/* yup, delete it */
-    fs_give ((void **) &s);	/* and flush the name */
-  }
-  return ret;
-}
-
 /* Get password from console
  * Accepts: prompt
  * Returns: password
