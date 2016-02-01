@@ -493,7 +493,8 @@ ExtractListPostAddress(const String& listPostHeader)
                // start of an URL, get it
                if ( wxStrncmp(++p, _T("mailto:"), MAILTO_LEN) != 0 )
                {
-                  if ( wxStrncmp(p, _T("http:"), 5) != 0 )
+                  if ( wxStrncmp(p, _T("http:"), 5) != 0 &&
+                        wxStrncmp(p, _T("https:"), 6) != 0 )
                   {
                      wxLogDebug(_T("Unknown URL scheme in List-Post (%s)"),
                                 listPostHeader.c_str());
