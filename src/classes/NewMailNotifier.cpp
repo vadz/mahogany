@@ -243,7 +243,7 @@ void DoNotify(unsigned long numFolders, const FolderNewMailInfo* folders)
       notification.SetTitle(title);
    }
 
-#if defined(__WXGTK__) && wxUSE_LIBNOTIFY
+#if defined(__WXGTK__) && wxUSE_LIBNOTIFY && !wxCHECK_VERSION(3, 1, 0)
    // Use a more appropriate stock icon under GTK.
    notification.GTKSetIconName("mail-message-new");
 #endif
