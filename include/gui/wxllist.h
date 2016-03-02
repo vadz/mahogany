@@ -1322,7 +1322,7 @@ class wxLayoutDataObject : public wxCustomDataObject
 public:
    wxLayoutDataObject()
       {
-         SetFormat(wxDataFormat("application/wxlayoutlist"));
+         SetFormat(wxDataFormat(wxS("application/wxlayoutlist")));
       }
 
    // type safe wrappers
