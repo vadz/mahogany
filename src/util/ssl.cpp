@@ -76,6 +76,12 @@ extern const MOption MP_SSL_DLL_SSL;
    #define ssl_STACK STACK
    #define sk_value_t char *
 #endif
+// OpenSSL 1.0.2g
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x1000207fL)
+   #define ssl_const3 const
+#else
+   #define ssl_const3
+#endif
 
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
@@ -136,7 +142,7 @@ SSL_DEF( sk_value_t, sk_value, (const ssl_STACK *s, int n), (s, n) );
 
 SSL_DEF_VOID( RAND_seed, (const void *buf,int num), (buf, num) );
 SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
-SSL_DEF( BIO *, BIO_new_mem_buf, (void *buf, int len), (buf, len) );
+SSL_DEF( BIO *, BIO_new_mem_buf, (ssl_const3 void *buf, int len), (buf, len) );
 SSL_DEF( int, BIO_free, (BIO *a), (a) );
 SSL_DEF( long, SSL_CTX_ctrl, (SSL_CTX *ctx,int cmd, long larg, ssl_parg parg), (ctx,cmd,larg,parg) );
 SSL_DEF_VOID( SSL_CTX_set_verify, (SSL_CTX *ctx,int mode, int (*callback)(int, X509_STORE_CTX *)), (ctx,mode,callback) );
