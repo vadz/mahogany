@@ -737,7 +737,7 @@ MessageCC::GetBody(void)
 
    if ( !(m_Body && m_Envelope) )
    {
-   ERRORMESSAGE((_T("failed to get body and envelope!")));
+      ERRORMESSAGE((_T("failed to get body and envelope!")));
    }
 }
 
