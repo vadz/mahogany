@@ -735,7 +735,10 @@ MessageCC::GetBody(void)
                                          FT_UID);
    m_folder->UnLock();
 
-   ASSERT_MSG( m_Body && m_Envelope, _T("failed to get body and envelope!") );
+   if ( !(m_Body && m_Envelope) )
+   {
+   ERRORMESSAGE((_T("failed to get body and envelope!")));
+   }
 }
 
 MESSAGECACHE *
