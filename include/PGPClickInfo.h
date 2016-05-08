@@ -188,7 +188,7 @@ public:
    }
 
    // override this to get the missing key from server
-   virtual void OnLeftClick(const wxPoint&) const;
+   virtual void OnLeftClick() const;
 
 private:
    MCryptoEngine * const m_engine;

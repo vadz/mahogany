@@ -256,7 +256,7 @@ ClickablePGPInfo::ShowRawText() const
 // PGPInfoKeyNotFoundSig
 // ----------------------------------------------------------------------------
 
-void PGPInfoKeyNotFoundSig::OnLeftClick(const wxPoint&) const
+void PGPInfoKeyNotFoundSig::OnLeftClick() const
 {
    MessageView * const mview = GetMessageView();
    CHECK_RET( mview, "should have the associated message view" );
