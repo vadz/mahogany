@@ -578,7 +578,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
 #ifdef OS_WIN
    // last, look in the resources
    {
-      wxIcon icon(iconNameOrig);
+      icon = wxIcon(iconNameOrig);
       if ( icon.Ok() ) {
          wxLogTrace(wxTraceIconLoading, _T("... icon found in the ressources."));
          return icon;

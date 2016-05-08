@@ -5235,16 +5235,16 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             // so far we only use GetMessage() when processing
             // WXMENU_MSG_QUICK_FILTER
             {
-               Message *msg = ((ASMailFolder::ResultMessage *)result)->GetMessage();
-               if ( msg )
+               Message *message = ((ASMailFolder::ResultMessage *)result)->GetMessage();
+               if ( message )
                {
                   MFolder_obj folder(m_folderName);
 
                   String to;
-                  (void)msg->GetDecodedHeaderLine(_T("To"), to);
+                  (void)message->GetDecodedHeaderLine(_T("To"), to);
 
                   if ( CreateQuickFilter(folder,
-                                         msg->From(), msg->Subject(), to,
+                                         message->From(), message->Subject(), to,
                                          m_Frame) )
                   {
                      // ask the user if he doesn't want to test his new filter
@@ -5261,7 +5261,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                           ) )
                      {
                         UIdArray selections;
-                        selections.Add(msg->GetUId());
+                        selections.Add(message->GetUId());
                         m_TicketList->Add(
                               m_ASMailFolder->ApplyFilterRules(&selections, this)
                            );
@@ -5269,7 +5269,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   }
                   //else: filter not created, nothing to apply
 
-                  msg->DecRef();
+                  message->DecRef();
                }
             }
             break;

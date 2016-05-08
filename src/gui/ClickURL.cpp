@@ -480,7 +480,7 @@ void ClickableURL::OpenInBrowser(int options) const
       // either not Netscape or Netscape isn't running or we have non-UNIX
       if ( !bOk )
       {
-         const String command = ExpandExternalCommand(browser, m_url);
+         command = ExpandExternalCommand(browser, m_url);
 
          wxString errmsg;
          errmsg.Printf(_("Couldn't launch browser: '%s' failed"),

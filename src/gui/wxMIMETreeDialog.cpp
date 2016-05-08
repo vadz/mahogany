@@ -355,10 +355,10 @@ void wxMIMETreeDialog::SaveMessages(size_t count, const MimePart **parts)
          HeaderInfoList_obj hil(mf->GetHeaders());
          if ( hil )
          {
-            const size_t count = hil->Count();
+            const size_t hcount = hil->Count();
             UIdArray all;
-            all.Alloc(count);
-            for ( size_t n = 0; n < count; n++ )
+            all.Alloc(hcount);
+            for ( size_t n = 0; n < hcount; n++ )
             {
                HeaderInfo *hi = hil->GetItemByIndex(n);
                if ( hi )

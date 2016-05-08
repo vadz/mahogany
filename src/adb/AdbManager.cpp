@@ -305,17 +305,16 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
     // merge both arrays into one big one: notice that the order is important,
     // the groups should come first (see below)
     ArrayAdbElements aEverything;
-    size_t n;
 
     size_t nGroupCount = aGroups.GetCount();
-    for ( n = 0; n < nGroupCount; n++ ) {
+    for ( size_t n = 0; n < nGroupCount; n++ ) {
       aEverything.Add(aGroups[n]);
     }
 
     wxArrayString emails;
     wxString email;
     size_t nEntryCount = aEntries.GetCount();
-    for ( n = 0; n < nEntryCount; n++ ) {
+    for ( size_t n = 0; n < nEntryCount; n++ ) {
       AdbEntry *entry = aEntries[n];
 
       entry->GetField(AdbField_EMail, &email);
@@ -341,7 +340,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
         AdbEntryGroup *group = aGroups[index];
         wxArrayString aEntryNames;
         size_t count = group->GetEntryNames(aEntryNames);
-        for ( n = 0; n < count; n++ ) {
+        for ( size_t n = 0; n < count; n++ ) {
           AdbEntry *entry = group->GetEntry(aEntryNames[n]);
           if ( entry ) {
             results.Add(entry->GetDescription());

@@ -1372,8 +1372,8 @@ void wxMainFrame::DoFolderSearch()
    SearchCriterium crit;
 
    Profile_obj profile(GetFolderProfile());
-   MFolder_obj folder(m_FolderTree->GetSelection());
-   if ( ConfigureSearchMessages(&crit, profile, folder, this) )
+   MFolder_obj folderSel(m_FolderTree->GetSelection());
+   if ( ConfigureSearchMessages(&crit, profile, folderSel, this) )
    {
       AsyncSearchData *searchData = NULL;
 

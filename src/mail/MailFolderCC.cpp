@@ -3519,21 +3519,21 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
    if ( last )
    {
       // only search among the messages after this one
-      SEARCHSET *set = mail_newsearchset();
-      set->first = last + 1;
+      SEARCHSET *sset = mail_newsearchset();
+      sset->first = last + 1;
 
       CHECK( m_MailStream, 0, _T("SearchByFlag: folder is closed") );
 
 
       if ( flags & SEARCH_UID )
       {
-         set->last = mail_uid(m_MailStream, m_nMessages);
-         pgm->uid = set;
+         sset->last = mail_uid(m_MailStream, m_nMessages);
+         pgm->uid = sset;
       }
       else // msgno search
       {
-         set->last = m_nMessages;
-         pgm->msgno = set;
+         sset->last = m_nMessages;
+         pgm->msgno = sset;
       }
    }
 

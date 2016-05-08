@@ -218,8 +218,8 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
    size_t count = gs_receivers.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      MEventReceiverInfo *info = gs_receivers[n];
-      if ( info->id == eventId && &(info->receiver) == &who )
+      MEventReceiverInfo *infoOld = gs_receivers[n];
+      if ( infoOld->id == eventId && &(infoOld->receiver) == &who )
       {
          FAIL_MSG( "Registering the same handler twice in "
                    "MEventManager::Register()" );

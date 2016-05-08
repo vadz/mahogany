@@ -1562,8 +1562,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
    bdy->contents.text.size = len;
 
 
-   PARAMETER *lastpar = NULL,
-             *par;
+   PARAMETER *lastpar = NULL;
 
    // do we already have CHARSET parameter?
    bool hasCharset = false;
@@ -1573,7 +1572,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       MessageParameterList::iterator i;
       for( i = plist->begin(); i != plist->end(); i++ )
       {
-         par = mail_newbody_parameter();
+         PARAMETER *par = mail_newbody_parameter();
 
          String name = i->name;
          if ( name.Lower() == "charset" )
@@ -1620,7 +1619,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
 
       if ( !cs.empty() )
       {
-         par = mail_newbody_parameter();
+         PARAMETER *par = mail_newbody_parameter();
          par->attribute = strdup("CHARSET");
          par->value     = strdup(cs.ToAscii());
          par->next      = lastpar;
@@ -1633,13 +1632,12 @@ SendMessageCC::AddPart(MimeType::Primary type,
       bdy->disposition.type = strdup(disposition.ToAscii());
    if ( dlist )
    {
-      PARAMETER *lastpar = NULL,
-                *par;
+      lastpar = NULL;
 
       MessageParameterList::iterator i;
       for ( i = dlist->begin(); i != dlist->end(); i++ )
       {
-         par = mail_newbody_parameter();
+         PARAMETER *par = mail_newbody_parameter();
          par->attribute = strdup(i->name.ToAscii());
          par->value     = strdup(MIME::EncodeHeader(i->value));
          par->next      = NULL;

@@ -3422,7 +3422,6 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
       }
       else
       {
-         MailFolderStatus status;
          (void)mf->CountAllMessages(&status);
       }
 

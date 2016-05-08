@@ -956,15 +956,15 @@ VarExpander::GetAbsFilename(const String& name)
       else
       {
          // try the global dir
-         String path = READ_CONFIG(profile, MP_COMPOSETEMPLATEPATH_GLOBAL);
-         if ( path.empty() )
-            path = mApplication->GetDataDir();
-         if ( !path.empty() || path.Last() != '/' )
+         String pathGlobal = READ_CONFIG(profile, MP_COMPOSETEMPLATEPATH_GLOBAL);
+         if ( pathGlobal.empty() )
+            pathGlobal= mApplication->GetDataDir();
+         if ( !pathGlobal.empty() || pathGlobal.Last() != '/' )
          {
-            path += '/';
+            pathGlobal+= '/';
          }
 
-         filename.Prepend(path);
+         filename.Prepend(pathGlobal);
       }
    }
    //else: absolute filename given, don't look anywhere else

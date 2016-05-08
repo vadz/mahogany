@@ -2779,9 +2779,9 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
             if ( !email.empty() )
                profileTargetFolder->writeEntry(MP_FROM_ADDRESS, email);
 
-            const String& name = addr->GetName();
-            if ( !name.empty() )
-               profileTargetFolder->writeEntry(MP_PERSONALNAME, name);
+            const String& addrname = addr->GetName();
+            if ( !addrname.empty() )
+               profileTargetFolder->writeEntry(MP_PERSONALNAME, addrname);
          }
       }
    }

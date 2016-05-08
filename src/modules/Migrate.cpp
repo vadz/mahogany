@@ -1190,9 +1190,9 @@ MigrateWizardConfirmPage::BuildMsg(MigrateWizard *parent) const
                 "server %s"),
               data.countFolders, data.source.server.c_str());
 
-   const String& root = data.source.root;
-   if ( !root.empty() )
-      msg += String::Format(_(" (under %s only)"), root.c_str());
+   const String& rootSrc = data.source.root;
+   if ( !rootSrc.empty() )
+      msg += String::Format(_(" (under %s only)"), rootSrc);
 
    msg += _T('\n');
 
@@ -1204,9 +1204,9 @@ MigrateWizardConfirmPage::BuildMsg(MigrateWizard *parent) const
                data.dstIMAP.server.c_str()
              );
 
-      const String& root = data.dstIMAP.root;
-      if ( !root.empty() )
-         msg += String::Format(_(" (under %s)"), root.c_str());
+      const String& rootDst = data.dstIMAP.root;
+      if ( !rootDst.empty() )
+         msg += String::Format(_(" (under %s)"), rootDst);
 
       msg += _T('\n');
    }
@@ -1708,7 +1708,6 @@ void MigrateWizardProgressPage::DoMigration()
       m_gaugeMsg->SetValue(m_countMessages);
       m_gaugeFolder->SetValue(Data().countFolders);
 
-      String msg;
       if ( m_nErrors )
       {
          wxLogError(_("There were errors during the migration."));

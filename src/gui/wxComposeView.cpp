@@ -2579,21 +2579,20 @@ wxComposeView::CreateEditor()
    else // have at least one editor, load it
    {
       // TODO: make it configurable
-      //String name = (*listing)[0].GetName();
-      String name = _T("BareBonesEditor");
+      String editorname = _T("BareBonesEditor");
 
-      MModule *editorFactory = MModule::LoadModule(name);
+      MModule *editorFactory = MModule::LoadModule(editorname);
       if ( !editorFactory ) // failed to load the configured editor
       {
          // try any other
          String nameFirst = (*listing)[0].GetName();
 
-         if ( name != nameFirst )
+         if ( editorname != nameFirst )
          {
             wxLogWarning(_("Failed to load the configured message editor '%s'.\n"
                            "\n"
                            "Reverting to the default message editor."),
-                         name.c_str());
+                         editorname);
 
             editorFactory = MModule::LoadModule(nameFirst);
          }

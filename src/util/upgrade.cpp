@@ -1529,7 +1529,7 @@ static wxString GetRFC822Time(void)
 
 #ifdef USE_WIZARD
 static
-void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData);
+void CompleteConfiguration();
 
 static void SetupServers(void);
 
@@ -1707,7 +1707,7 @@ bool RunInstallWizard(
       profile->writeEntry(MP_MOVE_NEWMAIL, false);
    }
 
-   CompleteConfiguration(gs_installWizardData);
+   CompleteConfiguration();
 
    String mainFolderName;
 #ifdef USE_INBOX
@@ -1799,7 +1799,7 @@ bool RunInstallWizard(
   as needed.
 */
 static
-void CompleteConfiguration(const struct InstallWizardData& gs_installWizardData)
+void CompleteConfiguration()
 {
    Profile *profile = mApplication->GetProfile();
 
@@ -1991,15 +1991,15 @@ CopyEntries(wxConfigBase *src,
                wxString val;
                if ( src->Read(entry, &val) )
                {
-                  bool ok;
+                  bool copiedOk;
                   long l;
                   if ( val.ToLong(&l) )
-                     ok = dest->Write(newentry, l);
+                     copiedOk = dest->Write(newentry, l);
                   else
-                     ok = dest->Write(newentry, val);
+                     copiedOk = dest->Write(newentry, val);
 
-                  if ( ok )
-                     numCopied++;
+                  if ( copiedOk )
+                     copiedOk++;
                }
             }
             break;
@@ -2105,8 +2105,7 @@ UpgradeFrom010()
    {
       if(mainFolder[0u] == '/')
       {
-         wxString tmp = mainFolder.Mid(1);
-         mainFolder = tmp;
+         mainFolder = mainFolder.Mid(1);
          p->writeEntry(MP_MAINFOLDER, mainFolder);
       }
    }

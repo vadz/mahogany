@@ -167,7 +167,7 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
    if ( m_openAsMsg )
    {
       m_chkOpenAsMsg = new wxCheckBox(this, wxID_ANY, _("Open as &mail message"));
-      wxLayoutConstraints *c = new wxLayoutConstraints;
+      c = new wxLayoutConstraints;
       c->top.Below(m_txtCommand, 3*LAYOUT_Y_MARGIN);
       c->centreX.SameAs(this, wxCentreX);
       c->width.AsIs();

@@ -552,12 +552,12 @@ StringList Threadable::messageThreadReferences() const
             // In case of duplicated reference we keep the last one:
             // It is important that In-Reply-To is the last reference
             // in the list.
-            StringList::iterator i;
-            for (i = tmp.begin(); i != tmp.end(); i++)
+            StringList::iterator it;
+            for (it = tmp.begin(); it != tmp.end(); it++)
             {
-               if (*i == ref)
+               if (*it == ref)
                {
-                  tmp.erase(i);
+                  tmp.erase(it);
                   break;
                }
             }

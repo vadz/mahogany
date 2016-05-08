@@ -2775,12 +2775,9 @@ MessageView::ProcessPart(const MimePart *mimepart, MimePartAction action)
                return true;
 
             case Part_Test:
-               {
-                  const MimeType type = mimepart->GetType();
-                  return (type.GetPrimary() == MimeType::IMAGE &&
-                           m_viewer->CanInlineImages()) ||
-                              m_viewer->CanProcess(type.GetFull());
-               }
+               return (type.GetPrimary() == MimeType::IMAGE &&
+                        m_viewer->CanInlineImages()) ||
+                           m_viewer->CanProcess(type.GetFull());
 
             default:
                FAIL_MSG( "unknown MIME part processing action" );

@@ -614,10 +614,10 @@ PGPEngine::ExecCommand(const String& options,
                   { 10, "sha512" },
                };
 
-               String err;
+               String errmsg;
                if ( *pc++ != 'D' )
                {
-                  err.Printf(_("unexpected signature type '%c'"), pc[-1]);
+                  errmsg.Printf(_("unexpected signature type '%c'"), pc[-1]);
                }
                else
                {
@@ -627,8 +627,8 @@ PGPEngine::ExecCommand(const String& options,
                   unsigned long n;
                   if ( !pkalg.ToULong(&n) )
                   {
-                     err.Printf(_("unexpected public key algorithm \"%s\""),
-                                pkalg.c_str());
+                     errmsg.Printf(_("unexpected public key algorithm \"%s\""),
+                                   pkalg.c_str());
                   }
                   else
                   {
@@ -637,8 +637,8 @@ PGPEngine::ExecCommand(const String& options,
                      const String micalg(ReadNumber(pc));
                      if ( !micalg.ToULong(&n) )
                      {
-                        err.Printf(_("unexpected hash algorithm \"%s\""),
-                                   micalg.c_str());
+                        errmsg.Printf(_("unexpected hash algorithm \"%s\""),
+                                      micalg.c_str());
                      }
                      else
                      {
@@ -658,10 +658,10 @@ PGPEngine::ExecCommand(const String& options,
 
                         if ( !found )
                         {
-                           err.Printf(_("unsupported hash algorithm \"%s\", "
-                                        "please configure GPG to use a hash "
-                                        "algorithm compatible with RFC 3156"),
-                                      micalg.c_str());
+                           errmsg.Printf(_("unsupported hash algorithm \"%s\", "
+                                           "please configure GPG to use a hash "
+                                           "algorithm compatible with RFC 3156"),
+                                         micalg.c_str());
 
                            status = SIGN_UNKNOWN_MICALG;
                         }
@@ -669,13 +669,13 @@ PGPEngine::ExecCommand(const String& options,
                   }
                }
 
-               if ( !err.empty() )
+               if ( !errmsg.empty() )
                {
                   // don't overwrite a more specific error code if set above
                   if ( status != SIGN_UNKNOWN_MICALG )
                      status = SIGN_ERROR;
 
-                  wxLogError(_("Failed to sign message: %s"), err.c_str());
+                  wxLogError(_("Failed to sign message: %s"), errmsg);
                }
             }
             else if ( code == _T("BEGIN_SIGNING") )

@@ -223,11 +223,11 @@ wxMFrame::SetTitle(String const &title)
 }
 
 void
-wxMFrame::Create(const String &name, wxWindow *parent)
+wxMFrame::Create(const String &framename, wxWindow *parent)
 {
    wxCHECK_RET( !m_initialised, _T("wxMFrame created twice") );
 
-   SetName(name);
+   SetName(framename);
 
    int xpos, ypos, width, height;
    bool startIconised, startMaximised;
@@ -235,7 +235,7 @@ wxMFrame::Create(const String &name, wxWindow *parent)
                    &startIconised, &startMaximised);
 
    // use name as default title
-   if ( !wxFrame::Create(parent, -1, name,
+   if ( !wxFrame::Create(parent, -1, framename,
                          wxPoint(xpos, ypos), wxSize(width,height)) )
    {
       wxFAIL_MSG( _T("Failed to create a frame!") );

@@ -214,16 +214,16 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                      pc++;
 
                      // quoted argument?
-                     bool quoted = *pc == '"';
-                     if ( quoted )
+                     bool quotedArg = *pc == '"';
+                     if ( quotedArg )
                         pc++;
 
                      // stop on some speical chars if not quoted, otherwise
                      // only stop at the closing quote
                      while ( *pc &&
-                              (quoted ? *pc != '"'
-                                      : !strchr("+-=, ", *pc) &&
-                                          *pc != bracketClose) )
+                              (quotedArg ? *pc != '"'
+                                         : !strchr("+-=, ", *pc) &&
+                                             *pc != bracketClose) )
                      {
                         if ( *pc == '\\' )
                         {
@@ -249,7 +249,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                         pc++;
                      }
 
-                     if ( quoted )
+                     if ( quotedArg )
                      {
                         // skip closing quote or complain about missing one
                         if ( *pc == '"' )

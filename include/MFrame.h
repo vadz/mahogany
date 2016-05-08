@@ -19,14 +19,14 @@ class MFrameBase
 {
 private:
    /// each frame has a unique name used to identify it
-   String name;
+   String m_name;
 
 public:
    /// ctor takes the name of the frame class
-   MFrameBase(const String& str) : name(str) { }
+   MFrameBase(const String& str) : m_name(str) { }
 
    /// retrieve the name of the window class
-   const char *GetName() const { return name.c_str(); }
+   const char *GetName() const { return m_name.c_str(); }
 
    // VZ: this could lead to an ambiguity as wxFrame (from which wxMFrame
    //     derives as well) has this (virtual) method too

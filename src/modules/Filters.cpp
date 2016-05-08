@@ -2130,8 +2130,8 @@ static Value func_istome(ArgList *args, FilterRuleImpl *p)
 
    if ( msg )
    {
-      String value;
-      if ( msg->GetHeaderLine(_T("List-Post"), value) )
+      String valueListPost;
+      if ( msg->GetHeaderLine(_T("List-Post"), valueListPost) )
       {
          return Value(true);
       }

@@ -207,14 +207,14 @@ void AutoCollectAddress(const String& email,
             entry->IncRef();
             entry->AddEMail(email);
 
-            wxString name;
-            entry->GetField(AdbField_NickName, &name);
+            wxString nickname;
+            entry->GetField(AdbField_NickName, &nickname);
             if ( frame )
             {
                wxLogStatus(frame,
                            _("Auto collected e-mail address '%s' "
                              "(added to the entry '%s')."),
-                           email.c_str(), name.c_str());
+                           email, nickname);
             }
             entry->DecRef();
          }

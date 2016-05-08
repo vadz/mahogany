@@ -654,8 +654,6 @@ InitRecipients(Composer *cv,
    size_t countReplyTo = msg->GetAddresses(MAT_REPLYTO, replyToAddresses);
    replyToAddresses.Sort();
 
-   size_t n, count; // loop variables
-
    // REPLY_LIST overrides any Reply-To in the header
    if ( replyKind != MailFolder::REPLY_LIST )
    {
@@ -687,7 +685,7 @@ InitRecipients(Composer *cv,
       {
          wxArrayString addresses;
          size_t count = msg->GetAddresses(MAT_TO, addresses);
-         for ( n = 0; n < count; n++ )
+         for ( size_t n = 0; n < count; n++ )
          {
             rcptAddresses.Add(addresses[n]);
             rcptTypes.Add(Recipient_To);
@@ -699,7 +697,7 @@ InitRecipients(Composer *cv,
          rcptTypes.Add(Recipient_To);
 
          // add the remaining Reply-To addresses (usually there will be none)
-         for ( n = 1; n < countReplyTo; n++ )
+         for ( size_t n = 1; n < countReplyTo; n++ )
          {
             // FIXME: same as above
             rcptAddresses.Add(MIME::DecodeHeader(replyToAddresses[n]));
@@ -726,7 +724,7 @@ InitRecipients(Composer *cv,
    {
       // add all recipients in the composer in the reverse order -- so
       // that they appear there as we want them
-      n = rcptAddresses.GetCount();
+      size_t n = rcptAddresses.GetCount();
       CHECK_RET( rcptTypes.GetCount() == n, _T("logic error in InitRecipients") );
 
       while ( n-- )
@@ -770,8 +768,8 @@ InitRecipients(Composer *cv,
 #endif // 0
 
    // decode headers before comparing them
-   count = otherAddresses.GetCount();
-   for ( n = 0; n < count; n++ )
+   size_t count = otherAddresses.GetCount();
+   for ( size_t n = 0; n < count; n++ )
    {
       // FIXME: as above, we lose the original encoding here
       otherAddresses[n] = MIME::DecodeHeader(otherAddresses[n]);
@@ -811,7 +809,7 @@ InitRecipients(Composer *cv,
    // mailing lists
    wxArrayInt addressesToIgnore,
               addressesList;
-   for ( n = 0; n < uniqueAddresses.GetCount(); n++ )
+   for ( size_t n = 0; n < uniqueAddresses.GetCount(); n++ )
    {
       const String& addr = uniqueAddresses[n];
 
@@ -866,7 +864,7 @@ InitRecipients(Composer *cv,
    }
 
    count = uniqueAddresses.GetCount();
-   for ( n = 0; n < count; n++ )
+   for ( size_t n = 0; n < count; n++ )
    {
       if ( addressesToIgnore.Index(n) != wxNOT_FOUND )
       {
@@ -917,7 +915,7 @@ InitRecipients(Composer *cv,
 
    // finally add all recipients in the composer in the reverse order -- so
    // that they appear there as we want them
-   n = rcptAddresses.GetCount();
+   size_t n = rcptAddresses.GetCount();
    CHECK_RET( rcptTypes.GetCount() == n, _T("logic error in InitRecipients") );
 
    while ( n-- )

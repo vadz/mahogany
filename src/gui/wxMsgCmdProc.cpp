@@ -963,15 +963,15 @@ void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
    uidsReclassified.reserve(count);
    for ( size_t i = 0; i < count; i++ )
    {
-      Message_obj msg(GetMessage(uids[i]));
-      if ( !msg )
+      Message_obj message(GetMessage(uids[i]));
+      if ( !message)
       {
          wxLogError(_("Failed to retrieve the message %#08x to reclassify."),
                     uids[i]);
          continue;
       }
 
-      if ( SpamFilter::Reclassify(*msg, isSpam) )
+      if ( SpamFilter::Reclassify(*message, isSpam) )
          uidsReclassified.push_back(uids[i]);
    }
 
@@ -1776,7 +1776,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
                      // don't copy the messages to the trash, they
                      // had been already copied somewhere
-                     Ticket t = m_asmf
+                     Ticket tDel = m_asmf
                                  ? m_asmf->DeleteOrTrashMessages
                                    (
                                     seq,
@@ -1785,9 +1785,9 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                                    )
                                  : ILLEGAL_TICKET;
 
-                     if ( t != ILLEGAL_TICKET )
+                     if ( tDel != ILLEGAL_TICKET )
                      {
-                        m_TicketList->Add(t);
+                        m_TicketList->Add(tDel);
                      }
                      else // failed to delete?
                      {
