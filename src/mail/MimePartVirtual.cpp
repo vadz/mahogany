@@ -81,7 +81,7 @@ MimePartVirtual::MimePartVirtual(BODY *body,
 
    Create(body, parent, nPart);
 
-   m_pStart = pHeader + body->mime.offset;
+   m_pStart = pHeader + body->mime.offset - parent->m_body->contents.offset;
    m_lenHeader = body->mime.text.size - lenEOL;
    m_lenBody = body->contents.text.size;
 
