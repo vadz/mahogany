@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(configure.in)
+AC_INIT(Mahogany, 0.67)
 AC_REVISION([$Id$])
 
 rm -f conftestdata
