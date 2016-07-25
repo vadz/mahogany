@@ -1,4 +1,5 @@
 aclocal.m4
+configure
 include/MInterface.cpp
 include/MInterface.h
 include/config.h
