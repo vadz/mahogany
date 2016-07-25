@@ -248,6 +248,20 @@ dnl   defines GXX with yes if using gxx, else empty
 dnl   defines CXXFLAGS
 AC_PROG_CXX
 
+dnl We need C++11 support, so check for it.
+AC_CACHE_CHECK([whether $CC accepts -std=c++11],
+    m_cv_cc_std_cxx11,
+    [M_CXX_OPTION([-std=c++11],
+	m_cv_cc_std_cxx11="yes",
+	m_cv_cc_std_cxx11="no")]
+)
+if test $m_cv_cc_std_cxx11 != "yes"; then
+    AC_MSG_ERROR([
+    Sorry, $CC doesn't support -std=c++11 option and can't be used to compile
+    this program.])
+fi
+CXXFLAGS="$CXXFLAGS -std=c++11"
+
 dnl disable support for exceptions if the compiler is g++ and
 dnl new enough to support it.
 case "$GXX" in yes)
