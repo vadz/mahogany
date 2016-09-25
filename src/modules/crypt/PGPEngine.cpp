@@ -328,6 +328,11 @@ PGPEngine::ExecCommand(const String& options,
    size_t lenIn = strlen(bufIn);
    const char *ptrIn = bufIn;
 
+   // the value of the last NOTATION_NAME line, if any, and whether it's
+   // critical
+   wxString lastNotationName;
+   bool lastNotationCritical = false;
+
    bool outEof = false,
         errEof = false;
    while ( !process.IsDone() || !outEof || !errEof )
@@ -701,6 +706,28 @@ PGPEngine::ExecCommand(const String& options,
 
                   wxLogWarning(_("No secret key which can decrypt this message "
                                  "(%s) is available."), keys.c_str());
+               }
+            }
+            else if ( code == "NOTATION_NAME" )
+            {
+               lastNotationName = pc;
+               lastNotationCritical = false;
+            }
+            else if ( code == "NOTATION_FLAGS" )
+            {
+               if ( *pc == '1' )
+                  lastNotationCritical = true;
+
+               // we ignore the "human readable" flag because it's not clear
+               // how exactly should it be handled
+            }
+            else if ( code == "NOTATION_DATA" )
+            {
+               const wxString data(pc);
+               if ( lastNotationCritical )
+               {
+                  wxLogWarning(_("Critical notation in the signature: %s=%s"),
+                               lastNotationName, data);
                }
             }
             else if ( code == _T("END_DECRYPTION") ||
