@@ -307,7 +307,14 @@ PGPEngine::ExecCommand(const String& options,
    CHECK( in && out && err, CANNOT_EXEC_PROGRAM,
             _T("where is PGP subprocess stdin/out/err?") );
 
-   wxTextInputStream errText(*err);
+   // Lines received from GPG are normally encoded in UTF-8, but they may
+   // contain bytes sequences invalid in UTF-8 in practice, e.g. this happens
+   // under Windows when the key description itself is not in UTF-8 and gpg
+   // just seems to dump it on output directly. Because of this, we can't just
+   // use wxConvUTF8 here but need to treat the input as raw bytes and then
+   // carefully convert it wxString ourselves.
+   wxTextInputStream errText(*err, " ", wxConvISO8859_1);
+   wxMBConvUTF8 nonStrictUTF8(wxMBConvUTF8::MAP_INVALID_UTF8_TO_OCTAL);
 
    Status status = MAX_ERROR;
 
@@ -382,7 +389,7 @@ PGPEngine::ExecCommand(const String& options,
       }
       else if ( err->CanRead() )
       {
-         String line = errText.ReadLine();
+         String line(errText.ReadLine().To8BitData(), nonStrictUTF8);
 
          // Log all GPG messages, this is useful for diagnosing problems
          if ( log )
