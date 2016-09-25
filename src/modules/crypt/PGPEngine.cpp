@@ -449,8 +449,7 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
-               wxLogWarning(_("Expired signature from \"%s\""),
-                            log->GetUserID().c_str());
+               wxLogWarning(_("Expired signature from \"%s\""), pc);
 
                status = SIGNATURE_EXPIRED_ERROR;
             }
