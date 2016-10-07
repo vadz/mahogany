@@ -366,7 +366,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
          // failed.
          if ( value->empty() )
          {
-            wxLogWarning(_("Unknown variable '%s' at line %d, position %d "
+            wxLogWarning(_("Unknown variable '%s' at line %zu, position %zu "
                            "in the file '%s'."),
                          name.c_str(),
                          m_nLine,
