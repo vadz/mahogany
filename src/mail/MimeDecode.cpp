@@ -332,8 +332,25 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
                if ( encodingWord == wxFONTENCODING_DEFAULT )
                {
                   // CharsetToEncoding() returns this for US-ASCII but
-                  // wxCSConv() doesn't accept it
-                  textDecoded = wxString::FromAscii(ctext, len);
+                  // wxCSConv() doesn't accept it, so handle it manually (we
+                  // also avoid wxString::FromAscii() because it asserts if the
+                  // string contains non-ASCII characters, but this can happen,
+                  // after all we're using untrusted input).
+                  textDecoded.reserve(len);
+                  for (unsigned long n = 0; n < len; ++n)
+                  {
+                     const unsigned char c = ctext[n];
+                     if ( c >= 0x80 )
+                     {
+                        wxLogDebug(wxS("Invalid character \"%c\" "
+                                       "in ASCII-encoded word \"%s\""),
+                                   c, in);
+                     }
+                     else
+                     {
+                        textDecoded += static_cast<char>(c);
+                     }
+                  }
                }
                else // real conversion needed
                {
