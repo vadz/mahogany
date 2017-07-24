@@ -2791,7 +2791,7 @@ wxLayoutList::DrawCursor(wxDC& UNUSED_IF_USE_CARET(dc),
    wxASSERT(m_CursorSize.x >= WXLO_MINIMUM_CURSOR_WIDTH);
    dc.SetBrush(*wxWHITE_BRUSH);
    //FIXME: wxGTK XOR is borken at the moment!!!dc.SetLogicalFunction(wxXOR);
-   dc.SetPen(wxPen(*wxBLACK,1,wxSOLID));
+   dc.SetPen(*wxBLACK);
    if(active)
    {
       dc.SetLogicalFunction(wxXOR);
