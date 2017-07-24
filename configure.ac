@@ -1,7 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(configure.in)
-AC_REVISION([$Id$])
+AC_INIT(Mahogany, 0.67)
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -248,6 +247,20 @@ dnl   defines CXX with the compiler to use
 dnl   defines GXX with yes if using gxx, else empty
 dnl   defines CXXFLAGS
 AC_PROG_CXX
+
+dnl We need C++11 support, so check for it.
+AC_CACHE_CHECK([whether $CC accepts -std=c++11],
+    m_cv_cc_std_cxx11,
+    [M_CXX_OPTION([-std=c++11],
+	m_cv_cc_std_cxx11="yes",
+	m_cv_cc_std_cxx11="no")]
+)
+if test $m_cv_cc_std_cxx11 != "yes"; then
+    AC_MSG_ERROR([
+    Sorry, $CC doesn't support -std=c++11 option and can't be used to compile
+    this program.])
+fi
+CXXFLAGS="$CXXFLAGS -std=c++11"
 
 dnl disable support for exceptions if the compiler is g++ and
 dnl new enough to support it.
@@ -746,7 +759,7 @@ dnl Check for Python headers first: we need this for both dynamic and static
 dnl linking
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-	for ver in 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.5; do
+	for ver in 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.5; do
 	    M_CHECK_MYHEADER_VER(
 		Python.h,
 		$ver,
