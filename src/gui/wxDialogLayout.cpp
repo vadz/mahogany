@@ -566,7 +566,7 @@ wxNotebookWithImages::wxNotebookWithImages(wxWindow *parent,
 {
    if ( ShouldShowIcons() )
    {
-      wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
+      wxImageList *imageList = new wxImageList(32, 32);
       wxIconManager *iconmanager = mApplication->GetIconManager();
 
       for ( size_t n = 0; aszImages[n]; n++ ) {
