@@ -270,9 +270,14 @@ static char *ssl_start_work (SSLSTREAM *stream,char *host,unsigned long flags)
       (err = ssl_validate_cert (cert = SSL_get_peer_certificate (stream->con),
 				host))) {
 				/* application callback */
-    if (scq) return (*scq) (err,host,cert ? cert->name : "???") ? NIL : "";
+    char cert_name[256];
+    if (cert) {
+      X509_NAME_oneline (X509_get_subject_name(cert),cert_name,255);
+    }
+    else strcpy (cert_name, "???");
+    if (scq) return (*scq) (err,host,cert_name) ? NIL : "";
 				/* error message to return via mm_log() */
-    sprintf (tmp,"*%.128s: %.255s",err,cert ? cert->name : "???");
+    sprintf (tmp,"*%.128s: %.255s",err,cert_name);
     return ssl_last_error = cpystr (tmp);
   }
   return NIL;
@@ -319,12 +324,14 @@ static char *ssl_validate_cert (X509 *cert,char *host)
   char *s,*t,*ret;
   void *ext;
   GENERAL_NAME *name;
+  char cert_name[256];
 				/* make sure have a certificate */
   if (!cert) ret = "No certificate from server";
 				/* and that it has a name */
-  else if (!cert->name) ret = "No name in certificate";
+  else if (!X509_NAME_oneline (X509_get_subject_name(cert),
+			        cert_name,255)) ret = "No name in certificate";
 				/* locate CN */
-  else if (s = strstr (cert->name,"/CN=")) {
+  else if (s = strstr (cert_name,"/CN=")) {
     if (t = strchr (s += 4,'/')) *t = '\0';
 				/* host name matches pattern? */
     ret = ssl_compare_hostnames (host,s) ? NIL :
