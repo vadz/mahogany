@@ -36,6 +36,8 @@
 
 #include <wx/dynlib.h>
 
+#include <stdint.h>
+
 extern const MOption MP_SSL_DLL_CRYPTO;
 extern const MOption MP_SSL_DLL_SSL;
 
@@ -82,6 +84,31 @@ extern const MOption MP_SSL_DLL_SSL;
 #else
    #define ssl_const3
 #endif
+// OpenSSL 1.1.0
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+   #define ssl_const110 const
+
+   // A couple of functions used by c-client code were deprecated in OpenSSL
+   // 1.1.0 and preserved only as compatibility defines. We still want to
+   // define stub functions for them though and macros just get into the way.
+   #undef SSL_library_init
+   #undef SSL_load_error_strings
+   #undef ERR_load_crypto_strings
+   #undef SSL_CTX_set_tmp_rsa_callback
+   #undef SSLv23_client_method
+   #undef SSLv23_server_method
+   #undef sk_num
+   #undef sk_value
+#else
+   #define ssl_const110
+
+   // Conversely, a few functions existed as macros originally but need to be
+   // loaded dynamically in 1.1.0. Handling them is simpler as c-client code
+   // will still use the macros with old versions, while we'll provide the
+   // forwarder functions for the later ones.
+   #undef SSL_in_init
+   #undef SSL_CTX_set_options
+#endif
 
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
@@ -108,8 +135,11 @@ extern "C" {
 #define SSL_DEF_VOID(name, args, params) \
    SSL_DEF2(void, name, args, params, (void))
 
+#define SSL_LOOKUP_NO_ERROR_CHECK(name) \
+      stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(#name)
+
 #define SSL_LOOKUP(name) \
-      stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(#name); \
+      SSL_LOOKUP_NO_ERROR_CHECK(name); \
       if ( !stub_##name ) \
          goto error
 
@@ -137,8 +167,12 @@ SSL_DEF( int, SSL_get_fd, (ssl_const1 SSL *s), (s) );
 SSL_DEF( int, SSL_set_fd, (SSL *s, int fd), (s, fd) );
 SSL_DEF( int, SSL_get_error, (ssl_const1 SSL *s, int ret_code), (s, ret_code) );
 SSL_DEF( X509 *, SSL_get_peer_certificate, (ssl_const1 SSL *s), (s) );
+
 SSL_DEF( int, sk_num, (const ssl_STACK *s), (s) );
 SSL_DEF( sk_value_t, sk_value, (const ssl_STACK *s, int n), (s, n) );
+
+SSL_DEF( int, OPENSSL_sk_num, (const struct stack_st *s), (s) );
+SSL_DEF( void*, OPENSSL_sk_value, (const struct stack_st *s, int n), (s, n) );
 
 SSL_DEF_VOID( RAND_seed, (const void *buf,int num), (buf, num) );
 SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
@@ -163,9 +197,9 @@ SSL_DEF( int,  SSL_accept, (SSL *ssl), (ssl) );
 SSL_DEF( int, X509_STORE_CTX_get_error, (X509_STORE_CTX *ctx), (ctx) );
 SSL_DEF( const char *, X509_verify_cert_error_string, (long n), (n) );
 SSL_DEF( X509 *, X509_STORE_CTX_get_current_cert, (X509_STORE_CTX *ctx), (ctx) );
-SSL_DEF( X509_NAME *, X509_get_subject_name, (X509 *a), (a) );
-SSL_DEF( char *, X509_NAME_oneline, (X509_NAME *a,char *buf,int size), (a,buf,size) );
-SSL_DEF( void *, X509_get_ext_d2i, (X509 *x, int nid, int *crit, int *idx), (x, nid, crit, idx) );
+SSL_DEF( X509_NAME *, X509_get_subject_name, (ssl_const110 X509 *a), (a) );
+SSL_DEF( char *, X509_NAME_oneline, (ssl_const110 X509_NAME *a,char *buf,int size), (a,buf,size) );
+SSL_DEF( void *, X509_get_ext_d2i, (ssl_const110 X509 *x, int nid, int *crit, int *idx), (x, nid, crit, idx) );
 SSL_DEF_VOID( X509_free, (X509 *x), (x) );
 SSL_DEF( int, SSL_shutdown, (SSL *s), (s) );
 SSL_DEF( int, SSL_CTX_use_certificate, (SSL_CTX *ctx, X509 *x), (ctx, x) );
@@ -181,9 +215,49 @@ SSL_DEF( EVP_PKEY *, PEM_read_bio_PrivateKey, (BIO *bp, EVP_PKEY **x, pem_passwo
 SSL_DEF( unsigned long, ERR_get_error, (void), () );
 SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p), (e, p) );
 
-#undef SSL_DEF
+// Those are macros until 1.1.0, functions in it.
+SSL_DEF( int, SSL_in_init, (SSL* s), (s) );
+SSL_DEF( unsigned long, SSL_CTX_set_options, (SSL_CTX *ctx, unsigned long op), (ctx, op) );
+
+// These functions are used inside macro expansions in openssl/ssl.h.
+SSL_DEF( int, OPENSSL_init_ssl, (uint64_t opts, const struct ossl_init_settings_st* settings), (opts, settings) );
+SSL_DEF( int, OPENSSL_init_crypto, (uint64_t opts, const struct ossl_init_settings_st* settings), (opts, settings) );
 
 } // extern "C"
+
+// These functions are not used by c-client but only in this file itself.
+SSL_DEF( const SSL_METHOD *, TLS_client_method, (void), () );
+SSL_DEF( const SSL_METHOD *, TLS_server_method, (void), () );
+
+static int compat_SSL_library_init()
+{
+   return (*stub_OPENSSL_init_ssl)(0, NULL);
+}
+
+#ifndef OPENSSL_INIT_LOAD_SSL_STRINGS
+   #define OPENSSL_INIT_LOAD_SSL_STRINGS 0x00200000L
+#endif
+#ifndef OPENSSL_INIT_LOAD_CRYPTO_STRINGS
+   #define OPENSSL_INIT_LOAD_CRYPTO_STRINGS 0x00000002L
+#endif
+
+static void compat_SSL_load_error_strings()
+{
+   (*stub_OPENSSL_init_ssl)(OPENSSL_INIT_LOAD_SSL_STRINGS |
+                            OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+}
+
+static void compat_ERR_load_crypto_strings()
+{
+   (*stub_OPENSSL_init_crypto)(OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+}
+
+static void compat_SSL_CTX_set_tmp_rsa_callback(SSL_CTX *, RSA *(*)(SSL *, int, int))
+{
+   // Nothing to do here, this seems to be unsupported in OpenSSL 1.1.0.
+}
+
+#undef SSL_DEF
 
 static bool gs_SSL_loaded = false;
 static bool gs_SSL_available = false;
@@ -214,6 +288,40 @@ bool InitSSL(void) /* FIXME: MT */
    if ( !gs_dllSll.Load(ssl_dll) )
       goto error;
 
+   SSL_LOOKUP_NO_ERROR_CHECK(SSL_library_init);
+   if ( stub_SSL_library_init )
+   {
+      // We must be using OpenSSL < 1.1.0, so all the other functions removed
+      // in 1.1.0 should be there.
+      SSL_LOOKUP(SSL_load_error_strings);
+      SSL_LOOKUP(ERR_load_crypto_strings);
+      SSL_LOOKUP(SSL_CTX_set_tmp_rsa_callback);
+      SSL_LOOKUP(SSLv23_server_method);
+      SSL_LOOKUP(SSLv23_client_method);
+      SSL_LOOKUP(sk_num);
+      SSL_LOOKUP(sk_value);
+   }
+   else // Perhaps it's OpenSSL 1.1.0+, check for new functions.
+   {
+      SSL_LOOKUP(OPENSSL_init_ssl);
+      SSL_LOOKUP(OPENSSL_init_crypto);
+      SSL_LOOKUP(TLS_server_method);
+      SSL_LOOKUP(TLS_client_method);
+      SSL_LOOKUP(OPENSSL_sk_num);
+      SSL_LOOKUP(OPENSSL_sk_value);
+      SSL_LOOKUP(SSL_in_init);
+      SSL_LOOKUP(SSL_CTX_set_options);
+
+      // We've got the new functions, but we still need to provide the old ones
+      // to c-client
+      stub_SSL_library_init = compat_SSL_library_init;
+      stub_SSL_load_error_strings = compat_SSL_load_error_strings;
+      stub_ERR_load_crypto_strings = compat_ERR_load_crypto_strings;
+      stub_SSL_CTX_set_tmp_rsa_callback = compat_SSL_CTX_set_tmp_rsa_callback;
+      stub_SSLv23_client_method = stub_TLS_client_method;
+      stub_SSLv23_server_method = stub_TLS_server_method;
+   }
+
    SSL_LOOKUP(SSL_new);
    SSL_LOOKUP(SSL_free);
    SSL_LOOKUP(SSL_set_rfd);
@@ -223,8 +331,6 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_read);
    SSL_LOOKUP(SSL_write);
    SSL_LOOKUP(SSL_pending);
-   SSL_LOOKUP(SSL_library_init);
-   SSL_LOOKUP(SSL_load_error_strings);
    SSL_LOOKUP(SSL_CTX_new);
    SSL_LOOKUP(SSL_CTX_use_certificate);
    SSL_LOOKUP(SSL_CTX_use_PrivateKey);
@@ -235,8 +341,6 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_set_fd);
    SSL_LOOKUP(SSL_get_error);
    SSL_LOOKUP(SSL_get_peer_certificate);
-   SSL_LOOKUP(sk_num);
-   SSL_LOOKUP(sk_value);
    SSL_LOOKUP(RAND_seed);
    SSL_LOOKUP(BIO_new_socket);
    SSL_LOOKUP(BIO_new_mem_buf);
@@ -249,13 +353,10 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_set_connect_state);
    SSL_LOOKUP(SSL_state);
    SSL_LOOKUP(SSL_ctrl);
-   SSL_LOOKUP(ERR_load_crypto_strings);
    SSL_LOOKUP(TLSv1_server_method);
-   SSL_LOOKUP(SSLv23_server_method);
    SSL_LOOKUP(SSL_CTX_set_cipher_list);
    SSL_LOOKUP(SSL_CTX_use_certificate_chain_file);
    SSL_LOOKUP(SSL_CTX_use_RSAPrivateKey_file);
-   SSL_LOOKUP(SSL_CTX_set_tmp_rsa_callback);
    SSL_LOOKUP(SSL_accept);
    SSL_LOOKUP(X509_STORE_CTX_get_error);
    SSL_LOOKUP(X509_verify_cert_error_string);
@@ -268,7 +369,6 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_CTX_free);
    SSL_LOOKUP(RSA_generate_key);
    SSL_LOOKUP(TLSv1_client_method);
-   SSL_LOOKUP(SSLv23_client_method);
    SSL_LOOKUP(EVP_PKEY_free);
    SSL_LOOKUP(PEM_read_bio_X509);
    SSL_LOOKUP(PEM_read_bio_PrivateKey);
