@@ -224,7 +224,7 @@ extern "C"
    M_PY_WRAPPER_DECL(PyObject*, PyDict_GetItemString, (PyObject *, const char *));
    M_PY_WRAPPER_DECL(PyObject *, PyDict_New, (void));
    M_PY_WRAPPER_DECL(int, PyDict_SetItem, (PyObject *mp, PyObject *key, PyObject *item));
-   M_PY_WRAPPER_DECL(int, PyDict_SetItemString, (PyObject *dp, char *key, PyObject *item));
+   M_PY_WRAPPER_DECL(int, PyDict_SetItemString, (PyObject *dp, const char *key, PyObject *item));
 
    // arguments
    M_PY_WRAPPER_DECL(int, PyArg_Parse, (PyObject *, char *, ...));
