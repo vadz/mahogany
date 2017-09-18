@@ -2312,7 +2312,9 @@ MailFolderCmn::SendMsgStatusChangeEvent()
                   status.what--; \
                } \
                else \
+               { \
                   FAIL_MSG( _T("error in msg status change logic") ); \
+               } \
             }
 
          UPDATE_NUM_OF(recent);
