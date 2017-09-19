@@ -1281,6 +1281,11 @@ void wxProfileSettingsEditDialog::OnConfigSourceChange(wxCommandEvent& event)
 void
 wxProfileSettingsEditDialog::ApplyConfigSourceSelectedByUser(Profile& profile)
 {
+   // This method can be called even if there is only a single config source,
+   // in which case m_chcSources is null and we have nothing to do anyhow.
+   if ( !m_chcSources )
+      return;
+
    ConfigSource * const configOld =
       profile.SetConfigSourceForWriting(m_chcSources->GetSelectedSource());
 
