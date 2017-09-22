@@ -862,7 +862,7 @@ PGPEngine::Sign(const String& user,
 
    String options("--detach-sign");
    if ( !user.empty() )
-      options += "--local-user " + user;
+      options += " --local-user " + user;
 
    options += ' ' + tmpfname.GetName();
    return ExecCommand(options, wxEmptyString, messageOut, log);
