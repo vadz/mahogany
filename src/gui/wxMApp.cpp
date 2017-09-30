@@ -981,7 +981,7 @@ wxMApp::OnInit()
    // by default only time stamp is used by wxLog, we want to have the time
    // with date as the program may run for several days and we also use ISO
    // format for it to have consistent output everywhere
-   wxLog::SetTimestamp("%c");
+   wxLog::SetTimestamp("%Y-%m-%d %H:%M:%S");
 
 #ifdef USE_I18N
    // Set up locale first, so everything is in the right language.
