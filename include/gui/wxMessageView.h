@@ -27,6 +27,7 @@
 
 class FolderView;
 class MsgCmdProc;
+class wxInfoBar;
 
 // ----------------------------------------------------------------------------
 // wxMessageView
@@ -48,6 +49,8 @@ public:
 
    /// Destructor
    ~wxMessageView();
+
+   virtual wxWindow *GetContainerWindow() const { return m_viewerParent; }
 
    /// show message
    virtual void DoShowMessage(Message *msg);
@@ -79,6 +82,14 @@ private:
 
    /// the array containing the names of all the existing viewers
    wxArrayString m_namesViewers;
+
+   /// The window containing the real viewer and various helper elements such
+   /// as the wxInfoBar below.
+   wxWindow* m_viewerParent;
+
+   /// The info bar object used for showing errors and warnings specific to
+   /// this message.
+   wxInfoBar* m_infobar;
 };
 
 // ----------------------------------------------------------------------------

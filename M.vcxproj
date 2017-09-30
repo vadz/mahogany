@@ -481,6 +481,7 @@
     <ClCompile Include="src\gui\wxMGuiUtils.cpp" />
     <ClCompile Include="src\gui\wxMimeDialog.cpp" />
     <ClCompile Include="src\gui\wxMIMETreeDialog.cpp" />
+    <ClCompile Include="src\gui\wxMLog.cpp" />
     <ClCompile Include="src\gui\wxModulesDlg.cpp" />
     <ClCompile Include="src\gui\wxMsgCmdProc.cpp" />
     <ClCompile Include="src\gui\wxMSplash.cpp" />
@@ -1404,6 +1405,7 @@
     <ClInclude Include="include\FolderType.h" />
     <ClInclude Include="include\FolderView.h" />
     <ClInclude Include="include\guidef.h" />
+    <ClInclude Include="include\gui\wxMLog.h" />
     <ClInclude Include="include\HeaderInfo.h" />
     <ClInclude Include="include\HeaderInfoImpl.h" />
     <ClInclude Include="include\HeadersDialogs.h" />

@@ -30,6 +30,8 @@
 #  include <wx/menu.h>
 #endif //USE_PCH
 
+#include <wx/infobar.h>
+
 #include "MessageViewer.h"
 #include "MsgCmdProc.h"
 #include "FolderView.h"
@@ -44,6 +46,7 @@
 #include "mail/MimeDecode.h"
 
 #include "gui/wxMessageView.h"
+#include "gui/wxMLog.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -192,7 +195,17 @@ wxMessageView::wxMessageView(wxWindow *parent,
    // OnViewerChange() for the initial dummy viewer
    m_FolderView = NULL;
 
-   Init(parent, profile);
+   m_viewerParent = new wxWindow(parent, wxID_ANY);
+   m_infobar = new wxInfoBar(m_viewerParent);
+
+   // Don't delay showing the error messages with unnecessary effects.
+   m_infobar->SetShowHideEffects(wxSHOW_EFFECT_NONE, wxSHOW_EFFECT_NONE);
+
+   wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
+   sizer->Add(m_infobar, wxSizerFlags().Expand());
+   m_viewerParent->SetSizer(sizer);
+
+   Init(m_viewerParent, profile);
 
    // now really set it
    m_FolderView = folderView;
@@ -222,6 +235,11 @@ MessageView::CreateStandalone(wxWindow *parent, Profile *profile)
 void
 wxMessageView::DoShowMessage(Message *mailMessage)
 {
+   // First, dismiss any previously shown warnings.
+   m_infobar->Dismiss();
+
+   wxMLogTargetSetter logTarget(m_infobar);
+
    MessageView::DoShowMessage(mailMessage);
 
    wxFrame *frame = GetParentFrame();
@@ -243,6 +261,8 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
                               const MessageViewer *viewerNew,
                               const String& nameViewer)
 {
+   m_infobar->Dismiss();
+
    if ( m_FolderView )
    {
       m_FolderView->OnMsgViewerChange(viewerNew ? viewerNew->GetWindow()
@@ -251,6 +271,8 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
 
    if ( viewerOld )
    {
+      // Deleting the window will also remove it from the viewer parent sizer,
+      // no need to do anything else.
       delete viewerOld->GetWindow();
    }
 
@@ -268,15 +290,21 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
       CHECK_RET( mbar, _T("no menu bar in the frame containing wxMessageView?") );
 
       mbar->Check(WXMENU_VIEW_VIEWERS_BEGIN + 1 + n, true);
-
-      // finally we must ensure that the new viewer is positioned/sized
-      // correctly: folder view does it itself in OnMsgViewerChange() but for
-      // standalone message view frame we have to do it ourselves
-      if ( !m_FolderView )
-      {
-         frame->SendSizeEvent();
-      }
    }
+
+   // finally we must ensure that the new viewer is positioned/sized correctly:
+   if ( viewerNew )
+   {
+      m_viewerParent->GetSizer()->Add(viewerNew->GetWindow(),
+                                      wxSizerFlags(1).Expand());
+   }
+
+   m_viewerParent->Layout();
+
+   // We may not return to the event loop immediately, as we could be opening a
+   // new folder, which takes time, so update the viewer window here explicitly
+   // to avoid not laid out yet window showing on the screen, which is ugly.
+   m_viewerParent->Update();
 }
 
 MessageViewer *

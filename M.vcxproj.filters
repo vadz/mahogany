@@ -582,6 +582,9 @@
     <ClCompile Include="src\wx\generic\vcarddlg.cpp">
       <Filter>Source Files\vcard</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\wxMLog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\interface\HeaderInfo.i">
@@ -935,6 +938,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\mail\Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\wxMLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
