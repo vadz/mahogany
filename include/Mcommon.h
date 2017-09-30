@@ -83,19 +83,12 @@ extern void CloseSplash();
 #  define M_LOG_URGENT  wxLOG_Error
 
 #  define ERRORMESSAGE(arg)   CloseSplash(); wxLogError arg
-#  define SYSERRMESSAGE(arg)  CloseSplash(); wxLogSysError arg
-#  define FATALERROR(arg)     CloseSplash(); wxLogFatalError arg
-#  define INFOMESSAGE(arg)    CloseSplash(); wxLogInfo arg
 #  define LOGMESSAGE(arg)     wxLogGeneric arg
 #  define STATUSMESSAGE(arg)  wxLogStatus arg
 #  ifdef DEBUG
 #     define   DBGMESSAGE(arg)    wxLogDebug arg
-#     define   TRACEMESSAGE(arg)  wxLogTrace arg
-#     define   INTERNALERROR(arg) wxLogFatalError arg    // aborts
 #  else
 #     define   DBGMESSAGE(arg)
-#     define   TRACEMESSAGE(arg)
-#     define   INTERNALERROR(arg) wxLogError arg         // just log the error
 #  endif
 
 #if defined(OS_UNIX) || defined(__CYGWIN__)
