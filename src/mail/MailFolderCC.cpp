@@ -3342,23 +3342,27 @@ MailFolderCC::GetMsgnoFromUID(UIdType uid) const
 Message *
 MailFolderCC::GetMessage(unsigned long uid) const
 {
-   if ( !CheckConnection() )
+   Message* msg = NULL;
+   if ( CheckConnection() )
+   {
+      HeaderInfoList_obj headers(GetHeaders());
+      CHECK( headers, NULL, _T("GetMessage: failed to get headers") );
+
+      UIdType idx = headers->GetIdxFromUId(uid);
+      CHECK( idx != UID_ILLEGAL, NULL, _T("GetMessage: no UID with this message") );
+
+      HeaderInfo *hi = headers->GetItemByIndex((size_t)idx);
+      if ( hi )
+         msg = MessageCC::Create((MailFolderCC *)this, *hi); // const_cast
+   }
+
+   if ( !msg )
    {
       wxLogError(_("Failed to retrieve message from folder '%s'."),
                  GetName());
-      return NULL;
    }
 
-   HeaderInfoList_obj headers(GetHeaders());
-   CHECK( headers, NULL, _T("GetMessage: failed to get headers") );
-
-   UIdType idx = headers->GetIdxFromUId(uid);
-   CHECK( idx != UID_ILLEGAL, NULL, _T("GetMessage: no UID with this message") );
-
-   HeaderInfo *hi = headers->GetItemByIndex((size_t)idx);
-   CHECK( hi, NULL, _T("invalid UID in GetMessage") );
-
-   return MessageCC::Create((MailFolderCC *)this, *hi); // const_cast
+   return msg;
 }
 
 // ----------------------------------------------------------------------------

@@ -608,9 +608,6 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
       m_mf->GetHeaderInfo(self->m_headers, seq);
    }
 
-   // the caller will crash...
-   ASSERT_MSG( m_headers[n], _T("returning NULL HeaderInfo?") );
-
    return m_headers[n];
 }
 
