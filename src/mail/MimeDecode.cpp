@@ -342,7 +342,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
                      const unsigned char c = ctext[n];
                      if ( c >= 0x80 )
                      {
-                        wxLogDebug(wxS("Invalid character \"%c\" "
+                        wxLogDebug(wxS("Invalid character 0x%x "
                                        "in ASCII-encoded word \"%s\""),
                                    c, in);
                      }
