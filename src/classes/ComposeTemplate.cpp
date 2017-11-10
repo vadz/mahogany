@@ -598,7 +598,21 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
          wxStringTokenizer tk(name, " '-", wxTOKEN_STRTOK);
          while ( tk.HasMoreTokens() )
          {
-            wxChar chInitial = tk.GetNextToken()[0u];
+            const wxString& token = tk.GetNextToken();
+            if ( token == "via" )
+            {
+               // Many mailing lists rewrite "From:" header to be "Original
+               // Sender via Mailing List <mailing@list.address>" to avoid
+               // problems with DKIM, don't include the nonsensical "vML"
+               // string into our attribution here.
+               if ( !prefix.empty() )
+                  break;
+
+               // Unless we have nothing in it yet, in this case "via" might
+               // have been a false positive?
+            }
+
+            wxChar chInitial = token[0u];
 
             if ( chInitial == '<' )
             {
