@@ -341,6 +341,9 @@ public:
                      wxFolderListCtrl *listCtrl);
    virtual ~wxFolderMsgWindow();
 
+   // Called only once, soon after creation.
+   void SetViewerContainerWindow(wxWindow *winViewerContainer);
+
    // called when the old viewer window is about to be destroyed and replaced
    // with the new one
    void SetViewerWindow(wxWindow *winViewerNew);
@@ -375,6 +378,9 @@ private:
 
    // the folder view list part
    wxFolderListCtrl *m_listCtrl;
+
+   // the window containing the viewer window (never NULL)
+   wxWindow *m_winViewerContainer;
 
    // the current viewer window (may be NULL)
    wxWindow *m_winViewer;
@@ -1138,8 +1144,13 @@ wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent,
 #endif // USE_VIEWER_BAR
    m_folderView = folderView;
    m_listCtrl = listCtrl;
-   m_winViewer = NULL;
+   m_winViewerContainer = NULL;
    m_evtHandlerMsgView = NULL;
+}
+
+void wxFolderMsgWindow::SetViewerContainerWindow(wxWindow *winViewerContainer)
+{
+   m_winViewerContainer = winViewerContainer;
 }
 
 // called when the old viewer window is about to be destroyed and replaced
@@ -1365,7 +1376,7 @@ void wxFolderMsgWindow::UpdateOptions()
 
 void wxFolderMsgWindow::OnSize(wxSizeEvent& /* event */)
 {
-   if ( m_winViewer )
+   if ( m_winViewerContainer )
    {
       Resize();
    }
@@ -1439,7 +1450,7 @@ void wxFolderMsgWindow::Resize()
       y = 0;
    }
 
-   m_winViewer->SetSize(0, y, size.x, size.y - y);
+   m_winViewerContainer->SetSize(0, y, size.x, size.y - y);
 }
 
 // ----------------------------------------------------------------------------
@@ -3364,6 +3375,9 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_MessageWindow = new wxFolderMsgWindow(m_SplitterWindow, this, m_FolderCtrl);
 
    m_MessagePreview = MessageView::Create(m_MessageWindow, this);
+
+   m_MessageWindow->
+      SetViewerContainerWindow(m_MessagePreview->GetContainerWindow());
 
    m_MessageWindow->SetViewerWindow(m_MessagePreview->GetWindow());
 

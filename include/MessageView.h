@@ -101,6 +101,10 @@ public:
     */
    //@{
 
+   /// Get the window containing the viewer window and any other helper GUI
+   /// elements.
+   virtual wxWindow *GetContainerWindow() const = 0;
+
    /// get the underlying window
    wxWindow *GetWindow() const;
 
