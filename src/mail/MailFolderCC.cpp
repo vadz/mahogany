@@ -671,10 +671,14 @@ public:
 
       m_msgProgress.Printf(_("Retrieving %lu message headers..."), m_nTotal);
 
+      // Make a placeholder for the message of comparable size to the messages
+      // shown below by UpdateProgress().
       m_progdlg = new MProgressDialog
                       (
                         name,
-                        m_msgProgress + _T("\n\n"),
+                        m_msgProgress + "\n\n" +
+                        _("Initializing...") + '\n' +
+                        wxString(' ', 100) + '\n',
                         m_nTotal
                       );
    }
@@ -691,9 +695,9 @@ public:
 
          // construct the label
          String label;
-         label << m_msgProgress << _T('\n')
-               << _("From: ") << entry.GetFrom() << _T('\n')
-               << _("Subject: ") << entry.GetSubject();
+         label << m_msgProgress << "\n\n"
+               << _("From: ") << ShortenIfNecessary(entry.GetFrom()) << _T('\n')
+               << _("Subject: ") << ShortenIfNecessary(entry.GetSubject());
 
          if ( !m_progdlg->Update(m_nRetrieved, label) )
          {
@@ -706,6 +710,26 @@ public:
    }
 
 private:
+   // A small helper to avoid showing too long strings in the progress dialog.
+   static wxString ShortenIfNecessary(const String& s)
+   {
+      wxString label(s);
+
+      // Ensure it doesn't have multiple lines.
+      label = label.BeforeFirst('\n');
+
+      // This is arbitrary, but we need to have some limit.
+      const size_t MAX_LABEL_LEN = 72;
+      if ( label.length() > MAX_LABEL_LEN )
+      {
+         label.Truncate(MAX_LABEL_LEN - 3);
+         label += "...";
+      }
+
+      return label;
+   }
+
+
    // the total number of messages we are going to retrieve
    size_t m_nTotal;
 
