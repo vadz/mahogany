@@ -41,11 +41,6 @@ wxMLog::Activate()
    delete wxLog::SetActiveTarget(ms_MLog);
 }
 
-wxMLog::wxMLog()
-{
-   m_activeInfoBar = NULL;
-}
-
 void
 wxMLog::DoLogRecord(wxLogLevel level,
                     const wxString& msg,

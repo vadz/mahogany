@@ -33,14 +33,14 @@ protected:
                             const wxLogRecordInfo& info);
 
 private:
-   // Ctor is private, use static Activate() to 
-   wxMLog();
+   // Ctor is private, use static Activate() to actually create the object.
+   wxMLog() = default;
 
    // The unique currently used wxMLog.
    static wxMLog* ms_MLog;
 
    // This member is private and can be manipulated only by wxMLogTargetSetter.
-   wxInfoBarBase* m_activeInfoBar;
+   wxInfoBarBase* m_activeInfoBar = nullptr;
 
    friend class wxMLogTargetSetter;
 
