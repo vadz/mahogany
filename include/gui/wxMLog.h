@@ -36,11 +36,20 @@ private:
    // Ctor is private, use static Activate() to actually create the object.
    wxMLog() = default;
 
+   // This method is private and can be called only by wxMLogTargetSetter.
+   void SetInfoBarToUse(wxInfoBarBase* infobar);
+
    // The unique currently used wxMLog.
    static wxMLog* ms_MLog;
 
-   // This member is private and can be manipulated only by wxMLogTargetSetter.
+   // SetInfoBarToUse() must be called to change this from outside this class.
    wxInfoBarBase* m_activeInfoBar = nullptr;
+
+   // The last shown message using the same infobar as is currently used.
+   wxString m_lastMsg;
+
+   // The level of the last shown message, only used if m_lastMsg is not empty.
+   wxLogLevel m_lastShownLevel = wxLOG_Max;
 
    friend class wxMLogTargetSetter;
 
@@ -57,13 +66,13 @@ public:
       : m_infobarOrig(wxMLog::ms_MLog ? wxMLog::ms_MLog->m_activeInfoBar : NULL)
    {
       if ( wxMLog::ms_MLog )
-         wxMLog::ms_MLog->m_activeInfoBar = infobar;
+         wxMLog::ms_MLog->SetInfoBarToUse(infobar);
    }
 
    ~wxMLogTargetSetter()
    {
       if ( wxMLog::ms_MLog )
-         wxMLog::ms_MLog->m_activeInfoBar = m_infobarOrig;
+         wxMLog::ms_MLog->SetInfoBarToUse(m_infobarOrig);
    }
 
 private:

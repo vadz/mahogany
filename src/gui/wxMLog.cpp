@@ -42,6 +42,43 @@ wxMLog::Activate()
 }
 
 void
+wxMLog::SetInfoBarToUse(wxInfoBarBase* infobar)
+{
+   // Last message was shown in a different infobar, so forget about it.
+   m_lastMsg.clear();
+   m_lastShownLevel = wxLOG_Max;
+
+   m_activeInfoBar = infobar;
+}
+
+static
+int GetFlagsForLogLevel(wxLogLevel level)
+{
+   switch ( level )
+   {
+      case wxLOG_FatalError:
+      case wxLOG_Error:
+         return wxICON_ERROR;
+
+      case wxLOG_Warning:
+         return wxICON_WARNING;
+
+      case wxLOG_Message:
+      case wxLOG_Info:
+         return wxICON_INFORMATION;
+
+      case wxLOG_Status:
+      case wxLOG_Debug:
+      case wxLOG_Trace:
+      case wxLOG_Progress:
+      case wxLOG_User:
+      case wxLOG_Max:
+      default:
+         return 0;
+   }
+}
+
+void
 wxMLog::DoLogRecord(wxLogLevel level,
                     const wxString& msg,
                     const wxLogRecordInfo& info)
@@ -52,33 +89,39 @@ wxMLog::DoLogRecord(wxLogLevel level,
       return;
    }
 
-   int flags = 0;
-   switch ( level )
+   int flags = GetFlagsForLogLevel(level);
+   if ( !flags )
    {
-      case wxLOG_FatalError:
-      case wxLOG_Error:
-         flags |= wxICON_ERROR;
-         break;
-
-      case wxLOG_Warning:
-         flags |= wxICON_WARNING;
-         break;
-
-      case wxLOG_Message:
-      case wxLOG_Info:
-         flags |= wxICON_INFORMATION;
-         break;
-
-      case wxLOG_Status:
-      case wxLOG_Debug:
-      case wxLOG_Trace:
-      case wxLOG_Progress:
-      case wxLOG_User:
-      case wxLOG_Max:
-      default:
-         // These messages are not shown in the infobar at all.
-         return;
+      // These messages are too low priority to be shown in the infobar.
+      return;
    }
 
-   m_activeInfoBar->ShowMessage(msg, flags);
+   wxString msgToShow;
+
+   if ( m_lastMsg.empty() )
+   {
+      m_lastMsg = msg;
+      msgToShow = msg;
+   }
+   else // We already have another message shown
+   {
+      // Check if we need to override it with the more recent one: normally we
+      // do it, but avoid overriding an error with an informational message.
+      if ( level <= m_lastShownLevel )
+      {
+         m_lastMsg = msg;
+         m_lastShownLevel = level;
+      }
+      else // The new message has strictly lower severity
+      {
+         // Don't show it and don't update the last values, but do use the same
+         // flags as the last time instead of the new ones.
+         flags = GetFlagsForLogLevel(m_lastShownLevel);
+      }
+
+      msgToShow = m_lastMsg;
+      msgToShow += " (and other messages, see log)";
+   }
+
+   m_activeInfoBar->ShowMessage(msgToShow, flags);
 }
