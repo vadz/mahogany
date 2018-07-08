@@ -62,8 +62,6 @@ public:
    */
    virtual void MOcheck(void) const
       {
-         /// check that this != NULL
-         wxASSERT(this);
          /// check that the object is really a MObject
          wxASSERT(m_magic == MOBJECT_MAGIC);
       }

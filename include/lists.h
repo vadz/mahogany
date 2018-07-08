@@ -49,9 +49,9 @@ struct ListNodeBase \
    inline ~ListNodeBase(void) \
       { magic = 0xDECEA5ED; } \
    inline void NodeCheck(void) const \
-      { ASSERT(this); ASSERT(magic == 0xBA5EBA5E); } \
+      { ASSERT(magic == 0xBA5EBA5E); } \
    inline void NodeRefCheck(void) const \
-      { ASSERT(this); ASSERT(magic == 0xBA5EBA5E || magic == 0xDEADBEEF); } \
+      { ASSERT(magic == 0xBA5EBA5E || magic == 0xDEADBEEF); } \
 };
 #else
 #define M_LIST_BASE \
