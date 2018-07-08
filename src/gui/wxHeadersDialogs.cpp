@@ -938,12 +938,12 @@ void wxCustomHeadersDialog::ModifyHeader(int index,
                                          const String& headerValue,
                                          CustomHeaderType type)
 {
-   if ( m_listctrl->SetItem(index, 0, headerName) == -1 )
+   if ( !m_listctrl->SetItem(index, 0, headerName) )
    {
       FAIL_MSG(_T("can't set item info in listctrl"));
    }
 
-   if ( m_listctrl->SetItem(index, 1, headerValue) == -1 )
+   if ( !m_listctrl->SetItem(index, 1, headerValue) )
    {
       FAIL_MSG(_T("can't set item info in listctrl"));
    }
@@ -972,7 +972,7 @@ void wxCustomHeadersDialog::AddHeader(int index,
       FAIL_MSG(_T("can't insert item into listctrl"));
    }
 
-   if ( m_listctrl->SetItem(index, 1, headerValue) == -1 )
+   if ( !m_listctrl->SetItem(index, 1, headerValue) )
    {
       FAIL_MSG(_T("can't set item info in listctrl"));
    }
