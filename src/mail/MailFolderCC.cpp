@@ -676,9 +676,9 @@ public:
       m_progdlg = new MProgressDialog
                       (
                         name,
-                        m_msgProgress + "\n\n" +
-                        _("Initializing...") + '\n' +
-                        wxString(' ', 100) + '\n',
+                        m_msgProgress + "\n" +
+                        _("Initializing...") + wxString(L'\u00a0', 150) +
+                        '\n',
                         m_nTotal
                       );
    }
@@ -695,7 +695,7 @@ public:
 
          // construct the label
          String label;
-         label << m_msgProgress << "\n\n"
+         label << m_msgProgress << "\n"
                << _("From: ") << ShortenIfNecessary(entry.GetFrom()) << _T('\n')
                << _("Subject: ") << ShortenIfNecessary(entry.GetSubject());
 
