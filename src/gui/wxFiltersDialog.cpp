@@ -1743,7 +1743,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
    c->top.Below(btnEdit, LAYOUT_Y_MARGIN);
    btnRename->SetConstraints(c);
 
-   wxButton *btnDelete = new wxButton(this, Button_Delete, _("&Delete"));
+   wxButton *btnDelete = new wxButton(this, Button_Delete, _("Delete"));
    c = new wxLayoutConstraints;
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
