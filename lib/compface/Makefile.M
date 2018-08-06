@@ -13,7 +13,7 @@
 include ../../makeopts
 
 CPPFLAGS=$(CFACE_CPPFLAGS)
-CFLAGS=$(CFACE_CFLAGS)
+CFLAGS=$(CFACE_CFLAGS) -fPIC
 
 OBJECTS=arith.o file.o compress.o gen.o uncompface.o compface.o
 
