@@ -741,6 +741,8 @@ PGPEngine::ExecCommand(const String& options,
                       code == _T("GOT_IT") ||
                       code == _T("SIGEXPIRED") || // we will give a warning
                       code == _T("KEYEXPIRED") || // when we get EXPKEYSIG
+                      code == _T("KEY_CONSIDERED") ||
+                      code == _T("PINENTRY_LAUNCHED") ||
                       code == _T("PLAINTEXT") ||
                       code == _T("PLAINTEXT_LENGTH") ||
                       code == _T("IMPORT_OK") ||
