@@ -752,8 +752,17 @@ PGPEngine::ExecCommand(const String& options,
             }
             else
             {
-               wxLogWarning(_("Ignoring unexpected GnuPG status line: \"%s\""),
-                            line.c_str());
+               // Don't use wxLogWarning() here, new versions of gpg may (and
+               // did, in the past) add new messages that we don't handle, but
+               // it's not necessarily a problem that the user must be notified
+               // about.
+               log->AddMessage
+                    (
+                        wxString::Format
+                        (
+                         _("Ignoring unexpected GnuPG status line: \"%s\""), line
+                        )
+                    );
             }
             // Extract user id used to sign
             if ( log && (code == _T("GOODSIG") || code == _T("BADSIG")) )
