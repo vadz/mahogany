@@ -741,6 +741,8 @@ PGPEngine::ExecCommand(const String& options,
                       code == _T("GOT_IT") ||
                       code == _T("SIGEXPIRED") || // we will give a warning
                       code == _T("KEYEXPIRED") || // when we get EXPKEYSIG
+                      code == _T("KEY_CONSIDERED") ||
+                      code == _T("PINENTRY_LAUNCHED") ||
                       code == _T("PLAINTEXT") ||
                       code == _T("PLAINTEXT_LENGTH") ||
                       code == _T("IMPORT_OK") ||
@@ -750,8 +752,17 @@ PGPEngine::ExecCommand(const String& options,
             }
             else
             {
-               wxLogWarning(_("Ignoring unexpected GnuPG status line: \"%s\""),
-                            line.c_str());
+               // Don't use wxLogWarning() here, new versions of gpg may (and
+               // did, in the past) add new messages that we don't handle, but
+               // it's not necessarily a problem that the user must be notified
+               // about.
+               log->AddMessage
+                    (
+                        wxString::Format
+                        (
+                         _("Ignoring unexpected GnuPG status line: \"%s\""), line
+                        )
+                    );
             }
             // Extract user id used to sign
             if ( log && (code == _T("GOODSIG") || code == _T("BADSIG")) )
