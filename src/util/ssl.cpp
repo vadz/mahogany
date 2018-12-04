@@ -109,6 +109,12 @@ extern const MOption MP_SSL_DLL_SSL;
    #undef SSL_in_init
    #undef SSL_CTX_set_options
 #endif
+// OpenSSL 1.1.1
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x1010100fL)
+   #define ssl_const111 const
+#else
+   #define ssl_const111
+#endif
 
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
@@ -216,7 +222,7 @@ SSL_DEF( unsigned long, ERR_get_error, (void), () );
 SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p), (e, p) );
 
 // Those are macros until 1.1.0, functions in it.
-SSL_DEF( int, SSL_in_init, (SSL* s), (s) );
+SSL_DEF( int, SSL_in_init, (ssl_const111 SSL* s), (s) );
 SSL_DEF( unsigned long, SSL_CTX_set_options, (SSL_CTX *ctx, unsigned long op), (ctx, op) );
 
 // These functions are used inside macro expansions in openssl/ssl.h.
