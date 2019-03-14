@@ -357,7 +357,6 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_CTX_set_default_verify_paths);
    SSL_LOOKUP(SSL_set_bio);
    SSL_LOOKUP(SSL_set_connect_state);
-   SSL_LOOKUP(SSL_state);
    SSL_LOOKUP(SSL_ctrl);
    SSL_LOOKUP(TLSv1_server_method);
    SSL_LOOKUP(SSL_CTX_set_cipher_list);
