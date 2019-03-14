@@ -394,6 +394,12 @@ bool InitSSL(void) /* FIXME: MT */
    return true;
 
 error:
+   // Unload the DLLs to avoid assertion failures when calling Load() on them
+   // again if we reattempt SSL initialization later (note that Unload() itself
+   // doesn't assert and just doesn't do anything if the DLL is not loaded).
+   gs_dllSll.Unload();
+   gs_dllCrypto.Unload();
+
    if ( !s_errMsgGiven )
    {
       ERRORMESSAGE((_("SSL authentication is not available.")));
