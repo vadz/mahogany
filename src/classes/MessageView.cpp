@@ -176,19 +176,7 @@ RecodeText(String *text, wxFontEncoding encSrc, wxFontEncoding encDst)
    const wxCharBuffer textMB(text->mb_str(wxCSConv(encSrc)));
    CHECK_RET( textMB, "string not in source encoding?" );
 
-   // Special case of using UTF-8: it often happens that a message encoded in
-   // UTF-8 has some trailer with Latin-1 appended to it. In this case, try to
-   // recover as much of UTF-8 text as possible.
-   if ( encDst == wxFONTENCODING_UTF8 )
-   {
-      *text = String(textMB, wxMBConvUTF8(wxMBConvUTF8::MAP_INVALID_UTF8_TO_PUA));
-   }
-   else
-   {
-      String textNew = String(textMB, wxCSConv(encDst));
-      if ( !textNew.empty() )
-         text->swap(textNew);
-   }
+   *text = MIME::DecodeText(textMB, textMB.length(), encDst);
 }
 
 #else // !wxUSE_UNICODE

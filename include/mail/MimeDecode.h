@@ -81,6 +81,15 @@ EncodeHeader(const wxString& in, wxFontEncoding enc = wxFONTENCODING_SYSTEM);
 */
 String DecodeHeader(const String& in, wxFontEncoding *encoding = NULL);
 
+/**
+   Helper for decoding the given data using the specified encoding.
+
+   This method tries hard to return something useful and ignores invalid
+   characters when decoding using UTF-8 instead of failing and returning an
+   empty string, which is not useful.
+ */
+String DecodeText(const char *p, size_t len, wxFontEncoding enc);
+
 } // namespace MIME
 
 #endif // M_MAIL_MIMEDECODE_H

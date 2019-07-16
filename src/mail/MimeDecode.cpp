@@ -738,3 +738,18 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
 
    return headerEnc.ToAscii();
 }
+
+String MIME::DecodeText(const char *p, size_t len, wxFontEncoding enc)
+{
+   // Special case of using UTF-8: it often happens that a message encoded in
+   // UTF-8 has some trailer with Latin-1 appended to it. In this case, try to
+   // recover as much of UTF-8 text as possible.
+   if ( enc == wxFONTENCODING_UTF8 )
+   {
+      return String(p, wxMBConvUTF8(wxMBConvUTF8::MAP_INVALID_UTF8_TO_PUA), len);
+   }
+   else
+   {
+      return String(p, wxCSConv(enc), len);
+   }
+}
