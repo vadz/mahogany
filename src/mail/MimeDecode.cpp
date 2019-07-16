@@ -643,16 +643,12 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
    if ( !NeedsEncoding(in) )
       return in.ToAscii();
 
-   // decide about the encoding to use if none specified
-   if ( enc == wxFONTENCODING_SYSTEM )
+   // If we were given an explicit encoding to use, check if we can use it, and
+   // if not fall back to the same UTF-8 (which can always be used) as we use
+   // by default if no encoding was specified in the first place.
+   if ( enc == wxFONTENCODING_SYSTEM ||
+         wxCSConv(enc).FromWChar(NULL, 0, in.wc_str(wxConvLibc)) == wxCONV_FAILED )
    {
-      // try to use the user current encoding first
-      enc = wxLocale::GetSystemEncoding();
-   }
-
-   if ( wxCSConv(enc).FromWChar(NULL, 0, in.wc_str(wxConvLibc)) == wxCONV_FAILED )
-   {
-      // but if we can't encode with it, fall back to UTF-8 as it never fails
       enc = wxFONTENCODING_UTF8;
    }
 
