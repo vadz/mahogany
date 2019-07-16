@@ -284,28 +284,6 @@ wxFontEncoding MimePartCCBase::GetTextEncoding() const
       {
          m_encoding = wxFONTENCODING_ISO8859_1;
       }
-
-      // special case: many broken programs generate messages with UTF-8
-      // charset but without properly encoding the contents in UTF-8 which
-      // results in "s" being empty and not showing the text parts at all
-      //
-      // so if the conversion failed, try to show the text at least somehow
-      // using latin1 (and the user will be able to change the encoding
-      // manually from the menu later which would be impossible if we returned
-      // an empty string from GetTextContent())
-      if ( m_encoding == wxFONTENCODING_UTF8 ||
-            m_encoding == wxFONTENCODING_UTF7 )
-      {
-         // check if we really have valid UTF-x
-         unsigned long len;
-         const char *p = reinterpret_cast<const char *>(GetContent(&len));
-
-         if ( p &&
-               wxCSConv(m_encoding).ToWChar(NULL, 0, p, len) == wxCONV_FAILED )
-         {
-            m_encoding = wxFONTENCODING_ISO8859_1;
-         }
-      }
    }
 
    return m_encoding;
@@ -496,7 +474,7 @@ String MimePartCCBase::GetTextContent() const
    wxString s;
    if ( p )
    {
-      s = wxString(p, wxCSConv(GetTextEncoding()), len);
+      s = MIME::DecodeText(p, len, GetTextEncoding());
    }
 
    return s;
