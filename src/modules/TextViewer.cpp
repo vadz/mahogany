@@ -37,10 +37,6 @@
 
 #include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
 
-#ifdef __WXMSW__
-   #include <wx/msw/private.h>
-#endif // __WXMSW__
-
 // only Win32 supports URLs in the text control natively so far, define this to
 // use this possibility
 //
