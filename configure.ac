@@ -60,6 +60,7 @@ echo ""
 
 AC_CONFIG_HEADER(include/config.h)
 AC_CONFIG_AUX_DIR(extra/scripts)
+AC_CONFIG_MACRO_DIR([extra/m4])
 ### HACK: unfortunately, the Makefiles in subdirectories can use this
 ### install program without qualification.  We really shouldn't do it
 ### this way, but we force the install-sh found here to be a full path.
@@ -171,7 +172,7 @@ case "$m_cv_prefix" in /*) ;; *)
 esac
 prefix=$m_cv_prefix
 
-AM_OPTIONS_WXCONFIG
+WX_CONFIG_OPTIONS
 
 dnl save parameter settings in case stuff below aborts
 AC_CACHE_SAVE
@@ -978,7 +979,7 @@ dnl notice that libraries option should use correct order, otherwise statically
 dnl linking won't work!
 wxlibs=html,adv,qa,core,xml,net,base
 
-AM_PATH_WXCONFIG($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[$wxlibs], [--debug=$debug_option])
+WX_CONFIG_CHECK($MIN_WX_VERSION, [wxOK=1],[wxOK=0],[$wxlibs], [--debug=$debug_option])
 
 if test "$wxOK" != 1; then
     if test $debug_option = "yes"; then

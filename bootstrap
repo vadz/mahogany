@@ -42,7 +42,7 @@ if [ ! -f configure.ac -o ! -f include/Mcommon.h ]; then
 fi
 
 echo "Setting up build system for Mahogany:"
-echo " - aclocal " && aclocal ${wx:+-I $wx} && \
+echo " - aclocal " && aclocal && \
 echo " - autoconf " && autoconf && \
 echo "Build setup successful, type \"configure\" to configure Mahogany now." && \
 exit 0
