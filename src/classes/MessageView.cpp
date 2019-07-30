@@ -2627,8 +2627,8 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
             // messages created under Unix systems, but c-client functions used
             // in MimePartVirtual do expect a message in canonical format so we
             // must ensure that we do have CR LFs
-            MimePartVirtual *mpv = new
-               MimePartVirtual(strutil_enforceCRLF(decryptedData).To8BitData());
+            const String dataCRLF = strutil_enforceCRLF(decryptedData);
+            MimePartVirtual *mpv = new MimePartVirtual(dataCRLF.utf8_str());
             if ( mpv->IsOk() )
             {
 
