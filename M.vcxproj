@@ -282,7 +282,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;w:\dev\lang\python\2.7.3\Include;w:\dev\lang\python\2.7.3\PC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -314,7 +313,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;WXUSINGDLL;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -348,7 +346,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -382,7 +379,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
