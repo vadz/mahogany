@@ -146,7 +146,7 @@
     <ClCompile>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
@@ -162,7 +162,7 @@
       <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc140_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc14x_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -179,7 +179,7 @@
     <ClCompile>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;WXUSINGDLL;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;WXUSINGDLL;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
@@ -195,7 +195,7 @@
       <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc140_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc14x_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -214,7 +214,7 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
@@ -248,7 +248,7 @@
     </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Mpch.h</PrecompiledHeaderFile>
@@ -281,7 +281,7 @@
       <AdditionalOptions>/Zm110 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;w:\dev\lang\python\2.7.3\Include;w:\dev\lang\python\2.7.3\PC;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -297,7 +297,7 @@
     <Link>
       <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc140_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc14x_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>10000000</StackReserveSize>
@@ -312,7 +312,7 @@
       <AdditionalOptions>/Zm110 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;WXUSINGDLL;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;WXUSINGDLL;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -328,7 +328,7 @@
     <Link>
       <AdditionalDependencies>imap.lib;compface.lib;dspam.lib;versit.lib;winmm.lib;comctl32.lib;rpcrt4.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)M.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc140_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir);$(wxwin)\lib\vc14x_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>10000000</StackReserveSize>
@@ -345,7 +345,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -378,7 +378,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;$(wxwin)/include/msvc;$(wxwin)/include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION=140;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE;wxMSVC_VERSION_ABI_COMPAT;wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
