@@ -1,5 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 14.00
-# Visual Studio 2015
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29020.237
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "M", "M.vcxproj", "{1515C8EB-5C72-43DF-9D3A-0703F155F268}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imap", "lib\imap\imap.vcxproj", "{457CFEC8-5C3F-4C7E-98A6-B65E1DE22682}"
