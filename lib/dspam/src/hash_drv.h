@@ -73,7 +73,7 @@ struct _hash_drv_storage
   int flags;
 
   struct nt *dir_handles;
-} *hash_drv_storage_t;
+};
 
 typedef struct _hash_drv_spam_record
 {
