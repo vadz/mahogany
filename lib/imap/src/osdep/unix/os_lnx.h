@@ -43,6 +43,7 @@
 
 #define direct dirent
 
+extern int safe_flock (int fd,int op);
 #define flock safe_flock
 
 
