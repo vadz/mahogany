@@ -1454,7 +1454,15 @@ case "$GXX" in yes)
 	1)	CXXFLAGS_RELAXED="$CXXFLAGS_RELAXED -Wall -pedantic -Wno-long-long"
 		CXXFLAGS="$CXXFLAGS -Werror -pedantic -Wno-long-long" ;;
 	*)	CXXFLAGS_RELAXED="$CXXFLAGS_RELAXED -Wall"
-		CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers" ;;
+		CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers"
+
+		dnl Unfortunately we have to disable this warning globally for the
+		dnl compiler versions giving it (8+), as the use of PCH prevents
+		dnl disabling it locally in wxWidgets from working. This can only be
+		dnl avoided if we stop using the PCH or if we change all the code using
+		dnl wx event table macros to use Bind() instead.
+		M_ADD_CXXFLAGS_IF_SUPPORTED(-Wno-cast-function-type)
+		;;
 	esac ;;	
 esac
 AC_SUBST(CXXFLAGS_RELAXED)
