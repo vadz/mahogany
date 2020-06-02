@@ -560,7 +560,7 @@ bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)
       case Test_Open:
       case Test_OpenReadOnly:
       {
-         FILE *fp = fopen(fullname.fn_str(), Test_Open ? "a" : "r");
+         FILE *fp = fopen(fullname.fn_str(), test == Test_Open ? "a" : "r");
          if ( fp != NULL )
          {
             fclose(fp);
