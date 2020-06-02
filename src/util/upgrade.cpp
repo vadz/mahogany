@@ -1999,7 +1999,7 @@ CopyEntries(wxConfigBase *src,
                      copiedOk = dest->Write(newentry, val);
 
                   if ( copiedOk )
-                     copiedOk++;
+                     numCopied++;
                }
             }
             break;
