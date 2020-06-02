@@ -939,6 +939,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
 
       default:
          wxFAIL_MSG( _T("Unexpected encoding in CheckLanguageInMenu") );
+         // fall through
 
       case wxFONTENCODING_DEFAULT:
          id = WXMENU_LANG_DEFAULT;

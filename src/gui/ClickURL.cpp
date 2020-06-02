@@ -305,8 +305,8 @@ ClickableURL::ClickableURL(MessageView *msgView, const String& url)
       {
          case _T('\r'):
          case _T('\n'):
-            // ignore
-            break;
+            // ignore and skip adding it to the URL below
+            continue;
 
          case _T('@'):
             if ( !hadColon )
@@ -314,14 +314,14 @@ ClickableURL::ClickableURL(MessageView *msgView, const String& url)
                // we don't have an explicit scheme, assume email address
                m_isMail = Yes;
             }
-            // fall through
+            break;
 
          case _T(':'):
             hadColon = true;
-
-         default:
-            m_url += *p;
+            break;
       }
+
+      m_url += *p;
    }
 }
 

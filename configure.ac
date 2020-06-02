@@ -1462,6 +1462,11 @@ case "$GXX" in yes)
 		dnl avoided if we stop using the PCH or if we change all the code using
 		dnl wx event table macros to use Bind() instead.
 		M_ADD_CXXFLAGS_IF_SUPPORTED(-Wno-cast-function-type)
+
+		dnl Relax gcc checks for "fall through" comments: there are many of
+		dnl those that don't match the default strict checks (level 4) enabled
+		dnl by -Wextra, but they all contain "fall though", so match level 2.
+		M_ADD_CXXFLAGS_IF_SUPPORTED(-Wimplicit-fallthrough=2)
 		;;
 	esac ;;	
 esac

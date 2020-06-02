@@ -1663,7 +1663,10 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
                   MessageAddressType mat;
                   switch ( envhdr )
                   {
-                     default: FAIL_MSG( "forgot to add header here" );
+                     default:
+                        FAIL_MSG( "forgot to add header here" );
+                        // fall through
+
                      case EnvelopHeader_From: mat = MAT_FROM; break;
                      case EnvelopHeader_To: mat = MAT_TO; break;
                      case EnvelopHeader_Cc: mat = MAT_CC; break;

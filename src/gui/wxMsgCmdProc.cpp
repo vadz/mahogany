@@ -614,7 +614,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
             {
                default:
                   FAIL_MSG( _T("unknown reply menu command") );
-                  // fall through
+                  wxFALLTHROUGH;
 
                CASE_REPLY(REPLY);
                CASE_REPLY(REPLY_SENDER);

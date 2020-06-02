@@ -245,6 +245,7 @@ void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
 
          default:
             FAIL_MSG(_T("unknown mouse action"));
+            // fall through
 
          case WXLOWIN_MENU_LCLICK:
             ci->OnLeftClick();

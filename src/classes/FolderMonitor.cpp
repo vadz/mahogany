@@ -517,8 +517,8 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
             i->SetState(Folder_Ok);
             break;
          }
-         //else: fall through
 #endif // USE_DIALUP
+         //else: fall through
 
       case Folder_Unaccessible:
          // don't even try any more

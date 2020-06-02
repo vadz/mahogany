@@ -275,6 +275,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
             case '=':
                if ( alignment == None )
                   alignment = Center;
+               // fall through
 
             case '1':
             case '2':

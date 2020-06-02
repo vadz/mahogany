@@ -210,6 +210,7 @@ CountQuoteLevel(const wxChar *string,
          default:
          case Line_Unknown:
             FAIL_MSG( _T("logical error: unexpected sameAsNext value") );
+            // fall through
 
          case Line_Different:
             // check for wrapped quoted lines

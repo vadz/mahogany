@@ -3015,11 +3015,13 @@ bool wxOptionsPage::DoTransferOptionsToWindow()
             {
                wxASSERT( !m_aDefaults[n].IsNumeric() );
             }
+            // fall through
 
             // can only have text value
          case Field_Passwd:
             if( GetFieldType(n) == Field_Passwd )
                strValue = strutil_decrypt(strValue);
+            // fall through
 
          case Field_Font:
          case Field_Dir:

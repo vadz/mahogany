@@ -1762,14 +1762,6 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
                FAIL_MSG(_T("invalid file folder subtype"));
                // fall through
 
-#ifdef EXPERIMENTAL_MFormat
-            case FileFolderSubtype_MFile:
-               return MF_MFILE;
-
-            case FileFolderSubtype_MDir:
-               return MF_MDIR;
-#endif // EXPERIMENTAL_MFormat
-
             case FileFolderSubtype_Mbx:
             case FileFolderSubtype_Mbox:
             case FileFolderSubtype_Mmdf:
@@ -1778,6 +1770,14 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
 
             case FileFolderSubtype_MH:
                return MF_MH;
+
+#ifdef EXPERIMENTAL_MFormat
+            case FileFolderSubtype_MFile:
+               return MF_MFILE;
+
+            case FileFolderSubtype_MDir:
+               return MF_MDIR;
+#endif // EXPERIMENTAL_MFormat
          }
 
       case Radio_Pop:
@@ -2510,9 +2510,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       switch(folderType)
       {
          default:
-            FAIL_MSG( _T("new foldertype with server added") );
-            // fall through, otherwise we will crash with uninit serverType
-            // anyhow
+            FAIL_MSG( "don't know how to create server folder of this type" );
+            return false;
 
          case MF_NNTP:
             serverType = ServerNews;
@@ -2581,7 +2580,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       case MF_INBOX:
          if ( !m_dlgCreate )
             break;
-         //else: can't create INBOX folder!
+         //else: fall through, can't create INBOX folder
 
       case MF_GROUP:
          WriteEntryIfChanged(Path, m_mailboxname->GetValue());

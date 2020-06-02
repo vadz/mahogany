@@ -106,6 +106,7 @@ MIME::Encoding MIME::GetEncodingForFontEncoding(wxFontEncoding enc)
 
       default:
          FAIL_MSG( _T("unknown encoding") );
+         // fall through
 
       case wxFONTENCODING_SYSTEM:
          return Encoding_Unknown;

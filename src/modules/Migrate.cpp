@@ -666,8 +666,8 @@ MigrateModule::Entry(int arg, ...)
             return DoMigrate() ? 0 : -1;
 
          FAIL_MSG( _T("unexpected menu event in migrate module") );
-         // fall through
       }
+         // fall through
 
       default:
          return 0;
@@ -1961,6 +1961,7 @@ bool MigrateWizard::HasNextPage(wxWizardPage *page)
 
       default:
          FAIL_MSG( _T("unknown page in MigrateWizard") );
+         // fall through
 
       case Page_WarnEmptySource:
       case Page_CantAccessSource:
