@@ -36,6 +36,8 @@
 #include <syslog.h>
 #include <sys/file.h>
 
+/* Real declaration in utime.h is compatible, but different. */
+extern int utime(const char *filename, const time_t *times);
 
 /* Linux gets this wrong */
 
