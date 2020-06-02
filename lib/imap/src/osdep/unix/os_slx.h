@@ -26,20 +26,6 @@
  * Last Edited:	30 August 2006
  */
 
-/*
- *** These lines are claimed to be necessary to build on Debian Linux on an
- *** Alpha.
- */
-
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 1
-#endif /* _XOPEN_SOURCE */
-#ifndef _BSD_SOURCE
-#define _BSD_SOURCE 1
-#endif /* _BSD_SOURCE */
-
-/* end Debian Linux on Alpha strangeness */
-
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -50,6 +36,8 @@
 #include <syslog.h>
 #include <sys/file.h>
 
+/* Real declaration in utime.h is compatible, but different. */
+extern int utime(const char *filename, const time_t *times);
 
 /* Linux gets this wrong */
 
@@ -57,6 +45,7 @@
 
 #define direct dirent
 
+extern int safe_flock (int fd,int op);
 #define flock safe_flock
 
 

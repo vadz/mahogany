@@ -114,7 +114,7 @@ MIXBURP {
 DRIVER *mix_valid (char *name);
 long mix_isvalid (char *name,char *meta);
 void *mix_parameters (long function,void *value);
-long mix_dirfmttest (char *name);
+long mix_dirfmttest (const char *name);
 void mix_scan (MAILSTREAM *stream,char *ref,char *pat,char *contents);
 long mix_scan_contents (char *name,char *contents,unsigned long csiz,
 			unsigned long fsiz);
@@ -125,7 +125,7 @@ long mix_unsubscribe (MAILSTREAM *stream,char *mailbox);
 long mix_create (MAILSTREAM *stream,char *mailbox);
 long mix_delete (MAILSTREAM *stream,char *mailbox);
 long mix_rename (MAILSTREAM *stream,char *old,char *newname);
-int mix_rselect (struct direct *name);
+int mix_rselect (const struct direct *name);
 MAILSTREAM *mix_open (MAILSTREAM *stream);
 void mix_close (MAILSTREAM *stream,long options);
 void mix_abort (MAILSTREAM *stream);
@@ -140,8 +140,8 @@ THREADNODE *mix_thread (MAILSTREAM *stream,char *type,char *charset,
 long mix_ping (MAILSTREAM *stream);
 void mix_check (MAILSTREAM *stream);
 long mix_expunge (MAILSTREAM *stream,char *sequence,long options);
-int mix_select (struct direct *name);
-int mix_msgfsort (const void *d1,const void *d2);
+int mix_select (const struct direct *name);
+int mix_msgfsort (const struct direct **d1,const struct direct **d2);
 long mix_addset (SEARCHSET **set,unsigned long start,unsigned long size);
 long mix_burp (MAILSTREAM *stream,MIXBURP *burp,unsigned long *reclaimed);
 long mix_burp_check (SEARCHSET *set,size_t size,char *file);
@@ -284,7 +284,7 @@ void *mix_parameters (long function,void *value)
  * Returns: T if internal name, NIL otherwise
  */
 
-long mix_dirfmttest (char *name)
+long mix_dirfmttest (const char *name)
 {
 				/* belongs to MIX if starts with .mix */
   return strncmp (name,MIXNAME,sizeof (MIXNAME) - 1) ? NIL : LONGT;
@@ -587,7 +587,7 @@ long mix_rename (MAILSTREAM *stream,char *old,char *newname)
  * Returns: T if mix file name, NIL otherwise
  */
 
-int mix_rselect (struct direct *name)
+int mix_rselect (const struct direct *name)
 {
   return mix_dirfmttest (name->d_name);
 }
@@ -1146,9 +1146,10 @@ long mix_expunge (MAILSTREAM *stream,char *sequence,long options)
  * ".mix" with no suffix was used by experimental versions
  */
 
-int mix_select (struct direct *name)
+int mix_select (const struct direct *name)
 {
-  char c,*s;
+  char c;
+  const char *s;
 				/* make sure name has prefix */
   if (mix_dirfmttest (name->d_name)) {
     for (c = *(s = name->d_name + sizeof (MIXNAME) - 1); c && isxdigit (c);
@@ -1165,10 +1166,10 @@ int mix_select (struct direct *name)
  * Returns: -1 if d1 < d2, 0 if d1 == d2, 1 d1 > d2
  */
 
-int mix_msgfsort (const void *d1,const void *d2)
+int mix_msgfsort (const struct direct **d1,const struct direct **d2)
 {
-  char *n1 = (*(struct direct **) d1)->d_name + sizeof (MIXNAME) - 1;
-  char *n2 = (*(struct direct **) d2)->d_name + sizeof (MIXNAME) - 1;
+  const char *n1 = (*d1)->d_name + sizeof (MIXNAME) - 1;
+  const char *n2 = (*d2)->d_name + sizeof (MIXNAME) - 1;
   return compare_ulong (*n1 ? strtoul (n1,NIL,16) : 0,
 			*n2 ? strtoul (n2,NIL,16) : 0);
 }
