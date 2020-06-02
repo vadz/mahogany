@@ -3001,7 +3001,7 @@ public:
                                   "'%s'\n"
                                   "Corrected configuration data."),
                                 f->GetFullName().c_str()));
-                  f->SetFlags(f->GetFlags() & !MF_FLAGS_INCOMING);
+                  f->SetFlags(f->GetFlags() & ~MF_FLAGS_INCOMING);
                }
             }
          }
