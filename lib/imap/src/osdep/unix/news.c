@@ -405,7 +405,7 @@ MAILSTREAM *news_open (MAILSTREAM *stream)
 int news_select (const struct direct *name)
 {
   char c;
-  char *s = name->d_name;
+  const char *s = name->d_name;
   while (c = *s++) if (!isdigit (c)) return NIL;
   return T;
 }

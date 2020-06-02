@@ -114,7 +114,7 @@ MIXBURP {
 DRIVER *mix_valid (char *name);
 long mix_isvalid (char *name,char *meta);
 void *mix_parameters (long function,void *value);
-long mix_dirfmttest (char *name);
+long mix_dirfmttest (const char *name);
 void mix_scan (MAILSTREAM *stream,char *ref,char *pat,char *contents);
 long mix_scan_contents (char *name,char *contents,unsigned long csiz,
 			unsigned long fsiz);
@@ -284,7 +284,7 @@ void *mix_parameters (long function,void *value)
  * Returns: T if internal name, NIL otherwise
  */
 
-long mix_dirfmttest (char *name)
+long mix_dirfmttest (const char *name)
 {
 				/* belongs to MIX if starts with .mix */
   return strncmp (name,MIXNAME,sizeof (MIXNAME) - 1) ? NIL : LONGT;
@@ -1148,7 +1148,8 @@ long mix_expunge (MAILSTREAM *stream,char *sequence,long options)
 
 int mix_select (const struct direct *name)
 {
-  char c,*s;
+  char c;
+  const char *s;
 				/* make sure name has prefix */
   if (mix_dirfmttest (name->d_name)) {
     for (c = *(s = name->d_name + sizeof (MIXNAME) - 1); c && isxdigit (c);

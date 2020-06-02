@@ -1197,7 +1197,7 @@ long mh_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
 int mh_select (const struct direct *name)
 {
   char c;
-  char *s = name->d_name;
+  const char *s = name->d_name;
   while (c = *s++) if (!isdigit (c)) return NIL;
   return T;
 }
