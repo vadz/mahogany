@@ -602,6 +602,7 @@ wxMFrame::OnMenuCommand(int id)
 
             composeView->InitText();
          }
+         break;
 
       case WXMENU_FILE_COLLECT:
          {
