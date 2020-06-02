@@ -250,34 +250,15 @@ dnl   defines CXXFLAGS
 AC_PROG_CXX
 
 dnl We need C++11 support, so check for it.
-AC_CACHE_CHECK([whether $CC accepts -std=c++11],
-    m_cv_cc_std_cxx11,
-    [M_CXX_OPTION([-std=c++11],
-	m_cv_cc_std_cxx11="yes",
-	m_cv_cc_std_cxx11="no")]
-)
-if test $m_cv_cc_std_cxx11 != "yes"; then
-    AC_MSG_ERROR([
-    Sorry, $CC doesn't support -std=c++11 option and can't be used to compile
-    this program.])
-fi
-CXXFLAGS="$CXXFLAGS -std=c++11"
+AX_CXX_CHECK_FLAG([-std=c++11],,,[CXXFLAGS="$CXXFLAGS -std=c++11"], [
+	AC_MSG_ERROR([
+Sorry, $CXX doesn't support -std=c++11 option and can't be used to compile this program.
+	])
+])
 
 dnl disable support for exceptions if the compiler is g++ and
 dnl new enough to support it.
-case "$GXX" in yes)
-	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
-		m_cv_gxx_exceptions,
-		[echo 'void f(){}' >conftest.cc
-		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
-		'')	m_cv_gxx_exceptions=yes ;;
-		*)	m_cv_gxx_exceptions=no ;;
-		esac
-		rm -f conftest*])
-	case "$m_cv_gxx_exceptions" in yes)
-		CXXFLAGS="$CXXFLAGS -fno-exceptions"
-	esac
-esac
+M_ADD_CXXFLAGS_IF_SUPPORTED([-fno-exceptions])
 
 dnl check whether the C++ supports the new logical operator names
 dnl c-client library uses some of them as field names
@@ -1342,27 +1323,16 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 dnl imap
 IMAP_CFLAGS="$CFLAGS $IMAP_CFLAGS"
 dnl there are too many warnings in c-client sources which its author
-dnl refuses to fix, suppress them when using gcc4
-AC_CACHE_CHECK([whether $CC accepts -Wno-pointer-sign],
-    m_cv_cc_no_warn_ptr_sign,
-    [M_GCC_OPTION(-Wno-pointer-sign,
-	m_cv_cc_no_warn_ptr_sign="yes",
-	m_cv_cc_no_warn_ptr_sign="no")]
-)
-if test $m_cv_cc_no_warn_ptr_sign = "yes"; then
-    IMAP_CFLAGS="$IMAP_CFLAGS -Wno-pointer-sign"
-fi
-AC_CACHE_CHECK([whether $CC accepts -Wno-pointer-to-int-cast],
-    m_cv_cc_no_warn_ptr_to_int_cast,
-    [M_GCC_OPTION(-Wno-pointer-to-int-cast,
-	m_cv_cc_no_warn_ptr_to_int_cast="yes",
-	m_cv_cc_no_warn_ptr_to_int_cast="no")]
-)
-if test $m_cv_cc_no_warn_ptr_to_int_cast = "yes"; then
-    dnl assume that if -Wno-pointer-to-int-cast is supported, then so is the
-    dnl opposite option
-    IMAP_CFLAGS="$IMAP_CFLAGS -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast"
-fi
+dnl refuses to fix, suppress them if possible.
+AX_C_CHECK_FLAG(-Wno-pointer-sign,,,[
+	IMAP_CFLAGS="$IMAP_CFLAGS -Wno-pointer-sign"
+])
+
+dnl assume that if -Wno-pointer-to-int-cast is supported, then so is the
+dnl opposite option
+AX_C_CHECK_FLAG(-Wno-pointer-to-int-cast,,,[
+	IMAP_CFLAGS="$IMAP_CFLAGS -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast"
+])
 AC_SUBST(IMAP_CFLAGS)
 
 dnl compface

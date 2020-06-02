@@ -170,32 +170,10 @@ AC_DEFUN([M_CHECK_MYHEADER_VER],
   ]
 )
 
-dnl M_GCC_OPTION(OPTION, ACTION-IF-SUPPORTED, ACTION-IF-NOT-SUPPORTED)
+dnl M_ADD_CXXFLAGS_IF_SUPPORTED(OPTION)
 dnl
-dnl Check if gcc supports the given option (fails if compiler is not gcc)
-AC_DEFUN([M_GCC_OPTION], [
-   AC_REQUIRE([AC_PROG_CC])
-   if test "x$GCC" = "xyes"; then
-      echo 'void f(){}' >conftest.c
-      case "`$CC $1 -c conftest.c 2>&1`" in
-         '') ifelse([$2], , :, [$2]) ;;
-         *)  ifelse([$3], , :, [$3]) ;;
-      esac
-      rm -f conftest.*
-   else
-      ifelse([$3], , :, [$3])
-   fi
-])
-
-dnl M_CXX_OPTION(OPTION, ACTION-IF-SUPPORTED, ACTION-IF-NOT-SUPPORTED)
-dnl
-dnl Check if C++ compiler supports the given option.
-AC_DEFUN([M_CXX_OPTION], [
-   AC_REQUIRE([AC_PROG_CXX])
-   echo 'void f(){}' >conftest.cc
-   case "`$CXX $1 -c conftest.cc 2>&1`" in
-      '') ifelse([$2], , :, [$2]) ;;
-      *)  ifelse([$3], , :, [$3]) ;;
-   esac
-   rm -f conftest.*
+dnl Check if the C++ compiler supports the given option and adds it to CXXFLAGS
+dnl if it does.
+AC_DEFUN([M_ADD_CXXFLAGS_IF_SUPPORTED], [
+   AX_CXX_CHECK_FLAG($1,,,[CXXFLAGS="$CXXFLAGS $1"])
 ])
