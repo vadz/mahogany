@@ -515,6 +515,8 @@ enum ConfigFields
    ConfigField_AutoCollectOutgoing,
    ConfigField_WhiteListHelp,
    ConfigField_WhiteList,
+   ConfigField_NeverSendToAddressesHelp,
+   ConfigField_NeverSendToAddresses,
    ConfigField_EquivAddressesHelp,
    ConfigField_EquivAddresses,
 #ifdef USE_BBDB
@@ -1774,6 +1776,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                     Field_Message, -1 },
    { gettext_noop("Addresses in &white list"),      Field_List, -1 },
 
+   { gettext_noop("\nThis is a list of addresses that Mahogany will never add "
+                  "to the recipients list automatically,\n"
+                  "e.g. when replying. This can be useful to e.g. avoid "
+                  "accidentally replying to addresses always sending a bounce back."),
+                  Field_Message, -1 },
+   { gettext_noop("Addresses to &never send messages to"), Field_List, -1 },
+
    { gettext_noop("\nYou can add strings of the form \"<address1>=<address2>\" "
                   "here to indicate that\n"
                   "Mahogany should treat these addresses as being equivalent.\n"
@@ -2320,6 +2329,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOCOLLECT_OUTGOING),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_WHITE_LIST),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_NEVER_SEND_TO_ADDRESSES),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_EQUIV_ADDRESSES),
 #ifdef USE_BBDB
@@ -3301,7 +3312,7 @@ bool wxOptionsPage::GetListboxFromButtonEvent(const wxEvent& event,
          break;
    }
 
-   CHECK( data, false, _T("button even from foreign lbox?") );
+   CHECK( data, false, _T("button event from foreign lbox?") );
 
    if ( pLbox )
       *pLbox = lbox;
@@ -4296,12 +4307,19 @@ wxOptionsPageAdb::wxOptionsPageAdb(MBookCtrl *parent,
    lboxDataWhiteList->m_lboxDlgPers = _T("LastWhiteList");
    lboxDataWhiteList->m_next = lboxDataMLAddr;
 
+   LboxData *lboxDataNeverSendToList = new LboxData;
+   lboxDataNeverSendToList->m_idListbox = ConfigField_NeverSendToAddresses;
+   lboxDataNeverSendToList->m_lboxDlgTitle = _("Addresses to not send to automatically");
+   lboxDataNeverSendToList->m_lboxDlgPrompt = _("Address");
+   lboxDataNeverSendToList->m_lboxDlgPers = _T("LastNeverSendToList");
+   lboxDataNeverSendToList->m_next = lboxDataWhiteList;
+
    LboxData *lboxDataEquivList = new LboxData;
    lboxDataEquivList->m_idListbox = ConfigField_EquivAddresses;
    lboxDataEquivList->m_lboxDlgTitle = _("Equivalent addresses");
    lboxDataEquivList->m_lboxDlgPrompt = _("Pair of equivalent addresses");
    lboxDataEquivList->m_lboxDlgPers = _T("LastEquivList");
-   lboxDataEquivList->m_next = lboxDataWhiteList;
+   lboxDataEquivList->m_next = lboxDataNeverSendToList;
 
    m_lboxData = lboxDataEquivList;
 }

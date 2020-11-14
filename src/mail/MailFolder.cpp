@@ -63,6 +63,7 @@ extern const MOption MP_FORWARD_PREFIX;
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_IMAPHOST;
 extern const MOption MP_LIST_ADDRESSES;
+extern const MOption MP_NEVER_SEND_TO_ADDRESSES;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_PERSONALNAME;
 extern const MOption MP_POPHOST;
@@ -646,6 +647,10 @@ InitRecipients(Composer *cv,
    String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
    wxArrayString ownAddresses = strutil_restore_array(returnAddrs);
 
+   // addresses to exclude
+   const wxArrayString excludedAddresses =
+      strutil_restore_array(READ_CONFIG(profile, MP_NEVER_SEND_TO_ADDRESSES));
+
    // is this a message from ourselves?
    bool fromMyself = false;
 
@@ -729,7 +734,9 @@ InitRecipients(Composer *cv,
 
       while ( n-- )
       {
-         cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n]);
+         const String& addr = rcptAddresses[n];
+         if ( !Address::IsInList(excludedAddresses, addr) )
+            cv->AddRecipients(addr, (RecipientType)rcptTypes[n]);
       }
 
       return;
@@ -920,7 +927,9 @@ InitRecipients(Composer *cv,
 
    while ( n-- )
    {
-      cv->AddRecipients(rcptAddresses[n], (RecipientType)rcptTypes[n]);
+      const String& addr = rcptAddresses[n];
+      if ( !Address::IsInList(excludedAddresses, addr) )
+         cv->AddRecipients(addr, (RecipientType)rcptTypes[n]);
    }
 }
 

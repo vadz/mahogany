@@ -212,6 +212,7 @@ extern const MOption MP_COMPOSE_SHOW_FROM;
 extern const MOption MP_DEFAULT_REPLY_KIND;
 extern const MOption MP_LIST_ADDRESSES;
 extern const MOption MP_EQUIV_ADDRESSES;
+extern const MOption MP_NEVER_SEND_TO_ADDRESSES;
 extern const MOption MP_REPLY_PREFIX;
 extern const MOption MP_FORWARD_PREFIX;
 extern const MOption MP_REPLY_COLLAPSE_PREFIX;
@@ -836,6 +837,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_LIST_ADDRESSES_NAME "MLAddresses"
 /// array of equivalent address pairs
 #define   MP_EQUIV_ADDRESSES_NAME "EquivAddresses"
+/// array of addresses to never send email to
+#define   MP_NEVER_SEND_TO_ADDRESSES_NAME "NeverSendToAddresses"
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_NAME         "ReplyPrefix"
 /// prefix for subject in forwards
@@ -1697,6 +1700,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_LIST_ADDRESSES_DEFVAL ""
 /// array of equivalent address pairs
 #define   MP_EQUIV_ADDRESSES_DEFVAL ""
+/// array of addresses to never send email to
+#define   MP_NEVER_SEND_TO_ADDRESSES_DEFVAL ""
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_DEFVAL      "Re: "
 /// prefix for subject in forwards

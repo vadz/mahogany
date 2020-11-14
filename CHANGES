@@ -9,6 +9,7 @@
 Release 0.68 'Cynthia' September xx, 2010
 -----------------------------------------
 
+2020-11-14 VZ: Add option for addresses not to reply to automatically.
 2015-08-28 NB: Removed "Browser is Netscape" and "Open in new window" and
                   added "Open in another browser" instead
 2015-03-11 VZ: Make it simpler to specify the attachment names in the message.
