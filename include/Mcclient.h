@@ -60,8 +60,9 @@ extern "C"
 #     undef   SendMessage
 #  endif // OS_WIN
 
-   // misc.h redefines max as Max breaking standard headers compilation
+   // misc.h redefines min/max as Min/Max breaking standard headers compilation
 #  undef max
+#  undef min
 
    // finally it also defines the name commonly used as C++ template parameter!
 #  undef T
