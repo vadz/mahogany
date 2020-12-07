@@ -870,10 +870,10 @@ int HtmlViewer::CalculateFontSize(const wxFont& font)
 
 wxString HtmlViewer::GetVirtualFileName(size_t n) const
 {
-   // the image file names must be globally unique, so concatenate the address
-   // of this object together with counter to obtain a really unique name
-   return wxString::Format(_T("Mhtml%08lx%lu.png"),
-                           (unsigned long)this, (unsigned long)n);
+   // the image file names must be globally unique, so use a counter to ensure
+   // we never reuse it
+   static unsigned long s_htmlImage = 0;
+   return wxString::Format(_T("Mhtml%08lx%zd.png"), ++s_htmlImage, n);
 }
 
 wxString HtmlViewer::CreateImageInMemoryFS(const wxImage& image)
