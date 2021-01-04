@@ -193,8 +193,15 @@ private:
    bool m_hasHtmlContents;
 
 
+   // This is used in GetVirtualFileName() to ensure that the names we return
+   // from there are distinct for different objects by incrementing this
+   // counter every time a new viewer object is created.
+   static unsigned long s_viewerCount;
+
    DECLARE_MESSAGE_VIEWER()
 };
+
+unsigned long HtmlViewer::s_viewerCount = 0;
 
 // ----------------------------------------------------------------------------
 // HTML_Handler_META: wxHTML handler for the <meta> tag, see EncodingChanger
@@ -580,6 +587,8 @@ IMPLEMENT_MESSAGE_VIEWER(HtmlViewer,
 
 HtmlViewer::HtmlViewer()
 {
+   s_viewerCount++;
+
    wxFileSystem::AddHandler(new wxInternetFSHandler);
 
    m_window = NULL;
@@ -870,10 +879,7 @@ int HtmlViewer::CalculateFontSize(const wxFont& font)
 
 wxString HtmlViewer::GetVirtualFileName(size_t n) const
 {
-   // the image file names must be globally unique, so use a counter to ensure
-   // we never reuse it
-   static unsigned long s_htmlImage = 0;
-   return wxString::Format(_T("Mhtml%08lx%zd.png"), ++s_htmlImage, n);
+   return wxString::Format(_T("Mhtml%08lx%zd.png"), s_viewerCount, n);
 }
 
 wxString HtmlViewer::CreateImageInMemoryFS(const wxImage& image)
