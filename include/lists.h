@@ -123,7 +123,8 @@ public: \
        @param n if not NULL, the node to which to point \
    */ \
    inline iterator(ListNode *n = NULL) : node(n) {} \
-   inline iterator(const iterator &i) : node(i.node) {} \
+   iterator(const iterator &i) = default; \
+   iterator& operator=(const iterator &i) = default; \
    /** Dereference operator. \
        @return the data pointer of the node belonging to this \
        iterator \
