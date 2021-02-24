@@ -195,7 +195,7 @@ wxMessageView::wxMessageView(wxWindow *parent,
    // OnViewerChange() for the initial dummy viewer
    m_FolderView = NULL;
 
-   m_viewerParent = new wxWindow(parent, wxID_ANY);
+   m_viewerParent = new wxPanel(parent);
    m_infobar = new wxInfoBar(m_viewerParent);
 
    // Don't delay showing the error messages with unnecessary effects.
