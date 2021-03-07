@@ -272,7 +272,7 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
                    "Vadim Zeitlin, " <<
                    wxString::FromUTF8("Karsten Ball\xc3\xbc""der") << ", "
                    "Greg Noel,<br>" <<
-                   wxString::FromUTF8("Nerijus Bali\xc3\xbbnas") << ", "
+                   wxString::FromUTF8("Nerijus Baliūnas") << ", "
                    "Xavier Nodet, Vaclav Slavik,<br>"
                    "Daniel Seifert, Michele Ravani, Michael A Chase,<br>"
                    "Robert Vazan " << _("and many others") << "<br>"
