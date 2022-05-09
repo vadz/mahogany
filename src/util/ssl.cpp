@@ -115,6 +115,13 @@ extern const MOption MP_SSL_DLL_SSL;
 #else
    #define ssl_const111
 #endif
+// OpenSSL 3.0
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+   #define ssl_const30 const
+   #define SSL_get_peer_certificate SSL_get1_peer_certificate
+#else
+   #define ssl_const30
+#endif
 
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
@@ -200,9 +207,9 @@ SSL_DEF( int, SSL_CTX_use_certificate_chain_file, (SSL_CTX *ctx, const char *fil
 SSL_DEF( int, SSL_CTX_use_RSAPrivateKey_file, (SSL_CTX *ctx, const char *file, int type), (ctx,file,type) );
 SSL_DEF_VOID( SSL_CTX_set_tmp_rsa_callback, (SSL_CTX *ctx, RSA *(*cb)(SSL *,int, int)), (ctx,cb) );
 SSL_DEF( int,  SSL_accept, (SSL *ssl), (ssl) );
-SSL_DEF( int, X509_STORE_CTX_get_error, (X509_STORE_CTX *ctx), (ctx) );
+SSL_DEF( int, X509_STORE_CTX_get_error, (ssl_const30 X509_STORE_CTX *ctx), (ctx) );
 SSL_DEF( const char *, X509_verify_cert_error_string, (long n), (n) );
-SSL_DEF( X509 *, X509_STORE_CTX_get_current_cert, (X509_STORE_CTX *ctx), (ctx) );
+SSL_DEF( X509 *, X509_STORE_CTX_get_current_cert, (ssl_const30 X509_STORE_CTX *ctx), (ctx) );
 SSL_DEF( X509_NAME *, X509_get_subject_name, (ssl_const110 X509 *a), (a) );
 SSL_DEF( char *, X509_NAME_oneline, (ssl_const110 X509_NAME *a,char *buf,int size), (a,buf,size) );
 SSL_DEF( void *, X509_get_ext_d2i, (ssl_const110 X509 *x, int nid, int *crit, int *idx), (x, nid, crit, idx) );
@@ -346,7 +353,12 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_get_fd);
    SSL_LOOKUP(SSL_set_fd);
    SSL_LOOKUP(SSL_get_error);
+// OpenSSL 3.0
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+   SSL_LOOKUP(SSL_get1_peer_certificate);
+#else
    SSL_LOOKUP(SSL_get_peer_certificate);
+#endif
    SSL_LOOKUP(RAND_seed);
    SSL_LOOKUP(BIO_new_socket);
    SSL_LOOKUP(BIO_new_mem_buf);
