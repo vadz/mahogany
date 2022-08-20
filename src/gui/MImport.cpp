@@ -145,7 +145,7 @@ public:
                             const wxString& szString,
                             const wxLogRecordInfo& info)
    {
-      time_t t = info.timestamp;
+      const wxLongLong t = info.timestampMS;
       m_dialog->GetLogListBox()->Append(
             wxString::Format(_T("%s:\t%s"),
                              wxDateTime(t).FormatTime().c_str(),
