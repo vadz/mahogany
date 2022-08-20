@@ -423,9 +423,6 @@
     <ClCompile Include="src\adb\ProvPasswd.cpp">
       <Filter>Source Files\adb\providers</Filter>
     </ClCompile>
-    <ClCompile Include="src\adb\ExportPalm.cpp">
-      <Filter>Source Files\adb\impexp</Filter>
-    </ClCompile>
     <ClCompile Include="src\adb\ExportText.cpp">
       <Filter>Source Files\adb\impexp</Filter>
     </ClCompile>

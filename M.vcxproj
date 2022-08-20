@@ -591,7 +591,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\adb\ExportPalm.cpp" />
     <ClCompile Include="src\adb\ExportText.cpp" />
     <ClCompile Include="src\adb\ExportVCard.cpp" />
     <ClCompile Include="src\adb\ImportEudora.cpp" />
