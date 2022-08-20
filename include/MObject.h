@@ -56,6 +56,13 @@ public:
          m_magic = MOBJECT_MAGIC;
          Register();
       }
+   MObject& operator=(const MObject &oldobj)
+      {
+         MOcheck();
+         oldobj.MOcheck();
+         return *this;
+      }
+
    /** Check validity of this object.
        This function should be called wherever such an object is used,
        especially at the beginning of all methods.
@@ -99,8 +106,12 @@ protected:
    /// a simple magic number as a validity check
    int m_magic;
 #else
+   MObject() = default;
+   MObject(const MObject&) = default;
+   MObject^ operator=(const MObject&) = default;
+
    /// virtual destructor
-   virtual ~MObject() {}
+   virtual ~MObject() = default;
    /// empty MOcheck() method
    void MOcheck(void) const {}
    /// nothing

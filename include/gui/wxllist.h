@@ -363,6 +363,9 @@ struct wxLayoutStyleInfo
                      wxColour *fg = NULL,
                      wxColour *bg = NULL,
                      wxFontEncoding enc = wxFONTENCODING_DEFAULT);
+
+   wxLayoutStyleInfo(const wxLayoutStyleInfo&) = default;
+
    wxLayoutStyleInfo & operator=(const wxLayoutStyleInfo &right);
 
    wxColour & GetBGColour() { return m_bg; }

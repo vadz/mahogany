@@ -381,6 +381,8 @@ public:
    }
 #endif // DEBUG
 
+   Value& operator=(const Value&) = default;
+
    bool IsValid(void) const
       { MOcheck(); return m_Type != Type_Error; }
    bool IsNumber(void) const
