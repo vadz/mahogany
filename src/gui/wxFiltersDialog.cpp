@@ -530,7 +530,8 @@ public:
                case ORC_MF_Important: return _T("*");
                case ORC_MF_Recent:    return _T("R");
             }
-            CHECK( false, wxEmptyString, _T("Invalid test message flag") );
+            wxFAIL_MSG( "Invalid test message flag" );
+            return String();
 
          // Argument is used, but not for spam or message flag
          default:
