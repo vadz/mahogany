@@ -129,10 +129,9 @@ public:
    void SetWordWrap(bool on = true) { m_DoWordWrap = on; }
    
    /** Redraws the window.
-       Internally, this stores the parameter and calls a refresh on
-       wxMSW, draws directly on wxGTK.
+       This actually is the same as Refresh() now.
    */
-   void RequestUpdate(const wxRect *updateRect = NULL);
+   void RequestUpdate() { Refresh(); }
 
    /// if exact == false, assume 50% extra size for the future
    void ResizeScrollbars(bool exact = false);  // don't change this to true!
@@ -149,7 +148,6 @@ public:
    //@{
    void OnSize(wxSizeEvent &event);
    void OnPaint(wxPaintEvent &event);
-   void OnIdle(wxIdleEvent &event);
    void OnChar(wxKeyEvent& event);
    void OnKeyDown(wxKeyEvent& event);
    void OnKeyUp(wxKeyEvent& event);
@@ -165,15 +163,10 @@ public:
    void OnMouseMove(wxMouseEvent &event)       { OnMouse(WXLOWIN_MENU_MOUSEMOVE, event) ; }
    void OnSetFocus(wxFocusEvent &ev);
    void OnKillFocus(wxFocusEvent &ev);
-#ifdef __WXMSW__
-   void OnScroll(wxScrollWinEvent& ev);
-#endif // __WXMSW__
    //@}
 
    /// Creates a wxMenu for use as a format popup.
    static wxMenu * MakeFormatMenu(void);
-   /// Redraws the window, used by RequestUpdate() or OnPaint().
-   void InternalPaint(const wxRect *updateRect);
 
    /** Tell window to update a wxStatusBar with UserData labels and
        cursor positions.
@@ -238,7 +231,7 @@ protected:
    bool m_HaveFocus;
    /// do we handle clicks of the right mouse button?
    bool m_DoPopupMenu;
-   /// Should InternalPaint() scroll to cursor (VZ: seems unused any more)
+   /// Should OnPaint() scroll to cursor (VZ: seems unused any more)
    bool m_ScrollToCursor;
    /// Do we currently have a non-standard cursor?
    bool m_HandCursor;
@@ -302,8 +295,6 @@ private:
 #endif
    /// For finding text and finding it again:
    wxString m_FindString;
-   /// does hte window need to be repainted?
-   bool m_needsRedraw;
 //@}
 
    DECLARE_EVENT_TABLE()

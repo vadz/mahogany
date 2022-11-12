@@ -103,7 +103,6 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_SIZE    (wxLayoutWindow::OnSize)
 
    EVT_PAINT    (wxLayoutWindow::OnPaint)
-   EVT_IDLE     (wxLayoutWindow::OnIdle)
 
    EVT_CHAR     (wxLayoutWindow::OnChar)
    EVT_KEY_DOWN (wxLayoutWindow::OnKeyDown)
@@ -123,10 +122,6 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
 
    EVT_SET_FOCUS(wxLayoutWindow::OnSetFocus)
    EVT_KILL_FOCUS(wxLayoutWindow::OnKillFocus)
-
-#ifdef __WXMSW__
-   EVT_SCROLLWIN(wxLayoutWindow::OnScroll)
-#endif // __WXMSW__
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -171,8 +166,6 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
 #endif
    SetWordWrap(false);
    SetWrapMargin(0);
-
-   m_needsRedraw = true;
 
    // no scrollbars initially
    m_hasHScrollbar =
@@ -249,7 +242,7 @@ wxLayoutWindow::DoClearWindow(bool noUpdate)
 
    if ( !noUpdate )
    {
-      RequestUpdate((wxRect *)NULL);
+      RequestUpdate();
    }
 }
 
@@ -815,7 +808,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    }
    ScrollToCursor();
    // refresh the screen
-   RequestUpdate(m_llist->GetUpdateRect());
+   RequestUpdate();
 }
 
 void
@@ -912,49 +905,6 @@ wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
    wxPaintDC dc(this);
 #endif
 
-   RequestUpdate();
-}
-
-// under MSW, idle events are not generated while the scrollbar is being
-// dragged, so no repainting occurs
-//
-// this probably should be fixed in wxMSW aas it surely affects other controls
-// as well, but for now fixing it here
-#ifdef __WXMSW__
-
-void
-wxLayoutWindow::OnScroll(wxScrollWinEvent& event)
-{
-   InternalPaint(NULL);
-
-   event.Skip();
-}
-
-#endif // __WXMSW__
-
-void
-wxLayoutWindow::RequestUpdate(const wxRect * /* updateRect */)
-{
-   m_needsRedraw = true;
-}
-
-void
-wxLayoutWindow::OnIdle(wxIdleEvent &event)
-{
-   if ( m_needsRedraw )
-   {
-      InternalPaint(NULL);
-
-      m_needsRedraw = false;
-   }
-
-   event.Skip();
-}
-
-void
-wxLayoutWindow::InternalPaint(const wxRect *updateRect)
-{
-   wxClientDC dc( this );
    PrepareDC( dc );
 
 #ifdef WXLAYOUT_USE_CARET
@@ -977,14 +927,6 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    if ( x1 <= 0 || y1 <= 0 )
    {
       return;
-   }
-
-   if(updateRect)
-   {
-      WXLO_DEBUG(("Update rect: %ld,%ld / %ld,%ld",
-                  updateRect->x, updateRect->y,
-                  updateRect->x+updateRect->width,
-                  updateRect->y+updateRect->height));
    }
 
    ResizeScrollbars(true);
@@ -1037,15 +979,6 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    }
 
    // This is the important bit: we tell the list to draw itself
-#if WXLO_DEBUG_URECT
-   if(updateRect)
-   {
-      WXLO_DEBUG(("Update rect: %ld,%ld / %ld,%ld",
-                  updateRect->x, updateRect->y,
-                  updateRect->x+updateRect->width,
-                  updateRect->y+updateRect->height));
-   }
-#endif
 
    // Device origins on the memDC are suspect, we translate manually
    // with the translate parameter of Draw().
@@ -1070,11 +1003,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 #ifdef WXLO_PARTIAL_REFRESH
    // This somehow doesn't work, but even the following bit with the
    // whole rect at once is still a bit broken I think.
-   wxRegionIterator ri;
-   if(updateRect)
-      ri = wxRegionIterator(*updateRect);
-   else
-      ri = wxRegionIterator(GetUpdateRegion());
+   wxRegionIterator ri(GetUpdateRegion());
    if(ri)
       while(ri)
       {
@@ -1087,12 +1016,6 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    else
 #endif
    {
-      // FIXME: Trying to copy only the changed parts, but it does not seem
-      // to work:
-//      x0 = updateRect->x; y0 = updateRect->y;
-//      if(updateRect->height < y1)
-//         y1 = updateRect->height;
-//      y1 += WXLO_YOFFSET; //FIXME might not be needed
       dc.Blit(x0, y0, x1, y1, &dcMem, 0, 0, wxCOPY, FALSE);
    }
    WXLO_TIMER_STOP(BlitTimer);
