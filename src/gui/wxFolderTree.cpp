@@ -1686,7 +1686,7 @@ wxString wxFolderTreeNode::GetName() const
 
          // valid IMAP modified UTF-7 mailbox name, convert to the encoding
          // used by the GUI
-         name << wxString(nameutf7.wc_str(wxConvUTF7), *wxConvUI);
+         name << nameutf7.mb_str(wxConvUTF7);
       }
       else // s != '&'
       {
