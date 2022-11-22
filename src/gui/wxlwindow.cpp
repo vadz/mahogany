@@ -900,10 +900,7 @@ wxLayoutWindow::ScrollToCursor(void)
 void
 wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
 {
-#ifdef __WXMSW__
-   // must create it under Windows
    wxPaintDC dc(this);
-#endif
 
    PrepareDC( dc );
 
