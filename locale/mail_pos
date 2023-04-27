@@ -14,7 +14,7 @@ fi
 
 for po in *.po
 do
-	translator=`fgrep Last-Translator $po | \
+	translator=`grep -F Last-Translator $po | \
 		sed "1,$ s/\"Last-Translator://g" | \
 		sed '1,$ s/\\\\n"//g'`
 

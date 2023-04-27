@@ -1217,7 +1217,7 @@ auto|Auto|AUTO|1)
 	fi
 	echo "int main() { return 0; }" >conftest.c
 	if $CXX -o conftest $WX_LIBS conftest.c 2>link.log >&2 && \
-		$LDD conftest | fgrep libwx 2>/dev/null >&2
+		$LDD conftest | grep -F libwx 2>/dev/null >&2
 	then
 		m_cv_USE_MODULES=dynamic
 		MAKE_USE_MODULES="USE_MODULES=dynamic"
