@@ -436,7 +436,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
             }
          }
 
-         wxLogStatus(parent, _("Saved %u addresses."), saved);
+         wxLogStatus(parent, _("Saved %zu addresses."), saved);
        }
        //else: cancelled
     }
