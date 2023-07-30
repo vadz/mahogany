@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Mahogany
+Icon=mahogany.svg
+StartupWMClass=M
+StartupNotify=true
+Exec=/usr/bin/M
