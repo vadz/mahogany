@@ -963,7 +963,9 @@ static bool CheckWhiteList(const Message& msg, String *match)
 #ifdef USE_RBL
 
 
+#ifndef __STRICT_ANSI__
 #define __STRICT_ANSI__
+#endif
 #include <netinet/in.h>
 
 // FreeBSD uses a variable name "class"
