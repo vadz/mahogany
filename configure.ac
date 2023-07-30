@@ -1318,7 +1318,7 @@ dnl --------------------------------------------------------------------------
 dnl add other flags
 CFLAGS="$CFLAGS $CODE_GEN_FLAGS"
 CXXFLAGS="$CXXFLAGS $CODE_GEN_FLAGS"
-LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
+LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM $LIBS_SSL"
 
 dnl imap
 IMAP_CFLAGS="$CFLAGS $IMAP_CFLAGS"
