@@ -1446,7 +1446,7 @@ wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
          //     awfully wasteful but currently it's possible for wxCSConv::
          //     WC2MB() to return successfully when it's used for just testing
          //     and not real conversion under Win32
-         if ( !wxString(pwz, wxCSConv(enc)).empty() )
+         if ( wxCSConv(enc).FromWChar(NULL, 0, pwz) > 0 )
             break;
       }
    }
