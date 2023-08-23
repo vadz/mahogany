@@ -1026,7 +1026,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
    if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
    {
       wxLogError(_("The folder '%s' is used by Mahogany and cannot be deleted"),
-                 folder->GetFullName().c_str());
+                 folder->GetFullName());
       return false;
    }
 
@@ -1046,13 +1046,13 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
       {
          msg.Printf(_("Do you really want to remove folder '%s' and all of its\n"
                       "subfolders? You will permanently lose all the settings\n"
-                      "for the removed folders!"), folder->GetName().c_str());
+                      "for the removed folders!"), folder->GetName());
       }
       else // remove and delete
       {
          msg.Printf(_("Do you really want to delete folder '%s' and all of its\n"
                       "subfolders? All messages contained in them will be "
-                      "permanently lost!"), folder->GetFullName().c_str());
+                      "permanently lost!"), folder->GetFullName());
       }
    }
    else
@@ -1064,13 +1064,13 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
          msgbox = M_MSGBOX_CONFIRM_FOLDER_DELETE;
 
          msg.Printf(_("Do you really want to remove folder '%s'?"),
-                    folder->GetFullName().c_str());
+                    folder->GetFullName());
       }
       else // remove and delete
       {
          msg.Printf(_("Do you really want to delete folder '%s' with\n"
                       "all the messages contained in it?"),
-                    folder->GetFullName().c_str());
+                    folder->GetFullName());
       }
    }
 
@@ -1094,7 +1094,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
          if ( !ok )
          {
             wxLogError(_("Failed to physically delete folder '%s'."),
-                       folder->GetFullName().c_str());
+                       folder->GetFullName());
          }
       }
 
@@ -1133,7 +1133,7 @@ bool wxFolderTree::OnRename(MFolder *folder,
    {
       wxLogStatus(wxGetTopLevelParent(m_tree),
                   _("Successfully renamed folder '%s'."),
-                  folder->GetFullName().c_str());
+                  folder->GetFullName());
    }
    else
    {
@@ -1172,12 +1172,12 @@ bool wxFolderTree::OnMove(MFolder *folder,
    {
       wxLogStatus(wxGetTopLevelParent(m_tree),
                   _("Successfully moved folder '%s' to '%s'."),
-                  folder->GetFullName().c_str(), newParent->GetFullName().c_str());
+                  folder->GetFullName(), newParent->GetFullName());
    }
    else
    {
       wxLogError(_("Failed to move the folder '%s' from '%s' to '%s'."),
-                 name.c_str(), oldPath.c_str(), newPath.c_str());
+                 name, oldPath, newPath);
    }
    return false;
 }
@@ -1191,7 +1191,7 @@ void wxFolderTree::OnClear(MFolder *folder)
                 "folder '%s'?\n"
                 "\n"
                 "Warning: it will be impossible to undelete them!"),
-                fullname.c_str());
+                fullname);
 
    wxWindow *parent = m_tree->wxWindow::GetParent();
 
@@ -1212,13 +1212,13 @@ void wxFolderTree::OnClear(MFolder *folder)
       if ( n < 0 )
       {
          wxLogError(_("Failed to delete messages from folder '%s'."),
-                    fullname.c_str());
+                    fullname);
       }
       else
       {
          wxLogStatus(GetFrame(parent),
-                     _("%lu messages were deleted from folder '%s'."),
-                     (unsigned long)n, fullname.c_str());
+                     _("%ld messages were deleted from folder '%s'."),
+                     n, fullname);
       }
    }
 }
@@ -1232,13 +1232,13 @@ void wxFolderTree::OnUpdate(MFolder *folder)
       if ( !MailFolder::CheckFolder(folder) )
       {
          wxLogError(_("Failed to update the status of the folder '%s'."),
-                    folder->GetFullName().c_str());
+                    folder->GetFullName());
       }
       else
       {
          wxLogStatus(wxGetTopLevelParent(m_tree),
                      _("Updated status of the folder '%s'"),
-                     folder->GetFullName().c_str());
+                     folder->GetFullName());
       }
    }
    else // update subfolders
@@ -1268,7 +1268,7 @@ bool wxFolderTree::OnClose(MFolder *folder)
 
    wxLogStatus(wxGetTopLevelParent(m_tree),
                _("Folder '%s' closed."),
-               folder->GetFullName().c_str());
+               folder->GetFullName());
 
    m_tree->SetOpenFolderName(wxEmptyString);
 
@@ -1581,7 +1581,7 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
       {
          if ( !ParseColourString(colorName, &col) )
          {
-            wxLogDebug(_T("Invalid colour string '%s'."), colorName.c_str());
+            wxLogDebug(_T("Invalid colour string '%s'."), colorName);
             col = *wxBLACK;
          }
       }
@@ -1854,7 +1854,7 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
          *menu = new FolderMenu(isRoot);
       }
 
-      (*menu)->SetTitle(wxString::Format(_("Folder '%s'"), title.c_str()));
+      (*menu)->SetTitle(wxString::Format(_("Folder '%s'"), title));
 
       // some items (all WXMENU_FOLDEX_XXX ones) are taken care of there already
       m_sink->UpdateMenu(*menu, folder);
@@ -1984,7 +1984,7 @@ bool wxFolderTreeImpl::CanRenameFolder(const MFolder *folder) const
    else if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
    {
       wxLogError(_("The folder '%s' is used by Mahogany and cannot be renamed."),
-                 folder->GetName().c_str());
+                 folder->GetName());
    }
    else
    {
@@ -2135,7 +2135,7 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
       }
 
       wxLogStatus(GetFrame(this), _("Folder '%s' %s"),
-                  folder->GetName().c_str(),
+                  folder->GetName(),
                   removeOnly ? _("removed from the tree")
                              : _("deleted"));
    }
@@ -2657,7 +2657,7 @@ void wxFolderTreeImpl::OnTreeBeginDrag(wxTreeEvent& event)
    {
       wxLogStatus(GetFrame(this),
                  _("The folder \"%s\" cannot be moved."),
-                 folder->GetFullName().c_str());
+                 folder->GetFullName());
       return;
    }
 
@@ -2710,15 +2710,15 @@ void wxFolderTreeImpl::OnTreeEndDrag(wxTreeEvent& event)
       if ( !folderSrc->Move(folderDst) )
       {
          wxLogError(_("Failed to move the folder \"%s\" to \"%s\"."),
-                    folderSrc->GetFullName().c_str(),
-                    folderDst->GetFullName().c_str());
+                    folderSrc->GetFullName(),
+                    folderDst->GetFullName());
       }
       else // moved ok
       {
          wxLogStatus(GetFrame(this),
                      _("Successfully moved the folder \"%s\" to \"%s\"."),
-                     folderSrc->GetFullName().c_str(),
-                     folderDst->GetFullName().c_str());
+                     folderSrc->GetFullName(),
+                     folderDst->GetFullName());
       }
    }
 }
@@ -3367,7 +3367,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 {
    wxLogTrace(M_TRACE_MFSTATUS, _T("Folder tree: status changed for '%s'."),
-              folderName.c_str());
+              folderName);
 
    // check if we need to react to this event at all
    // ----------------------------------------------
@@ -3418,7 +3418,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
       MailFolder_obj mf(MailFolder::GetOpenedFolderFor(folder));
       if ( !mf )
       {
-         wxLogDebug(_T("Failed to update status for '%s'"), folderName.c_str());
+         wxLogDebug(_T("Failed to update status for '%s'"), folderName);
       }
       else
       {
@@ -3487,7 +3487,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
    node->SetStatus(this, statusFormat, status);
 
    wxLogTrace(M_TRACE_MFSTATUS, _T("Folder tree: updated status for '%s'"),
-              folderName.c_str());
+              folderName);
 }
 
 // ----------------------------------------------------------------------------

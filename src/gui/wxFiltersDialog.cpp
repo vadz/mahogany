@@ -1817,7 +1817,7 @@ wxAllFiltersDialog::OnAddFiter(wxCommandEvent& /* event */)
                    "a folder to which you'd like to assign this filter\n"
                    "right now (otherwise you can do it later by using\n"
                    "the \"Filters\" entry in the \"Folder\" menu)?"),
-                 name.c_str());
+                 name);
 
       if ( MDialog_YesNoDialog(msg,
                                this,
@@ -2000,7 +2000,7 @@ wxAllFiltersDialog::DoCopyFilter(const wxString& nameOld,
       String msg;
       msg.Printf(_("Filter '%s' already exists, are you sure you want "
                    "to overwrite it with the filter '%s'?"),
-                nameOld.c_str(), nameNew.c_str());
+                nameOld, nameNew);
       if ( !MDialog_YesNoDialog(msg,
                                 this,
                                 _("Overwrite filter?"),
@@ -2098,7 +2098,7 @@ public:
         m_filterNames(filterNames)
       {
          SetTitle(String::Format(_("Filters copying messages to \"%s\""),
-                                 folderName.c_str()));
+                                 folderName));
       }
 
    virtual bool TransferDataToWindow()
@@ -2136,7 +2136,7 @@ private:
    static String GetCaption(MFolder *folder)
    {
       return wxString::Format(_("Configure filters for '%s'"),
-                              folder->GetName().c_str());
+                              folder->GetName());
    }
 
    // the folder which we are working with
@@ -2773,7 +2773,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
                wxLogWarning(_("Only a single sender address can be specified "
                               "here, \"%s\" will be used and the rest of "
                               "the sender string will be ignored."),
-                            addr->GetAddress().c_str());
+                            addr->GetAddress());
             }
 
             const String& email = addr->GetEMail();
@@ -2913,7 +2913,7 @@ static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
       {
          String msg;
          msg.Printf(_("The filter '%s' already exists, do you want "
-                      "to replace it?"), name.c_str());
+                      "to replace it?"), name);
          if ( !MDialog_YesNoDialog(msg, parent, _("Replace filter?"),
                                    M_DLG_NO_DEFAULT,
                                    M_MSGBOX_FILTER_REPLACE) )
@@ -3038,7 +3038,7 @@ extern bool FindFiltersForFolder(MFolder *folder, wxWindow *parent)
    {
       wxLogStatus(GetFrame(parent),
                   _("No filters copying messages to folder \"%s\" found."),
-                  fullname.c_str());
+                  fullname);
 
       return false;
    }

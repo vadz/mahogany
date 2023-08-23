@@ -171,7 +171,7 @@ public:
          // useful ones
 #if 0
          wxLogStatus(m_frame, _("Selected folder '%s'."),
-                     newsel->GetFullName().c_str());
+                     newsel->GetFullName());
 #endif // 0
 
          m_frame->UpdateFolderMenuUI(newsel);
@@ -771,7 +771,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder, bool readonly)
    if ( m_folderName == folderName )
    {
       wxLogStatus(this, _("The folder '%s' is already opened."),
-                  m_folderName.c_str());
+                  m_folderName);
 
       return true;
    }
@@ -787,7 +787,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder, bool readonly)
       {
          // don't set the unaccessible flag - may be it's ok
          wxLogStatus(this, _("Opening folder '%s' cancelled."),
-                     m_folderName.c_str());
+                     m_folderName);
       }
 
       m_folderName.clear();
@@ -1031,7 +1031,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                   if ( count )
                   {
                      wxLogStatus(this, _("Created %u folders under '%s'."),
-                                 count, folder->GetPath().c_str());
+                                 count, folder->GetPath());
                   }
 
                   folder->DecRef();
@@ -1063,12 +1063,12 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                   {
                      wxLogError(_("Failed to update the status of "
                                   "the folder '%s'."),
-                                folder->GetFullName().c_str());
+                                folder->GetFullName());
                   }
                   else
                   {
                      wxLogStatus(this, _("Updated status of the folder '%s'"),
-                                 folder->GetFullName().c_str());
+                                 folder->GetFullName());
                   }
                }
             }
@@ -1388,7 +1388,7 @@ void wxMainFrame::DoFolderSearch()
          {
             wxLogError(_("Can't search for messages in a "
                          "non existent folder '%s'."),
-                       name.c_str());
+                       name);
             continue;
          }
 
@@ -1399,7 +1399,7 @@ void wxMainFrame::DoFolderSearch()
             {
                wxLogError(_("Can't search for messages in the "
                             "folder '%s'."),
-                          name.c_str());
+                          name);
 
                continue;
             }
@@ -1613,7 +1613,7 @@ public:
                   (
                      _("Checking status of the folder \"%s\" failed, do you\n"
                        "want to continue updating the other folders?"),
-                     folderName.c_str()
+                     folderName
                   ),
                   m_winParent,
                   MDIALOG_YESNOTITLE,

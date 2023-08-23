@@ -699,7 +699,7 @@ void wxTemplatesDialogBase::CheckForChanges()
       String msg;
       msg.Printf(_("You have modified the template '%s', "
                    "would you like to save it?"),
-                 m_name.c_str());
+                 m_name);
       if ( MDialog_YesNoDialog(msg, this,
                                MDIALOG_YESNOTITLE,
                                M_DLG_YES_DEFAULT,
@@ -829,7 +829,7 @@ wxChooseTemplateDialog::GetTemplateTitle(MessageTemplateKind kind) const
          FAIL_MSG(_T("unknown template kind"));
    }
 
-   title.Printf(_("Please choose template for %s"), what.c_str());
+   title.Printf(_("Please choose template for %s"), what);
 
    return title;
 }
@@ -995,7 +995,7 @@ wxString wxAllTemplatesDialog::GetTemplateTitle(MessageTemplateKind kind) const
          FAIL_MSG(_T("unknown template kind"));
    }
 
-   title.Printf(_("Configure templates for %s"), what.c_str());
+   title.Printf(_("Configure templates for %s"), what);
 
    return title;
 }
@@ -1040,8 +1040,7 @@ void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& /* event */)
    wxASSERT_MSG( !!m_name, _T("shouldn't try to delete") );
 
    String msg;
-   msg.Printf(_("Do you really want to delete the template '%s'?"),
-              m_name.c_str());
+   msg.Printf(_("Do you really want to delete the template '%s'?"), m_name);
    if ( MDialog_YesNoDialog(msg, this,
                             MDIALOG_YESNOTITLE,
                             M_DLG_NO_DEFAULT,

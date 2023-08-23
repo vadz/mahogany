@@ -219,7 +219,7 @@ wxMFrame::SetTitle(String const &title)
    t += _(" [debug build]");
 #endif
 
-   wxFrame::SetTitle(t.c_str());
+   wxFrame::SetTitle(t);
 }
 
 void
@@ -737,12 +737,12 @@ wxMFrame::OnMenuCommand(int id)
                {
                   wxLogStatus(this,
                               _("Settings successfully exported to file \"%s\""),
-                              path.c_str());
+                              path);
                }
                else
                {
                   wxLogError(_("Failed to export settings to the file \"%s\"."),
-                             path.c_str());
+                             path);
                }
             }
             else // import
@@ -751,12 +751,12 @@ wxMFrame::OnMenuCommand(int id)
                {
                   wxLogStatus(this,
                               _("Settings successfully imported from \"%s\""),
-                              path.c_str());
+                              path);
                }
                else
                {
                   wxLogError(_("Failed to import settings from the file \"%s\"."),
-                             path.c_str());
+                             path);
                }
             }
          }
@@ -878,7 +878,7 @@ wxMFrame::OnMenuCommand(int id)
                   }
                }
 
-               wxLogStatus(this, _("Created new identity '%s'."), ident.c_str());
+               wxLogStatus(this, _("Created new identity '%s'."), ident);
             }
          }
          break;
@@ -1023,7 +1023,7 @@ wxMFrame::OnMenuCommand(int id)
                   combo->Delete(combo->FindString(ident));
                }
 
-               wxLogStatus(this, _("Identity '%s' deleted."), ident.c_str());
+               wxLogStatus(this, _("Identity '%s' deleted."), ident);
             }
          }
          break;

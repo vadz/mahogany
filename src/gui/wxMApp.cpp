@@ -961,7 +961,7 @@ wxMApp::OnInit()
    if ( !m_snglInstChecker->Create
                             (
                               wxString::Format(_T(".mahogany-%s.lock"),
-                                               wxGetUserId().c_str()),
+                                               wxGetUserId()),
                               _T("/tmp")
                             ) )
    {
@@ -1197,13 +1197,13 @@ wxMApp::OnInit()
          {
             msg.Printf("Locale '%s' couldn't be set, do you want to "
                        "retry setting it the next time?",
-                       locale.c_str());
+                       locale);
          }
          else // failedToLoadMsgs
          {
             msg.Printf("Impossible to load message catalog(s) for the "
                        "locale '%s', do you want to retry next time?",
-                       locale.c_str());
+                       locale);
          }
 
          if ( wxMessageBox(msg, _T("Error"),
@@ -1569,7 +1569,7 @@ bool wxMApp::InitHelp()
                       "\n"
                       "Would you like to specify another help files "
                       "location (otherwise help will be unavailable)?"),
-                    helpdir.c_str());
+                    helpdir);
 
          if ( !MDialog_YesNoDialog(msg, NULL, _("Mahogany Help")) )
          {
@@ -1698,7 +1698,7 @@ wxMApp::LoadModules(void)
 
       if ( !module )
       {
-         ERRORMESSAGE((_("Cannot load module '%s'."), name.c_str()));
+         ERRORMESSAGE((_("Cannot load module '%s'."), name));
       }
       else
       {
@@ -2268,7 +2268,7 @@ void wxMApp::SetLogFile(const String& filename)
          }
 
          wxLogVerbose(_("Started logging to the log file '%s'."),
-                      filename.c_str());
+                      filename);
       }
    }
 }
@@ -2581,7 +2581,7 @@ static String GetIPCSocket()
       // seems to be better than UID as, although it seems unlikely, we might
       // have the same user logged in from 2 different machines sharing the
       // same /tmp directory
-      s_socketName.Printf(_T("/tmp/.mahogany-%s.ipc"), wxGetUserId().c_str());
+      s_socketName.Printf(_T("/tmp/.mahogany-%s.ipc"), wxGetUserId());
    }
 
    return s_socketName;

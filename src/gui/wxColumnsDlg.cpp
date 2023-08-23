@@ -143,7 +143,7 @@ wxFolderViewColumnsDialog(const String& folderName,
     : wxSelectionsOrderDialogSimple
       (
          _("&Select the columns to show:"),
-         String::Format(_("Configure columns for '%s'"), folderName.c_str()),
+         String::Format(_("Configure columns for '%s'"), folderName),
          names,
          status,
          _T("FolderViewCol"),

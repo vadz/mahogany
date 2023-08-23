@@ -561,7 +561,7 @@ MDialog_SystemErrorMessage(const wxString& message,
    msg = String(message) + _("\nSystem error: ")
       + wxSafeConvertMB2WX(strerror(errno));
 
-   MDialog_ErrorMessage(msg.c_str(), parent, wxString(M_TITLE_PREFIX)+title, modal);
+   MDialog_ErrorMessage(msg, parent, wxString(M_TITLE_PREFIX)+title, modal);
 }
 
 
@@ -634,7 +634,7 @@ bool MDialog_Message(const wxString& message,
       configPath = GetPersMsgBoxName(persMsg);
 
    return MDialog_Message(message, parent, title,
-                          persMsg ? configPath.c_str()
+                          persMsg ? (const char *)configPath.c_str()
                                   : (const char *)NULL,
                           flags);
 }
@@ -1241,7 +1241,7 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
    wxString foldername = profile->GetFolderName();
    wxString labelBox;
    if ( !foldername.empty() )
-      labelBox.Printf(_("&Date format for folder '%s'"), foldername.c_str());
+      labelBox.Printf(_("&Date format for folder '%s'"), foldername);
    else
       labelBox.Printf(_("&Default date format"));
 
@@ -1852,7 +1852,7 @@ void CheckExpungeDialog(ASMailFolder *asmf, wxWindow *parent)
          String msg;
          msg.Printf(_("Do you want to expunge all deleted messages\n"
                       "in folder '%s'?"),
-                    mf->GetName().c_str());
+                    mf->GetName());
 
          if ( MDialog_YesNoDialog(msg, parent, MDIALOG_YESNOTITLE,
                                   M_DLG_NO_DEFAULT,
@@ -2537,7 +2537,7 @@ bool wxSelectionsOrderDialog::OnItemAdd(const wxString& item)
       if ( m_checklstBox->GetString(n) == item )
       {
          wxLogWarning(_("The string \"%s\" is already present in the list."),
-                      item.c_str());
+                      item);
 
          return false;
       }
@@ -3071,7 +3071,7 @@ public:
       : MPasswordDialog(
                         parent,
                         _("Please enter login/password to access this folder"),
-                        wxString::Format(_("Folder '%s':"), folderName.c_str()),
+                        wxString::Format(_("Folder '%s':"), folderName),
                         username,
                         password
                        )
@@ -3110,7 +3110,7 @@ public:
                            _("Please enter login/password to %s this message"),
                            protocol == Prot_SMTP ? _("send") : _("post")
                         ),
-                        wxString::Format(_("Server '%s':"), server.c_str()),
+                        wxString::Format(_("Server '%s':"), server),
                         username,
                         password
                        )

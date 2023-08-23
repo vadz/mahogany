@@ -42,9 +42,7 @@
 
 static String GetRenameDialogTitle(const MFolder *folder)
 {
-   wxString title;
-   title.Printf(_("Rename folder '%s'"), folder->GetFullName().c_str());
-   return title;
+   return wxString::Format(_("Rename folder '%s'"), folder->GetFullName());
 }
 
 // ----------------------------------------------------------------------------

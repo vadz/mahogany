@@ -290,7 +290,7 @@ void wxMIMETreeDialog::OnSave(wxCommandEvent& WXUNUSED(event))
       if ( !mimepart )
       {
          wxLogWarning(_("Failed to save MIME part \"%s\", skipping."),
-                      m_treectrl->GetItemText(selections[n]).c_str());
+                      m_treectrl->GetItemText(selections[n]));
          continue;
       }
 

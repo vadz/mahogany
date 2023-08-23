@@ -382,7 +382,7 @@ wxLayoutObjectText::DebugDump(void) const
    wxString str;
    str = wxLayoutObject::DebugDump();
    wxString str2;
-   str2.Printf(" `%s`", m_Text.c_str());
+   str2.Printf(" `%s`", m_Text);
    return str+str2;
 }
 #endif

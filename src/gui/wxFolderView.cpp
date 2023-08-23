@@ -1944,9 +1944,9 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
       String colName = GetColumnName(col).Lower();
 
       menu.Append(WXMENU_FVIEW_SORT_BY_COL + col,
-                  wxString::Format(_("Sort by %s"), colName.c_str()));
+                  wxString::Format(_("Sort by %s"), colName));
       menu.Append(WXMENU_FVIEW_SORT_BY_COL_REV + col,
-                  wxString::Format(_("Reverse sort by %s"), colName.c_str()));
+                  wxString::Format(_("Reverse sort by %s"), colName));
       menu.AppendSeparator();
    }
    //else: clicked outside any column or on a column we can't use for sorting
@@ -2075,7 +2075,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       // we can't sort by this column
       wxLogStatus(GetFrame(this),
                   _("Impossible to sort messages using %s column"),
-                  GetColumnName(col).Lower().c_str());
+                  GetColumnName(col).Lower());
       return;
    }
 
@@ -2736,7 +2736,7 @@ void wxFolderListCtrl::SetSortOrder(Profile *profile,
                                     bool reverse)
 {
    wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
-               GetColumnName(col).Lower().c_str(),
+               GetColumnName(col).Lower(),
                reverse ? _(" (reverse)") : "");
 
    profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
@@ -3532,8 +3532,8 @@ void wxFolderView::MoveToNextSearchMatch(bool forward)
       wxLogStatus(m_Frame, _("Search result %lu of %lu for \"%s\"%s"),
                   (unsigned long)(m_searchData.idx + 1),
                   (unsigned long)count,
-                  m_searchData.str.c_str(),
-                  status.c_str());
+                  m_searchData.str,
+                  status);
    }
 }
 
@@ -3936,7 +3936,7 @@ wxFolderView::DoClear(bool keepTheViewer)
             {
                wxString msg;
                msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
-                          m_ASMailFolder->GetName().c_str());
+                          m_ASMailFolder->GetName());
 
                if ( MDialog_YesNoDialog
                     (
@@ -4140,7 +4140,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
             if ( AddAllSubfoldersToTree(folder, asmf) > 0 )
             {
                wxLogStatus(_("You can now open any of the folders on the "
-                             "IMAP server '%s'"), folder->GetName().c_str());
+                             "IMAP server '%s'"), folder->GetName());
             }
 
             asmf->DecRef();
@@ -4163,7 +4163,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                _("The folder '%s' couldn't be opened last time, "
                  "do you still want to try to open it (it "
                  "will probably fail again)?"),
-               m_fullname.c_str()
+               m_fullname
             ),
             m_Frame,
             MDIALOG_YESNOTITLE,
@@ -4193,7 +4193,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
          {
             // the dialog was cancelled
             wxLogStatus(m_Frame, _("Opening the folder '%s' cancelled."),
-                        m_fullname.c_str());
+                        m_fullname);
 
             mApplication->SetLastError(M_ERROR_CANCEL);
             return false;
@@ -4236,7 +4236,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                            "If you believe this message to be incorrect, "
                            "you may reset \"Can be opened\" flag in the\n"
                            "folder properties dialog and try again."),
-                         m_fullname.c_str());
+                         m_fullname);
             break;
 
          default:
@@ -4265,7 +4265,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                     (
                      wxString::Format(_("The folder '%s' could not be opened, "
                                         "would you like to change its settings?"),
-                                      m_fullname.c_str()),
+                                      m_fullname),
                      m_Frame,
                      MDIALOG_YESNOTITLE,
                      M_DLG_YES_DEFAULT,
@@ -5051,7 +5051,7 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
       // assume we're in a folder view frame
       wxLogStatus(GetFrame(m_Parent),
                   _("Closing folder '%s' because the underlying mail "
-                    "folder was deleted."), m_folderName.c_str());
+                    "folder was deleted."), m_folderName);
 
       Clear();
    }
@@ -5313,7 +5313,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                {
                   wxLogStatus(m_Frame,
                               _("No messages matching \"%s\" found."),
-                              m_searchData.str.c_str());
+                              m_searchData.str);
                }
             }
             break;

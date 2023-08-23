@@ -372,7 +372,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    wxString foldername = profile->GetFolderName();
    wxString labelBox;
    if ( !foldername.empty() )
-      labelBox.Printf(_("&Headers for folder '%s'"), foldername.c_str());
+      labelBox.Printf(_("&Headers for folder '%s'"), foldername);
    else
       labelBox.Printf(_("Default headers"));
    wxStaticBox *box = CreateStdButtonsAndBox(labelBox);
@@ -641,7 +641,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    wxString foldername = profile->GetFolderName();
    wxString labelBox;
    if ( !foldername.empty() )
-      labelBox.Printf(_("Custom header for folder '%s'"), foldername.c_str());
+      labelBox.Printf(_("Custom header for folder '%s'"), foldername);
    else
       labelBox.Printf(_("Default custom header"));
    wxStaticBox *box = CreateStdButtonsAndBox(labelBox);
@@ -798,7 +798,7 @@ bool wxCustomHeaderDialog::TransferDataFromWindow()
 
    if ( !reason.empty() )
    {
-      wxLogError(_("Specified header name is invalid: %s."), reason.c_str());
+      wxLogError(_("Specified header name is invalid: %s."), reason);
       return false;
    }
 
@@ -841,7 +841,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    wxString foldername = profile->GetFolderName();
    wxString labelBox;
    if ( !foldername.empty() )
-      labelBox.Printf(_("Custom &headers for folder '%s'"), foldername.c_str());
+      labelBox.Printf(_("Custom &headers for folder '%s'"), foldername);
    else
       labelBox.Printf(_("Default custom headers"));
 

@@ -208,14 +208,14 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
                          "exactly two '%%s' format specificators.\n"
                          "The current setting '%s' is incorrect and "
                          "the default value will be used instead."),
-                       strConvertProgram.c_str());
+                       strConvertProgram);
             strConvertProgram = GetStringDefault(MP_CONVERTPROGRAM);
          }
          String command;
-         command.Printf(strConvertProgram, filename.c_str(), tempfile.c_str());
+         command.Printf(strConvertProgram, filename, tempfile);
          wxLogTrace(wxTraceIconLoading,
                     _T("wxIconManager::LoadImage() calling '%s'..."),
-                    command.c_str());
+                    command);
          if(wxSystem(command) == 0)
          {
             wxLogNull lo; // suppress error messages
@@ -264,7 +264,7 @@ wxIconManager::LoadImageXpm(String filename)
    char **cpptr = NULL;
 
    wxLogTrace(wxTraceIconLoading, _T("wxIconManager::LoadImage(%s) called..."),
-              filename.c_str());
+              filename);
 
    wxFileName fn(filename);
    if ( fn.GetExt() == _T("xpm") )
@@ -281,11 +281,10 @@ wxIconManager::LoadImageXpm(String filename)
 
       String tempfile(fnXPM.GetFullPath());
       String command;
-      command.Printf(READ_APPCONFIG_TEXT(MP_CONVERTPROGRAM),
-                     filename.c_str(), tempfile.c_str());
+      command.Printf(READ_APPCONFIG_TEXT(MP_CONVERTPROGRAM), filename, tempfile);
       wxLogTrace(wxTraceIconLoading,
                  _T("wxIconManager::LoadImage() calling '%s'..."),
-                 command.c_str());
+                 command);
       if(wxSystem(command) == 0)
          cpptr = LoadXpm(tempfile);
 
@@ -504,7 +503,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
 
    strutil_tolower(iconName);
    wxLogTrace(wxTraceIconLoading, _T("wxIconManager::GetIcon(%s) called..."),
-              iconNameOrig.c_str());
+              iconNameOrig);
 
    wxIcon icon;
 
@@ -567,7 +566,7 @@ wxIconManager::GetIcon(const String &iconNameOrig)
                id.iconRef = icon;
                id.iconName = iconName;
                wxLogTrace(wxTraceIconLoading, _T("... icon found in '%s'"),
-                          name.c_str());
+                          name);
                m_iconList.push_front(id);
                return icon;
             }

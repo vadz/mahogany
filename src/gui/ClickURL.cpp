@@ -220,7 +220,7 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
             if ( !addr )
             {
                wxLogError(_("Failed to parse address \"%s\""),
-                          m_clickableURL->GetUrl().c_str());
+                          m_clickableURL->GetUrl());
                break;
             }
 
@@ -239,8 +239,7 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
                                        READ_CONFIG(profile, MP_WHITE_LIST)));
             if ( whitelist.Index(str) != wxNOT_FOUND )
             {
-               wxLogStatus(frame, _("\"%s\" is already in the white list"),
-                           str.c_str());
+               wxLogStatus(frame, _("\"%s\" is already in the white list"), str);
                break;
             }
 
@@ -248,7 +247,7 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
 
             profile->writeEntry(MP_WHITE_LIST, strutil_flatten_array(whitelist));
 
-            wxLogStatus(frame, _("Added \"%s\" to the white list"), str.c_str());
+            wxLogStatus(frame, _("Added \"%s\" to the white list"), str);
          }
          break;
 
@@ -377,7 +376,7 @@ void ClickableURL::OpenInBrowser(int options) const
    bool anotherBrowser = (options & URLOpen_Other) != 0;
 
    wxFrame *frame = m_msgView->GetParentFrame();
-   wxLogStatus(frame, _("Opening URL '%s'..."), m_url.c_str());
+   wxLogStatus(frame, _("Opening URL '%s'..."), m_url);
 
    MBusyCursor bc;
 
@@ -433,8 +432,7 @@ void ClickableURL::OpenInBrowser(int options) const
       if ( !command.empty() )
       {
          wxString errmsg;
-         errmsg.Printf(_("Could not launch browser: '%s' failed."),
-                       command.c_str());
+         errmsg.Printf(_("Could not launch browser: '%s' failed."), command);
          bOk = m_msgView->LaunchProcess(command, errmsg);
       }
       else // easy case: open in the same window
@@ -473,8 +471,7 @@ void ClickableURL::OpenInBrowser(int options) const
          command = ExpandExternalCommand(browser, m_url);
 
          wxString errmsg;
-         errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
-                       command.c_str());
+         errmsg.Printf(_("Couldn't launch browser: '%s' failed"), command);
 
          bOk = m_msgView->LaunchProcess(command, errmsg);
       }
@@ -482,11 +479,11 @@ void ClickableURL::OpenInBrowser(int options) const
 
    if ( bOk )
    {
-      wxLogStatus(frame, _("Opening URL '%s'... done."), m_url.c_str());
+      wxLogStatus(frame, _("Opening URL '%s'... done."), m_url);
    }
    else
    {
-      wxLogStatus(frame, _("Opening URL '%s' failed."), m_url.c_str());
+      wxLogStatus(frame, _("Opening URL '%s' failed."), m_url);
    }
 }
 

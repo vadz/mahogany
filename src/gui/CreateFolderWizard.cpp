@@ -557,7 +557,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
                   "it here you will be asked for it later.");
       }
 
-      text.Printf(msg, entry.c_str());
+      text.Printf(msg, entry);
    }
 
    wxStaticText *msgCtrl = new wxStaticText(this, -1, text);
@@ -747,7 +747,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
             {
                wxLogError(_("The path '%s' is invalid for a MH folder. All MH "
                             "folders should be under the directory '%s'."),
-                         name.c_str(), root.c_str());
+                         name, root);
 
                return false;
             }
@@ -994,7 +994,7 @@ MWizard_CreateFolder_FinalPage::MWizard_CreateFolder_FinalPage(MWizard *wizard)
       "the folder properties dialog later. Simply\n"
       "click the right mouse button on the\n"
       "entry in the tree and choose \"Properties\"."
-   ), params->m_Name.c_str());
+   ), params->m_Name);
 
    MFolderType ftype = params->m_FolderType;
    if ( ftype != MF_ILLEGAL &&

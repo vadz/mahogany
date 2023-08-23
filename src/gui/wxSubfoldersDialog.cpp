@@ -555,7 +555,7 @@ wxSubfoldersTree::OnListFolder(const String& path, wxChar delim, long attr)
    wxString name;
    if ( !StringStartsWith(path, m_reference, Case_Ignore, &name) )
    {
-      wxLogDebug(_T("Folder specification '%s' unexpected."), path.c_str());
+      wxLogDebug(_T("Folder specification '%s' unexpected."), path);
       return;
    }
 
@@ -963,7 +963,7 @@ void wxSubscriptionDialog::OnTreeExpanded(wxTreeEvent& event)
    wxTreeItemId id = event.GetItem();
    size_t nFolders = m_treectrl->GetChildrenCount(id);
    m_box->SetLabel(wxString::Format(_("%u subfolders under %s"),
-                   nFolders, m_treectrl->GetItemText(id).c_str()));
+                   nFolders, m_treectrl->GetItemText(id)));
 
    event.Skip();
 }
@@ -1087,8 +1087,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             folderNew = parent->CreateSubfolder(name, m_folderType, false);
             if ( !folderNew )
             {
-               wxLogError(_("Failed to create folder '%s'."),
-                          (fullpath + name).c_str());
+               wxLogError(_("Failed to create folder '%s'."), fullpath + name);
 
                // can't create children if parent creation failed...
                break;
@@ -1247,7 +1246,7 @@ ListFolderEventReceiver::OnListFolder(const String& path,
 
    if ( name.empty() )
    {
-      wxLogDebug(_T("Folder specification '%s' unexpected."), path.c_str());
+      wxLogDebug(_T("Folder specification '%s' unexpected."), path);
       return;
    }
 
@@ -1315,7 +1314,7 @@ ListFolderEventReceiver::OnListFolder(const String& path,
    }
    else
    {
-      wxLogError(_("Failed to create the folder '%s'"), name.c_str());
+      wxLogError(_("Failed to create the folder '%s'"), name);
    }
 }
 
@@ -1330,8 +1329,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    if ( !CanHaveSubfolders(folder->GetType(), folder->GetFlags()) )
    {
       // how did we get here at all?
-      wxLogMessage(_("The folder '%s' has no subfolders."),
-                   folder->GetPath().c_str());
+      wxLogMessage(_("The folder '%s' has no subfolders."), folder->GetPath());
 
       return FALSE;
    }
@@ -1353,7 +1351,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 
          wxLogError(_("Impossible to browse subfolders of folder '%s' because "
                       "the folder cannot be opened."),
-                    folderPath.c_str());
+                    folderPath);
       }
       //else: the user didn't want to open the folder (for example because it
       //      requires going online and he didn't want it)
@@ -1367,7 +1365,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
            "to the folder tree (or select the individual folders\n"
            "manually)?"),
          parent,
-         wxString::Format(_("Subfolders of '%s'"), folder->GetPath().c_str()),
+         wxString::Format(_("Subfolders of '%s'"), folder->GetPath()),
          M_DLG_YES_DEFAULT,
          M_MSGBOX_ADD_ALL_SUBFOLDERS
         )

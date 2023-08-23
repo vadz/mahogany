@@ -834,7 +834,7 @@ public:
       CreatePagesDesc();
       SetPagesDesc(m_nPages, m_aPages);
 
-      SetTitle(wxString::Format(_("Settings for identity '%s'"), m_identity.c_str()));
+      SetTitle(wxString::Format(_("Settings for identity '%s'"), m_identity));
 
       CreateAllControls();
       Layout();
@@ -3383,7 +3383,7 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
    if ( lbox->FindString(str) != -1 ) {
       // it is, don't add it twice
       wxLogError(_("String '%s' is already present in the list, not added."),
-                 str.c_str());
+                 str);
 
       return FALSE;
    }
@@ -4467,10 +4467,10 @@ bool wxOptionsPageSync::DoTransferOptionsFromWindow()
             {
                if ( usingConfigFile )
                   wxLogError(_("Failed to export settings to the file \"%s\"."),
-                             filenameConfig.c_str());
+                             filenameConfig);
                else
                   wxLogError(_("Failed to import settings from the file \"%s\"."),
-                             filenameConfig.c_str());
+                             filenameConfig);
             }
          }
       }
@@ -4513,12 +4513,12 @@ void wxOptionsPageSync::OnButton(wxCommandEvent& event)
       if ( save )
       {
          wxLogError(_("Failed to save remote configuration to '%s'"),
-                    foldername.c_str());
+                    foldername);
       }
       else // restoring
       {
          wxLogError(_("Failed to retrieve remote configuration from '%s'"),
-                    foldername.c_str());
+                    foldername);
       }
    }
    else // ok
@@ -4526,12 +4526,12 @@ void wxOptionsPageSync::OnButton(wxCommandEvent& event)
       if ( save )
       {
          wxLogMessage(_("Successfully saved remote configuration to '%s'."),
-                      foldername.c_str());
+                      foldername);
       }
       else // restoring
       {
          wxLogMessage(_("Successfully restored remote configuration from '%s'."),
-                      foldername.c_str());
+                      foldername);
       }
    }
 
@@ -5304,7 +5304,7 @@ bool wxConfigSourcesDialog::TransferDataFromWindow()
 
          if ( names.Index(s) != wxNOT_FOUND )
          {
-            wxLogError(_("Name \"%s\" is not unique."), s.c_str());
+            wxLogError(_("Name \"%s\" is not unique."), s);
             return false;
          }
 

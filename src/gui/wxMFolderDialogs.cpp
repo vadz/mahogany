@@ -908,7 +908,7 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
    {
       wxLogError(_("Folder '%s' specified as the parent for the new folder "
                    "doesn't exist. Please choose an existing folder as "
-                   "parent or leave it blank."), folderName.c_str());
+                   "parent or leave it blank."), folderName);
       ok = FALSE;
    }
 
@@ -2321,8 +2321,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       wxString mhName = path;
       if ( !MailFolder::GetMHFolderName(&mhName) )
       {
-         wxLogError(_("Impossible to create MH folder '%s'."),
-                    path.c_str());
+         wxLogError(_("Impossible to create MH folder '%s'."), path);
 
          wxLog::FlushActive();
 
@@ -2400,7 +2399,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                        "if you don't want this to happen you should fill "
                        "it in here or,\n"
                        "alternatively, select anonymous access.\n"),
-                     what.c_str()
+                     what
                    );
 
                if ( msgbox == M_MSGBOX_ASK_PWD )
@@ -2418,7 +2417,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                    << wxString::Format
                       (
                         _("So would you like to leave the %s empty?"),
-                        what.c_str()
+                        what
                       );
 
                if ( !MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,

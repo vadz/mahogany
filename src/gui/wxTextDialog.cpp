@@ -309,8 +309,7 @@ void MTextDialog::OnFindDialogNext(wxFindDialogEvent& event)
 
       if ( !m_regexFind.Compile(strFind, flagsRE) )
       {
-         wxLogError(_("Invalid regular expression \"%s\"."),
-                    strFind.c_str());
+         wxLogError(_("Invalid regular expression \"%s\"."), strFind);
          return;
       }
 

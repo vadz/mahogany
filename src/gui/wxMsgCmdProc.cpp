@@ -770,8 +770,7 @@ MsgCmdProcImpl::ShowUIDL(UIdType uid)
    if ( uidString.empty() )
       wxLogWarning("This message doesn't have a valid UID.");
    else
-      wxLogMessage("The UID of this message is '%s'.",
-                   uidString.c_str());
+      wxLogMessage("The UID of this message is '%s'.", uidString);
 }
 
 #endif // EXPERIMENTAL_show_uid
@@ -840,14 +839,14 @@ void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
       wxLogError(_("Messages in the folder \"%s\" can't be modified, "
                    "please copy the message to a local or IMAP folder "
                    "before removing attachments from it."),
-                 mf->GetName().c_str());
+                 mf->GetName());
       return;
    }
 
    if ( mf->IsReadOnly() )
    {
       wxLogError(_("Folder \"%s\" is read-only, please reopen it in "
-                   "read-write mode."), mf->GetName().c_str());
+                   "read-write mode."), mf->GetName());
       return;
    }
 
@@ -868,7 +867,7 @@ void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
       if ( desc.empty() )
          desc = mimepart->GetFilename();
       if ( desc.empty() )
-         desc.Printf(_("Unnamed %s #%d"), mimetype.GetFull().c_str(), i);
+         desc.Printf(_("Unnamed %s #%d"), mimetype.GetFull(), i);
 
       desc << " ("
            << SizeInBytesToString(mimepart->GetSize(), SizeToString_Medium)
@@ -1020,15 +1019,15 @@ void MsgCmdProcImpl::CheckIfSpam(const UIdArray& uids)
       if ( SpamFilter::CheckIfSpam(*msg, wxEmptyString, &result) )
       {
          wxLogWarning(str + _("seems to be a spam (%s)."),
-                      msg->Subject().c_str(),
-                      msg->From().c_str(),
-                      result.c_str());
+                      msg->Subject(),
+                      msg->From(),
+                      result);
       }
       else // !spam
       {
          wxLogMessage(str + _("doesn't seem to be a spam."),
-                      msg->Subject().c_str(),
-                      msg->From().c_str());
+                      msg->Subject(),
+                      msg->From());
       }
    }
 
@@ -1372,7 +1371,7 @@ MsgCmdProcImpl::SaveMessagesToFolder(const UIdArray& selections,
       new AsyncStatusHandler(this, wxString::Format
                                    (
                                        _("Saving %lu message(s) to '%s'..."),
-                                       count, folder->GetFullName().c_str()
+                                       count, folder->GetFullName()
                                    ));
 
    Ticket t = m_asmf->
@@ -1381,7 +1380,7 @@ MsgCmdProcImpl::SaveMessagesToFolder(const UIdArray& selections,
    status->Monitor(t, wxString::Format
                       (
                          _("Failed to save messages to the folder '%s'."),
-                         folder->GetFullName().c_str()
+                         folder->GetFullName()
                       ));
 
    folder->DecRef();
@@ -1501,7 +1500,7 @@ MsgCmdProcImpl::DropMessagesToFolder(const UIdArray& selections,
 {
    wxLogTrace(M_TRACE_DND, _T("Saving %lu message(s) to folder '%s'"),
               (unsigned long)selections.GetCount(),
-              folder->GetFullName().c_str());
+              folder->GetFullName());
 
    Ticket t = SaveMessagesToFolder(selections, folder);
 

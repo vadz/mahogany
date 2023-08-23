@@ -1153,8 +1153,7 @@ AttachmentMenu::OnCommandEvent(wxCommandEvent &event)
                const wxFileOffset len = file.Length();
                if ( len == 0 )
                {
-                  wxLogWarning(_("Attached file \"%s\" is empty"),
-                               filename.c_str());
+                  wxLogWarning(_("Attached file \"%s\" is empty"), filename);
                   break;
                }
 
@@ -1177,15 +1176,14 @@ AttachmentMenu::OnCommandEvent(wxCommandEvent &event)
 
             if ( !ok )
             {
-               wxLogError(_("Failed to get data of attached file \"%s\"."),
-                          filename.c_str());
+               wxLogError(_("Failed to get data of attached file \"%s\"."), filename);
                break;
             }
 
             MDialog_ShowText
             (
                GetFrame(m_window),
-               wxString::Format(_("Attached file \"%s\""), filename.c_str()),
+               wxString::Format(_("Attached file \"%s\""), filename),
                content,
                "AttachView"
             );
@@ -1975,7 +1973,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
                else // bad header format
                {
                   wxLogDebug(_T("Corrupted ") HEADER_GEOMETRY _T(" header '%s'."),
-                             value.c_str());
+                             value);
                }
             }
          }
@@ -2168,7 +2166,7 @@ wxComposeView::~wxComposeView()
       if ( !wxRemoveFile(m_filenameAutoSave) )
       {
          wxLogSysError(_("Failed to remove stale composer autosave file '%s'"),
-                       m_filenameAutoSave.c_str());
+                       m_filenameAutoSave);
       }
    }
 }
@@ -2602,7 +2600,7 @@ wxComposeView::CreateEditor()
             wxLogError(_("Failed to load the default message editor '%s'.\n"
                          "\n"
                          "Builtin message editing will not work!"),
-                       nameFirst.c_str());
+                       nameFirst);
          }
       }
 
@@ -2866,7 +2864,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
             wxLogStatus(this,
                         _("Address '%s' is already in the recipients list, "
                           "not added."),
-                        addr.c_str());
+                        addr);
          }
          else // found with a different type
          {
@@ -2878,7 +2876,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
                wxLogStatus(this,
                            _("Address '%s' was already in the recipients list "
                              "with a different type, just changed the type."),
-                           addr.c_str());
+                           addr);
 
                m_rcptExtra[n]->SetType(addrType);
             }
@@ -2887,7 +2885,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
                wxLogStatus(this,
                            _("Address '%s' was already in the recipients list "
                              "with a different type, not added."),
-                           addr.c_str());
+                           addr);
             }
          }
 
@@ -3298,7 +3296,7 @@ wxComposeView::DoInitText(Message *msgOrig)
                wxLog::FlushActive();
 
                msg.Printf(_("Couldn't read vCard file '%s'."),
-                          filename.c_str());
+                          filename);
             }
          }
 
@@ -3746,12 +3744,11 @@ wxComposeView::OnMenuCommand(int id)
             }
             else if ( InsertFileAsText(filename, MessageEditor::Insert_Append) )
             {
-               wxLogStatus(this, _("Inserted file '%s'."), filename.c_str());
+               wxLogStatus(this, _("Inserted file '%s'."), filename);
             }
             else
             {
-               wxLogError(_("Failed to insert the text file '%s'."),
-                          filename.c_str());
+               wxLogError(_("Failed to insert the text file '%s'."), filename);
             }
          }
          break;
@@ -3776,8 +3773,7 @@ wxComposeView::OnMenuCommand(int id)
                // we have been saved
                ResetDirty();
 
-               wxLogStatus(this, _("Message text saved to file '%s'."),
-                           filename.c_str());
+               wxLogStatus(this, _("Message text saved to file '%s'."), filename);
             }
             else
             {
@@ -3823,7 +3819,7 @@ wxComposeView::OnMenuCommand(int id)
                //else: we will take it from the profile when we will send the msg
 
                wxLogStatus(this, _("Added custom header '%s' to the message."),
-                           headerName.c_str());
+                           headerName);
             }
             //else: cancelled
          }
@@ -4001,7 +3997,7 @@ bool wxComposeView::StartExternalEditor()
 
          if ( !m_pidEditor  )
          {
-            wxLogError(_("Execution of '%s' failed."), command.c_str());
+            wxLogError(_("Execution of '%s' failed."), command);
          }
          else // editor launched
          {
@@ -4090,7 +4086,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
       {
          if ( wxRemove(m_tmpFileName) != 0 )
          {
-            wxLogDebug(_T("Stale temp file '%s' left."), m_tmpFileName.c_str());
+            wxLogDebug(_T("Stale temp file '%s' left."), m_tmpFileName);
          }
 
          ok = true;
@@ -4119,8 +4115,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 
    if ( !ok )
    {
-      wxLogError(_("The text was left in the file '%s'."),
-                 m_tmpFileName.c_str());
+      wxLogError(_("The text was left in the file '%s'."), m_tmpFileName);
    }
 
    m_pidEditor = 0;
@@ -4261,8 +4256,7 @@ wxComposeView::InsertFile(const wxChar *fileName,
    strMimeType = props.mimetype.GetFull();
    DoInsertAttachment(mc, strMimeType);
 
-   wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
-               filename.c_str(), strMimeType.c_str());
+   wxLogStatus(this, _("Inserted file '%s' (as '%s')"), filename, strMimeType);
 
 }
 
@@ -4283,8 +4277,7 @@ wxComposeView::InsertFileAsText(const String& filename,
       {
          if ( insMode != MessageEditor::Insert_Replace )
          {
-            wxLogVerbose(_("File '%s' is empty, no text to insert."),
-                         filename.c_str());
+            wxLogVerbose(_("File '%s' is empty, no text to insert."), filename);
             return true;
          }
          //else: replace old text with new (empty) one
@@ -4648,7 +4641,7 @@ bool wxComposeView::CheckForForgottenAttachments() const
               "Please change it in the program options and reenable "
               "the check for forgotten attachments there\n"
               "as it will be temporarily disabled now."),
-            reText.c_str()
+            reText
          ),
          this
       );
@@ -4834,8 +4827,8 @@ wxComposeView::EncodeText(const wxString& text,
                         _("Text of this message can't be converted "
                           "to the encoding \"%s\", would you like "
                           " to send it in encoding \"%s\" instead?"),
-                        wxFontMapper::GetEncodingName(m_encoding).c_str(),
-                        wxFontMapper::GetEncodingName(encodingPart).c_str()
+                        wxFontMapper::GetEncodingName(m_encoding),
+                        wxFontMapper::GetEncodingName(encodingPart)
                      ),
                      this,
                      MDIALOG_YESNOTITLE,
@@ -4871,8 +4864,7 @@ wxComposeView::EncodeText(const wxString& text,
                         _("Text of this message can't be converted "
                           "to the encoding \"%s\", would you like "
                           "to send it in UTF-8 instead?"),
-                        wxFontMapper::
-                           GetEncodingName(encodingPart).c_str()
+                        wxFontMapper::GetEncodingName(encodingPart)
                      ),
                      this,
                      MDIALOG_YESNOTITLE,
@@ -5023,7 +5015,7 @@ wxComposeView::BuildMessage(int flags) const
                   else if ( flags & Interactive )
                   {
                      wxLogError(_("Cannot read file '%s' included in "
-                                  "this message!"), filename.c_str());
+                                  "this message!"), filename);
                   }
 
                   delete [] buffer;
@@ -5031,7 +5023,7 @@ wxComposeView::BuildMessage(int flags) const
                else if ( flags & Interactive )
                {
                   wxLogError(_("Cannot open file '%s' included in "
-                               "this message!"), filename.c_str());
+                               "this message!"), filename);
                }
 
                if ( !partOk )
@@ -5322,7 +5314,7 @@ void wxComposeView::OnSendResult(const SendThreadResult& res)
          if ( res.outbox.empty() )
          {
             s.Printf(_("Message has been posted to %s"),
-                     GetRecipients(Recipient_Newsgroup).c_str());
+                     GetRecipients(Recipient_Newsgroup));
          }
          else
          {
@@ -5335,13 +5327,13 @@ void wxComposeView::OnSendResult(const SendThreadResult& res)
          {
             // NB: don't show BCC as the message might be saved in the log file
             s.Printf(_("Message has been sent to %s"),
-                     GetRecipients(Recipient_To).c_str());
+                     GetRecipients(Recipient_To));
 
             String rcptCC = GetRecipients(Recipient_Cc);
             if ( !rcptCC.empty() )
             {
                s += String::Format(_(" (with courtesy copy sent to %s)"),
-                                   rcptCC.c_str());
+                                   rcptCC);
             }
             else // no CC
             {
@@ -5355,7 +5347,7 @@ void wxComposeView::OnSendResult(const SendThreadResult& res)
       }
 
       // avoid crashes if the message has any stray '%'s
-      wxLogStatus(this, _T("%s"), s.c_str());
+      wxLogStatus(this, _T("%s"), s);
 
       // we can now safely remove the draft message, if any
       DeleteDraft();
@@ -5710,7 +5702,7 @@ bool wxComposeView::DeleteDraft()
    if ( !mf->DeleteMessage(m_DraftMessage->GetUId()) )
    {
       wxLogError(_("Failed to delete the original draft message from "
-                   "the folder '%s'."), mf->GetName().c_str());
+                   "the folder '%s'."), mf->GetName());
       return false;
    }
 
@@ -5849,7 +5841,7 @@ bool wxComposeView::SaveAsDraft() const
          _("Your message has been saved in the folder '%s',\n"
            "simply open it and choose \"Message|Edit in composer\" to\n"
            "continue writing it."),
-         nameDrafts.c_str()
+         nameDrafts
       ),
       self->GetFrame(),
       M_MSGBOX_DRAFT_SAVED,
@@ -5907,13 +5899,13 @@ wxComposeView::AutoSave()
          if ( !wxMkdir(name, 0700) )
          {
             wxLogSysError(_("Failed to create the directory '%s' for the "
-                            "temporary composer files"), name.c_str());
+                            "temporary composer files"), name);
 
             wxLogError(_("Composer messages won't be saved automatically "
                          "for the duration of this session.\n"
                          "Please make sure that Mahogany can create the "
                          "directory \"%s\" and restart the program."),
-                       name.c_str());
+                       name);
             s_autosaveEnabled = false;
 
             return false;
@@ -6046,7 +6038,7 @@ bool Composer::RestoreAll()
       }
 
       wxLogError(_("Failed to resume composing the message from file '%s'"),
-                 filename.c_str());
+                 filename);
    }
 
    if ( nResumed )

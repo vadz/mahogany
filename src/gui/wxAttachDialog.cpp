@@ -219,7 +219,7 @@ bool wxAttachmentDialog::TransferDataFromWindow()
    propsNew.mimetype = strMime;
    if ( !propsNew.mimetype.IsOk() )
    {
-      wxLogError(_("MIME type \"%s\" is illegal."), strMime.c_str());
+      wxLogError(_("MIME type \"%s\" is illegal."), strMime);
       return false;
    }
 

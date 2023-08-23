@@ -115,7 +115,7 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
                        "The command may contain the string \"%%s\" which will "
                        "be replaced by the file name and if you don't specify it, "
                        "the file name will be appended at the end."),
-                     mimetype.c_str()
+                     mimetype
                   );
    if ( m_openAsMsg )
    {

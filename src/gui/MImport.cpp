@@ -148,7 +148,7 @@ public:
       const wxLongLong t = info.timestampMS;
       m_dialog->GetLogListBox()->Append(
             wxString::Format(_T("%s:\t%s"),
-                             wxDateTime(t).FormatTime().c_str(),
+                             wxDateTime(t).FormatTime(),
                              szString)
          );
    }
@@ -409,8 +409,7 @@ static bool FindAllImporters(wxArrayImporters& importers,
       }
       else
       {
-         wxLogDebug(_T("Couldn't load importer module '%s'."),
-                    entry.GetName().c_str());
+         wxLogDebug(_T("Couldn't load importer module '%s'."), entry.GetName());
       }
    }
 
