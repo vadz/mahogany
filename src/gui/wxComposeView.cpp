@@ -4818,21 +4818,14 @@ wxComposeView::EncodeText(const wxString& text,
           encodingPart != m_encoding )
    {
       // try converting this part to the message encoding
-      wxCSConv convPart(encodingPart);
-      wxWCharBuffer wtext(convPart.cMB2WC(text));
-
-      bool ok = wtext.length() != 0;
-
-      if ( ok )
+      textBuf = text.mb_str(wxCSConv(m_encoding));
+      if ( !textBuf )
       {
-         wxCSConv convMsg(m_encoding);
-         textBuf = wxCharBuffer(convMsg.cWC2MB(wtext));
-         ok = textBuf.length() != 0;
-      }
+         // Before asking whether to convert to the part encoding, check if it
+         // can be converted.
+         textBuf = text.mb_str(wxCSConv(encodingPart));
 
-      if ( !ok )
-      {
-         if ( (flags & Interactive) && !m_okToConvertOnSend )
+         if ( textBuf.length() && (flags & Interactive) && !m_okToConvertOnSend )
          {
             if ( !MDialog_YesNoDialog
                   (
