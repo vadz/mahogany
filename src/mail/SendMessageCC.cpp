@@ -2261,6 +2261,58 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
   {
      for ( size_t n = 0; ms_HeaderNames[n]; n++ )
      {
+        // We should wrap all headers, but this might break something, so wrap
+        // just the one which regularly gets too long to fit the maximum
+        // message line length (998 bytes).
+        constexpr const char* REFERENCES_HEADER = "References";
+
+        if ( strcmp(ms_HeaderNames[n], REFERENCES_HEADER) == 0 )
+        {
+           // Note that we don't bother null-terminating headers while we're
+           // inside this block, we just do it once at the end. The pointer is
+           // just always positioned at the end of the string, as done here.
+           headers += strlen(headers);
+
+           auto output = [&headers](const char* s, size_t len = 0)
+           {
+              if ( !len )
+                 len = strlen(s);
+              memcpy(headers, s, len);
+              headers += len;
+           };
+
+           output(REFERENCES_HEADER);
+           output(": ");
+
+           const char* value = ms_HeaderValues[n];
+           for ( ;; )
+           {
+              auto space = strchr(value, ' ');
+              if ( !space )
+              {
+                 // Output the rest of the header.
+                 output(value);
+                 output("\r\n");
+
+                 break;
+              }
+
+              // Output just the part until the next space and add a
+              // continuation line.
+              output(value, space - value);
+              output("\r\n    "); // Same indent as c-client RFC822BUFFER.
+
+              value = space;
+              while ( isspace(*value) )
+                 value++;
+           }
+
+           *headers = '\0';
+
+           // Skip generic case below.
+           continue;
+        }
+
         rfc822_header_line(&headers,
                            const_cast<char *>(ms_HeaderNames[n]),
                            env,
