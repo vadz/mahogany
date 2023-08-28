@@ -153,7 +153,8 @@ MTextDialog::MTextDialog(wxWindow *parent,
                            wxTE_MULTILINE |
                            wxTE_READONLY |
                            wxTE_NOHIDESEL |
-                           wxTE_RICH2);
+                           wxTE_RICH2 |
+                           wxTE_DONTWRAP);
 
    // use fixed-width font and latin1 encoding in which all text is valid:
    // without encoding information (which wouldn't make sense anyhow as we can
