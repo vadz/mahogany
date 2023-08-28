@@ -270,6 +270,11 @@ wxArrayString
 MessageCC::GetHeaderLines(const char **headersOrig,
                           wxArrayInt *encodings) const
 {
+   // Some headers have to be returned as multiline, but others must always be
+   // on the same line. This should probably be specified by caller, but for
+   // now decide what to do ourselves here depending on the headers requests.
+   int flags = HeaderIterator::Collapse;
+
    // loop variable for iterating over headersOrig
    const char **headers;
 
@@ -279,6 +284,13 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    wxArrayString values;
    for ( headers = headersOrig; *headers; headers++ )
    {
+      if ( strcmp(*headers, "References") == 0 )
+      {
+         // This header must be preserved as it can be too long to fit on a
+         // single line.
+         flags = HeaderIterator::MultiLineOk;
+      }
+
       values.Add(wxEmptyString);
       if ( encodings )
       {
@@ -331,7 +343,7 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 
       // extract the headers values
       HeaderIterator hdrIter(wxString::From8BitData(rc));
-      hdrIter.GetAll(&names, &valuesInDisorder);
+      hdrIter.GetAll(&names, &valuesInDisorder, flags);
 
       // and then copy the headers in order into the dst array
       size_t nHdr = 0;
