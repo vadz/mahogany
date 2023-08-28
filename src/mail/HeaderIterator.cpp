@@ -118,7 +118,7 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                {
                   if ( flags & MultiLineOk )
                   {
-                     m_str += _T('\n');
+                     m_str += "\r\n";
                      m_str += *m_pcCurrent;
                   }
 
