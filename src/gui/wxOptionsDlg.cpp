@@ -557,13 +557,6 @@ enum ConfigFields
    ConfigField_ExternalEditor,
    ConfigField_AutoLaunchExtEditor,
 
-#ifdef USE_OPENSSL
-   ConfigField_HelpersSkip4,
-   ConfigField_SslHelp,
-   ConfigField_SslDllName,
-   ConfigField_CryptoDllName,
-#endif // USE_OPENSSL
-
    ConfigField_HelpersSkip5,
    ConfigField_PGPHelp,
    ConfigField_PGPCommand,
@@ -1839,16 +1832,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&External editor"),            Field_File,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
 
-#ifdef USE_OPENSSL
-   { "",                                           Field_Message, -1 },
-   { gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure, encrypted\n"
-                  "communications, if you have the libssl and libcrypto shared libraries\n"
-                  "(DLLs) on your system."),
-     Field_Message, -1                     },
-   { gettext_noop("Location of lib&ssl"),         Field_File,    -1                     },
-   { gettext_noop("Location of libcr&ypto"),      Field_File,    -1                     },
-#endif // USE_OPENSSL
-
    { "",                                           Field_Message, -1 },
    { gettext_noop("GNU Privacy Guard or a compatible program may be used to verify the\n"
                   "cryptographic signatures of the messages you receive and decrypt them.\n"
@@ -2366,12 +2349,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
    CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
-#ifdef USE_OPENSSL
-   CONFIG_NONE(),
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_SSL_DLL_SSL),
-   CONFIG_ENTRY(MP_SSL_DLL_CRYPTO),
-#endif // USE_OPENSSL
+
    CONFIG_NONE(),
    CONFIG_NONE(), // PGP help
    CONFIG_ENTRY(MP_PGP_COMMAND),

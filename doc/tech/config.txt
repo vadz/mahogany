@@ -227,8 +227,6 @@ MP_SMTPHOST_PASSWORD	MailHostPw	""
 MP_SMTPHOST_USE_SSL	MailHostSSL	0l
 MP_SPLASHDELAY	SplashDelay	5
 MP_SSH_PATH	SshPath	"ssh"
-MP_SSL_DLL_CRYPTO	CryptoDll	"libcrypto.dll" or "libcrypto.so.0"
-MP_SSL_DLL_SSL	SSLDll	"libssl.dll" or "libssl.so.0"
 MP_STARTUPSCRIPT	StartupScript	"Minit"
 MP_SYNC_DATE	SyncDate	0L
 MP_SYNC_FILTERS	SyncFilters	0L

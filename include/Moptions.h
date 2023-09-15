@@ -383,8 +383,6 @@ extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_NAMED;
 extern const MOption MP_AUTOCOLLECT_SENDER;
 extern const MOption MP_AUTOCOLLECT_OUTGOING;
-extern const MOption MP_SSL_DLL_SSL;
-extern const MOption MP_SSL_DLL_CRYPTO;
 extern const MOption MP_INCFAX_SUPPORT;
 extern const MOption MP_INCFAX_DOMAINS;
 extern const MOption MP_ADB_SUBSTRINGEXPANSION;
