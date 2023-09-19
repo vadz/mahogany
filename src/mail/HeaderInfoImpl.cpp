@@ -405,38 +405,30 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
    // the user himself
    if ( replaceFromWithTo )
    {
-      size_t nAdrCount = ownAddresses.GetCount();
-      if ( nAdrCount )
+      for ( const auto& ownAddress : ownAddresses )
       {
-         AddressList_obj addrList(*value);
-         const Address* const addr = addrList->GetFirst();
-         if ( addr )
+         // Allow the use of wildcards, e.g. to support own addresses of
+         // the form "localpart+*@domain", and match them anywhere inside the
+         // header for simplicity (otherwise we'd have to extract the email
+         // part of it for matching).
+         if ( value->Matches("*" + ownAddress + "*") )
          {
-            const String email = addr->GetEMail();
-            for ( size_t nAdr = 0; nAdr < nAdrCount; nAdr++ )
+            // sender is the user himself, do the replacement
+            *value = hi->GetTo();
+
+            if ( value->empty() )
             {
-               // Allow the use of wildcards, e.g. to support own addresses of
-               // the form "localpart+*@domain".
-               if ( email.Matches(ownAddresses[nAdr]) )
+               // hmm, must be a newsgroup message
+               String ng = hi->GetNewsgroups();
+               if ( !ng.empty() )
                {
-                  // sender is the user himself, do the replacement
-                  *value = hi->GetTo();
-
-                  if ( value->empty() )
-                  {
-                     // hmm, must be a newsgroup message
-                     String ng = hi->GetNewsgroups();
-                     if ( !ng.empty() )
-                     {
-                        *value = ng;
-                        return Newsgroup;
-                     }
-                     //else: weird, both to and newsgroup are empty??
-                  }
-
-                  return To;
+                  *value = ng;
+                  return Newsgroup;
                }
+               //else: weird, both to and newsgroup are empty??
             }
+
+            return To;
          }
       }
    }
