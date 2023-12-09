@@ -4812,7 +4812,7 @@ wxComposeView::EncodeText(const wxString& text,
    {
       // try converting this part to the message encoding
       textBuf = text.mb_str(wxCSConv(m_encoding));
-      if ( !textBuf )
+      if ( !textBuf.length() )
       {
          // Before asking whether to convert to the part encoding, check if it
          // can be converted.
