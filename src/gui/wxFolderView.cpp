@@ -2992,6 +2992,13 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       return text;
    }
 
+   // We can get here if the window is being repainted while some other
+   // operation is already being executed, notably under wxGTK calling
+   // wxLogStatus(), as done by HeaderInfoList, results in wxEVT_PAINT
+   // generation.
+   if ( m_mutexHeaders.IsLocked() || !mApplication->AllowBgProcessing() )
+      return text;
+
    HeaderInfo *hi = GetHeaderInfo((size_t)item);
    if ( !hi )
    {
