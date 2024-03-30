@@ -2433,7 +2433,7 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 
       if ( !m_headers->Count() )
       {
-         // this probably menas that we lost the connection unexpectedly
+         // this probably means that we lost the connection unexpectedly
          return NULL;
       }
    }
