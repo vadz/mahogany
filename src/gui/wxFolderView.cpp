@@ -2601,7 +2601,12 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
          // now the header info should be in cache, so GetHeaderInfo() will
          // return it
-         RefreshItems(posMin, posMax);
+         //
+         // don't call RefreshItems() from here because it somehow doesn't work,
+         // see https://github.com/wxWidgets/wxWidgets/issues/24443
+         CallAfter([this, posMin, posMax]() {
+            RefreshItems(posMin, posMax);
+         });
       }
    }
 
