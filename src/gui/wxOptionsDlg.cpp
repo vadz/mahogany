@@ -72,7 +72,6 @@
 #include "FolderView.h"
 #include "TemplateDialog.h"
 
-#include "MPython.h"             // defines USE_PYTHON_DYNAMIC
 #include "InitPython.h"
 
 #include "ColourNames.h"
@@ -354,10 +353,6 @@ enum ConfigFields
    ConfigField_PythonFirst = ConfigField_FoldersLast,
    ConfigField_Python_HelpText,
    ConfigField_EnablePython,
-#ifdef USE_PYTHON_DYNAMIC
-   ConfigField_PythonDll_Help,
-   ConfigField_PythonDll,
-#endif // USE_PYTHON_DYNAMIC
    ConfigField_PythonPath_Help,
    ConfigField_PythonPath,
    ConfigField_PythonModuleToLoad_Help,
@@ -1500,14 +1495,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_AppWide, -1 },
    { gettext_noop("&Enable Python"),               Field_Bool |
                                                    Field_AppWide, -1,                        },
-#ifdef USE_PYTHON_DYNAMIC
-   { gettext_noop("If Mahogany can't find Python shared library in one of\n"
-                  "the standard locations, you may enter full path to it here\n"),
-                                                   Field_Message |
-                                                   Field_AppWide, ConfigField_EnablePython   },
-   { gettext_noop("Python &DLL"),                  Field_File |
-                                                   Field_AppWide, ConfigField_EnablePython   },
-#endif // USE_PYTHON_DYNAMIC
    { gettext_noop("The option below determines where Mahogany should look for\n"
                   "Python modules (in addition to standard places)"),                  Field_Message |
                                                    Field_AppWide, ConfigField_EnablePython   },
@@ -2162,10 +2149,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #ifdef USE_PYTHON
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_USEPYTHON),
-#ifdef USE_PYTHON_DYNAMIC
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_PYTHONDLL),
-#endif // USE_PYTHON_DYNAMIC
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_PYTHONPATH),
    CONFIG_NONE(),

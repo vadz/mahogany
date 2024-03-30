@@ -136,16 +136,6 @@ InitPython(void)
       return true;
    }
 
-   // check if Python is available at all if we load it during run-time
-#ifdef USE_PYTHON_DYNAMIC
-   if ( !InitPythonDll() )
-   {
-      wxLogError(_("Python dynamic library couldn't be loaded."));
-
-      return false;
-   }
-#endif // USE_PYTHON_DYNAMIC
-
    // initialise the interpreter -- this we do always, just to avoid problems
    Py_Initialize();
    gs_isPythonInitialized = true;
@@ -209,10 +199,6 @@ void FreePython()
 
       gs_isPythonInitialized = false;
    }
-
-#ifdef USE_PYTHON_DYNAMIC
-   FreePythonDll();
-#endif // USE_PYTHON_DYNAMIC
 }
 
 #endif // USE_PYTHON

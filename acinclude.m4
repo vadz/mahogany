@@ -133,43 +133,6 @@ AC_DEFUN([M_CHECK_MYHEADER],
   ]
 )
 
-dnl M_CHECK_MYHEADER_VER(HEADER-FILE, VERSION, LIBPATHLIST, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
-AC_DEFUN([M_CHECK_MYHEADER_VER],
-  [ m_safe=`echo "$1_$2" | sed 'y%./+-%__p_%'`
-    AC_MSG_CHECKING([for $1 ($2)])
-    AC_CACHE_VAL(m_cv_header_$m_safe,
-      [ m_save_CPPFLAGS="$CPPFLAGS"
-        for j in "." $3 ; do
-           CPPFLAGS="-I$j $CPPFLAGS"
-           AC_TRY_CPP(dnl
-             [#include <$1>],
-             [
-               if test "$j" = "."; then
-                  j="/usr/include"
-               fi
-               eval "m_cv_header_$m_safe=$j"
-               CPPFLAGS="$m_save_CPPFLAGS"
-               break
-             ],
-             [ eval "m_cv_header_$m_safe=no" ]
-           )
-           CPPFLAGS="$m_save_CPPFLAGS"
-        done
-      ]
-    )
-    if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
-       dnl FIXME surely there must be a simpler way? (VZ)
-       dir=`eval echo $\`eval echo m_cv_header_$m_safe\``
-       AC_MSG_RESULT(yes (in $dir))
-       eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
-       ifelse([$4], , :, [$4])
-    else
-       AC_MSG_RESULT(no)
-       ifelse([$5], , , [$5])dnl
-    fi
-  ]
-)
-
 dnl M_ADD_CXXFLAGS_IF_SUPPORTED(OPTION)
 dnl
 dnl Check if the C++ compiler supports the given option and adds it to CXXFLAGS

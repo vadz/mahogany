@@ -7,7 +7,7 @@ ifdef USE_PYTHON
 IFACE_DIR := .src/../include/interface
 
 IFILES	:= $(filter-out swigcmn.i, $(notdir $(wildcard $(IFACE_DIR)/*.i)))
-MSRC	:= Python/InitPython.cpp Python/PythonHelp.cpp Python/PythonDll.cpp
+MSRC	:= Python/InitPython.cpp Python/PythonHelp.cpp
 
 MOBJS	+= $(patsubst %.i,Python/%.o,$(IFILES)) $(MSRC:.cpp=.o)
 MSGSRC	+= $(MSRC)

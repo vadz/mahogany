@@ -113,28 +113,15 @@ M_OVERRIDES(nls,i18n support,USE_I18N,1,
 --disable-nls           no internationalization support)
 
 M_OVERRIDES(python,Python scripting,USE_PYTHON,1,
---with-python=xxx       one of none/static/dynamic)
+--with-python           use Python scripting)
 
 M_OVERRIDES(dspam,DSPAM spam filter,USE_DSPAM,1,
 --with-dspam            use DSPAM for spam filtering)
 
-dnl choose how to use Python: normally, dynamic loading is preferred, but it
-dnl doesn't work under Mac (we need Python.bundle, but all we have is Python
-dnl framework which is a dylib and not a bundle)
 if test "$USE_PYTHON" = 1; then
-    if test "$USE_MAC" = 1; then
-	USE_PYTHON="static"
-    else
-	USE_PYTHON="dynamic"
-    fi
+    M_OVERRIDES(swig,whether we should use SWIG,USE_SWIG,1,
+    --without-swig          do not use swig even if it is available)
 fi
-
-case "$USE_PYTHON" in
-    static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-	M_OVERRIDES(swig,whether we should use SWIG,USE_SWIG,1,
-	--without-swig          don't use swig even if it is available)
-	;;
-esac
 
 dnl dialup is not currently supported under Mac OS X
 if test "$USE_MAC" = 0; then
@@ -554,6 +541,9 @@ if test "x$USE_DIALUP" = "x1"; then
     AC_DEFINE(USE_DIALUP)
 fi
 
+dnl Find pkg-config outside of any conditional.  Done before any PKG_* call.
+PKG_PROG_PKG_CONFIG
+
 dnl --------------------------------------------------------------------------
 dnl check for SSL
 dnl --------------------------------------------------------------------------
@@ -737,120 +727,21 @@ dnl --------------------------------------------------------------------------
 dnl which Python version are we going to use?
 PYTHON_VER=
 
-dnl Check for Python headers first: we need this for both dynamic and static
-dnl linking
-case "$USE_PYTHON" in
-static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-	for ver in 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.5; do
-	    M_CHECK_MYHEADER_VER(
-		Python.h,
-		$ver,
-		[ \
-		    $prefix/include/python$ver \
-		    /usr/include/python$ver \
-		    /usr/local/include/python$ver \
-		    /System/Library/Frameworks/Python.framework/Versions/$ver/include/python$ver \
-		],
-		[
-		    PYTHON_VER=$ver
-		    break
-		]
-	    )
-	done
-	if test "x$PYTHON_VER" = "x"; then
+if test "$USE_PYTHON" = 1; then
+    PKG_CHECK_MODULES(PYTHON, [python2],
+	[
+	    CXXFLAGS="$PYTHON_CFLAGS $CXXFLAGS"
+	    PYTHON_VER=`$PKG_CONFIG --modversion python2`
+	],
+	[
 	    USE_PYTHON=0
-	fi
-	;;
-
-none|0)
-	USE_PYTHON=0
-	;;
-
-*)
-	USE_PYTHON=0
-	AC_MSG_WARN(Unrecognized --with-python option value.)
-	;;
-esac
-
-dnl now check for the Python lib but only if linking statically
-case "$USE_PYTHON" in
-dynamic|Dynamic|DYNAMIC)
-	if test "$USE_MAC" = 1; then
-	    AC_MSG_ERROR([Dynamic Python loading is not supported under Mac OS])
-	fi
-	AC_DEFINE(USE_PYTHON_DYNAMIC)
-	;;
-
-static|Static|STATIC|1)
-	if test "$USE_MAC" = 1; then
-	    PYTHON_LIBS="-framework Python"
-	    AC_CACHE_CHECK(if we can link with Python framework,
-			   m_cv_framework_python,
-			   [
-			    LIBS_OLD=$LIBS
-			    LIBS="$LIBS $PYTHON_LIBS"
-			    AC_TRY_LINK([#include "python.h"],
-					[Py_Initialize();],
-					m_cv_framework_python=yes,
-					m_cv_framework_python=no)
-			    LIBS="$LIBS_OLD"
-			   ])
-	    if test "$m_cv_framework_python" != "yes"; then
-		PYTHON_LIBS=""
-	    fi
-	fi
-
-	if test "x$PYTHON_LIBS" = "x"; then
-	    M_CHECK_MYLIB(python$PYTHON_VER, main,
-	    [ \
-		$prefix/lib \
-		$prefix/lib/python$PYTHON_VER \
-		$prefix/lib/python$PYTHON_VER/config \
-		/usr/lib \
-		/usr/lib/python$PYTHON_VER \
-		/usr/lib/python$PYTHON_VER/config \
-		/usr/local/lib \
-		/usr/local/lib/python$PYTHON_VER \
-		/usr/local/lib/python$PYTHON_VER/config \
-	    ],
-	    [
-		VARNAME="libpath_python`echo $PYTHON_VER | sed 's/\./_/'`_main"
-		PYTHON_LIBS="`eval echo $\`echo $VARNAME\`` -lpython$PYTHON_VER"
-	    ],
-	    [
-		USE_PYTHON=0
-	    ])
-	    if test "$USE_PYTHON" != 0; then
-		dnl extra libs required by python on freebsd
-		case "$OSTYPE" in freebsd* | FreeBSD*)
-		    PYTHON_LIBS="-lreadline $PYTHON_LIBS"
-		    ;;
-		esac
-
-		dnl Python2 uses forkpty() and openpty() which are not in libc
-		dnl under Linux but in libutil
-		if test "$PYTHON_VER" != "1.5"; then
-		    AC_CHECK_FUNC(openpty,,
-			    AC_CHECK_LIB(util,openpty,
-				PYTHON_LIBS="-lutil $PYTHON_LIBS"))
-		fi
-	    fi
-	fi
-	;;
-
-0)
-	;;
-
-*)
-	AC_MSG_WARN(configure logic error, please report this bug)
-	;;
-esac
+	]
+    )
+fi
 
 case "$USE_PYTHON" in
 0)	MAKE_USE_PYTHON=''
 	AC_MSG_WARN([Mahogany will be built without embedded Python interpreter])
-	PYTHON_LIBS=''
-	PYTHON_VER=""
 	;;
 
 *)	AC_DEFINE(USE_PYTHON)
