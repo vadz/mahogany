@@ -173,7 +173,6 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 #ifdef OS_UNIX
    if(! loaded) // try to use imageMagick to convert image to another format:
    {
-      String oldfilename = filename;
       String tempfile = filename;
       int format = READ_APPCONFIG(MP_TMPGFXFORMAT);
       if((format < 0 || format > NUMBER_OF_FORMATS)

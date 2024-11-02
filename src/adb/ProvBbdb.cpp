@@ -474,8 +474,6 @@ BbdbEntry::ReadListOfVectors(String *string)
    StringListListList vlist;
    StringListList     slist;
 
-   String        str;
-
    if(! ReadToken('(', string))
    {
       ReadNil(string);

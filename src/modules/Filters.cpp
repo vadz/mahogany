@@ -1878,7 +1878,6 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
    if ( !msg )
       return false;
 
-   wxArrayString params;
    if ( args->Count() != 1 )
       return 0;
 

@@ -238,7 +238,6 @@ bool wxVCardObject::GetValue(unsigned long *val) const
 
 bool wxVCardObject::GetNamedPropValue(const char *name, wxString *val) const
 {
-    wxString value;
     wxVCardObject *vcObj = GetProperty(wxConvertMB2WX(name));
     if ( vcObj )
     {

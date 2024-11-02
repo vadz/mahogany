@@ -5254,7 +5254,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 
       m_TicketList->Remove(t);
 
-      String msg;
       switch ( result->GetOperation() )
       {
          case ASMailFolder::Op_GetMessage:

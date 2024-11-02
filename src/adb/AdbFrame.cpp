@@ -1703,7 +1703,7 @@ ask_name:
   }
 
   // prepare strings for diagnostic messages
-  wxString strWhere, strGroup = group->GetWhere();
+  wxString strWhere = group->GetWhere();
   wxString strWhat = m_bLastNewWasGroup ? _("group") : _("entry");
 
   // first check that it doesn't already exist

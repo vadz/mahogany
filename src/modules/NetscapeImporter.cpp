@@ -1063,7 +1063,6 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
   wxStringTokenizer tkz;
   wxString varName;
   wxString value;
-  wxString msg;
   size_t nLines = file.GetLineCount();
 
 
@@ -1243,7 +1242,6 @@ bool MNetscapeImporter::ImportFolderSettings ( MyHashTable& tbl )
    return FALSE;
 
   bool tmpBool = FALSE;
-  wxString lstr;
 
   // pref says not to check for new mail, then set to a very large number
   // otherwise leave it as set.

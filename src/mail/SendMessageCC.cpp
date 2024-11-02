@@ -646,8 +646,7 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
 
    // next deal with the remaining headers
    String name,
-          value,
-          nameUpper;
+          value;
    HeaderIterator hdrIter = message->GetHeaderIterator();
    while ( hdrIter.GetNext(&name, &value) )
    {

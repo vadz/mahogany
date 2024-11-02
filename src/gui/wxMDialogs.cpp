@@ -577,7 +577,7 @@ MDialog_FatalErrorMessage(const wxString& message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent, wxString(M_TITLE_PREFIX)+title,true);
+   MDialog_ErrorMessage(msg,parent, wxString(M_TITLE_PREFIX)+title,true);
    mApplication->Exit();
 }
 

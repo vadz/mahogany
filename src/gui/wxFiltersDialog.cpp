@@ -2305,7 +2305,6 @@ void wxFolderFiltersDialog::OnAddButton(wxCommandEvent& event)
 {
    if ( event.GetEventObject() == m_btnAdd )
    {
-      wxArrayString allFiltersOld = Profile::GetAllFilters();
       String name = CreateNewFilter(this);
       if ( !name.empty() )
       {
