@@ -2004,7 +2004,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// colour for unread messages
 #define   MP_FVIEW_UNREADCOLOUR_DEFVAL      "blue"
 /// colour for flagged messages
-#define   MP_FVIEW_FLAGGEDCOLOUR_DEFVAL      "purple"
+#define   MP_FVIEW_FLAGGEDCOLOUR_DEFVAL      "magenta"
 /// automatically select next unread message after finishing the current one
 #define MP_FVIEW_AUTONEXT_UNREAD_MSG_DEFVAL 1L
 /// automatically select next unread folder after finishing the current one
