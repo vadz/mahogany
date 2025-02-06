@@ -117,6 +117,13 @@ MIME::Encoding MIME::GetEncodingForFontEncoding(wxFontEncoding enc)
 // decoding
 // ----------------------------------------------------------------------------
 
+// Local wrapper around public function taking char* and length.
+static
+String DecodeString(const std::string& s, wxFontEncoding enc)
+{
+   return MIME::DecodeText(s.data(), s.length(), enc);
+}
+
 /*
    See RFC 2047 for the description of the encodings used in the mail headers.
    Briefly, "encoded words" can be inserted which have the form of
@@ -135,10 +142,25 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
    // we don't enforce the sanity checks on charset and encoding - should we?
    // const char *specials = "()<>@,;:\\\"[].?=";
 
-   // there can be words in different encodings inside the same header so this
-   // variable doesn't really make sense but in practice only one encoding will
-   // be used in the entire header
-   wxFontEncoding encodingHeader = wxFONTENCODING_SYSTEM;
+   // encoding of the previous word or wxFONTENCODING_SYSTEM if it wasn't
+   // encoded (or there wasn't any previous word at all yet)
+   wxFontEncoding encodingLastWord = wxFONTENCODING_SYSTEM;
+
+   // the not yet decoded text using encodingLastWord, we'll convert it from
+   // this encoding all at once when we can be sure that there is nothing
+   // following it any more
+   //
+   // notice that this is more than just an optimization: RFC 2047 encoding can
+   // separate bytes that are part of the same multibyte characters, e.g. if
+   // the string is sufficiently long and needs to be wrapped it's perfectly
+   // possible that the leading byte of UTF-8 encoding is part of one encoded
+   // word while the rest of them are in the other one and so converting each
+   // of them from UTF-8 on their own wouldn't work, but combining them and
+   // only converting both at once would
+   std::string textLastWord;
+
+   if ( pEncoding )
+      *pEncoding = wxFONTENCODING_SYSTEM;
 
    // if the header starts with an encoded word, preceding whitespace must be
    // ignored, so the flag must be set to true initially
@@ -197,19 +219,20 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             wxLogDebug(_T("Unrecognized charset name \"%s\""), csName.mb_str());
          }
 
-         // this is not a problem in Unicode build
-#if !wxUSE_UNICODE
-         if ( encodingHeader != wxFONTENCODING_SYSTEM &&
-               encodingHeader != encodingWord )
+         if ( encodingWord != encodingLastWord )
          {
-            // this is a bug (well, missing feature) in ANSI build of Mahogany
-            wxLogDebug(_T("This header contains encoded words with different ")
-                       _T("encodings and won't be rendered correctly."));
+            if ( encodingLastWord != wxFONTENCODING_SYSTEM )
+            {
+               // The last word must be complete now, decode it.
+               out += DecodeString(textLastWord, encodingLastWord);
+            }
+
+            encodingLastWord = encodingWord;
+            textLastWord.clear();
+
+            if ( pEncoding )
+               *pEncoding = encodingWord;
          }
-#endif // !wxUSE_UNICODE
-
-         encodingHeader = encodingWord;
-
 
          // get the encoding in RFC 2047 sense
          enum
@@ -269,13 +292,15 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          p += 2; // skip "Q?" or "B?"
 
          // get the encoded text
+         std::string encWord;
          bool hasUnderscore = false;
-         const wxString::const_iterator encTextStart = p;
          while ( p != last && (*p != '?' || *(p + 1) != '=') )
          {
             // this is needed for QP hack below
             if ( *p == '_' )
                hasUnderscore = true;
+
+            encWord += *p;
 
             ++p;
          }
@@ -289,23 +314,19 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             break;
          }
 
-         // convert the encoded word to char[] buffer for c-client
-         wxCharBuffer encWord(wxString(encTextStart, p).To8BitData());
-
          // skip '=' following '?'
          ++p;
 
-         String textDecoded;
-         if ( encWord )
+         if ( !encWord.empty() )
          {
-            const unsigned long lenEncWord = strlen(encWord);
+            const unsigned long lenEncWord = encWord.length();
 
             // now decode the text using c-client functions
             unsigned long len;
             void *text;
             if ( enc2047 == Encoding_Base64 )
             {
-               text = rfc822_base64(UCHAR_CCAST(encWord), lenEncWord, &len);
+               text = rfc822_base64(UCHAR_CCAST(encWord.data()), lenEncWord, &len);
             }
             else // QP
             {
@@ -316,73 +337,25 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
                // standard-conforming
                if ( hasUnderscore )
                {
-                  for ( char *pc = encWord.data(); *pc; ++pc )
+                  for ( auto& c : encWord )
                   {
-                     if ( *pc == '_' )
-                        *pc = ' ';
+                     if ( c == '_' )
+                        c = ' ';
                   }
                }
 
-               text = rfc822_qprint(UCHAR_CCAST(encWord), lenEncWord, &len);
+               text = rfc822_qprint(UCHAR_CCAST(encWord.data()), lenEncWord, &len);
             }
 
             if ( text )
             {
                const char * const ctext = static_cast<char *>(text);
 
-               if ( encodingWord == wxFONTENCODING_DEFAULT )
-               {
-                  // CharsetToEncoding() returns this for US-ASCII but
-                  // wxCSConv() doesn't accept it, so handle it manually (we
-                  // also avoid wxString::FromAscii() because it asserts if the
-                  // string contains non-ASCII characters, but this can happen,
-                  // after all we're using untrusted input).
-                  textDecoded.reserve(len);
-                  for (unsigned long n = 0; n < len; ++n)
-                  {
-                     const unsigned char c = ctext[n];
-                     if ( c >= 0x80 )
-                     {
-                        wxLogDebug(wxS("Invalid character 0x%x "
-                                       "in ASCII-encoded word \"%s\""),
-                                   c, in);
-                     }
-                     else
-                     {
-                        textDecoded += static_cast<char>(c);
-                     }
-                  }
-               }
-               else // real conversion needed
-               {
-                  textDecoded = wxString(ctext, wxCSConv(encodingWord), len);
-               }
+               textLastWord.append(ctext, ctext + len);
 
                fs_give(&text);
             }
          }
-
-         if ( textDecoded.empty() )
-         {
-            // if decoding failed it is probably better to show undecoded
-            // text than nothing at all
-            textDecoded = wxString(encWordStart, p + 1);
-         }
-
-         // normally we leave the (8 bit) string as is and remember its
-         // encoding so that we may choose the font for displaying it
-         // correctly, but in case of UTF-7/8 we really need to transform it
-         // here as we don't have any UTF-7/8 fonts, so we should display a
-         // different string
-#if !wxUSE_UNICODE
-         if ( encodingHeader == wxFONTENCODING_UTF7 ||
-                  encodingHeader == wxFONTENCODING_UTF8 )
-         {
-            encodingHeader = ConvertUTFToMB(&textDecoded, encodingHeader);
-         }
-#endif // !wxUSE_UNICODE
-
-         out += textDecoded;
 
          // forget the space before this encoded word, it must be ignored
          space.clear();
@@ -398,6 +371,15 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
       }
       else // just another normal char
       {
+         // the last word won't be continued any more, so decode it, if any
+         if ( encodingLastWord != wxFONTENCODING_SYSTEM )
+         {
+            out += DecodeString(textLastWord, encodingLastWord);
+
+            encodingLastWord = wxFONTENCODING_SYSTEM;
+            textLastWord.clear();
+         }
+
          // if we got any delayed whitespace (see above), flush it now
          if ( !space.empty() )
          {
@@ -411,8 +393,9 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
       }
    }
 
-   if ( pEncoding )
-      *pEncoding = encodingHeader;
+   // decode anything that remains
+   if ( encodingLastWord != wxFONTENCODING_SYSTEM )
+      out += DecodeString(textLastWord, encodingLastWord);
 
    return out;
 }
@@ -670,15 +653,15 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
 
 String MIME::DecodeText(const char *p, size_t len, wxFontEncoding enc)
 {
-   // Special case of using UTF-8: it often happens that a message encoded in
-   // UTF-8 has some trailer with Latin-1 appended to it. In this case, try to
-   // recover as much of UTF-8 text as possible.
-   if ( enc == wxFONTENCODING_UTF8 )
-   {
-      return String(p, wxMBConvUTF8(wxMBConvUTF8::MAP_INVALID_UTF8_TO_PUA), len);
-   }
-   else
-   {
-      return String(p, wxCSConv(enc), len);
-   }
+   // Use always successful conversion from UTF-8 as fallback because it's
+   // better to return some garbage (which could, hopefully, contain readable
+   // parts of text) than nothing at all.
+   String s;
+   if ( enc != wxFONTENCODING_UTF8 )
+      s = String(p, wxCSConv(enc), len);
+
+   if ( s.empty() )
+      s = String(p, wxMBConvUTF8(wxMBConvUTF8::MAP_INVALID_UTF8_TO_PUA), len);
+
+   return s;
 }
