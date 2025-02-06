@@ -449,9 +449,9 @@ String MIME::DecodeHeader(const String& in, wxFontEncoding *pEncoding)
 // returns true if the character must be encoded in a MIME header
 //
 // NB: we suppose that any special characters had been already escaped
-static inline bool NeedsEncodingInHeader(wxUChar c)
+static inline bool NeedsEncodingInHeader(unsigned char c)
 {
-   return  c >= 127 || iscntrl(c);
+   return c < 20 || c >= 127;
 }
 
 // return true if the string contains any characters which must be encoded
@@ -459,26 +459,19 @@ static bool NeedsEncoding(const String& in)
 {
    // if input contains "=?", encode it anyhow to avoid generating invalid
    // encoded words
-   if ( in.find(_T("=?")) == wxString::npos )
-   {
-      // only encode the strings which contain the characters unallowed in RFC
-      // 822 headers
-      wxString::const_iterator p;
-      const wxString::const_iterator end = in.end();
-      for ( p = in.begin(); p != end; ++p )
-      {
-         if ( NeedsEncodingInHeader(*p) )
-            break;
-      }
+   if ( in.find(_T("=?")) != wxString::npos )
+      return true;
 
-      if ( p == end )
-      {
-         // string has only valid chars, don't encode
-         return false;
-      }
+   // only encode the strings which contain the characters unallowed in RFC
+   // 822 headers
+   for ( auto c : in )
+   {
+      if ( !c.IsAscii() || NeedsEncodingInHeader(c.GetValue()) )
+         return true;
    }
 
-   return true;
+   // string has only valid chars, don't encode
+   return false;
 }
 
 // encode the given text unconditionally, i.e. without checking if it must be
@@ -503,7 +496,7 @@ EncodeText(const String& in,
    String out;
    out.reserve(csName.length() + strlen(buf) + 7 /* for =?...?X?...?= */);
 
-   const char *s = buf;
+   auto *s = reinterpret_cast<const unsigned char*>(buf.data());
    while ( *s )
    {
       // if we wrapped, insert a line break
@@ -523,11 +516,11 @@ EncodeText(const String& in,
       {
          for ( ; s[len]; len++ )
          {
-            const char c = s[len];
+            const unsigned char c = s[len];
 
             // normal characters stand for themselves in QP, the encoded ones
             // take 3 positions (=XX)
-            lenRemaining -= (NeedsEncodingInHeader(c) || strchr(" \t=?", c))
+            lenRemaining -= (NeedsEncodingInHeader(c) || strchr(" =?", c))
                               ? 3 : 1;
 
             if ( lenRemaining <= 0 )
@@ -560,7 +553,7 @@ EncodeText(const String& in,
       }
 
       // do encode this word
-      unsigned char *text = (unsigned char *)s; // cast for cclient
+      unsigned char *text = const_cast<unsigned char*>(s); // cast for cclient
 
       // length of the encoded text and the text itself
       unsigned long lenEnc;
