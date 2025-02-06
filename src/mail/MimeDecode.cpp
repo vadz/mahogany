@@ -520,7 +520,7 @@ EncodeText(const String& in,
 
             // normal characters stand for themselves in QP, the encoded ones
             // take 3 positions (=XX)
-            lenRemaining -= (NeedsEncodingInHeader(c) || strchr(" =?", c))
+            lenRemaining -= (NeedsEncodingInHeader(c) || strchr("=?", c))
                               ? 3 : 1;
 
             if ( lenRemaining <= 0 )
@@ -591,7 +591,7 @@ EncodeText(const String& in,
             switch ( *p )
             {
                case ' ':
-                  encword2 += _T("=20");
+                  encword2 += '_'; // More readable than =20
                   break;
 
                case '\t':
