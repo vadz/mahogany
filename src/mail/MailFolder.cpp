@@ -1117,10 +1117,7 @@ MailFolder::ReplyMessage(Message *msg,
    {
       String references = headersOrig[1].Trim(TRUE).Trim(FALSE);
       if ( !references.empty() )
-      {
-         // continue "References" header on the next line
-         references += _T("\015\012 ");
-      }
+         references += ' ';
       references += messageid;
 
       cv->AddHeaderEntry(_T("References"), references);

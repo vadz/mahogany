@@ -5519,10 +5519,7 @@ bool wxComposeView::ConfigureInReplyTo()
                // if replacement failed (or if we had nothing to replace),
                // just add new message id
                if ( !ref.empty() )
-               {
-                  // continue "References" header on the next line
-                  ref += _T("\015\012 ");
-               }
+                  ref += ' ';
 
                ref += messageIdNew;
             }
