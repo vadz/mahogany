@@ -800,20 +800,12 @@ public:
 
       // AddHeaderEntry("In-Reply-To") is called after composer creation, so we
       // want to update our state a bit later
-      Connect(wxEVT_IDLE, wxIdleEventHandler(IsReplyButton::OnIdle));
+      CallAfter(&ToggleIconButton::Update);
    }
 
 private:
    virtual void DoHandleClick() { m_composer->ConfigureInReplyTo(); }
    virtual bool DoGetValue() const { return m_composer->IsInReplyTo(); }
-
-   void OnIdle(wxIdleEvent& /* event */)
-   {
-      Disconnect(wxID_ANY, wxEVT_IDLE,
-                     wxIdleEventHandler(IsReplyButton::OnIdle));
-
-      Update();
-   }
 
    DECLARE_NO_COPY_CLASS(IsReplyButton)
 };
