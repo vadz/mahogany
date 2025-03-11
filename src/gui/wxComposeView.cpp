@@ -5384,7 +5384,7 @@ wxComposeView::AddHeaderEntry(const String& name, const String& value)
          i != end;
          ++i, ++j )
    {
-      if ( *i == name )
+      if ( wxStricmp(*i, name) == 0 )
       {
          if ( value.empty() )
          {
@@ -5421,7 +5421,7 @@ bool wxComposeView::IsInReplyTo() const
                               end = m_extraHeadersNames.end();
    for ( i = m_extraHeadersNames.begin(); i != end; ++i )
    {
-      if ( *i == "In-Reply-To" )
+      if ( wxStricmp(*i, "In-Reply-To") == 0 )
          return true;
    }
 
@@ -5435,7 +5435,7 @@ bool wxComposeView::ConfigureInReplyTo()
    for ( i = m_extraHeadersNames.begin(),
          j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
    {
-      if ( *i == "In-Reply-To" )
+      if ( wxStricmp(*i, "In-Reply-To") == 0 )
          break;
    }
 
@@ -5458,7 +5458,7 @@ bool wxComposeView::ConfigureInReplyTo()
             end = m_extraHeadersNames.end(),
             j = m_extraHeadersValues.begin() ; i != end; ++i, ++j )
       {
-         if ( *i == "References" )
+         if ( wxStricmp(*i, "References") == 0 )
          {
             String ref = *j;
             ref.Trim(true).Trim(false);
@@ -5508,7 +5508,7 @@ bool wxComposeView::ConfigureInReplyTo()
             end = m_extraHeadersNames.begin(),
             j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
       {
-         if ( *i == "References" )
+         if ( wxStricmp(*i, "References") == 0 )
          {
             String ref = *j;
 
