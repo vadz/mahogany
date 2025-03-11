@@ -432,7 +432,7 @@ String MIME::DecodeHeader(const String& in, wxFontEncoding *pEncoding)
 // returns true if the character must be encoded in a MIME header
 //
 // NB: we suppose that any special characters had been already escaped
-static inline bool NeedsEncodingInHeader(unsigned char c)
+static inline bool NeedsEncodingInHeader(unsigned c)
 {
    return c < 20 || c >= 127;
 }
@@ -449,7 +449,7 @@ static bool NeedsEncoding(const String& in)
    // 822 headers
    for ( auto c : in )
    {
-      if ( !c.IsAscii() || NeedsEncodingInHeader(c.GetValue()) )
+      if ( NeedsEncodingInHeader(c.GetValue()) )
          return true;
    }
 
