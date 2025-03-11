@@ -628,6 +628,14 @@ END_EVENT_TABLE()
 
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
            : wxMFrame(iname,parent)
+#if wxCHECK_VERSION(3, 3, 0)
+             // We could wait until we open any network connections before
+             // doing this, but it does no real harm to initialize it
+             // immediately.
+             , m_powerDelaySleep(wxPOWER_RESOURCE_SYSTEM,
+                                 _("Close network connections"),
+                                 wxPOWER_DELAY)
+#endif // wx 3.3.0+
 {
    // init members
    m_searchData = NULL;

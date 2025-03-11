@@ -128,6 +128,10 @@ protected:
 
 
 #ifdef wxHAS_POWER_EVENTS
+#if wxCHECK_VERSION(3, 3, 0)
+   wxPowerResourceBlocker m_powerDelaySleep;
+#endif // wx 3.3.0+
+
    // the list of folders which were opened when we were suspended
    typedef std::vector<MailFolder*> MailFolders;
    MailFolders m_foldersToResume;
