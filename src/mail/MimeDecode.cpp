@@ -583,23 +583,18 @@ EncodeTextBase64(const char* in, const String& csName)
       if ( !out.empty() )
          out += "\r\n  ";
 
-      // how many characters may we put in this encoded word?
-      size_t len = 0;
-
-      // take into account the length of "=?charset?...?="
-      int lenRemaining = RFC2047_MAXWORD_LEN - overhead;
-
       // rfc822_binary() splits lines after 60 characters so don't make
       // chunks longer than this as the base64-encoded headers can't have
       // EOLs in them
       static const int CCLIENT_MAX_BASE64_LEN = 60;
 
-      if ( lenRemaining > CCLIENT_MAX_BASE64_LEN )
-         lenRemaining = CCLIENT_MAX_BASE64_LEN;
+      // but if the charset name is sufficiently long, we may need to make them
+      // shorter than this
+      size_t lenRemaining = wxMin(CCLIENT_MAX_BASE64_LEN,
+                                  RFC2047_MAXWORD_LEN - overhead);
 
-      // we can calculate how many characters we may put into lenRemaining
-      // directly
-      len = (lenRemaining / 4) * 3;
+      // we can calculate how many characters we may put on one line directly
+      size_t len = (lenRemaining / 4) * 3;
 
       // but not more than what we have
       size_t lenMax = strlen(reinterpret_cast<const char*>(s));
@@ -613,9 +608,8 @@ EncodeTextBase64(const char* in, const String& csName)
 
       // length of the encoded text and the text itself
       unsigned long lenEnc;
-      unsigned char *textEnc;
+      unsigned char *textEnc = rfc822_binary(text, len, &lenEnc);
 
-      textEnc = rfc822_binary(text, len, &lenEnc);
       while ( textEnc[lenEnc - 2] == '\r' && textEnc[lenEnc - 1] == '\n' )
       {
          // discard eol which we don't need in the header
