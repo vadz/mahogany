@@ -5,6 +5,8 @@ typedef wxString String;
 
 #include "mail/MimeDecode.h"
 
+wxGCC_WARNING_SUPPRESS(write-strings)
+
 extern "C" {
 
 void *fs_get (size_t size) { return malloc(size); }
@@ -324,6 +326,8 @@ unsigned char *rfc822_8bit (unsigned char *src,unsigned long srcl,
   return ret;
 }
 }
+
+wxGCC_WARNING_RESTORE(write-strings)
 
 int main()
 {
