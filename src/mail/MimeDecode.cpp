@@ -525,7 +525,7 @@ EncodeText(const String& in,
 
          // we can calculate how many characters we may put into lenRemaining
          // directly
-         len = (lenRemaining / 4) * 3 - 2;
+         len = (lenRemaining / 4) * 3;
 
          // but not more than what we have
          size_t lenMax = strlen(reinterpret_cast<const char*>(s));
