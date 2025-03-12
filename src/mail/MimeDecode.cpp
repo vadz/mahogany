@@ -528,7 +528,7 @@ EncodeText(const String& in,
          len = (lenRemaining / 4) * 3 - 2;
 
          // but not more than what we have
-         size_t lenMax = wxStrlen(s);
+         size_t lenMax = strlen(reinterpret_cast<const char*>(s));
          if ( len > lenMax )
          {
             len = lenMax;
