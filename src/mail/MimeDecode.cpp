@@ -461,25 +461,17 @@ static bool NeedsEncoding(const String& in)
 // encoded (this is supposed to be done in the caller) and using the specified
 // encodings and charset (which are supposed to be detected by the caller too)
 static String
-EncodeText(const String& in,
+EncodeText(const char* in,
            wxFontEncoding enc,
            MIME::Encoding enc2047,
            const String& csName)
 {
    // encode the word splitting it in the chunks such that they will be no
    // longer than 75 characters each
-   wxCharBuffer buf(in.mb_str(wxCSConv(enc)));
-   if ( !buf )
-   {
-      // if the header can't be encoded using the given encoding, use UTF-8
-      // which always works
-      buf = in.utf8_str();
-   }
-
    String out;
-   out.reserve(csName.length() + strlen(buf) + 7 /* for =?...?X?...?= */);
+   out.reserve(csName.length() + strlen(in) + 7 /* for =?...?X?...?= */);
 
-   auto *s = reinterpret_cast<const unsigned char*>(buf.data());
+   auto *s = reinterpret_cast<const unsigned char*>(in);
    while ( *s )
    {
       // if we wrapped, insert a line break
@@ -648,7 +640,18 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
       csName = _T("UNKNOWN");
    }
 
-   return EncodeText(in, enc, enc2047, csName).ToAscii();
+   wxCharBuffer inbuf;
+   if ( enc != wxFONTENCODING_UTF8 )
+      inbuf = in.mb_str(wxCSConv(enc));
+
+   if ( !inbuf )
+   {
+      // if the header can't be encoded using the given encoding, use UTF-8
+      // which always works
+      inbuf = in.utf8_str();
+   }
+
+   return EncodeText(inbuf.data(), enc, enc2047, csName).ToAscii();
 }
 
 String MIME::DecodeText(const char *p, size_t len, wxFontEncoding enc)
