@@ -462,7 +462,6 @@ static bool NeedsEncoding(const String& in)
 // encodings and charset (which are supposed to be detected by the caller too)
 static String
 EncodeText(const char* in,
-           wxFontEncoding enc,
            MIME::Encoding enc2047,
            const String& csName)
 {
@@ -651,7 +650,7 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
       inbuf = in.utf8_str();
    }
 
-   return EncodeText(inbuf.data(), enc, enc2047, csName).ToAscii();
+   return EncodeText(inbuf.data(), enc2047, csName).ToAscii();
 }
 
 String MIME::DecodeText(const char *p, size_t len, wxFontEncoding enc)
