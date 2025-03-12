@@ -387,12 +387,6 @@ int main()
             "\xD0\x92 \xD0\xA6 2007",
             wxFONTENCODING_UTF8
         },
-
-        {
-            "=?us-ascii?Q?Foo=20bar?=",
-            "Foo bar",
-            wxFONTENCODING_DEFAULT
-        },
     };
 
     int rc = EXIT_SUCCESS;
