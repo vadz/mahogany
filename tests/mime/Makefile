@@ -1,6 +1,9 @@
-WX_CONFIG := /usr/local/src/build/wx-gtkud/wx-config
+WX_CONFIG := wx-config
 
-top_builddir := /home/zeitlin/build/M-gtkud
+ifndef top_builddir
+$(error Define top_builddir to point to build directory on make command line)
+endif
+
 top_srcdir := ../..
 
 CXXFLAGS := -I$(top_srcdir)/include `$(WX_CONFIG) --cxxflags` -g
