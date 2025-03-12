@@ -457,14 +457,20 @@ static bool NeedsEncoding(const String& in)
    return false;
 }
 
+// Some constants used by the encoding functions below.
+static constexpr size_t RFC2047_MAXWORD_LEN = 75;
+static constexpr size_t MIME_WORD_OVERHEAD = 7; // =?...?X?...?=
+
 // encode the text in the charset with the given name in QP
 static String
 EncodeTextQP(const char* in, const String& csName)
 {
    // encode the word splitting it in the chunks such that they will be no
-   // longer than 75 characters each
+   // longer than maximum length each
+   const size_t overhead = MIME_WORD_OVERHEAD + csName.length();
+
    String out;
-   out.reserve(csName.length() + strlen(in) + 7 /* for =?...?X?...?= */);
+   out.reserve(strlen(in) + overhead);
 
    auto *s = reinterpret_cast<const unsigned char*>(in);
    while ( *s )
@@ -473,13 +479,11 @@ EncodeTextQP(const char* in, const String& csName)
       if ( !out.empty() )
          out += "\r\n  ";
 
-      static const size_t RFC2047_MAXWORD_LEN = 75;
-
       // how many characters may we put in this encoded word?
       size_t len = 0;
 
       // take into account the length of "=?charset?...?="
-      int lenRemaining = RFC2047_MAXWORD_LEN - (5 + csName.length());
+      int lenRemaining = RFC2047_MAXWORD_LEN - overhead;
 
       // for QP we need to examine all characters
       for ( ; s[len]; len++ )
@@ -565,10 +569,12 @@ EncodeTextQP(const char* in, const String& csName)
 static String
 EncodeTextBase64(const char* in, const String& csName)
 {
+   const size_t overhead = MIME_WORD_OVERHEAD + csName.length();
+
    // encode the word splitting it in the chunks such that they will be no
-   // longer than 75 characters each
+   // longer than maximum length each
    String out;
-   out.reserve(csName.length() + strlen(in) + 7 /* for =?...?X?...?= */);
+   out.reserve(strlen(in) + overhead);
 
    auto *s = reinterpret_cast<const unsigned char*>(in);
    while ( *s )
@@ -577,13 +583,11 @@ EncodeTextBase64(const char* in, const String& csName)
       if ( !out.empty() )
          out += "\r\n  ";
 
-      static const size_t RFC2047_MAXWORD_LEN = 75;
-
       // how many characters may we put in this encoded word?
       size_t len = 0;
 
       // take into account the length of "=?charset?...?="
-      int lenRemaining = RFC2047_MAXWORD_LEN - (5 + csName.length());
+      int lenRemaining = RFC2047_MAXWORD_LEN - overhead;
 
       // rfc822_binary() splits lines after 60 characters so don't make
       // chunks longer than this as the base64-encoded headers can't have
