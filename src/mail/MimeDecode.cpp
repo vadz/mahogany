@@ -457,13 +457,9 @@ static bool NeedsEncoding(const String& in)
    return false;
 }
 
-// encode the given text unconditionally, i.e. without checking if it must be
-// encoded (this is supposed to be done in the caller) and using the specified
-// encodings and charset (which are supposed to be detected by the caller too)
+// encode the text in the charset with the given name in QP
 static String
-EncodeText(const char* in,
-           MIME::Encoding enc2047,
-           const String& csName)
+EncodeTextQP(const char* in, const String& csName)
 {
    // encode the word splitting it in the chunks such that they will be no
    // longer than 75 characters each
@@ -486,43 +482,19 @@ EncodeText(const char* in,
       int lenRemaining = RFC2047_MAXWORD_LEN - (5 + csName.length());
 
       // for QP we need to examine all characters
-      if ( enc2047 == MIME::Encoding_QuotedPrintable )
+      for ( ; s[len]; len++ )
       {
-         for ( ; s[len]; len++ )
+         const unsigned char c = s[len];
+
+         // normal characters stand for themselves in QP, the encoded ones
+         // take 3 positions (=XX)
+         lenRemaining -= (NeedsEncodingInHeader(c) || strchr("=?", c))
+                           ? 3 : 1;
+
+         if ( lenRemaining <= 0 )
          {
-            const unsigned char c = s[len];
-
-            // normal characters stand for themselves in QP, the encoded ones
-            // take 3 positions (=XX)
-            lenRemaining -= (NeedsEncodingInHeader(c) || strchr("=?", c))
-                              ? 3 : 1;
-
-            if ( lenRemaining <= 0 )
-            {
-               // can't put any more chars into this word
-               break;
-            }
-         }
-      }
-      else // Base64
-      {
-         // rfc822_binary() splits lines after 60 characters so don't make
-         // chunks longer than this as the base64-encoded headers can't have
-         // EOLs in them
-         static const int CCLIENT_MAX_BASE64_LEN = 60;
-
-         if ( lenRemaining > CCLIENT_MAX_BASE64_LEN )
-            lenRemaining = CCLIENT_MAX_BASE64_LEN;
-
-         // we can calculate how many characters we may put into lenRemaining
-         // directly
-         len = (lenRemaining / 4) * 3;
-
-         // but not more than what we have
-         size_t lenMax = strlen(reinterpret_cast<const char*>(s));
-         if ( len > lenMax )
-         {
-            len = lenMax;
+            // can't put any more chars into this word
+            break;
          }
       }
 
@@ -533,19 +505,7 @@ EncodeText(const char* in,
       unsigned long lenEnc;
       unsigned char *textEnc;
 
-      if ( enc2047 == MIME::Encoding_QuotedPrintable )
-      {
-            textEnc = rfc822_8bit(text, len, &lenEnc);
-      }
-      else // Encoding_Base64
-      {
-            textEnc = rfc822_binary(text, len, &lenEnc);
-            while ( textEnc[lenEnc - 2] == '\r' && textEnc[lenEnc - 1] == '\n' )
-            {
-               // discard eol which we don't need in the header
-               lenEnc -= 2;
-            }
-      }
+      textEnc = rfc822_8bit(text, len, &lenEnc);
 
       // put into string as we might want to do some more replacements...
       String encword(wxString::FromAscii(CHAR_CAST(textEnc), lenEnc));
@@ -554,48 +514,115 @@ EncodeText(const char* in,
       // do it inside the headers
       //
       // we also have to encode '?'s in the headers which are not encoded by it
-      if ( enc2047 == MIME::Encoding_QuotedPrintable )
+      String encword2;
+      encword2.reserve(encword.length());
+
+      bool replaced = false;
+      for ( const wxChar *p = encword.c_str(); *p; p++ )
       {
-         String encword2;
-         encword2.reserve(encword.length());
-
-         bool replaced = false;
-         for ( const wxChar *p = encword.c_str(); *p; p++ )
+         switch ( *p )
          {
-            switch ( *p )
-            {
-               case ' ':
-                  encword2 += '_'; // More readable than =20
-                  break;
+            case ' ':
+               encword2 += '_'; // More readable than =20
+               break;
 
-               case '\t':
-                  encword2 += _T("=09");
-                  break;
+            case '\t':
+               encword2 += _T("=09");
+               break;
 
-               case '?':
-                  encword2 += _T("=3F");
-                  break;
+            case '?':
+               encword2 += _T("=3F");
+               break;
 
-               default:
-                  encword2 += *p;
+            default:
+               encword2 += *p;
 
-                  // skip assignment to replaced below
-                  continue;
-            }
-
-            replaced = true;
+               // skip assignment to replaced below
+               continue;
          }
 
-         if ( replaced )
-         {
-            encword = encword2;
-         }
+         replaced = true;
+      }
+
+      if ( replaced )
+      {
+         encword = encword2;
       }
 
       // append this word to the header
-      out << _T("=?") << csName << _T('?') << (char)enc2047 << _T('?')
-          << encword
-          << _T("?=");
+      out << _T("=?") << csName << _T("?Q?") << encword << _T("?=");
+
+      fs_give((void **)&textEnc);
+
+      // skip the already encoded part
+      s += len;
+   }
+
+   return out;
+}
+
+// same as the function above but use Base64 encoding
+static String
+EncodeTextBase64(const char* in, const String& csName)
+{
+   // encode the word splitting it in the chunks such that they will be no
+   // longer than 75 characters each
+   String out;
+   out.reserve(csName.length() + strlen(in) + 7 /* for =?...?X?...?= */);
+
+   auto *s = reinterpret_cast<const unsigned char*>(in);
+   while ( *s )
+   {
+      // if we wrapped, insert a line break
+      if ( !out.empty() )
+         out += "\r\n  ";
+
+      static const size_t RFC2047_MAXWORD_LEN = 75;
+
+      // how many characters may we put in this encoded word?
+      size_t len = 0;
+
+      // take into account the length of "=?charset?...?="
+      int lenRemaining = RFC2047_MAXWORD_LEN - (5 + csName.length());
+
+      // rfc822_binary() splits lines after 60 characters so don't make
+      // chunks longer than this as the base64-encoded headers can't have
+      // EOLs in them
+      static const int CCLIENT_MAX_BASE64_LEN = 60;
+
+      if ( lenRemaining > CCLIENT_MAX_BASE64_LEN )
+         lenRemaining = CCLIENT_MAX_BASE64_LEN;
+
+      // we can calculate how many characters we may put into lenRemaining
+      // directly
+      len = (lenRemaining / 4) * 3;
+
+      // but not more than what we have
+      size_t lenMax = strlen(reinterpret_cast<const char*>(s));
+      if ( len > lenMax )
+      {
+         len = lenMax;
+      }
+
+      // do encode this word
+      unsigned char *text = const_cast<unsigned char*>(s); // cast for cclient
+
+      // length of the encoded text and the text itself
+      unsigned long lenEnc;
+      unsigned char *textEnc;
+
+      textEnc = rfc822_binary(text, len, &lenEnc);
+      while ( textEnc[lenEnc - 2] == '\r' && textEnc[lenEnc - 1] == '\n' )
+      {
+         // discard eol which we don't need in the header
+         lenEnc -= 2;
+      }
+
+      // put into string as we might want to do some more replacements...
+      String encword(wxString::FromAscii(CHAR_CAST(textEnc), lenEnc));
+
+      // append this word to the header
+      out << _T("=?") << csName << _T("?B?") << encword << _T("?=");
 
       fs_give((void **)&textEnc);
 
@@ -620,16 +647,6 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
       enc = wxFONTENCODING_UTF8;
    }
 
-   // get the encoding in RFC 2047 sense
-   MIME::Encoding enc2047 = MIME::GetEncodingForFontEncoding(enc);
-
-   if ( enc2047 == MIME::Encoding_Unknown )
-   {
-      FAIL_MSG( _T("should have valid MIME encoding") );
-
-      enc2047 = MIME::Encoding_QuotedPrintable;
-   }
-
    // get the name of the charset to use
    String csName = MIME::GetCharsetForFontEncoding(enc);
    if ( csName.empty() )
@@ -650,7 +667,23 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
       inbuf = in.utf8_str();
    }
 
-   return EncodeText(inbuf.data(), enc2047, csName).ToAscii();
+   String out;
+   switch ( MIME::GetEncodingForFontEncoding(enc) )
+   {
+      case MIME::Encoding_Unknown:
+         FAIL_MSG( "using unknown MIME encoding?" );
+         wxFALLTHROUGH;
+
+      case MIME::Encoding_QuotedPrintable:
+         out = EncodeTextQP(inbuf.data(), csName);
+         break;
+
+      case MIME::Encoding_Base64:
+         out = EncodeTextBase64(inbuf.data(), csName);
+         break;
+   }
+
+   return out.ToAscii();
 }
 
 String MIME::DecodeText(const char *p, size_t len, wxFontEncoding enc)
