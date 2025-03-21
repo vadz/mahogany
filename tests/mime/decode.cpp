@@ -358,32 +358,32 @@ int main()
             wxFONTENCODING_KOI8
         },
         {
-            "Ludovic =?ISO-8859-1?Q?P=E9net?= <ludovic@xxx.com>",
-            "Ludovic P\303\251net <ludovic@xxx.com>",
+            "=?ISO-8859-1?Q?Ludovic_P=E9net?=",
+            "Ludovic P\303\251net",
             wxFONTENCODING_ISO8859_1
         },
         {
-            "Ludovic =?UTF-8?Q?P=C3=A9net?= <ludovic@xxx.com>",
-            "Ludovic P\303\251net <ludovic@xxx.com>",
+            "=?UTF-8?Q?Ludovic_P=C3=A9net?=",
+            "Ludovic P\303\251net",
             wxFONTENCODING_UTF8
         },
 
         {
-            "=?UTF-8?Q?=D0=92=D0=B0=D0=B4=D0=B8=D0=BC_"
-            "=D0=A6=D0=B5=D0=B9=D1=82=D0=BB=D0=B8=D0=BD?=",
+            "=?UTF-8?Q?=D0=92=D0=B0=D0=B4=D0=B8=D0=BC_=D0=A6=D0=B5=D0=B9=D1=82=D0=BB?=\r\n"
+            "  =?UTF-8?Q?=D0=B8=D0=BD?=",
             "\xD0\x92\xD0\xB0\xD0\xB4\xD0\xB8\xD0\xBC "
             "\xD0\xA6\xD0\xB5\xD0\xB9\xD1\x82\xD0\xBB\xD0\xB8\xD0\xBD",
             wxFONTENCODING_UTF8
         },
 
         {
-            "2006 =?UTF-8?Q?=D0=92_=D0=A6?= 2007",
+            "=?UTF-8?Q?2006_=D0=92_=D0=A6_2007?=",
             "2006 \xD0\x92 \xD0\xA6 2007",
             wxFONTENCODING_UTF8
         },
 
         {
-            "=?UTF-8?Q?=D0=92_=D0=A6?= 2007",
+            "=?UTF-8?Q?=D0=92_=D0=A6_2007?=",
             "\xD0\x92 \xD0\xA6 2007",
             wxFONTENCODING_UTF8
         },

@@ -465,101 +465,78 @@ static constexpr size_t MIME_WORD_OVERHEAD = 7; // =?...?X?...?=
 static String
 EncodeTextQP(const char* in, const String& csName)
 {
-   // encode the word splitting it in the chunks such that they will be no
+   // encode the text splitting it in the chunks such that they will be no
    // longer than maximum length each
    const size_t overhead = MIME_WORD_OVERHEAD + csName.length();
+
+   const char* const HEX_DIGITS = "0123456789ABCDEF";
 
    String out;
    out.reserve(strlen(in) + overhead);
 
-   auto *s = reinterpret_cast<const unsigned char*>(in);
-   while ( *s )
+   // Each iteration of this loop corresponds to a physical line.
+   while ( *in )
    {
-      // if we wrapped, insert a line break
       if ( !out.empty() )
          out += "\r\n  ";
 
-      // how many characters may we put in this encoded word?
-      size_t len = 0;
+      out += "=?";
+      out += csName;
+      out += "?Q?";
 
-      // take into account the length of "=?charset?...?="
-      int lenRemaining = RFC2047_MAXWORD_LEN - overhead;
-
-      // for QP we need to examine all characters
-      for ( ; s[len]; len++ )
+      // Iterate over the characters that fit into the current line.
+      size_t lineLen = overhead;
+      for ( ;; ++in )
       {
-         const unsigned char c = s[len];
+         const unsigned char c = *in;
 
-         // normal characters stand for themselves in QP, the encoded ones
-         // take 3 positions (=XX)
-         lenRemaining -= (NeedsEncodingInHeader(c) || strchr("=?", c))
-                           ? 3 : 1;
-
-         if ( lenRemaining <= 0 )
-         {
-            // can't put any more chars into this word
+         if ( c == '\0' )
             break;
-         }
-      }
 
-      // do encode this word
-      unsigned char *text = const_cast<unsigned char*>(s); // cast for cclient
-
-      // length of the encoded text and the text itself
-      unsigned long lenEnc;
-      unsigned char *textEnc;
-
-      textEnc = rfc822_8bit(text, len, &lenEnc);
-
-      // put into string as we might want to do some more replacements...
-      String encword(wxString::FromAscii(CHAR_CAST(textEnc), lenEnc));
-
-      // hack: rfc822_8bit() doesn't encode spaces normally but we must
-      // do it inside the headers
-      //
-      // we also have to encode '?'s in the headers which are not encoded by it
-      String encword2;
-      encword2.reserve(encword.length());
-
-      bool replaced = false;
-      for ( const wxChar *p = encword.c_str(); *p; p++ )
-      {
-         switch ( *p )
+         // If this character is 0, we must encode "c" instead.
+         unsigned char unencoded = '\0';
+         switch ( c )
          {
             case ' ':
-               encword2 += '_'; // More readable than =20
+               // Encode spaces as underscores rather than =20, as this is more
+               // readable, even if both are allowed.
+               unencoded = '_';
                break;
 
-            case '\t':
-               encword2 += _T("=09");
-               break;
-
+               // These characters need to be encoded in headers to avoid
+               // clashing with the encoded word syntax. In principle, we could
+               // let them remain unencoded if they don't occur in the same
+               // combination as in the encoded word syntax, but for now keep
+               // things simple and always encode them.
+            case '=':
             case '?':
-               encword2 += _T("=3F");
                break;
 
             default:
-               encword2 += *p;
-
-               // skip assignment to replaced below
-               continue;
+               if ( !NeedsEncodingInHeader(c) )
+                  unencoded = c;
+               break;
          }
 
-         replaced = true;
+         const auto lenNeeded = unencoded ? 1 : 3;
+         if ( lineLen + lenNeeded > RFC2047_MAXWORD_LEN )
+            break;
+
+         if ( unencoded )
+         {
+            out += unencoded;
+         }
+         else
+         {
+            out += '=';
+            out += HEX_DIGITS[c >> 4];
+            out += HEX_DIGITS[c & 0xf];
+         }
+
+         lineLen += lenNeeded;
       }
 
-      if ( replaced )
-      {
-         encword = encword2;
-      }
-
-      // append this word to the header
-      out << _T("=?") << csName << _T("?Q?") << encword << _T("?=");
-
-      fs_give((void **)&textEnc);
-
-      // skip the already encoded part
-      s += len;
+      out += "?=";
    }
 
    return out;
