@@ -5375,8 +5375,26 @@ void wxComposeView::OnSendThreadDone(wxThreadEvent& evt)
 }
 
 void
-wxComposeView::AddHeaderEntry(const String& name, const String& value)
+wxComposeView::AddHeaderEntry(const String& name, const String& valueOrig)
 {
+   // We may need to unfold the header if it contains line folds, we don't want
+   // to have them in the logical header value that we store internally.
+   String value;
+   for ( size_t pos = 0;; )
+   {
+      auto eol = valueOrig.find("\r\n ", pos);
+      if ( eol == String::npos )
+      {
+         value.append(valueOrig, pos, String::npos);
+         break;
+      }
+
+      value.append(valueOrig, pos, eol - pos);
+      value += ' ';
+
+      pos = eol + 3;
+   }
+
    // first check if we don't already have a header with this name
    const StringList::iterator end = m_extraHeadersNames.end();
    for ( StringList::iterator i = m_extraHeadersNames.begin(),
