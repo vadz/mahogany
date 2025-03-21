@@ -5402,7 +5402,7 @@ wxComposeView::AddHeaderEntry(const String& name, const String& value)
 
    // if we didn't find it, add a new one
    m_extraHeadersNames.push_back(name.utf8_string());
-   m_extraHeadersValues.push_back(MIME::EncodeHeader(value).data());
+   m_extraHeadersValues.push_back(MIME::EncodeHeader(value));
 }
 
 bool wxComposeView::IsPGPSigningEnabled() const

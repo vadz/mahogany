@@ -835,12 +835,12 @@ SendMessageCC::SetSubject(const String& subject)
 
    // don't encode the headers of an existing message second time, we want to
    // preserve them as they are
-   wxCharBuffer buf;
+   std::string buf;
    if ( m_cloneOfExisting )
       buf = subject.ToAscii();
    else
       buf = MIME::EncodeHeader(subject, m_encHeaders);
-   m_Envelope->subject = cpystr(buf);
+   m_Envelope->subject = cpystr(buf.c_str());
 }
 
 void
@@ -1331,8 +1331,8 @@ SendMessageCC::Build(bool forStorage)
          continue;
       }
 
-      const wxCharBuffer value(MIME::EncodeHeader(i->m_value));
-      if ( !value )
+      const std::string value(MIME::EncodeHeader(i->m_value));
+      if ( value.empty() )
       {
          wxLogError(_("Invalid value \"%s\" for the custom header \"%s\""),
                     i->m_value.c_str(), i->m_name.c_str());
@@ -1349,7 +1349,7 @@ SendMessageCC::Build(bool forStorage)
       // Conversion to ASCII is safe because HeaderName::IsValid() would have
       // returned false if we had any non-ASCII characters in the name.
       m_headerNames[h] = strutil_strdup(i->m_name.ToAscii());
-      m_headerValues[h] = strutil_strdup(value);
+      m_headerValues[h] = strutil_strdup(value.c_str());
 
       h++;
    }
@@ -1586,7 +1586,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
          }
 
          par->attribute = strdup(name.ToAscii());
-         par->value     = strdup(MIME::EncodeHeader(i->value));
+         par->value     = strdup(MIME::EncodeHeader(i->value).c_str());
          par->next      = lastpar;
          lastpar = par;
       }
@@ -1638,7 +1638,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       {
          PARAMETER *par = mail_newbody_parameter();
          par->attribute = strdup(i->name.ToAscii());
-         par->value     = strdup(MIME::EncodeHeader(i->value));
+         par->value     = strdup(MIME::EncodeHeader(i->value).c_str());
          par->next      = NULL;
          if(lastpar)
             lastpar->next = par;

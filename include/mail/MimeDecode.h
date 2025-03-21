@@ -66,7 +66,7 @@ String GetCharsetForFontEncoding(wxFontEncoding enc);
               use the encoding of the current locale
    @return the encoded text or NULL buffer if encoding failed
  */
-wxCharBuffer
+std::string
 EncodeHeader(const wxString& in, wxFontEncoding enc = wxFONTENCODING_SYSTEM);
 
 /**

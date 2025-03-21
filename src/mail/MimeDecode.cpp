@@ -462,8 +462,8 @@ static constexpr size_t RFC2047_MAXWORD_LEN = 75;
 static constexpr size_t MIME_WORD_OVERHEAD = 7; // =?...?X?...?=
 
 // encode the text in the charset with the given name in QP
-static String
-EncodeTextQP(const char* in, const String& csName)
+static std::string
+EncodeTextQP(const char* in, const std::string& csName)
 {
    // encode the text splitting it in the chunks such that they will be no
    // longer than maximum length each
@@ -471,7 +471,7 @@ EncodeTextQP(const char* in, const String& csName)
 
    const char* const HEX_DIGITS = "0123456789ABCDEF";
 
-   String out;
+   std::string out;
    out.reserve(strlen(in) + overhead);
 
    // Each iteration of this loop corresponds to a physical line.
@@ -543,14 +543,14 @@ EncodeTextQP(const char* in, const String& csName)
 }
 
 // same as the function above but use Base64 encoding
-static String
-EncodeTextBase64(const char* in, const String& csName)
+static std::string
+EncodeTextBase64(const char* in, const std::string& csName)
 {
    const size_t overhead = MIME_WORD_OVERHEAD + csName.length();
 
    // encode the word splitting it in the chunks such that they will be no
    // longer than maximum length each
-   String out;
+   std::string out;
    out.reserve(strlen(in) + overhead);
 
    auto *s = reinterpret_cast<const unsigned char*>(in);
@@ -594,10 +594,14 @@ EncodeTextBase64(const char* in, const String& csName)
       }
 
       // put into string as we might want to do some more replacements...
-      String encword(wxString::FromAscii(CHAR_CAST(textEnc), lenEnc));
+      std::string encword(CHAR_CAST(textEnc), lenEnc);
 
       // append this word to the header
-      out << _T("=?") << csName << _T("?B?") << encword << _T("?=");
+      out += "=?";
+      out += csName;
+      out += "?B?";
+      out += encword;
+      out += "?=";
 
       fs_give((void **)&textEnc);
 
@@ -608,10 +612,10 @@ EncodeTextBase64(const char* in, const String& csName)
    return out;
 }
 
-wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
+std::string MIME::EncodeHeader(const String& in, wxFontEncoding enc)
 {
    if ( !NeedsEncoding(in) )
-      return in.ToAscii();
+      return std::string(in.ToAscii());
 
    // If we were given an explicit encoding to use, check if we can use it, and
    // if not fall back to the same UTF-8 (which can always be used) as we use
@@ -623,12 +627,12 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
    }
 
    // get the name of the charset to use
-   String csName = MIME::GetCharsetForFontEncoding(enc);
+   std::string csName = MIME::GetCharsetForFontEncoding(enc).utf8_string();
    if ( csName.empty() )
    {
       FAIL_MSG( _T("should have a valid charset name!") );
 
-      csName = _T("UNKNOWN");
+      csName = "UNKNOWN";
    }
 
    wxCharBuffer inbuf;
@@ -642,7 +646,7 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
       inbuf = in.utf8_str();
    }
 
-   String out;
+   std::string out;
    switch ( MIME::GetEncodingForFontEncoding(enc) )
    {
       case MIME::Encoding_Unknown:
@@ -658,7 +662,7 @@ wxCharBuffer MIME::EncodeHeader(const String& in, wxFontEncoding enc)
          break;
    }
 
-   return out.ToAscii();
+   return out;
 }
 
 String MIME::DecodeText(const char *p, size_t len, wxFontEncoding enc)

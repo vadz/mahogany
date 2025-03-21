@@ -406,11 +406,11 @@ int main()
         if ( d.enc == wxFONTENCODING_DEFAULT )
             continue;
 
-        const wxCharBuffer buf = MIME::EncodeHeader(s, d.enc);
-        if ( strcmp(buf, d.encoded) != 0 )
+        const std::string buf = MIME::EncodeHeader(s, d.enc);
+        if ( buf != d.encoded )
         {
             printf("ERROR: encoding #%u: expected \"%s\", got \"%s\"\n",
-                   n, d.encoded, (const char *)buf);
+                   n, d.encoded, buf.c_str());
         }
     }
 

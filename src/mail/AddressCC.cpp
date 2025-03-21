@@ -576,7 +576,7 @@ ParseAddressList(const String& address,
       {
          String personal = wxString::FromUTF8(adr2->personal);
          fs_give((void **)&adr2->personal);
-         adr2->personal = cpystr(MIME::EncodeHeader(personal, enc));
+         adr2->personal = cpystr(MIME::EncodeHeader(personal, enc).c_str());
       }
    }
 
