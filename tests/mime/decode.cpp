@@ -337,7 +337,7 @@ int main()
     {
         const char *encoded;
         const char *utf8;
-        wxFontEncoding enc;
+        wxFontEncoding enc = wxFONTENCODING_UTF8;
         const char *encodedAlt = nullptr;
     } data[] =
     {
@@ -365,8 +365,7 @@ int main()
         },
         {
             "=?UTF-8?Q?Ludovic_P=C3=A9net?=",
-            "Ludovic P\303\251net",
-            wxFONTENCODING_UTF8
+            "Ludovic P\303\251net"
         },
 
         {
@@ -380,8 +379,7 @@ int main()
 
         {
             "=?UTF-8?Q?2006_=D0=92_=D0=A6_2007?=",
-            "2006 \xD0\x92 \xD0\xA6 2007",
-            wxFONTENCODING_UTF8
+            "2006 \xD0\x92 \xD0\xA6 2007"
         },
 
         {
