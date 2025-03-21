@@ -432,26 +432,6 @@ static inline bool NeedsEncodingInHeader(unsigned c)
    return c < 20 || c >= 127;
 }
 
-// return true if the string contains any characters which must be encoded
-static bool NeedsEncoding(const String& in)
-{
-   // if input contains "=?", encode it anyhow to avoid generating invalid
-   // encoded words
-   if ( in.find(_T("=?")) != wxString::npos )
-      return true;
-
-   // only encode the strings which contain the characters unallowed in RFC
-   // 822 headers
-   for ( auto c : in )
-   {
-      if ( NeedsEncodingInHeader(c.GetValue()) )
-         return true;
-   }
-
-   // string has only valid chars, don't encode
-   return false;
-}
-
 // Some constants used by the encoding functions below.
 static constexpr size_t RFC2047_MAXWORD_LEN = 75;
 static constexpr size_t MIME_WORD_OVERHEAD = 7; // =?...?X?...?=
@@ -609,7 +589,35 @@ EncodeTextBase64(const char* in, const std::string& csName)
 
 std::string MIME::EncodeHeader(const String& in, wxFontEncoding enc)
 {
-   if ( !NeedsEncoding(in) )
+   // First check if this text needs to be encoded at all.
+   size_t countNeedsEncoding = 0;
+   for ( auto c : in )
+   {
+      if ( NeedsEncodingInHeader(c.GetValue()) )
+         countNeedsEncoding++;
+   }
+
+   // We arbitrarily decide that if more than 1/4 of the string needs to be
+   // encoded, we'll encode it using Base64, otherwise we'll use QP to keep it
+   // roughly readable even in the encoded form.
+   MIME::Encoding enc2047 = MIME::Encoding_Unknown;
+   if ( !countNeedsEncoding )
+   {
+      // if input contains "=?", encode it anyhow to avoid generating invalid
+      // encoded words
+      if ( in.find(_T("=?")) != wxString::npos )
+         enc2047 = MIME::Encoding_QuotedPrintable;
+   }
+   else if ( countNeedsEncoding >= in.length() / 4 )
+   {
+      enc2047 = MIME::Encoding_Base64;
+   }
+   else
+   {
+      enc2047 = MIME::Encoding_QuotedPrintable;
+   }
+
+   if ( enc2047 == MIME::Encoding_Unknown )
       return std::string(in.ToAscii());
 
    // If we were given an explicit encoding to use, check if we can use it, and
@@ -642,11 +650,11 @@ std::string MIME::EncodeHeader(const String& in, wxFontEncoding enc)
    }
 
    std::string out;
-   switch ( MIME::GetEncodingForFontEncoding(enc) )
+   switch ( enc2047 )
    {
       case MIME::Encoding_Unknown:
-         FAIL_MSG( "using unknown MIME encoding?" );
-         wxFALLTHROUGH;
+         FAIL_MSG( "unreachable" );
+         break;
 
       case MIME::Encoding_QuotedPrintable:
          out = EncodeTextQP(inbuf.data(), csName);

@@ -338,6 +338,7 @@ int main()
         const char *encoded;
         const char *utf8;
         wxFontEncoding enc;
+        const char *encodedAlt = nullptr;
     } data[] =
     {
         {
@@ -373,7 +374,8 @@ int main()
             "  =?UTF-8?Q?=D0=B8=D0=BD?=",
             "\xD0\x92\xD0\xB0\xD0\xB4\xD0\xB8\xD0\xBC "
             "\xD0\xA6\xD0\xB5\xD0\xB9\xD1\x82\xD0\xBB\xD0\xB8\xD0\xBD",
-            wxFONTENCODING_UTF8
+            wxFONTENCODING_UTF8,
+            "=?UTF-8?B?0JLQsNC00LjQvCDQptC10LnRgtC70LjQvQ==?="
         },
 
         {
@@ -385,7 +387,8 @@ int main()
         {
             "=?UTF-8?Q?=D0=92_=D0=A6_2007?=",
             "\xD0\x92 \xD0\xA6 2007",
-            wxFONTENCODING_UTF8
+            wxFONTENCODING_UTF8,
+            "=?UTF-8?B?0JIg0KYgMjAwNw==?="
         },
     };
 
@@ -407,7 +410,7 @@ int main()
             continue;
 
         const std::string buf = MIME::EncodeHeader(s, d.enc);
-        if ( buf != d.encoded )
+        if ( buf != d.encoded && (!d.encodedAlt || buf != d.encodedAlt) )
         {
             printf("ERROR: encoding #%u: expected \"%s\", got \"%s\"\n",
                    n, d.encoded, buf.c_str());
