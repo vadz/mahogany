@@ -235,12 +235,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          }
 
          // get the encoding in RFC 2047 sense
-         enum
-         {
-            Encoding_Unknown,
-            Encoding_Base64,
-            Encoding_QuotedPrintable
-         } enc2047 = Encoding_Unknown;
+         MIME::Encoding enc2047 = MIME::Encoding_Unknown;
 
          ++p; // skip '?'
 
@@ -256,14 +251,14 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             if ( *(p + 1) == '?' )
             {
                if ( *p == 'B' || *p == 'b' )
-                  enc2047 = Encoding_Base64;
+                  enc2047 = MIME::Encoding_Base64;
                else if ( *p == 'Q' || *p == 'q' )
-                  enc2047 = Encoding_QuotedPrintable;
+                  enc2047 = MIME::Encoding_QuotedPrintable;
             }
             //else: multi letter encoding unrecognized
          }
 
-         if ( enc2047 == Encoding_Unknown )
+         if ( enc2047 == MIME::Encoding_Unknown )
          {
             wxLogDebug(_T("Unrecognized header encoding in '%s'."), in.c_str());
 
@@ -324,7 +319,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             // now decode the text using c-client functions
             unsigned long len;
             void *text;
-            if ( enc2047 == Encoding_Base64 )
+            if ( enc2047 == MIME::Encoding_Base64 )
             {
                text = rfc822_base64(UCHAR_CCAST(encWord.data()), lenEncWord, &len);
             }
