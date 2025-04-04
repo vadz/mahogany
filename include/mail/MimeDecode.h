@@ -87,6 +87,11 @@ String DecodeHeader(const String& in, wxFontEncoding *encoding = NULL);
    This method tries hard to return something useful and ignores invalid
    characters when decoding using UTF-8 instead of failing and returning an
    empty string, which is not useful.
+
+   @param p Pointer to the data to decode.
+   @param len Length of the data to decode.
+   @param enc Valid encoding, i.e. not wxFONTENCODING_SYSTEM or
+      wxFONTENCODING_DEFAULT.
  */
 String DecodeText(const char *p, size_t len, wxFontEncoding enc);
 

@@ -121,6 +121,14 @@ MIME::Encoding MIME::GetEncodingForFontEncoding(wxFontEncoding enc)
 static
 String DecodeString(const std::string& s, wxFontEncoding enc)
 {
+   // We allow encoding to be wxFONTENCODING_DEFAULT here for convenience: this
+   // is what CharsetToEncoding() returns for "US-ASCII" and we're called with
+   // its result. But DecodeText() doesn't accept it, so use a compatible
+   // encoding (could also use wxFONTENCODING_ISO8859_1, but this is a better
+   // fallback in case the string contents is invalid, i.e. not just ASCII).
+   if ( enc == wxFONTENCODING_DEFAULT )
+      enc = wxFONTENCODING_UTF8;
+
    return MIME::DecodeText(s.data(), s.length(), enc);
 }
 
