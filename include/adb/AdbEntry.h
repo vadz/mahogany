@@ -213,6 +213,8 @@ public:
     /// get the name of the group/group by name
   virtual AdbEntryGroup *GetGroup(const String& name) const = 0;
 
+  using AdbElement::GetGroup;
+
   // operations
     /// create entry/subgroup
   virtual AdbEntry *CreateEntry(const String& strName) = 0;

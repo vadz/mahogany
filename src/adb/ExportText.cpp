@@ -105,6 +105,8 @@ public:
    // current radio selection
    void Update(int selection);
 
+   using wxManuallyLaidOutDialog::Update;
+
 private:
    // the profile path for saving the last file used
    static const wxChar *ms_profilePathLastFile;

@@ -436,6 +436,8 @@ protected:
 
    void DoPopupMenu(const wxPoint& pos);
 
+   using wxPTreeCtrl::DoPopupMenu;
+
    // are we editing an item in place?
    bool IsEditingInPlace() const;
 
