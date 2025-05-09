@@ -225,6 +225,9 @@ public:
 
    virtual void Notify()
    {
+      if ( !mApplication->AllowBgProcessing() )
+         return;
+
       wxLogTrace(TRACE_TIMER, _T("Autosaving options and folder status."));
 
       (void)SaveAll();
