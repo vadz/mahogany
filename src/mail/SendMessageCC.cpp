@@ -661,7 +661,7 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
          }
          else
          {
-            m_extraHeaders.push_back(new MessageHeader(name, value));
+            m_extraHeaders.emplace_back(name, value);
          }
       }
    }
@@ -1007,10 +1007,24 @@ SendMessageCC::SetFcc(const String& fcc)
 // methods to manage the extra headers
 // ----------------------------------------------------------------------------
 
-MessageHeadersList::iterator
+MessageHeaders::iterator
+SendMessageCC::FindHeaderEntry(const String& name)
+{
+   MessageHeaders::iterator i;
+
+   for ( i = m_extraHeaders.begin(); i != m_extraHeaders.end(); ++i )
+   {
+      if ( wxStricmp(i->m_name, name) == 0 )
+         break;
+   }
+
+   return i;
+}
+
+MessageHeaders::const_iterator
 SendMessageCC::FindHeaderEntry(const String& name) const
 {
-   MessageHeadersList::iterator i;
+   MessageHeaders::const_iterator i;
 
    for ( i = m_extraHeaders.begin(); i != m_extraHeaders.end(); ++i )
    {
@@ -1032,7 +1046,7 @@ SendMessageCC::GetHeaderEntry(const String& name) const
 {
    String value;
 
-   MessageHeadersList::iterator i = FindHeaderEntry(name);
+   MessageHeaders::const_iterator i = FindHeaderEntry(name);
    if ( i != m_extraHeaders.end() )
    {
       value = i->m_value;
@@ -1064,7 +1078,7 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
    }
    else // all the other headers
    {
-      MessageHeadersList::iterator i = FindHeaderEntry(name);
+      MessageHeaders::iterator i = FindHeaderEntry(name);
       if ( i != m_extraHeaders.end() )
       {
          // update existing value
@@ -1072,7 +1086,7 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
       }
       else // add a new header entry
       {
-         m_extraHeaders.push_back(new MessageHeader(nameIn, value));
+         m_extraHeaders.emplace_back(nameIn, value);
       }
    }
 }
@@ -1080,7 +1094,7 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
 void
 SendMessageCC::RemoveHeaderEntry(const String& name)
 {
-   MessageHeadersList::iterator i = FindHeaderEntry(name);
+   MessageHeaders::iterator i = FindHeaderEntry(name);
    CHECK_RET( i != m_extraHeaders.end(), "RemoveHeaderEntry(): no such header" );
 
    (void)m_extraHeaders.erase(i);
@@ -1309,7 +1323,7 @@ SendMessageCC::Build(bool forStorage)
         xmailerSet = false;
 
    // add the additional header lines added by the user
-   for ( MessageHeadersList::iterator i = m_extraHeaders.begin();
+   for ( MessageHeaders::iterator i = m_extraHeaders.begin();
          i != m_extraHeaders.end();
          ++i )
    {

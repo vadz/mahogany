@@ -17,13 +17,14 @@
 #  include "Mcclient.h"
 #endif  //USE_PCH
 
-#include "lists.h"
 #include "SendMessage.h"
+
+#include <vector>
 
 class Profile;
 
 // ----------------------------------------------------------------------------
-// MessageHeadersList: the list of custom (or extra) headers
+// A single custom (or extra) header or a collection of them
 // ----------------------------------------------------------------------------
 
 struct MessageHeader
@@ -37,7 +38,7 @@ struct MessageHeader
           m_value;
 };
 
-M_LIST_OWN(MessageHeadersList, MessageHeader);
+using MessageHeaders = std::vector<MessageHeader>;
 
 // ----------------------------------------------------------------------------
 // SendMessageCC: allows to send/post messages using c-client
@@ -165,7 +166,8 @@ protected:
    void CheckAddressFieldForErrors(ADDRESS *adr);
 
    /// get the iterator pointing to the given header or m_extraHeaders.end()
-   MessageHeadersList::iterator FindHeaderEntry(const String& name) const;
+   MessageHeaders::iterator FindHeaderEntry(const String& name);
+   MessageHeaders::const_iterator FindHeaderEntry(const String& name) const;
 
    /**
       Return the password needed to login to the SMTP server.
@@ -300,7 +302,7 @@ private:
    const char **m_headerValues;
 
    /// extra headers to be added before sending
-   MessageHeadersList m_extraHeaders;
+   MessageHeaders m_extraHeaders;
 
    /**
       True if we're a copy of an existing message, false if this is a new
