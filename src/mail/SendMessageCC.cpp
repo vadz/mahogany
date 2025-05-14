@@ -1292,26 +1292,21 @@ SendMessageCC::Build(bool forStorage)
 
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
    // last NULL entry
-   size_t n = m_extraHeaders.size() + 4;
-   m_headers.resize(n);
-
-   // the current header position in m_headers
-   int h = 0;
+   m_headers.reserve(m_extraHeaders.size() + 4);
+   m_headers.clear();
 
    bool replyToSet = false,
         xmailerSet = false;
 
    // add the additional header lines added by the user
-   for ( MessageHeaders::iterator i = m_extraHeaders.begin();
-         i != m_extraHeaders.end();
-         ++i )
+   for ( const auto& header : m_extraHeaders )
    {
-      const HeaderName name(i->m_name);
+      const HeaderName name(header.m_name);
       const wxString headerErr = name.IsValid();
       if ( !headerErr.empty() )
       {
          wxLogError(_("Custom header name \"%s\" is invalid: %s."),
-                    i->m_name, headerErr);
+                    header.m_name, headerErr);
          return false;
       }
 
@@ -1320,15 +1315,15 @@ SendMessageCC::Build(bool forStorage)
          // We shouldn't be getting such headers at all here, but if we somehow
          // do, ignore them.
          wxLogDebug("Ignoring the value of not user-settable header \"%s\"",
-                    i->m_name);
+                    header.m_name);
          continue;
       }
 
-      const std::string value(MIME::EncodeHeader(i->m_value));
+      const std::string value(MIME::EncodeHeader(header.m_value));
       if ( value.empty() )
       {
          wxLogError(_("Invalid value \"%s\" for the custom header \"%s\""),
-                    i->m_value.c_str(), i->m_name.c_str());
+                    header.m_value.c_str(), header.m_name.c_str());
 
          return false;
       }
@@ -1339,10 +1334,7 @@ SendMessageCC::Build(bool forStorage)
          xmailerSet = true;
 
 
-      m_headers[h].m_name = i->m_name;
-      m_headers[h].m_value = value;
-
-      h++;
+      m_headers.emplace_back(header.m_name, value);
    }
 
    // don't add any extra headers when cloning an existing message
@@ -1352,8 +1344,6 @@ SendMessageCC::Build(bool forStorage)
       // allow it -- why not?)
       if ( !xmailerSet )
       {
-         m_headers[h].m_name = "X-Mailer";
-
          // NB: do *not* translate these strings, this doesn't make much sense
          //     (the user doesn't usually see them) and, worse, we shouldn't
          //     include 8bit chars (which may - and do - occur in translations)
@@ -1365,7 +1355,7 @@ SendMessageCC::Build(bool forStorage)
 #else // Windows
          version << ", running under " << wxGetOsDescription();
 #endif // Unix/Windows
-         m_headers[h++].m_value = version;
+         m_headers.emplace_back("X-Mailer", version);
       }
 
       // set Reply-To if it hadn't been set by the user as a custom header
@@ -1374,10 +1364,7 @@ SendMessageCC::Build(bool forStorage)
          ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
 
          if ( !m_ReplyTo.empty() )
-         {
-            m_headers[h].m_name = "Reply-To";
-            m_headers[h++].m_value = m_ReplyTo;
-         }
+            m_headers.emplace_back("Reply-To", m_ReplyTo);
       }
 
 #ifdef HAVE_XFACES
@@ -1387,15 +1374,12 @@ SendMessageCC::Build(bool forStorage)
          XFace xface;
          if ( xface.CreateFromFile(m_XFaceFile) )
          {
-            m_headers[h].m_name = "X-Face";
-            m_headers[h++].m_value = xface.GetHeaderLine();
+            m_headers.emplace_back("X-Face", xface.GetHeaderLine());
          }
          //else: couldn't read X-Face from file (complain?)
       }
 #endif // HAVE_XFACES
    }
-
-   m_headers.resize(h);
 
 
    // after fully constructing everything check if we need to add a
