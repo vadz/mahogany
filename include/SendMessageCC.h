@@ -29,6 +29,8 @@ class Profile;
 
 struct MessageHeader
 {
+   MessageHeader() = default;
+
    MessageHeader(const String& name, const String& value)
       : m_name(name), m_value(value)
    {
@@ -291,15 +293,12 @@ private:
    //@{
 
    /**
-     m_headerNames and m_headerValues are the "final" arrays of headers, i.e.
-     they are passed to c-client when we send the message while the extra
+     "Final" version of the headers.
+
+     They are passed to c-client when we send the message while the extra
      headers are used to construct them.
     */
-
-   /// names of header lines
-   const char **m_headerNames;
-   /// values of header lines
-   const char **m_headerValues;
+   MessageHeaders m_headers;
 
    /// extra headers to be added before sending
    MessageHeaders m_extraHeaders;

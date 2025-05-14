@@ -193,17 +193,12 @@ public:
 
        Ctor will block if another Rfc822OutputRedirector is already in use.
 
-       @param extraHeadersNames NUL-terminated array of names of extra headers
-         to add to the normal output.
-       @param extraHeadersValues NUL-terminated array of values of extra
-         headers, must have the same number of elements as @a extraHeadersNames.
+       @param extraHeaders extra headers to add to the normal output.
        @param flags May include AddBcc flag to include BCC header in output, by
          default it is not included to avoid leaking information about BCC
          recipients.
     */
-   Rfc822OutputRedirector(const char **extraHeadersNames,
-                          const char **extraHeadersValues,
-                          int flags = 0);
+   Rfc822OutputRedirector(const MessageHeaders& extraHeaders, int flags = 0);
 
    /**
        Dtor restores the original c-client output function.
@@ -223,8 +218,7 @@ private:
    static bool ms_outputBcc;
 
    // the extra headers written by FullRfc822Output()
-   static const char **ms_HeaderNames;
-   static const char **ms_HeaderValues;
+   static MessageHeaders ms_Headers;
 
    // and a mutex to protect them
    static MTMutex ms_mutexExtraHeaders;
@@ -366,9 +360,6 @@ SendMessageCC::SendMessageCC(const Profile *profile,
 
    m_cloneOfExisting = false;
    m_sign = false;
-
-   m_headerNames =
-   m_headerValues = NULL;
 
    m_wasBuilt = false;
 
@@ -696,17 +687,6 @@ SendMessageCC::~SendMessageCC()
    mail_free_envelope(&m_Envelope);
    mail_free_body_part(&m_partTop);
 
-   if(m_headerNames)
-   {
-      for(int j = 0; m_headerNames[j] ; j++)
-      {
-         delete [] (char *)m_headerNames[j];
-         delete [] (char *)m_headerValues[j];
-      }
-      delete [] m_headerNames;
-      delete [] m_headerValues;
-   }
-
    const_cast<Profile *>(m_profile)->DecRef();
 }
 
@@ -935,7 +915,7 @@ SendMessageCC::SetAddresses(const String &to,
 {
    // If Build() has already been called, then it's too late to change
    // anything.
-   ASSERT(m_headerNames == NULL);
+   ASSERT(m_headers.empty());
 
    SetAddressField(&m_Envelope->to, to);
    SetAddressField(&m_Envelope->cc, cc);
@@ -949,7 +929,7 @@ SendMessageCC::SetNewsgroups(const String &groups)
 {
    // If Build() has already been called, then it's too late to change
    // anything.
-   ASSERT(m_headerNames == NULL);
+   ASSERT(m_headers.empty());
 
    // TODO-NEWS: we should support sending and posting the message, doing
    //            it separately if necessary
@@ -1313,10 +1293,9 @@ SendMessageCC::Build(bool forStorage)
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
    // last NULL entry
    size_t n = m_extraHeaders.size() + 4;
-   m_headerNames = new const char*[n];
-   m_headerValues = new const char*[n];
+   m_headers.resize(n);
 
-   // the current header position in m_headerNames/Values
+   // the current header position in m_headers
    int h = 0;
 
    bool replyToSet = false,
@@ -1360,8 +1339,8 @@ SendMessageCC::Build(bool forStorage)
          xmailerSet = true;
 
 
-      m_headerNames[h] = strutil_strdup(i->m_name.c_str());
-      m_headerValues[h] = strutil_strdup(value.c_str());
+      m_headers[h].m_name = i->m_name;
+      m_headers[h].m_value = value;
 
       h++;
    }
@@ -1373,7 +1352,7 @@ SendMessageCC::Build(bool forStorage)
       // allow it -- why not?)
       if ( !xmailerSet )
       {
-         m_headerNames[h] = strutil_strdup("X-Mailer");
+         m_headers[h].m_name = "X-Mailer";
 
          // NB: do *not* translate these strings, this doesn't make much sense
          //     (the user doesn't usually see them) and, worse, we shouldn't
@@ -1386,7 +1365,7 @@ SendMessageCC::Build(bool forStorage)
 #else // Windows
          version << ", running under " << wxGetOsDescription();
 #endif // Unix/Windows
-         m_headerValues[h++] = strutil_strdup(version.ToAscii());
+         m_headers[h++].m_value = version;
       }
 
       // set Reply-To if it hadn't been set by the user as a custom header
@@ -1396,8 +1375,8 @@ SendMessageCC::Build(bool forStorage)
 
          if ( !m_ReplyTo.empty() )
          {
-            m_headerNames[h] = strutil_strdup("Reply-To");
-            m_headerValues[h++] = strutil_strdup(m_ReplyTo.ToAscii());
+            m_headers[h].m_name = "Reply-To";
+            m_headers[h++].m_value = m_ReplyTo;
          }
       }
 
@@ -1408,16 +1387,15 @@ SendMessageCC::Build(bool forStorage)
          XFace xface;
          if ( xface.CreateFromFile(m_XFaceFile) )
          {
-            m_headerNames[h] = strutil_strdup("X-Face");
-            m_headerValues[h++] = strutil_strdup(xface.GetHeaderLine().ToAscii());
+            m_headers[h].m_name = "X-Face";
+            m_headers[h++].m_value = xface.GetHeaderLine();
          }
          //else: couldn't read X-Face from file (complain?)
       }
 #endif // HAVE_XFACES
    }
 
-   m_headerNames[h] = NULL;
-   m_headerValues[h] = NULL;
+   m_headers.resize(h);
 
 
    // after fully constructing everything check if we need to add a
@@ -2008,7 +1986,7 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
    bool success;
    if ( stream )
    {
-      Rfc822OutputRedirector redirect(m_headerNames, m_headerValues);
+      Rfc822OutputRedirector redirect(m_headers);
 
       switch ( m_Protocol )
       {
@@ -2089,8 +2067,7 @@ bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
    char headers[16*1024];
 
    // install our output routine temporarily
-   Rfc822OutputRedirector redirect(m_headerNames, m_headerValues,
-                                   Rfc822OutputRedirector::AddBcc);
+   Rfc822OutputRedirector redirect(m_headers, Rfc822OutputRedirector::AddBcc);
 
    return rfc822_output(headers, m_Envelope, GetBody(),
                         writer, where, NIL) != NIL;
@@ -2199,20 +2176,17 @@ static long write_str_output(void *stream, char *string)
 
 bool Rfc822OutputRedirector::ms_outputBcc = false;
 
-const char **Rfc822OutputRedirector::ms_HeaderNames = NULL;
-const char **Rfc822OutputRedirector::ms_HeaderValues = NULL;
+MessageHeaders Rfc822OutputRedirector::ms_Headers;
 
 MTMutex Rfc822OutputRedirector::ms_mutexExtraHeaders;
 
-Rfc822OutputRedirector::Rfc822OutputRedirector(const char **extraHeadersNames,
-                                               const char **extraHeadersValues,
+Rfc822OutputRedirector::Rfc822OutputRedirector(const MessageHeaders& headers,
                                                int flags)
 {
    ms_mutexExtraHeaders.Lock();
 
    ms_outputBcc = (flags & AddBcc) != 0;
-   ms_HeaderNames = extraHeadersNames;
-   ms_HeaderValues = extraHeadersValues;
+   ms_Headers = headers;
 
    m_oldRfc822Output = mail_parameters(NULL, GET_RFC822OUTPUT, NULL);
    (void)mail_parameters(NULL, SET_RFC822OUTPUT, (void *)FullRfc822Output);
@@ -2222,9 +2196,7 @@ Rfc822OutputRedirector::~Rfc822OutputRedirector()
 {
    (void)mail_parameters(NULL, SET_RFC822OUTPUT, m_oldRfc822Output);
 
-   // Avoid leaving dangling pointers.
-   ms_HeaderNames = NULL;
-   ms_HeaderValues = NULL;
+   ms_Headers.clear();
 
    ms_mutexExtraHeaders.Unlock();
 }
@@ -2268,67 +2240,64 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
   }
 
   // and add all other additional custom headers at the end
-  if ( ms_HeaderNames )
+  for ( const auto& header : ms_Headers )
   {
-     for ( size_t n = 0; ms_HeaderNames[n]; n++ )
+     // We should wrap all headers, but this might break something, so wrap
+     // just the one which regularly gets too long to fit the maximum
+     // message line length (998 bytes).
+     constexpr const char* REFERENCES_HEADER = "References";
+
+     if ( header.m_name == REFERENCES_HEADER )
      {
-        // We should wrap all headers, but this might break something, so wrap
-        // just the one which regularly gets too long to fit the maximum
-        // message line length (998 bytes).
-        constexpr const char* REFERENCES_HEADER = "References";
+        // Note that we don't bother null-terminating headers while we're
+        // inside this block, we just do it once at the end. The pointer is
+        // just always positioned at the end of the string, as done here.
+        headers += strlen(headers);
 
-        if ( strcmp(ms_HeaderNames[n], REFERENCES_HEADER) == 0 )
+        auto output = [&headers](const char* s, size_t len = 0)
         {
-           // Note that we don't bother null-terminating headers while we're
-           // inside this block, we just do it once at the end. The pointer is
-           // just always positioned at the end of the string, as done here.
-           headers += strlen(headers);
+           if ( !len )
+              len = strlen(s);
+           memcpy(headers, s, len);
+           headers += len;
+        };
 
-           auto output = [&headers](const char* s, size_t len = 0)
+        output(REFERENCES_HEADER);
+        output(": ");
+
+        const char* value = header.m_value.c_str();
+        for ( ;; )
+        {
+           auto space = strchr(value, ' ');
+           if ( !space )
            {
-              if ( !len )
-                 len = strlen(s);
-              memcpy(headers, s, len);
-              headers += len;
-           };
+              // Output the rest of the header.
+              output(value);
+              output("\r\n");
 
-           output(REFERENCES_HEADER);
-           output(": ");
-
-           const char* value = ms_HeaderValues[n];
-           for ( ;; )
-           {
-              auto space = strchr(value, ' ');
-              if ( !space )
-              {
-                 // Output the rest of the header.
-                 output(value);
-                 output("\r\n");
-
-                 break;
-              }
-
-              // Output just the part until the next space and add a
-              // continuation line.
-              output(value, space - value);
-              output("\r\n    "); // Same indent as c-client RFC822BUFFER.
-
-              value = space;
-              while ( isspace(*value) )
-                 value++;
+              break;
            }
 
-           *headers = '\0';
+           // Output just the part until the next space and add a
+           // continuation line.
+           output(value, space - value);
+           output("\r\n    "); // Same indent as c-client RFC822BUFFER.
 
-           // Skip generic case below.
-           continue;
+           value = space;
+           while ( isspace(*value) )
+              value++;
         }
 
-        rfc822_header_line(&headers,
-                           const_cast<char *>(ms_HeaderNames[n]),
-                           env,
-                           const_cast<char *>(ms_HeaderValues[n]));
+        *headers = '\0';
+
+        // Skip generic case below.
+        continue;
      }
+
+     rfc822_header_line(&headers,
+                        const_cast<char *>(header.m_name.c_str()),
+                        env,
+                        const_cast<char *>(header.m_value.c_str()));
   }
 
   // terminate the headers part
