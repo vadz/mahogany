@@ -786,11 +786,6 @@ private:
   // opposite order)
   void LayoutButtons(wxPanel *panel, size_t nButtons, wxButton *aButtons[]);
 
-  // calculate the (approx.) minimal dimensions of the frame (returns TRUE if
-  // done, may return FALSE if called too early, i.e. before the window is
-  // fully created)
-  bool SetMinSize();
-
   // expand the specified path returning the pointer to the last item
   // (or NULL if the path is invalid)
   AdbTreeElement *ExpandBranch(const wxString& strEntry);
@@ -1338,7 +1333,12 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   panel->SetAutoLayout(TRUE);
   SetAutoLayout(TRUE);
 
-  SetMinSize();
+  // all buttons have the same size and we use them as length unit
+  int widthBtn, heightBtn;
+  m_btnCancel->GetClientSize(&widthBtn, &heightBtn);
+
+  // FIXME the numbers are completely arbitrary
+  SetSizeHints(7*widthBtn, 22*heightBtn);
 
   // caption and icon
   // ----------------
@@ -2686,22 +2686,6 @@ bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
 
   m_treeAdb->SetFocus();
   m_treeAdb->SelectAndShow(current->GetId());
-
-  return TRUE;
-}
-
-// calculate the minimal size of the frame and set it
-bool wxAdbEditFrame::SetMinSize()
-{
-  if ( !m_btnCancel )
-    return FALSE;
-
-  // all buttons have the same size and we use them as length unit
-  int widthBtn, heightBtn;
-  m_btnCancel->GetClientSize(&widthBtn, &heightBtn);
-
-  // FIXME the numbers are completely arbitrary
-  SetSizeHints(7*widthBtn, 22*heightBtn);
 
   return TRUE;
 }
