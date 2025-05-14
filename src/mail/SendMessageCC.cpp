@@ -1360,9 +1360,7 @@ SendMessageCC::Build(bool forStorage)
          xmailerSet = true;
 
 
-      // Conversion to ASCII is safe because HeaderName::IsValid() would have
-      // returned false if we had any non-ASCII characters in the name.
-      m_headerNames[h] = strutil_strdup(i->m_name.ToAscii());
+      m_headerNames[h] = strutil_strdup(i->m_name.c_str());
       m_headerValues[h] = strutil_strdup(value.c_str());
 
       h++;

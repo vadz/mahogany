@@ -34,8 +34,8 @@ struct MessageHeader
    {
    }
 
-   String m_name,
-          m_value;
+   std::string m_name,
+               m_value;
 };
 
 using MessageHeaders = std::vector<MessageHeader>;
