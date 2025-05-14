@@ -61,7 +61,7 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
-   void Update(wxCommandEvent & ev);
+   void OnListBox(wxCommandEvent & ev);
    bool InternalUpdate(size_t n);
 
    virtual ~wxModulesDialog();
@@ -76,7 +76,7 @@ protected:
 };
 
 BEGIN_EVENT_TABLE(wxModulesDialog, wxDialog)
-   EVT_LISTBOX(-1, wxModulesDialog::Update)
+   EVT_LISTBOX(-1, wxModulesDialog::OnListBox)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -142,7 +142,7 @@ wxModulesDialog::~wxModulesDialog()
 }
 
 void
-wxModulesDialog::Update(wxCommandEvent & ev)
+wxModulesDialog::OnListBox(wxCommandEvent & ev)
 {
    int n = ev.GetInt(); // which one was clicked
 
