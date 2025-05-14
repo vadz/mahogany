@@ -5760,7 +5760,9 @@ SendMessage *wxComposeView::BuildDraftMessage(int flags) const
    msg->AddHeaderEntry(HEADER_GEOMETRY, value);
 
    // also save the Fcc header contents because it's not a "real" header
-   msg->AddHeaderEntry(_T("FCC"), GetRecipients(Recipient_Fcc));
+   const String& fcc = GetRecipients(Recipient_Fcc);
+   if ( !fcc.empty() )
+      msg->AddHeaderEntry(_T("FCC"), fcc);
 
    return msg.release();
 }
