@@ -50,7 +50,7 @@
 #  define  OS_UNIX    1
 #  define  OS_TYPE    "unix"
 #  undef   OS_SUBTYPE
-#  ifdef linux
+#  ifdef __linux__
 #     define   OS_LINUX
 #     define   OS_SUBTYPE   "linux-gnu"
 #  endif
