@@ -2308,7 +2308,13 @@ MailFolderCmn::SendMsgStatusChangeEvent()
                }
                else
                {
-                  FAIL_MSG( "error in msg status change logic" );
+                  FAIL_MSG(wxString::Format(
+                     "Error in status update logic in %s: %s %s but there "
+                     "are no such messages in the old status",
+                     GetName(),
+                     name,
+                     isDeleted ? "message deleted" : "message lost status bit"
+                  ));
                }
             }
          };
