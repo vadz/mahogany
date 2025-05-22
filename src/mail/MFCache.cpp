@@ -266,8 +266,6 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
    str.Alloc(1024);     // avoid extra memory allocations
    name.Alloc(1024);
 
-   MailFolderStatus status;
-
    size_t count = file.GetLineCount();
    for ( size_t n = 1; n < count; n++ )
    {
@@ -298,7 +296,7 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
       name.Replace(CACHE_DELIMITER CACHE_DELIMITER, CACHE_DELIMITER);
 
       // get the rest
-      status.Init();
+      MailFolderStatus status;
       switch ( fmt )
       {
          case CacheFile_1_0:

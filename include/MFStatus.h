@@ -26,17 +26,12 @@ class MailFolder;
 
 struct MailFolderStatus
 {
-   MailFolderStatus() { Init(); }
-
-   void Init()
+   explicit MailFolderStatus(unsigned long total = UID_ILLEGAL) : total(total)
    {
-      total = UID_ILLEGAL;
-      newmsgs =
-      recent =
-      unread =
-      flagged =
-      searched = 0;
    }
+
+   MailFolderStatus(const MailFolderStatus& status) = default;
+   MailFolderStatus& operator=(const MailFolderStatus& status) = default;
 
    bool IsValid() const { return total != UID_ILLEGAL; }
 
@@ -58,12 +53,12 @@ struct MailFolderStatus
    // note that unread is the total number of unread messages, i.e. it
    // includes some which are just unseen and the others which are new (i.e.
    // unseen and recent)
-   unsigned long total,
-                 newmsgs,
-                 recent,
-                 unread,
-                 flagged,
-                 searched;
+   unsigned long total = UID_ILLEGAL,
+                 newmsgs = 0,
+                 recent = 0,
+                 unread = 0,
+                 flagged = 0,
+                 searched = 0;
 };
 
 /**

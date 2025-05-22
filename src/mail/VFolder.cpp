@@ -504,8 +504,7 @@ unsigned long MailFolderVirt::CountDeletedMessages() const
 
 bool MailFolderVirt::DoCountMessages(MailFolderStatus *status) const
 {
-   status->Init();
-   status->total = GetMsgCount();
+   *status = MailFolderStatus(GetMsgCount());
 
    MsgCookie cookie;
    for ( Msg *msg = GetFirstMsg(cookie); msg; msg = GetNextMsg(cookie) )

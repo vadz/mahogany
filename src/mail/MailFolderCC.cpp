@@ -3316,9 +3316,8 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::DoCountMessages()"),
               GetName().c_str());
 
-   status->Init();
+   *status = MailFolderStatus(m_MailStream->nmsgs);
 
-   status->total = m_MailStream->nmsgs;
    status->recent = m_MailStream->recent;
 
    status->unread = CountUnseenMessages();
@@ -3327,11 +3326,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
    {
       status->newmsgs = CountNewMessages();
    }
-   else // no recent or no unseen
-   {
-      // hence no new
-      status->newmsgs = 0;
-   }
+   // else: no recent or no unseen, hence no new, leave it at 0
 
    // then get the number of flagged messages
    SEARCHPGM *pgm = mail_newsearchpgm();
