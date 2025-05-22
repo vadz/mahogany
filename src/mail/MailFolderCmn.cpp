@@ -2285,36 +2285,39 @@ MailFolderCmn::SendMsgStatusChangeEvent()
          // (which is discussable at least for flagged and searched flags
          // although, OTOH, why flag a deleted message?)
 
-         #define UPDATE_NUM_OF(what)   \
-            if ( (!isDeleted && msgStatusNew.what) && \
-                 (wasDeleted || !msgStatusOld.what) ) \
-            { \
-               wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "++ (now %lu)", \
-                          GetName().c_str(), status.what + 1); \
-               status.what++; \
-            } \
-            else if ( (!wasDeleted && msgStatusOld.what) && \
-                      (isDeleted || !msgStatusNew.what) ) \
-            { \
-               if ( status.what > 0 ) \
-               { \
-                  wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "-- (now %lu)", \
-                             GetName().c_str(), status.what - 1); \
-                  status.what--; \
-               } \
-               else \
-               { \
-                  FAIL_MSG( _T("error in msg status change logic") ); \
-               } \
+         const auto updateNumOf = [&](unsigned long MailFolderStatus::*what,
+                                      const char *name)
+         {
+            if ( (!isDeleted && msgStatusNew.*what) &&
+                 (wasDeleted || !(msgStatusOld.*what)) )
+            {
+               (status.*what)++;
+
+               wxLogTrace(M_TRACE_MFSTATUS, "%s: %s++ (now %lu)",
+                          GetName(), name, status.*what);
             }
+            else if ( (!wasDeleted && msgStatusOld.*what) &&
+                      (isDeleted || !(msgStatusNew.*what)) )
+            {
+               if ( status.*what > 0 )
+               {
+                  (status.*what)--;
 
-         UPDATE_NUM_OF(recent);
-         UPDATE_NUM_OF(unread);
-         UPDATE_NUM_OF(newmsgs);
-         UPDATE_NUM_OF(flagged);
-         UPDATE_NUM_OF(searched);
+                  wxLogTrace(M_TRACE_MFSTATUS, "%s: %s-- (now %lu)",
+                             GetName(), name, status.*what);
+               }
+               else
+               {
+                  FAIL_MSG( "error in msg status change logic" );
+               }
+            }
+         };
 
-         #undef UPDATE_NUM_OF
+         updateNumOf(&MailFolderStatus::recent, "recent");
+         updateNumOf(&MailFolderStatus::unread, "unread");
+         updateNumOf(&MailFolderStatus::newmsgs, "newmsgs");
+         updateNumOf(&MailFolderStatus::flagged, "flagged");
+         updateNumOf(&MailFolderStatus::searched, "searched");
       }
 
       mfStatusCache->UpdateStatus(GetName(), status);
