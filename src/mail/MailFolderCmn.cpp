@@ -2211,22 +2211,13 @@ bool MailFolderCmn::CountAllMessages(MailFolderStatus *status) const
 // MailFolderCmn message status
 // ----------------------------------------------------------------------------
 
-// msg status info
-//
-// NB: name MessageStatus is already taken by MailFolder
-struct MsgStatus
-{
-   bool recent;
-   bool unread;
-   bool newmsgs;
-   bool flagged;
-   bool searched;
-};
-
 // is this message recent/new/unread/...?
-static MsgStatus AnalyzeStatus(int stat)
+//
+// The returned MailFolderStatus total field is unused and the other ones have
+// values of 0 or 1 only.
+static MailFolderStatus AnalyzeStatus(int stat)
 {
-   MsgStatus status;
+   MailFolderStatus status;
 
    // deal with recent and new (== recent and !seen)
    status.recent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
@@ -2287,8 +2278,8 @@ MailFolderCmn::SendMsgStatusChangeEvent()
             n++;
          }
 
-         MsgStatus msgStatusOld = AnalyzeStatus(statusOld),
-                   msgStatusNew = AnalyzeStatus(statusNew);
+         const auto msgStatusOld = AnalyzeStatus(statusOld),
+                    msgStatusNew = AnalyzeStatus(statusNew);
 
          // we consider that a message has some flag only if it is not deleted
          // (which is discussable at least for flagged and searched flags
