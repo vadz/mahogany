@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(Mahogany, 0.67)
+AC_INIT(Mahogany, 0.68)
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
