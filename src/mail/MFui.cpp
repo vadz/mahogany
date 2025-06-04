@@ -80,7 +80,7 @@ SizeToString(unsigned long sizeBytes,
          break;
 
       case MessageSize_Bytes:
-         s.Printf(_("%lu%s"), sizeBytes, terse ? "" : _(" bytes"));
+         s.Printf(_("%lu%s"), sizeBytes, terse ? wxString{} : _(" bytes"));
          break;
 
       case MessageSize_KBytes:

@@ -3463,7 +3463,7 @@ void wxComposeView::SetEncodingToSameAs(const Message *msg)
 void wxComposeView::EnableEditing(bool enable)
 {
    // indicate the current state in the status bar
-   SetStatusText(enable ? "" : _("RO"), 1);
+   SetStatusText(enable ? wxString{} : _("RO"), 1);
 
    m_editor->Enable(enable);
 }

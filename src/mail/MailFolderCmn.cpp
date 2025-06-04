@@ -1887,7 +1887,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ProcessNewMail(%lu msgs) for %s",
               GetName(),
               (unsigned long)uidsNew.GetCount(),
-              folderDst ? folderDst->GetFullName() : "ourselves");
+              folderDst ? folderDst->GetFullName() : wxString("ourselves"));
 
    // use the settings for the folder where the new mail is!
    MFolder *folderWithNewMail;
