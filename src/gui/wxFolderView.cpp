@@ -1934,9 +1934,9 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    {
       String colName = GetColumnName(col).Lower();
 
-      menu.Append(WXMENU_FVIEW_SORT_BY_COL + col,
+      menu.Append(WXMENU_FVIEW_SORT_BY_COL + static_cast<int>(col),
                   wxString::Format(_("Sort by %s"), colName));
-      menu.Append(WXMENU_FVIEW_SORT_BY_COL_REV + col,
+      menu.Append(WXMENU_FVIEW_SORT_BY_COL_REV + static_cast<int>(col),
                   wxString::Format(_("Reverse sort by %s"), colName));
       menu.AppendSeparator();
    }

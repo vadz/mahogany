@@ -891,7 +891,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       case wxFONTENCODING_ISO8859_13:
       case wxFONTENCODING_ISO8859_14:
       case wxFONTENCODING_ISO8859_15:
-         id = WXMENU_LANG_ISO8859_1 + encoding - wxFONTENCODING_ISO8859_1;
+         id = static_cast<int>(WXMENU_LANG_ISO8859_1) + encoding - wxFONTENCODING_ISO8859_1;
          break;
 
       case wxFONTENCODING_CP1250:
@@ -902,7 +902,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       case wxFONTENCODING_CP1255:
       case wxFONTENCODING_CP1256:
       case wxFONTENCODING_CP1257:
-         id = WXMENU_LANG_CP1250 + encoding - wxFONTENCODING_CP1250;
+         id = static_cast<int>(WXMENU_LANG_CP1250) + encoding - wxFONTENCODING_CP1250;
          break;
 
       case wxFONTENCODING_KOI8:
