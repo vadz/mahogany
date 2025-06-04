@@ -3,7 +3,7 @@
 // File name:   classes/MFilter.cpp - implements MFilter and related classes
 // Purpose:     non GUI filter classes responsible for storing filters in
 //              profile
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     2000
 // CVS-ID:      $Id$

@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxComposeView.h - composer GUI frame class
 // Purpose:     wxComposeView declaration
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$

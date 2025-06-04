@@ -3,11 +3,11 @@
 // File name:   Mcommon.h - the common declarations included by everyone
 // Purpose:     contains debugging and logging macros, mainly, which everyone
 //              needs
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     11.07.99
 // CVS-ID:      $Id$
-// Copyright:   (c) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)
+// Copyright:   (c) 1998-2000 by Karsten BallÃ¼der (Ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

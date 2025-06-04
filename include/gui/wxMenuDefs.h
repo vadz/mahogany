@@ -4,7 +4,7 @@
 // Purpose:     the definitions of all menu (and toolbar, inspite the name)
 //              items are gathered here complemented with some convenience
 //              functions for menu/toolbar creation
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by: Vadim Zeitlin
 // Created:     09.08.98
 // CVS-ID:      $Id$

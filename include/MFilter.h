@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MFilter - a class for managing filter config settings            *
  *                                                                  *
- * (C) 2000 by Karsten Ballüder (ballueder@gmx.net)                 *
+ * (C) 2000 by Karsten BallÃ¼der (ballueder@gmx.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/

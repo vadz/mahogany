@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxIconManager - allocating and deallocating icons for drawing    *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (ballueder@gmx.net)            *
+ * (C) 1997-1999 by Karsten BallÃ¼der (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

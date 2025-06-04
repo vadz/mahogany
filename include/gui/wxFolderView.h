@@ -2,7 +2,7 @@
 // Project:     Mahogany - cross platform e-mail GUI client
 // File name:   gui/wxFolderView.h - wxFolderView and related classes
 // Purpose:     wxFolderView is used to show to the user folder contents
-// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Author:      Karsten BallÃ¼der (Ballueder@gmx.net)
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

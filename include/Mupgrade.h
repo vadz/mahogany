@@ -2,11 +2,11 @@
 // Project:     M
 // File name:   Mupgrade.h - config and upgrading functionality
 // Purpose:     
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     29.11.98
 // CVS-ID:      $Id$
-// Copyright:   (c) 1998 Karsten Ballüder <Ballueder@usa.net>
+// Copyright:   (c) 1998 Karsten BallÃ¼der <Ballueder@usa.net>
 // Licence:     M license
 // //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 

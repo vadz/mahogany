@@ -3,7 +3,7 @@
 // File name:   mail/Message.cpp: implements some static Message methods
 // Purpose:     Message is an ABC but it provides some utility functions which
 //              we implement here, the rest is in MessageCC
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$

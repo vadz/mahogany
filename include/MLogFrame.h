@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MLogFrame.h : baseclass for window printing log output           *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten BallÃ¼der (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/

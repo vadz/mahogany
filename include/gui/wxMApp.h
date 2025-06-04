@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxMApp.h - GUI-specific part of application logic
 // Purpose:     declares wxMApp class implementing MApplication ABC
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

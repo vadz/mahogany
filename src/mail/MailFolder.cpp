@@ -3,11 +3,11 @@
 // File name:   mail/MailFolder.cpp: generic MailFolder methods which don't
 //              use cclient (i.e. don't really work with mail folders)
 // Purpose:     handling of mail folders with c-client lib
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Copyright:   (C) 1997-2000 by Karsten BallÃ¼der (ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

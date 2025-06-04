@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMDialogs.cpp : wxWindows version of dialog boxes               *
  *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1998-2000 by Karsten BallÃ¼der (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/

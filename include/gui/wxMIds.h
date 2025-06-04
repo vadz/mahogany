@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMIds.h : define numeric ids and menu names                     *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten BallÃ¼der (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/

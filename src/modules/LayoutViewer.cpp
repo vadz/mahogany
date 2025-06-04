@@ -5,7 +5,7 @@
 //              using bits and pieces of the original Karsten's code but
 //              repackaged in a modular way and separated from the rest of
 //              defunct wxMessageView
-// Author:      Vadim Zeitlin (based on code by Karsten Ballüder)
+// Author:      Vadim Zeitlin (based on code by Karsten BallÃ¼der)
 // Modified by:
 // Created:     24.07.01
 // CVS-ID:      $Id$

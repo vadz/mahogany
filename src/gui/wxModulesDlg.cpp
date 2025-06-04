@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxModulesDlg.cpp
 // Purpose:     dialog to configure the modules [not] to load
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by: Vadim Zeitlin on 2004-07-11 to select modules not to be loaded
 // Created:     13.04.01 (extracted from src/gui/wxComposeView.cpp)
 // CVS-ID:      $Id$

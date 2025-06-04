@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   MessageCC.h - declares MessageCC class
 // Purpose:     implementation of Message using c-client API
-// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Author:      Karsten BallÃ¼der (Ballueder@gmx.net)
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

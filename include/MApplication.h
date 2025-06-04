@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MApplication class: all non GUI specific application stuff       *
  *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten BallÃ¼der (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/

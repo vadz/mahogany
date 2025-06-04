@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * strutil.h : utility functions for string handling                *
  *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998-2000 by Karsten BallÃ¼der (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *

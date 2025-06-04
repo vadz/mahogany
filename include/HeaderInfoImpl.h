@@ -2,11 +2,11 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   include/HeaderInfoImpl.h: HeaderInfoListImpl class
 // Purpose:     provide implementation of the ABC HeaderInfoList
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$
-// Copyright:   (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)
+// Copyright:   (C) 1998-2000 by Karsten BallÃ¼der (karsten@phy.hw.ac.uk)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

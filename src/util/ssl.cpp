@@ -2,11 +2,11 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   util/ssl.cpp
 // Purpose:     SSL support functions
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     24.01.01 (extracted from MailFolderCC.cpp)
 // CVS-ID:      $Id$
-// Copyright:   (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Copyright:   (C) 1997-2000 by Karsten BallÃ¼der (ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxFiltersDialog.cpp - GUI for editing mail filters
 // Purpose:     implements all the dialogs for configuring filters
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1999
 // CVS-ID:      $Id$

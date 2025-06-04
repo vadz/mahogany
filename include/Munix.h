@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Munix.h - unix specific configuration                            *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997 by Karsten BallÃ¼der (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/

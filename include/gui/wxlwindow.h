@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxLwindow.h : a scrolled Window for displaying/entering rich text*
  *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
+ * (C) 1998-2000 by Karsten BallÃ¼der (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

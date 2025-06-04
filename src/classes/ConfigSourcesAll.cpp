@@ -45,7 +45,7 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 // ----------------------------------------------------------------------------
 
 /**
-   wxConfigMultiplexer is a wxConfig façade for AllConfigSources.
+   wxConfigMultiplexer is a wxConfig faÃ§ade for AllConfigSources.
 
    wxConfigMultiplexer presents wxConfig interface for AllConfigSources
    functionality, i.e. it reads from all config sources and not just from the

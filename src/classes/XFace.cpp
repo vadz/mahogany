@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * XFace.cc -  a class encapsulating XFace handling                 *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (ballueder@gmx.net)            *
+ * (C) 1998-1999 by Karsten BallÃ¼der (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

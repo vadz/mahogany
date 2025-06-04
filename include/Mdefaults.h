@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   Mdefaults.h: Mahogany options and their default values
 // Purpose:     functions for reading the value of an option from Profile
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by: Vadim Zeitlin at 22.08.01 to use MOption class
 // Created:     1997
 // CVS-ID:      $Id$

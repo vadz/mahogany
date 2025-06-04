@@ -2,11 +2,11 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/ProvBbdb.cpp - AdbDataProvider interfacing to
 //              .bbdb from emacs
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     20 Jan 1999
 // CVS-ID:      $Id$
-// Copyright:   (c) 1999 Karsten Ballüder <Ballueder@usa.net>
+// Copyright:   (c) 1999 Karsten BallÃ¼der <Ballueder@usa.net>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -5,7 +5,7 @@
 // Purpose:     functions common to all MailFolder implementations, in
 //              particular handling of folder closing (including keep alive
 //              logic) and the new mail processing (filtering, collecting, ...)
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     02.04.01 (extracted from mail/MailFolder.cpp)
 // CVS-ID:      $Id$

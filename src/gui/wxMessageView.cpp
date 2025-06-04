@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxMessageView.cpp - message viewer window
 // Purpose:     implementation of msg viewer using wxWindows
-// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Author:      Karsten BallÃ¼der (Ballueder@gmx.net)
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$

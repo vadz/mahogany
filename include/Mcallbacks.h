@@ -2,7 +2,7 @@
  * Mcallbacks.h : define the names of all callback functions for    *
  *                use in profiles                                   *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten BallÃ¼der (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$             *
  *

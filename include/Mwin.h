@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Mwin.h - Windows specific configuration                          *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten BallÃ¼der (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/

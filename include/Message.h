@@ -2,11 +2,11 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   Message.h: declaration of the Message class interface
 // Purpose:     Message is an ABC for the classes representing a mail message
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (c) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Copyright:   (c) 1997-2000 by Karsten BallÃ¼der (ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

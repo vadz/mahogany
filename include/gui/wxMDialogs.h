@@ -1,7 +1,7 @@
 /*******************************************************************
  * wxMDialogs.h : wxWindows version of dialog boxes                 *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (ballueder@bmx.net)            *
+ * (C) 1998-1999 by Karsten BallÃ¼der (ballueder@bmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

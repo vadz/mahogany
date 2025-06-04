@@ -2,7 +2,7 @@
 // Project:     M
 // File name:   PythonHelp.h - functions for working with Python
 // Purpose:     some simple high-level functions for calling Python code
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$

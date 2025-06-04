@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   Profile.h: Mahogany Profile class
 // Purpose:     Profiles are used for storing all program options and much more
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

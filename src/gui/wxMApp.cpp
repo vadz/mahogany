@@ -3,7 +3,7 @@
 // File name:   gui/wxMApp.cpp - GUI-specific part of application logic
 // Purpose:     program application, startup, non-portable hooks to implement
 //              the functionality needed by MApplication, also log window impl
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

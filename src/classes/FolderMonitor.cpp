@@ -6,7 +6,7 @@
 // Modified by:
 // Created:     13.11.01 (based on MailCollector.cpp)
 // CVS-ID:      $Id$
-// Copyright:   (c) 1999-2000 Karsten Ballüder (Ballueder@gmx.net)
+// Copyright:   (c) 1999-2000 Karsten BallÃ¼der (Ballueder@gmx.net)
 //              (c) 2001      Vadim Zeitlin    <vadim@wxwindows.org>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////

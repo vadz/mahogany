@@ -4,11 +4,11 @@
 // Purpose:     HeaderInfo contains all envelope information for one message,
 //              HeaderInfoList knows how to retrieve HeaderInfos for the given
 //              folder
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$
-// Copyright:   (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)
+// Copyright:   (C) 1998-2000 by Karsten BallÃ¼der (karsten@phy.hw.ac.uk)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

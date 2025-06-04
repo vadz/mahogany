@@ -2,7 +2,7 @@
 // Project:     M
 // File name:   src/gui/ImportFoldersWizard.cpp
 // Purpose:     Implementation of the folder import wizard.
-// Author:      Karsten Ballüder (ballueder@gmx.net)
+// Author:      Karsten BallÃ¼der (ballueder@gmx.net)
 // Created:     2010-05-18 (extracted from src/gui/wxWizards.cpp)
 // CVS-ID:      $Id$
 // Copyright:   (c) 2000-2010 M-Team

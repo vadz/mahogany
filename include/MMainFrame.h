@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MMainFrame.h : application's main frame                          *
  *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
+ * (C) 1997-2000 by Karsten BallÃ¼der (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *

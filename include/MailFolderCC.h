@@ -2,11 +2,11 @@
 // Project:     Mahogany - cross platform e-mail GUI client
 // File name:   MailFolderCC.h: declaration of MailFolderCC class
 // Purpose:     handling of mail folders with c-client lib
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (C) 1997-2001 by Karsten Ballüder (ballueder@gmx.net)
+// Copyright:   (C) 1997-2001 by Karsten BallÃ¼der (ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

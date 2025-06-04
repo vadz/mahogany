@@ -3,7 +3,7 @@
 // File name:   wxMessageView.h: wxMessageView and wxMessageViewFrame
 // Purpose:     wxMessageView adds missing GUI bits and pieces to MessageView:
 //              it shows the popup menu when needed &c
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

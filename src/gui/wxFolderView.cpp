@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxFolderView.cpp - window with folder view inside
 // Purpose:     wxFolderView is used to show to the user folder contents
-// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Author:      Karsten BallÃ¼der (Ballueder@gmx.net)
 // Modified by: VZ at 13.07.01: use virtual list control, update on demand
 // Created:     1997
 // CVS-ID:      $Id$

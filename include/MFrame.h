@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MFrame.h : GUI independent frame/window representation           *
  *                                                                  *
- * (C) 1997, 1998 by Karsten Ballüder (Ballueder@usa.net)           *
+ * (C) 1997, 1998 by Karsten BallÃ¼der (Ballueder@usa.net)           *
  *                                                                  *
  * $Id$
  *******************************************************************/

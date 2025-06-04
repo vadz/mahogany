@@ -3,7 +3,7 @@
 // File name:   mail/HeaderInfoImpl.cpp - implements HeaderInfo(List) classes
 // Purpose:     implements HI in the simplest way: just store all data in
 //              memory
-// Author:      Vadim Zeitlin, Karsten Ballüder
+// Author:      Vadim Zeitlin, Karsten BallÃ¼der
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

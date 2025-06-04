@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Calendar - a Calendar module for Mahogany                        *
  *                                                                  *
- * (C) 2000 by Karsten Ballüder (Ballueder@gmx.net)                 *
+ * (C) 2000 by Karsten BallÃ¼der (Ballueder@gmx.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -1082,7 +1082,7 @@ MMODULE_BEGIN_IMPLEMENT(CalendarModule,
                         "1.00")
    MMODULE_PROP("description",
                 _("This module provides a calendar and scheduling plugin."))
-   MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
+   MMODULE_PROP("author", "Karsten BallÃ¼der <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(CalendarModule)
 
 

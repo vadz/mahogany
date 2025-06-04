@@ -3,7 +3,7 @@
 // File name:   Mconfig.h: common compilation configuration settings
 // Purpose:     config.h is edited by the user, this one detects the rest
 //              automatically
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$

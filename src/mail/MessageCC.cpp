@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   mail/MessageCC.cpp - implements MessageCC class
 // Purpose:     implementation of a message structure using cclient API
-// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Author:      Karsten BallÃ¼der (Ballueder@gmx.net)
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$

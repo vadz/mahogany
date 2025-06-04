@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   guidef.h
 // Purpose:     miscellaneous GUI helpers
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Created:     1998
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998-2006 Mahogany team

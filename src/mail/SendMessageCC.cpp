@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   mail/SendMessageCC.cpp: implementation of SendMessageCC
 // Purpose:     sending/posting of mail messages with c-client lib
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$

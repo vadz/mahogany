@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * sysutil.cpp : utility functions for various OS functionality     *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999 by Karsten BallÃ¼der (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
  *                                                                  *

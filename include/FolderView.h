@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   FolderView.h - interface of the folder view class
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)
+// Copyright:   (C) 1997-2000 by Karsten BallÃ¼der (Ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MModule - a pluggable module architecture for Mahogany           *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)              *
+ * (C) 1999 by Karsten BallÃ¼der (karsten@phy.hw.ac.uk)              *
  *                                                                  *
  * $Id$
  *******************************************************************/

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Filters - a pluggable module for filtering messages              *
  *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (ballueder@gmx.net)            *
+ * (C) 1999-2000 by Karsten BallÃ¼der (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

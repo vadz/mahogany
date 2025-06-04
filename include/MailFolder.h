@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   MailFolder.h: MailFolder class declaration
 // Purpose:     MailFolder is the ABC defining the interface to mail folders
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by: Vadim Zeitlin at 24.01.01: complete rewrite of update logic
 // Created:     1997
 // CVS-ID:      $Id$

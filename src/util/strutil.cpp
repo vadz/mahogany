@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * strutil.cc : utility functions for string handling               *
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1998,1999 by Karsten BallÃ¼der (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *                                                                  *

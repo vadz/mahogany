@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxllist: wxLayoutList, a layout engine for text and graphics     *
  *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
+ * (C) 1998-2000 by Karsten BallÃ¼der (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

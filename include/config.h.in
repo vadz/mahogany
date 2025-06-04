@@ -1,12 +1,12 @@
 /*-*- c++ -*-********************************************************
  * config.h.in: config.h template file for use with autoconf        *
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998,1999 by Karsten BallÃ¼der (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
 /// @package M
-/// @author Karsten Ballüder (Ballueder@usa.net)
+/// @author Karsten BallÃ¼der (Ballueder@usa.net)
 /**@name config.h.in: Defines generated automatically from configure.in by autoheader.  */
 //@{
 #ifndef __cplusplus

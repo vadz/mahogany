@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MHelp.h : M's help system, based on numeric help topic ids       *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten BallÃ¼der (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/

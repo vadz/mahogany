@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxComposeView.cpp - composer GUI code
 // Purpose:     shows a frame containing the header controls and editor window
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$

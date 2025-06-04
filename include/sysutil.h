@@ -2,10 +2,10 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   include/sysutil.h
 // Purpose:     utility functions for various OS-level functionality
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Created:     1999
 // CVS-ID:      $Id$
-// Copyright:   (c) 1999 Karsten Ballüder
+// Copyright:   (c) 1999 Karsten BallÃ¼der
 //              (c) 2000-2006 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////

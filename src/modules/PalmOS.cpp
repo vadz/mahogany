@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * PalmOS -  PalmOS connectivity module for Mahogany                *
  *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)           *
+ * (C) 1999-2000 by Karsten BallÃ¼der (Ballueder@gmx.net)           *
  *                  Daniel Seifert (dseifert@gmx.net)               *
  *                                                                  *
  * $Id$              *
@@ -618,7 +618,7 @@ MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
                         "1.00")
    MMODULE_PROP("description",
                 _("This module provides PalmOS connectivity"))
-   MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
+   MMODULE_PROP("author", "Karsten BallÃ¼der <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(PalmOSModule)
 
 

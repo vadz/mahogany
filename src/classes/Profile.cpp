@@ -2,7 +2,7 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   Profile.cpp
 // Purpose:     implementation of Profile &c
-// Author:      Karsten Ballüder
+// Author:      Karsten BallÃ¼der
 // Modified by: Vadim Zeitlin at 26.08.03 to use AllConfigSources
 // Created:     1998
 // CVS-ID:      $Id$

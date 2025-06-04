@@ -2,14 +2,14 @@
  * ASMailFolder class: ABC defining the interface for asynchronous  *
  *                     mail folders                                 *
  *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (balluder@gmx.net)             *
+ * (C) 1999-2000 by Karsten BallÃ¼der (balluder@gmx.net)             *
  *                                                                  *
  * $Id$
  *******************************************************************/
 
 /**
    @package Mailfolder access
-   @author  Karsten Ballüder
+   @author  Karsten BallÃ¼der
 */
 #ifndef ASMAILFOLDER_H
 #define ASMAILFOLDER_H

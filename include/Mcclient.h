@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Mc-client.h - c-client header inclusion for Mahogany             *
  *                                                                  *
- * (C) 2000 by Karsten Ballüder (Ballueder@gmx.net)                 *
+ * (C) 2000 by Karsten BallÃ¼der (Ballueder@gmx.net)                 *
  *                                                                  *
  * $Id$
  *                                                                  *

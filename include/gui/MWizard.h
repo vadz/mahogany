@@ -2,7 +2,7 @@
 // Project:     M
 // File name:   include/gui/MWizard.h
 // Purpose:     Declaration of MWizard class.
-// Author:      Karsten Ballüder (ballueder@gmx.net)
+// Author:      Karsten BallÃ¼der (ballueder@gmx.net)
 // Created:     2010-05-18 (extracted from src/gui/wxWizards.cpp)
 // CVS-ID:      $Id$
 // Copyright:   (c) 2000-2010 M-Team

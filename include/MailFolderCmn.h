@@ -4,11 +4,11 @@
 // Purpose:     MailFolderCmn is a normal base class implementing the methods
 //              of MailFolder ABC for which we can write a reasonable generic
 //              implementation
-// Author:      Karsten Ballüder, Vadim Zeitlin
+// Author:      Karsten BallÃ¼der, Vadim Zeitlin
 // Modified by:
 // Created:     1998
 // CVS-ID:      $Id$
-// Copyright:   (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Copyright:   (C) 1998-2000 by Karsten BallÃ¼der (ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 

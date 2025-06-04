@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxlwindow.cpp : a scrolled Window for displaying/entering rich text*
  *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
+ * (C) 1998-2000 by Karsten BallÃ¼der (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -432,7 +432,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
          if ( m_Selecting )
          {
             // end selection at the cursor position corresponding to the
-            // current mouse position, but don´t move cursor there.
+            // current mouse position, but don't move cursor there.
             m_llist->EndSelection(cursorPos,m_ClickPosition);
             m_Selecting = false;
             // copy selected text to primary selection without
