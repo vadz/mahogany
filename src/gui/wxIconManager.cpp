@@ -34,6 +34,8 @@
 #include <wx/file.h>
 #include <wx/filename.h>
 
+#include <fstream>
+
 #ifdef USE_ICONS_FROM_RESOURCES
 #  define   unknown_xpm     "unknown"
 #  define   MFrame_xpm      "mframe"
@@ -306,7 +308,7 @@ wxIconManager::LoadXpm(String filename)
    ASSERT(cpptr);
    bool found_xpm = false;
 
-   ifstream in(filename.mb_str());
+   std::ifstream in(filename.mb_str());
    if(in)
    {
       String str;

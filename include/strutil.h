@@ -11,6 +11,8 @@
 #ifndef STRUTIL_H
 #define STRUTIL_H
 
+#include <iostream>
+
 #include <time.h>          // for time_t
 
 #include "FolderType.h"    // for strutil_expandfoldername
@@ -37,7 +39,7 @@ inline bool strutil_isempty(const wxChar *s) { return s == NULL || *s == _T('\0'
     @param istr reference to an input stream
     @param str reference to the string to write to
 */
-void strutil_getstrline(istream &istr, String &str);
+void strutil_getstrline(std::istream &istr, String &str);
 
 /** Read a folded string into a string variable.
 
@@ -46,7 +48,7 @@ void strutil_getstrline(istream &istr, String &str);
     @param istr reference to an input stream
     @param str reference to the string to write to
 */
-void strutil_getfoldedline(istream &istr, String &str);
+void strutil_getfoldedline(std::istream &istr, String &str);
 
 /** Get the part of a string before the delimiter.
 

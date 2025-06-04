@@ -35,6 +35,8 @@
 #include "adb/AdbBook.h"
 #include "adb/AdbDataProvider.h"
 
+#include <fstream>
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -117,7 +119,7 @@ public:
    bool IsDirty() const;
    void ClearDirty();
 
-   bool ReadFromStream(istream &stream);
+   bool ReadFromStream(std::istream &stream);
    
 private:
    virtual ~LineBook();
@@ -152,7 +154,7 @@ private:
    bool m_dirty;
 };
 
-ostream& operator << (ostream& out, const LineEntryData& entry);
+std::ostream& operator << (std::ostream& out, const LineEntryData& entry);
 
 // our AdbEntryData implementation
 class LineEntry : public AdbEntry
@@ -249,10 +251,10 @@ LineBook::LineBook(const String& file)
    m_bad = false;
    m_dirty = false;
    
-   ifstream stream(m_file.fn_str());
+   std::ifstream stream(m_file.fn_str());
    if ( !stream.good() )
    {
-      ofstream create(m_file.fn_str(), ios::out|ios::ate);
+      std::ofstream create(m_file.fn_str(), std::ios::out|std::ios::ate);
       if ( !create.good() )
          goto FileError;
       create.close();
@@ -369,7 +371,7 @@ bool LineBook::Flush()
    {
       String commit = wxFileName::CreateTempFileName(wxEmptyString);
       
-      ofstream stream(commit.fn_str());
+      std::ofstream stream(commit.fn_str());
       if ( !stream.good() )
          goto FileError;
       
@@ -418,7 +420,7 @@ void LineBook::ClearDirty()
    }
 }
 
-bool LineBook::ReadFromStream(istream &stream)
+bool LineBook::ReadFromStream(std::istream &stream)
 {
    for(;;)
    {
@@ -525,7 +527,7 @@ int LineEntryData::Matches(const wxChar *what, int /*where*/, int how) const
    return addressCopy.Matches(whatCopy) ? AdbLookup_EMail : 0;
 }
 
-ostream& operator << (ostream& out, const LineEntryData& entry)
+std::ostream& operator << (std::ostream& out, const LineEntryData& entry)
 {
    String address;
    entry.GetField(AdbField_EMail, &address);
@@ -533,7 +535,7 @@ ostream& operator << (ostream& out, const LineEntryData& entry)
    String nonspace = LineEntry::StripSpace(address);
    
    if ( nonspace.size() > 0 )
-      out << nonspace << endl;
+      out << nonspace << std::endl;
    
    return out;
 }

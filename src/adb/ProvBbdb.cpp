@@ -49,11 +49,7 @@
 #include <wx/file.h>
 #include <wx/filename.h>
 
-#if wxUSE_IOSTREAMH
-#  include <fstream.h>                  // for ifstream
-#else
-#  include <fstream>                    // for ifstream
-#endif
+#include <fstream>                    // for ifstream
 
 #include "strlist.h"
 
@@ -143,7 +139,7 @@ public:
    static StringListList ReadVector(String *string);
    static StringListListList ReadListOfVectors(String *string);
 
-   static void WriteString(ostream &out, String const &string);
+   static void WriteString(std::ostream &out, String const &string);
 
    static bool ReadNil(String *line);
    static bool ReadHeader(String *version, String *line);
@@ -412,7 +408,7 @@ BbdbEntry::ReadString(String * line, bool *success)
 }
 
 void
-BbdbEntry::WriteString(ostream &out, String const &string)
+BbdbEntry::WriteString(std::ostream &out, String const &string)
 {
    const wxChar *cptr;
 
@@ -676,12 +672,12 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    BbdbEntry *e;
    wxString line, version;
    int ignored = 0, entries_read = 0;
-   ifstream file(strName.mb_str());
+   std::ifstream file(strName.mb_str());
    int length = 0;
 
-   file.seekg(0, ios::end);
+   file.seekg(0, std::ios::end);
    length = (int) (file.tellg() / 1024);
-   file.seekg(0, ios::beg);
+   file.seekg(0, std::ios::beg);
 
    // read the header info
    strutil_getstrline(file,line);
@@ -777,9 +773,9 @@ BbdbEntryGroup::~BbdbEntryGroup()
                                       length, NULL, wxPD_APP_MODAL);
 
          String str;
-         ofstream out(m_strName.mb_str());
+         std::ofstream out(m_strName.mb_str());
          size_t n,m;
-         out << ";;; file-version: 2" << endl;
+         out << ";;; file-version: 2" << std::endl;
          for(i = m_entries->begin(); i != m_entries->end(); i++)
          {
             e = *i;
@@ -852,7 +848,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
                e->GetEMail(m, &str);
                out << '"' << str << "\" ";
             }
-            out << ") nil nil]" << endl;
+            out << ") nil nil]" << std::endl;
          }
          status_frame.Update(++count);
       }
@@ -1070,7 +1066,7 @@ BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
          // and Test_Create
          if(wxFileExists(name))
          {
-            ifstream file(name.mb_str());
+            std::ifstream file(name.mb_str());
             String line;
             strutil_getstrline(file, line);
             return BbdbEntry::ReadHeader(NULL, &line);

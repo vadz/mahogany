@@ -77,7 +77,7 @@ static String strutil_decrypt_tf(const String& cleartext);
 // ============================================================================
 
 void
-strutil_getstrline(istream &istr, String &str)
+strutil_getstrline(std::istream &istr, String &str)
 {
    char ch;
    str = wxEmptyString;
@@ -91,7 +91,7 @@ strutil_getstrline(istream &istr, String &str)
 }
 
 void
-strutil_getfoldedline(istream &istr, String &str)
+strutil_getfoldedline(std::istream &istr, String &str)
 {
    char ch;
    str = wxEmptyString;

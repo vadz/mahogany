@@ -67,6 +67,8 @@
 #include <wx/datetime.h>
 #include <wx/scopeguard.h>
 
+#include <fstream>
+
 extern bool InitSSL(); // from src/util/ssl.cpp
 
 class MOption;
@@ -2081,9 +2083,9 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
 {
    // note that we have to repeat ios::out and binary below, otherwise gcc 3.0
    // refuses to compile it as it converts everything to int and then fails
-   ofstream ostr(filename.mb_str(),
-                 append ? ios::out | ios::binary
-                        : ios::out | ios::binary | ios::trunc);
+   std::ofstream ostr(filename.mb_str(),
+                      append ? std::ios::out | std::ios::binary
+                             : std::ios::out | std::ios::binary | std::ios::trunc);
 
    bool ok = !(!ostr || ostr.bad());
    if ( ok )
@@ -2137,7 +2139,7 @@ SendMessageCC::WriteToFolder(String const &name)
 // rfc822_output() callback for writing into a file
 static long write_stream_output(void *stream, char *string)
 {
-   ostream *o = (ostream *)stream;
+   std::ostream *o = (std::ostream *)stream;
    *o << static_cast<const char *>(wxString::From8BitData(string).ToUTF8());
    if ( o->fail() )
       return NIL;

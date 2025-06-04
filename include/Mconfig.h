@@ -169,19 +169,6 @@
 #   define    Str(str) str
 #endif
 
-// you can't mix iostream.h and iostream, the former doesn't compile
-// with "using namespace std", the latter doesn't compile with older
-// compilers.
-
-#if wxUSE_IOSTREAMH
-#  include <iostream.h>
-#  include <fstream.h>
-#else
-#  include <iostream>
-#  include <fstream>
-   using namespace std;
-#endif
-
 // set the proper STL class names
 #ifdef  CC_MSC
 # define  STL_LIST  std::list
