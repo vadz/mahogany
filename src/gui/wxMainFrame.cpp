@@ -109,24 +109,17 @@ extern int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent);
 
 #ifdef OS_WIN
 
-// For now this is only defined under Windows but maybe we can find some way to
-// do it elsewhere too later (but this would only be useful if/when wx
-// implements resume events generation for the other platforms).
-#define CAN_CHECK_NETWORK_STATE
-
 #include <wx/dynlib.h>
 
-// Check if we have network connection at all. This is a bit vague but seems to
-// do roughly what we need here, i.e. if this function returns false we have
-// really no chance of connecting to the remote servers while it might work if
-// it returns true.
-static bool IsNetworkAvailable()
+// Check until we think we have a working network, but not for longer than the
+// specified timeout.
+static bool WaitForNetwork(int timeoutInSec)
 {
    static wxDynamicLibrary s_dllWinINet("wininet", wxDL_QUIET);
    if ( !s_dllWinINet.IsLoaded() )
    {
-      // If we can't check for it, it's better to assume that it is available
-      // immediately than never returning true at all.
+      // If we can't check for it, we have no choice but to assume that it is
+      // available immediately.
       return true;
    }
 
@@ -139,11 +132,106 @@ static bool IsNetworkAvailable()
       return true;
    }
 
-   DWORD flags;
-   return (*s_pfnInternetGetConnectedState)(&flags, 0) == TRUE;
+   for ( int n = 0; n < timeoutInSec/2; n++ )
+   {
+      DWORD flags;
+      if ( (*s_pfnInternetGetConnectedState)(&flags, 0) == TRUE )
+      {
+         wxLogDebug("Network is available.");
+         return true;
+      }
+
+      wxLogDebug("Network is still not available, sleeping.");
+      wxMilliSleep(500);
+   }
+
+   return false;
 }
 
-#endif // OS_WIN
+#elif defined(OS_LINUX)
+
+// Use Linux-specific connection timeout support to quickly check if we can
+// connect to some well-known server.
+
+#include <stdint.h>
+#include <unistd.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+
+static bool WaitForNetwork(int timeoutInSec)
+{
+   const int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+   if ( sock == -1 )
+   {
+      // This is really unexpected.
+      return false;
+   }
+
+   struct SocketCloser
+   {
+      explicit SocketCloser(int sock) : m_sock(sock) {}
+      ~SocketCloser() { close(m_sock); }
+
+      const int m_sock;
+   } closer{sock};
+
+   // Timeout must be expressed in ms.
+   const uint32_t timeout = 1000*timeoutInSec;
+   setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &timeout, sizeof(timeout));
+
+   // Hardcode 1.1.1.1 as a well-known always online HTTP server.
+   sockaddr_in address;
+   address.sin_family = AF_INET;
+   address.sin_addr.s_addr = 0x01010101;
+   address.sin_port = htons(80);
+
+   const auto start = wxDateTime::UNow();
+   wxLogDebug("Start trying to connect to 1.1.1.1 at %s...",
+              start.Format("%H:%M:%S.%l"));
+
+   // Connect may fail immediately if the network is not up yet, so wait for
+   // half of the timeout before giving up on it.
+   const auto end = start + wxTimeSpan::Seconds(timeoutInSec/2);
+   for ( ;; )
+   {
+      if ( connect(sock, (sockaddr*)&address, sizeof(address)) == 0 )
+         break;
+
+      const auto now = wxDateTime::UNow();
+      if ( now > end )
+      {
+         // We waited long enough, give up.
+         wxLogDebug("Connection failed at %s: %s",
+                    now.Format("%H:%M:%S.%l"),
+                    wxSysErrorMsgStr());
+         return false;
+      }
+   }
+
+   if ( shutdown(sock, SHUT_RDWR) != 0 )
+   {
+      wxLogDebug("Connection succeeded but shutdown failed: %s",
+                 wxSysErrorMsgStr());
+      return false;
+   }
+
+   wxLogDebug("Connection and shutdown succeeded, network seems to be up at %s.",
+              wxDateTime::UNow().Format("%H:%M:%S.%l"));
+
+   return true;
+}
+
+#else // other/unsupported platforms
+
+static bool WaitForNetwork(int /* timeoutInSec */)
+{
+   // We don't know how to do this here, so just assume it's available.
+   return true;
+}
+
+#endif // platforms
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -1318,37 +1406,25 @@ void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
                         numFolders),
                numFolders);
 
-#ifdef CAN_CHECK_NETWORK_STATE
    bool checkedNetwork = false;
-#endif // CAN_CHECK_NETWORK_STATE
    for ( MailFolders::iterator i = foldersToResume.begin();
          i != foldersToResume.end();
          ++i )
    {
       MailFolder* const mf = *i;
 
-#ifdef CAN_CHECK_NETWORK_STATE
       if ( !checkedNetwork && mf->NeedsNetwork() )
       {
          // We can get a resume event before the system got reconnected so stay
          // here for a few seconds to give it a chance to do it as otherwise
          // reopening the remote folders after resume would always fail.
-         const long resumeTimeout = READ_APPCONFIG(MP_WAIT_NETWORK_AFTER_RESUME);
-         for ( int n = 0; n < resumeTimeout/2; n++ )
+         if ( !WaitForNetwork(READ_APPCONFIG(MP_WAIT_NETWORK_AFTER_RESUME)) )
          {
-            if ( IsNetworkAvailable() )
-            {
-               wxLogDebug("Network is available.");
-               break;
-            }
-
-            wxLogDebug("Network is still not available, sleeping.");
-            wxMilliSleep(500);
+            wxLogStatus(_("Network seems to be unavailable after resume."));
          }
 
          checkedNetwork = true;
       }
-#endif // CAN_CHECK_NETWORK_STATE
 
       if ( !mf->Resume() )
       {
