@@ -10,6 +10,11 @@
 #ifndef   MCCLIENT_H
 #define   MCCLIENT_H
 
+// MSVS 2022 requires this.
+#ifdef CC_MSC
+   #define M_LOGICAL_OP_NAMES
+#endif
+
 extern "C"
 {
 #  define private cc__private
