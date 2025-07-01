@@ -53,9 +53,15 @@
 
 #include <wx/generic/helpext.h>
 
-#if wxUSE_POSTSCRIPT
+// wxUSE_POSTSCRIPT may be set to 1 under Windows, but we really only want to
+// use it under Unix (and probably not even there, actually...).
+#if defined(OS_UNIX) && wxUSE_POSTSCRIPT
+   #define USE_POSTSCRIPT 1
+#endif
+
+#if USE_POSTSCRIPT
    #include <wx/generic/prntdlgg.h>
-#endif // wxUSE_POSTSCRIPT
+#endif // USE_POSTSCRIPT
 
 #if defined(OS_WIN) || defined(__CYGWIN__)
    #define wxConnection    wxDDEConnection
@@ -1368,7 +1374,7 @@ void wxMApp::CleanUpPrintData()
    // save our preferred printer settings
    if ( m_PrintData )
    {
-#if wxUSE_POSTSCRIPT
+#if USE_POSTSCRIPT
       wxPrintNativeDataBase * const dataNative = m_PrintData->GetNativeData();
       wxPostScriptPrintNativeData * const dataPS =
          wxDynamicCast(dataNative, wxPostScriptPrintNativeData);
@@ -1378,7 +1384,7 @@ void wxMApp::CleanUpPrintData()
          m_profile->writeEntry(MP_PRINT_COMMAND, dataPS->GetPrinterCommand());
          m_profile->writeEntry(MP_PRINT_OPTIONS, dataPS->GetPrinterOptions());
       }
-#endif // wxUSE_POSTSCRIPT
+#endif // USE_POSTSCRIPT
 
       m_profile->writeEntry(MP_PRINT_ORIENTATION, m_PrintData->GetOrientation());
       m_profile->writeEntry(MP_PRINT_MODE, m_PrintData->GetPrintMode());
@@ -1414,7 +1420,7 @@ const wxPrintData *wxMApp::GetPrintData()
    {
       m_PrintData = new wxPrintData;
 
-#if wxUSE_POSTSCRIPT && !defined(__WINE__)
+#if USE_POSTSCRIPT && !defined(__WINE__)
       wxPrintNativeDataBase * const dataNative = m_PrintData->GetNativeData();
       wxPostScriptPrintNativeData * const dataPS =
          wxDynamicCast(dataNative, wxPostScriptPrintNativeData);
@@ -1443,7 +1449,7 @@ const wxPrintData *wxMApp::GetPrintData()
       m_PrintData->SetPaperId((wxPaperSize)(long)READ_APPCONFIG(MP_PRINT_PAPER));
       m_PrintData->SetFilename(READ_APPCONFIG(MP_PRINT_FILE));
       m_PrintData->SetColour(READ_APPCONFIG(MP_PRINT_COLOUR));
-#endif // wxUSE_POSTSCRIPT
+#endif // USE_POSTSCRIPT
    }
 #endif // wxUSE_PRINTING_ARCHITECTURE
 
@@ -1466,14 +1472,14 @@ wxPageSetupDialogData *wxMApp::GetPageSetupData()
    {
       m_PageSetupData = new wxPageSetupDialogData(*GetPrintData());
 
-#if wxUSE_POSTSCRIPT
+#if USE_POSTSCRIPT
       m_PageSetupData->SetMarginTopLeft(wxPoint(
          READ_APPCONFIG(MP_PRINT_TOPMARGIN_X),
          READ_APPCONFIG(MP_PRINT_TOPMARGIN_X)));
       m_PageSetupData->SetMarginBottomRight(wxPoint(
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X),
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X)));
-#endif // wxUSE_POSTSCRIPT
+#endif // USE_POSTSCRIPT
    }
 #endif // wxUSE_PRINTING_ARCHITECTURE
 
