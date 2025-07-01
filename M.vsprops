@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(WXWIN)\wxwidgets.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_NET_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_STC_LIB;wxNO_WEBVIEW_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!--
+        Globally disable some warnings:
+
+        - 4100: 'identifier' : unreferenced formal parameter
+            There are just too many of those and they rarely indicate any serious problem.
+        - 4244: '=': conversion from 'type' to 'type'
+          4267: 'argument': conversion from 'size_t' to 'type', possible loss of data
+            Would be nice to fix but, again, there are just too many of those right now.
+        -->
+      <DisableSpecificWarnings>4100;4244;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>
