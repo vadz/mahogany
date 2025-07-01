@@ -286,7 +286,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
   {
     wxLogStatus(frame,
                 _("Looking for matches for '%s' in the address books..."),
-                what.c_str());
+                what);
   }
 
   MBusyCursor bc;
@@ -351,7 +351,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
 
         if ( frame ) {
           wxLogStatus(frame, _("Expanded '%s' using entries from group '%s'"),
-                      what.c_str(), group->GetDescription().c_str());
+                      what, group->GetDescription());
         }
       }
       else {
@@ -365,7 +365,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
           String name;
           entry->GetField(AdbField_FullName, &name);
           wxLogStatus(frame, _("Expanded '%s' using entry '%s'"),
-                      what.c_str(), name.c_str());
+                      what, name);
         }
       }
     }
@@ -378,7 +378,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
   else {
     if ( frame )
     {
-      wxLogStatus(frame, _("No matches for '%s'."), what.c_str());
+      wxLogStatus(frame, _("No matches for '%s'."), what);
     }
   }
 
@@ -475,7 +475,7 @@ AdbExpandSingleAddress(String *address,
                  // at least cc, bcc and body are also possible but we don't
                  // handle them now
                  wxLogDebug("Ignoring unknown mailto: URL parameter %s=\"%s\"",
-                            param.c_str(), value.c_str());
+                            param, value);
               }
 
               posParamStart = posParamEnd;
@@ -753,7 +753,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
    }
 
    if ( book == NULL ) {
-      wxLogError(_("Can't open the address book '%s'."), name.c_str());
+      wxLogError(_("Can't open the address book '%s'."), name);
    }
    else {
       book->IncRef();

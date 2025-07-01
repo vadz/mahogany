@@ -466,8 +466,7 @@ void DspamFilter::Train(wxWindow *parent)
             (
                wxString::Format
                (
-                  _("Does the folder \"%s\" contain spam?"),
-                  name.c_str()
+                  _("Does the folder \"%s\" contain spam?"), name
                ),
                parent,
                _("Choose DSPAM training mode")
@@ -493,7 +492,7 @@ void DspamFilter::Train(wxWindow *parent)
    if ( !mf )
    {
       wxLogError(_("Failed to open folder \"%s\" with training messages."),
-                 name.c_str());
+                 name);
       return;
    }
 

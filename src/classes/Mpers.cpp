@@ -226,7 +226,7 @@ extern String GetPersMsgBoxHelp(const String& name)
 
    if ( !s )
    {
-      s.Printf(_("unknown (%s)"), name.c_str());
+      s.Printf(_("unknown (%s)"), name);
    }
 
    return s;

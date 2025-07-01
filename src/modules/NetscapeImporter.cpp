@@ -679,7 +679,7 @@ int MNetscapeImporter::GetFeatures() const
 bool MNetscapeImporter::Applies() const
 {
   // just check for ~/.netscape directory
-  bool b = wxDir::Exists(m_PrefDir.c_str());
+  bool b = wxDir::Exists(m_PrefDir);
   return b;
 }
 
@@ -701,7 +701,7 @@ bool MNetscapeImporter::ImportADB()
 
    wxString filename = importer->GetDefaultFilename();
    wxLogMessage(_("Starting importing %s address book '%s'..."),
-                "Netscape", filename.c_str());
+                "Netscape", filename);
    bool ok = AdbImport(filename, "Netscape.adb", "Netscape Address Book", importer);
 
    importer->DecRef();
@@ -728,13 +728,13 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
   // if the mail dir was found in the preferences, it will be used
   // otherwise the default ($HOME/nsmail) will have to do.
 
-  if (! wxDir::Exists(m_MailDir.c_str()) )
+  if (! wxDir::Exists(m_MailDir) )
    {
      // TODO
      // - ask the user for his Netscape mail dir
      //   On the other hand it should ahve been read in prefs
      wxLogMessage(_("Cannot import folders, directory '%s' doesn't exist"),
-                  m_MailDir.c_str());
+                  m_MailDir);
      return FALSE;
    }
 
@@ -811,7 +811,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
 
   if ( !fileList.GetCount() && !dirList.GetCount() )
    {
-    wxLogMessage(_("No folders found in '%s'."), dir.c_str());
+    wxLogMessage(_("No folders found in '%s'."), dir);
 
     // we can consider the operation successful
     return TRUE;
@@ -891,13 +891,13 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
      if ( folder )
       {
         folderList.Add(folder);
-        wxLogMessage(_("Imported group folder: %s."),dirFldName.c_str());
+        wxLogMessage(_("Imported group folder: %s."),dirFldName);
       }
      else
       return FALSE;
 
      // check if there is a file matching (without .sbd)
-     int i = fileList.Index( dirFldName.c_str() );
+     int i = fileList.Index( dirFldName );
      if ( i != wxNOT_FOUND)
       {
         // TODO
@@ -920,7 +920,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
            folderList.Add(subFolder);
            fileList.RemoveAt(i);      // this one has been created, remove from filelist
            wxLogMessage(_("NOTE: >>>>>> Created 'AAA Misc' folder to contain the msgs currently in group folder %s."),
-                        dirFldName.c_str());
+                        dirFldName);
          }
         else
          return FALSE;
@@ -980,7 +980,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
     if ( folder )
       {
         folderList.Add(folder);
-        wxLogMessage(_("Imported mail folder: %s "), name.c_str());
+        wxLogMessage(_("Imported mail folder: %s "), name);
       }
     else
       return FALSE;
@@ -1006,7 +1006,7 @@ bool MNetscapeImporter::ImportSettings()
   if ( ! ImportSettingsFromFileIfExists(filename) )
   {
    wxLogMessage(_("Couldn't import the global preferences file: %s."),
-             filename.c_str());
+             filename);
   }
 
   // user own preference files
@@ -1023,7 +1023,7 @@ bool MNetscapeImporter::ImportSettings()
   // 'preferences.js' is the main one
   // if it doesn't exist, bail out
   filename = m_PrefDir + DIR_SEPARATOR + g_PrefFile;
-  if (! wxFile::Exists(filename.c_str()) )
+  if (! wxFile::Exists(filename) )
    {
      // TODO
      // - ask user if he knows where the prefs file is
@@ -1034,7 +1034,7 @@ bool MNetscapeImporter::ImportSettings()
   if ( !status )
   {
      wxLogMessage(_("Couldn't import the user preferences file: %s."),
-                  filename.c_str());
+                  filename);
   }
 
   return status;
@@ -1084,9 +1084,9 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
       if ( nEq == wxNOT_FOUND )
       {
          wxLogDebug(_T("%s(%lu): missing variable identifier ('%s')."),
-                    filename.c_str(),
+                    filename,
                     (unsigned long)nLine + 1,
-                    g_VarIdent.c_str());
+                    g_VarIdent);
 
          // skip line
          continue;
@@ -1303,7 +1303,7 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
 
      else if (map[i].mpKey == _T("Not mapped"))
       {
-        wxLogMessage(_("Key '%s' hasn't been mapped yet"), map[i].npKey.c_str());
+        wxLogMessage(_("Key '%s' hasn't been mapped yet"), map[i].npKey);
         map[i].procd = TRUE; // mark to find out which ones in the file are also in the maps
         continue;
       }
@@ -1327,7 +1327,7 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
            }
          else
            wxLogMessage(_("Parsing error for key '%s'"),
-                     map[i].npKey.c_str());
+                     map[i].npKey);
          break;
         }
       case NM_IS_STRING:
@@ -1338,14 +1338,14 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
              if ((map[i].type == NM_IS_STRING) && value.empty() )
                {
                 wxLogMessage(_("Bad value for key '%s': cannot be empty"),
-                          map[i].npKey.c_str());
+                          map[i].npKey);
                 break;
                }
              map[i].procd = WriteProfileEntry(map[i].mpKey, value, map[i].desc);
             }
          else
            wxLogMessage(_("Parsing error for key '%s'"),
-                     map[i].npKey.c_str());
+                     map[i].npKey);
          break;
         }
       case NM_IS_INT:
@@ -1356,11 +1356,11 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
            }
          else
            wxLogMessage(_("Type mismatch for key '%s' ulong expected.'"),
-                     map[i].npKey.c_str());
+                     map[i].npKey);
          break;
         }
       default:
-        wxLogMessage(_("Bad type key '%s'"), map[i].npKey.c_str());
+        wxLogMessage(_("Bad type key '%s'"), map[i].npKey);
       }
      if ( ! map[i].procd )
       return FALSE;
@@ -1383,9 +1383,9 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const wxString& v
 
   if ( (status = l_Profile->writeEntry( key, tmpVal)) == true )
    wxLogMessage(_("Imported '%s' setting from %s: %s."),
-             desc.c_str(),"Netscape",tmpVal.c_str());
+             desc,"Netscape",tmpVal);
   else
-   wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
+   wxLogWarning(_("Failed to write '%s' entry to profile"), desc);
 
   return status;
 }
@@ -1398,9 +1398,9 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const int val, co
 
   if ( (status = l_Profile->writeEntry(key, val)) == true )
    wxLogMessage(_("Imported '%s' setting from %s: %u."),
-             desc.c_str(),"Netscape",val);
+             desc,"Netscape",val);
   else
-   wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
+   wxLogWarning(_("Failed to write '%s' entry to profile"), desc);
 
   return status;
 }
@@ -1412,14 +1412,14 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const bool val, c
   Profile* l_Profile = mApplication->GetProfile();
 
   if ( val )
-   status = l_Profile->writeEntry( key.c_str(), 1L);
+   status = l_Profile->writeEntry( key, 1L);
   else
-   status = l_Profile->writeEntry( key.c_str(), 0L);
+   status = l_Profile->writeEntry( key, 0L);
 
   if ( status )
-   wxLogMessage(_("Imported '%s' setting from %s: %u."), desc.c_str(),"Netscape",val);
+   wxLogMessage(_("Imported '%s' setting from %s: %u."), desc,"Netscape",val);
   else
-   wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
+   wxLogWarning(_("Failed to write '%s' entry to profile"), desc);
 
   return status;
 }

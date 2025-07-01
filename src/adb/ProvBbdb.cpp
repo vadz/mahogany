@@ -485,7 +485,7 @@ BbdbEntry::ReadListOfVectors(String *string)
 
    if(! ReadToken(')', string))
    {
-      wxLogWarning(_("Bbdb::ReadListOfVectors expected ')', found '%s'"), string->c_str());
+      wxLogWarning(_("Bbdb::ReadListOfVectors expected ')', found '%s'"), *string);
    }
 
    return vlist;
@@ -684,13 +684,13 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    if(! BbdbEntry::ReadHeader(&version, &line))
    {
       wxLogError(_("BBDB: file has wrong header line: '%s'"),
-                 line.c_str());
+                 line);
       MEndBusyCursor();
       return;
    }
    else
    {
-      LOGMESSAGE((M_LOG_WINONLY, _("BBDB: file format version '%s'"), version.c_str()));
+      LOGMESSAGE((M_LOG_WINONLY, _("BBDB: file format version '%s'"), version));
    }
 
    MProgressDialog status_frame
@@ -751,7 +751,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          String str;
          str.Printf(_("Save BBDB address book '%s'?\n"
                       "This might lead to loss of some of the original data."),
-                    m_strName.c_str());
+                    m_strName);
          save = MDialog_YesNoDialog(str,NULL,_("BBDB"),
                                     M_DLG_YES_DEFAULT,
                                     M_MSGBOX_BBDB_SAVE_DIALOG);
@@ -888,7 +888,7 @@ BbdbEntryGroup::GetEntry(const String& name)
 
    BbdbEntryList::iterator i;
 
-//   wxLogDebug(_T("BbdbEntryGroup::GetEntry() called with: %s"), name.c_str());
+//   wxLogDebug(_T("BbdbEntryGroup::GetEntry() called with: %s"), name);
    for(i = m_entries->begin(); i != m_entries->end(); i++)
    {
       (**i).MOcheck();
@@ -911,7 +911,7 @@ BbdbEntryGroup::Exists(const String& path)
 AdbEntryGroup *BbdbEntryGroup::GetGroup(const String& name) const
 {
    MOcheck();
-//   wxLogDebug(_T("BbdbEntryGroup::GetGroup() called with: %s"), name.c_str());
+//   wxLogDebug(_T("BbdbEntryGroup::GetGroup() called with: %s"), name);
    return NULL;
 }
 

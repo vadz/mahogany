@@ -174,7 +174,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    if ( !*module )
    {
       ERRORMESSAGE(( _("Module \"%s\" couldn't be loaded."),
-                     modname.c_str() ));
+                     modname ));
       return false;
    }
 
@@ -195,7 +195,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
       Py_XDECREF(*module);
 
       ERRORMESSAGE(( _("Function \"%s\" not found in module \"%s\"."),
-                     functionName.c_str(), modname.c_str() ));
+                     functionName, modname ));
       return false;
    }
 
@@ -236,7 +236,7 @@ PythonFunction(const char *func,
       String err = PythonGetErrorMessage();
       if ( !err.empty() )
       {
-         ERRORMESSAGE((_T("%s"), err.c_str()));
+         ERRORMESSAGE((err));
       }
    }
 
@@ -290,7 +290,7 @@ PythonStringFunction(const String& func,
 
          default:
             ERRORMESSAGE((_("Too many arguments to Python function \"%s\"."),
-                          func.c_str()));
+                          func));
             rc = NULL;
       }
 
@@ -314,11 +314,11 @@ PythonStringFunction(const String& func,
       String err = PythonGetErrorMessage();
       if ( !err.empty() )
       {
-         ERRORMESSAGE((_T("%s"), err.c_str()));
+         ERRORMESSAGE((err));
       }
    }
 
-   ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func.c_str()));
+   ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func));
 
    return false;
 }
@@ -377,7 +377,7 @@ PythonRunScript(const char *filename)
       String err = PythonGetErrorMessage();
       if ( !err.empty() )
       {
-         ERRORMESSAGE((_T("%s"), err.c_str()));
+         ERRORMESSAGE((err));
       }
 
       ERRORMESSAGE((_("Execution of the Python script \"%s\" failed."),

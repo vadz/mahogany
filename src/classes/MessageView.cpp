@@ -809,7 +809,7 @@ MessageView::CreateViewer()
       wxLogWarning(_("Failed to load the configured message viewer '%s'.\n"
                      "\n"
                      "Reverting to the available message viewer '%s'."),
-                   name.c_str(), nameAlt.c_str());
+                   name, nameAlt);
 
       viewer = LoadViewer(name = nameAlt);
    }
@@ -875,7 +875,7 @@ MessageView::InitializeViewFilters()
             {
                ERRORMESSAGE(( _("Incorrect message view filter priority %d "
                                 "for the filter \"%s\""),
-                              (int)prio, name.c_str() ));
+                              (int)prio, name ));
 
                prio = ViewFilter::Priority_Lowest;
             }
@@ -1792,7 +1792,7 @@ MessageView::ShowFace(const wxString& faceString)
    if ( faceString.length() > 966 )
    {
       wxLogDebug("Message \"%s\" Face header is too long, ignored.",
-                 m_mailMessage->Subject().c_str());
+                 m_mailMessage->Subject());
       return;
    }
 
@@ -1814,7 +1814,7 @@ MessageView::ShowFace(const wxString& faceString)
    if ( !faceData )
    {
       wxLogDebug("Message \"%s\" Face header is not valid base64, ignored.",
-                 m_mailMessage->Subject().c_str());
+                 m_mailMessage->Subject());
       return;
    }
 
@@ -1825,14 +1825,14 @@ MessageView::ShowFace(const wxString& faceString)
    if ( !face.LoadFile(is, wxBITMAP_TYPE_PNG) )
    {
       wxLogDebug("Message \"%s\" Face header is corrupted, ignored.",
-                 m_mailMessage->Subject().c_str());
+                 m_mailMessage->Subject());
       return;
    }
 
    if ( face.GetWidth() != 48 || face.GetHeight() != 48 )
    {
       wxLogDebug("Message \"%s\" Face header has non-standard size.",
-                 m_mailMessage->Subject().c_str());
+                 m_mailMessage->Subject());
    }
 
    m_viewer->ShowXFace(face);
@@ -2250,7 +2250,7 @@ MessageView::ShowPart(const MimePart *mimepart)
       // ignore empty parts but warn user as it might indicate a problem
       wxLogStatus(GetParentFrame(),
                   _("Skipping the empty MIME part #%s."),
-                  mimepart->GetPartSpec().c_str());
+                  mimepart->GetPartSpec());
 
       return;
    }
@@ -2279,7 +2279,7 @@ MessageView::ShowPart(const MimePart *mimepart)
       }
       else
       {
-         wxLogDebug("Invalid MIME type '%s'!", typeName.c_str());
+         wxLogDebug("Invalid MIME type '%s'!", typeName);
       }
    }
 
@@ -3014,7 +3014,7 @@ bool MessageView::ChangeViewerWithoutUpdate(const String& viewerName)
    MessageViewer *viewer = LoadViewer(viewerName);
    if ( !viewer )
    {
-      wxLogWarning(_("Viewer \"%s\" couldn't be set."), viewerName.c_str());
+      wxLogWarning(_("Viewer \"%s\" couldn't be set."), viewerName);
       return false;
    }
 
@@ -3254,7 +3254,7 @@ void MessageView::MimeOpenAsMessage(const MimePart *mimepart)
       {
          wxString name;
          name.Printf(_("Attached message '%s'"),
-                     mimepart->GetFilename().c_str());
+                     mimepart->GetFilename());
 
          MFolder_obj mfolder(MFolder::CreateTempFile(name, filename));
 
@@ -3292,13 +3292,13 @@ void MessageView::MimeDoOpen(const String& command, const String& filename)
 {
    if ( command.empty() )
    {
-      wxLogWarning(_("No command to open file \"%s\"."), filename.c_str());
+      wxLogWarning(_("No command to open file \"%s\"."), filename);
       return;
    }
 
    // see HandleProcessTermination() for the explanation of "possibly"
    wxString errmsg;
-   errmsg.Printf(_("External viewer \"%s\" possibly failed"), command.c_str());
+   errmsg.Printf(_("External viewer \"%s\" possibly failed"), command);
    (void)LaunchProcess(command, errmsg, filename);
 }
 
@@ -3380,7 +3380,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       if ( !wxRemoveFile(filename) )
       {
          wxLogDebug("Warning: stale temp file '%s' will be left.",
-                    filename.c_str());
+                    filename);
       }
 
       filename = path + wxFILE_SEP_PATH + name;
@@ -3437,7 +3437,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          String filenamePS = filename.BeforeLast('.') + ".ps";
          String command;
          command.Printf(READ_CONFIG_TEXT(profile,MP_TIFF2PS),
-                        filename.c_str(), filenamePS.c_str());
+                        filename, filenamePS);
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:
          //system(command);  // this produces a postscript file on  success
@@ -3445,7 +3445,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          // We cannot use launch process, as it doesn't wait for the
          // program to finish.
          //wxString msg;
-         //msg.Printf(_("Running '%s' to create Postscript file failed."), command.c_str());
+         //msg.Printf(_("Running '%s' to create Postscript file failed."), command);
          //(void)LaunchProcess(command, msg );
 
          wxRemoveFile(filename);
@@ -3528,7 +3528,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
       if ( !wxRemoveFile(filename) )
       {
          wxLogDebug("Warning: stale temp file '%s' will be left.",
-                    filename.c_str());
+                    filename);
       }
 
       filename = path + wxFILE_SEP_PATH + name;
@@ -3644,7 +3644,7 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
          if ( strutil_isempty(ifilename) )
          {
             wxLogStatus(GetParentFrame(), _("Wrote %lu bytes to file '%s'"),
-                        len, filename.c_str());
+                        len, filename);
          }
 
          return true;
@@ -3715,7 +3715,7 @@ MessageView::DoMenuCommand(int id)
                {
                   wxLogStatus(GetParentFrame(),
                               _("'%s' not found"),
-                              text.c_str());
+                              text);
                }
             }
          }
@@ -4030,7 +4030,7 @@ MessageView::RunProcess(const String& command)
 {
    wxLogStatus(GetParentFrame(),
                _("Calling external viewer '%s'"),
-               command.c_str());
+               command);
    return wxExecute(command, true) == 0;
 }
 
@@ -4052,7 +4052,7 @@ MessageView::LaunchProcess(const String& command,
 {
    wxLogStatus(GetParentFrame(),
                _("Calling external viewer '%s'"),
-               command.c_str());
+               command);
 
    // If we pass a (temporary) file as parameter to the command, we want to
    // monitor the child process termination to be able to remove the file as
@@ -4069,7 +4069,7 @@ MessageView::LaunchProcess(const String& command,
 
       if ( !errormsg.empty() )
       {
-         wxLogError("%s.", errormsg.c_str());
+         wxLogError("%s.", errormsg);
       }
 
       return false;
@@ -4108,7 +4108,7 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
       // so just warn the user about it...
       wxLogStatus(GetParentFrame(),
                   _("%s (non null exit code %d)"),
-                  info->GetErrorMsg().c_str(),
+                  info->GetErrorMsg(),
                   exitcode);
    }
 

@@ -48,7 +48,7 @@
    if ( !m_folder->IsOpened() )                                               \
    {                                                                          \
       ERRORMESSAGE((_("Cannot access closed folder '%s'."),                   \
-                   m_folder->GetName().c_str()));                             \
+                   m_folder->GetName()));                                     \
       return;                                                                 \
    }
 
@@ -57,7 +57,7 @@
    if ( !m_folder->IsOpened() )                                               \
    {                                                                          \
       ERRORMESSAGE((_("Cannot access closed folder '%s'."),                   \
-                   m_folder->GetName().c_str()));                             \
+                   m_folder->GetName()));                                     \
       return rc;                                                              \
    }
 
@@ -637,7 +637,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
    {
       ERRORMESSAGE((_("Impossible to retrieve message text: "
                       "folder '%s' is closed."),
-                    m_folder->GetName().c_str()));
+                    m_folder->GetName()));
       return NULL;
    }
 
@@ -645,7 +645,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
    {
       ERRORMESSAGE((_("Impossible to retrieve message text: "
                       "failed to lock folder '%s'."),
-                    m_folder->GetName().c_str()));
+                    m_folder->GetName()));
       return NULL;
    }
 
@@ -710,7 +710,7 @@ MessageCC::GetEnvelope()
    {
       ERRORMESSAGE((_("Impossible to retrieve message headers: "
                       "failed to lock folder '%s'."),
-                    m_folder->GetName().c_str()));
+                    m_folder->GetName()));
    }
 
    m_Envelope = mail_fetch_structure(m_folder->Stream(),
@@ -738,7 +738,7 @@ MessageCC::GetBody(void)
    {
       ERRORMESSAGE((_("Impossible to retrieve message body: "
                       "failed to lock folder '%s'."),
-                    m_folder->GetName().c_str()));
+                    m_folder->GetName()));
    }
 
    m_Envelope = mail_fetchstructure_full(m_folder->Stream(),

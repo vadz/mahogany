@@ -1100,7 +1100,7 @@ VarExpander::ExpandFile(const String& name,
       if ( !SlurpFile(filename, value) )
       {
          wxLogError(_("Failed to insert file '%s' into the message."),
-                    name.c_str());
+                    name);
 
          return FALSE;
       }
@@ -1155,7 +1155,7 @@ VarExpander::ExpandAttach(const String& name,
       if ( !SlurpFile(filename, value) )
       {
          wxLogError(_("Failed to attach file '%s' to the message."),
-                    name.c_str());
+                    name);
 
          return FALSE;
       }
@@ -1213,7 +1213,7 @@ VarExpander::ExpandCommand(const String& name,
 
    if ( !ok )
    {
-      wxLogSysError(_("Failed to execute the command '%s'"), name.c_str());
+      wxLogSysError(_("Failed to execute the command '%s'"), name);
 
       // make sure the value isn't empty to avoid message about unknown
       // variable from the parser
@@ -1233,7 +1233,7 @@ VarExpander::SetHeaderValue(const String& name,
    if ( arguments.GetCount() != 1 )
    {
       wxLogError(_("${header:%s} requires exactly one argument."),
-                 name.c_str());
+                 name);
 
       *value = _T('?');
 
@@ -1485,7 +1485,7 @@ String VarExpander::GetSignature() const
             if ( !hasSign )
             {
                wxLogError(_("Failed to read signature file \"%s\""),
-                          path.c_str());
+                          path);
             }
          }
 
@@ -1506,7 +1506,7 @@ String VarExpander::GetSignature() const
                   log->Flush();
 
                msg.Printf(_("Signature file '%s' couldn't be opened."),
-                          strSignFile.c_str());
+                          strSignFile);
             }
 
             msg += _("\n\nWould you like to choose your signature "

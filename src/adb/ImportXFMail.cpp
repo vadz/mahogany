@@ -93,7 +93,7 @@ String AdbXFMailImporter::GetDefaultFilename() const
    {
       // nice try, but it's not there - so we don't know
       wxLogVerbose(_("Didn't find the XFMail address book in the default "
-                     "location (%s)."), location.c_str());
+                     "location (%s)."), location);
 
       location.Empty();
    }

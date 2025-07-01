@@ -65,7 +65,7 @@ size_t AdbModule::EnumModules(const char *kind,
       }
       else
       {
-         wxLogDebug(_T("Failed to load ADB importer '%s'."), info->name.c_str());
+         wxLogDebug(_T("Failed to load ADB importer '%s'."), info->name);
       }
 
       info = info->next;
@@ -93,7 +93,7 @@ AdbModule *AdbModule::GetModuleByName(const char *kind, const String& name)
       }
       else
       {
-         wxLogDebug(_T("Failed to load ADB importer '%s'."), info->name.c_str());
+         wxLogDebug(_T("Failed to load ADB importer '%s'."), info->name);
       }
 
       importer = NULL;

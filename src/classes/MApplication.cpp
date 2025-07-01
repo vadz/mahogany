@@ -282,7 +282,7 @@ MAppBase::ContinueStartup()
       else // invalid folder name
       {
          wxLogWarning(_("Failed to open folder '%s' in the main window."),
-                      foldername.c_str());
+                      foldername);
       }
    }
 
@@ -328,7 +328,7 @@ MAppBase::ContinueStartup()
          else
          {
             wxLogWarning(_("Failed to reopen folder '%s', it doesn't seem "
-                           "to exist any more."), name.c_str());
+                           "to exist any more."), name);
 
             ok = false;
          }
@@ -387,7 +387,7 @@ MAppBase::OnStartup()
       if ( !ConfigSource::Copy(*configDst, *configSrc) )
       {
          wxLogError(_("Failed to import Mahogany settings from \"%s\"."),
-                    m_cmdLineOptions->configImport.c_str());
+                    m_cmdLineOptions->configImport);
 
          // continue nevertheless
       }
@@ -397,7 +397,7 @@ MAppBase::OnStartup()
          // anything at all (this shouldn't be annoying as import is not
          // supposed to be used often)
          wxLogMessage(_("Successfully imported Mahogany settings from \"%s\"."),
-                      m_cmdLineOptions->configImport.c_str());
+                      m_cmdLineOptions->configImport);
       }
    }
 
@@ -811,7 +811,7 @@ MAppBase::CanClose() const
                      (
                         _("Would you like to purge all messages from "
                           "the trash mailbox (%s)?"),
-                        trashName.c_str()
+                        trashName
                      ),
                      NULL,
                      _("Empty trash?"),
@@ -1136,14 +1136,14 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
          if(mf == NULL)
          {
             String msg;
-            msg.Printf(_("Cannot open outbox '%s'"), outbox.c_str());
+            msg.Printf(_("Cannot open outbox '%s'"), outbox);
             ERRORMESSAGE((msg));
             return FALSE;
          }
       }
       else
       {
-         ERRORMESSAGE((_("Outbox folder '%s' doesn't exist"), outbox.c_str()));
+         ERRORMESSAGE((_("Outbox folder '%s' doesn't exist"), outbox));
          return FALSE;
       }
    }
@@ -1193,7 +1193,7 @@ MAppBase::SendOutbox(const String & outbox, bool
    MFolder_obj folderOutbox(outbox);
    if ( !folderOutbox )
    {
-      ERRORMESSAGE((_("Outbox folder '%s' doesn't exist"), outbox.c_str()));
+      ERRORMESSAGE((_("Outbox folder '%s' doesn't exist"), outbox));
       return;
    }
 
@@ -1201,7 +1201,7 @@ MAppBase::SendOutbox(const String & outbox, bool
    if(! mf)
    {
       String msg;
-      msg.Printf(_("Cannot open outbox '%s'"), outbox.c_str());
+      msg.Printf(_("Cannot open outbox '%s'"), outbox);
       ERRORMESSAGE((msg));
       return;
    }
@@ -1256,8 +1256,8 @@ MAppBase::SendOutbox(const String & outbox, bool
       const HeaderInfo *hi = hil[i];
       if ( !hi )
       {
-         ERRORMESSAGE(( _("Failed to access message #%lu in the outbox."),
-                        (unsigned long)nbOfMsgTried ));
+         ERRORMESSAGE(( _("Failed to access message #%zu in the outbox."),
+                        nbOfMsgTried ));
          ++i;
 
          continue;
@@ -1266,18 +1266,18 @@ MAppBase::SendOutbox(const String & outbox, bool
       Message_obj msg(mf->GetMessage(hi->GetUId()));
       if ( !msg )
       {
-         ERRORMESSAGE(( _("Failed to recreate message #%lu from the outbox."),
-                        (unsigned long)nbOfMsgTried ));
+         ERRORMESSAGE(( _("Failed to recreate message #%zu from the outbox."),
+                        nbOfMsgTried ));
          ++i;
 
          continue;
       }
 
       const String subject = msg->Subject();
-      STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
-                      (unsigned long)nbOfMsgTried,
-                      (unsigned long)totalNb,
-                      subject.c_str()));
+      STATUSMESSAGE(( _("Sending message %zu/%zu: %s"),
+                      nbOfMsgTried,
+                      totalNb,
+                      subject));
       wxYield();
       SendMessage_obj
          sendMsg(SendMessage::CreateFromMsg(mf->GetProfile(), msg.Get()));
@@ -1289,7 +1289,7 @@ MAppBase::SendOutbox(const String & outbox, bool
       }
       else
       {
-         ERRORMESSAGE((_("Cannot send message '%s'."), subject.c_str()));
+         ERRORMESSAGE((_("Cannot send message '%s'."), subject));
          ++i;
       }
 
@@ -1299,8 +1299,8 @@ MAppBase::SendOutbox(const String & outbox, bool
    if(count > 0)
    {
       String msg;
-      msg.Printf(_("Sent %lu messages from outbox \"%s\"."),
-                 (unsigned long) count, mf->GetName().c_str());
+      msg.Printf(_("Sent %zu messages from outbox \"%s\"."),
+                 count, mf->GetName());
       STATUSMESSAGE((msg));
    }
 }

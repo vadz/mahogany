@@ -759,7 +759,7 @@ bool FCBook::Flush()
    if ( !m_pConfig->Flush() )
    {
       wxLogError(_("Couldn't create or write address book file '%s'."),
-                 m_strFile.c_str());
+                 m_strFile);
 
       return false;
    }

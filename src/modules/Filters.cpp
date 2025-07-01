@@ -1067,7 +1067,7 @@ FilterRuleImpl::Error(const String &error)
    unsigned long pos = GetPos();
    String tmp;
    tmp.Printf(_("Parse error at input position %lu:\n  %s\n%s<error> %s"),
-              pos, error.c_str(), CharLeft().c_str(), CharMid().c_str());
+              pos, error, CharLeft(), CharMid());
 
    // FIXME: this should be wxLogError() call as otherwise we get several
    //        message boxes for each error instead of only one combining all
@@ -1813,7 +1813,7 @@ FilterRuleImpl::ParseFunctionCall(Token id)
    {
       String err;
       err.Printf(_("Functioncall expected '(' after '%s'."),
-                 id.GetIdentifier().c_str());
+                 id.GetIdentifier());
       Error(err);
       return NULL;
    }
@@ -1853,7 +1853,7 @@ FilterRuleImpl::ParseFunctionCall(Token id)
    {
       String err;
       err.Printf(_("Attempt to call undefined function '%s'."),
-                 id.GetIdentifier().c_str());
+                 id.GetIdentifier());
       Error(err);
       delete args;
       return NULL;
@@ -2803,9 +2803,9 @@ FilterRuleApply::CreateProgressDialog()
                (
                   wxString::Format
                   (
-                     _("Filtering %lu messages in folder \"%s\":"),
-                     static_cast<unsigned long>(m_msgs.GetCount()),
-                     m_parent->m_MailFolder->GetName().c_str()
+                     _("Filtering %zu messages in folder \"%s\":"),
+                     m_msgs.GetCount(),
+                     m_parent->m_MailFolder->GetName()
                   ),
                   // make the message wide enough to show filtering messages
                   // and tall enough for 4 lines that we use for them
@@ -2846,7 +2846,7 @@ FilterRuleApply::GetMessage()
       wxLogDebug(
          _T("Filter error: message with UID %ld in folder '%s' doesn't exist any more."),
                  m_parent->m_MessageUId,
-                 m_parent->m_MailFolder->GetName().c_str());
+                 m_parent->m_MailFolder->GetName());
       return false;
    }
 
@@ -3079,12 +3079,12 @@ FilterRuleApply::UpdateProgressDialog()
       //
       // NB: textLog may contain '%'s itself, so don't let it be
       //     interpreted as a format string
-      wxLogGeneric(M_LOG_WINONLY, _T("%s"), textLog.c_str());
+      wxLogGeneric(M_LOG_WINONLY, _T("%s"), textLog);
    }
    else // no progress dialog
    {
       // see comment above
-      wxLogStatus(_T("%s"), textLog.c_str());
+      wxLogStatus(_T("%s"), textLog);
    }
 
    // We don't need this anymore
@@ -3106,7 +3106,7 @@ FilterRuleApply::ProgressCopy()
       if( !m_pd->Update(m_msgs.GetCount() + m_idx,
                         GetExecuteProgressString(
                           wxString::Format(_("Copying messages to '%s'..."),
-                                           m_destinations[m_idx].c_str()))) )
+                                           m_destinations[m_idx]))) )
       {
          return false;
       }

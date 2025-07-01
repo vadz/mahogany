@@ -1319,7 +1319,7 @@ void wxPTreeCtrl::RestoreExpandedBranches(const wxTreeItemId& itemRoot,
             if ( !node.ToULong(&index) )
             {
                 wxLogDebug(_T("Corrupted config data: '%s'."),
-                           node.c_str());
+                           node);
                 break;
             }
 

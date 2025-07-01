@@ -269,13 +269,13 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    if ( !dll )
    {
       wxLogTrace(M_TRACE_MODULES, _T("Failed to load module '%s' from '%s'."),
-                 name.c_str(), pathname.c_str());
+                 name, pathname);
 
       return NULL;
    }
 
    wxLogTrace(M_TRACE_MODULES, _T("Successfully loaded module '%s' from '%s'."),
-              name.c_str(), pathname.c_str());
+              name, pathname);
 
    MModule_InitModuleFuncType initFunc =
       (MModule_InitModuleFuncType)dll->GetSymbol(MMODULE_INITMODULE_FUNCTION);
@@ -321,7 +321,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
 
       String msg;
       msg.Printf(_("Cannot initialise module '%s', error code %d."),
-                 pathname.c_str(), errorCode);
+                 pathname, errorCode);
       MDialog_ErrorMessage(msg);
    }
 
@@ -357,7 +357,7 @@ MModule::LoadModule(const String & name)
    }
 
    wxLogTrace(M_TRACE_MODULES, _T("Looking for module '%s' in the path '%s'."),
-              name.c_str(), path.c_str());
+              name, path);
 #endif // DEBUG
 
    const wxString moduleExt = DLL_EXTENSION;
@@ -384,7 +384,7 @@ MModule::GetProvider(const wxString &interfaceName)
    if ( !listing )
    {
       wxLogWarning(_("No modules implementing \"%s\" interface found."),
-                   interfaceName.c_str());
+                   interfaceName);
       return NULL;
    }
 
@@ -393,7 +393,7 @@ MModule::GetProvider(const wxString &interfaceName)
       wxLogWarning(_("Several modules implement \"%s\" interface, you "
                      "should probably disable all but one of them using the "
                      "\"Edit|Modules...\" menu command."),
-                   interfaceName.c_str());
+                   interfaceName);
 
       // still return something
    }
@@ -623,7 +623,7 @@ MModule::ListAvailableModules(const String& interfaceName)
 
    wxLogTrace(M_TRACE_MODULES,
               _T("Looking for modules of type \"%s\" in the path '%s'."),
-              interfaceName.c_str(), path.c_str());
+              interfaceName, path);
 #endif // DEBUG
 
    // First, build list of all .dll/.so files in module directories
@@ -679,7 +679,7 @@ MModule::ListAvailableModules(const String& interfaceName)
       {
          // this is not our module
          wxLogWarning(_("Shared library '%s' is not a Mahogany module."),
-                      filename.c_str());
+                      filename);
 
          continue;
       }
@@ -729,7 +729,7 @@ MModule::ListAvailableModules(const String& interfaceName)
       else // no properties in this module??
       {
          wxLogWarning(_("Mahogany module '%s' is probably corrupted"),
-                      filename.c_str());
+                      filename);
       }
    }
 

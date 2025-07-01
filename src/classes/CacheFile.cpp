@@ -85,7 +85,7 @@ int CacheFile::CheckFormatVersion(const String& header, int *version) const
          wxLogWarning(_("Your mail folder status cache file (%s) was "
                         "created by a newer version of Mahogany but "
                         "will be overwritten when the program exits "
-                        "in older format."), GetFileName().c_str());
+                        "in older format."), GetFileName());
 
          // don't try to read it
          return -1;
@@ -218,7 +218,7 @@ bool CacheFile::Load()
       if ( !ok )
       {
          wxLogWarning(_("Failed to load cache file '%s'."),
-                      GetFileName().c_str());
+                      GetFileName());
       }
    }
 

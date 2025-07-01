@@ -180,7 +180,7 @@ static MFDriver *GetFolderDriver(const MFolder *folder)
    MFDriver *driver = MFDriver::Get(kind.ToAscii());
    if ( !driver )
    {
-      ERRORMESSAGE((_("Unknown folder kind '%s'"), kind.c_str()));
+      ERRORMESSAGE((_("Unknown folder kind '%s'"), kind));
    }
 
    return driver;
@@ -259,7 +259,7 @@ bool MailFolder::CheckNetwork(const MFolder *
       msg.Printf(_("To open the folder '%s', network access is required "
                    "but it is currently not available.\n"
                    "Would you like to connect to the network now?"),
-                 folder->GetFullName().c_str());
+                 folder->GetFullName());
 
       if ( MDialog_YesNoDialog(msg,
                                frame,
@@ -498,7 +498,7 @@ ExtractListPostAddress(const String& listPostHeader)
                         wxStrncmp(p, _T("https:"), 6) != 0 )
                   {
                      wxLogDebug(_T("Unknown URL scheme in List-Post (%s)"),
-                                listPostHeader.c_str());
+                                listPostHeader);
                   }
 
                   p = wxStrchr(p, _T('>'));
@@ -571,7 +571,7 @@ ExtractListPostAddress(const String& listPostHeader)
             // this is just for me, so that I could check for possible bugs in
             // this code
             wxLogDebug(_T("Malformed List-Post header '%s'!"),
-                       listPostHeader.c_str());
+                       listPostHeader);
             return wxEmptyString;
       }
    }
@@ -1086,9 +1086,9 @@ MailFolder::ReplyMessage(Message *msg,
       {
          replyLevel++;
          newSubject.Printf(_T("%s[%d]: %s"),
-                           replyPrefixWithoutColon.c_str(),
+                           replyPrefixWithoutColon,
                            replyLevel,
-                           subject.c_str());
+                           subject);
       }
    }
 
@@ -1382,7 +1382,7 @@ MailFolder::ProposeSavePassword(MailFolder *mf,
           _("Would you like to permanently remember the password "
             "for the folder '%s'?\n"
             "(WARNING: don't do it if you are concerned about security)"),
-            mf->GetName().c_str()
+            mf->GetName()
          ),
          NULL,
          MDIALOG_YESNOTITLE,

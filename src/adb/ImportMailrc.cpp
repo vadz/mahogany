@@ -194,7 +194,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
       if ( addresses->GetCount() == 0 )
       {
          wxLogWarning(_("Mailrc entry '%s' doesn't have any addresses and "
-                        "will be ignored."), line.c_str());
+                        "will be ignored."), line);
 
          return FALSE;
       }
@@ -219,7 +219,7 @@ String AdbMailrcImporter::GetDefaultFilename() const
    {
       // nice try, but it's not there - so we don't know
       wxLogVerbose(_("Didn't find the mailrc address book in the default "
-                     "location (%s)."), location.c_str());
+                     "location (%s)."), location);
 
       location.Empty();
    }

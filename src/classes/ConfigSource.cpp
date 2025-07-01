@@ -119,7 +119,7 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
    String type;
    if ( !config.Read(path, &type) )
    {
-      wxLogError(_("Invalid config source \"%s\" without type."), name.c_str());
+      wxLogError(_("Invalid config source \"%s\" without type."), name);
 
       return NULL;
    }
@@ -129,7 +129,7 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
    if ( !factory )
    {
       wxLogError(_("Unknown type \"%s\" for config source \"%s\"."),
-                 type.c_str(), name.c_str());
+                 type, name);
 
       return NULL;
    }
@@ -349,12 +349,12 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
          if ( !wxMkdir(localFilePath, 0700) )
          {
             wxLogError(_("Cannot create the directory for configuration "
-                         "files '%s'."), localFilePath.c_str());
+                         "files '%s'."), localFilePath);
             return false;
          }
 
          wxLogInfo(_("Created directory '%s' for configuration files."),
-                   localFilePath.c_str());
+                   localFilePath);
 
          // also create an empty config file with the right permissions:
          String filename;
@@ -384,7 +384,7 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
                          "The programs settings might have been changed without "
                          "your knowledge and the passwords stored in your config\n"
                          "file (if any) could have been compromised!\n\n"),
-                       localFilePath.c_str());
+                       localFilePath);
 
             if ( chmod(localFilePath.fn_str(), st.st_mode & ~(S_IWGRP | S_IWOTH)) == 0 )
             {
@@ -405,7 +405,7 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
       {
          wxLogSysError(_("Failed to access the directory '%s' containing "
                          "the configuration files."),
-                       localFilePath.c_str());
+                       localFilePath);
       }
 
       localFilePath << DIR_SEPARATOR << _T("config");
@@ -425,7 +425,7 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
                             "The program settings could have been changed without\n"
                             "your knowledge, please consider reinstalling the "
                             "program!"),
-                          localFilePath.c_str());
+                          localFilePath);
             }
 
             if ( st.st_mode & (S_IRGRP | S_IROTH) )
@@ -438,7 +438,7 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
                         _("Configuration file '%s' was readable for other users.\n"
                           "Passwords may have been compromised, please "
                           "consider changing them!"),
-                        localFilePath.c_str()
+                        localFilePath
                       );
             }
 
@@ -810,7 +810,7 @@ ConfigSourceLocalFactory::Create(const ConfigSource& config, const String& name)
    if ( !config.Read(name + FileNamePath(), &filename) )
    {
       wxLogError(_("No filename for local config source \"%s\"."),
-                 name.c_str());
+                 name);
       return NULL;
    }
 

@@ -68,8 +68,8 @@ void MObjectRC::CheckLeaks()
    }
 
    for ( size_t n = 0; n < nCount; n++ ) {
-      wxLogDebug(_T("Object %lu: %s"),
-                 (unsigned long)n, gs_aObjects[n]->DebugDump().c_str());
+      wxLogDebug(_T("Object %zu: %s"),
+                 n, gs_aObjects[n]->DebugDump());
    }
 }
 

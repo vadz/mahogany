@@ -119,7 +119,7 @@ bool MPineImporter::ImportADB()
 
    wxString filename = importer->GetDefaultFilename();
    wxLogMessage(_("Starting importing %s address book '%s'..."),
-                "PINE", filename.c_str());
+                "PINE", filename);
    bool ok = AdbImport(filename, _T("pine.adb"), _T("PINE Address Book"), importer);
 
    importer->DecRef();
@@ -189,7 +189,7 @@ bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
                            );
          if ( folder )
          {
-            wxLogMessage(_("Imported folder '%s'."), path.c_str());
+            wxLogMessage(_("Imported folder '%s'."), path);
 
             nImported++;
 
@@ -197,7 +197,7 @@ bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
          }
          else
          {
-            wxLogError(_("Error importing folder '%s'."), path.c_str());
+            wxLogError(_("Error importing folder '%s'."), path);
          }
       }
 
@@ -270,7 +270,7 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       mApplication->GetProfile()->writeEntry(MP_EXTERNALEDITOR, editor);
 
       wxLogMessage(_("Imported external editor setting from %s: %s."),
-                   "PINE", editor.c_str());
+                   "PINE", editor);
    }
    else if ( var == _T("mail-check-interval") )
    {
@@ -292,32 +292,32 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
    {
       mApplication->GetProfile()->writeEntry(MP_NNTPHOST, value);
       wxLogMessage(_("Imported NNTP host setting from %s: %s."),
-                   "PINE", value.c_str());
+                   "PINE", value);
    }
    else if ( var == _T("personal-name") )
    {
       mApplication->GetProfile()->writeEntry(MP_PERSONALNAME, value);
       wxLogMessage(_("Imported personal name setting from %s: %s."),
-                   "PINE", value.c_str());
+                   "PINE", value);
    }
    else if ( var == _T("reply-indent-string") )
    {
       mApplication->GetProfile()->writeEntry(MP_REPLY_PREFIX, value);
       wxLogMessage(_("Imported reply prefix setting from %s: %s."),
-                   "PINE", value.c_str());
+                   "PINE", value);
    }
    else if ( var == _T("signature-file") )
    {
       mApplication->GetProfile()->writeEntry(MP_COMPOSE_SIGNATURE, value);
       wxLogMessage(_("Imported signature location from %s: %s."),
-                   "PINE", value.c_str());
+                   "PINE", value);
    }
    else if ( var == _T("smtp-server") )
    {
       // FIXME this is a list and the entries may contain port numbers too!
       mApplication->GetProfile()->writeEntry(MP_SMTPHOST, value);
       wxLogMessage(_("Imported SMTP server setting from %s: %s."),
-                   "PINE", value.c_str());
+                   "PINE", value);
    }
 }
 
@@ -343,7 +343,7 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
    if ( !file.Open() )
    {
       wxLogError(_("Couldn't open %s configuration file '%s'."),
-                 "PINE", filename.c_str());
+                 "PINE", filename);
 
       return FALSE;
    }
@@ -363,9 +363,9 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
       int nEq = line.Find('=');
       if ( nEq == wxNOT_FOUND )
       {
-         wxLogDebug(_T("%s(%lu): missing '=' sign."),
-                    filename.c_str(),
-                    (unsigned long)nLine + 1);
+         wxLogDebug(_T("%s(%zu): missing '=' sign."),
+                    filename,
+                    nLine + 1);
 
          // skip line
          continue;
