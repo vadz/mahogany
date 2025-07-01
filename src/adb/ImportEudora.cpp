@@ -179,7 +179,7 @@ bool AdbEudoraImporter::ParseTagValue(const char **ppc,
    else
    {
       wxLogWarning(_("Unknown tag '%s' in Eudora address book file ignored."),
-                   tag.c_str());
+                   tag);
    }
 
    *ppc = pc;

@@ -202,7 +202,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          if ( p == end )
          {
             wxLogDebug(_T("Invalid encoded word syntax in '%s': missing charset."),
-                       in.c_str());
+                       in);
             out += wxString(encWordStart, end);
 
             break;
@@ -268,15 +268,14 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
          if ( enc2047 == MIME::Encoding_Unknown )
          {
-            wxLogDebug(_T("Unrecognized header encoding in '%s'."), in.c_str());
+            wxLogDebug(_T("Unrecognized header encoding in '%s'."), in);
 
             // scan until the end of the encoded word
             const size_t posEncWordStart = p - in.begin();
             const size_t posEncWordEnd = in.find("?=", p - in.begin());
             if ( posEncWordEnd == wxString::npos )
             {
-               wxLogDebug(_T("Missing encoded word end marker in '%s'."),
-                          in.c_str());
+               wxLogDebug(_T("Missing encoded word end marker in '%s'."), in);
                out += wxString(encWordStart, end);
 
                break;
@@ -310,8 +309,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
          if ( p == last )
          {
-            wxLogDebug(_T("Missing encoded word end marker in '%s'."),
-                       in.c_str());
+            wxLogDebug(_T("Missing encoded word end marker in '%s'."), in);
             out += wxString(encWordStart, end);
 
             break;

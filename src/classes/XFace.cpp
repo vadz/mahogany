@@ -180,7 +180,7 @@ XFace::GetXFaceImg(const String& filename,
       {
          String msg;
          msg.Printf(_("Could not load XFace file '%s'."),
-                    filename.c_str());
+                    filename);
       }
    }
    if(success)

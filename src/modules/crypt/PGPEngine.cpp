@@ -245,7 +245,7 @@ PGPEngine::ExecCommand(const String& options,
                       );
 
          if ( log )
-            log->AddMessage(String::Format(_("Executing \"%s\""), command.c_str()));
+            log->AddMessage(String::Format(_("Executing \"%s\""), command));
 
          pid = wxExecute(command, wxEXEC_ASYNC, &process);
       }
@@ -260,7 +260,7 @@ PGPEngine::ExecCommand(const String& options,
       }
       else // have command but executing it failed
       {
-         msg = String::Format(_("Failed to execute \"%s\"."), pgp.c_str());
+         msg = String::Format(_("Failed to execute \"%s\"."), pgp);
       }
 
       msg += "\n";
@@ -440,7 +440,7 @@ PGPEngine::ExecCommand(const String& options,
                if ( status != SIGNATURE_EXPIRED_ERROR )
                {
                   wxLogStatus(_("Valid signature from \"%s\""),
-                              log->GetUserID().c_str());
+                              log->GetUserID());
                   status = OK;
                }
             }
@@ -480,7 +480,7 @@ PGPEngine::ExecCommand(const String& options,
                {
                   status = SIGNATURE_UNTRUSTED_WARNING;
                   wxLogStatus(_("Valid signature from (invalid) \"%s\""),
-                              log->GetUserID().c_str());
+                              log->GetUserID());
                }
                // else: "_MARGINAL, _FULLY and _ULTIMATE" do not trigger a warning
             }
@@ -522,7 +522,7 @@ PGPEngine::ExecCommand(const String& options,
             else if ( code == _T("MISSING_PASSPHRASE") )
             {
                wxLogError(_("Passphrase for the user \"%s\" unavailable."),
-                          user.c_str());
+                          user);
             }
             else if ( code == _T("DECRYPTION_FAILED") )
             {
@@ -639,7 +639,7 @@ PGPEngine::ExecCommand(const String& options,
                   if ( !pkalg.ToULong(&n) )
                   {
                      errmsg.Printf(_("unexpected public key algorithm \"%s\""),
-                                   pkalg.c_str());
+                                   pkalg);
                   }
                   else
                   {
@@ -649,7 +649,7 @@ PGPEngine::ExecCommand(const String& options,
                      if ( !micalg.ToULong(&n) )
                      {
                         errmsg.Printf(_("unexpected hash algorithm \"%s\""),
-                                      micalg.c_str());
+                                      micalg);
                      }
                      else
                      {
@@ -672,7 +672,7 @@ PGPEngine::ExecCommand(const String& options,
                            errmsg.Printf(_("unsupported hash algorithm \"%s\", "
                                            "please configure GPG to use a hash "
                                            "algorithm compatible with RFC 3156"),
-                                         micalg.c_str());
+                                         micalg);
 
                            status = SIGN_UNKNOWN_MICALG;
                         }
@@ -711,7 +711,7 @@ PGPEngine::ExecCommand(const String& options,
                      keys += keysEnc[keysNoPrivate - 1];
 
                   wxLogWarning(_("No secret key which can decrypt this message "
-                                 "(%s) is available."), keys.c_str());
+                                 "(%s) is available."), keys);
                }
             }
             else if ( code == "NOTATION_NAME" )
@@ -940,8 +940,8 @@ PGPEngine::GetPublicKey(const String& pk,
                      wxString::Format
                      (
                         "--keyserver %s --recv-keys %s",
-                        keyserver.c_str(),
-                        pk.c_str()
+                        keyserver,
+                        pk
                      ),
                      wxEmptyString,
                      dummyOut,
@@ -956,12 +956,12 @@ PGPEngine::GetPublicKey(const String& pk,
 
       case NO_DATA_ERROR:
          wxLogWarning(_("Public key not found on the key server \"%s\"."),
-                      keyserver.c_str());
+                      keyserver);
          break;
 
       case OK:
          wxLogMessage(_("Successfully imported public key \"%s\"."),
-                      pk.c_str());
+                      pk);
          break;
    }
 
@@ -996,7 +996,7 @@ PassphraseManager::Get(const String& user, String& passphrase)
                             (
                               _("Passphrase is required to unlock the "
                                 "secret key for \n"
-                                "user \"%s\":"), user.c_str()
+                                "user \"%s\":"), user
                             ),
                             _("Mahogany: Please enter the passphrase"),
                             wxEmptyString,
@@ -1029,7 +1029,7 @@ PassphraseManager::Unget(const String& user, String& passphrase)
             wxString::Format
             (
                _("Would you like to keep the passphrase for the "
-                 "user \"%s\" in memory?"), user.c_str()
+                 "user \"%s\" in memory?"), user
             ),
             NULL,
             _("Mahogany: Remember the passphrase?"),

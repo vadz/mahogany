@@ -746,7 +746,7 @@ AllConfigSources::SetSources(const wxArrayString& names,
          if ( !factory )
          {
             wxLogError(_("Unknown configuration source type \"%s\"."),
-                       type.c_str());
+                       type);
          }
 
          // restore old config sources

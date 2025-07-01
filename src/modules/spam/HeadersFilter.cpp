@@ -801,7 +801,7 @@ static bool CheckReceivedHeaders(const String& value)
       return false;
 
    // it should be in the beginning of the header line
-   if ( pc != value.c_str() && *(pc - 1) != '\n' )
+   if ( pc != value && *(pc - 1) != '\n' )
       return false;
 
    // and it should be the last Received: header -- unfortunately there are
@@ -1001,7 +1001,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
    int len;
 
    String domain;
-   domain.Printf(_T("%d.%d.%d.%d.%s"), d, c, b, a, rblDomain.c_str() );
+   domain.Printf(_T("%d.%d.%d.%d.%s"), d, c, b, a, rblDomain );
 
    res_init();
    len = res_query( domain.ToAscii(), C_IN, T_A,
@@ -1043,7 +1043,7 @@ static bool findIP(String &header,
       if (closePos == wxNOT_FOUND)
          // no second bracket found
          break;
-      if (wxSscanf(ip.c_str(), _T("%d.%d.%d.%d"), a,b,c,d) != 4)
+      if (wxSscanf(ip, _T("%d.%d.%d.%d"), a,b,c,d) != 4)
       {
          // no valid IP number behind open bracket, continue
          // search:
@@ -1095,7 +1095,7 @@ HeadersFilter::DoCheckIfSpam(const Profile *profile,
          if ( CheckWhiteList(msg, &match) )
          {
             if ( result )
-               result->Printf("\"%s\" is in the white list", match.c_str());
+               result->Printf("\"%s\" is in the white list", match);
 
             // this is definitely not a spam
             return -1;

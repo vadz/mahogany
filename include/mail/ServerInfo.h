@@ -74,7 +74,7 @@ public:
          {
             wxLogTrace(TRACE_SERVER_CACHE,
                        _T("Reusing existing server entry for %s(%s)."),
-                       folder->GetFullName().c_str(), i->m_login.c_str());
+                       folder->GetFullName(), i->m_login);
 
             // found
             return *i;
@@ -84,7 +84,7 @@ public:
       // not found
       wxLogTrace(TRACE_SERVER_CACHE,
                  _T("No server entry for %s found."),
-                 folder->GetFullName().c_str());
+                 folder->GetFullName());
 
       return NULL;
    }
@@ -106,7 +106,7 @@ public:
       {
          wxLogTrace(TRACE_SERVER_CACHE,
                     _T("Creating new server entry for %s(%s)."),
-                    folder->GetFullName().c_str(), folder->GetLogin().c_str());
+                    folder->GetFullName(), folder->GetLogin());
 
          serverInfo = mf->CreateServerInfo(folder);
 
@@ -206,7 +206,7 @@ protected:
 
       wxLogTrace(TRACE_SERVER_CACHE,
                  _T("Created server entry for %s(%s)."),
-                 folder->GetFullName().c_str(), m_login.c_str());
+                 folder->GetFullName(), m_login);
    }
 
    // login and password for this server if we need it and if we're allowed to

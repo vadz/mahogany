@@ -248,7 +248,7 @@ void MyFrame::AddSampleText(wxLayoutList *llist)
         for ( wxString s = file.GetFirstLine(); !file.Eof(); s = file.GetNextLine() )
         {
             wxString line;
-            llist->Insert(line.Format(_T("%6u: %s"),file.GetCurrentLine()+1,s.c_str()));
+            llist->Insert(line.Format(_T("%6u: %s"),file.GetCurrentLine()+1,s));
             llist->LineBreak();
         }
     }

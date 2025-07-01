@@ -579,7 +579,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
          wxLogWarning(_("Sorry, impossible to determine the location of "
                         "the default address book file for the format "
                         "'%s' - please specify the file manually in the "
-                        "next dialog."), importerDesc.c_str());
+                        "next dialog."), importerDesc);
 
          // make the message appear before the dialog box, otherwise it's
          // really confusing - we say that we determine the file location

@@ -291,8 +291,7 @@ bool SendMessage::Bounce(const String& address,
 
    if ( !sendMsg->SendOrQueue() )
    {
-      ERRORMESSAGE((_("Failed to bounce the message to \"%s\"."),
-                    address.c_str()));
+      ERRORMESSAGE((_("Failed to bounce the message to \"%s\"."), address));
 
       return false;
    }
@@ -898,7 +897,7 @@ void SendMessageCC::CheckAddressFieldForErrors(ADDRESS *adrStart)
          adrPrev->next = adr->next;
 
          DBGMESSAGE(("Invalid recipient address '%s' ignored.",
-                    AddressCC(adr).GetAddress().c_str()));
+                    AddressCC(adr).GetAddress()));
 
          // prevent mail_free_address() from freeing the entire list tail
          adr->next = NULL;
@@ -975,7 +974,7 @@ SendMessageCC::SetFcc(const String& fcc)
          // not folder names as the file names? this would allow saving
          // outgoing messages to files very easily...
          ERRORMESSAGE((_("The folder '%s' specified in the FCC list "
-                         "doesn't exist."), folderName.c_str()));
+                         "doesn't exist."), folderName));
          return false;
       }
 
@@ -1052,7 +1051,7 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
    else if ( !HeaderName(name).CanBeSetByUser() )
    {
       ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
-                    nameIn.c_str()));
+                    nameIn));
    }
    else if ( name == "SUBJECT" )
    {
@@ -1117,7 +1116,7 @@ String BuildMessageId(const char *hostname)
    return String::Format("<Mahogany-%s-%lu-%s.%02u@%s>",
                          M_VERSION,
                          s_pid,
-                         dt.Format("%Y%m%d-%H%M%S").c_str(),
+                         dt.Format("%Y%m%d-%H%M%S"),
                          s_numInSec,
                          hostname);
 }
@@ -1177,7 +1176,7 @@ SendMessageCC::Sign()
       String err = n == 0 ? String(_("no error information available"))
                           : log.GetMessage(n - 1);
 
-      ERRORMESSAGE((_("Signing the message failed: %s"), err.c_str()));
+      ERRORMESSAGE((_("Signing the message failed: %s"), err));
 
       return false;
    }
@@ -1325,7 +1324,7 @@ SendMessageCC::Build(bool forStorage)
       if ( value.empty() )
       {
          wxLogError(_("Invalid value \"%s\" for the custom header \"%s\""),
-                    header.m_value.c_str(), header.m_name.c_str());
+                    header.m_value, header.m_name);
 
          return false;
       }
@@ -1863,7 +1862,7 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
          {
             wxLogTrace(TRACE_SEND,
                        "Trying to open connection to SMTP server \"%s\"",
-                       m_ServerHost.c_str());
+                       m_ServerHost);
 
             if ( READ_CONFIG(m_profile, MP_SMTP_USE_8BIT) )
             {
@@ -1897,7 +1896,7 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
       case Prot_NNTP:
          wxLogTrace(TRACE_SEND,
                     "Trying to open connection to NNTP server \"%s\"",
-                    m_ServerHost.c_str());
+                    m_ServerHost);
 
          stream = nntp_open_full(NIL, hostlist, CONST_CCAST("nntp"), NIL, options);
          break;
@@ -1932,7 +1931,7 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
                   if ( WEXITSTATUS(rc) != 0 )
                   {
                      errDetailed->Printf(_("Failed to execute local MTA \"%s\""),
-                                         m_SendmailCmd.c_str());
+                                         m_SendmailCmd);
                   }
                   else
                   {
@@ -1942,7 +1941,7 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
                else
                {
                   errDetailed->Printf(_("Failed to write to temporary file \"%s\""),
-                                      filename.c_str());
+                                      filename);
                }
             }
             else
@@ -2032,7 +2031,7 @@ SendMessageCC::AfterSending()
          i != m_FccList.end();
          i++ )
    {
-      wxLogTrace(TRACE_SEND, "FCCing message to %s", (*i)->c_str());
+      wxLogTrace(TRACE_SEND, "FCCing message to %s", **i);
 
       WriteToFolder(**i);
    }
@@ -2103,7 +2102,7 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
    if ( !ok )
    {
       ERRORMESSAGE((_("Failed to write message to file '%s'."),
-                    filename.c_str()));
+                    filename));
    }
 
    return ok;
@@ -2116,7 +2115,7 @@ SendMessageCC::WriteToFolder(String const &name)
    if ( !folder )
    {
       ERRORMESSAGE((_("Can't save sent message in the folder '%s' "
-                      "which doesn't exist."), name.c_str()));
+                      "which doesn't exist."), name));
       return false;
    }
 
@@ -2124,7 +2123,7 @@ SendMessageCC::WriteToFolder(String const &name)
    if ( !mf )
    {
       ERRORMESSAGE((_("Can't open folder '%s' to save the message to."),
-                    name.c_str()));
+                    name));
       return false;
    }
 

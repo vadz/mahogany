@@ -117,7 +117,7 @@ void PopFlagsCacheFile::SaveFlags()
    if ( !Save() )
    {
       wxLogWarning(_("Failed to save flags for POP3 folder '%s'"),
-                   m_folderName.c_str());
+                   m_folderName);
    }
 }
 
@@ -208,7 +208,7 @@ bool PopFlagsCacheFile::DoSave(wxTempFile& file)
          flags = 0;
       }
 
-      str.Printf(_T("%s %d\n"), m_uidls->Item(msgno - 1).c_str(), flags);
+      str.Printf(_T("%s %d\n"), m_uidls->Item(msgno - 1), flags);
 
       if ( !file.Write(str) )
       {
@@ -324,7 +324,7 @@ extern void Pop3_SaveFlags(const String& folderName, MAILSTREAM *stream)
       {
          if ( !wxRemoveFile(filename) )
          {
-            wxLogWarning(_("Stale cache file '%s' left."), filename.c_str());
+            wxLogWarning(_("Stale cache file '%s' left."), filename);
          }
       }
 

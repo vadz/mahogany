@@ -288,7 +288,7 @@ public:
    virtual wxString DebugDump(void) const;
 #endif
 
-   virtual CoordType GetLength(void) const { return wxStrlen(m_Text.c_str()); }
+   virtual CoordType GetLength(void) const { return m_Text.length(); }
 
    // for editing:
    wxString & GetText(void) { return m_Text; }

@@ -447,7 +447,7 @@ static void CloseOrKeepStream(MAILSTREAM *stream,
    else
    {
       wxLogTrace(TRACE_MF_CALLS, _T("Closing connection to '%s'"),
-                 folder->GetFullName().c_str());
+                 folder->GetFullName());
 
       mail_close(stream);
    }
@@ -1174,7 +1174,7 @@ private:
                0,
                MessageSize_AutoBytes,
                SizeToString_Verbose
-            ).c_str()
+            )
           );
 
       m_dlgProgress = new MProgressDialog
@@ -1293,7 +1293,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
       if ( ssl != SSLSupport_TLSIfAvailable )
       {
          wxLogWarning(_("Ignoring SSL authentication for folder '%s'"),
-                      name.c_str());
+                      name);
       }
 
       // and reset it to nothing in any case
@@ -1426,7 +1426,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
                {
                   wxLogError(_("Invalid MH folder name '%s' not under the "
                                "root MH directory '%s'."),
-                            p, mhRoot.c_str());
+                            p, mhRoot);
 
                   return wxEmptyString;
                }
@@ -1773,7 +1773,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
    // exist
    {
       wxLogTrace(TRACE_MF_CALLS, _T("Trying to open MailFolderCC '%s' first."),
-                 imapspec.c_str());
+                 imapspec);
 
       CCErrorDisabler noErrs;
       stream = MailOpen(NULL, imapspec);
@@ -1793,7 +1793,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
    if ( !stream || stream->halfopen )
    {
       wxLogTrace(TRACE_MF_CALLS, _T("Creating MailFolderCC '%s'."),
-                 imapspec.c_str());
+                 imapspec);
 
       // stream may be NIL or not here
       MailCreate(stream, imapspec);
@@ -1806,7 +1806,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
 
       // and try to open it again now
       wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s' after creating it."),
-                 imapspec.c_str());
+                 imapspec);
 
       stream = MailOpen(stream, imapspec);
    }
@@ -1930,7 +1930,7 @@ void MailFolderCC::CreateFileFolder()
          tmp << _T("#driver.") << cclient_drivers[format] << _T('/');
 
          wxLogDebug(_T("Trying to create folder \"%s\" in %s format."),
-                    m_ImapSpec.c_str(), cclient_drivers[format]);
+                    m_ImapSpec, cclient_drivers[format]);
       }
       else // MF_MH folder
       {
@@ -2017,7 +2017,7 @@ MailFolderCC::CheckForFileLock()
                                    "\n"
                                    "Some other process may be using the folder.\n"
                                    "Shall I forcefully override the lock?"),
-                                 lockfile.c_str(), file.c_str()
+                                 lockfile, file
                               ),
                               NULL,
                               MDIALOG_YESNOTITLE,
@@ -2036,7 +2036,7 @@ MailFolderCC::CheckForFileLock()
                                  String::Format
                                  (
                                     _("The file '%s' is not empty, still remove it?"),
-                                    lockfile.c_str()
+                                    lockfile
                                  ),
                                  NULL,
                                  MDIALOG_YESNOTITLE,
@@ -2073,13 +2073,13 @@ bool
 MailFolderCC::Open(OpenMode openmode)
 {
    wxLogTrace(TRACE_MF_CALLS, _T("%s \"'%s'\""),
-              GetOperationName(openmode).c_str(), GetName().c_str());
+              GetOperationName(openmode), GetName());
 
    wxFrame *frame = GetInteractiveFrame();
    if ( frame )
    {
       STATUSMESSAGE((frame, _("%s mailbox \"%s\"..."),
-                     GetOperationName(openmode).c_str(), GetName().c_str()));
+                     GetOperationName(openmode), GetName()));
    }
 
    // Now, we apply the very latest c-client timeout values, in case they have
@@ -2196,7 +2196,7 @@ MailFolderCC::Open(OpenMode openmode)
          }
 
          wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s'."),
-                    m_ImapSpec.c_str());
+                    m_ImapSpec);
 
          m_MailStream = MailOpen(stream, m_ImapSpec, ccOptions);
       }
@@ -2222,7 +2222,7 @@ MailFolderCC::Open(OpenMode openmode)
       }
 
       wxLogTrace(TRACE_MF_CALLS, _T("Half opening MailFolderCC '%s'."),
-                 m_ImapSpec.c_str());
+                 m_ImapSpec);
 
       // redirect all notifications to us again
       CCDefaultFolder def(this);
@@ -2249,7 +2249,7 @@ MailFolderCC::Open(OpenMode openmode)
 
       // give the general error message anyhow
       String err;
-      err.Printf(_("Could not open mailbox '%s'."), GetName().c_str());
+      err.Printf(_("Could not open mailbox '%s'."), GetName());
 
       // and then try to give more details about what happened
       if ( !explanation.empty() )
@@ -2257,7 +2257,7 @@ MailFolderCC::Open(OpenMode openmode)
          err << _T("\n\n") << explanation;
       }
 
-      wxLogError(_T("%s"), err.c_str());
+      wxLogError(_T("%s"), err);
 
       return false;
    }
@@ -2312,7 +2312,7 @@ MailFolderCC::Open(OpenMode openmode)
 
       if ( !msg.empty() )
       {
-         STATUSMESSAGE((frame, msg, GetName().c_str()));
+         STATUSMESSAGE((frame, msg, GetName()));
       }
    }
 
@@ -2328,7 +2328,7 @@ MailFolderCC::Open(OpenMode openmode)
 void
 MailFolderCC::Close(bool mayLinger)
 {
-   wxLogTrace(TRACE_MF_CALLS, _T("Closing folder '%s'"), GetName().c_str());
+   wxLogTrace(TRACE_MF_CALLS, _T("Closing folder '%s'"), GetName());
 
    MailFolderCmn::Close(mayLinger);
 
@@ -2613,7 +2613,7 @@ MailFolderCC::Checkpoint(void)
    if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox '%s'"),
-                   GetName().c_str()));
+                   GetName()));
       return;
    }
 #endif // USE_DIALUP
@@ -2622,7 +2622,7 @@ MailFolderCC::Checkpoint(void)
    if ( lock )
    {
       wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::Checkpoint() on %s."),
-                 GetName().c_str());
+                 GetName());
 
       mail_check(m_MailStream); // update flags, etc, .newsrc
    }
@@ -2665,7 +2665,7 @@ MailFolderCC::Ping(void)
                (
                   _("Dial-Up network is down.\n"
                     "Do you want to try to check folder '%s' anyway?"),
-                  GetName().c_str()
+                  GetName()
                ),
                NULL,
                MDIALOG_YESNOTITLE,
@@ -2703,7 +2703,7 @@ MailFolderCC::PingOpenedFolder()
    // caller must check for this
    CHECK( m_MailStream, false, _T("PingOpenedFolder() called for closed folder") );
 
-   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::Ping(%s)"), GetName().c_str());
+   wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::Ping(%s)"), GetName());
 
    return mail_ping(m_MailStream) != NIL;
 }
@@ -2791,7 +2791,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
    MMStatusRedirector statusRedir(spec, mailstatus);
 
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::CheckStatus() on %s."),
-              spec.c_str());
+              spec);
 
    mail_status(stream, spec.char_str(), STATUS_FLAGS);
 
@@ -2849,7 +2849,7 @@ bool MailFolderCC::CheckStatus(const MFolder *folder)
    if ( !DoCheckStatus(folder, &mailstatus) )
    {
       ERRORMESSAGE(( _("Failed to check status of the folder '%s'"),
-                     folder->GetFullName().c_str() ));
+                     folder->GetFullName() ));
       return false;
    }
 
@@ -2940,7 +2940,7 @@ bool
 MailFolderCC::AppendMessage(const String& msg)
 {
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::AppendMessage(string)"),
-              GetName().c_str());
+              GetName());
 
    if ( CheckConnection() )
    {
@@ -2959,7 +2959,7 @@ MailFolderCC::AppendMessage(const String& msg)
    }
 
    wxLogError(_("Failed to save message to the folder '%s'"),
-              GetName().c_str());
+              GetName());
 
    return false;
 }
@@ -2973,7 +2973,7 @@ MailFolderCC::AppendMessage(const Message& msg)
    //           mail_append() here!
 
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::AppendMessage(Message)"),
-              GetName().c_str());
+              GetName());
 
    String date;
    msg.GetHeaderLine(_T("Date"), date);
@@ -3021,10 +3021,10 @@ MailFolderCC::AppendMessage(const Message& msg)
 
    // useful to know which message exactly we failed to copy
    wxLogError(_("Message details: subject '%s', from '%s'"),
-              msg.Subject().c_str(), msg.From().c_str());
+              msg.Subject(), msg.From());
 
    wxLogError(_("Failed to save message to the folder '%s'"),
-              GetName().c_str());
+              GetName());
 
    return false;
 }
@@ -3038,7 +3038,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    CHECK( count, true, _T("SaveMessages(): nothing to save") );
 
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SaveMessages(%s)"),
-              GetName().c_str(), folder->GetFullName().c_str());
+              GetName(), folder->GetFullName());
 
    /*
       This is an optimisation: if both mailfolders are IMAP and on the same
@@ -3231,7 +3231,7 @@ void
 MailFolderCC::ExpungeMessages(void)
 {
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ExpungeMessages()"),
-              GetName().c_str());
+              GetName());
 
    if ( !PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
@@ -3314,7 +3314,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
    CHECK( m_MailStream, false, _T("DoCountMessages: folder is closed") );
 
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::DoCountMessages()"),
-              GetName().c_str());
+              GetName());
 
    *status = MailFolderStatus(m_MailStream->nmsgs);
 
@@ -3677,7 +3677,7 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
    if ( !CanSetFlag(flag) )
    {
       ERRORMESSAGE((_("Impossible to set this flag for the folder '%s'."),
-                    GetName().c_str()));
+                    GetName()));
 
       return false;
    }
@@ -3687,13 +3687,13 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
    const String sequence = seq.GetString();
 
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SetFlags(%s) = %s"),
-              GetName().c_str(), sequence.c_str(), flags.c_str());
+              GetName(), sequence, flags);
 
    // let a Python callback veto the flag change
 #if 0
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
                      1, this, this->GetClassName(),
-                     GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
+                     GetProfile(), "ss", sequence, flags),1)  )
 #endif
    {
       MBusyCursor busyCursor;
@@ -4032,7 +4032,7 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
       if ( pgmSort )
       {
          wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SortMessages()"),
-                    GetName().c_str());
+                    GetName());
 
          // if any new messages appear in the folder during sorting, nmsgs is
          // going to change but we only have enough place for the current value
@@ -4213,7 +4213,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
          // do server side threading
 
          wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ThreadMessages()"),
-                    GetName().c_str());
+                    GetName());
 
          ASSERT_MSG( !thrData->m_root, _T("will leak THREADNODE tree!") );
 
@@ -4267,7 +4267,7 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
 
    String sequence = seq.GetString();
    wxLogTrace(TRACE_MF_CALLS, _T("Retrieving headers %s for '%s'..."),
-              sequence.c_str(), GetName().c_str());
+              sequence, GetName());
 
    // prepare overviewData to be used by OverviewHeaderEntry()
    // --------------------------------------------------------
@@ -4342,7 +4342,7 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
    if ( !m_MailStream )
    {
       ERRORMESSAGE((_("Error retrieving the message headers from folder '%s'"),
-                    GetName().c_str()));
+                    GetName()));
    }
 
    return overviewData.GetRetrievedCount();
@@ -4482,7 +4482,7 @@ MailFolderCC::HandleMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       {
          // this is strange...
          wxLogDebug(_T("mm_exists() for not opened folder '%s' ignored."),
-                    GetName().c_str());
+                    GetName());
       }
 #endif // DEBUG
 
@@ -4630,7 +4630,7 @@ void MailFolderCC::OnNewMail()
    CHECK_RET( !m_MailStream->lock, _T("OnNewMail: folder is locked") );
 
    wxLogTrace(TRACE_MF_EVENTS, _T("Got new mail notification for '%s'"),
-              GetName().c_str());
+              GetName());
 
    // the number of unread/marked/... messages may have changed (there
    // could be some more of them among the new ones), so forget the
@@ -4690,7 +4690,7 @@ void MailFolderCC::OnNewMail()
             // use "%ld" to print UID_ILLEGAL as -1 although it's really
             // unsigned
             wxLogTrace(TRACE_MF_NEWMAIL, _T("Folder %s: last new UID %ld -> %ld"),
-                       GetName().c_str(), m_uidLastNew, uidsNew->Last());
+                       GetName(), m_uidLastNew, uidsNew->Last());
 
             // update m_uidLastNew to avoid finding the same messages again the
             // next time
@@ -5045,7 +5045,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
    CHECK_RET(mf, _T("mm_status for non existent folder"));
 
    wxLogTrace(TRACE_MF_CALLBACK, _T("mm_status: folder '%s', %lu messages"),
-              mf->m_ImapSpec.c_str(), status->messages);
+              mf->m_ImapSpec, status->messages);
 
    // do nothing here for now
 }
@@ -5066,7 +5066,7 @@ MailFolderCC::mm_notify(MAILSTREAM * stream, const String& str, long errflg)
       mf->ForceClose();
 
       wxLogWarning(_("Connection to the folder '%s' lost unexpectedly."),
-                   mf->GetName().c_str());
+                   mf->GetName());
    }
 
    mm_log(str, errflg, mf);
@@ -5181,7 +5181,7 @@ MailFolderCC::mm_dlog(const String& str)
    GetLogCircle().Add(str);
 
    // send it to the window
-   wxLogGeneric(M_LOG_WINONLY, _("Mail log: %s"), str.c_str());
+   wxLogGeneric(M_LOG_WINONLY, _("Mail log: %s"), str);
 }
 
 /** get user name and password
@@ -5486,7 +5486,7 @@ bool
 MailFolderCC::Rename(const MFolder *mfolder, const String& name)
 {
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC::Rename(): %s -> %s"),
-              mfolder->GetPath().c_str(), name.c_str());
+              mfolder->GetPath(), name);
 
    // I'm unsure if this is needed but I suppose we're going to have problems
    // if we rename the folder being used - or maybe not?
@@ -5514,9 +5514,9 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
    {
       wxLogError(_("Failed to rename the mailbox for folder '%s' "
                    "from '%s' to '%s'."),
-                 mfolder->GetFullName().c_str(),
-                 mfolder->GetPath().c_str(),
-                 name.c_str());
+                 mfolder->GetFullName(),
+                 mfolder->GetPath(),
+                 name);
 
       return false;
    }
@@ -5535,7 +5535,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    String fullname = mfolder->GetFullName();
    String mboxpath = MailFolder::GetImapSpec(mfolder);
 
-   wxLogTrace(TRACE_MF_CALLS, _T("Clearing folder '%s'"), fullname.c_str());
+   wxLogTrace(TRACE_MF_CALLS, _T("Clearing folder '%s'"), fullname);
 
    // if this folder is opened, use its stream - and also notify about message
    // deletion
@@ -5577,7 +5577,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       if ( !stream )
       {
-         wxLogError(_("Impossible to open folder '%s'"), fullname.c_str());
+         wxLogError(_("Impossible to open folder '%s'"), fullname);
 
          delete noCCC;
 
@@ -5657,7 +5657,7 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
    String mboxpath = MailFolder::GetImapSpec(mfolder, login);
 
    wxLogTrace(TRACE_MF_CALLS,
-              _T("MailFolderCC::DeleteFolder(%s)"), mboxpath.c_str());
+              _T("MailFolderCC::DeleteFolder(%s)"), mboxpath);
 
    return mail_delete(NIL, mboxpath.char_str()) != NIL;
 }

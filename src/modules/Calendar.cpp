@@ -313,7 +313,7 @@ public:
       {
          wxString tmp = m_TextCtrl->GetValue();
          long l = 1;
-         sscanf(tmp.c_str(),"%ld", &l);
+         sscanf(tmp,"%ld", &l);
          l += delta;
          if(l < 1)
             l = 1;
@@ -752,7 +752,7 @@ CalendarFrame::GetConfig(void)
          {
             wxString msg;
             msg.Printf(_("Cannot create calendar module folder '%s'."),
-                       m_FolderName.c_str());
+                       m_FolderName);
             m_Module->ErrorMessage(msg);
          }
       }
@@ -788,7 +788,7 @@ CalendarFrame::ParseDateLine(const wxString &line)
    wxDateTimeWithRepeat dt;
    long year, month, day;
    long yr, mr, dr, yre, mre, dre;
-   if(sscanf(line.c_str(),"%ld %ld %ld %ld %ld %ld %ld %ld %ld",
+   if(sscanf(line,"%ld %ld %ld %ld %ld %ld %ld %ld %ld",
              &year, &month, &day,
              &yr, &mr, &dr,
              &yre, &mre, &dre) != 9)
@@ -990,8 +990,8 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
                {
                   wxString txt;
                   txt.Printf(_("Stored reminder `%s' in mailbox `%s'."),
-                             m_Alarms[count]->GetSubject().c_str(),
-                             m_NewMailFolder.c_str());
+                             m_Alarms[count]->GetSubject(),
+                             m_NewMailFolder);
                   GetStatusBar()->SetStatusText(txt);
 
                   DeleteOrRewrite(mf, msg,
@@ -1012,7 +1012,7 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
                {
                   wxString txt;
                   txt.Printf(_("Sent or queued message `%s'."),
-                             m_Alarms[count]->GetSubject().c_str());
+                             m_Alarms[count]->GetSubject());
                   GetStatusBar()->SetStatusText(txt);
                   DeleteOrRewrite(mf, msg,
                                   m_Alarms[count]->GetDate(), action);
@@ -1067,7 +1067,7 @@ CalendarFrame::AddReminder(const wxString &itext,
           << "\015\012"
           << tmp
           << "\015\012";
-      text.Printf(fmt, timeStr.c_str(), MakeDateLine(when).c_str());
+      text.Printf(fmt, timeStr, MakeDateLine(when));
    }
    class Message * msg = m_MInterface->CreateMessage(text,UID_ILLEGAL,m_Profile);
    (void) m_Folder->AppendMessage(msg);

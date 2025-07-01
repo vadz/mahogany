@@ -247,14 +247,14 @@ public:
             m_Locked = TRUE;
             wxString pidstr;
             pidstr.Printf("%lu", (unsigned long) getpid());
-            write(fd, (char *)pidstr.c_str(),pidstr.Length());
+            write(fd, (char *)pidstr,pidstr.Length());
             close(fd);
          }
          else
          {
             wxString msg;
             msg.Printf(_("Could not obtain lock for '/dev/%s'"),
-                       m_Device.c_str());
+                       m_Device);
             wxLogSysError(msg);
          }
          return m_Locked;
@@ -605,8 +605,8 @@ PalmOSModule::GetConfig(void)
 
    String dev;
    dev = m_PilotDev;
-   if(strncmp(m_PilotDev,"/dev/",5)==0)
-      dev = m_PilotDev.c_str()+5;
+   if(strncmp(m_PilotDev.c_str(),"/dev/",5)==0)
+      dev = m_PilotDev+5;
    if(m_Lock) delete m_Lock;
    m_Lock = new wxDeviceLock(dev);
 }
@@ -738,7 +738,7 @@ PalmOSModule::Connect(void)
          {
             String msg;
             msg.Printf(_("Executing command '%s' returned an error code (%d)."),
-                       m_Script1.c_str(), rc);
+                       m_Script1, rc);
             ErrorMessage(msg);
          }
       }
@@ -853,7 +853,7 @@ PalmOSModule::Disconnect(void)
          {
             String msg;
             msg.Printf(_("Executing command '%s' returned an error code (%d)."),
-                       m_Script2.c_str(), rc);
+                       m_Script2, rc);
             ErrorMessage(msg);
          }
       }
@@ -966,7 +966,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, const wxString& directory)
       {
          wxString msg;
          msg.Printf(_("Ignoring file '%s' with unknown extension."),
-                    name.c_str());
+                    name);
          StatusMessage(_(msg));
          continue;
       }
@@ -976,7 +976,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, const wxString& directory)
 
       // now we open the file and see whether it is really a file for
       // the Palm. If yes, then we remember the filename.
-      struct pi_file *f = pi_file_open((char*)name.c_str());
+      struct pi_file *f = pi_file_open((char*)name);
       if (f > 0)
       {
          pi_file_close(f);
@@ -1050,7 +1050,7 @@ PalmOSModule::Backup(void)
    {
       String msg;
       msg.Printf(_("Could not access backup directory '%s'."),
-                 m_BackupDir.c_str());
+                 m_BackupDir);
       ErrorMessage(msg);
    }
 
@@ -1107,7 +1107,7 @@ PalmOSModule::Backup(void)
       else
          fname.Append(".pdb");
 
-      name.Printf("%s%s", m_BackupDir.c_str(), fname.c_str());
+      name.Printf("%s%s", m_BackupDir, fname);
 
       // update progress dialog, exit on "cancel"
       if( ! pd->Update(max++, name) )
@@ -1118,7 +1118,7 @@ PalmOSModule::Backup(void)
 
       // check whether this might be a database we have to ignore
       if (m_IncrBackup)
-         if (stat(name.c_str(), &statb) == 0)
+         if (stat(name, &statb) == 0)
             if (info.modifyDate == statb.st_mtime) {
                RemoveFromList(orig_files, name);
                continue;
@@ -1132,7 +1132,7 @@ PalmOSModule::Backup(void)
       // check exclude list
       int pos;
 
-      pos = m_BackupExcludeList.find(fname.c_str(), 0);
+      pos = m_BackupExcludeList.find(fname, 0);
       if (pos >= 0) {
          // the found string is only valid, if it is either surrounded by commata or
          // with string start or end
@@ -1163,12 +1163,12 @@ PalmOSModule::Backup(void)
       }
 
       // create file
-      f = pi_file_create((char*)name.c_str(), &info);
+      f = pi_file_create((char*)name, &info);
 
       if (f == 0) {
          wxString msg;
          msg.Printf(_("Unable to create file %s!"),
-                    (char*)name.c_str());
+                    (char*)name);
          ErrorMessage(_(msg));
          continue;
       }
@@ -1176,7 +1176,7 @@ PalmOSModule::Backup(void)
       if (pi_file_retrieve(f, m_PiSocket, 0) < 0) {
          wxString msg;
          msg.Printf(_("Unable to backup database %s!"),
-                    name.c_str());
+                    name);
          ErrorMessage(_(msg));
       }
 
@@ -1198,7 +1198,7 @@ PalmOSModule::Backup(void)
    // Remaining files are outdated
    if (m_BackupSync) {
       for (unsigned int j = 0; j < orig_files.GetCount(); j++)
-         unlink(orig_files.Item(j).c_str());  // delete
+         unlink(orig_files.Item(j));  // delete
    }
 
    // All files are backed up now.
@@ -1250,7 +1250,7 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
       db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
       // remember filename
-      sprintf(db[dbcount]->name, "%s", fnames.Item(j).c_str());
+      sprintf(db[dbcount]->name, "%s", fnames.Item(j));
 
       f = pi_file_open(db[dbcount]->name);
 
@@ -1364,7 +1364,7 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
    {
       wxString msg;
       msg.Printf(_("Could not access directory %s!"),
-                 directory.c_str());
+                 directory);
       ErrorMessage(_(msg));
       return;
    }
@@ -1680,7 +1680,7 @@ PalmOSModule::SendEMails(void)
       String tmpstr;
       tmpstr.Printf(_("Transferred %d/%d messages."),
                     numMessagesTransferred, numMessages);
-      dlp_AddSyncLogEntry(m_PiSocket, (char *)tmpstr.c_str());
+      dlp_AddSyncLogEntry(m_PiSocket, (char *)tmpstr);
       StatusMessage(tmpstr);
    }
    if(! numMessages)
@@ -1709,7 +1709,7 @@ PalmOSModule::StoreEMails(void)
    if(! mf)
    {
       String tmpstr;
-      tmpstr.Printf(_("Cannot open PalmOS synchronisation mailbox '%s'"), m_PalmBox.c_str());
+      tmpstr.Printf(_("Cannot open PalmOS synchronisation mailbox '%s'"), m_PalmBox);
       ErrorMessage((tmpstr));
       return;
    }
@@ -1735,9 +1735,8 @@ PalmOSModule::StoreEMails(void)
       if((hi->GetStatus() & MailFolder::MSG_STAT_DELETED) != 0)
       {
          String tmpstr;
-         tmpstr.Printf(_("Skipping deleted message %lu/%lu"),
-                       (unsigned long)(i+1),
-                       (unsigned long)(hil->Count()));
+         tmpstr.Printf(_("Skipping deleted message %zu/%zu"),
+                       i+1, hil->Count());
          StatusMessage(tmpstr);
       }
       else
@@ -1756,10 +1755,9 @@ PalmOSModule::StoreEMails(void)
          msg = mf->GetMessage(hi->GetUId());
          ASSERT(msg);
          String tmpstr;
-         tmpstr.Printf( _("Storing message %lu/%lu: %s"),
-                        (unsigned long)(i+1),
-                        (unsigned long)(hil->Count()),
-                        msg->Subject().c_str());
+         tmpstr.Printf( _("Storing message %zu/%zu: %s"),
+                        i+1, hil->Count(),
+                        msg->Subject());
          StatusMessage(tmpstr);
          String content;
          msg->GetHeaderLine("From",content);
@@ -1787,7 +1785,7 @@ PalmOSModule::StoreEMails(void)
          }
          // msg->WriteToString(content, false /* headers */);
          String content2;
-         const char *cptr = content.c_str();
+         const char *cptr = content;
          while(*cptr)
          {
             if(*cptr != '\r')
@@ -1802,10 +1800,9 @@ PalmOSModule::StoreEMails(void)
          if(dlp_WriteRecord(m_PiSocket, m_MailDB, 0, 0, 0, buffer, len, 0) <= 0)
          {
             String tmpstr;
-            tmpstr.Printf( _("Could not store message %lu/%lu: %s"),
-                           (unsigned long)(i+1),
-                           (unsigned long)(hil->Count()),
-                           msg->Subject().c_str());
+            tmpstr.Printf( _("Could not store message %zu/%zu: %s"),
+                           i+1, hil->Count(),
+                           msg->Subject());
             ErrorMessage(tmpstr);
             count++;
          }
@@ -1818,9 +1815,9 @@ PalmOSModule::StoreEMails(void)
    if(count > 0)
    {
       String tmpstr;
-      tmpstr.Printf(_("Stored %lu/%lu messages on PalmOS device."),
-                    (unsigned long) count,
-                    (unsigned long) hil->Count());
+      tmpstr.Printf(_("Stored %zu/%zu messages on PalmOS device."),
+                    count,
+                    hil->Count());
       StatusMessage((tmpstr));
    }
    SafeDecRef(hil);
@@ -1846,17 +1843,17 @@ PalmOSModule::SyncMAL(void)
    if(m_MALUseProxy)
    {
       StatusMessage(_("Setting up MAL proxy..."));
-      setHttpProxy ((char *) m_MALProxyHost.c_str());
+      setHttpProxy ((char *) m_MALProxyHost);
       setHttpProxyPort ( m_MALProxyPort);
-      setProxyUsername ((char *) m_MALProxyLogin.c_str());
-      setProxyPassword ((char *) m_MALProxyPassword.c_str());
+      setProxyUsername ((char *) m_MALProxyLogin);
+      setProxyPassword ((char *) m_MALProxyPassword);
    }
 
    /* are we using a SOCKS proxy? */
    if(m_MALUseSocks)
    {
       StatusMessage(_("Setting up SOCKS proxy..."));
-      setSocksProxy ((char *) m_MALSocksHost.c_str());
+      setSocksProxy ((char *) m_MALSocksHost);
       setSocksProxyPort ( m_MALSocksPort );
    }
    StatusMessage(_("Synchronising MAL server/AvantGo..."));

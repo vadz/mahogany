@@ -221,7 +221,7 @@ bool AdbVCardExporter::DoExportEntry(const AdbEntry& entry,
    // write vCard to the file
    if ( !vcard.Write(filename) )
    {
-      wxLogError(_("Failed to write vCard to the file '%s'."), filename.c_str());
+      wxLogError(_("Failed to write vCard to the file '%s'."), filename);
 
       return FALSE;
    }
@@ -238,7 +238,7 @@ bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
       if ( !wxMkdir(dirname, 0755) )
       {
          wxLogError(_("Failed to export address book to '%s'."),
-                    dirname.c_str());
+                    dirname);
 
          return FALSE;
       }
@@ -305,7 +305,7 @@ bool AdbVCardExporter::Export(AdbEntryGroup& group, const String& dest)
    if ( DoExportGroup(group, dirname) )
    {
       wxLogMessage(_("Successfully exported address book data to "
-                     "directory '%s'"), dirname.c_str());
+                     "directory '%s'"), dirname);
 
       return TRUE;
    }

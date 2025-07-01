@@ -154,7 +154,7 @@ MFDialogComponent::WriteSettings(void)
                                (int) m_Logical,
                                (int) m_Inverted,
                                (int) m_Test,
-                               strutil_escapeString(m_Argument).c_str(),
+                               strutil_escapeString(m_Argument),
                                (int) m_Target);
    if ( m_Target == ORC_W_Header )
       s << " \"" << strutil_escapeString(m_TargetArgument) << '"';
@@ -779,7 +779,7 @@ MFDialogSettingsImpl::WriteActionSettings(void) const
 {
    return String::Format(_T("%d \"%s\""),
                          (int) m_Action,
-                         strutil_escapeString(m_ActionArgument).c_str());
+                         strutil_escapeString(m_ActionArgument));
 }
 
 String
@@ -1165,7 +1165,7 @@ GetFilterForFolder(const MFolder *folder)
    if ( !filterRule )
    {
       wxLogError(_("Error parsing filter '%s' for folder '%s'"),
-                 filterString.c_str(), folder->GetFullName().c_str());
+                 filterString, folder->GetFullName());
    }
 
    // cache the newly created rule and make sure it doesn't go away

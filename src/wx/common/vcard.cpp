@@ -120,7 +120,7 @@ wxVCard::~wxVCard()
     if ( !vObj )
     {
         wxLogError(_("The file '%s' doesn't contain any vCard objects."),
-                   filename.c_str());
+                   filename);
     }
     else
     {
