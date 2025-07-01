@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(WXWIN)\wxwidgets.props" />
+    <Import Project="C:\dev\miniconda3\envs\wxenv\Library\wxwidgets.props" /> <!-- FIXME-VZ -->
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-  </PropertyGroup>
     <!--
       Our library projects don't have DLL configurations, so we need to look in
       the directories without "DLL" in their names to find them.
@@ -13,6 +12,7 @@
     <LibOutDir Condition="'$(Configuration)'=='Debug DLL'">$(SolutionDir)\$(Platform)\Debug\output\</LibOutDir>
     <LibOutDir Condition="'$(Configuration)'=='Release'">$(OutDir)</LibOutDir>
     <LibOutDir Condition="'$(Configuration)'=='Release DLL'">$(SolutionDir)\$(Platform)\Release\output\</LibOutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_NET_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_STC_LIB;wxNO_WEBVIEW_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -27,7 +27,9 @@
         -->
       <DisableSpecificWarnings>4100;4244;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalLibraryDirectories>$(LibOutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(LibOutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
 </Project>
