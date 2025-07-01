@@ -18,6 +18,7 @@ jobs:
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v3
       with:
+        auto-activate-base: false
         auto-update-conda: false
         activate-environment: wxenv
         channels: conda-forge,defaults
