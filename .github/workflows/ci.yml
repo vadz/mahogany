@@ -10,6 +10,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     env:
+      LD_LIBRARY_PATH: /usr/lib/miniconda/lib
       WX_CONFIG: /usr/share/miniconda/bin/wx-config
     steps:
     - uses: actions/checkout@v4
@@ -25,6 +26,8 @@ jobs:
     - name: Install wxWidgets
       run: |
         conda install -y conda-forge::wxwidgets
+    - name: Setup tmate
+      uses: mxschmitt/action-tmate@v3
     - name: Configure
       run: |
         mkdir build
@@ -53,4 +56,4 @@ jobs:
     - name: Build
       env:
         WXWIN: 'c:\Miniconda\envs\wxenv\Library'
-      run: msbuild.exe M.sln
+      run: msbuild.exe -noLogo -maxCpuCount -property:Platform=x64,Configuration="Release DLL" M.sln
