@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    env:
+      WX_CONFIG: /usr/share/miniconda/bin/wx-config
+    steps:
+    - uses: actions/checkout@v4
+    - name: Bootstrap
+      run: ./bootstrap
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-activate-base: false
+        auto-update-conda: false
+        activate-environment: wxenv
+        channels: conda-forge,defaults
+    - name: Install wxWidgets
+      run: |
+        conda install -y conda-forge::wxwidgets
+    - name: Configure
+      run: |
+        mkdir build
+        cd build
+        ../configure
+    - name: Build
+      run: |
+        make -C build
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v2
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-activate-base: false
+        auto-update-conda: false
+        activate-environment: wxenv
+        channels: conda-forge,defaults
+    - name: Install wxWidgets
+      run: |
+        conda install -y conda-forge::wxwidgets
+    - name: Build
+      env:
+        WXWIN: 'c:\Miniconda\envs\wxenv\Library'
+      run: msbuild.exe M.sln
