@@ -10,7 +10,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     env:
-      WX_CONFIG: /usr/share/miniconda/bin/wx-config
+      LD_LIBRARY_PATH: /usr/lib/miniconda/lib
     steps:
     - uses: actions/checkout@v4
     - name: Bootstrap
@@ -29,10 +29,10 @@ jobs:
       run: |
         mkdir build
         cd build
-        ../configure
+        ../configure --with-wx-config=/usr/share/miniconda/bin/wx-config
     - name: Build
       run: |
-        make -C build
+        make -j`nproc` -C build
 
   build-windows:
     runs-on: windows-latest
@@ -53,4 +53,4 @@ jobs:
     - name: Build
       env:
         WXWIN: 'c:\Miniconda\envs\wxenv\Library'
-      run: msbuild.exe M.sln
+      run: msbuild.exe -noLogo -maxCpuCount -property:"Platform=x64,Configuration=Release DLL" M.sln
