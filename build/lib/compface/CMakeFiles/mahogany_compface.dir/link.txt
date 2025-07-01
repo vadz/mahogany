@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcompface.a CMakeFiles/mahogany_compface.dir/arith.c.o CMakeFiles/mahogany_compface.dir/compface.c.o CMakeFiles/mahogany_compface.dir/compress.c.o CMakeFiles/mahogany_compface.dir/file.c.o CMakeFiles/mahogany_compface.dir/gen.c.o CMakeFiles/mahogany_compface.dir/uncompface.c.o
+/usr/bin/ranlib libcompface.a

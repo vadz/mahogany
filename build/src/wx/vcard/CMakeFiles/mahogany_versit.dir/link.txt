@@ -1,0 +1,2 @@
+/usr/bin/ar qc libversit.a CMakeFiles/mahogany_versit.dir/vobject.c.o CMakeFiles/mahogany_versit.dir/vcc.c.o
+/usr/bin/ranlib libversit.a

@@ -48,8 +48,24 @@ target_include_directories(mahogany_dspam
 target_compile_definitions(mahogany_dspam PRIVATE
     _CRT_SECURE_NO_WARNINGS
     _CRT_NONSTDC_NO_WARNINGS
-    HAVE_CONFIG_H
 )
+
+# Create a basic config header if it doesn't exist
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/auto-config.h")
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/auto-config.h" "
+/* Basic configuration for DSPAM library */
+#ifndef AUTO_CONFIG_H
+#define AUTO_CONFIG_H
+
+#define HAVE_CONFIG_H
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_UNISTD_H 1
+
+#endif /* AUTO_CONFIG_H */
+")
+    target_include_directories(mahogany_dspam PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 if(WIN32)
     target_compile_definitions(mahogany_dspam PRIVATE 

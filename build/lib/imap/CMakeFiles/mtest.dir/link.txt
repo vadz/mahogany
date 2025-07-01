@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/mtest.dir/link.d CMakeFiles/mtest.dir/src/mtest/mtest.c.o -o mtest  libimap.a -ldl -lpthread -lrt /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so

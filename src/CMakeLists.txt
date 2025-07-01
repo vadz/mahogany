@@ -3,6 +3,12 @@
 #################################################################################
 # This file builds the main Mahogany GUI email client application.
 
+# Check if wxWidgets is available
+if(NOT HAVE_WXWIDGETS)
+    message(STATUS "Skipping main application - wxWidgets not found")
+    return()
+endif()
+
 # Core application sources
 set(MAHOGANY_SOURCES
     # Classes

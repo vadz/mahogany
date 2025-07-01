@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/mahogany_dspam.dir/src/base64.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/base64.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/bnr.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/bnr.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/buffer.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/buffer.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/config_shared.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/config_shared.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/decode.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/decode.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/diction.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/diction.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/error.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/error.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/hash.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/hash.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/hash_drv.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/hash_drv.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/heap.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/heap.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/libdspam.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/libdspam.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/list.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/list.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/nodetree.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/nodetree.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/pref.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/pref.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/read_config.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/read_config.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/tokenizer.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/tokenizer.c.o.d"
+  "CMakeFiles/mahogany_dspam.dir/src/util.c.o"
+  "CMakeFiles/mahogany_dspam.dir/src/util.c.o.d"
+  "libdspam.a"
+  "libdspam.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/mahogany_dspam.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
