@@ -108,7 +108,7 @@ protected:
 #else
    MObject() = default;
    MObject(const MObject&) = default;
-   MObject^ operator=(const MObject&) = default;
+   MObject& operator=(const MObject&) = default;
 
    /// virtual destructor
    virtual ~MObject() = default;
