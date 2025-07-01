@@ -1,2 +1,0 @@
-/usr/bin/ar qc libimap.a "CMakeFiles/mahogany_imap.dir/src/c-client/flstring.c.o" "CMakeFiles/mahogany_imap.dir/src/c-client/misc.c.o" "CMakeFiles/mahogany_imap.dir/src/c-client/netmsg.c.o" "CMakeFiles/mahogany_imap.dir/src/c-client/newsrc.c.o" "CMakeFiles/mahogany_imap.dir/src/c-client/rfc822.c.o" "CMakeFiles/mahogany_imap.dir/src/c-client/utf8.c.o" "CMakeFiles/mahogany_imap.dir/src/c-client/utf8aux.c.o"
-/usr/bin/ranlib libimap.a

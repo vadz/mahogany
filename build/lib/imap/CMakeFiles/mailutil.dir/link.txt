@@ -1,1 +1,0 @@
-/usr/bin/cc -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/mailutil.dir/link.d CMakeFiles/mailutil.dir/src/mailutil/mailutil.c.o -o mailutil  libimap.a -ldl -lpthread -lrt /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so
