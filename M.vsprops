@@ -8,10 +8,10 @@
       Our library projects don't have DLL configurations, so we need to look in
       the directories without "DLL" in their names to find them.
       -->
-    <LibOutDir Condition="'$(Configuration)'=='Debug'">$(OutDir)</LibOutDir>
-    <LibOutDir Condition="'$(Configuration)'=='Debug DLL'">$(SolutionDir)\$(Platform)\Debug\output\</LibOutDir>
-    <LibOutDir Condition="'$(Configuration)'=='Release'">$(OutDir)</LibOutDir>
-    <LibOutDir Condition="'$(Configuration)'=='Release DLL'">$(SolutionDir)\$(Platform)\Release\output\</LibOutDir>
+    <LibOutSubdir Condition="'$(Configuration)'=='Debug'">Debug</LibOutSubdir>
+    <LibOutSubdir Condition="'$(Configuration)'=='Debug DLL'">Debug</LibOutSubdir>
+    <LibOutSubdir Condition="'$(Configuration)'=='Release'">Release</LibOutSubdir>
+    <LibOutSubdir Condition="'$(Configuration)'=='Release DLL'">Release</LibOutSubdir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -29,7 +29,7 @@
       <AdditionalIncludeDirectories>include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(LibOutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(Platform)\$(LibOutSubdir)\output;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
 </Project>
