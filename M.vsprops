@@ -3,6 +3,16 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(WXWIN)\wxwidgets.props" />
   </ImportGroup>
+  <PropertyGroup Label="UserMacros">
+    <!--
+      Our library projects don't have DLL configurations, so we need to look in
+      the directories without "DLL" in their names to find them.
+      -->
+    <LibOutSubdir Condition="'$(Configuration)'=='Debug'">Debug</LibOutSubdir>
+    <LibOutSubdir Condition="'$(Configuration)'=='Debug DLL'">Debug</LibOutSubdir>
+    <LibOutSubdir Condition="'$(Configuration)'=='Release'">Release</LibOutSubdir>
+    <LibOutSubdir Condition="'$(Configuration)'=='Release DLL'">Release</LibOutSubdir>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>wxNO_AUI_LIB;wxNO_GL_LIB;wxNO_MEDIA_LIB;wxNO_RIBBON_LIB;wxNO_RICHTEXT_LIB;wxNO_STC_LIB;wxNO_WEBVIEW_LIB;wxNO_XRC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -18,5 +28,8 @@
       <DisableSpecificWarnings>4100;4244;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>include;lib/compface;lib/imap/src/osdep/nt;lib/imap/src/c-client;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(Platform)\$(LibOutSubdir)\output;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
 </Project>
