@@ -230,26 +230,26 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\ip_nt.c;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="src\osdep\nt\os_nt.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating osdep.h.c...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h.c
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating osdep.h.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\osdep.h.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Creating osdep.h.c...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h.c
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RootDir)%(Directory)\osdep.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Creating osdep.h.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FullPath);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\osdep.h.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating osdep.h.c...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h.c
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(RootDir)%(Directory)\osdep.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating osdep.h.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\osdep.h.c;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Creating osdep.h.c...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h.c
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RootDir)%(Directory)\osdep.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Creating osdep.h.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy "%(FullPath)" "%(RootDir)%(Directory)"\osdep.h
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath);%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\osdep.h.c;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(RootDir)%(Directory)\osdep.h;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
