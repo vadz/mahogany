@@ -258,8 +258,8 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       }
       else
       {
-         wxLogDebug(_T(".pinerc(%lu): non numeric composer-wrap-column value."),
-                    (unsigned long)line);
+         wxLogDebug(_T(".pinerc(%zu): non numeric composer-wrap-column value."),
+                    line);
       }
    }
    else if ( var == _T("editor") )
@@ -284,8 +284,8 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       }
       else
       {
-         wxLogDebug(_T(".pinerc(%lu): non numeric mail-check-interval value."),
-                    (unsigned long)line);
+         wxLogDebug(_T(".pinerc(%zu): non numeric mail-check-interval value."),
+                    line);
       }
    }
    else if ( var == _T("nntp-server") )

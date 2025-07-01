@@ -733,8 +733,7 @@ MModule::ListAvailableModules(const String& interfaceName)
       }
    }
 
-   wxLogTrace(M_TRACE_MODULES, _T("\t%lu modules found."),
-              (unsigned long)count);
+   wxLogTrace(M_TRACE_MODULES, _T("\t%zu modules found."), count);
 
    listing->SetCount(count);
 

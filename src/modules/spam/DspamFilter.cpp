@@ -518,12 +518,7 @@ void DspamFilter::Train(wxWindow *parent)
 
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( !pd.Update(n + 1, String::Format
-                             (
-                                 _("Message %lu of %lu"),
-                                 (unsigned long)n,
-                                 (unsigned long)count
-                             )) )
+      if ( !pd.Update(n + 1, String::Format(_("Message %zu of %zu"), n, count)) )
       {
          // cancelled by user
          break;
@@ -541,7 +536,7 @@ void DspamFilter::Train(wxWindow *parent)
          }
       }
 
-      wxLogWarning(_("Failed to retrieve message #%lu."));
+      wxLogWarning(_("Failed to retrieve message #%zu."), n);
    }
 }
 

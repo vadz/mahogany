@@ -2858,8 +2858,7 @@ void MProgressInfo::SetLabel(const wxString& label)
 
 void MProgressInfo::SetValue(size_t numDone)
 {
-   SetLabel(wxString::Format(_("%lu done"),
-                             static_cast<unsigned long>(numDone)));
+   SetLabel(wxString::Format(_("%zu done"), numDone));
 }
 
 MProgressInfo::~MProgressInfo()

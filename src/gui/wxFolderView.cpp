@@ -2862,7 +2862,7 @@ void wxFolderListCtrl::UpdateStatusBar()
 
       String msg;
       if ( m_countSelected )
-         msg.Printf(_("%lu messages selected"), (unsigned long)m_countSelected);
+         msg.Printf(_("%zu messages selected"), m_countSelected);
 
       // determine where should this message go
       wxFrame *frame = GetFrame(this);
@@ -3527,9 +3527,9 @@ void wxFolderView::MoveToNextSearchMatch(bool forward)
          status = String(_T(" (")) + status + String(_T(')'));
       }
 
-      wxLogStatus(m_Frame, _("Search result %lu of %lu for \"%s\"%s"),
-                  (unsigned long)(m_searchData.idx + 1),
-                  (unsigned long)count,
+      wxLogStatus(m_Frame, _("Search result %zu of %zu for \"%s\"%s"),
+                  (m_searchData.idx + 1),
+                  count,
                   m_searchData.str,
                   status);
    }
@@ -5083,8 +5083,8 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    size_t n,
           count = event.GetCount();
 
-   wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Expunge(%lu items), now %d"),
-              (unsigned long)count, m_FolderCtrl->GetItemCount());
+   wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Expunge(%zu items), now %d"),
+              count, m_FolderCtrl->GetItemCount());
 
    HeaderInfoList_obj hil(GetFolder()->GetHeaders());
 

@@ -355,9 +355,9 @@ void MailFolderKeepAliveTimer::Notify(void)
 MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
 {
    wxLogTrace(TRACE_MF_CLOSE,
-              _T("Delaying closing of '%s' (%lu refs) for %d seconds."),
+              _T("Delaying closing of '%s' (%zu refs) for %d seconds."),
               mf->GetName(),
-              (unsigned long)mf->GetNRef(),
+              mf->GetNRef(),
               secs == NEVER_EXPIRES ? -1 : secs);
 
    m_mf = mf;
@@ -374,8 +374,8 @@ MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
 
 MfCloseEntry::~MfCloseEntry()
 {
-   wxLogTrace(TRACE_MF_CLOSE, _T("Destroying MfCloseEntry(%s) (%lu refs left)"),
-              m_mf->GetName(), (unsigned long)m_mf->GetNRef());
+   wxLogTrace(TRACE_MF_CLOSE, _T("Destroying MfCloseEntry(%s) (%zu refs left)"),
+              m_mf->GetName(), m_mf->GetNRef());
 
    m_mf->RealDecRef();
 }
@@ -1884,9 +1884,9 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
 bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
                                    const MFolder *folderDst)
 {
-   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ProcessNewMail(%lu msgs) for %s",
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ProcessNewMail(%zu msgs) for %s",
               GetName(),
-              (unsigned long)uidsNew.GetCount(),
+              uidsNew.GetCount(),
               folderDst ? folderDst->GetFullName() : wxString("ourselves"));
 
    // use the settings for the folder where the new mail is!

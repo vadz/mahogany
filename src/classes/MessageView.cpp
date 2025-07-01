@@ -2140,14 +2140,14 @@ void MessageView::ShowImage(const MimePart *mimepart)
                msg.Printf
                    (
                      _("An image embedded in this message is bigger "
-                       "than the currently configured limit of %luKb.\n"
+                       "than the currently configured limit of %ldKb.\n"
                        "\n"
                        "Would you still like to see it?\n"
                        "\n"
                        "You can change this setting in the \"Message "
                        "View\" page of the preferences dialog to 0 if "
                        "you want to always show the images inline."),
-                     (unsigned long)m_ProfileValues.inlineGFX
+                     m_ProfileValues.inlineGFX
                    );
 
                if ( MDialog_YesNoDialog

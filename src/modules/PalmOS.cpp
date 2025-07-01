@@ -1735,9 +1735,8 @@ PalmOSModule::StoreEMails(void)
       if((hi->GetStatus() & MailFolder::MSG_STAT_DELETED) != 0)
       {
          String tmpstr;
-         tmpstr.Printf(_("Skipping deleted message %lu/%lu"),
-                       (unsigned long)(i+1),
-                       (unsigned long)(hil->Count()));
+         tmpstr.Printf(_("Skipping deleted message %zu/%zu"),
+                       i+1, hil->Count());
          StatusMessage(tmpstr);
       }
       else
@@ -1756,9 +1755,8 @@ PalmOSModule::StoreEMails(void)
          msg = mf->GetMessage(hi->GetUId());
          ASSERT(msg);
          String tmpstr;
-         tmpstr.Printf( _("Storing message %lu/%lu: %s"),
-                        (unsigned long)(i+1),
-                        (unsigned long)(hil->Count()),
+         tmpstr.Printf( _("Storing message %zu/%zu: %s"),
+                        i+1, hil->Count(),
                         msg->Subject());
          StatusMessage(tmpstr);
          String content;
@@ -1802,9 +1800,8 @@ PalmOSModule::StoreEMails(void)
          if(dlp_WriteRecord(m_PiSocket, m_MailDB, 0, 0, 0, buffer, len, 0) <= 0)
          {
             String tmpstr;
-            tmpstr.Printf( _("Could not store message %lu/%lu: %s"),
-                           (unsigned long)(i+1),
-                           (unsigned long)(hil->Count()),
+            tmpstr.Printf( _("Could not store message %zu/%zu: %s"),
+                           i+1, hil->Count(),
                            msg->Subject());
             ErrorMessage(tmpstr);
             count++;
@@ -1818,9 +1815,9 @@ PalmOSModule::StoreEMails(void)
    if(count > 0)
    {
       String tmpstr;
-      tmpstr.Printf(_("Stored %lu/%lu messages on PalmOS device."),
-                    (unsigned long) count,
-                    (unsigned long) hil->Count());
+      tmpstr.Printf(_("Stored %zu/%zu messages on PalmOS device."),
+                    count,
+                    hil->Count());
       StatusMessage((tmpstr));
    }
    SafeDecRef(hil);
