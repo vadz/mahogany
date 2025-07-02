@@ -124,18 +124,17 @@ elseif(UNIX)
 endif()
 
 # Find required dependencies
-find_package(wxWidgets QUIET COMPONENTS core base net html aui adv)
+find_package(wxWidgets QUIET COMPONENTS core base net html qa)
 if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
     message(STATUS "Found wxWidgets: ${wxWidgets_VERSION}")
     set(HAVE_WXWIDGETS ON)
 else()
-    message(WARNING "wxWidgets not found. GUI application will not be built.")
-    message(STATUS "To build the complete application, please install wxWidgets 3.0 or later.")
-    message(STATUS "On Ubuntu/Debian: sudo apt-get install libwxgtk3.0-gtk3-dev")
-    message(STATUS "On CentOS/RHEL: sudo yum install wxGTK3-devel")
-    message(STATUS "On Windows: Download from https://www.wxwidgets.org/")
-    set(HAVE_WXWIDGETS OFF)
+    message(FATAL_ERROR "wxWidgets not found. Mahogany requires wxWidgets 3.0 or later.
+To install wxWidgets:
+- Ubuntu/Debian: sudo apt-get install libwxgtk3.0-gtk3-dev
+- CentOS/RHEL: sudo yum install wxGTK3-devel  
+- Windows: Download from https://www.wxwidgets.org/")
 endif()
 
 # Find optional dependencies
@@ -174,14 +173,6 @@ endif()
 # Set global include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-)
-
-# Configure version header
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/Mversion.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/include/Mversion.h"
-    @ONLY
 )
 
 # Add subdirectories for libraries
@@ -203,47 +194,6 @@ if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-# Install configuration
-include(GNUInstallDirs)
-
-# Generate and install export configuration
-install(EXPORT MahoganyTargets
-    FILE MahoganyTargets.cmake
-    NAMESPACE Mahogany::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Mahogany
-)
-
-# Create config file
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MahoganyConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/MahoganyConfig.cmake"
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Mahogany
-)
-
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/MahoganyConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-
-install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/MahoganyConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/MahoganyConfigVersion.cmake"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Mahogany
-)
-
-# Install headers
-install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mahogany
-    FILES_MATCHING PATTERN "*.h"
-)
-
-# Install configured version header
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/Mversion.h"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mahogany
-)
-
 # Summary
 message(STATUS "")
 message(STATUS "Mahogany Configuration Summary:")
@@ -255,9 +205,4 @@ message(STATUS "  Python support: ${ENABLE_PYTHON}")
 message(STATUS "  SSL support: ${ENABLE_SSL}")
 message(STATUS "  Build tests: ${BUILD_TESTS}")
 message(STATUS "  Build utilities: ${BUILD_UTILITIES}")
-message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
-if(NOT HAVE_WXWIDGETS)
-    message(STATUS "")
-    message(STATUS "NOTE: Libraries will be built but GUI application requires wxWidgets.")
-endif()
 message(STATUS "")

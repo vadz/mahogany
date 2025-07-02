@@ -3,12 +3,6 @@
 #################################################################################
 # This file builds the main Mahogany GUI email client application.
 
-# Check if wxWidgets is available
-if(NOT HAVE_WXWIDGETS)
-    message(STATUS "Skipping main application - wxWidgets not found")
-    return()
-endif()
-
 # Core application sources
 set(MAHOGANY_SOURCES
     # Classes
@@ -184,17 +178,16 @@ set(MAHOGANY_SOURCES
 
 # Python interface sources (optional)
 set(PYTHON_SOURCES
-    Python/HeaderInfo_swig.cpp
+    Python/HeaderInfo.cpp-swig
     Python/InitPython.cpp
-    Python/MDialogs_swig.cpp
-    Python/MailFolder_swig.cpp
-    Python/Message_swig.cpp
-    Python/MimePart_swig.cpp
-    Python/MimeType_swig.cpp
-    Python/PythonDll.cpp
+    Python/MDialogs.cpp-swig
+    Python/MailFolder.cpp-swig
+    Python/Message.cpp-swig
+    Python/MimePart.cpp-swig
+    Python/MimeType.cpp-swig
     Python/PythonHelp.cpp
-    Python/SendMessage_swig.cpp
-    Python/swiglib_swig.cpp
+    Python/SendMessage.cpp-swig
+    Python/swiglib.cpp-swig
 )
 
 # Create the main executable
@@ -279,27 +272,3 @@ endif()
 install(TARGETS mahogany
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-# Install resources (if they exist)
-if(EXISTS "${CMAKE_SOURCE_DIR}/res")
-    install(DIRECTORY "${CMAKE_SOURCE_DIR}/res/"
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/mahogany
-        FILES_MATCHING 
-        PATTERN "*.ico"
-        PATTERN "*.png" 
-        PATTERN "*.xpm"
-        PATTERN "*.bmp"
-    )
-endif()
-
-# Install documentation
-if(EXISTS "${CMAKE_SOURCE_DIR}/doc")
-    install(FILES 
-        "${CMAKE_SOURCE_DIR}/README"
-        "${CMAKE_SOURCE_DIR}/COPYING"
-        "${CMAKE_SOURCE_DIR}/CREDITS"
-        "${CMAKE_SOURCE_DIR}/CHANGES"
-        DESTINATION ${CMAKE_INSTALL_DOCDIR}
-        OPTIONAL
-    )
-endif()

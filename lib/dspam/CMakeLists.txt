@@ -38,8 +38,7 @@ set_target_properties(mahogany_dspam PROPERTIES
 # Include directories
 target_include_directories(mahogany_dspam
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:include/mahogany/dspam>
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -100,17 +99,3 @@ if(WIN32)
 elseif(UNIX)
     target_link_libraries(mahogany_dspam PRIVATE m)
 endif()
-
-# Install the library
-install(TARGETS mahogany_dspam
-    EXPORT MahoganyTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-# Install headers
-install(DIRECTORY src/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mahogany/dspam
-    FILES_MATCHING PATTERN "*.h"
-)

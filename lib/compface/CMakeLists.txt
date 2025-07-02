@@ -53,17 +53,3 @@ endif()
 set_target_properties(mahogany_compface PROPERTIES
     LINKER_LANGUAGE C
 )
-
-# Install the library
-install(TARGETS mahogany_compface
-    EXPORT MahoganyTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-# Install headers
-file(GLOB COMPFACE_HEADERS "*.h")
-install(FILES ${COMPFACE_HEADERS}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mahogany/compface
-)

@@ -20,4 +20,3 @@ src/wx/vcard/vcc.c
 tags
 Win32/
 x64/
-build/
