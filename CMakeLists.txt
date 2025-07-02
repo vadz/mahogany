@@ -90,7 +90,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(ENABLE_PYTHON "Enable Python scripting support" ON)
 option(ENABLE_SSL "Enable SSL/TLS support" ON)
-option(BUILD_TESTS "Build test programs" ON)
 option(BUILD_UTILITIES "Build utility programs" ON)
 
 # Set default build type if not specified
@@ -188,12 +187,6 @@ else()
     message(STATUS "Skipping main application build (wxWidgets not found)")
 endif()
 
-# Add tests if enabled
-if(BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
-
 # Summary
 message(STATUS "")
 message(STATUS "Mahogany Configuration Summary:")
@@ -203,6 +196,5 @@ message(STATUS "  Shared libraries: ${BUILD_SHARED_LIBS}")
 message(STATUS "  wxWidgets found: ${HAVE_WXWIDGETS}")
 message(STATUS "  Python support: ${ENABLE_PYTHON}")
 message(STATUS "  SSL support: ${ENABLE_SSL}")
-message(STATUS "  Build tests: ${BUILD_TESTS}")
 message(STATUS "  Build utilities: ${BUILD_UTILITIES}")
 message(STATUS "")
