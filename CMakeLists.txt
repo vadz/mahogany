@@ -31,27 +31,25 @@
 #    make
 #
 # 3. Build with options:
-#    cmake -DBUILD_SHARED_LIBS=ON -DENABLE_PYTHON=ON -DCMAKE_BUILD_TYPE=Release ..
+#    cmake -DENABLE_PYTHON=ON -DCMAKE_BUILD_TYPE=Release ..
 #    make
 #
 # 4. Install:
-#    make install
+#    make
 #
 # BUILD OPTIONS:
 # --------------
-# - BUILD_SHARED_LIBS: Build shared libraries instead of static (default: OFF)
 # - ENABLE_PYTHON: Enable Python scripting support (default: ON if Python found)
 # - ENABLE_SSL: Enable SSL/TLS support (default: ON if OpenSSL found)
 # - CMAKE_BUILD_TYPE: Debug, Release, RelWithDebInfo, MinSizeRel
-# - CMAKE_INSTALL_PREFIX: Installation directory
 #
 # TARGETS:
 # --------
-# Libraries:
-# - mahogany_imap: IMAP client library (static/shared)
-# - mahogany_compface: X-Face image library (static/shared)
-# - mahogany_dspam: Spam filtering library (static/shared)
-# - mahogany_versit: vCard library (static/shared)
+# Libraries (all built as static):
+# - mahogany_imap: IMAP client library
+# - mahogany_compface: X-Face image library
+# - mahogany_dspam: Spam filtering library
+# - mahogany_versit: vCard library
 #
 # Executables:
 # - mahogany: Main GUI application
@@ -72,8 +70,17 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+# Extract version from Mversion.h
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/Mversion.h" MVERSION_H_CONTENT)
+string(REGEX MATCH "#define M_VERSION_MAJOR[ \t]+([0-9]+)" _ "${MVERSION_H_CONTENT}")
+set(VERSION_MAJOR "${CMAKE_MATCH_1}")
+string(REGEX MATCH "#define M_VERSION_MINOR[ \t]+([0-9]+)" _ "${MVERSION_H_CONTENT}")
+set(VERSION_MINOR "${CMAKE_MATCH_1}")
+string(REGEX MATCH "#define M_VERSION_RELEASE[ \t]+([0-9]+)" _ "${MVERSION_H_CONTENT}")
+set(VERSION_RELEASE "${CMAKE_MATCH_1}")
+
 project(Mahogany 
-    VERSION 0.68.0
+    VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_RELEASE}"
     DESCRIPTION "Mahogany Cross-Platform Email Client"
     LANGUAGES C CXX
 )
@@ -83,14 +90,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Include CMake modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 # Build options
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(ENABLE_PYTHON "Enable Python scripting support" ON)
 option(ENABLE_SSL "Enable SSL/TLS support" ON)
-option(BUILD_UTILITIES "Build utility programs" ON)
 
 # Set default build type if not specified
 if(NOT CMAKE_BUILD_TYPE)
@@ -102,9 +104,6 @@ endif()
 if(WIN32)
     # Windows-specific settings
     add_definitions(-DWIN32 -D_WINDOWS -D_UNICODE -DUNICODE)
-    if(BUILD_SHARED_LIBS)
-        add_definitions(-DWXUSINGDLL)
-    endif()
     
     # Disable specific warnings to match MSBuild configuration
     if(MSVC)
@@ -123,15 +122,15 @@ elseif(UNIX)
 endif()
 
 # Find required dependencies
-find_package(wxWidgets QUIET COMPONENTS core base net html qa)
+find_package(wxWidgets 3.2 REQUIRED COMPONENTS core base net html qa)
 if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
     message(STATUS "Found wxWidgets: ${wxWidgets_VERSION}")
     set(HAVE_WXWIDGETS ON)
 else()
-    message(FATAL_ERROR "wxWidgets not found. Mahogany requires wxWidgets 3.0 or later.
+    message(FATAL_ERROR "wxWidgets not found. Mahogany requires wxWidgets 3.2 or later.
 To install wxWidgets:
-- Ubuntu/Debian: sudo apt-get install libwxgtk3.0-gtk3-dev
+- Ubuntu/Debian: sudo apt-get install libwxgtk3.2-gtk3-dev
 - CentOS/RHEL: sudo yum install wxGTK3-devel  
 - Windows: Download from https://www.wxwidgets.org/")
 endif()
@@ -169,32 +168,21 @@ elseif(UNIX)
     endif()
 endif()
 
-# Set global include directories
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
 # Add subdirectories for libraries
 add_subdirectory(lib/imap)
 add_subdirectory(lib/compface)
 add_subdirectory(lib/dspam)
 add_subdirectory(src/wx/vcard)
 
-# Add main source directory (only if wxWidgets is available)
-if(HAVE_WXWIDGETS)
-    add_subdirectory(src)
-else()
-    message(STATUS "Skipping main application build (wxWidgets not found)")
-endif()
+# Add main application directory.
+add_subdirectory(src)
 
 # Summary
 message(STATUS "")
 message(STATUS "Mahogany Configuration Summary:")
 message(STATUS "  Version: ${PROJECT_VERSION}")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  Shared libraries: ${BUILD_SHARED_LIBS}")
 message(STATUS "  wxWidgets found: ${HAVE_WXWIDGETS}")
 message(STATUS "  Python support: ${ENABLE_PYTHON}")
 message(STATUS "  SSL support: ${ENABLE_SSL}")
-message(STATUS "  Build utilities: ${BUILD_UTILITIES}")
 message(STATUS "")

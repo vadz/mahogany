@@ -43,7 +43,6 @@ sudo apt-get install build-essential cmake libwxgtk3.0-gtk3-dev libssl-dev pytho
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
-make install
 ```
 
 #### Windows
@@ -55,46 +54,30 @@ build.bat
 mkdir build && cd build
 cmake .. -G "Visual Studio 17 2022" -A x64
 cmake --build . --config Release
-cmake --install . --config Release
 ```
 
 ## Build Options
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `BUILD_SHARED_LIBS` | `OFF` | Build shared libraries instead of static |
 | `ENABLE_PYTHON` | `ON` | Enable Python scripting support |
 | `ENABLE_SSL` | `ON` | Enable SSL/TLS support |
-| `BUILD_TESTS` | `ON` | Build test programs |
-| `BUILD_UTILITIES` | `ON` | Build utility programs |
 | `CMAKE_BUILD_TYPE` | `Release` | Build type (Debug/Release/RelWithDebInfo/MinSizeRel) |
 
 Example:
 ```bash
-cmake .. -DBUILD_SHARED_LIBS=ON -DENABLE_PYTHON=OFF -DCMAKE_BUILD_TYPE=Debug
+cmake .. -DENABLE_PYTHON=OFF -DCMAKE_BUILD_TYPE=Debug
 ```
 
-## Library Usage
+## Application Build
 
-The CMake system generates proper config files for use with `find_package()`:
-
-```cmake
-find_package(Mahogany REQUIRED)
-target_link_libraries(your_target Mahogany::mahogany_imap)
-```
-
-Available targets:
-- `Mahogany::mahogany_imap`
-- `Mahogany::mahogany_compface` 
-- `Mahogany::mahogany_dspam`
-- `Mahogany::mahogany_versit`
-- `Mahogany::mahogany` (if wxWidgets available)
+Mahogany is built as a standalone application with all libraries statically linked.
 
 ## Platform-Specific Notes
 
 ### Windows
 - The build uses the same compiler flags and dependencies as the existing MSBuild system
-- Both static and DLL builds are supported
+- All libraries are built statically
 - Precompiled headers are used when available
 
 ### Unix/Linux

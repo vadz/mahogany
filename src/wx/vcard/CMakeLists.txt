@@ -38,22 +38,11 @@ else()
 endif()
 
 # Create the versit library
-# This library can be built as either static or shared
-add_library(mahogany_versit ${VERSIT_SOURCES})
-
-# Set library properties
-set_target_properties(mahogany_versit PROPERTIES
-    OUTPUT_NAME versit
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-)
+add_library(mahogany_versit STATIC ${VERSIT_SOURCES})
 
 # Include directories
 target_include_directories(mahogany_versit
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include/mahogany/versit>
-    PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -87,18 +76,4 @@ endif()
 # Force C compilation for this library  
 set_target_properties(mahogany_versit PROPERTIES
     LINKER_LANGUAGE C
-)
-
-# Install the library
-install(TARGETS mahogany_versit
-    EXPORT MahoganyTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-# Install headers
-file(GLOB VERSIT_HEADERS "*.h")
-install(FILES ${VERSIT_HEADERS}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mahogany/versit
 )

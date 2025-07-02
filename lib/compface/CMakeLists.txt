@@ -15,14 +15,7 @@ set(COMPFACE_SOURCES
 )
 
 # Create the compface library
-add_library(mahogany_compface ${COMPFACE_SOURCES})
-
-# Set library properties
-set_target_properties(mahogany_compface PROPERTIES
-    OUTPUT_NAME compface
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-)
+add_library(mahogany_compface STATIC ${COMPFACE_SOURCES})
 
 # Include directories
 target_include_directories(mahogany_compface

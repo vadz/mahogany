@@ -268,7 +268,3 @@ if(ENABLE_SSL AND OpenSSL_FOUND)
     target_link_libraries(mahogany PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 endif()
 
-# Install the executable
-install(TARGETS mahogany
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)

@@ -4,7 +4,7 @@
 # This file builds the IMAP client library which provides email protocol support
 # for IMAP4, POP3, SMTP, NNTP and other mail protocols.
 
-# Library sources from c-client (core only for cross-platform compatibility)
+# Library sources from c-client (core functionality)
 set(IMAP_C_CLIENT_SOURCES
     src/c-client/flstring.c
     src/c-client/misc.c
@@ -13,13 +13,12 @@ set(IMAP_C_CLIENT_SOURCES
     src/c-client/rfc822.c
     src/c-client/utf8.c
     src/c-client/utf8aux.c
-    # Temporarily exclude protocol implementations that need full OSDEP
-    # src/c-client/imap4r1.c
-    # src/c-client/mail.c
-    # src/c-client/nntp.c
-    # src/c-client/pop3.c
-    # src/c-client/smanager.c
-    # src/c-client/smtp.c
+    src/c-client/imap4r1.c
+    src/c-client/mail.c
+    src/c-client/nntp.c
+    src/c-client/pop3.c
+    src/c-client/smanager.c
+    src/c-client/smtp.c
 )
 
 # Platform-specific OS sources
@@ -91,25 +90,14 @@ typedef unsigned int uint;
 endif()
 
 # Create the IMAP library
-add_library(mahogany_imap 
+add_library(mahogany_imap STATIC
     ${IMAP_C_CLIENT_SOURCES}
     ${IMAP_OSDEP_SOURCES}
-)
-
-# Set library properties
-set_target_properties(mahogany_imap PROPERTIES
-    OUTPUT_NAME imap
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 
 # Include directories
 target_include_directories(mahogany_imap
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/c-client>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/charset>
-        $<INSTALL_INTERFACE:include/mahogany/imap>
-    PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c-client
         ${CMAKE_CURRENT_SOURCE_DIR}/src/charset
 )
@@ -155,7 +143,7 @@ set_target_properties(mahogany_imap PROPERTIES
     LINKER_LANGUAGE C
 )
 
-# Link libraries
+# Platform-specific linking
 if(WIN32)
     target_link_libraries(mahogany_imap PRIVATE ws2_32)
 endif()
@@ -163,49 +151,4 @@ endif()
 if(ENABLE_SSL AND OpenSSL_FOUND)
     target_link_libraries(mahogany_imap PRIVATE OpenSSL::SSL OpenSSL::Crypto)
     target_compile_definitions(mahogany_imap PRIVATE HAVE_SSL)
-endif()
-
-# Install the library
-install(TARGETS mahogany_imap
-    EXPORT MahoganyTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-# Install headers
-install(DIRECTORY src/c-client/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mahogany/imap
-    FILES_MATCHING PATTERN "*.h"
-)
-
-# Build test program if enabled (disabled for now - needs full OSDEP support)
-if(FALSE AND BUILD_UTILITIES)
-    # MTEST utility
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/mtest/mtest.c")
-        add_executable(mtest src/mtest/mtest.c)
-        target_link_libraries(mtest mahogany_imap ${PLATFORM_LIBS})
-        target_include_directories(mtest PRIVATE 
-            src/c-client 
-            ${IMAP_OSDEP_INCLUDE}
-        )
-        
-        install(TARGETS mtest
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        )
-    endif()
-    
-    # MAILUTIL utility  
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/mailutil/mailutil.c")
-        add_executable(mailutil src/mailutil/mailutil.c)
-        target_link_libraries(mailutil mahogany_imap ${PLATFORM_LIBS})
-        target_include_directories(mailutil PRIVATE 
-            src/c-client 
-            ${IMAP_OSDEP_INCLUDE}
-        )
-        
-        install(TARGETS mailutil
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        )
-    endif()
 endif()
