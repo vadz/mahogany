@@ -27,8 +27,7 @@ set_target_properties(mahogany_compface PROPERTIES
 # Include directories
 target_include_directories(mahogany_compface
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include/mahogany/compface>
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Preprocessor definitions
