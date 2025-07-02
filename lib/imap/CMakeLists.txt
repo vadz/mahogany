@@ -95,6 +95,9 @@ add_library(mahogany_imap STATIC
     ${IMAP_OSDEP_SOURCES}
 )
 
+# Use common C library settings
+target_link_libraries(mahogany_imap PRIVATE mahogany_c_library_common)
+
 # Include directories
 target_include_directories(mahogany_imap
     PUBLIC
@@ -111,32 +114,10 @@ foreach(dir ${IMAP_OSDEP_INCLUDE})
     endif()
 endforeach()
 
-# Preprocessor definitions
+# Library-specific preprocessor definitions
 target_compile_definitions(mahogany_imap PRIVATE
     CHUNKSIZE=65536
-    _CRT_SECURE_NO_WARNINGS
-    _CRT_NONSTDC_NO_WARNINGS
 )
-
-if(WIN32)
-    target_compile_definitions(mahogany_imap PRIVATE WIN32)
-endif()
-
-# Compiler-specific settings
-if(MSVC)
-    target_compile_options(mahogany_imap PRIVATE
-        /wd4273  # Disable specific warning
-    )
-    target_compile_definitions(mahogany_imap PRIVATE
-        _CRT_SECURE_NO_WARNINGS
-        _CRT_NONSTDC_NO_WARNINGS
-    )
-elseif(CMAKE_COMPILER_IS_GNUCC)
-    target_compile_options(mahogany_imap PRIVATE
-        -Wno-pointer-sign
-        -Wno-unused-parameter
-    )
-endif()
 
 # Force C compilation for this library
 set_target_properties(mahogany_imap PROPERTIES

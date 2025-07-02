@@ -28,16 +28,13 @@ set(DSPAM_SOURCES
 # Create the DSPAM library
 add_library(mahogany_dspam STATIC ${DSPAM_SOURCES})
 
+# Use common C library settings
+target_link_libraries(mahogany_dspam PRIVATE mahogany_c_library_common)
+
 # Include directories
 target_include_directories(mahogany_dspam
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-# Preprocessor definitions
-target_compile_definitions(mahogany_dspam PRIVATE
-    _CRT_SECURE_NO_WARNINGS
-    _CRT_NONSTDC_NO_WARNINGS
 )
 
 # Handle auto-config.h generation
@@ -86,23 +83,7 @@ endif()
 
 if(WIN32)
     target_compile_definitions(mahogany_dspam PRIVATE 
-        WIN32
         _WINDLL
-    )
-endif()
-
-# Compiler-specific settings
-if(MSVC)
-    target_compile_options(mahogany_dspam PRIVATE
-        /wd4996  # Disable deprecated function warnings
-        /wd4244  # Disable conversion warnings
-        /wd4267  # Disable size_t conversion warnings
-    )
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    target_compile_options(mahogany_dspam PRIVATE
-        -Wno-unused-parameter
-        -Wno-sign-compare
-        -Wno-unused-variable
     )
 endif()
 

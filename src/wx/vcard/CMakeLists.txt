@@ -40,38 +40,14 @@ endif()
 # Create the versit library
 add_library(mahogany_versit STATIC ${VERSIT_SOURCES})
 
+# Use common C library settings
+target_link_libraries(mahogany_versit PRIVATE mahogany_c_library_common)
+
 # Include directories
 target_include_directories(mahogany_versit
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-# Preprocessor definitions
-target_compile_definitions(mahogany_versit PRIVATE
-    _CRT_SECURE_NO_WARNINGS
-    _CRT_NONSTDC_NO_WARNINGS
-)
-
-if(WIN32)
-    target_compile_definitions(mahogany_versit PRIVATE WIN32)
-    if(BUILD_SHARED_LIBS)
-        target_compile_definitions(mahogany_versit PRIVATE _WINDLL)
-    endif()
-endif()
-
-# Compiler-specific settings
-if(MSVC)
-    target_compile_options(mahogany_versit PRIVATE
-        /wd4996  # Disable deprecated function warnings
-        /wd4244  # Disable conversion warnings
-    )
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    target_compile_options(mahogany_versit PRIVATE
-        -Wno-unused-parameter
-        -Wno-sign-compare
-        -Wno-parentheses
-    )
-endif()
 
 # Force C compilation for this library  
 set_target_properties(mahogany_versit PROPERTIES

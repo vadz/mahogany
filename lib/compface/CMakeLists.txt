@@ -17,29 +17,14 @@ set(COMPFACE_SOURCES
 # Create the compface library
 add_library(mahogany_compface STATIC ${COMPFACE_SOURCES})
 
+# Use common C library settings
+target_link_libraries(mahogany_compface PRIVATE mahogany_c_library_common)
+
 # Include directories
 target_include_directories(mahogany_compface
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-# Preprocessor definitions
-target_compile_definitions(mahogany_compface PRIVATE
-    _CRT_SECURE_NO_WARNINGS
-    _CRT_NONSTDC_NO_WARNINGS
-)
-
-if(WIN32)
-    target_compile_definitions(mahogany_compface PRIVATE WIN32)
-endif()
-
-# Compiler-specific settings
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-    target_compile_options(mahogany_compface PRIVATE
-        -Wno-unused-parameter
-        -Wno-sign-compare
-    )
-endif()
 
 # Force C compilation for this library
 set_target_properties(mahogany_compface PROPERTIES

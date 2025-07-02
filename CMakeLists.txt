@@ -168,6 +168,38 @@ elseif(UNIX)
     endif()
 endif()
 
+# Create interface target for C library common settings
+add_library(mahogany_c_library_common INTERFACE)
+
+# Common preprocessor definitions for C libraries
+target_compile_definitions(mahogany_c_library_common INTERFACE
+    _CRT_SECURE_NO_WARNINGS
+    _CRT_NONSTDC_NO_WARNINGS
+)
+
+if(WIN32)
+    target_compile_definitions(mahogany_c_library_common INTERFACE WIN32)
+endif()
+
+# Common compiler-specific settings for C libraries
+if(MSVC)
+    target_compile_options(mahogany_c_library_common INTERFACE
+        /wd4996  # Disable deprecated function warnings
+        /wd4244  # Disable conversion warnings
+        /wd4267  # Disable size_t conversion warnings
+        /wd4100  # Disable unused parameter warnings
+        /wd4273  # Disable inconsistent dll linkage warnings
+    )
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+    target_compile_options(mahogany_c_library_common INTERFACE
+        -Wno-unused-parameter
+        -Wno-sign-compare
+        -Wno-unused-variable
+        -Wno-pointer-sign
+        -Wno-parentheses
+    )
+endif()
+
 # Add subdirectories for libraries
 add_subdirectory(lib/imap)
 add_subdirectory(lib/compface)
