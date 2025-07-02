@@ -52,9 +52,7 @@ jobs:
         conda install -y conda-forge::wxwidgets
     - name: Configure with CMake
       run: |
-        mkdir cmake-build
-        cd cmake-build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        WX_CONFIG=/usr/share/miniconda/bin/wx-config cmake -S . -B cmake-build
     - name: Build with CMake
       run: |
         make -j`nproc` -C cmake-build
