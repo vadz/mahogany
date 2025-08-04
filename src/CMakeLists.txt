@@ -1,7 +1,4 @@
-#################################################################################
-# CMakeLists.txt for Main Mahogany Application
-#################################################################################
-# This file builds the main Mahogany GUI email client application.
+# CMakeLists.txt for Mahogany application itself
 
 # Core application sources
 set(MAHOGANY_SOURCES
@@ -31,7 +28,7 @@ set(MAHOGANY_SOURCES
     classes/Sequence.cpp
     classes/XFace.cpp
     classes/kbList.cpp
-    
+
     # GUI components
     gui/AddressExpander.cpp
     gui/ClickAtt.cpp
@@ -77,7 +74,7 @@ set(MAHOGANY_SOURCES
     gui/wxllist.cpp
     gui/wxlparser.cpp
     gui/wxlwindow.cpp
-    
+
     # Mail handling
     mail/ASMailFolder.cpp
     mail/Address.cpp
@@ -109,7 +106,7 @@ set(MAHOGANY_SOURCES
     mail/Threading.cpp
     mail/VFolder.cpp
     mail/VMessage.cpp
-    
+
     # Address book
     adb/AdbDialogs.cpp
     adb/AdbEntry.cpp
@@ -134,7 +131,7 @@ set(MAHOGANY_SOURCES
     adb/ProvLine.cpp
     adb/ProvPalm.cpp
     adb/ProvPasswd.cpp
-    
+
     # Modules
     modules/BareBonesEditor.cpp
     modules/Calendar.cpp
@@ -160,7 +157,7 @@ set(MAHOGANY_SOURCES
     modules/viewflt/TextMarkup.cpp
     modules/viewflt/Trailer.cpp
     modules/viewflt/UUDecode.cpp
-    
+
     # Utilities
     util/ColourNames.cpp
     util/matchurl.cpp
@@ -169,7 +166,7 @@ set(MAHOGANY_SOURCES
     util/sysutil.cpp
     util/twofish2.c
     util/upgrade.cpp
-    
+
     # wxWidgets extensions
     wx/common/vcard.cpp
     wx/generic/persctrl.cpp
@@ -194,7 +191,7 @@ set(PYTHON_SOURCES
 add_executable(mahogany ${MAHOGANY_SOURCES})
 
 # Add Python sources if enabled
-if(ENABLE_PYTHON AND Python3_FOUND)
+if(WITH_PYTHON)
     target_sources(mahogany PRIVATE ${PYTHON_SOURCES})
 endif()
 
@@ -205,16 +202,16 @@ set_target_properties(mahogany PROPERTIES
 )
 
 # Include directories
-target_include_directories(mahogany PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_BINARY_DIR}/include
+target_include_directories(mahogany
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_BINARY_DIR}/include
 )
 
 # Preprocessor definitions
 target_compile_definitions(mahogany PRIVATE
     wxNO_AUI_LIB
-    wxNO_GL_LIB  
+    wxNO_GL_LIB
     wxNO_MEDIA_LIB
     wxNO_RIBBON_LIB
     wxNO_RICHTEXT_LIB
@@ -224,10 +221,10 @@ target_compile_definitions(mahogany PRIVATE
 )
 
 if(WIN32)
-    target_compile_definitions(mahogany PRIVATE 
-        WIN32 
-        _WINDOWS 
-        _UNICODE 
+    target_compile_definitions(mahogany PRIVATE
+        WIN32
+        _WINDOWS
+        _UNICODE
         UNICODE
     )
     if(BUILD_SHARED_LIBS)
@@ -247,10 +244,22 @@ if(MSVC)
     )
 endif()
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+    add_compile_options(-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers)
+endif()
+
+
+# Platform-specific libraries
+if(WIN32)
+    set(PLATFORM_LIBS winmm comctl32 rpcrt4 ws2_32)
+elseif(UNIX AND NOT APPLE)
+    set(PLATFORM_LIBS dl pthread)
+endif()
+
 # Link libraries
 target_link_libraries(mahogany PRIVATE
     mahogany_imap
-    mahogany_compface  
+    mahogany_compface
     mahogany_dspam
     mahogany_versit
     ${wxWidgets_LIBRARIES}
@@ -258,13 +267,12 @@ target_link_libraries(mahogany PRIVATE
 )
 
 # Python support
-if(ENABLE_PYTHON AND Python3_FOUND)
+if(WITH_PYTHON)
     target_link_libraries(mahogany PRIVATE Python3::Python)
     target_include_directories(mahogany PRIVATE ${Python3_INCLUDE_DIRS})
 endif()
 
 # SSL support
-if(ENABLE_SSL AND OpenSSL_FOUND)
+if(WITH_SSL)
     target_link_libraries(mahogany PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 endif()
-

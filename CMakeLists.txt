@@ -1,20 +1,4 @@
-#################################################################################
-# CMakeLists.txt for Mahogany Email Client
-#################################################################################
-# 
-# This is the main CMake configuration file for the Mahogany email client project.
-# It provides a cross-platform build system that mirrors the existing Visual Studio
-# MSBuild configuration while adding support for other platforms.
-#
-# OVERVIEW:
-# ---------
-# Mahogany is a full-featured GUI email client built with wxWidgets that includes:
-# - Main application (M/Mahogany executable)
-# - IMAP library for mail handling
-# - Compface library for X-Face image support
-# - DSPAM library for spam filtering
-# - Versit library for vCard handling
-# - Python scripting interface
+# Top level CMakeLists.txt for Mahogany
 #
 # USAGE:
 # ------
@@ -25,62 +9,42 @@
 #    - Python development headers (optional, for Python support)
 #    - OpenSSL (optional, for SSL/TLS support)
 #
-# 2. Basic build:
-#    mkdir build && cd build
-#    cmake ..
-#    make
+# 2. Configure:
 #
-# 3. Build with options:
-#    cmake -DENABLE_PYTHON=ON -DCMAKE_BUILD_TYPE=Release ..
-#    make
+#    cmake -S . -B build-dir
+#
+#    The following Mahogany-specific options can be set:
+#
+#    - WITH_PYTHON: Enable Python scripting support (default: ON if Python found)
+#    - WITH_SSL: Enable SSL/TLS support (default: ON if OpenSSL found)
+#
+# 3. Build:
+#
+#    cmake --build build-dir --config Release
 #
 # 4. Install:
-#    make
 #
-# BUILD OPTIONS:
-# --------------
-# - ENABLE_PYTHON: Enable Python scripting support (default: ON if Python found)
-# - ENABLE_SSL: Enable SSL/TLS support (default: ON if OpenSSL found)
-# - CMAKE_BUILD_TYPE: Debug, Release, RelWithDebInfo, MinSizeRel
+#    cmake --install build-dir
 #
-# TARGETS:
-# --------
-# Libraries (all built as static):
-# - mahogany_imap: IMAP client library
-# - mahogany_compface: X-Face image library
-# - mahogany_dspam: Spam filtering library
-# - mahogany_versit: vCard library
+# TODO:
+# -----
 #
-# Executables:
-# - mahogany: Main GUI application
-# - mtest: IMAP test utility (if built)
-# - mailutil: Mail utility (if built)
-#
-# PLATFORM SUPPORT:
-# ------------------
-# - Windows (MSVC, MinGW)
-# - Linux (GCC, Clang)
-# - macOS (Clang, GCC)
-# - Other Unix-like systems
-#
-# The CMake configuration automatically detects the platform and applies
-# appropriate compiler flags and library dependencies.
-#
-#################################################################################
+# - Add support for running SWIG.
+# - Add WITH_MODULES=static|dynamic option.
 
 cmake_minimum_required(VERSION 3.16)
 
-# Extract version from Mversion.h
+# Extract version from Mversion.h which is the source of truth for it.
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/Mversion.h" MVERSION_H_CONTENT)
-string(REGEX MATCH "#define M_VERSION_MAJOR[ \t]+([0-9]+)" _ "${MVERSION_H_CONTENT}")
-set(VERSION_MAJOR "${CMAKE_MATCH_1}")
-string(REGEX MATCH "#define M_VERSION_MINOR[ \t]+([0-9]+)" _ "${MVERSION_H_CONTENT}")
-set(VERSION_MINOR "${CMAKE_MATCH_1}")
-string(REGEX MATCH "#define M_VERSION_RELEASE[ \t]+([0-9]+)" _ "${MVERSION_H_CONTENT}")
-set(VERSION_RELEASE "${CMAKE_MATCH_1}")
+string(REGEX MATCH "#define +M_VERSION_MAJOR +([0-9]+)" _ "${MVERSION_H_CONTENT}")
+set(M_VERSION_MAJOR "${CMAKE_MATCH_1}")
+string(REGEX MATCH "#define +M_VERSION_MINOR +([0-9]+)" _ "${MVERSION_H_CONTENT}")
+set(M_VERSION_MINOR "${CMAKE_MATCH_1}")
+string(REGEX MATCH "#define +M_VERSION_RELEASE +([0-9]+)" _ "${MVERSION_H_CONTENT}")
+set(M_VERSION_RELEASE "${CMAKE_MATCH_1}")
 
-project(Mahogany 
-    VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_RELEASE}"
+project(Mahogany
+    VERSION "${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE}"
     DESCRIPTION "Mahogany Cross-Platform Email Client"
     LANGUAGES C CXX
 )
@@ -91,80 +55,55 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Build options
-option(ENABLE_PYTHON "Enable Python scripting support" ON)
-option(ENABLE_SSL "Enable SSL/TLS support" ON)
+option(WITH_PYTHON "Enable Python scripting support" ON)
+option(WITH_SSL "Enable SSL/TLS support" ON)
 
-# Set default build type if not specified
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING 
-        "Choose the type of build: Debug Release RelWithDebInfo MinSizeRel" FORCE)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Release' as none was specified.")
+    set(CMAKE_BUILD_TYPE Release CACHE
+        STRING "Choose the type of build: Debug Release RelWithDebInfo MinSizeRel"
+        FORCE
+    )
+    # Set the possible values of build type for cmake-gui
+    set_property(CACHE CMAKE_BUILD_TYPE
+        PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
+    )
 endif()
 
-# Platform-specific settings
-if(WIN32)
-    # Windows-specific settings
-    add_definitions(-DWIN32 -D_WINDOWS -D_UNICODE -DUNICODE)
-    
-    # Disable specific warnings to match MSBuild configuration
-    if(MSVC)
-        add_compile_options(/wd4100 /wd4244 /wd4267)
-        # Set stack reserve size for debug builds
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000")
-        endif()
-    endif()
-elseif(UNIX)
-    # Unix-specific settings
-    add_definitions(-D_GNU_SOURCE)
-    if(CMAKE_COMPILER_IS_GNUCXX)
-        add_compile_options(-Wall -Wextra -Wno-unused-parameter)
-    endif()
-endif()
 
 # Find required dependencies
 find_package(wxWidgets 3.2 REQUIRED COMPONENTS core base net html qa)
-if(wxWidgets_FOUND)
-    include(${wxWidgets_USE_FILE})
-    message(STATUS "Found wxWidgets: ${wxWidgets_VERSION}")
-    set(HAVE_WXWIDGETS ON)
-else()
+if(NOT wxWidgets_FOUND)
     message(FATAL_ERROR "wxWidgets not found. Mahogany requires wxWidgets 3.2 or later.
+
 To install wxWidgets:
 - Ubuntu/Debian: sudo apt-get install libwxgtk3.2-gtk3-dev
-- CentOS/RHEL: sudo yum install wxGTK3-devel  
+- CentOS/RHEL: sudo yum install wxGTK3-devel
 - Windows: Download from https://www.wxwidgets.org/")
 endif()
 
+include(${wxWidgets_USE_FILE})
+
 # Find optional dependencies
-if(ENABLE_PYTHON)
+if(WITH_PYTHON)
     find_package(Python3 COMPONENTS Development)
     if(Python3_FOUND)
         message(STATUS "Found Python: ${Python3_VERSION}")
         add_definitions(-DHAVE_PYTHON)
     else()
         message(WARNING "Python development headers not found. Python support will be disabled.")
-        set(ENABLE_PYTHON OFF)
+        set(WITH_PYTHON OFF)
     endif()
 endif()
 
-if(ENABLE_SSL)
+if(WITH_SSL)
     find_package(OpenSSL)
     if(OpenSSL_FOUND)
         message(STATUS "Found OpenSSL: ${OPENSSL_VERSION}")
         add_definitions(-DHAVE_SSL)
     else()
         message(WARNING "OpenSSL not found. SSL/TLS support will be disabled.")
-        set(ENABLE_SSL OFF)
-    endif()
-endif()
-
-# Platform-specific libraries
-if(WIN32)
-    set(PLATFORM_LIBS winmm comctl32 rpcrt4 ws2_32)
-elseif(UNIX)
-    set(PLATFORM_LIBS dl pthread)
-    if(NOT APPLE)
-        list(APPEND PLATFORM_LIBS rt)
+        set(WITH_SSL OFF)
     endif()
 endif()
 
@@ -211,9 +150,8 @@ add_subdirectory(src)
 
 # Summary
 message(STATUS "")
-message(STATUS "Mahogany Configuration Summary:")
-message(STATUS "  Version: ${PROJECT_VERSION}")
+message(STATUS "Configured Mahogany ${PROJECT_VERSION}:")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  wxWidgets found: ${HAVE_WXWIDGETS}")
-message(STATUS "  Python support: ${ENABLE_PYTHON}")
-message(STATUS "  SSL support: ${ENABLE_SSL}")
+message(STATUS "  wxWidgets: ${wxWidgets_VERSION}")
+message(STATUS "  Python support: ${WITH_PYTHON}")
+message(STATUS "  SSL support: ${WITH_SSL}")
