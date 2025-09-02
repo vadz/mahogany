@@ -221,7 +221,7 @@ PythonFunction(const char *func,
       // now build object reference argument:
       String ptrCls(classname);
       ptrCls += _T(" *");
-      PyObject *object = SWIG_Python_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
+      PyObject *object = SWIG_Python_NewPointerObj(NULL, obj, SWIG_TypeQuery(ptrCls), 0);
 
       // and do call the function
       M_PyObject rc(PyObject_CallFunction(function, PYTHON_CCAST("O"), object));
