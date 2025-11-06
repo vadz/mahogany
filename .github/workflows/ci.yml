@@ -34,6 +34,29 @@ jobs:
       run: |
         make -j`nproc` -C build
 
+  build-linux-cmake:
+    runs-on: ubuntu-latest
+    env:
+      LD_LIBRARY_PATH: /usr/lib/miniconda/lib
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-activate-base: false
+        auto-update-conda: false
+        activate-environment: wxenv
+        channels: conda-forge,defaults
+    - name: Install wxWidgets
+      run: |
+        conda install -y conda-forge::wxwidgets
+    - name: Configure with CMake
+      run: |
+        WX_CONFIG=/usr/share/miniconda/bin/wx-config cmake -S . -B cmake-build
+    - name: Build with CMake
+      run: |
+        make -j`nproc` -C cmake-build
+
   build-windows:
     runs-on: windows-latest
     steps:
@@ -54,3 +77,28 @@ jobs:
       env:
         WXWIN: 'c:\Miniconda\envs\wxenv\Library'
       run: msbuild.exe -noLogo -maxCpuCount -property:"Platform=x64,Configuration=Release DLL" M.sln
+
+  build-windows-cmake:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-activate-base: false
+        auto-update-conda: false
+        activate-environment: wxenv
+        channels: conda-forge,defaults
+    - name: Install wxWidgets
+      run: |
+        conda install -y conda-forge::wxwidgets
+    - name: Configure with CMake
+      env:
+        WXWIN: 'c:\Miniconda\envs\wxenv\Library'
+      run: |
+        mkdir cmake-build
+        cd cmake-build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+    - name: Build with CMake
+      run: |
+        cmake --build cmake-build --config Release
