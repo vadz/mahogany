@@ -33,16 +33,22 @@ extern const MOption MP_PYTHONPATH;
 extern const MOption MP_PYTHONMODULE_TO_LOAD;
 extern const MOption MP_USEPYTHON;
 
+#if PY_VERSION_HEX >= 0x03000000
+   #define PY_INIT_FUNC(name) PyInit__##name
+#else
+   #define PY_INIT_FUNC(name) init_##name
+#endif
+
 // module initialization functions (called by InitPython() below)
 extern "C"
 {
-   void init_HeaderInfo();
-   void init_MDialogs();
-   void init_MailFolder();
-   void init_MimePart();
-   void init_MimeType();
-   void init_Message();
-   void init_SendMessage();
+   void PY_INIT_FUNC(HeaderInfo)();
+   void PY_INIT_FUNC(MDialogs)();
+   void PY_INIT_FUNC(MailFolder)();
+   void PY_INIT_FUNC(MimePart)();
+   void PY_INIT_FUNC(MimeType)();
+   void PY_INIT_FUNC(Message)();
+   void PY_INIT_FUNC(SendMessage)();
 }
 
 namespace
@@ -145,13 +151,13 @@ InitPython(void)
    SetPythonPath();
 
    // initialise the modules
-   init_HeaderInfo();
-   init_MDialogs();
-   init_MailFolder();
-   init_MimePart();
-   init_MimeType();
-   init_Message();
-   init_SendMessage();
+   PY_INIT_FUNC(HeaderInfo)();
+   PY_INIT_FUNC(MDialogs)();
+   PY_INIT_FUNC(MailFolder)();
+   PY_INIT_FUNC(MimePart)();
+   PY_INIT_FUNC(MimeType)();
+   PY_INIT_FUNC(Message)();
+   PY_INIT_FUNC(SendMessage)();
 
    // the return code
    bool rc = true;
