@@ -25,6 +25,7 @@
 #   include "guidef.h"                  // for GetFrame
 #   include "gui/wxMApp.h"              // for wxMApp
 
+#   include <wx/dcclient.h>
 #   include <wx/textctrl.h>
 #endif // USE_PCH
 
