@@ -24,6 +24,7 @@
 #   include "Mcommon.h"
 #   include "MApplication.h"
 #   include <wx/filefn.h>      // for wxSplitPath
+#   include <wx/filename.h>
 #endif //USE_PCH
 
 #include <wx/bitmap.h>

@@ -68,6 +68,7 @@
 #  include "strutil.h"
 #  include "Mdefaults.h"
 
+#  include <wx/filename.h>
 #  include <wx/layout.h>
 #  include <wx/stattext.h>      // for wxStaticText
 #endif // USE_PCH

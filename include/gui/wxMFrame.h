@@ -21,6 +21,7 @@
 #include <wx/frame.h>
 
 class Profile;
+class wxConfigBase;
 
 #ifdef USE_PYTHON
    class PythonOptionChangeHandler;

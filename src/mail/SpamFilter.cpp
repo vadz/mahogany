@@ -27,6 +27,7 @@
    #include "strutil.h"            // for strutil_restore_array
    #include "Profile.h"            // for Profile_obj
    #include <wx/frame.h>
+   #include <wx/stattext.h>
 #endif // USE_PCH
 
 #include <wx/imaglist.h>

@@ -15,15 +15,21 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "MHelp.h"
+#   include "Mdefaults.h"
 
 #   include <wx/layout.h>
 #   include <wx/menu.h>
+#   include <wx/spinbutt.h>
 #   include <wx/statusbr.h>
 #   include <wx/statbox.h>
+#   include <wx/stattext.h>
 #   include <wx/textdlg.h>
+#   include <wx/timer.h>
 #endif // USE_PCH
 
 #include "modules/Calendar.h"
+
+#include "MInterface.h"
 
 #include "UIdArray.h"
 

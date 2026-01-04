@@ -26,6 +26,7 @@
 #  include "MApplication.h"
 #  include "gui/wxIconManager.h"
 
+#  include <wx/filename.h>
 #  include <wx/statbmp.h>
 #  include <wx/layout.h>
 #  include <wx/statbox.h>

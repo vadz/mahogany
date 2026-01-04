@@ -20,6 +20,8 @@
 
 #ifndef  USE_PCH
    #include "Mcclient.h"
+
+   #include <wx/utils.h>
 #endif // !USE_PCH
 
 #include "mail/MimeDecode.h"

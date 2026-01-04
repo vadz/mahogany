@@ -33,7 +33,7 @@
 #endif // __WINE__
 #endif // USE_PCH
 
-#include <wx/confbase.h>
+#include <wx/config.h>
 
 #include "lists.h"
 #include "pointers.h"

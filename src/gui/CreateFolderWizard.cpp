@@ -19,6 +19,10 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
+#  include "guidef.h"
+#  include "strutil.h"
+#  include "Mdefaults.h"
+#  include "gui/wxIconManager.h"
 #endif // USE_PCH
 
 #include "MailFolderCC.h"

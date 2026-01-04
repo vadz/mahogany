@@ -28,6 +28,7 @@
 #include "gui/MBookCtrl.h"
 
 #include "MEvent.h"
+#include "Profile.h"
 
 // -----------------------------------------------------------------------------
 // forward declarations

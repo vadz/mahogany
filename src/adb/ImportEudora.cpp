@@ -59,6 +59,7 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
+   #include <wx/filename.h>
    #include <wx/log.h>                  // for wxLogWarning
 #endif // USE_PCH
 

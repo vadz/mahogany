@@ -35,6 +35,7 @@
 #   include <wx/statbox.h>
 #   include <wx/choicdlg.h>
 #   include <wx/filedlg.h>
+#   include <wx/filename.h>
 #endif //USE_PCH
 
 #include "adb/AdbImport.h"

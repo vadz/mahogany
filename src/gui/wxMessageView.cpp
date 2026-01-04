@@ -23,11 +23,16 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "Mdefaults.h"
+#  include "MApplication.h"
 #  include "Profile.h"
+
+#  include "gui/wxIconManager.h"
 
 #  include <wx/stattext.h>
 #  include <wx/app.h>
 #  include <wx/menu.h>
+#  include <wx/panel.h>
+#  include <wx/sizer.h>
 #endif //USE_PCH
 
 #include <wx/infobar.h>

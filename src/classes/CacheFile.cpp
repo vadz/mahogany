@@ -29,6 +29,7 @@
    #include <wx/wxchar.h>        // for wxPrintf/Scanf
 #endif // USE_PCH
 
+#include <wx/filename.h>
 #include <wx/filefn.h>        // for wxMkdir
 #include <wx/textfile.h>
 

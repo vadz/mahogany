@@ -72,6 +72,8 @@
    #include <wx/msw/msvcrt.h>
 #endif
 
-#endif  //USE_PCH
+#else   //!USE_PCH
+#  include "Mcommon.h"
+#endif  //USE_PCH/!USE_PCH
 
 #endif  //MPCH_H

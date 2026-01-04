@@ -41,6 +41,7 @@
 #   include <wx/print.h>
 #   include <wx/log.h>
 #   include <wx/filefn.h>
+#   include <wx/filename.h>
 #   include <wx/msgdlg.h>
 #endif // USE_PCH
 

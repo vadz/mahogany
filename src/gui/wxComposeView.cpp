@@ -29,6 +29,7 @@
 #  include "MHelp.h"
 #  include "gui/wxIconManager.h"
 
+#  include <wx/config.h>
 #  include <wx/sizer.h>
 #  include <wx/menu.h>
 #  include <wx/filedlg.h>

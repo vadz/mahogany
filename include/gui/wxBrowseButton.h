@@ -16,6 +16,7 @@
 
 #ifndef USE_PCH
 #   include <wx/button.h>
+#   include <wx/combobox.h>
 #   include <wx/textctrl.h>
 #endif // USE_PCH
 

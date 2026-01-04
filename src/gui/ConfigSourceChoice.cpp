@@ -20,14 +20,16 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#  include "Mcommon.h"
+#  include "guidef.h"
 #endif
 
 #include "ConfigSourcesAll.h"
 
 #include "gui/ConfigSourceChoice.h"
 
+#include <wx/layout.h>
 #include <wx/statline.h>
+#include <wx/stattext.h>
 
 // ============================================================================
 // ConfigSourceChoice implementation

@@ -24,6 +24,7 @@
 #   include "Mcommon.h"
 #   include "guidef.h"
 #   include "strutil.h"
+#   include "Mdefaults.h"
 #   include "Profile.h"
 #   include "MApplication.h"
 #   include "Profile.h"
@@ -33,6 +34,7 @@
 #   include <wx/stattext.h>        // for wxStaticText
 #   include <wx/layout.h>
 #   include <wx/checklst.h>
+#   include <wx/combobox.h>
 #   include <wx/statbox.h>
 #endif // USE_PCH
 
