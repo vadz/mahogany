@@ -1351,12 +1351,8 @@ SendMessageCC::Build(bool forStorage)
          //     include 8bit chars (which may - and do - occur in translations)
          //     in headers!
          String version;
-         version << "Mahogany " << M_VERSION_STRING;
-#ifdef OS_UNIX
-         version  << ", compiled for " << M_OSINFO;
-#else // Windows
-         version << ", running under " << wxGetOsDescription();
-#endif // Unix/Windows
+         version << "Mahogany " << M_VERSION_STRING
+                 << ", running under " << wxGetOsDescription();
          m_headers.emplace_back("X-Mailer", version);
       }
 

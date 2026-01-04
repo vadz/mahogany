@@ -171,7 +171,6 @@ dnl --------------------------------------------------------------------------
 AC_CANONICAL_HOST
 dnl setting the OS type for information
 AC_DEFINE_UNQUOTED(M_CANONICAL_HOST,"$host")
-AC_DEFINE_UNQUOTED(M_OSINFO,_T("`uname -s -r -m`"))
 AC_DEFINE_UNQUOTED(M_PREFIX,"$prefix")
 
 dnl set the top level directories

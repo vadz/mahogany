@@ -106,11 +106,6 @@
 */
 #define M_CANONICAL_HOST "illegal-illegal-illegal-illegal"
 
-/** This define carries some information about the operating system
-    and release for which M is compiled.
-*/
-#define M_OSINFO   _T("UnknownOS")
-
 /** The top level source directory */
 #undef M_TOP_SOURCEDIR
 
