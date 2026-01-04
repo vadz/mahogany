@@ -1,0 +1,21 @@
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   build/cmake/config.h.in - config.h template for CMake
+// Purpose:     this file contains hand-generated options for Windows
+// Copyright:   (c) 2025 Vadim Zeitlin <vadim@zeitlins.org>
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+#cmakedefine USE_PYTHON 1
+
+#cmakedefine USE_SSL 1
+
+/* These are always enabled in CMake builds */
+#define USE_I18N 1
+#define HAVE_COMPFACE_H 1
+#define USE_MODULES 1
+#define USE_MODULES_STATIC 1
+
+#define M_PREFIX "@CMAKE_INSTALL_PREFIX@"
+
+#define M_CANONICAL_HOST "@CMAKE_LIBRARY_ARCHITECTURE@"
