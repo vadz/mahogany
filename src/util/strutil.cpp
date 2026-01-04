@@ -43,9 +43,9 @@ extern "C"
 {
    #include "utf8.h"  // for utf8_text_utf7() and arrays below
    // arrays used by GuessUnicodeCharset()
-   #include "charset/iso_8859.c"
-   #include "charset/windows.c"
-   #include "charset/koi8_r.c"
+   #include "../../lib/imap/src/charset/iso_8859.c"
+   #include "../../lib/imap/src/charset/windows.c"
+   #include "../../lib/imap/src/charset/koi8_r.c"
 }
 
 class MOption;
