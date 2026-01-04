@@ -117,4 +117,7 @@
 /** The top level build directory */
 #undef M_TOP_BUILDDIR
 
+/** This is defined for Unix builds using make. */
+#define USE_LINKAGE_NO_SSL 1
+
 //@}
