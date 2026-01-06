@@ -113,11 +113,6 @@
 #ifdef   _MSC_VER
 #   define   CC_MSC   1
 #   define   CC_TYPE  "Visual C++"
-
-    // no reason not to use precompiled headers with VC++
-#   ifndef USE_PCH
-#       define USE_PCH
-#   endif
 #endif
 
 // MSVC defines _DEBUG in debug builds, set DEBUG accordingly
