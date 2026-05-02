@@ -104,7 +104,7 @@ void ReadColour(wxColour *col, Profile *profile, const MOption& opt)
    {
       wxLogError(_("Cannot find a colour named \"%s\", using default instead "
                    "(please check the value of option \"%s\")"),
-                 value.c_str(),
+                 value,
                  GetOptionName(opt));
    }
 }

@@ -88,7 +88,7 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                {
                   // but have seen something -- this is not normal
                   wxLogDebug(_T("Header line '%s' is malformed; ignored."),
-                             m_str.c_str());
+                             m_str);
                }
                else // no name neither
                {

@@ -501,7 +501,7 @@ bool wxVCardDialog::TransferDataFromWindow()
     if ( !!birthday && !dt.ParseDate(birthday) )
     {
         wxLogError(_("Invalid birthday date: '%s'"),
-                   m_birthday->GetValue().c_str());
+                   m_birthday->GetValue());
 
         return FALSE;
     }

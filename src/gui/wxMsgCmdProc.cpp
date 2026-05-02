@@ -981,9 +981,9 @@ void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
         (
             String::Format
             (
-               _("Do you want to permanently delete the %lu messages "
+               _("Do you want to permanently delete the %zu messages "
                  "marked as spam now?"),
-               (unsigned long)uidsReclassified.size()
+               uidsReclassified.size()
             ),
             GetFrame(),
             MDIALOG_YESNOTITLE,
@@ -1099,7 +1099,7 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
       msg->DecRef();
    }
 
-   STATUSMESSAGE((_("Bounced %lu messages."), (unsigned long)countOk));
+   STATUSMESSAGE((_("Bounced %zu messages."), countOk));
 }
 
 void
@@ -1113,8 +1113,7 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
          (
             String::Format
             (
-               _("Do you want to resend the %lu selected messages?"),
-               (unsigned long)count
+               _("Do you want to resend the %zu selected messages?"), count
             ),
             GetFrame(),
             MDIALOG_YESNOTITLE,
@@ -1157,7 +1156,7 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
 
       if ( !sendMsg->SendOrQueue() )
       {
-         ERRORMESSAGE((_("Failed to resend the message %lu."), (unsigned long)n));
+         ERRORMESSAGE((_("Failed to resend the message %zu."), n));
       }
       else
       {
@@ -1165,7 +1164,7 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
       }
    }
 
-   STATUSMESSAGE((_("Resent %lu messages."), (unsigned long)countOk));
+   STATUSMESSAGE((_("Resent %zu messages."), countOk));
 }
 
 void
@@ -1253,10 +1252,10 @@ MsgCmdProcImpl::DeleteAndExpungeMessages(const UIdArray& selections)
             String::Format
             (
                _("Do you really want to permanently delete "
-                 "the %lu selected messages?\n"
+                 "the %zu selected messages?\n"
                  "\n"
                  "Note that it will be impossible to restore them!"),
-               (unsigned long)selections.Count()
+               selections.Count()
             ),
             GetFrame(),
             MDIALOG_YESNOTITLE,
@@ -1498,8 +1497,8 @@ void
 MsgCmdProcImpl::DropMessagesToFolder(const UIdArray& selections,
                                      MFolder *folder)
 {
-   wxLogTrace(M_TRACE_DND, _T("Saving %lu message(s) to folder '%s'"),
-              (unsigned long)selections.GetCount(),
+   wxLogTrace(M_TRACE_DND, _T("Saving %zu message(s) to folder '%s'"),
+              selections.GetCount(),
               folder->GetFullName());
 
    Ticket t = SaveMessagesToFolder(selections, folder);
@@ -1625,12 +1624,12 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
 void
 MsgCmdProcImpl::ApplyFilters(const UIdArray& selections)
 {
-   const unsigned long count = selections.GetCount();
+   const auto count = selections.GetCount();
 
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
                                    (
-                                      _("Applying filter rules to %lu message(s)..."),
+                                      _("Applying filter rules to %zu message(s)..."),
                                       count
                                    ));
 
@@ -1639,7 +1638,7 @@ MsgCmdProcImpl::ApplyFilters(const UIdArray& selections)
    {
       status->SetSuccessMsg(wxString::Format
                             (
-                              _("Applied filters to %lu message(s), "
+                              _("Applied filters to %zu message(s), "
                               "see log window for details."),
                               count
                             ));
@@ -1753,7 +1752,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   UIdArray *seq = result->GetSequence();
                   CHECK( seq, false, _T("invalid async event data") );
 
-                  unsigned long count = seq->Count();
+                  const auto count = seq->Count();
 
                   if ( wasDropped )
                   {
@@ -1765,7 +1764,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                      }
                      //else: dropped and already marked for deletion, delete below
 
-                     msg.Printf(_("Dropped %lu message(s)."), count);
+                     msg.Printf(_("Dropped %zu message(s)."), count);
                   }
                   //else: not dropped
 
@@ -1796,7 +1795,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
                      if ( !wasDropped )
                      {
-                        msg.Printf(_("Moved %lu message(s)."), count);
+                        msg.Printf(_("Moved %zu message(s)."), count);
                      }
                      //else: message already given above
                   }
@@ -1804,7 +1803,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   {
                      if ( !hadStatusObject )
                      {
-                        msg.Printf(_("Copied %lu message(s)."), count);
+                        msg.Printf(_("Copied %zu message(s)."), count);
                      }
                      //else: message already given
                   }

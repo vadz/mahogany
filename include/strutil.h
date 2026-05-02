@@ -25,11 +25,7 @@ class wxRegEx;
 //@{
 
 
-#ifdef USE_WXSTRING // use std::string
-   inline bool strutil_isempty(const String &s) { return IsEmpty(s); }
-#else
-   inline bool strutil_isempty(const String &s) { return *s.c_str() == _T('\0'); }
-#endif
+inline bool strutil_isempty(const String &s) { return s.empty(); }
 
 /// return true if string is empty
 inline bool strutil_isempty(const wxChar *s) { return s == NULL || *s == _T('\0'); }

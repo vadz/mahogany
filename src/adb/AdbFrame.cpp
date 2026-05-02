@@ -1514,7 +1514,7 @@ void wxAdbEditFrame::RestoreSettings1()
       else {
         wxLogWarning(_("Address book '%s' couldn't be opened:\n"
                        "this format is not supported."),
-                     strFile.c_str());
+                     strFile);
         bAllAdbOk = FALSE;
       }
     }
@@ -1619,7 +1619,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
 {
   // check that we don't already have it
   if ( IsAdbOpened(strPath) ) {
-    wxLogError(_("The address book '%s' is already opened."), strPath.c_str());
+    wxLogError(_("The address book '%s' is already opened."), strPath);
 
     return FALSE;
   }
@@ -1710,7 +1710,7 @@ ask_name:
   wxASSERT( !m_strLastNewEntry.IsEmpty() ); // don't add empty entries
   if ( group->FindChild(m_strLastNewEntry) ) {
     wxLogError(_("%s '%s' already exists %s."),
-               strWhat.c_str(), m_strLastNewEntry.c_str(), strWhere.c_str());
+               strWhat, m_strLastNewEntry, strWhere);
     goto ask_name;
   }
 
@@ -1719,7 +1719,7 @@ ask_name:
                                                m_bLastNewWasGroup != 0);
   if ( element == NULL ) {
     wxLogError(_("Can't create %s named '%s' %s."),
-               strWhat.c_str(), m_strLastNewEntry.c_str(), strWhere.c_str());
+               strWhat, m_strLastNewEntry, strWhere);
     goto ask_name;
   }
 
@@ -1730,7 +1730,7 @@ ask_name:
   m_treeAdb->SelectItem(element->GetId());
 
   wxLogStatus(this, _("Created new %s '%s' %s."),
-              strWhat.c_str(), m_strLastNewEntry.c_str(), strWhere.c_str());
+              strWhat, m_strLastNewEntry, strWhere);
 }
 
 void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
@@ -1814,13 +1814,13 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       // construct the message
       wxString msg;
       msg.Printf(_("Really delete the %s '%s'?"),
-                 strWhat.c_str(), strName.c_str());
+                 strWhat, strName);
       if ( !MDialog_YesNoDialog(msg, this,
                                 _("Address book editor"),
                                 M_DLG_NO_DEFAULT,
                                 msgbox) ) {
         wxLogStatus(this, _("Cancelled: '%s' not deleted."),
-                    m_current->GetName().c_str());
+                    m_current->GetName());
         return;
       }
     }
@@ -1858,7 +1858,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   }
 
   strWhat[0u] = (wxChar)toupper(strWhat[0u]);
-  wxLogStatus(this, _("%s '%s' deleted."), strWhat.c_str(), strName.c_str());
+  wxLogStatus(this, _("%s '%s' deleted."), strWhat, strName);
 }
 
 void wxAdbEditFrame::DoRenameNode()
@@ -1870,13 +1870,13 @@ void wxAdbEditFrame::AdvanceToNextFound()
 {
   size_t nCount = m_aFindResults.Count();
   if ( nCount == 0 )
-    wxLogWarning(_("Cannot find any matches for '%s'."), m_strFind.c_str());
+    wxLogWarning(_("Cannot find any matches for '%s'."), m_strFind);
   else {
     if ( m_nFindIndex == -1 ) {
       // called for the first time (for this search)
       m_nFindIndex = 0;
       wxLogStatus(this, _("Search for '%s' found %d entries."),
-                  m_strFind.c_str(), nCount);
+                  m_strFind, nCount);
     }
     else if ( (size_t)++m_nFindIndex == nCount ) {
       wxLogStatus(this, _("Search wrapped to the beginning."));
@@ -1899,7 +1899,7 @@ void wxAdbEditFrame::DoFind()
   m_nFindIndex = -1;
   m_strFind = m_textKey->GetValue();
 
-  wxBusyInfo busy(wxString::Format("Searching for \"%s\"...", m_strFind.c_str()),
+  wxBusyInfo busy(wxString::Format("Searching for \"%s\"...", m_strFind),
                   this);
 
   DoFind(m_strFind, m_root);
@@ -1949,7 +1949,7 @@ void wxAdbEditFrame::DoUndoChanges()
   // the IncRef() done by GetData() compensated with DecRef() in SetData()
   m_notebook->SetData(GetEntry());
 
-  wxLogStatus(this, _("Changes to '%s' undone"), m_current->GetName().c_str());
+  wxLogStatus(this, _("Changes to '%s' undone"), m_current->GetName());
 }
 
 bool wxAdbEditFrame::OnMEvent(MEventData& d)
@@ -2093,9 +2093,9 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
          AdbTreeBook *book = (AdbTreeBook *)m_current;
          wxString name = book->GetName();
          if ( !book->Flush() )
-            wxLogError(_T("Couldn't flush book '%s'!"), name.c_str());
+            wxLogError(_T("Couldn't flush book '%s'!"), name);
          else
-            wxLogStatus(this, _T("Book '%s' flushed."), name.c_str());
+            wxLogStatus(this, _T("Book '%s' flushed."), name);
       }
       else {
          wxLogError(_T("Select a book to flush"));
@@ -2234,7 +2234,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
         if ( !book->Flush() ) {
            wxLogWarning(_("Address book '%s' was created, but could not "
                           "be flushed. It might be unaccessible until "
-                          "the program is restarted."), strAdbName.c_str());
+                          "the program is restarted."), strAdbName);
         }
 
         book->DecRef();
@@ -2271,7 +2271,7 @@ bool wxAdbEditFrame::ImportAdb()
   if ( ok )
   {
     wxLogStatus(this, _("Address book successfully imported into book '%s'."),
-                adbname.c_str());
+                adbname);
   }
   else
   {
@@ -2310,7 +2310,7 @@ void wxAdbEditFrame::ExportVCardEntry()
     if ( exporter->Export(*entry, filename) )
     {
       wxLogStatus(this, _("Successfully exported address book data to the file '%s'."),
-                  filename.c_str());
+                  filename);
     }
     else
     {
@@ -2424,7 +2424,7 @@ void wxAdbEditFrame::DoPaste()
   if ( group->FindChild(m_clipboard->GetName()) ) {
     wxLogError(_("Cannot paste entry '%s' %s: an entry with\n"
                  "the same name already exists."),
-               m_clipboard->GetName().c_str(), group->GetWhere().c_str());
+               m_clipboard->GetName(), group->GetWhere());
     return;
   }
 
@@ -2475,7 +2475,7 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
   }
   else {
     wxString str;
-    str.Printf(_("Editing entry '%s' %s"), m_current->GetName().c_str(), m_current->GetParent()->GetWhere().c_str());
+    str.Printf(_("Editing entry '%s' %s"), m_current->GetName(), m_current->GetParent()->GetWhere());
     SetStatusText(str, 1);
   }
 
@@ -2658,15 +2658,15 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
       current = curGroup->FindChild(aComponents[n]);
       if ( current == NULL ) {
         wxLogError(_("No entry '%s':\n'%s' has no entry/subgroup '%s'."),
-                   strEntry.c_str(),
-                   curGroup->GetName().c_str(),
-                   aComponents[n].c_str());
+                   strEntry,
+                   curGroup->GetName(),
+                   aComponents[n]);
         return NULL;
       }
     }
     else { // current item is an entry
       wxLogError(_("Entry '%s' cannot have subgroup/entry '%s'!"),
-                 current->GetName().c_str(), aComponents[n].c_str());
+                 current->GetName(), aComponents[n]);
 
       return NULL;
     }
@@ -3097,7 +3097,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // set label and position
   // ----------------------
   wxString strTitle;
-  strTitle.Printf(_("Properties for '%s'"), book->GetName().c_str());
+  strTitle.Printf(_("Properties for '%s'"), book->GetName());
   SetTitle(strTitle);
 
   Centre(wxCENTER_FRAME | wxBOTH);
@@ -3317,7 +3317,7 @@ void wxAdbNotebook::SaveChanges()
     m_pAdbEntry->GetField(AdbField_NickName, &str);
     if ( m_bDirty ) {
       wxLogStatus((wxFrame *)this->GetGrandParent(),
-                  _("Entry '%s' saved."), str.c_str());
+                  _("Entry '%s' saved."), str);
     }
   }
 }
@@ -4080,7 +4080,7 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
   // first check that it doesn't already exist
   if ( m_pGroup->Exists(name) ) {
     wxLogError(_("%s '%s' already exists in this group."),
-               strWhat.c_str(), name.c_str());
+               strWhat, name);
 
     return NULL;
   }

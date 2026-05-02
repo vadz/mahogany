@@ -174,7 +174,7 @@ wxString AdbPineImporter::ExtractField(size_t *index,
          {
             wxLogWarning(_("Unterminated mailing address list at line %d "
                            "in the PINE address book file '%s'."),
-                         *index, line->c_str());
+                         *index, *line);
          }
       }
    }
@@ -415,7 +415,7 @@ size_t AdbPineImporter::SplitMailingListAddresses(const wxString& addresses,
    if ( !addresses || addresses[0u] != '(' || addresses.Last() != ')' )
    {
       wxLogWarning(_("Invalid format for list of addresses of PINE mailing "
-                     "list entry: '%s'."), addresses.c_str());
+                     "list entry: '%s'."), addresses);
 
       return 0;
    }
@@ -452,7 +452,7 @@ size_t AdbPineImporter::SplitMailingListAddresses(const wxString& addresses,
                if ( email.Last() != '>' )
                {
                   wxLogWarning(_("No matching '>' in the address '%s'."),
-                               address.c_str());
+                               address);
                }
                else
                {
@@ -642,7 +642,7 @@ String AdbPineImporter::GetDefaultFilename() const
    {
       // nice try, but it's not there - so we don't know
       wxLogVerbose(_("Didn't find the PINE address book in the default "
-                     "location (%s)."), location.c_str());
+                     "location (%s)."), location);
 
       location.Empty();
    }

@@ -89,8 +89,8 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
 
       if ( !entryName )
       {
-         wxLogDebug(_T("Autogenerating nickname for nameless address entry %lu in '%s'"),
-                    (unsigned long)nEntry, path.c_str());
+         wxLogDebug(_T("Autogenerating nickname for nameless address entry %zu in '%s'"),
+                    nEntry, path);
 
          entryName.Printf(_("Nameless entry %d"), ++nAnonIndex);
       }
@@ -99,7 +99,7 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
       if ( !entry )
       {
          wxLogError(_("Import error: cannot create entry '%s/%s'."),
-                    path.c_str(), entryName.c_str());
+                    path, entryName);
 
          return FALSE;
       }
@@ -125,7 +125,7 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
       if ( !subgroup )
       {
          wxLogError(_("Import error: cannot create group '%s/%s'."),
-                    path.c_str(), groupName.c_str());
+                    path, groupName);
 
          return FALSE;
       }
@@ -178,7 +178,7 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
          wxString msg;
          msg.Printf(_("It seems that the file '%s' is not in the format '%s',\n"
                       "do you still want to try to import it?"),
-                    filename.c_str(), importer->GetFormatDesc());
+                    filename, importer->GetFormatDesc());
 
          if ( !MDialog_YesNoDialog(msg, NULL, _("Address book import"),
                                    M_DLG_NO_DEFAULT,
@@ -209,7 +209,7 @@ bool DoAdbImport(const String& filename,
       if ( errMsg )
       {
          errMsg->Printf(_("couldn't start importing from file '%s'."),
-                        filename.c_str());
+                        filename);
       }
    }
    else
@@ -264,7 +264,7 @@ bool AdbImport(const String& filename,
    if ( !adbBook )
    {
       errMsg.Printf(_("cannot create native address book '%s'."),
-                     adbname.c_str());
+                     adbname);
 
       goto exit;
    }
@@ -302,7 +302,7 @@ exit:
 
       wxLogMessage(_("Successfully imported address book from file '%s' "
                      "(format '%s')"),
-                   adbname.c_str(),
+                   adbname,
                    importer->GetFormatDesc());
    }
    else // an error occured
@@ -317,14 +317,14 @@ exit:
             // nothing else...
             errImport += _T('.');
 
-            wxLogError(errImport, adbname.c_str());
+            wxLogError(errImport, adbname);
          }
          else
          {
             // add the detailed error message
             errImport += _T(": %s");
 
-            wxLogError(errImport, adbname.c_str(), errMsg.c_str());
+            wxLogError(errImport, adbname, errMsg);
          }
       }
    }
@@ -350,7 +350,7 @@ bool AdbImport(const String& filename,
       wxString errImport = _("Import of address book from file '%s' failed");
       errImport += _T(": %s");
 
-      wxLogError(errImport, filename.c_str(), _("unsupported format."));
+      wxLogError(errImport, filename, _("unsupported format."));
 
       return false;
    }

@@ -423,7 +423,7 @@ SpamFilter::CheckIfSpam(const Message& msg,
             if ( result )
             {
                *result = String::Format("recognized as spam by %s filter: %s",
-                                        name.c_str(), result->c_str());
+                                        name, *result);
             }
             return true;
 
@@ -431,7 +431,7 @@ SpamFilter::CheckIfSpam(const Message& msg,
             if ( result )
             {
                *result = String::Format("recognized as non-spam by %s filter: %s",
-                                        name.c_str(), result->c_str());
+                                        name, *result);
             }
             return false;
 
@@ -520,15 +520,13 @@ bool SpamFilter::EditParameters(wxFrame *parent, String *params)
       SpamFilter *filter = FindByName(name);
       if ( !filter )
       {
-         wxLogDebug(_T("invalid filter name \"%s\" in isspam()"),
-                    name.c_str());
+         wxLogDebug(_T("invalid filter name \"%s\" in isspam()"), name);
          continue;
       }
 
       if ( filters.Index(filter->GetLongName()) != wxNOT_FOUND )
       {
-         wxLogDebug(_T("duplicate filter name \"%s\" in isspam()"),
-                    name.c_str());
+         wxLogDebug(_T("duplicate filter name \"%s\" in isspam()"), name);
          continue;
       }
 
@@ -620,7 +618,7 @@ void SpamFilter::DoLoadAll()
       MModule * const module = MModule::LoadModule(name);
       if ( !module )
       {
-         wxLogError(_("Failed to load spam filter \"%s\"."), name.c_str());
+         wxLogError(_("Failed to load spam filter \"%s\"."), name);
          continue;
       }
 

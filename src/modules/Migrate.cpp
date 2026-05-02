@@ -429,7 +429,7 @@ public:
             _("Failed to access the IMAP server %s,\n"
               "please return to the previous page and\n"
               "check its parameters."),
-            parent->Data().source.server.c_str()
+            parent->Data().source.server
          )
         )
    {
@@ -458,7 +458,7 @@ public:
               "\n"
               "You may want to return to the previous page\n"
               "and change the server parameters there."),
-            parent->Data().source.server.c_str()
+            parent->Data().source.server
          )
         )
    {
@@ -812,7 +812,7 @@ bool IMAPServerPanel::TransferDataFromWindow()
       unsigned long l;
       if ( !port.ToULong(&l) || l > INT_MAX )
       {
-         wxLogError(_("Invalid port specification: %s"), port.c_str());
+         wxLogError(_("Invalid port specification: %s"), port);
 
          return false;
       }
@@ -1188,7 +1188,7 @@ MigrateWizardConfirmPage::BuildMsg(MigrateWizard *parent) const
 
    msg.Printf(_("About to start copying %d folders from the\n"
                 "server %s"),
-              data.countFolders, data.source.server.c_str());
+              data.countFolders, data.source.server);
 
    const String& rootSrc = data.source.root;
    if ( !rootSrc.empty() )
@@ -1201,7 +1201,7 @@ MigrateWizardConfirmPage::BuildMsg(MigrateWizard *parent) const
       msg += String::Format
              (
                _("to the IMAP server\n%s"),
-               data.dstIMAP.server.c_str()
+               data.dstIMAP.server
              );
 
       const String& rootDst = data.dstIMAP.root;
@@ -1217,7 +1217,7 @@ MigrateWizardConfirmPage::BuildMsg(MigrateWizard *parent) const
                _("to the files in %s format under the\n"
                  "directory \"%s\""),
                LocalPanel::GetFormatName(data.dstLocal.format),
-               data.dstLocal.root.c_str()
+               data.dstLocal.root
              );
    }
 
@@ -1335,7 +1335,7 @@ bool MigrateWizardProgressPage::UpdateFolderProgress()
                         _("Folder: %d/%d (%s)"),
                         m_nFolder + 1,
                         Data().countFolders,
-                        fullname.c_str()
+                        fullname
                      )
                   );
 
@@ -1491,7 +1491,7 @@ MigrateWizardProgressPage::GetDstFolder(const String& name, int flags)
          if ( !wxDirExists(path) && !wxMkdir(path) )
          {
             wxLogWarning(_("Failed to create directory \"%s\" for folder \"%s\""),
-                         path.c_str(), name.c_str());
+                         path, name);
          }
 
          // and modify the name for the file itself
@@ -1566,7 +1566,7 @@ MigrateWizardProgressPage::CopyMessages(MailFolder *mfSrc, MFolder *folderDst)
       {
          wxLogError(_("Failed to copy the message %d from folder \"%s\""),
                     m_nMessage,
-                    Data().folderNames[m_nFolder].c_str());
+                    Data().folderNames[m_nFolder]);
 
          return false;
       }
@@ -1598,7 +1598,7 @@ bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
    MailFolder_obj mf(OpenSource(Data().source, name));
    if ( !mf )
    {
-      wxLogError(_("Failed to open source folder \"%s\""), name.c_str());
+      wxLogError(_("Failed to open source folder \"%s\""), name);
 
       return false;
    }
@@ -1618,7 +1618,7 @@ bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
    MailFolder_obj mfDst(MailFolder::OpenFolder(folderDst));
    if ( !mfDst )
    {
-      wxLogError(_("Failed to create the target folder \"%s\""), name.c_str());
+      wxLogError(_("Failed to create the target folder \"%s\""), name);
 
       return false;
    }
@@ -1666,7 +1666,7 @@ bool MigrateWizardProgressPage::ProcessAllFolders()
          {
             // it's not a fatal error (no messages lost...) but still worth
             // noting
-            wxLogWarning(_("Failed to copy the folder \"%s\""), name.c_str());
+            wxLogWarning(_("Failed to copy the folder \"%s\""), name);
          }
       }
       else // a "file"-like folder, copy the messages from it
@@ -1674,7 +1674,7 @@ bool MigrateWizardProgressPage::ProcessAllFolders()
          if ( !ProcessOneFolder(name, Data().folderFlags[m_nFolder]) )
          {
             wxLogError(_("Failed to copy messages from folder \"%s\""),
-                       name.c_str());
+                       name);
 
             m_nErrors++;
          }

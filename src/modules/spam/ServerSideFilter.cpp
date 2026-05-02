@@ -135,7 +135,7 @@ ServerSideFilter::DoReclassify(const Profile *profile,
       if ( !reason.empty() )
       {
          wxLogError(_("Error while reclassifying the message: %s."),
-                    reason.c_str());
+                    reason);
          return false;
       }
    }
@@ -191,7 +191,7 @@ ServerSideFilter::DoCheckIfSpam(const Profile *profile,
       return false;
 
    if ( result )
-      result->Printf("%s: %s", headerName.c_str(), headerValue.c_str());
+      result->Printf("%s: %s", headerName, headerValue);
 
    return true;
 }

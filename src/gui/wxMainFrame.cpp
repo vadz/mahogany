@@ -512,9 +512,9 @@ public:
       {
          OpenFolderViewFrame(m_folderVirt, frame);
 
-         wxLogStatus(frame, _("Found %lu messages in %lu folders."),
-                     (unsigned long)m_nMatchingMessages,
-                     (unsigned long)m_nMatchingFolders);
+         wxLogStatus(frame, _("Found %zu messages in %zu folders."),
+                     m_nMatchingMessages,
+                     m_nMatchingFolders);
 
       }
       else

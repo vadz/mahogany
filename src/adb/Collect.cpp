@@ -156,7 +156,7 @@ void AutoCollectAddress(const String& email,
       {
          wxLogError(_("Failed to create the address book '%s' "
                       "for autocollected e-mail addresses."),
-                      bookName.c_str());
+                      bookName);
 
          // TODO ask the user if he wants to disable autocollect?
          return;
@@ -229,8 +229,8 @@ void AutoCollectAddress(const String& email,
                      String::Format
                      (
                         _("Add new e-mail entry '%s' for '%s' to the database?"),
-                        email.c_str(),
-                        name.c_str()
+                        email,
+                        name
                      ),
                      frame
                   )
@@ -242,7 +242,7 @@ void AutoCollectAddress(const String& email,
                {
                   wxLogError(_("Couldn't create an entry in the address "
                                "book '%s' for autocollected address."),
-                             bookName.c_str());
+                             bookName);
 
                   // TODO ask the user if he wants to disable autocollect?
                }
@@ -274,9 +274,9 @@ void AutoCollectAddress(const String& email,
                      wxLogStatus(frame,
                                  _("Auto collected e-mail address '%s' "
                                    "(created new entry '%s' in group '%s')."),
-                                 email.c_str(),
-                                 name.c_str(),
-                                 group->GetName().c_str());
+                                 email,
+                                 name,
+                                 group->GetName());
                   }
                }
             }
@@ -334,7 +334,7 @@ void AutoCollectAddress(const String& email,
       {
          wxLogStatus(frame,
                      _("'%s': the name is missing, address was not "
-                       "autocollected."), email.c_str());
+                       "autocollected."), email);
       }
    }
 }
@@ -393,7 +393,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
          {
             wxLogError(_("Failed to create the address book '%s' "
                          "for autocollected e-mail addresses."),
-                         bookName.c_str());
+                         bookName);
 
             // TODO ask the user for another book name
             return -1;
@@ -404,7 +404,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
          {
             wxLogError(_("Failed to create group '%s' in the address "
                          "book '%s'."),
-                         groupName.c_str(), bookName.c_str());
+                         groupName, bookName);
 
             return -1;
          }

@@ -418,7 +418,7 @@ bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
   String str;
   str.Printf("Return TRUE from DummyDataProvider::TestBookAccess(%d) "
              " for '%s'?",
-             test, name.c_str());
+             test, name);
   return MDialog_YesNoDialog(str);
 }
 

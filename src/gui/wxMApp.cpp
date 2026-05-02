@@ -1967,9 +1967,7 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
    if(nNNTP == 0 && nSMTP == 0)
       msg = _("Outbox empty");
    else
-      msg.Printf(_("Outbox %lu, %lu"),
-                 (unsigned long) nSMTP,
-                 (unsigned long) nNNTP);
+      msg.Printf(_("Outbox %lu, %lu"), nSMTP, nNNTP);
 
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    CHECK_RET( sbar, _T("no status bar in the main frame?") );

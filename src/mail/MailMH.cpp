@@ -163,7 +163,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
       }
       else
       {
-         wxLogDebug(_T("Folder specification '%s' unexpected."), spec.c_str());
+         wxLogDebug(_T("Folder specification '%s' unexpected."), spec);
       }
    }
 
@@ -173,7 +173,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
 
 void MHFoldersImporter::OnNewFolder(String& name)
 {
-   wxLogMessage(_T("Found MH folder %s"), name.c_str());
+   wxLogMessage(_T("Found MH folder %s"), name);
 }
 
 // ----------------------------------------------------------------------------
@@ -265,8 +265,8 @@ MailFolder::GetMHFolderName(String *path)
       {
          wxLogError(_("Invalid MH folder name '%s' - all MH folders should "
                       "be under '%s' directory."),
-                    name.c_str(),
-                    gs_MHRootDir.c_str());
+                    name,
+                    gs_MHRootDir);
 
          return FALSE;
       }
@@ -320,7 +320,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
    if ( !folderMH )
    {
       wxLogError(_("Failed to create root MH folder at '%s'."),
-                 root.c_str());
+                 root);
 
       ok = FALSE;
    }
@@ -346,7 +346,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
       if ( !ok )
       {
          wxLogError(_("Failed to import MH subfolders under '%s'."),
-                    root.c_str());
+                    root);
       }
    }
 

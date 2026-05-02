@@ -1075,28 +1075,28 @@ bool InstallWizardServersPage::TransferDataFromWindow()
       {
          failed++;
          tmp.Printf(_("POP3 server '%s'.\n"),
-                    gs_installWizardData.pop.c_str());
+                    gs_installWizardData.pop);
          check += tmp;
       }
       if( !CheckHostName(gs_installWizardData.smtp) )
       {
          failed++;
          tmp.Printf(_("SMTP server '%s'.\n"),
-                    gs_installWizardData.smtp.c_str());
+                    gs_installWizardData.smtp);
          check += tmp;
       }
       if( !CheckHostName(gs_installWizardData.imap) )
       {
          failed++;
          tmp.Printf(_("IMAP server '%s'.\n"),
-                    gs_installWizardData.imap.c_str());
+                    gs_installWizardData.imap);
          check += tmp;
       }
       if( !CheckHostName(gs_installWizardData.nntp) )
       {
          failed++;
          tmp.Printf(_("NNTP server '%s'.\n"),
-                    gs_installWizardData.nntp.c_str());
+                    gs_installWizardData.nntp);
          check += tmp;
       }
       if(failed)
@@ -1133,7 +1133,7 @@ InstallWizardServersPage::AddDomain(wxString& server, const wxString& domain)
    wxString msg;
    msg.Printf(_("You have no domain specified for the server '%s'.\n"
                 "Do you want to add the domain '%s'?"),
-              server.c_str(), domain.c_str());
+              server, domain);
    if(MDialog_YesNoDialog(msg,this, MDIALOG_YESNOTITLE, true))
 #endif // 0
 
@@ -1518,7 +1518,7 @@ static wxString GetRFC822Time(void)
    }
    timeStr.Printf(_T("%02d %s %d %02d:%02d:%02d"),
                   ourtime->tm_mday,
-                  timeStr.c_str(),
+                  timeStr,
                   ourtime->tm_year+1900,
                   ourtime->tm_hour,
                   ourtime->tm_min,
@@ -1778,7 +1778,7 @@ bool RunInstallWizard(
               );
 
          String timeStr = GetRFC822Time();
-         String msgString = wxString::Format(msgFmt, timeStr.c_str());
+         String msgString = wxString::Format(msgFmt, timeStr);
 
          msgString = strutil_enforceCRLF(msgString);
          mf->AppendMessage(msgString);
@@ -2182,7 +2182,7 @@ public:
                config->DeleteEntry(MP_OLD_FOLDER_HOST);
 
                wxLogTrace(_T("Successfully converted folder '%s'"),
-                          folderName.c_str());
+                          folderName);
             }
             else
             {
@@ -2247,7 +2247,7 @@ public:
          };
 
          wxLogTrace(_T("Updating templates for the folder '%s'..."),
-                    folderName.c_str());
+                    folderName);
 
          for ( size_t n = 0; n < WXSIZEOF(templateKinds); n++ )
          {
@@ -2266,20 +2266,20 @@ public:
                   wxLogWarning(_("A profile entry '%s' already exists, "
                                  "impossible to upgrade the existing template "
                                  "in '%s/%s/%s'"),
-                               entryNew.c_str(),
-                               folderName.c_str(),
-                               group.c_str(),
-                               entry.c_str());
+                               entryNew,
+                               folderName,
+                               group,
+                               entry);
 
                   m_ok = false;
                }
                else
                {
                   wxLogTrace(_T("\t%s/%s/%s upgraded to %s"),
-                             folderName.c_str(),
-                             group.c_str(),
-                             entry.c_str(),
-                             entryNew.c_str());
+                             folderName,
+                             group,
+                             entry,
+                             entryNew);
 
                   profileApp->writeEntry(entryNew, templateValue);
                   profile->writeEntry(entry, entryNew);
@@ -2511,7 +2511,7 @@ UpdateNonFolderProfiles(wxConfigBase *config)
          if ( deleteGroup )
          {
             wxLogWarning(_("Removing invalid config settings group '%s'."),
-                         name.c_str());
+                         name);
          }
       }
 
@@ -2928,7 +2928,7 @@ Upgrade(const String& fromVersion)
          if ( success && UpgradeFrom066() )
             wxLogMessage(_("Configuration information and program files were "
                            "successfully upgraded from the version '%s'."),
-                         fromVersion.c_str());
+                         fromVersion);
          else
             wxLogError(_("Configuration information and program files "
                          "could not be upgraded from version '%s', some "
@@ -2936,7 +2936,7 @@ Upgrade(const String& fromVersion)
                          "\n"
                          "It is recommended that you uninstall and reinstall "
                          "the program before using it."),
-                       fromVersion.c_str());
+                       fromVersion);
          // fall through
 
       case Version_Last:
@@ -2950,7 +2950,7 @@ Upgrade(const String& fromVersion)
       case Version_Unknown:
          wxLogError(_("The previously installed version of Mahogany (%s) was "
                       "probably newer than this one. Cannot upgrade."),
-                    fromVersion.c_str());
+                    fromVersion);
          return false;
    }
 
@@ -2977,8 +2977,8 @@ public:
                   "Found additional folder '%s'\n"
                   "marked as central new mail folder. Ignoring it.\n"
                   "New Mail folder used is '%s'."),
-                             f->GetFullName().c_str(),
-                             m_NewMailFolder.c_str()));
+                             f->GetFullName(),
+                             m_NewMailFolder));
 //               f->SetFlags(f->GetFlags() & !MF_FLAGS_NEWMAILFOLDER);
                Profile *p = Profile::CreateProfile(f->GetFullName());
                if(p)
@@ -3000,7 +3000,7 @@ public:
                   ERRORMESSAGE((_("Cannot auto-collect mail from the new mail folder\n"
                                   "'%s'\n"
                                   "Corrected configuration data."),
-                                f->GetFullName().c_str()));
+                                f->GetFullName()));
                   f->SetFlags(f->GetFlags() & ~MF_FLAGS_INCOMING);
                }
             }
@@ -3048,7 +3048,7 @@ VerifyStdFolder(const MOption& optName,
 
       if ( !folder )
       {
-         wxLogError(_("Failed to create system folder '%s'"), name.c_str());
+         wxLogError(_("Failed to create system folder '%s'"), name);
 
          return 0;
       }
@@ -3625,7 +3625,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    if ( !folder )
    {
       wxLogError(_("Folder '%s' for storing remote configuration "
-                   "doesn't exist."), foldername.c_str());
+                   "doesn't exist."), foldername);
       return false;
    }
 
@@ -3634,7 +3634,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    if(! mf)
    {
       wxLogError(_("Please check that the folder '%s' where the remote "
-                   "configuration is stored exists."), foldername.c_str());
+                   "configuration is stored exists."), foldername);
 
       return false;
    }
@@ -3644,13 +3644,13 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    {
       if ( nMessages == 0 )
          wxLogError(_("Configuration mailbox '%s' does not contain any "
-                      "information."), mf->GetName().c_str());
+                      "information."), mf->GetName());
       else
          wxLogError(
             _("Configuration mailbox '%s' contains more than\n"
               "one message. Possibly wrong mailbox specified?\n"
               "If this mailbox is the correct one, please remove\n"
-              "the extra messages and try again."), mf->GetName().c_str());
+              "the extra messages and try again."), mf->GetName());
       mf->DecRef();
       return false;
    }
@@ -3663,7 +3663,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
       wxLogError(
          _("The message in the configuration mailbox '%s' does not\n"
            "contain configuration settings. Please remove it."),
-         mf->GetName().c_str());
+         mf->GetName());
       mf->DecRef();
       msg->DecRef();
       hil->DecRef();
@@ -3794,7 +3794,7 @@ bool SaveRemoteConfigSettings(bool confirm)
          _("Configuration mailbox '%s' contains more than\n"
            "one message. Possibly wrong mailbox specified?\n"
            "If this mailbox is the correct one, please remove\n"
-           "the extra messages and try again."), mf->GetName().c_str());
+           "the extra messages and try again."), mf->GetName());
       mf->DecRef();
       return false;
    }
@@ -3812,7 +3812,7 @@ bool SaveRemoteConfigSettings(bool confirm)
          wxLogError(
             _("The message in the configuration mailbox '%s' does not\n"
               "contain configuration settings. Please remove it."),
-            mf->GetName().c_str());
+            mf->GetName());
          mf->DecRef();
          msg->DecRef();
          return false;
@@ -3840,7 +3840,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       {
          wxLogError(
             _("Cannot remove old configuration information from\n"
-              "mailbox '%s'."), mf->GetName().c_str());
+              "mailbox '%s'."), mf->GetName());
          mf->DecRef();
          msg->DecRef();
          return false;
@@ -3902,7 +3902,7 @@ bool SaveRemoteConfigSettings(bool confirm)
        tmpfile.Read(buffer, lenTmp) != lenTmp)
    {
       wxLogError(_("Cannot read configuration info from temporary file\n"
-                   "'%s'."), filename.c_str());
+                   "'%s'."), filename);
       tmpfile.Close();
       delete [] buffer;
       mf->DecRef();
@@ -3922,7 +3922,7 @@ bool SaveRemoteConfigSettings(bool confirm)
    if( ! mf->AppendMessage(msgText) )
    {
       wxLogError(_("Storing configuration information in mailbox\n"
-                   "'%s' failed."), mf->GetName().c_str());
+                   "'%s' failed."), mf->GetName());
       rc = false;
    }
    mf->DecRef();
@@ -3933,7 +3933,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       wxString msg;
       msg.Printf(
          _("Successfully stored shared configuration info in folder '%s'."),
-         mf->GetName().c_str());
+         mf->GetName());
       MDialog_Message(msg, NULL, _("Saved settings"),
                       GetPersMsgBoxName(M_MSGBOX_CONFIG_SAVED_REMOTELY));
    }

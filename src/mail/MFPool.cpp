@@ -246,7 +246,7 @@ MFPool::Add(MFDriver *driver,
 
    pool->connections.push_back(new MFConnection(mf, spec, folder));
 
-   wxLogTrace(TRACE_MFPOOL, _T("Added '%s' to the pool."), mf->GetName().c_str());
+   wxLogTrace(TRACE_MFPOOL, _T("Added '%s' to the pool."), mf->GetName());
 }
 
 /* static */
@@ -291,7 +291,7 @@ bool MFPool::Remove(MailFolder *mf)
          if ( i->mf == mf )
          {
             wxLogTrace(TRACE_MFPOOL, _T("Removing '%s' from the pool."),
-                       mf->GetName().c_str());
+                       mf->GetName());
 
             pool->connections.erase(i);
 

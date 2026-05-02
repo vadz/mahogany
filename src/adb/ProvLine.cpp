@@ -269,7 +269,7 @@ LineBook::LineBook(const String& file)
 
    return;
 FileError:
-   wxLogError(_("Cannot open file %s."), m_file.c_str());
+   wxLogError(_("Cannot open file %s."), m_file);
    m_bad = true;
 }
 
@@ -395,7 +395,7 @@ bool LineBook::Flush()
    
    return true;
 FileError:
-   wxLogError(_("Cannot write to file %s."), m_file.c_str());
+   wxLogError(_("Cannot write to file %s."), m_file);
    return false;
 }
 

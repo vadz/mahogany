@@ -268,7 +268,7 @@ bool AdbTextExporter::Export(AdbEntryGroup& group, const String& dest)
       if ( DoExportGroup(group, file, dialog.GetDelimiter()) )
       {
          wxLogMessage(_("Successfully exported address book data to "
-                        "file '%s'"), filename.c_str());
+                        "file '%s'"), filename);
 
          return TRUE;
       }

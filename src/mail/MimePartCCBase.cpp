@@ -105,7 +105,7 @@ MimePartCCBase::Create(BODY *body, MimePartCCBase *parent, size_t nPart)
       m_spec << specParent << '.';
    }
 
-   m_spec << wxString::Format(_T("%lu"), (unsigned long)nPart);
+   m_spec << wxString::Format(_T("%zu"), nPart);
 }
 
 MimePartCCBase::~MimePartCCBase()

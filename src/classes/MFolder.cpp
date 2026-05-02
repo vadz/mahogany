@@ -562,7 +562,7 @@ MFolder::Create(const String& fullname, MFolderType type, bool tryCreateLater)
    if ( folder )
    {
       wxLogError(_("Cannot create a folder '%s' which already exists."),
-                 fullname.c_str());
+                 fullname);
 
       folder->DecRef();
 
@@ -1027,7 +1027,7 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name,
    if ( folder )
    {
       wxLogError(_("Cannot create subfolder '%s': folder with this name "
-                   "already exists."), name.c_str());
+                   "already exists."), name);
 
       folder->DecRef();
 
@@ -1108,7 +1108,7 @@ bool MFolderFromProfile::Rename(const String& newName)
    {
       wxLogError(_("Cannot rename folder '%s' to '%s': the folder with "
                    "the new name already exists."),
-                   m_folderName.c_str(), newName.c_str());
+                   m_folderName, newName);
 
       return false;
    }
@@ -1120,7 +1120,7 @@ bool MFolderFromProfile::Rename(const String& newName)
    {
       wxLogError(_("Cannot rename folder '%s' to '%s': the folder with "
                    "the new name already exists."),
-                   m_folderName.c_str(), newName.c_str());
+                   m_folderName, newName);
 
       return false;
    }
@@ -1185,7 +1185,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
    if ( !newSubfolder )
    {
       wxLogError(_("Could not create subfolder '%s' in '%s'."),
-                   name.c_str(), path.c_str());
+                   name, path);
       return false;
    }
 
@@ -1229,7 +1229,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
             dialogSettings->SetAction(dialogSettings->GetAction(), argument);
             filterDesc.Set(dialogSettings);
             filter->Set(filterDesc);
-            wxLogStatus(_("Filter '%s' has been updated."), filterName.c_str());
+            wxLogStatus(_("Filter '%s' has been updated."), filterName);
          }
          else
          {
@@ -1239,7 +1239,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       else
       {
          // XNOTODO: Find out how to update this filter anyway
-         wxLogError(_("Filter '%s' is not \"simple\" and has not been updated."), filterName.c_str());
+         wxLogError(_("Filter '%s' is not \"simple\" and has not been updated."), filterName);
       }
       filter->DecRef();
    }
@@ -1413,7 +1413,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
    {
       wxLogError(_("Cannot create a folder '%s'.\n"
                    "Maybe a folder of this name already exists?"),
-                 fullname.c_str());
+                 fullname);
 
       return NULL;
    }
@@ -1502,7 +1502,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
       }
       else
       {
-         wxLogWarning(_("Failed to create folder '%s'"), fullname.c_str());
+         wxLogWarning(_("Failed to create folder '%s'"), fullname);
       }
 
       cont = dir.GetNext(&filename);
@@ -1533,7 +1533,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
       }
       else
       {
-         wxLogWarning(_("Failed to create folder group '%s'"), dirname.c_str());
+         wxLogWarning(_("Failed to create folder group '%s'"), dirname);
       }
 
       cont = dir.GetNext(&dirname);

@@ -466,8 +466,7 @@ void DspamFilter::Train(wxWindow *parent)
             (
                wxString::Format
                (
-                  _("Does the folder \"%s\" contain spam?"),
-                  name.c_str()
+                  _("Does the folder \"%s\" contain spam?"), name
                ),
                parent,
                _("Choose DSPAM training mode")
@@ -493,7 +492,7 @@ void DspamFilter::Train(wxWindow *parent)
    if ( !mf )
    {
       wxLogError(_("Failed to open folder \"%s\" with training messages."),
-                 name.c_str());
+                 name);
       return;
    }
 
@@ -519,12 +518,7 @@ void DspamFilter::Train(wxWindow *parent)
 
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( !pd.Update(n + 1, String::Format
-                             (
-                                 _("Message %lu of %lu"),
-                                 (unsigned long)n,
-                                 (unsigned long)count
-                             )) )
+      if ( !pd.Update(n + 1, String::Format(_("Message %zu of %zu"), n, count)) )
       {
          // cancelled by user
          break;
@@ -542,7 +536,7 @@ void DspamFilter::Train(wxWindow *parent)
          }
       }
 
-      wxLogWarning(_("Failed to retrieve message #%lu."));
+      wxLogWarning(_("Failed to retrieve message #%zu."), n);
    }
 }
 

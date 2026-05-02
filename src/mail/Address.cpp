@@ -75,7 +75,7 @@ static const AddressHash& GetAddressHash()
          if ( equiv.size() != 2 )
          {
             wxLogWarning(_("Invalid address equivalence option \"%s\""),
-                         equivPairs[n].c_str());
+                         equivPairs[n]);
             continue;
          }
 

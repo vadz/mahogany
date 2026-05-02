@@ -130,7 +130,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
          return TRUE;
 
       case '\0':
-         wxLogWarning(_("Unexpected end of file '%s'."), m_filename.c_str());
+         wxLogWarning(_("Unexpected end of file '%s'."), m_filename);
          return FALSE;
 
       default:
@@ -146,7 +146,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                            "%d in the file '%s'."),
                          pc - m_pStartOfLine + 1,
                          m_nLine,
-                         m_filename.c_str());
+                         m_filename);
 
             return FALSE;
          }
@@ -196,7 +196,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                                  "%d, position %d in the file '%s'"),
                                m_nLine,
                                pc - m_pStartOfLine,
-                               m_filename.c_str());
+                               m_filename);
 
                   return FALSE;
                }
@@ -259,7 +259,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                                           "%d, position %d in the file '%s'"),
                                         m_nLine,
                                         pc - m_pStartOfLine,
-                                        m_filename.c_str());
+                                        m_filename);
                      }
 
                      arguments.Add(arg);
@@ -305,7 +305,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                                  "%d, position %d in the file '%s'."),
                                m_nLine,
                                pc - m_pStartOfLine,
-                               m_filename.c_str());
+                               m_filename);
 
                   return FALSE;
                }
@@ -347,7 +347,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                                *pc,
                                m_nLine,
                                pc - m_pStartOfLine,
-                               m_filename.c_str(),
+                               m_filename,
                                bracketClose);
 
                   return FALSE;
@@ -369,10 +369,10 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
          {
             wxLogWarning(_("Unknown variable '%s' at line %zu, position %zu "
                            "in the file '%s'."),
-                         name.c_str(),
+                         name,
                          m_nLine,
                          pc - m_pStartOfLine - name.length(),
-                         m_filename.c_str());
+                         m_filename);
          }
          //else: message should have been already given
 

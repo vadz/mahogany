@@ -1074,7 +1074,7 @@ ProfileImpl::DebugDump() const
    PCHECK();
 
    return String::Format(_T("%s; name = \"%s\""),
-                         MObjectRC::DebugDump().c_str(), m_ProfileName.c_str());
+                         MObjectRC::DebugDump(), m_ProfileName);
 }
 
 #endif // DEBUG
@@ -1098,7 +1098,7 @@ void SaveArray(wxConfigBase *conf,
    size_t nCount = astr.Count();
    String strkey;
    for ( size_t n = 0; n < nCount; n++ ) {
-      strkey.Printf(_T("%lu"), (unsigned long)n);
+      strkey.Printf(_T("%zu"), n);
       conf->Write(path + strkey, astr[n]);
    }
 }
@@ -1113,7 +1113,7 @@ void RestoreArray(wxConfigBase *conf, wxArrayString& astr, const String& key)
 
    String strkey, strVal;
    for ( size_t n = 0; ; n++ ) {
-      strkey.Printf(_T("%lu"), (unsigned long)n);
+      strkey.Printf(_T("%zu"), n);
       if ( !conf->HasEntry(path+strkey) )
          break;
 

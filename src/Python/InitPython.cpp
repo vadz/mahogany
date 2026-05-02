@@ -63,7 +63,7 @@ bool CheckPyError()
 {
    if ( PyErr_Occurred() )
    {
-      ERRORMESSAGE((_T("%s"), PythonGetErrorMessage().c_str()));
+      ERRORMESSAGE((PythonGetErrorMessage()));
 
       return false;
    }
@@ -172,7 +172,7 @@ InitPython(void)
       if ( !CheckPyError() || !moduleInit )
       {
          ERRORMESSAGE(("Cannot load Python module \"%s\".",
-                       startScript.c_str()));
+                       startScript));
 
          rc = false;
       }

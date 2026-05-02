@@ -1215,7 +1215,7 @@ char ASMailFolder::GetFolderDelimiter() const
 String ASMailFolderImpl::DebugDump() const
 {
    String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf(_T("name '%s'"), GetName().c_str());
+   s2.Printf(_T("name '%s'"), GetName());
 
    return s1 + s2;
 }
@@ -1223,7 +1223,7 @@ String ASMailFolderImpl::DebugDump() const
 String ASMailFolder::ResultImpl::DebugDump() const
 {
    String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf(_T("operation id = %d, folder '%s'"), m_Id, m_Mf->GetName().c_str());
+   s2.Printf(_T("operation id = %d, folder '%s'"), m_Id, m_Mf->GetName());
 
    return s1 + s2;
 }

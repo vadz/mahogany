@@ -98,7 +98,7 @@ protected:
    {
       String s;
       if ( !from.empty() )
-         s.Printf(_T(" from \"%s\"") , from.c_str());
+         s.Printf(_T(" from \"%s\"") , from);
       return s;
    }
 
@@ -115,7 +115,7 @@ public:
    PGPInfoGoodSig(MessageView *msgView, const String& from)
       : PGPSignatureInfo(msgView,
                          wxString::Format(_("Good PGP signature%s"),
-                                          GetFromString(from).c_str()),
+                                          GetFromString(from)),
                          _T("pgpsig_good"),
                          *wxGREEN) { }
 
@@ -129,7 +129,7 @@ public:
    PGPInfoExpiredSig(MessageView *msgView, const String& from)
       : PGPSignatureInfo(msgView,
                          wxString::Format(_("Expired PGP signature%s"),
-                                          GetFromString(from).c_str()),
+                                          GetFromString(from)),
                          _T("pgpsig_exp"),
                          wxColour(0, 255, 255)) { }
 
@@ -143,7 +143,7 @@ public:
    PGPInfoUntrustedSig(MessageView *msgView, const String& from)
       : PGPSignatureInfo(msgView,
                          wxString::Format(_("PGP Signature from untrusted key \"%s\""),
-                                          from.c_str()),
+                                          from),
                          _T("pgpsig_untrust"),
                          wxColour(255, 128, 0)) { }
 
@@ -157,7 +157,7 @@ public:
    PGPInfoBadSig(MessageView *msgView, const String& from)
       : PGPSignatureInfo(msgView,
                          wxString::Format(_("Bad PGP signature%s"),
-                                          GetFromString(from).c_str()),
+                                          GetFromString(from)),
                          _T("pgpsig_bad"),
                          *wxRED) { }
 
@@ -178,7 +178,7 @@ public:
                          (
                            _("PGP public key not found%s, click here to "
                              "try to retrieve it."),
-                           GetFromString(from).c_str()
+                           GetFromString(from)
                          ),
                          _T("pgpsig_bad"),
                          wxColour(145, 145, 145)),

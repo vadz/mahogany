@@ -853,7 +853,7 @@ void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
    if ( col.Ok() )
    {
       m_htmlText += wxString::Format(_T(" %s=\"#%s\""),
-                                     attr, Col2Html(col).c_str());
+                                     attr, Col2Html(col));
    }
 }
 
@@ -1183,7 +1183,7 @@ void HtmlViewer::EndBody()
    m_htmlText += _T("</body></html>");
 
    // makes cut-&-pasting into Netscape easier
-   //wxLogTrace(_T("html"), _T("Generated HTML output:\n%s\n"), m_htmlText.c_str());
+   //wxLogTrace(_T("html"), _T("Generated HTML output:\n%s\n"), m_htmlText);
 
    m_window->SetPage(m_htmlText);
 

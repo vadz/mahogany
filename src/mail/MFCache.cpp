@@ -166,7 +166,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
    {
       wxLogTrace(M_TRACE_MFSTATUS,
                  _T("Added status for '%s' (%lu total, %lu unread)"),
-                 folderName.c_str(), status.total, status.unread);
+                 folderName, status.total, status.unread);
 
       // add it
       n = m_folderNames.Add(folderName);
@@ -183,7 +183,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
 
       wxLogTrace(M_TRACE_MFSTATUS,
                  _T("Changed status for '%s' (%lu total, %lu unread)"),
-                 folderName.c_str(), status.total, status.unread);
+                 folderName, status.total, status.unread);
    }
 
    // update
@@ -197,7 +197,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
 void MfStatusCache::InvalidateStatus(const String& folderName)
 {
    wxLogTrace(M_TRACE_MFSTATUS, _T("Invalidated status for '%s'"),
-              folderName.c_str());
+              folderName);
 
    int n = m_folderNames.Index(folderName);
    if ( n != wxNOT_FOUND )
@@ -345,7 +345,7 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
       else
       {
          wxLogDebug(_T("Removing deleted folder '%s' from status cache."),
-                    name.c_str());
+                    name);
       }
    }
 
@@ -407,7 +407,7 @@ bool MfStatusCache::DoSave(wxTempFile& file)
                  _T("%lu") CACHE_DELIMITER
                  _T("%lu") CACHE_DELIMITER
                  _T("%lu\n"),
-                 name.c_str(),
+                 name,
                  status->total,
                  status->newmsgs,
                  status->unread,

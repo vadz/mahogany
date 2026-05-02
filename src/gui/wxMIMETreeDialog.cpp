@@ -225,8 +225,7 @@ wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
 
    m_treectrl->Expand(m_treectrl->GetRootItem());
 
-   box->SetLabel(wxString::Format(_("%lu MIME parts"),
-                                  static_cast<unsigned long>(m_countParts)));
+   box->SetLabel(wxString::Format(_("%zu MIME parts"), m_countParts));
 
 
    SetSizer(sizerTop);

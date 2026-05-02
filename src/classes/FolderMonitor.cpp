@@ -157,7 +157,7 @@ public:
       m_timeNext = time(NULL) + (time_t)GetPollInterval();
 
       wxLogTrace(TRACE_MONITOR, _T("Next check for %s scheduled for %s"),
-                 m_folder->GetFullName().c_str(),
+                 m_folder->GetFullName(),
                  ctime(&m_timeNext));
    }
 
@@ -206,7 +206,7 @@ public:
          if ( folder->GetFlags() & MF_FLAGS_MONITOR )
          {
             wxLogTrace(TRACE_MONITOR, _T("Found folder to monitor: %s"),
-                       folderName.c_str());
+                       folderName);
 
             m_list.push_back(new FolderMonitorFolderEntry(folder));
          }
@@ -542,7 +542,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
       if ( !mf )
       {
          wxLogTrace(TRACE_MONITOR, _T("Skipping not opened folder %s"),
-                    folder->GetFullName().c_str());
+                    folder->GetFullName());
          return true;
       }
 
@@ -557,20 +557,20 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
                       "If you believe this message to be wrong, please "
                       "set the flag allowing to access the folder\n"
                       "without network in its \"Access\" properties page."),
-                    i->GetName().c_str()));
+                    i->GetName()));
 
       i->SetState(Folder_TempUnavailable);
    }
 #endif // USE_DIALUP
 
    wxLogTrace(TRACE_MONITOR, _T("Checking for new mail in '%s'."),
-              i->GetName().c_str());
+              i->GetName());
 
    if ( progInfo )
    {
       // show to the user that we're doing something
       progInfo->SetLabel(String::Format(_("Checking folder %s..."),
-                                        folder->GetFullName().c_str()));
+                                        folder->GetFullName()));
    }
 
    // don't show the dialogs in non-interactive mode
@@ -582,7 +582,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
          wxString msg;
          msg.Printf(_("Checking for new mail in the folder '%s' failed.\n"
                       "Do you want to stop checking it during this session?"),
-                    i->GetName().c_str());
+                    i->GetName());
 
          if ( MDialog_YesNoDialog
               (

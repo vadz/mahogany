@@ -157,11 +157,9 @@
 #ifdef USE_STD_STRING
 #   include   <string>
     typedef   std::string String;
-#   define    Str(str)((str).c_str())
 #else
 #   include   <wx/string.h>
     typedef   wxString String;
-#   define    Str(str) str
 #endif
 
 // set the proper STL class names
