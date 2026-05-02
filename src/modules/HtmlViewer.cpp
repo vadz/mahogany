@@ -158,9 +158,8 @@ private:
    // printing helper: creates m_printHtml object if not done yet
    void InitPrinting();
 
-   // emulate a key press: this is the only way I found to scroll
-   // wxScrolledWindow
-   void EmulateKeyPress(int keycode);
+   // emulate the effect of a wxScrollWinEvent with the given type
+   void EmulateScroll(wxEventType evtType);
 
 
    // the viewer window
@@ -1207,11 +1206,13 @@ void HtmlViewer::EndBody()
 // scrolling
 // ----------------------------------------------------------------------------
 
-void HtmlViewer::EmulateKeyPress(int keycode)
+void HtmlViewer::EmulateScroll(wxEventType evtType)
 {
-   wxKeyEvent event;
-   event.m_keyCode = keycode;
-   m_window->HandleOnChar(event);
+   wxScrollWinEvent event(evtType, 0, wxVERTICAL);
+   event.SetEventObject(m_window);
+   event.SetId(m_window->GetId());
+
+   m_window->ProcessWindowEvent(event);
 }
 
 bool
@@ -1219,7 +1220,7 @@ HtmlViewer::LineDown()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_DOWN);
+   EmulateScroll(wxEVT_SCROLLWIN_LINEDOWN);
 
    return check.HasChanged();
 }
@@ -1229,7 +1230,7 @@ HtmlViewer::LineUp()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_UP);
+   EmulateScroll(wxEVT_SCROLLWIN_LINEUP);
 
    return check.HasChanged();
 }
@@ -1239,7 +1240,7 @@ HtmlViewer::PageDown()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_PAGEDOWN);
+   EmulateScroll(wxEVT_SCROLLWIN_PAGEDOWN);
 
    return check.HasChanged();
 }
@@ -1249,7 +1250,7 @@ HtmlViewer::PageUp()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_PAGEUP);
+   EmulateScroll(wxEVT_SCROLLWIN_PAGEUP);
 
    return check.HasChanged();
 }
