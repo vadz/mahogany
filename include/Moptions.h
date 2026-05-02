@@ -1509,11 +1509,11 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_COMPOSETEMPLATEPATH_GLOBAL_DEFVAL   ""
 
 /// the format string for the folder tree display
-#define MP_FOLDERSTATUS_TREE_DEFVAL _("%f (%t, %u)")
+#define MP_FOLDERSTATUS_TREE_DEFVAL gettext_noop("%f (%t, %u)")
 /// the format string for status bar folder status display
-#define MP_FOLDERSTATUS_STATBAR_DEFVAL _("%f (%t messages, %u unread, %n new)")
+#define MP_FOLDERSTATUS_STATBAR_DEFVAL gettext_noop("%f (%t messages, %u unread, %n new)")
 /// the format string for title bar folder status display
-#define MP_FOLDERSTATUS_TITLEBAR_DEFVAL _("%f (%u unread, %n new)")
+#define MP_FOLDERSTATUS_TITLEBAR_DEFVAL gettext_noop("%f (%u unread, %n new)")
 
 /**@name Printer settings */
 //@{
@@ -1703,7 +1703,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_DEFVAL      "Re: "
 /// prefix for subject in forwards
-#define   MP_FORWARD_PREFIX_DEFVAL      _("Forwarded message: ")
+#define   MP_FORWARD_PREFIX_DEFVAL      gettext_noop("Forwarded message: ")
 /// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
 #define   MP_REPLY_COLLAPSE_PREFIX_DEFVAL 2L
 /// include the original message in the reply [no,ask,yes]
@@ -1944,7 +1944,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /**@name  Font settings for message view */
 //@{
 /// message view title
-#define   MP_MVIEW_TITLE_FMT_DEFVAL   _("from $from about \"$subject\"")
+#define   MP_MVIEW_TITLE_FMT_DEFVAL   gettext_noop("from $from about \"$subject\"")
 /// which font to use
 #define   MP_MVIEW_FONT_DEFVAL         0L
 /// which font size
@@ -2014,7 +2014,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// update the folder view status bar to show the msg info?
 #define   MP_FVIEW_STATUS_UPDATE_DEFVAL 0L
 /// folder view status bar string
-#define   MP_FVIEW_STATUS_FMT_DEFVAL _("Date: $date, Subject: $subject, From: $from")
+#define   MP_FVIEW_STATUS_FMT_DEFVAL gettext_noop("Date: $date, Subject: $subject, From: $from")
 /// delay before previewing the selected item in the folder view (0 to disable)
 #define MP_FVIEW_PREVIEW_DELAY_DEFVAL 500L
 /// split folder view vertically (or horizontally)?
