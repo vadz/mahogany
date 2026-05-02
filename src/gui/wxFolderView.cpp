@@ -2862,7 +2862,7 @@ void wxFolderListCtrl::UpdateStatusBar()
 
       String msg;
       if ( m_countSelected )
-         msg.Printf(_("%zu messages selected"), m_countSelected);
+         msg.Printf(_("%d messages selected"), m_countSelected);
 
       // determine where should this message go
       wxFrame *frame = GetFrame(this);
