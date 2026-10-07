@@ -3516,18 +3516,15 @@ wxFont
 wxFontCache::GetFont(int family, int size, int style, int weight,
                      bool underline, wxFontEncoding encoding)
 {
-   for(wxFCEList::iterator i = m_FontList.begin();
-       i != m_FontList.end(); ++i)
+   for ( const wxFontCacheEntry& fce : m_FontList )
    {
-      if( (**i).Matches(family, size, style, weight, underline, encoding) )
-         return (**i).GetFont();
+      if( fce.Matches(family, size, style, weight, underline, encoding) )
+         return fce.GetFont();
    }
 
    // not found:
-   wxFontCacheEntry *fce = new wxFontCacheEntry(family, size, style,
-                                                weight, underline, encoding);
-   m_FontList.push_back(fce);
-   return fce->GetFont();
+   m_FontList.emplace_back(family, size, style, weight, underline, encoding);
+   return m_FontList.back().GetFont();
 }
 
 /*

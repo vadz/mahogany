@@ -28,6 +28,8 @@
 
 #include   "kbList.h"
 
+#include <vector>
+
 // use the wxWindows caret class instead of home grown cursor whenever possible
 #ifdef __WXMSW__
 #   undef WXLAYOUT_USE_CARET
@@ -428,8 +430,6 @@ private:
    wxFontEncoding m_Encoding;
 };
 
-KBLIST_DEFINE(wxFCEList, wxFontCacheEntry);
-
 class wxFontCache
 {
 public:
@@ -442,7 +442,7 @@ public:
       }
 
 private:
-   wxFCEList m_FontList;
+   std::vector<wxFontCacheEntry> m_FontList;
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
