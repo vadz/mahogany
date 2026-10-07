@@ -71,7 +71,7 @@ protected:
    virtual ~MfStatusCache();
 
    // implement MEventReceiver pure virtual to process folder rename events
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    // do we need to be saved at all?
    bool IsDirty() const { return m_isDirty; }
@@ -81,16 +81,16 @@ protected:
 
    // override some CacheFile methods
 
-   virtual bool Save();
+   bool Save() override;
 
    // implement CacheFile pure virtuals
 
-   virtual String GetFileName() const;
-   virtual String GetFileHeader() const;
-   virtual int GetFormatVersion() const;
+   String GetFileName() const override;
+   String GetFileHeader() const override;
+   int GetFormatVersion() const override;
 
-   virtual bool DoLoad(const wxTextFile& file, int version);
-   virtual bool DoSave(wxTempFile& file);
+   bool DoLoad(const wxTextFile& file, int version) override;
+   bool DoSave(wxTempFile& file) override;
 
 private:
    // the names of the folders we have cached status for

@@ -54,12 +54,12 @@ extern const MOption MP_PERSONALNAME;
 class MXFMailImporter : public MImporter
 {
 public:
-   virtual bool Applies() const;
-   virtual int GetFeatures() const;
-   virtual bool ImportADB();
-   virtual bool ImportFolders(MFolder *folderParent, int flags);
-   virtual bool ImportSettings();
-   virtual bool ImportFilters();
+   bool Applies() const override;
+   int GetFeatures() const override;
+   bool ImportADB() override;
+   bool ImportFolders(MFolder *folderParent, int flags) override;
+   bool ImportSettings() override;
+   bool ImportFilters() override;
 
    DECLARE_M_IMPORTER()
 

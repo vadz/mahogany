@@ -186,8 +186,8 @@ public:
    const wxString& GetText() const { return m_strText; }
 
    // base class virtuals implemented
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // if using a textctrl and not a combobox, this will process the
    // ENTER key
@@ -222,8 +222,8 @@ public:
    bool HasUserChosenFolder() const { return m_userChoseFolder; }
 
    // base class virtuals implemented
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    void OnButton(wxCommandEvent &ev);
 
@@ -257,7 +257,7 @@ class MFolderDialogTree : public wxFolderTree
 public:
    MFolderDialogTree(MFolderDialog *dlg) : wxFolderTree(dlg) { m_dlg = dlg; }
 
-   virtual bool OnDoubleClick()
+   bool OnDoubleClick() override
    {
       // pretend the dialog was closed via ok button
       wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
@@ -1176,8 +1176,8 @@ public:
    virtual ~wxDateFmtDialog() { m_timer->Stop(); delete m_timer; }
 
    // transfer data to/from dialog
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    // returns TRUE if the format string was changed
    bool WasChanged(void) { return m_DateFmt != m_OldDateFmt;}
@@ -1198,7 +1198,7 @@ protected:
          m_dialog = dialog;
       }
 
-      virtual void Notify() { m_dialog->UpdateExample(); }
+      void Notify() override { m_dialog->UpdateExample(); }
 
    private:
       wxDateFmtDialog *m_dialog;
@@ -1396,8 +1396,8 @@ public:
    wxXFaceDialog(Profile *profile, wxWindow *parent);
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
    bool WasChanged(void)
       {
          return
@@ -1546,7 +1546,7 @@ public:
          m_NewUC = newUseCrypt;
       }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          static const char * keys[] =
          {
@@ -1592,8 +1592,8 @@ public:
    wxGlobalPasswdDialog(Profile *profile, wxWindow *parent);
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
    bool WasChanged(void) const
       {
          // difficult to say, be cautious:
@@ -1890,7 +1890,7 @@ public:
    bool ShouldShow() const { return m_listctrl->GetItemCount() != 0; }
 
    // transfer data (selections) from control
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 private:
    wxArrayInt  m_selections;
@@ -2245,8 +2245,8 @@ public:
                           const wxArrayString& choices,
                           wxArrayInt *selections);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    wxArrayInt *m_selections;
@@ -2689,7 +2689,7 @@ public:
       ms_allIdentCombos.Remove(this);
    }
 
-   virtual void DoDeleteOneItem(unsigned int index)
+   void DoDeleteOneItem(unsigned int index) override
    {
       // sync all other combos with this one
       size_t count = ms_allIdentCombos.GetCount();
@@ -2704,9 +2704,9 @@ public:
       wxChoice::DoDeleteOneItem(index);
    }
 
-   virtual int DoAppendItems(const wxArrayStringsAdapter& items,
-                             void **clientData,
-                             wxClientDataType type)
+   int DoAppendItems(const wxArrayStringsAdapter& items,
+                     void **clientData,
+                     wxClientDataType type) override
    {
       // sync all other comboboxes with the one on which Append() had been
       // called: be careful to avoid reentrancy which would result in the
@@ -2878,8 +2878,8 @@ public:
                 String *value2,
                 long textStyle = 0);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    wxTextCtrl *m_text1,
@@ -3020,7 +3020,7 @@ public:
    {
    }
 
-   virtual bool TransferDataToWindow();
+   bool TransferDataToWindow() override;
 
 protected:
    void OnUpdateOk(wxUpdateUIEvent& event);

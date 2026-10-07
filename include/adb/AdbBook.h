@@ -43,11 +43,11 @@ public:
 
     // get/set ADB name (shown in the ADB tree)
   virtual void SetName(const String& desc) = 0;
-  virtual String GetName() const = 0;
+  String GetName() const override = 0;
 
     // get/set the book description (shown in the ADB properties dialog)
   virtual void SetDescription(const String& desc) = 0;
-  virtual String GetDescription() const = 0;
+  String GetDescription() const override = 0;
 
     // get the total number of enters (for information purposes only, may be
     // not supported, especially for non local books)

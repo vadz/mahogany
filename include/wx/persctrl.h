@@ -250,13 +250,13 @@ public:
 
     // when the window is split for the first time we restore the previously
     // saved position of the splitter
-    virtual bool SplitVertically(wxWindow *window1, wxWindow *window2,
-                                 int sashPosition = 0);
-    virtual bool SplitHorizontally(wxWindow *window1, wxWindow *window2,
-                                   int sashPosition = 0);
+    bool SplitVertically(wxWindow *window1, wxWindow *window2,
+                         int sashPosition = 0) override;
+    bool SplitHorizontally(wxWindow *window1, wxWindow *window2,
+                           int sashPosition = 0) override;
 
     // we need to update our m_wasSplit here
-    virtual void OnUnsplit(wxWindow *removed);
+    void OnUnsplit(wxWindow *removed) override;
 
     // accessors
         // set the config object to use (must be !NULL)

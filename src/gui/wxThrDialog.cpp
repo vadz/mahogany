@@ -85,8 +85,8 @@ class wxMessageThreadingDialog : public wxOptionsPageSubdialog
 public:
    wxMessageThreadingDialog(Profile *profile, wxWindow *parent);
 
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    bool WasChanged() const { return m_wasChanged; }
 

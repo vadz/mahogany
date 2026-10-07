@@ -142,42 +142,42 @@ public:
 
 
    // implement Composer pure virtuals
-   virtual void InitText(Message *msg = NULL, const MessageView *msgview = NULL);
-   virtual void Launch();
-   virtual void InsertFile(const wxChar *filename,
-                           const wxChar *mimetype = NULL,
-                           const wxChar *name     = NULL);
+   void InitText(Message *msg = NULL, const MessageView *msgview = NULL) override;
+   void Launch() override;
+   void InsertFile(const wxChar *filename,
+                   const wxChar *mimetype = NULL,
+                   const wxChar *name     = NULL) override;
 
-   virtual void InsertData(void *data,
-                           size_t length,
-                           const wxChar *mimetype = NULL,
-                           const wxChar *name     = NULL,
-                           const wxChar *filename = NULL);
+   void InsertData(void *data,
+                   size_t length,
+                   const wxChar *mimetype = NULL,
+                   const wxChar *name     = NULL,
+                   const wxChar *filename = NULL) override;
 
-   virtual void InsertText(const String &txt);
+   void InsertText(const String &txt) override;
 
-   virtual void InsertMimePart(const MimePart *mimePart);
+   void InsertMimePart(const MimePart *mimePart) override;
 
-   virtual void MoveCursorTo(int x, int y);
-   virtual void MoveCursorBy(int x, int y);
+   void MoveCursorTo(int x, int y) override;
+   void MoveCursorBy(int x, int y) override;
 
    /** Set the newsgroups to post to.
        @param groups the list of newsgroups
    */
    void SetNewsgroups(const String &groups);
 
-   virtual void SetFrom(const String& from);
+   void SetFrom(const String& from) override;
 
    /// Set the default value for the "From" header (if we have it)
-   void SetDefaultFrom();
+   void SetDefaultFrom() override;
 
    /// sets Subject field
-   void SetSubject(const String &subj);
+   void SetSubject(const String &subj) override;
 
    /// adds recipients from addr (Recipient_Max means to reuse the last)
-   virtual void AddRecipients(const String& addr,
-                              RecipientType rcptType = Recipient_Max,
-                              int flags = AddRcpt_Expand);
+   void AddRecipients(const String& addr,
+                      RecipientType rcptType = Recipient_Max,
+                      int flags = AddRcpt_Expand) override;
 
    /// get from value (empty means default)
    String GetFrom() const;
@@ -186,7 +186,7 @@ public:
    virtual void GetRecipients(RecipientType type, wxArrayString& list) const;
 
    /// get addresses of this type formatted into string
-   virtual String GetRecipients(RecipientType type) const;
+   String GetRecipients(RecipientType type) const override;
 
    /**
       Save all the current recipients to the given address book/group
@@ -201,7 +201,7 @@ public:
                                 const String& group);
 
    /// get the currently entered subject
-   virtual String GetSubject() const;
+   String GetSubject() const override;
 
    /// set the focus to the editor window itself
    void SetFocusToComposer();
@@ -246,13 +246,13 @@ public:
    */
    //@{
       /// is it ok to close now?
-   virtual bool CanClose() const;
+   bool CanClose() const override;
 
       /// called when text zone contents changes
    void OnTextChange(wxCommandEvent &event);
 
       /// called on Menu selection
-   void OnMenuCommand(int id);
+   void OnMenuCommand(int id) override;
 
       /// for button
    void OnExpand(wxCommandEvent &event);
@@ -264,10 +264,10 @@ public:
    void OnExtEditorTerm(wxProcessEvent& event);
 
       /// called when composer window gets focus for the 1st time
-   virtual bool OnFirstTimeFocus();
+   bool OnFirstTimeFocus() override;
 
       /// called just before text in composer is modified for the 1st time
-   virtual void OnFirstTimeModify();
+   void OnFirstTimeModify() override;
 
       /// called when rcpt type is changed
    void OnRcptTypeChange(RecipientType type);
@@ -284,21 +284,21 @@ public:
    bool IsRecipientEnabled(size_t index) const;
 
    /// get the profile to use for options
-   Profile *GetProfile(void) const { return m_Profile; }
+   Profile *GetProfile(void) const override { return m_Profile; }
 
    /** Adds an extra header line.
        @param entry name of header entry
        @param value value of header entry
    */
-   void AddHeaderEntry(const String &entry, const String &value);
+   void AddHeaderEntry(const String &entry, const String &value) override;
 
    // set/reset the "dirty" flag
-   virtual void ResetDirty();
-   virtual void SetDirty();
+   void ResetDirty() override;
+   void SetDirty() override;
 
    // implement base class virtual
-   virtual wxComposeView *GetComposeView() { return this; }
-   virtual wxFrame *GetFrame() { return this; }
+   wxComposeView *GetComposeView() override { return this; }
+   wxFrame *GetFrame() override { return this; }
 
    /// set the colours and fonts for a (freshly created) text control
    void SetTextAppearance(wxTextCtrl *text);
@@ -472,8 +472,8 @@ protected:
 
 private:
    // implement base class pure virtual methods
-   virtual void DoCreateToolBar();
-   virtual void DoCreateStatusBar();
+   void DoCreateToolBar() override;
+   void DoCreateStatusBar() override;
 
    /// initialize the menubar
    void CreateMenu();
@@ -513,7 +513,7 @@ private:
    void EnableEditing(bool enable);
 
    /// get the options (for MessageEditor)
-   const Options& GetOptions() const { return m_options; }
+   const Options& GetOptions() const override { return m_options; }
 
    /**
        Called with the result of sending the message.

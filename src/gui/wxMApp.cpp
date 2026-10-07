@@ -196,8 +196,8 @@ public:
 
    // override base class virtual to implement saving the frame position and
    // to update the MP_SHOWLOG option
-   virtual bool OnFrameClose(wxFrame *frame);
-   virtual void OnFrameDelete(wxFrame *frame);
+   bool OnFrameClose(wxFrame *frame) override;
+   void OnFrameDelete(wxFrame *frame) override;
 
    // are we currently shown?
    bool IsShown() const;
@@ -226,10 +226,10 @@ class AutoSaveTimer : public wxTimer
 public:
    AutoSaveTimer() { m_started = FALSE; }
 
-   virtual bool Start( int millisecs = -1, bool oneShot = FALSE )
+   bool Start( int millisecs = -1, bool oneShot = FALSE ) override
       { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
 
-   virtual void Notify()
+   void Notify() override
    {
       if ( !mApplication->AllowBgProcessing() )
          return;
@@ -239,7 +239,7 @@ public:
       (void)SaveAll();
    }
 
-   virtual void Stop()
+   void Stop() override
       { if ( m_started ) wxTimer::Stop(); }
 
 public:
@@ -255,7 +255,7 @@ class MailCollectionTimer : public wxTimer
 public:
    MailCollectionTimer() { }
 
-   virtual void Notify();
+   void Notify() override;
 
 private:
    DECLARE_NO_COPY_CLASS(MailCollectionTimer)
@@ -268,7 +268,7 @@ class IdleTimer : public wxTimer
 public:
    IdleTimer() : wxTimer() { Start(100); }
 
-   virtual void Notify() { wxWakeUpIdle(); }
+   void Notify() override { wxWakeUpIdle(); }
 
 private:
    DECLARE_NO_COPY_CLASS(IdleTimer)
@@ -280,7 +280,7 @@ class AwayTimer : public wxTimer
 public:
    AwayTimer() { }
 
-   virtual void Notify()
+   void Notify() override
    {
       wxLogTrace(TRACE_TIMER, _T("Going away on timer"));
 
@@ -501,7 +501,7 @@ public:
    }
 
 protected:
-   virtual bool DoProcess()
+   bool DoProcess() override
    {
       if ( !wxDebugReportCompress::DoProcess() )
          return false;
@@ -2606,8 +2606,8 @@ public:
    {
    }
 
-   virtual bool OnExec(const wxString& WXUNUSED(topic),
-                       const wxString& data)
+   bool OnExec(const wxString& WXUNUSED(topic),
+               const wxString& data) override
    {
       return wxGetApp().OnRemoteRequest(data);
    }
@@ -2621,7 +2621,7 @@ private:
 class MAppIPCServer : public wxServer
 {
 public:
-   virtual wxConnectionBase *OnAcceptConnection(const wxString& topic)
+   wxConnectionBase *OnAcceptConnection(const wxString& topic) override
    {
       if ( topic != IPC_TOPIC )
          return NULL;

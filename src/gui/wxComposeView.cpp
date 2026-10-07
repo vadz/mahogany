@@ -411,7 +411,7 @@ public:
 
 protected:
    /// The thread entry function.
-   virtual void *Entry()
+   void *Entry() override
    {
       SendThreadResult res;
       if ( !m_msg.SendNow(&res.errGeneral, &res.errDetailed) )
@@ -543,10 +543,10 @@ public:
       m_btnAdd = NULL;
    }
 
-   virtual wxSizer *CreateControls(wxWindow *parent);
+   wxSizer *CreateControls(wxWindow *parent) override;
 
    // notify the composer that the default recipient type changed
-   virtual void OnTypeChange(RecipientType rcptType);
+   void OnTypeChange(RecipientType rcptType) override;
 
    // callback for "add new recipient" button
    void OnAdd();
@@ -554,7 +554,7 @@ public:
    virtual ~wxRcptMainControl();
 
 protected:
-   virtual wxAddressTextCtrl *CreateText(wxWindow *parent);
+   wxAddressTextCtrl *CreateText(wxWindow *parent) override;
 
 private:
    wxRcptAddButton *m_btnAdd;
@@ -592,12 +592,12 @@ public:
       m_index--;
    }
 
-   virtual wxSizer *CreateControls(wxWindow *parent);
+   wxSizer *CreateControls(wxWindow *parent) override;
 
    virtual ~wxRcptExtraControl();
 
 protected:
-   virtual wxAddressTextCtrl *CreateText(wxWindow *parent);
+   wxAddressTextCtrl *CreateText(wxWindow *parent) override;
 
 private:
    wxRcptRemoveButton *m_btnRemove;
@@ -713,7 +713,7 @@ public:
    }
 
    // we don't want to get in the way when tabbing through header fields
-   virtual bool AcceptsFocusFromKeyboard() const { return false; }
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 };
 
 // ----------------------------------------------------------------------------
@@ -741,7 +741,7 @@ public:
                wxCommandEventHandler(ToggleIconButton::OnClick));
    }
 
-   void Update()
+   void Update() override
    {
       UpdateWithoutRefresh();
       Refresh();
@@ -806,8 +806,8 @@ public:
    }
 
 private:
-   virtual void DoHandleClick() { m_composer->ConfigureInReplyTo(); }
-   virtual bool DoGetValue() const { return m_composer->IsInReplyTo(); }
+   void DoHandleClick() override { m_composer->ConfigureInReplyTo(); }
+   bool DoGetValue() const override { return m_composer->IsInReplyTo(); }
 
    DECLARE_NO_COPY_CLASS(IsReplyButton)
 };
@@ -832,8 +832,8 @@ public:
    }
 
 private:
-   virtual void DoHandleClick() { m_composer->TogglePGPSigning(); }
-   virtual bool DoGetValue() const { return m_composer->IsPGPSigningEnabled(); }
+   void DoHandleClick() override { m_composer->TogglePGPSigning(); }
+   bool DoGetValue() const override { return m_composer->IsPGPSigningEnabled(); }
 
    DECLARE_NO_COPY_CLASS(PGPSignButton)
 };
@@ -2356,7 +2356,7 @@ public:
     m_dataObjectLast = NULL;
   }
 
-  bool SetData(const wxDataFormat& format, size_t len, const void *buf)
+  bool SetData(const wxDataFormat& format, size_t len, const void *buf) override
   {
     m_dataObjectLast = GetObject(format);
     wxCHECK_MSG( m_dataObjectLast, FALSE, wxT("unsupported format in wxDataObjectCompositeEx"));
@@ -2391,7 +2391,7 @@ public:
     SetDataObject(dataObjectComposite);
   }
 
-  virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) {
+  wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) override {
     if ( !GetData() )
     {
       wxLogDebug(_T("Failed to get drag and drop data"));

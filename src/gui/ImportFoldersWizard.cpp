@@ -82,7 +82,7 @@ public:
 private:
    Params m_params;
 
-   virtual wxWizardPage *DoCreatePage(MWizardPageId id);
+   wxWizardPage *DoCreatePage(MWizardPageId id) override;
 
    DECLARE_NO_COPY_CLASS(ImportFoldersWizard)
 };
@@ -96,8 +96,8 @@ class MWizard_ImportFolders_ChoicePage : public MWizardPage
 public:
    MWizard_ImportFolders_ChoicePage(MWizard *wizard);
 
-   virtual MWizardPageId GetPreviousPageId() const { return MWizard_PageNone; }
-   virtual MWizardPageId GetNextPageId() const;
+   MWizardPageId GetPreviousPageId() const override { return MWizard_PageNone; }
+   MWizardPageId GetNextPageId() const override;
 
    void OnCheckBox(wxCommandEvent& event);
 
@@ -185,12 +185,12 @@ class MWizard_ImportFolders_MHPage : public MWizardPage
 public:
    MWizard_ImportFolders_MHPage(MWizard *wizard);
 
-   virtual MWizardPageId GetPreviousPageId() const
+   MWizardPageId GetPreviousPageId() const override
       { return MWizard_ImportFolders_Choice; }
-   virtual MWizardPageId GetNextPageId() const
+   MWizardPageId GetNextPageId() const override
       { return MWizard_PageNone; }
 
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 private:
    wxTextCtrl *m_textTop;

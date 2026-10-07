@@ -74,8 +74,8 @@ public:
               bool noUpdate = false);
 
    /// override base class virtual to also refresh the scrollbar position
-   virtual void Refresh(bool eraseBackground = TRUE,
-                        const wxRect *rect = (const wxRect *)NULL);
+   void Refresh(bool eraseBackground = TRUE,
+                const wxRect *rect = (const wxRect *)NULL) override;
 
    /** Sets a background image, only used on screen, not on printouts.
        @param bitmap a pointer to a wxBitmap or NULL to remove it

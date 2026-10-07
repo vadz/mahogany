@@ -125,7 +125,7 @@ public:
    void InsertTextInto(Composer& cv) const;
 
    // implement base class pure virtual function
-   virtual bool Output(const String& text);
+   bool Output(const String& text) override;
 
    // TODO the functions below should be in the base class (as pure virtuals)
    //      somehow, not here
@@ -296,10 +296,10 @@ public:
    }
 
    // implement base class pure virtual function
-   virtual bool Expand(const String& category,
-                       const String& name,
-                       const wxArrayString& arguments,
-                       String *value) const;
+   bool Expand(const String& category,
+               const String& name,
+               const wxArrayString& arguments,
+               String *value) const override;
 
 protected:
    // read the file into the string, return TRUE on success

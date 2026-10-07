@@ -344,7 +344,7 @@ public:
    //@}
 
    /// called when the events we're interested in are generated
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    /// CreateInternalMessage option changed
    void OnChangeCreateInternalMessage(MEventData& event);

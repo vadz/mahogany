@@ -299,7 +299,7 @@ public:
          m_mimepart = part;
       }
 
-   virtual wxString GetParamValue(const wxString& name) const;
+   wxString GetParamValue(const wxString& name) const override;
 
 private:
    const MimePart *m_mimepart;
@@ -309,7 +309,7 @@ private:
 class MIMEFSHandler : public wxMemoryFSHandler
 {
 public:
-   virtual bool CanOpen(const wxString& location)
+   bool CanOpen(const wxString& location) override
    {
       return GetProtocol(location) == "cid";
    }
@@ -329,9 +329,9 @@ public:
       m_isInBody = false;
    }
 
-   virtual void ProcessURL(const String& text,
-                           const String& url,
-                           MessageViewer *viewer)
+   void ProcessURL(const String& text,
+                   const String& url,
+                   MessageViewer *viewer) override
    {
       if ( m_isInBody )
          m_msgView->OnBodyText(text);
@@ -339,20 +339,20 @@ public:
       viewer->InsertURL(text, url);
    }
 
-   virtual void StartText()
+   void StartText() override
    {
       m_isInBody = true;
    }
 
-   virtual void EndText()
+   void EndText() override
    {
       m_isInBody = false;
    }
 
 protected:
-   virtual void DoProcess(String& text,
-                          MessageViewer *viewer,
-                          MTextStyle& style)
+   void DoProcess(String& text,
+                  MessageViewer *viewer,
+                  MTextStyle& style) override
    {
       if ( m_isInBody )
          m_msgView->OnBodyText(text);

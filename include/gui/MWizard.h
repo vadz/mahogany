@@ -117,8 +117,8 @@ public:
 
     /* These are two wxWindows wxWizard functions that we must override
     */
-   virtual wxWizardPage *GetPrev() const { return GetPageById(GetPreviousPageId()); }
-   virtual wxWizardPage *GetNext() const { return GetPageById(GetNextPageId()); }
+   wxWizardPage *GetPrev() const override { return GetPageById(GetPreviousPageId()); }
+   wxWizardPage *GetNext() const override { return GetPageById(GetNextPageId()); }
 
    /// Override these two in derived classes if needed:
    virtual MWizardPageId GetNextPageId() const

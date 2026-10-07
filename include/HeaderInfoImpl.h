@@ -50,38 +50,38 @@ WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
 class HeaderInfoListImpl : public HeaderInfoList
 {
 public:
-   virtual MsgnoType Count(void) const;
+   MsgnoType Count(void) const override;
 
-   virtual HeaderInfo *GetItemByIndex(MsgnoType n) const;
-   virtual MsgnoType GetIdxFromUId(UIdType uid) const;
+   HeaderInfo *GetItemByIndex(MsgnoType n) const override;
+   MsgnoType GetIdxFromUId(UIdType uid) const override;
 
-   virtual MsgnoType GetIdxFromPos(MsgnoType pos) const;
-   virtual MsgnoType GetPosFromIdx(MsgnoType n) const;
-   virtual MsgnoType GetOldPosFromIdx(MsgnoType n) const;
+   MsgnoType GetIdxFromPos(MsgnoType pos) const override;
+   MsgnoType GetPosFromIdx(MsgnoType n) const override;
+   MsgnoType GetOldPosFromIdx(MsgnoType n) const override;
 
-   virtual void OnRemove(MsgnoType n);
-   virtual void OnAdd(MsgnoType countNew);
-   virtual void OnClose();
+   void OnRemove(MsgnoType n) override;
+   void OnAdd(MsgnoType countNew) override;
+   void OnClose() override;
 
-   virtual size_t GetIndentation(MsgnoType n) const;
+   size_t GetIndentation(MsgnoType n) const override;
 
-   virtual MsgnoType FindHeaderByFlag(MailFolder::MessageStatus flag,
-                                      bool set, long posFrom);
-   virtual MsgnoType FindHeaderByFlagWrap(MailFolder::MessageStatus  flag,
-                                          bool set, long posFrom);
-   virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
-                                           bool set);
+   MsgnoType FindHeaderByFlag(MailFolder::MessageStatus flag,
+                              bool set, long posFrom) override;
+   MsgnoType FindHeaderByFlagWrap(MailFolder::MessageStatus  flag,
+                                  bool set, long posFrom) override;
+   MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
+                                   bool set) override;
 
-   virtual bool SetSortOrder(const SortParams& sortParams);
-   virtual bool SetThreadParameters(const ThreadParams& thrParams);
+   bool SetSortOrder(const SortParams& sortParams) override;
+   bool SetThreadParameters(const ThreadParams& thrParams) override;
 
-   virtual LastMod GetLastMod() const;
-   virtual bool HasChanged(const LastMod since) const;
+   LastMod GetLastMod() const override;
+   bool HasChanged(const LastMod since) const override;
 
-   virtual void CachePositions(const Sequence& seq);
-   virtual void CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo);
-   virtual bool IsInCache(MsgnoType pos) const;
-   virtual bool ReallyGet(MsgnoType pos);
+   void CachePositions(const Sequence& seq) override;
+   void CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo) override;
+   bool IsInCache(MsgnoType pos) const override;
+   bool ReallyGet(MsgnoType pos) override;
 
    virtual ~HeaderInfoListImpl();
 

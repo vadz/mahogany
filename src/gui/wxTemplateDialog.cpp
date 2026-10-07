@@ -117,7 +117,7 @@ public:
    bool WasChanged() const { return m_wasChanged; }
 
    // called by wxWindows when [Ok] button was pressed
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
    // callbacks
    void OnListboxSelection(wxCommandEvent& event);
@@ -152,8 +152,8 @@ public:
    // get the last template kind the user chose
    MessageTemplateKind GetTemplateKind() const { return m_kind; }
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // callbacks
    void OnListboxSelection(wxCommandEvent& event);
@@ -214,7 +214,7 @@ protected:
       FindWindow(wxID_OK)->Enable(m_listbox->GetSelection() != -1);
    }
 
-   virtual wxString GetTemplateTitle(MessageTemplateKind kind) const;
+   wxString GetTemplateTitle(MessageTemplateKind kind) const override;
 
 private:
    DECLARE_EVENT_TABLE()
@@ -227,7 +227,7 @@ class wxAllTemplatesDialog : public wxTemplatesDialogBase
 public:
    wxAllTemplatesDialog(const TemplatePopupMenuItem& menu, wxWindow *parent);
 
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 protected:
    // event handlers
@@ -245,7 +245,7 @@ protected:
 
    static MessageTemplateKind GetKindLastEdited();
 
-   virtual wxString GetTemplateTitle(MessageTemplateKind kind) const;
+   wxString GetTemplateTitle(MessageTemplateKind kind) const override;
 
 private:
    DECLARE_EVENT_TABLE()

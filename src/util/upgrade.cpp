@@ -363,9 +363,9 @@ public:
    static bool ShouldShowImportPage();
 
    // implement the wxWizardPage pure virtuals in terms of our ones
-   virtual wxWizardPage *GetPrev() const
+   wxWizardPage *GetPrev() const override
       { return GetPageById(GetPrevPageId()); }
-   virtual wxWizardPage *GetNext() const
+   wxWizardPage *GetNext() const override
       { return GetPageById(GetNextPageId()); }
 
    void OnWizardCancel(wxWizardEvent& event);
@@ -392,7 +392,7 @@ public:
    InstallWizardWelcomePage(wxWizard *wizard);
 
    // the next page depends on whether the user want or not to use the wizard
-   virtual InstallWizardPageId GetNextPageId() const;
+   InstallWizardPageId GetNextPageId() const override;
 
    // process check box click
    void OnUseWizardCheckBox(wxCommandEvent& event);
@@ -411,8 +411,8 @@ class InstallWizardIdentityPage : public InstallWizardPage
 public:
    InstallWizardIdentityPage(wxWizard *wizard);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    wxTextCtrl *m_name,
@@ -428,8 +428,8 @@ class InstallWizardServersPage : public InstallWizardPage
 public:
    InstallWizardServersPage(wxWizard *wizard);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    void AddDomain(wxString& server, const wxString& domain);
@@ -477,7 +477,7 @@ class InstallWizardOperationsPage : public InstallWizardPage
 public:
    InstallWizardOperationsPage(wxWizard *wizard);
 
-   virtual bool TransferDataToWindow()
+   bool TransferDataToWindow() override
       {
 #ifdef USE_DIALUP
          // no setting yet?
@@ -521,7 +521,7 @@ public:
          return true;
       }
 
-   virtual bool TransferDataFromWindow()
+   bool TransferDataFromWindow() override
       {
          gs_installWizardData.folderType  = m_FolderTypeChoice->GetSelection();
 #ifdef USE_PYTHON
@@ -598,8 +598,8 @@ class InstallWizardFinalPage : public InstallWizardPage
 public:
    InstallWizardFinalPage(wxWizard *wizard);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    wxCheckBox *m_checkboxSendTestMsg;
@@ -2167,7 +2167,7 @@ public:
    UpgradeFolderFrom020Traversal(MFolder* folder) : MFolderTraversal(*folder)
       { }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          Profile_obj profile(folderName);
 
@@ -2231,7 +2231,7 @@ public:
 
    bool IsOk() const { return m_ok; }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
    {
       Profile_obj profile(folderName);
       String group = M_TEMPLATE_SECTION;
@@ -2604,7 +2604,7 @@ public:
    UpgradeFolderFrom064Traversal(MFolder* folder) : MFolderTraversal(*folder)
       { }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          MFolder_obj folder(folderName);
          CHECK( folder, false, _T("traversed folder which doesn't exist?") );
@@ -2638,7 +2638,7 @@ public:
    UpgradeFolderFrom0641Traversal(MFolder* folder) : MFolderTraversal(*folder)
       { }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          MFolder_obj folder(folderName);
          CHECK( folder, false, _T("traversed folder which doesn't exist?") );
@@ -2966,7 +2966,7 @@ public:
       { }
 
    String GetNewMailFolder(void) const { return m_NewMailFolder; }
-   bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          MFolder *f = MFolder::Get(folderName);
          if(f && (f->GetFlags() & MF_FLAGS_NEWMAILFOLDER))

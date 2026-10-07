@@ -141,9 +141,9 @@ public:
 
    virtual ~wxImportDialogLog() { delete wxLog::SetActiveTarget(m_logOld); }
 
-   virtual void DoLogRecord(wxLogLevel WXUNUSED(level),
-                            const wxString& szString,
-                            const wxLogRecordInfo& info)
+   void DoLogRecord(wxLogLevel WXUNUSED(level),
+                    const wxString& szString,
+                    const wxLogRecordInfo& info) override
    {
       const wxLongLong t = info.timestampMS;
       m_dialog->GetLogListBox()->Append(

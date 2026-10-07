@@ -54,8 +54,8 @@ public:
                       AttachmentProperties *properties,
                       bool *allowDisable);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    bool HasChanges() const { return m_isDirty; }
 

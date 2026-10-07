@@ -284,10 +284,10 @@ public:
       m_dateGMT = dateGMT;
    }
 
-   virtual bool Expand(const String& category,
-                       const String& Name,
-                       const wxArrayString& /* arguments */,
-                       String *value) const
+   bool Expand(const String& category,
+               const String& Name,
+               const wxArrayString& /* arguments */,
+               String *value) const override
    {
       if ( !m_hi )
          return false;
@@ -352,7 +352,7 @@ public:
    void UpdateOptions();
 
    // don't get the focus from keyboard, we don't normally need it
-   virtual bool AcceptsFocusFromKeyboard() const { return false; }
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 
 protected:
    // the event handlers
@@ -656,9 +656,9 @@ protected:
    wxColour GetEntryColour(const HeaderInfo *hi) const;
 
    /// return information about the list ctrl items on demand
-   virtual wxString OnGetItemText(long item, long column) const;
-   virtual int OnGetItemImage(long item) const;
-   virtual wxListItemAttr *OnGetItemAttr(long item) const;
+   wxString OnGetItemText(long item, long column) const override;
+   int OnGetItemImage(long item) const override;
+   wxListItemAttr *OnGetItemAttr(long item) const override;
 
    /// read the column width string from profile or default one
    wxString GetColWidths() const;
@@ -828,13 +828,13 @@ public:
       m_folderView = view;
    }
 
-   virtual MFolder *GetFolder(wxCoord /* x */, wxCoord /* y */) const
+   MFolder *GetFolder(wxCoord /* x */, wxCoord /* y */) const override
    {
       // we don't even use the position of the drop
       return MFolder::Get(m_folderView->GetFullName());
    }
 
-   virtual void Refresh()
+   void Refresh() override
    {
       m_folderView->Update();
    }

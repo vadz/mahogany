@@ -99,7 +99,7 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 
 // this macro must be used inside the declaration of the importer class
 #define DECLARE_M_IMPORTER()                                                   \
-   virtual const char *GetProgName() const;                                    \
+   const char *GetProgName() const override;                                   \
    MMODULE_DEFINE();                                                           \
    DEFAULT_ENTRY_FUNC                                                          \
 

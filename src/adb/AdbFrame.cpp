@@ -428,8 +428,8 @@ public:
   AdbManager *GetAdbManager() const { return m_pManager; }
 
   // overriden base class virtuals
-  virtual AdbTreeElement *FindChild(const wxChar *szName);
-  virtual bool LoadChildren();
+  AdbTreeElement *FindChild(const wxChar *szName) override;
+  bool LoadChildren() override;
 
 private:
   wxArrayString& m_astrAdb;       // names of ADBs to load
@@ -604,8 +604,8 @@ public:
   wxADBFindDialog(wxWindow *parent, wxPTextEntry *text, int *where, int *how);
 
   // base class virtuals implemented
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
+  bool TransferDataToWindow() override;
+  bool TransferDataFromWindow() override;
 
 private:
   // data
@@ -637,8 +637,8 @@ public:
   bool CreateGroup() const { return m_bGroup; }
 
   // base class virtuals implemented
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
+  bool TransferDataToWindow() override;
+  bool TransferDataFromWindow() override;
 
 private:
   wxString m_strName;
@@ -656,8 +656,8 @@ class wxADBPropertiesDialog : public wxDialog
 public:
   wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book);
 
-  virtual bool TransferDataToWindow();
-  virtual bool TransferDataFromWindow();
+  bool TransferDataToWindow() override;
+  bool TransferDataFromWindow() override;
 
 private:
   AdbTreeBook *m_book;
@@ -688,7 +688,7 @@ public:
   static bool IsEditorShown() { return ms_nAdbFrames > 0; }
 
   // callbacks
-  bool OnMEvent(MEventData& event);
+  bool OnMEvent(MEventData& event) override;
 
   void OnMenuCommand(wxCommandEvent&);
 
@@ -775,8 +775,8 @@ public:
 
 private:
   // implement base class pure virtual methods
-  virtual void DoCreateToolBar() { CreateMToolbar(this, WXFRAME_ADB); }
-  virtual void DoCreateStatusBar() { CreateStatusBar(2); }
+  void DoCreateToolBar() override { CreateMToolbar(this, WXFRAME_ADB); }
+  void DoCreateStatusBar() override { CreateStatusBar(2); }
 
   // associate an ADB entry with the notebook panels
   void UpdateNotebook();
@@ -1019,8 +1019,8 @@ public:
     : wxAdbPage(notebook, _("Email"), wxAdbNotebook::EMail,
                 AdbField_EMailPageFirst, AdbField_EMailPageLast) { }
 
-  virtual void SetData(const AdbEntry& data);
-  virtual void SaveChanges(AdbEntry& data);
+  void SetData(const AdbEntry& data) override;
+  void SaveChanges(AdbEntry& data) override;
 
   // callbacks
   void OnCheckBox(wxCommandEvent&);

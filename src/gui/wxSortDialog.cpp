@@ -79,8 +79,8 @@ class wxMessageSortingDialog : public wxOptionsPageSubdialog
 public:
    wxMessageSortingDialog(Profile *profile, wxWindow *parent);
 
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    bool WasChanged(void) const { return m_wasChanged; }
 

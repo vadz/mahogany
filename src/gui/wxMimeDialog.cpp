@@ -52,8 +52,8 @@ public:
                         const String& mimetype,
                         bool *openAsMsg);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    const wxString& GetCommand() const { return m_command; }
 

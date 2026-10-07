@@ -532,10 +532,10 @@ public:
             m_module->DecRef();                                            \
       }                                                                    \
                                                                            \
-      virtual const char *GetType() const { return type; }                 \
+      const char *GetType() const override { return type; }                \
                                                                            \
-      virtual ConfigSource *Create(const ConfigSource& config,             \
-                                   const String& name)                     \
+      ConfigSource *Create(const ConfigSource& config,                     \
+                           const String& name) override                    \
       {                                                                    \
          return new cname(config, name);                                   \
       }                                                                    \
@@ -547,7 +547,7 @@ public:
    class cname##FactoryModule : public ConfigSourceFactoryModule           \
    {                                                                       \
    public:                                                                 \
-      virtual ConfigSourceFactory *CreateFactory()                         \
+      ConfigSourceFactory *CreateFactory() override                        \
       {                                                                    \
          return new cname##Factory(this);                                  \
       }                                                                    \

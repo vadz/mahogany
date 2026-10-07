@@ -217,10 +217,10 @@ public:
    class cname##Factory : public ViewFilterFactory                         \
    {                                                                       \
    public:                                                                 \
-      virtual int GetPriority() const { return prio; }                     \
-      virtual bool GetDefaultState() const { return state; }               \
-      virtual ViewFilter *Create(MessageView *msgView,                     \
-                                 ViewFilter *next) const                   \
+      int GetPriority() const override { return prio; }                    \
+      bool GetDefaultState() const override { return state; }              \
+      ViewFilter *Create(MessageView *msgView,                             \
+                         ViewFilter *next) const override                  \
          { return new cname(msgView, next, state); }                       \
                                                                            \
       MMODULE_DEFINE();                                                    \

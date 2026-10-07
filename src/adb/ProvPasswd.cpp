@@ -69,23 +69,23 @@ public:
    // implement interface methods
 
    // AdbEntry
-   virtual AdbEntryGroup *GetGroup() const { return m_pGroup; }
+   AdbEntryGroup *GetGroup() const override { return m_pGroup; }
 
-   virtual void GetFieldInternal(size_t n, String *pstr) const
+   void GetFieldInternal(size_t n, String *pstr) const override
       { GetField(n, pstr); }
-   virtual void GetField(size_t n, String *pstr) const;
+   void GetField(size_t n, String *pstr) const override;
 
-   virtual size_t GetEMailCount() const { return 1; }
-   virtual void GetEMail(size_t n, String *pstr) const;
+   size_t GetEMailCount() const override { return 1; }
+   void GetEMail(size_t n, String *pstr) const override;
 
-   virtual void ClearDirty() { }
-   virtual bool IsDirty() const { return false; }
+   void ClearDirty() override { }
+   bool IsDirty() const override { return false; }
 
-   virtual void SetField(size_t n, const String& strValue) { }
-   virtual void AddEMail(const String& strEMail) { }
-   virtual void ClearExtraEMails() { }
+   void SetField(size_t n, const String& strValue) override { }
+   void AddEMail(const String& strEMail) override { }
+   void ClearExtraEMails() override { }
 
-   virtual int Matches(const wxChar *str, int where, int how) const;
+   int Matches(const wxChar *str, int where, int how) const override;
 
 private:
    // user (==login) name and real name
@@ -106,24 +106,24 @@ public:
    // implement interface methods
 
    // AdbEntryGroup
-   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
-   virtual String GetName() const { return _("Local Users"); }
+   AdbEntryGroup *GetGroup() const override { return m_pParent; }
+   String GetName() const override { return _("Local Users"); }
 
-   virtual size_t GetEntryNames(wxArrayString& aNames) const;
-   virtual size_t GetGroupNames(wxArrayString& aNames) const;
+   size_t GetEntryNames(wxArrayString& aNames) const override;
+   size_t GetGroupNames(wxArrayString& aNames) const override;
 
-   virtual AdbEntry *GetEntry(const String& name);
-   virtual AdbEntryGroup *GetGroup(const String& name) const;
+   AdbEntry *GetEntry(const String& name) override;
+   AdbEntryGroup *GetGroup(const String& name) const override;
 
-   virtual bool Exists(const String& path);
+   bool Exists(const String& path) override;
 
-   virtual AdbEntry *CreateEntry(const String& strName);
-   virtual AdbEntryGroup *CreateGroup(const String& strName);
+   AdbEntry *CreateEntry(const String& strName) override;
+   AdbEntryGroup *CreateGroup(const String& strName) override;
 
-   virtual void DeleteEntry(const String& strName);
-   virtual void DeleteGroup(const String& strName);
+   void DeleteEntry(const String& strName) override;
+   void DeleteGroup(const String& strName) override;
 
-   virtual AdbEntry *FindEntry(const wxChar *szName);
+   AdbEntry *FindEntry(const wxChar *szName) override;
 
 private:
    // read /etc/passwd
@@ -150,51 +150,51 @@ public:
    // ---------------------------
 
    // AdbElement
-   virtual AdbEntryGroup *GetGroup() const { return NULL; }
+   AdbEntryGroup *GetGroup() const override { return NULL; }
 
    // AdbEntryGroup
-   virtual AdbEntry *GetEntry(const String& name)
+   AdbEntry *GetEntry(const String& name) override
       { return m_pRootGroup->GetEntry(name); }
 
-   virtual bool Exists(const String& path)
+   bool Exists(const String& path) override
       { return m_pRootGroup->Exists(path); }
 
-   virtual size_t GetEntryNames(wxArrayString& aNames) const
+   size_t GetEntryNames(wxArrayString& aNames) const override
       { return m_pRootGroup->GetEntryNames(aNames); }
-   virtual size_t GetGroupNames(wxArrayString& aNames) const
+   size_t GetGroupNames(wxArrayString& aNames) const override
       { return m_pRootGroup->GetGroupNames(aNames); }
 
-   virtual AdbEntryGroup *GetGroup(const String& name) const
+   AdbEntryGroup *GetGroup(const String& name) const override
       { return m_pRootGroup->GetGroup(name); }
 
-   virtual AdbEntry *CreateEntry(const String& strName)
+   AdbEntry *CreateEntry(const String& strName) override
       { return m_pRootGroup->CreateEntry(strName); }
-   virtual AdbEntryGroup *CreateGroup(const String& strName)
+   AdbEntryGroup *CreateGroup(const String& strName) override
       { return m_pRootGroup->CreateGroup(strName); }
 
-   virtual void DeleteEntry(const String& strName)
+   void DeleteEntry(const String& strName) override
       { m_pRootGroup->DeleteEntry(strName); }
-   virtual void DeleteGroup(const String& strName)
+   void DeleteGroup(const String& strName) override
       { m_pRootGroup->DeleteGroup(strName); }
 
-   virtual AdbEntry *FindEntry(const wxChar *szName)
+   AdbEntry *FindEntry(const wxChar *szName) override
       { return m_pRootGroup->FindEntry(szName); }
 
    // AdbBook
-   virtual bool IsSameAs(const String& name) const;
+   bool IsSameAs(const String& name) const override;
 
-   virtual String GetFileName() const;
+   String GetFileName() const override;
 
-   virtual void SetName(const String& name);
-   virtual String GetName() const;
+   void SetName(const String& name) override;
+   String GetName() const override;
 
-   virtual void SetDescription(const String& desc);
-   virtual String GetDescription() const;
+   void SetDescription(const String& desc) override;
+   String GetDescription() const override;
 
-   virtual size_t GetNumberOfEntries() const;
+   size_t GetNumberOfEntries() const override;
 
-   virtual bool IsLocal() const { return true; }
-   virtual bool IsReadOnly() const { return true; }
+   bool IsLocal() const override { return true; }
+   bool IsReadOnly() const override { return true; }
 
 private:
    virtual ~PasswdBook();
@@ -210,13 +210,13 @@ class PasswdDataProvider : public AdbDataProvider
 {
 public:
    // implement interface methods
-   virtual AdbBook *CreateBook(const String& name);
-   virtual bool EnumBooks(wxArrayString& aNames);
-   virtual bool DeleteBook(AdbBook *book);
-   virtual bool TestBookAccess(const String& name, AdbTests test);
+   AdbBook *CreateBook(const String& name) override;
+   bool EnumBooks(wxArrayString& aNames) override;
+   bool DeleteBook(AdbBook *book) override;
+   bool TestBookAccess(const String& name, AdbTests test) override;
 
-   virtual bool HasField(AdbField field) const;
-   virtual bool HasMultipleEMails() const { return false; }
+   bool HasField(AdbField field) const override;
+   bool HasMultipleEMails() const override { return false; }
 
    DECLARE_ADB_PROVIDER(PasswdDataProvider);
 };

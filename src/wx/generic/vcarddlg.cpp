@@ -131,8 +131,8 @@ class wxVCardDialog : public wxDialog
 public:
     wxVCardDialog(wxVCard *vcard);
 
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
 
 protected:
     // event handlers
@@ -193,8 +193,8 @@ class wxVCardAddressDialog : public wxDialog
 public:
     wxVCardAddressDialog(wxWindow *parent, const wxVCardAddressData& data);
 
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
 
     const wxVCardAddressData& GetData() const { return m_data; }
 

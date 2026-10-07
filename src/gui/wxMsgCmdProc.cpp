@@ -98,25 +98,25 @@ public:
    /**
      Set the folder to use - this should be called before ProcessCommand()
     */
-   virtual void SetFolder(ASMailFolder *asmf);
+   void SetFolder(ASMailFolder *asmf) override;
 
    /**
      Set the frame to use for status messages and (as parent for) dialogs
     */
-   virtual void SetFrame(wxFrame *frame) { m_frame = frame; }
+   void SetFrame(wxFrame *frame) override { m_frame = frame; }
 
-   virtual void SetWindowForDnD(wxWindow *win) { m_winForDnd = win; }
+   void SetWindowForDnD(wxWindow *win) override { m_winForDnd = win; }
 
    /**
      Process the given WXMENU_MSG_XXX command for all message
 
      @return true if the command was processed
     */
-   virtual bool ProcessCommand(int id,
-                               const UIdArray& messages,
-                               MFolder *folder);
+   bool ProcessCommand(int id,
+                       const UIdArray& messages,
+                       MFolder *folder) override;
 
-   virtual String GetFolderName() const
+   String GetFolderName() const override
    {
       String name;
       if ( m_asmf )
@@ -133,7 +133,7 @@ public:
    //@{
 
    /// needed for async event processing
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    /// add an async status object to m_arrayAsyncStatus
    void AddAsyncStatus(AsyncStatusHandler *asyncStatus);

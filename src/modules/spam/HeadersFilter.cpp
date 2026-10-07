@@ -209,29 +209,29 @@ public:
    HeadersFilter() { }
 
 protected:
-   virtual bool DoReclassify(const Profile * /* profile */,
-                             const Message& /* msg */,
-                             bool /* isSpam */)
+   bool DoReclassify(const Profile * /* profile */,
+                     const Message& /* msg */,
+                     bool /* isSpam */) override
    {
       // this filter can't be trained but it never really fails, it just
       // doesn't make sense
       return true;
    }
 
-   virtual void DoTrain(const Profile * /* profile */,
-                        const Message& /* msg */,
-                        bool /* isSpam */)
+   void DoTrain(const Profile * /* profile */,
+                const Message& /* msg */,
+                bool /* isSpam */) override
    {
       // this filter can't be trained
    }
 
-   virtual int DoCheckIfSpam(const Profile *profile,
-                             const Message& msg,
-                             const String& param,
-                             String *result);
-   virtual const char *GetOptionPageIconName() const { return "spam"; }
-   virtual SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
-                                             Profile *profile) const;
+   int DoCheckIfSpam(const Profile *profile,
+                     const Message& msg,
+                     const String& param,
+                     String *result) override;
+   const char *GetOptionPageIconName() const override { return "spam"; }
+   SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
+                                     Profile *profile) const override;
 
 
    DECLARE_SPAM_FILTER("headers", _("Heuristic headers test"), 30);
@@ -347,12 +347,12 @@ class SpamOptionExeAttach : public SpamOption
 public:
    SpamOptionExeAttach() : SpamOption(Spam_Test_ExeAttachment) { }
 
-   virtual size_t GetEntriesCount() const
+   size_t GetEntriesCount() const override
    {
       return SpamOption::GetEntriesCount() + 1;
    }
 
-   virtual size_t BuildFieldInfo(ArrayFieldInfo& fields, size_t n) const
+   size_t BuildFieldInfo(ArrayFieldInfo& fields, size_t n) const override
    {
       size_t count = SpamOption::BuildFieldInfo(fields, n);
       wxOptionsPage::FieldInfo& info = fields[n + count];

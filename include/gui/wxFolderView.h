@@ -67,20 +67,20 @@ public:
    /// Destructor
    virtual ~wxFolderView();
 
-   virtual bool GoToMessage(MsgnoType msgno);
+   bool GoToMessage(MsgnoType msgno) override;
 
-   virtual bool MoveToNextUnread(bool takeNextIfNoUnread = true);
+   bool MoveToNextUnread(bool takeNextIfNoUnread = true) override;
 
    /** Set the associated folder.
        @param folder the folder to display or NULL
    */
-   virtual void SetFolder(MailFolder *mf);
+   void SetFolder(MailFolder *mf) override;
 
    /** Open the specified folder
        @param folder the folder to open
        @return true if opened ok, false otherwise
     */
-   virtual bool OpenFolder(MFolder *folder, bool readonly = false);
+   bool OpenFolder(MFolder *folder, bool readonly = false) override;
 
    /** Open some messages.
        @param messages array holding the message numbers
@@ -138,7 +138,7 @@ public:
    void CreateViewMenu();
 
    /// event processing
-   virtual bool OnMEvent(MEventData& event)
+   bool OnMEvent(MEventData& event) override
    {
       if ( event.GetId() == MEventId_OptionsChange )
       {
@@ -151,20 +151,20 @@ public:
    }
 
    /// process folder delete event
-   virtual void OnFolderDeleteEvent(const String& folderName);
+   void OnFolderDeleteEvent(const String& folderName) override;
    /// update the folderview
-   virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
+   void OnFolderUpdateEvent(MEventFolderUpdateData &event) override;
    /// update the folderview
-   virtual void OnFolderExpungeEvent(MEventFolderExpungeData &event);
+   void OnFolderExpungeEvent(MEventFolderExpungeData &event) override;
    /// close the folder
-   virtual void OnFolderClosedEvent(MEventFolderClosedData &event);
+   void OnFolderClosedEvent(MEventFolderClosedData &event) override;
    /// update the folderview
-   virtual void OnMsgStatusEvent(MEventMsgStatusData &event);
+   void OnMsgStatusEvent(MEventMsgStatusData &event) override;
    /// the derived class should react to the result to an asynch operation
-   virtual void OnASFolderResultEvent(MEventASFolderResultData &event);
+   void OnASFolderResultEvent(MEventASFolderResultData &event) override;
 
    /// called when our message viewer changes
-   virtual void OnMsgViewerChange(wxWindow *viewerNew);
+   void OnMsgViewerChange(wxWindow *viewerNew) override;
 
    /// return profile name for persistent controls
    const wxString& GetFullName(void) const { return m_fullname; }
@@ -434,7 +434,7 @@ public:
 
       @return profile pointer, the caller must DecRef() it
    */
-   virtual Profile *GetFolderProfile(void) const;
+   Profile *GetFolderProfile(void) const override;
 
 protected:
    // event processing
@@ -443,8 +443,8 @@ protected:
 
 private:
    // implement base class pure virtual methods
-   virtual void DoCreateToolBar();
-   virtual void DoCreateStatusBar();
+   void DoCreateToolBar() override;
+   void DoCreateStatusBar() override;
 
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
 

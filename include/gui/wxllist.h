@@ -261,43 +261,43 @@ class wxLayoutObjectText : public wxLayoutObject
 public:
    wxLayoutObjectText(const wxString &txt = wxEmptyString);
 
-   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
-   virtual void Layout(wxDC &dc, wxLayoutList *llist);
-   virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     wxLayoutList *wxllist,
-                     CoordType begin = -1,
-                     CoordType end = -1);
+   wxLayoutObjectType GetType(void) const override { return WXLO_TYPE_TEXT; }
+   void Layout(wxDC &dc, wxLayoutList *llist) override;
+   void Draw(wxDC &dc, wxPoint const &coords,
+             wxLayoutList *wxllist,
+             CoordType begin = -1,
+             CoordType end = -1) override;
    /** Calculates and returns the size of the object.
        @param top where to store height above baseline
        @param bottom where to store height below baseline
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetSize(CoordType * top, CoordType *bottom) const;
+   wxPoint GetSize(CoordType * top, CoordType *bottom) const override;
    /// Return just the width of the object on the screen.
-   virtual CoordType GetWidth(void) const { return m_Width; }
+   CoordType GetWidth(void) const override { return m_Width; }
    /** Returns the cursor offset relating to the screen x position
        relative to begin of object.
        @param dc the wxDC to use for calculations
        @param xpos relative x position from head of object
        @return cursor coordinate offset
    */
-   virtual CoordType GetOffsetScreen(wxDC &dc, CoordType xpos) const;
+   CoordType GetOffsetScreen(wxDC &dc, CoordType xpos) const override;
 
-   virtual void Write(wxString &ostr);
+   void Write(wxString &ostr) override;
    static wxLayoutObjectText *Read(wxString &istr);
 
 #ifdef WXLAYOUT_DEBUG
    virtual wxString DebugDump(void) const;
 #endif
 
-   virtual CoordType GetLength(void) const { return m_Text.length(); }
+   CoordType GetLength(void) const override { return m_Text.length(); }
 
    // for editing:
    wxString & GetText(void) { return m_Text; }
    void SetText(wxString const &text);
    /** Makes a copy of this object.
     */
-   virtual wxLayoutObject *Copy(void);
+   wxLayoutObject *Copy(void) override;
 private:
    wxString m_Text;
    /// size of the box containing text
@@ -323,27 +323,27 @@ public:
 
    ~wxLayoutObjectIcon() { if(m_Icon) delete m_Icon; }
 
-   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
-   virtual void Layout(wxDC &dc, wxLayoutList *llist);
-   virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     wxLayoutList *wxllist,
-                     CoordType begin = -1,
-                     CoordType end = -1);
+   wxLayoutObjectType GetType(void) const override { return WXLO_TYPE_ICON; }
+   void Layout(wxDC &dc, wxLayoutList *llist) override;
+   void Draw(wxDC &dc, wxPoint const &coords,
+             wxLayoutList *wxllist,
+             CoordType begin = -1,
+             CoordType end = -1) override;
 
    /** Calculates and returns the size of the object.
        @param top where to store height above baseline
        @param bottom where to store height below baseline
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetSize(CoordType * top, CoordType *bottom) const;
+   wxPoint GetSize(CoordType * top, CoordType *bottom) const override;
    /// Return just the width of the object on the screen.
-   virtual CoordType GetWidth(void) const { return m_Icon->GetWidth(); }
+   CoordType GetWidth(void) const override { return m_Icon->GetWidth(); }
    // return a pointer to the icon
    wxBitmap *GetIcon(void) const { return m_Icon; }
    /** Makes a copy of this object.
     */
-   virtual wxLayoutObject *Copy(void);
-   virtual void Write(wxString &ostr);
+   wxLayoutObject *Copy(void) override;
+   void Write(wxString &ostr) override;
    static wxLayoutObjectIcon *Read(wxString &istr);
 private:
    wxBitmap *m_Icon;
@@ -455,12 +455,12 @@ private:
 class wxLayoutObjectCmd : public wxLayoutObject
 {
 public:
-   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_CMD; }
-   virtual void Layout(wxDC &dc, wxLayoutList *llist);
-   virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     wxLayoutList *wxllist,
-                     CoordType begin = -1,
-                     CoordType end = -1);
+   wxLayoutObjectType GetType(void) const override { return WXLO_TYPE_CMD; }
+   void Layout(wxDC &dc, wxLayoutList *llist) override;
+   void Draw(wxDC &dc, wxPoint const &coords,
+             wxLayoutList *wxllist,
+             CoordType begin = -1,
+             CoordType end = -1) override;
    wxLayoutObjectCmd(const wxFont& font);
    wxLayoutObjectCmd(int family = -1,
                      int size = -1,
@@ -476,8 +476,8 @@ public:
    wxLayoutStyleInfo * GetStyle(void) const;
    /** Makes a copy of this object.
     */
-   virtual wxLayoutObject *Copy(void);
-   virtual void Write(wxString &ostr);
+   wxLayoutObject *Copy(void) override;
+   void Write(wxString &ostr) override;
    static wxLayoutObjectCmd *Read(wxString &istr);
 private:
    wxLayoutStyleInfo *m_StyleInfo;
@@ -1375,18 +1375,18 @@ public:
    virtual ~wxLayoutPrintout();
 
    /** Called to set things up */
-   bool OnBeginDocument(int startPage, int endPage);
+   bool OnBeginDocument(int startPage, int endPage) override;
 
    /** Function which prints the n-th page.
        @param page the page number to print
        @return bool true if we are not at end of document yet
    */
-   bool OnPrintPage(int page);
+   bool OnPrintPage(int page) override;
    /** Checks whether page exists in document.
        @param page number of page
        @return true if page exists
    */
-   bool HasPage(int page);
+   bool HasPage(int page) override;
 
    /** Gets called from wxWindows to find out which pages are existing.
        I'm not totally sure about the parameters though.
@@ -1396,7 +1396,7 @@ public:
        @param selPageTo the last page to be printed
    */
    void GetPageInfo(int *minPage, int *maxPage,
-                    int *selPageFrom, int *selPageTo);
+                    int *selPageFrom, int *selPageTo) override;
 protected:
    /** This little function scales the DC so that the printout has
        roughly the same size as the output on screen.

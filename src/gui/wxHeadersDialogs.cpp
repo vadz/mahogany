@@ -123,8 +123,8 @@ public:
    wxComposeHeadersDialog(Profile *profile, wxWindow *parent);
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // did we do anything?
    bool HasChanges() const { return m_hasChanges; }
@@ -170,12 +170,12 @@ public:
    virtual ~wxMsgViewHeadersDialog();
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    // validate the header names
-   virtual bool OnItemAdd(const wxString& item);
+   bool OnItemAdd(const wxString& item) override;
 
 private:
    Profile *m_profile;
@@ -203,8 +203,8 @@ public:
    }
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // accessors
    const wxString& GetHeaderName() const { return m_headerName; }
@@ -244,8 +244,8 @@ public:
    virtual ~wxCustomHeadersDialog();
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // event handlers
    void OnUpdateUI(wxUpdateUIEvent& event);

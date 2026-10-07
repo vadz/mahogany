@@ -95,7 +95,7 @@ public:
       {
       }
 
-   virtual bool Layout() { return wxScrolledWindow::Layout(); }
+   bool Layout() override { return wxScrolledWindow::Layout(); }
 
 private:
    DECLARE_NO_COPY_CLASS(wxEnhScrolledWindow)

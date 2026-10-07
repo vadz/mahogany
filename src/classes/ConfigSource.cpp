@@ -62,10 +62,10 @@ public:
    // the type of the local config source
    static const char *Type() { return gettext_noop("file"); }
 
-   virtual const char *GetType() const { return Type(); }
-   virtual ConfigSource *Create(const ConfigSource& config, const String& name);
-   virtual bool
-       Save(ConfigSource& config, const String& name, const String& spec);
+   const char *GetType() const override { return Type(); }
+   ConfigSource *Create(const ConfigSource& config, const String& name) override;
+   bool
+       Save(ConfigSource& config, const String& name, const String& spec) override;
 
 private:
    // the path used for storing the file name in config

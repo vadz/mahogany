@@ -182,7 +182,7 @@ class MigrateModule : public MModule
 public:
    MigrateModule(MInterface *minterface);
 
-   virtual int Entry(int arg, ...);
+   int Entry(int arg, ...) override;
 
 private:
    // add a menu entry for us to the main frame menu, return true if ok
@@ -208,8 +208,8 @@ public:
    IMAPServerPanel(wxWindow *parent, MigrateImapServer *imapData);
    virtual ~IMAPServerPanel();
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // has anything changed?
    bool IsDirty() const { return m_isDirty; }
@@ -253,8 +253,8 @@ class LocalPanel : public wxEnhancedPanel
 public:
    LocalPanel(wxWindow *panel, MigrateLocal *localData);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // returns the name of the mailbox format
    static const wxChar *GetFormatName(FileMailboxFormat format);
@@ -316,12 +316,12 @@ public:
    // determine ourselves whether there is a prev/next page as we don't want to
    // create the pages just for this (this can usually be postponed until
    // later or even not done at all in some cases)
-   virtual bool HasNextPage(wxWizardPage *page);
-   virtual bool HasPrevPage(wxWizardPage *page);
+   bool HasNextPage(wxWizardPage *page) override;
+   bool HasPrevPage(wxWizardPage *page) override;
 
    // implement ListEventReceiver methods
-   virtual void OnListFolder(const String& path, wxChar delim, long flags);
-   virtual void OnNoMoreFolders();
+   void OnListFolder(const String& path, wxChar delim, long flags) override;
+   void OnNoMoreFolders() override;
 
 private:
    // return, creating if necessary, the given page
@@ -363,9 +363,9 @@ public:
       { m_wizard->EnableButtons(buttons, enable); }
 
    // let the wizard decide the order in which the pages are shown
-   virtual wxWizardPage *GetPrev() const
+   wxWizardPage *GetPrev() const override
       { return GetWizard()->GetPrevPage(GetId()); }
-   virtual wxWizardPage *GetNext() const
+   wxWizardPage *GetNext() const override
       { return GetWizard()->GetNextPage(GetId()); }
 
 private:
@@ -403,8 +403,8 @@ class MigrateWizardSourcePage : public MigrateWizardPage
 public:
    MigrateWizardSourcePage(MigrateWizard *parent);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    IMAPServerPanel *m_panel;
@@ -477,8 +477,8 @@ class MigrateWizardDstPage : public MigrateWizardPage
 public:
    MigrateWizardDstPage(MigrateWizard *parent);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    void OnRadioButton(wxCommandEvent& event);

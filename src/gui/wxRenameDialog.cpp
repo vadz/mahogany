@@ -61,7 +61,7 @@ public:
    // did anything change?
    bool HasChanges() const { return m_hasChanges; }
 
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 protected:
    void OnCheckbox(wxCommandEvent& event);

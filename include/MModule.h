@@ -370,18 +370,18 @@ void MModule_AddStaticModule(const char *Name,
 /// this macro must be used inside the class declaration for any module class
 #define MMODULE_DEFINE() \
 public: \
-   virtual const char * GetName(void) const; \
-   virtual const char * GetInterface(void) const; \
-   virtual const char * GetDescription(void) const; \
-   virtual const char * GetVersion(void) const; \
-   virtual void GetMVersion(int *version_major, \
-                            int *version_minor, \
-                            int *version_release) const; \
+   const char * GetName(void) const override; \
+   const char * GetInterface(void) const override; \
+   const char * GetDescription(void) const override; \
+   const char * GetVersion(void) const override; \
+   void GetMVersion(int *version_major, \
+                    int *version_minor, \
+                    int *version_release) const override; \
    static  MModule *Init(int, int, int, MInterface *, int *); \
    static const ModuleProperty ms_properties[]
 
 /// this macro may be used for modules which don't do anything in their Entry()
-#define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
+#define DEFAULT_ENTRY_FUNC   int Entry(int /* arg */, ...) override { return 0; }
 
 /// these macros must be used in the .cpp file implementing the module class
 #define MMODULE_BEGIN_IMPLEMENT(ClassName, Name, Interface, Description, Version) \

@@ -81,7 +81,7 @@ public:
    bool IsOk() const { return m_ok; }
 
    // event processing function
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 private:
    // called when a new folder must be added

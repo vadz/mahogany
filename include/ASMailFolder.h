@@ -389,11 +389,11 @@ public:
 class ASMailFolderResultImpl : public ASMailFolder::Result
 {
 public:
-   virtual UserData GetUserData(void) const { return m_UserData; }
-   virtual Ticket GetTicket(void) const { return m_Ticket; }
-   virtual ASMailFolder::OperationId GetOperation(void) const { return m_Id; }
-   virtual ASMailFolder *GetFolder(void) const { return m_Mf; }
-   virtual UIdArray * GetSequence(void) const { return m_Seq; }
+   UserData GetUserData(void) const override { return m_UserData; }
+   Ticket GetTicket(void) const override { return m_Ticket; }
+   ASMailFolder::OperationId GetOperation(void) const override { return m_Id; }
+   ASMailFolder *GetFolder(void) const override { return m_Mf; }
+   UIdArray * GetSequence(void) const override { return m_Seq; }
 protected:
    ASMailFolderResultImpl(ASMailFolder *mf,
               Ticket t,

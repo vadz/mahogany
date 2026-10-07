@@ -125,7 +125,7 @@ public:
 
    // implement interface methods
    // AdbEntry
-   virtual AdbEntryGroup *GetGroup() const;
+   AdbEntryGroup *GetGroup() const override;
 
    // an easier to use GetName()
    const wxChar *GetName() const
@@ -171,24 +171,24 @@ public:
 
    // implement interface methods
    // AdbEntryGroup
-   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
-   virtual String GetName() const { return m_strName; }
+   AdbEntryGroup *GetGroup() const override { return m_pParent; }
+   String GetName() const override { return m_strName; }
 
-   virtual size_t GetEntryNames(wxArrayString& aNames) const;
-   virtual size_t GetGroupNames(wxArrayString& aNames) const;
+   size_t GetEntryNames(wxArrayString& aNames) const override;
+   size_t GetGroupNames(wxArrayString& aNames) const override;
 
-   virtual AdbEntry *GetEntry(const String& name);
-   virtual AdbEntryGroup *GetGroup(const String& name) const;
+   AdbEntry *GetEntry(const String& name) override;
+   AdbEntryGroup *GetGroup(const String& name) const override;
 
-   virtual bool Exists(const String& path);
+   bool Exists(const String& path) override;
 
-   virtual AdbEntry *CreateEntry(const String& strName);
-   virtual AdbEntryGroup *CreateGroup(const String& strName);
+   AdbEntry *CreateEntry(const String& strName) override;
+   AdbEntryGroup *CreateGroup(const String& strName) override;
 
-   virtual void DeleteEntry(const String& strName);
-   virtual void DeleteGroup(const String& strName);
+   void DeleteEntry(const String& strName) override;
+   void DeleteGroup(const String& strName) override;
 
-   virtual AdbEntry *FindEntry(const wxChar *szName);
+   AdbEntry *FindEntry(const wxChar *szName) override;
 
 private:
    virtual ~BbdbEntryGroup();
@@ -207,55 +207,55 @@ public:
 
    // implement interface methods
    // AdbElement
-   virtual AdbEntryGroup *GetGroup() const { return NULL; }
+   AdbEntryGroup *GetGroup() const override { return NULL; }
 
    // AdbEntryGroup
-   virtual AdbEntry *GetEntry(const String& name)
+   AdbEntry *GetEntry(const String& name) override
       { return m_pRootGroup->GetEntry(name); }
 
-   virtual bool Exists(const String& path)
+   bool Exists(const String& path) override
       { return m_pRootGroup->Exists(path); }
 
-   virtual size_t GetEntryNames(wxArrayString& aNames) const
+   size_t GetEntryNames(wxArrayString& aNames) const override
       { return m_pRootGroup->GetEntryNames(aNames); }
-   virtual size_t GetGroupNames(wxArrayString& aNames) const
+   size_t GetGroupNames(wxArrayString& aNames) const override
       { return m_pRootGroup->GetGroupNames(aNames); }
 
-   virtual AdbEntryGroup *GetGroup(const String& name) const
+   AdbEntryGroup *GetGroup(const String& name) const override
       { return m_pRootGroup->GetGroup(name); }
 
-   virtual AdbEntry *CreateEntry(const String& strName)
+   AdbEntry *CreateEntry(const String& strName) override
       { return m_pRootGroup->CreateEntry(strName); }
-   virtual AdbEntryGroup *CreateGroup(const String& strName)
+   AdbEntryGroup *CreateGroup(const String& strName) override
       { return m_pRootGroup->CreateGroup(strName); }
 
-   virtual void DeleteEntry(const String& strName)
+   void DeleteEntry(const String& strName) override
       { m_pRootGroup->DeleteEntry(strName); }
-   virtual void DeleteGroup(const String& strName)
+   void DeleteGroup(const String& strName) override
       { m_pRootGroup->DeleteGroup(strName); }
 
-   virtual AdbEntry *FindEntry(const wxChar *szName)
+   AdbEntry *FindEntry(const wxChar *szName) override
       { return m_pRootGroup->FindEntry(szName); }
 
       // AdbBook
-   virtual bool IsSameAs(const String& name) const;
-   virtual String GetFileName() const;
+   bool IsSameAs(const String& name) const override;
+   String GetFileName() const override;
 
-   virtual void SetName(const String& name);
-   virtual String GetName() const;
+   void SetName(const String& name) override;
+   String GetName() const override;
 
-   virtual void SetDescription(const String& desc);
-   virtual String GetDescription() const;
+   void SetDescription(const String& desc) override;
+   String GetDescription() const override;
 
-   virtual size_t GetNumberOfEntries() const;
+   size_t GetNumberOfEntries() const override;
 
-   virtual bool IsLocal() const { return TRUE; }
-   virtual bool IsReadOnly() const;
+   bool IsLocal() const override { return TRUE; }
+   bool IsReadOnly() const override;
 
    /** Return the icon name if set. The numeric return value must be -1
      for the default, or an index into the image list in AdbFrame.cpp.
     */
-   virtual int GetIconId() const { return 6; }
+   int GetIconId() const override { return 6; }
 
 private:
    virtual ~BbdbBook();
@@ -274,14 +274,14 @@ class BbdbDataProvider : public AdbDataProvider
 {
 public:
    // implement interface methods
-   virtual AdbBook *CreateBook(const String& name);
-   virtual bool EnumBooks(wxArrayString& aNames);
-   virtual bool DeleteBook(AdbBook *book);
-   virtual bool TestBookAccess(const String& name, AdbTests test);
+   AdbBook *CreateBook(const String& name) override;
+   bool EnumBooks(wxArrayString& aNames) override;
+   bool DeleteBook(AdbBook *book) override;
+   bool TestBookAccess(const String& name, AdbTests test) override;
    
    // Our entry is derived from AdbEntryStoredInMemory
-   virtual bool HasField(AdbField field) const { return true; }
-   virtual bool HasMultipleEMails() const { return true; }
+   bool HasField(AdbField field) const override { return true; }
+   bool HasMultipleEMails() const override { return true; }
 
    DECLARE_ADB_PROVIDER(BbdbDataProvider);
 };

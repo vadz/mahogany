@@ -338,7 +338,7 @@ public:
    }
 
    /// return true if this server can be used with the given folder
-   bool CanBeUsedFor(const MFolder *folder) const;
+   bool CanBeUsedFor(const MFolder *folder) const override;
 
    /// check for the timed out connections for all servers
    static void CheckTimeoutAll();
@@ -358,7 +358,7 @@ public:
    void KeepStream(MAILSTREAM *stream, const MFolder *folder);
 
    /// close those of our connections which have timed out
-   virtual bool CheckTimeout();
+   bool CheckTimeout() override;
 
    //@}
 
@@ -408,7 +408,7 @@ private:
    public:
       ConnCloseTimer() { }
 
-      virtual void Notify() { ServerInfoEntryCC::CheckTimeoutAll(); }
+      void Notify() override { ServerInfoEntryCC::CheckTimeoutAll(); }
 
    private:
       DECLARE_NO_COPY_CLASS(ConnCloseTimer)
@@ -530,7 +530,7 @@ public:
       );
    }
 
-   virtual bool OnMEvent(MEventData& ev)
+   bool OnMEvent(MEventData& ev) override
    {
       MEventWithFolderData& event = (MEventWithFolderData &)ev;
       MailFolderCC *mfCC = (MailFolderCC *)event.GetFolder();

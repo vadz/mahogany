@@ -61,7 +61,7 @@ public:
    {
    }
 
-   virtual void SetPath(const wxString& path)
+   void SetPath(const wxString& path) override
    {
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       if ( config )
@@ -71,80 +71,80 @@ public:
       }
    }
 
-   virtual const wxString& GetPath() const { return m_path; }
+   const wxString& GetPath() const override { return m_path; }
 
 
-   virtual bool GetFirstGroup(wxString& str, long& lIndex) const
+   bool GetFirstGroup(wxString& str, long& lIndex) const override
    {
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       return config && config->GetFirstGroup(str, lIndex);
    }
 
-   virtual bool GetNextGroup(wxString& str, long& lIndex) const
+   bool GetNextGroup(wxString& str, long& lIndex) const override
    {
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       return config && config->GetNextGroup(str, lIndex);
    }
 
-   virtual bool GetFirstEntry(wxString& str, long& lIndex) const
+   bool GetFirstEntry(wxString& str, long& lIndex) const override
    {
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       return config && config->GetFirstEntry(str, lIndex);
    }
 
-   virtual bool GetNextEntry(wxString& str, long& lIndex) const
+   bool GetNextEntry(wxString& str, long& lIndex) const override
    {
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       return config && config->GetNextEntry(str, lIndex);
    }
 
 
-   virtual size_t GetNumberOfEntries(bool bRecursive = false) const
+   size_t GetNumberOfEntries(bool bRecursive = false) const override
    {
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       return config ? config->GetNumberOfEntries(bRecursive) : 0;
    }
 
-   virtual size_t GetNumberOfGroups(bool bRecursive = false) const
+   size_t GetNumberOfGroups(bool bRecursive = false) const override
    {
       wxConfigBase * const config = m_configSources.GetLocalConfig();
       return config ? config->GetNumberOfGroups(bRecursive) : 0;
    }
 
 
-   virtual bool HasGroup(const wxString& name) const
+   bool HasGroup(const wxString& name) const override
    {
       return m_configSources.HasGroup(MakeFullPath(name));
    }
 
-   virtual bool HasEntry(const wxString& name) const
+   bool HasEntry(const wxString& name) const override
    {
       return m_configSources.HasEntry(MakeFullPath(name));
    }
 
 
-   virtual bool Flush(bool /* bCurrentOnly */ = false)
+   bool Flush(bool /* bCurrentOnly */ = false) override
    {
       return m_configSources.FlushAll();
    }
 
-   virtual bool
-   RenameEntry(const wxString& /* oldName */, const wxString& /* newName */)
+   bool
+   RenameEntry(const wxString& /* oldName */, const wxString& /* newName */) override
    {
       FAIL_MSG( _T("not implemented") );
 
       return false;
    }
 
-   virtual bool
-   RenameGroup(const wxString& /* oldName */, const wxString& /* newName */)
+   bool
+   RenameGroup(const wxString& /* oldName */, const wxString& /* newName */) override
    {
       FAIL_MSG( _T("not implemented") );
 
       return false;
    }
 
-   virtual bool DeleteEntry(const wxString& key, bool /* groupIfEmpty */ = true)
+   bool DeleteEntry(const wxString& key, bool /* groupIfEmpty */ = true) override
    {
       wxString path;
       if ( *key.c_str() == _T('/') )
@@ -171,7 +171,7 @@ public:
       return true;
    }
 
-   virtual bool DeleteGroup(const wxString& key)
+   bool DeleteGroup(const wxString& key) override
    {
       const wxString path = MakeFullPath(key);
 
@@ -193,7 +193,7 @@ public:
       return true;
    }
 
-   virtual bool DeleteAll()
+   bool DeleteAll() override
    {
       // this is too dangerous, we don't provide any way to wipe out all config
       // information
@@ -239,7 +239,7 @@ protected:
    }
 
 
-   virtual bool DoReadString(const wxString& key, wxString *pStr) const
+   bool DoReadString(const wxString& key, wxString *pStr) const override
    {
       LookupData ld(key, wxEmptyString);
       if ( !DoRead(ld) )
@@ -249,7 +249,7 @@ protected:
       return true;
    }
 
-   virtual bool DoReadLong(const wxString& key, long *pl) const
+   bool DoReadLong(const wxString& key, long *pl) const override
    {
       LookupData ld(key, 0l);
       if ( !DoRead(ld) )
@@ -259,25 +259,25 @@ protected:
       return true;
    }
 
-   virtual bool DoWriteString(const wxString& key, const wxString& value)
+   bool DoWriteString(const wxString& key, const wxString& value) override
    {
       LookupData ld(key, value);
       return DoWrite(ld);
    }
 
-   virtual bool DoWriteLong(const wxString& key, long value)
+   bool DoWriteLong(const wxString& key, long value) override
    {
       LookupData ld(key, value);
       return DoWrite(ld);
    }
 
-   virtual bool DoReadBinary(const wxString& key, wxMemoryBuffer* buf) const
+   bool DoReadBinary(const wxString& key, wxMemoryBuffer* buf) const override
    {
       FAIL_MSG( "binary data unsupported" );
       return false;
    }
 
-   virtual bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf)
+   bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf) override
    {
       FAIL_MSG( "binary data unsupported" );
       return false;

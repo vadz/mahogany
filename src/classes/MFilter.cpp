@@ -548,43 +548,43 @@ class MFDialogSettingsImpl : public MFDialogSettings
 {
 public:
    /// The number of tests in the rule:
-   virtual size_t CountTests() const
+   size_t CountTests() const override
       { return m_Tests.Count(); }
 
    /// Return the n-th test:
-   virtual MFDialogTest GetTest(size_t n) const
+   MFDialogTest GetTest(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Test;
       }
    /// Is the n-th test inverted?
-   virtual bool IsInverted(size_t n) const
+   bool IsInverted(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Inverted;
       }
 
    /// Return the n-th logical operator, i.e. the one after the n-th test:
-   virtual MFDialogLogical GetLogical(size_t n) const
+   MFDialogLogical GetLogical(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Logical;
       }
 
    /// Return the n-th test's argument if any:
-   virtual String GetTestArgument(size_t n) const
+   String GetTestArgument(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Argument;
       }
 
-   virtual MFDialogTarget GetTestTarget(size_t n) const
+   MFDialogTarget GetTestTarget(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Target;
       }
 
-   virtual String GetTestTargetArgument(size_t n) const
+   String GetTestTargetArgument(size_t n) const override
       {
          MOcheck();
          ASSERT_MSG( GetTestTarget(n) == ORC_W_Header,
@@ -594,25 +594,25 @@ public:
       }
 
    /// Return the action component
-   virtual MFDialogAction GetAction() const
+   MFDialogAction GetAction() const override
       {
          MOcheck();
          return m_Action;
       }
    /// Return the action argument if any
-   virtual String GetActionArgument() const
+   String GetActionArgument() const override
       {
          MOcheck();
          return m_ActionArgument;
       }
    /// Add a new test component:
-   virtual void AddTest(MFDialogLogical l,
-                        bool isInverted,
-                        MFDialogTest test,
-                        MFDialogTarget target,
-                        String argument = wxEmptyString,
-                        String targetArg = wxEmptyString
-      )
+   void AddTest(MFDialogLogical l,
+                bool isInverted,
+                MFDialogTest test,
+                MFDialogTarget target,
+                String argument = wxEmptyString,
+                String targetArg = wxEmptyString
+      ) override
       {
          MOcheck();
          MFDialogComponent c;
@@ -625,15 +625,15 @@ public:
          m_Tests.Add(c);
       }
 
-   virtual void SetAction(MFDialogAction action, const String& arg)
+   void SetAction(MFDialogAction action, const String& arg) override
    {
       m_Action = action;
       m_ActionArgument = arg;
    }
 
-   virtual String WriteRule(void) const;
+   String WriteRule(void) const override;
 
-   virtual bool operator==(const MFDialogSettings& other) const;
+   bool operator==(const MFDialogSettings& other) const override;
 
    /// attempt to parse filter rule string
    bool ReadSettingsFromRule(const String & str);
@@ -811,7 +811,7 @@ MFDialogSettings *MFDialogSettings::Create()
 class MFilterFromProfile : public MFilter
 {
 public:
-   virtual MFilterDesc GetDesc(void) const
+   MFilterDesc GetDesc(void) const override
    {
       MFilterDesc fd;
       fd.SetName(m_Name);
@@ -829,7 +829,7 @@ public:
       return fd;
    }
 
-   virtual void Set(const MFilterDesc& fd)
+   void Set(const MFilterDesc& fd) override
    {
       m_Name = fd.GetName();
       SafeDecRef(m_Settings);
@@ -847,7 +847,7 @@ public:
       DoWrite();
    }
 
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       m_Profile->IncRef();
       return m_Profile;

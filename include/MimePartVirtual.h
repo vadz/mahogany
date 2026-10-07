@@ -62,8 +62,8 @@ public:
     */
    bool IsOk() const { return m_env && m_body; }
 
-   virtual const void *GetRawContent(unsigned long *len = NULL) const;
-   virtual String GetHeaders() const;
+   const void *GetRawContent(unsigned long *len = NULL) const override;
+   String GetHeaders() const override;
 
 private:
    // create all nested subparts

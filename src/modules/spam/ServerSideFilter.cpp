@@ -56,19 +56,19 @@ public:
    ServerSideFilter() { }
 
 protected:
-   virtual bool DoReclassify(const Profile *profile,
-                             const Message& msg,
-                             bool isSpam);
-   virtual void DoTrain(const Profile *profile,
-                        const Message& msg,
-                        bool isSpam);
-   virtual int DoCheckIfSpam(const Profile *profile,
-                             const Message& msg,
-                             const String& param,
-                             String *result);
-   virtual const char *GetOptionPageIconName() const { return "serverspam"; }
-   virtual SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
-                                             Profile *profile) const;
+   bool DoReclassify(const Profile *profile,
+                     const Message& msg,
+                     bool isSpam) override;
+   void DoTrain(const Profile *profile,
+                const Message& msg,
+                bool isSpam) override;
+   int DoCheckIfSpam(const Profile *profile,
+                     const Message& msg,
+                     const String& param,
+                     String *result) override;
+   const char *GetOptionPageIconName() const override { return "serverspam"; }
+   SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
+                                     Profile *profile) const override;
 
 private:
    DECLARE_SPAM_FILTER("serverside", _("Server Side"), 10);

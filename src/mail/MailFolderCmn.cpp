@@ -203,7 +203,7 @@ class MfCloseTimer : public wxTimer
 public:
    MfCloseTimer(MfCloser *mfCloser) { m_mfCloser = mfCloser; }
 
-   virtual void Notify(void);
+   void Notify(void) override;
 
 private:
    MfCloser *m_mfCloser;
@@ -260,7 +260,7 @@ public:
    MfCmnEventReceiver(MailFolderCmn *mf);
    virtual ~MfCmnEventReceiver();
 
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 private:
    MailFolderCmn *m_Mf;
@@ -285,7 +285,7 @@ public:
    }
 
    /// get called on timeout and pings the mailfolder
-   void Notify(void);
+   void Notify(void) override;
 
 protected:
    /// the mailfolder to update

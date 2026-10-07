@@ -62,10 +62,10 @@ public:
    bool  IsInitialised(void) const { return m_initialised; }
 
    /// make it visible or invisible
-   bool Show(bool visible = true) { return wxFrame::Show(visible); }
+   bool Show(bool visible = true) override { return wxFrame::Show(visible); }
 
    /// used to set the title of the window class
-   void  SetTitle(String const & name);
+   void  SetTitle(String const & name) override;
 
    /**
       This virtual method returns a pointer to the profile of the mailfolder
@@ -78,7 +78,7 @@ public:
    virtual Profile *GetFolderProfile(void) const;
 
    /// Passes a menu id to modules for reacting to it.
-   virtual bool ProcessModulesMenu(int id);
+   bool ProcessModulesMenu(int id) override;
 
    /**
       Methods for adding standard menus to the frame menu bar.
@@ -87,8 +87,8 @@ public:
       AddMessageMenu() if they show a message or AddViewMenu() otherwise.
     */
    //@{
-   virtual void AddFileMenu();
-   virtual void AddHelpMenu();
+   void AddFileMenu() override;
+   void AddHelpMenu() override;
    void AddEditMenu();
    void AddViewMenu();
    void AddMessageMenu();

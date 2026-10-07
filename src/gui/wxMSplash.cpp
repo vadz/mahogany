@@ -93,7 +93,7 @@ public:
       Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000, true /* single shot */);
    }
 
-   virtual void Notify();
+   void Notify() override;
 
 private:
    AboutWindow *m_window;

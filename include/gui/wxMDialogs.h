@@ -531,8 +531,8 @@ public:
    {
    }
 
-   virtual int ShowModal();
-   virtual void EndModal(int rc);
+   int ShowModal() override;
+   void EndModal(int rc) override;
 
    DECLARE_NO_COPY_CLASS(wxMDialog)
 };

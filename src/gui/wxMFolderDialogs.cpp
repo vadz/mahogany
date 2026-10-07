@@ -162,8 +162,8 @@ public:
    MFolder *GetFolder() const { SafeIncRef(m_newFolder); return m_newFolder; }
 
    // override control creation functions
-   virtual wxControl *CreateControlsAbove(wxPanel *panel);
-   virtual void CreateNotebook(wxPanel *panel);
+   wxControl *CreateControlsAbove(wxPanel *panel) override;
+   void CreateNotebook(wxPanel *panel) override;
 
    // control ids
    enum
@@ -179,7 +179,7 @@ public:
 
    // don't let the base class to enable the buttons if we can't allow it
    // because some entries are missing/incorrect
-   virtual void EnableButtons(bool enable)
+   void EnableButtons(bool enable) override
    {
       if ( !enable || ShouldEnableOk() )
          wxOptionsEditDialog::EnableButtons(enable);
@@ -187,7 +187,7 @@ public:
    }
 
    // base class pure virtual: return the profile we're working with (IncRef'd)
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       if ( m_newFolder && !m_profile )
       {
@@ -237,8 +237,8 @@ public:
    wxFolderPropertiesDialog(wxWindow *parent,
                             MFolder *folder);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    DECLARE_ABSTRACT_CLASS(wxFolderPropertiesDialog)
@@ -252,8 +252,8 @@ public:
    wxFolderCreateDialog(wxWindow *parent,
                         MFolder *parentFolder);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // called by the page to create the new folder
    MFolder *DoCreateFolder(MFolderType folderType);
@@ -298,8 +298,8 @@ public:
    void SetFolderPath(const String& profilePath)
       { m_folderPath = profilePath; }
 
-   virtual bool TransferDataToWindow(void);
-   virtual bool TransferDataFromWindow(void);
+   bool TransferDataToWindow(void) override;
+   bool TransferDataFromWindow(void) override;
 
    /// update controls after the current folder type changed
    void DoUpdateUI();
@@ -560,7 +560,7 @@ public:
       : wxFolderIconBrowseButton(parent, tooltip) { m_dlg = dlg; }
 
 private:
-   virtual void OnIconChange() { m_dlg->SetDirty(); }
+   void OnIconChange() override { m_dlg->SetDirty(); }
 
    wxFolderBaseDialog *m_dlg;
 

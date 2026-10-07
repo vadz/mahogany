@@ -404,19 +404,19 @@ MModule::GetProvider(const wxString &interfaceName)
 class MModuleListingEntryImpl : public MModuleListingEntry
 {
 public:
-   virtual const String &GetName(void) const
+   const String &GetName(void) const override
       { return m_Name; }
-   virtual const String &GetInterface(void) const
+   const String &GetInterface(void) const override
       { return m_Interface; }
-   virtual const String &GetShortDescription(void) const
+   const String &GetShortDescription(void) const override
       { return m_ShortDesc; }
-   virtual const String &GetDescription(void) const
+   const String &GetDescription(void) const override
       { return m_Desc; }
-   virtual const String &GetVersion(void) const
+   const String &GetVersion(void) const override
       { return m_Version; }
-   virtual const String &GetAuthor(void) const
+   const String &GetAuthor(void) const override
       { return m_Author; }
-   virtual MModule *GetModule(void) const
+   MModule *GetModule(void) const override
       {
          if(m_Module) m_Module->IncRef();
          return m_Module;
@@ -481,10 +481,10 @@ class MModuleListingImpl : public MModuleListing
 {
 public:
    /// returns the number of entries
-   virtual size_t Count(void) const
+   size_t Count(void) const override
       { return m_count; }
    /// returns the n-th entry
-   virtual const MModuleListingEntry & operator[] (size_t n) const
+   const MModuleListingEntry & operator[] (size_t n) const override
       { ASSERT(n <= m_count); return m_entries[n]; }
    /// returns the n-th entry
    MModuleListingEntryImpl & operator[] (size_t n)

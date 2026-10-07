@@ -56,8 +56,8 @@ void Parse_Debug(const wxChar * WXUNUSED_UNLESS_DEBUG(s))
 class wxVCardModule : public wxModule
 {
 public:
-    virtual bool OnInit() { return TRUE; }
-    virtual void OnExit() { cleanStrTbl(); }
+    bool OnInit() override { return TRUE; }
+    void OnExit() override { cleanStrTbl(); }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxVCardModule)

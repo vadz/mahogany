@@ -354,7 +354,7 @@ public:
    void OnIdle(wxIdleEvent& event);
 
    // event processing function
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 #if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    void OnMouseMove(wxMouseEvent &event)
@@ -630,7 +630,7 @@ class TreeMessagesDropWhere : public MMessagesDropWhere
 public:
    TreeMessagesDropWhere(wxFolderTreeImpl *tree) { m_tree = tree; }
 
-   virtual MFolder *GetFolder(wxCoord x, wxCoord y) const
+   MFolder *GetFolder(wxCoord x, wxCoord y) const override
    {
       wxTreeItemId item = m_tree->HitTest(wxPoint(x, y));
       if ( !item.IsOk() )
@@ -662,7 +662,7 @@ public:
    TreeDropTarget(MMessagesDropWhere *where, wxWindow *win)
       : MMessagesDropTarget(where, win) { m_folderLast = NULL; }
 
-   virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def)
+   wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def) override
    {
       TreeMessagesDropWhere *
          dropWhere = ((TreeMessagesDropWhere *)GetDropWhere());
@@ -699,7 +699,7 @@ public:
       return def;
    }
 
-   virtual void OnLeave()
+   void OnLeave() override
    {
       SafeDecRef(m_folderLast);
       m_folderLast = NULL;
@@ -707,7 +707,7 @@ public:
       MMessagesDropTarget::OnLeave();
    }
 
-   virtual bool OnDrop(wxCoord x, wxCoord y)
+   bool OnDrop(wxCoord x, wxCoord y) override
    {
       SafeDecRef(m_folderLast);
       m_folderLast = NULL;

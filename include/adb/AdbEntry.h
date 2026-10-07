@@ -175,7 +175,7 @@ public:
     /// description of an item is the name and the address
 
   /// return the full address, i.e. "personal-part <address-part>" string
-  virtual String GetDescription() const;
+  String GetDescription() const override;
 };
 
 class AdbEntryCommon : public AdbEntry
@@ -184,7 +184,7 @@ class AdbEntryCommon : public AdbEntry
    /** Retrieve the value of a field (see enum AdbField for index
        values). Tries to generate meaningful return values for empty
        FirstName/FamilyName fields. */
-  virtual void GetField(size_t n, wxString *pstr) const;
+  void GetField(size_t n, wxString *pstr) const override;
 };
 
 /**
@@ -232,14 +232,14 @@ public:
 
   // misc
     /// description of a group is just its name
-  virtual String GetDescription() const { return GetName(); }
+  String GetDescription() const override { return GetName(); }
 };
 
 class AdbEntryGroupCommon : public AdbEntryGroup
 {
 public:
    /// Brute force implementation that really iterates all entries
-  virtual int Matches(const wxChar *str, int where, int how);
+  int Matches(const wxChar *str, int where, int how) override;
 };
 
 // ============================================================================
@@ -254,15 +254,15 @@ public:
 
   // we can implement some of the base class functions in the manner independent
   // of the exact nature of the derived class
-  virtual void GetFieldInternal(size_t n, String *pstr) const;
-  virtual void SetField(size_t n, const String& strValue);
-  virtual void AddEMail(const String& strEMail);
-  virtual void ClearExtraEMails();
-  virtual size_t GetEMailCount() const { return m_astrEmails.Count(); }
-  virtual void GetEMail(size_t n, String *p) const { *p = m_astrEmails[n]; }
-  virtual void ClearDirty() { m_bDirty = FALSE; }
-  virtual bool IsDirty() const { return m_bDirty; }
-  virtual int Matches(const wxChar *str, int where, int how) const;
+  void GetFieldInternal(size_t n, String *pstr) const override;
+  void SetField(size_t n, const String& strValue) override;
+  void AddEMail(const String& strEMail) override;
+  void ClearExtraEMails() override;
+  size_t GetEMailCount() const override { return m_astrEmails.Count(); }
+  void GetEMail(size_t n, String *p) const override { *p = m_astrEmails[n]; }
+  void ClearDirty() override { m_bDirty = FALSE; }
+  bool IsDirty() const override { return m_bDirty; }
+  int Matches(const wxChar *str, int where, int how) const override;
 
 protected:
   wxArrayString m_astrFields; // all text entries (some may be not present)

@@ -162,10 +162,10 @@ public:
    void OnTreeExpanding(wxTreeEvent& event);
 
    // list event processing functions
-   virtual void OnListFolder(const String& path, wxChar delim, long flags);
+   void OnListFolder(const String& path, wxChar delim, long flags) override;
 
    // called when the last folder is received
-   virtual void OnNoMoreFolders();
+   void OnNoMoreFolders() override;
 
 private:
    // called when a new folder must be added
@@ -237,7 +237,7 @@ public:
    virtual ~wxSubscriptionDialog();
 
    // called when [Ok] is pressed, may veto it
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
    // callbacks
    // ---------
@@ -331,8 +331,8 @@ public:
    size_t AddAllFolders(MFolder *folder, ASMailFolder *mailFolder);
 
    // list folder events processing function
-   virtual void OnListFolder(const String& path, wxChar delim, long flags);
-   virtual void OnNoMoreFolders();
+   void OnListFolder(const String& path, wxChar delim, long flags) override;
+   void OnNoMoreFolders() override;
 
 private:
    // the progress meter

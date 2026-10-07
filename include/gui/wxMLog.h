@@ -28,9 +28,9 @@ public:
    static void Activate();
 
 protected:
-   virtual void DoLogRecord(wxLogLevel level,
-                            const wxString& msg,
-                            const wxLogRecordInfo& info);
+   void DoLogRecord(wxLogLevel level,
+                    const wxString& msg,
+                    const wxLogRecordInfo& info) override;
 
 private:
    // Ctor is private, use static Activate() to actually create the object.

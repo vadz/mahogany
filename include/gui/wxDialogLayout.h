@@ -191,7 +191,7 @@ public:
    virtual bool HasChanges() const { return m_bDirty; }
    virtual void SetDirty() { m_bDirty = TRUE; }
 
-   virtual void EndModal(int rc);
+   void EndModal(int rc) override;
 
 protected:
    // override this to return the profile which we're editing
@@ -291,18 +291,18 @@ public:
    // notifications from the notebook pages
       // something changed, set the dirty flag (must be called to enable the
       // Apply button)
-   virtual void SetDirty() { m_bDirty = TRUE; EnableButtons(TRUE); }
+   void SetDirty() override { m_bDirty = TRUE; EnableButtons(TRUE); }
       // something important change
    virtual void SetDoTest() { SetDirty(); m_bTest = TRUE; }
       // some setting changed, but won't take effect until restart
    virtual void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
 
    // get/set the dialog data
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // callbacks
-   void OnHelp(wxCommandEvent &event);
+   void OnHelp(wxCommandEvent &event) override;
    void OnOK(wxCommandEvent& event);
    void OnApply(wxCommandEvent& event);
    void OnCancel(wxCommandEvent& event);
@@ -336,7 +336,7 @@ protected:
 private:
    // implement base class pure virtual in terms of our existing function for
    // compatibility (CreateNotebook() existed before CreateMainWindow())
-   virtual wxWindow *CreateMainWindow(wxPanel *panel)
+   wxWindow *CreateMainWindow(wxPanel *panel) override
    {
       CreateNotebook(panel);
       return m_notebook;
@@ -592,7 +592,7 @@ public:
    }
 
    // forces a call to Layout() to get everything nicely laid out
-   virtual bool Layout() { return DoLayout(GetClientSize()); }
+   bool Layout() override { return DoLayout(GetClientSize()); }
 
    // show or hide the vertical scrollbar depending on whether there is enough
    // place or not

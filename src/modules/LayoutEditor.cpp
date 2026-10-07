@@ -58,37 +58,37 @@ public:
    virtual ~LayoutEditor();
 
    // accessors
-   virtual wxWindow *GetWindow() const;
-   virtual bool IsModified() const;
-   virtual bool IsEmpty() const;
-   virtual unsigned long ComputeHash() const;
+   wxWindow *GetWindow() const override;
+   bool IsModified() const override;
+   bool IsEmpty() const override;
+   unsigned long ComputeHash() const override;
 
    // creation
-   virtual void Create(Composer *composer, wxWindow *parent);
-   virtual void UpdateOptions();
-   virtual bool FinishWork();
+   void Create(Composer *composer, wxWindow *parent) override;
+   void UpdateOptions() override;
+   bool FinishWork() override;
 
    // operations
-   virtual void Clear();
-   virtual void Enable(bool enable);
-   virtual void ResetDirty();
-   virtual void SetEncoding(wxFontEncoding encoding);
-   virtual void Copy();
-   virtual void Cut();
-   virtual void Paste();
+   void Clear() override;
+   void Enable(bool enable) override;
+   void ResetDirty() override;
+   void SetEncoding(wxFontEncoding encoding) override;
+   void Copy() override;
+   void Cut() override;
+   void Paste() override;
 
-   virtual bool Print();
-   virtual void PrintPreview();
+   bool Print() override;
+   void PrintPreview() override;
 
-   virtual void MoveCursorTo(unsigned long x, unsigned long y);
-   virtual void MoveCursorBy(long x, long y);
-   virtual void SetFocus();
+   void MoveCursorTo(unsigned long x, unsigned long y) override;
+   void MoveCursorBy(long x, long y) override;
+   void SetFocus() override;
 
    // content
-   virtual void InsertAttachment(const wxBitmap& icon, EditorContentPart *mc);
-   virtual void InsertText(const String& text, InsertMode insMode);
-   virtual EditorContentPart *GetFirstPart();
-   virtual EditorContentPart *GetNextPart();
+   void InsertAttachment(const wxBitmap& icon, EditorContentPart *mc) override;
+   void InsertText(const String& text, InsertMode insMode) override;
+   EditorContentPart *GetFirstPart() override;
+   EditorContentPart *GetNextPart() override;
 
    // for wxComposerLayoutWindow only: we have to use
    bool OnFirstTimeFocus() { return MessageEditor::OnFirstTimeFocus(); }

@@ -171,11 +171,11 @@ public:
     /// override this function (see also MOBJECT_DEBUG macro) to provide
     /// some rich information about your object (MObjectRC::Dump() prints
     /// the base information such as name, pointer and ref count only)
-    virtual String DebugDump() const;
+    String DebugDump() const override;
 
     /// this function just returns the class name (also overriden by
     /// MOBJECT_DEBUG macro)
-    virtual const char *DebugGetClassName() const { return "<<Unknown>>"; }
+    const char *DebugGetClassName() const override { return "<<Unknown>>"; }
 #else
     static void CheckLeaks() { }
 #endif
@@ -226,8 +226,8 @@ private:
      /// declare all diagnostic functions (you must implement DebugDump)
 #   define MOBJECT_DEBUG(classname)                                           \
       public:                                                                 \
-         virtual const char *DebugGetClassName() const { return #classname; } \
-         virtual String DebugDump() const;
+         const char *DebugGetClassName() const override { return #classname; } \
+         String DebugDump() const override;
 
 #   define MOBJECT_NAME(classname) \
       public:                                                                 \

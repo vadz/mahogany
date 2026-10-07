@@ -254,7 +254,7 @@ public:
       m_frame = frame;
    }
 
-   virtual void OnSelectionChange(MFolder *oldsel, MFolder *newsel)
+   void OnSelectionChange(MFolder *oldsel, MFolder *newsel) override
    {
       if ( newsel )
       {
@@ -271,7 +271,7 @@ public:
       wxFolderTree::OnSelectionChange(oldsel, newsel);
    }
 
-   virtual void OnOpenHere(MFolder *folder)
+   void OnOpenHere(MFolder *folder) override
    {
       if ( !folder )
       {
@@ -288,7 +288,7 @@ public:
       wxFolderTree::OnOpenHere(folder);
    }
 
-   virtual void OnView(MFolder *folder)
+   void OnView(MFolder *folder) override
    {
       CHECK_RET( folder, _T("can't view a NULL folder") );
 
@@ -301,7 +301,7 @@ public:
       wxFolderTree::OnView(folder);
    }
 
-   virtual bool OnClose(MFolder *folder)
+   bool OnClose(MFolder *folder) override
    {
       m_frame->CloseFolder(folder);
 
@@ -325,7 +325,7 @@ public:
       m_mainFrame = mainFrame;
    }
 
-   virtual bool MoveToNextUnread(bool /* takeNextIfNoUnread */ = true)
+   bool MoveToNextUnread(bool /* takeNextIfNoUnread */ = true) override
    {
       if ( wxFolderView::MoveToNextUnread(false /* don't take next */) )
       {
@@ -352,7 +352,7 @@ public:
       return true;
    }
 
-   virtual void SetFolder(MailFolder *mf)
+   void SetFolder(MailFolder *mf) override
    {
       if ( !mf )
          m_mainFrame->ClearFolderName();
@@ -360,13 +360,13 @@ public:
       wxFolderView::SetFolder(mf);
    }
 
-   virtual void OnAppExit()
+   void OnAppExit() override
    {
       // don't do anything here: the base class version saves this folder name
       // in MP_OPENFOLDERS config entry but the main frame does it for us
    }
 
-   virtual Profile *GetFolderProfile() const
+   Profile *GetFolderProfile() const override
    {
       Profile *profile = GetProfile();
       if ( !profile )
@@ -1700,7 +1700,7 @@ public:
       m_nCount = 0;
    }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
    {
       MFolder_obj folder(folderName);
       CHECK( folder, false, _T("visiting folder which doesn't exist?") );

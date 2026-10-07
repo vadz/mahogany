@@ -110,43 +110,43 @@ public:
       /// Read a character entry.
    String readEntry(const String & key,
                     const String & defaultvalue = (const wxChar *)NULL,
-                    ReadResult * found = NULL) const;
+                    ReadResult * found = NULL) const override;
    /// Read an integer value.
    long readEntry(const String & key,
                   long defaultvalue,
-                  ReadResult * found = NULL) const;
+                  ReadResult * found = NULL) const override;
    /// read entry without recursing upwards
-   virtual int readEntryFromHere(const String& key, int defvalue) const;
+   int readEntryFromHere(const String& key, int defvalue) const override;
 
    /// Read anything, return true if found, falsee otherwise
    virtual bool readEntry(LookupData &ld,
                           int flags = Lookup_All) const;
 
-   virtual bool writeEntry(const String& key, const String& value);
-   virtual bool writeEntry(const String & key, long value);
-   virtual bool writeEntryIfNeeded(const String& key, long value, long def);
+   bool writeEntry(const String& key, const String& value) override;
+   bool writeEntry(const String & key, long value) override;
+   bool writeEntryIfNeeded(const String& key, long value, long def) override;
 
    //@}
 
-   virtual bool GetFirstGroup(String& s, EnumData& cookie) const;
-   virtual bool GetNextGroup(String& s, EnumData& cookie) const;
-   virtual bool GetFirstEntry(String& s, EnumData& cookie) const;
-   virtual bool GetNextEntry(String& s, EnumData& cookie) const;
+   bool GetFirstGroup(String& s, EnumData& cookie) const override;
+   bool GetNextGroup(String& s, EnumData& cookie) const override;
+   bool GetFirstEntry(String& s, EnumData& cookie) const override;
+   bool GetNextEntry(String& s, EnumData& cookie) const override;
 
       /// Returns a pointer to the parent profile.
-   virtual Profile *GetParent(void) const;
+   Profile *GetParent(void) const override;
 
-   virtual bool HasEntry(const String & key) const;
-   virtual bool HasGroup(const String & name) const;
-   virtual bool DeleteEntry(const String& key);
-   virtual bool DeleteGroup(const String & path);
-   virtual bool Rename(const String& oldName, const String& newName);
+   bool HasEntry(const String & key) const override;
+   bool HasGroup(const String & name) const override;
+   bool DeleteEntry(const String& key) override;
+   bool DeleteGroup(const String & path) override;
+   bool Rename(const String& oldName, const String& newName) override;
 
-   virtual const String& GetName(void) const { return m_ProfileName; }
+   const String& GetName(void) const override { return m_ProfileName; }
 
-   virtual wxConfigBase *GetConfig() const { return wxConfig::Get(); }
+   wxConfigBase *GetConfig() const override { return wxConfig::Get(); }
 
-   virtual void Suspend(void)
+   void Suspend(void) override
       {
          PCHECK();
 
@@ -158,26 +158,26 @@ public:
       }
 
    /// Commit changes from suspended mode.
-   virtual void Commit(void);
+   void Commit(void) override;
    /// Discard changes from suspended mode.
-   virtual void Discard(void);
+   void Discard(void) override;
    /// Is the profile currently suspended?
-   virtual bool IsSuspended(void) const { return m_Suspended != 0; }
+   bool IsSuspended(void) const override { return m_Suspended != 0; }
 
    /** This temporarily overloads this profile with another Identity,
        i.e. the name of an Identity profile. */
-   virtual void SetIdentity(const String & idName);
-   virtual void ClearIdentity(void);
-   virtual String GetIdentity(void) const;
+   void SetIdentity(const String & idName) override;
+   void ClearIdentity(void) override;
+   String GetIdentity(void) const override;
 
-   virtual bool IsAncestor(Profile *profile) const;
+   bool IsAncestor(Profile *profile) const override;
 
    String GetRootPath(void) const
    {
       return GetProfileSection();
    }
 
-   virtual String GetFolderName() const;
+   String GetFolderName() const override;
 
 protected:
    ProfileImpl()
@@ -253,7 +253,7 @@ public:
    static Identity * Create(const String &name)
       { return new Identity(name); }
 
-   virtual const wxChar * GetProfileSection(void) const
+   const wxChar * GetProfileSection(void) const override
       {
          return M_IDENTITY_CONFIG_SECTION;
       }
@@ -279,7 +279,7 @@ public:
    static FilterProfile * Create(const String &name)
       { return new FilterProfile(name); }
 
-   virtual const wxChar * GetProfileSection(void) const
+   const wxChar * GetProfileSection(void) const override
       {
          return M_FILTERS_CONFIG_SECTION;
       }
@@ -298,7 +298,7 @@ public:
    static TemplateProfile * Create(const String& kind)
       { return new TemplateProfile(kind); }
 
-   virtual const wxChar * GetProfileSection(void) const
+   const wxChar * GetProfileSection(void) const override
       {
          return M_TEMPLATES_CONFIG_SECTION;
       }
@@ -320,7 +320,7 @@ public:
       return new ModuleProfile(name);
    }
 
-   virtual const wxChar *GetProfileSection() const
+   const wxChar *GetProfileSection() const override
    {
       return _T("/Modules");
    }

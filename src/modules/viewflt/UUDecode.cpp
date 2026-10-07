@@ -49,9 +49,9 @@ public:
    UUDecodeFilter(MessageView *msgView, ViewFilter *next, bool enable);
 
 protected:
-   virtual void DoProcess(String& text,
-                          MessageViewer *viewer,
-                          MTextStyle& style);
+   void DoProcess(String& text,
+                  MessageViewer *viewer,
+                  MTextStyle& style) override;
 };
 
 // ----------------------------------------------------------------------------

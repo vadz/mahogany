@@ -51,8 +51,8 @@
 class AdbTextExporter : public AdbExporter
 {
 public:
-   virtual bool Export(AdbEntryGroup& group, const String& dest);
-   virtual bool Export(const AdbEntry& entry, const String& dest);
+   bool Export(AdbEntryGroup& group, const String& dest) override;
+   bool Export(const AdbEntry& entry, const String& dest) override;
 
    DECLARE_ADB_EXPORTER();
 
@@ -96,7 +96,7 @@ public:
    const wxString& GetDelimiter() const { return m_delim; }
 
    // transfer the data from window
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
    // event handlers
    void OnRadiobox(wxCommandEvent& event) { Update(event.GetInt()); }

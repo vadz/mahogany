@@ -130,7 +130,7 @@ public:
 
 /// dynamic object creation helpers
 #define DECLARE_ADB_PROVIDER(name)                                            \
-  String GetProviderName() const;                                             \
+  String GetProviderName() const override;                                    \
   static AdbProviderInfo ms_info
 #define IMPLEMENT_ADB_PROVIDER(name, bCanCreate, userName, fmt)               \
   String name::GetProviderName() const { return #name; }                      \

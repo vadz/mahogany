@@ -283,7 +283,7 @@ public:
    class cname ## Factory : public MCryptoEngineFactory                       \
    {                                                                          \
    public:                                                                    \
-      virtual MCryptoEngine *Get() { return cname::Get(); }                   \
+      MCryptoEngine *Get() override { return cname::Get(); }                  \
                                                                               \
       MMODULE_DEFINE();                                                       \
       DEFAULT_ENTRY_FUNC;                                                     \

@@ -200,7 +200,7 @@ public:
    ~FolderMonitorTraversal()
       { m_folder->DecRef(); }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          MFolder_obj folder(folderName);
 
@@ -240,12 +240,12 @@ public:
    virtual ~FolderMonitorImpl();
 
    // implement the FolderMonitor pure virtuals
-   virtual bool CheckNewMail(int flags);
-   virtual bool AddOrRemoveFolder(MFolder *folder, bool add);
-   virtual long GetMinCheckTimeout(void) const;
+   bool CheckNewMail(int flags) override;
+   bool AddOrRemoveFolder(MFolder *folder, bool add) override;
+   long GetMinCheckTimeout(void) const override;
 
    // react to folder deletion by removing it from the list of folders to poll
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 protected:
    /// check for new mail, must be called with m_inNewMailCheck locked

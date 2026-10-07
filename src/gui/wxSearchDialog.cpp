@@ -81,8 +81,8 @@ public:
                          wxWindow *parent);
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
 protected:
    // event handlers

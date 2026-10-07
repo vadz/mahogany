@@ -699,8 +699,8 @@ public:
    virtual ~wxGlobalOptionsDialog();
 
    // override base class functions
-   virtual void CreateNotebook(wxPanel *panel);
-   virtual bool TransferDataToWindow();
+   void CreateNotebook(wxPanel *panel) override;
+   bool TransferDataToWindow() override;
 
    // return TRUE if this dialog edits global options for the program, FALSE
    // if this is another kind of dialog
@@ -708,7 +708,7 @@ public:
 
 protected:
    // implement base class pure virtual
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       return ((wxOptionsNotebook *)m_notebook)->GetProfile();
    }
@@ -774,7 +774,7 @@ public:
    }
 
    // overloaded base class virtual
-   virtual void CreateNotebook(wxPanel *panel)
+   void CreateNotebook(wxPanel *panel) override
    {
       m_notebook = new wxCustomOptionsNotebook(panel,
                                                m_nPages,
@@ -784,7 +784,7 @@ public:
    }
 
 protected:
-   Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       SafeIncRef(m_profile);
       return m_profile;
@@ -836,11 +836,11 @@ public:
    // editing identities shouldn't give warning about "important programs
    // settings were changed" as the only really important ones are the global
    // ones
-   virtual void SetDoTest() { SetDirty(); } // TODO: might do something here
-   virtual void SetGiveRestartWarning() { }
+   void SetDoTest() override { SetDirty(); } // TODO: might do something here
+   void SetGiveRestartWarning() override { }
 
    // we're not the global options dialog
-   virtual bool IsGlobalOptionsDialog() const { return FALSE; }
+   bool IsGlobalOptionsDialog() const override { return FALSE; }
 
 protected:
    enum
@@ -878,7 +878,7 @@ public:
    bool HasChanges() const { return m_hasChanges; }
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 private:
    wxCheckListBox *m_checklistBox;
@@ -894,8 +894,8 @@ class wxConfigSourcesDialog : public wxManuallyLaidOutDialog
 public:
    wxConfigSourcesDialog(wxFrame *parent);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    // column indices

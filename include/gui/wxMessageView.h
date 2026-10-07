@@ -50,25 +50,25 @@ public:
    /// Destructor
    ~wxMessageView();
 
-   virtual wxWindow *GetContainerWindow() const { return m_viewerParent; }
+   wxWindow *GetContainerWindow() const override { return m_viewerParent; }
 
    /// show message
-   virtual void DoShowMessage(Message *msg);
+   void DoShowMessage(Message *msg) override;
 
    /// update the GUI to show the new viewer window
-   virtual void OnViewerChange(const MessageViewer *viewerOld,
-                               const MessageViewer *viewerNew,
-                               const String& nameViewer);
+   void OnViewerChange(const MessageViewer *viewerOld,
+                       const MessageViewer *viewerNew,
+                       const String& nameViewer) override;
 
    /// create the "View" menu for our parent frame
-   virtual void CreateViewMenu();
+   void CreateViewMenu() override;
 
-   virtual void OnToggleViewFilter(int id);
-   virtual void OnSelectViewer(int id);
+   void OnToggleViewFilter(int id) override;
+   void OnSelectViewer(int id) override;
 
 protected:
-   virtual MessageViewer *CreateDefaultViewer() const;
-   virtual void OnShowHeadersChange();
+   MessageViewer *CreateDefaultViewer() const override;
+   void OnShowHeadersChange() override;
 
 private:
    /// the associated folder view, if any
@@ -104,16 +104,16 @@ public:
 
    MessageView *GetMessageView() { return m_MessageView; }
 
-   virtual void OnMenuCommand(int id);
+   void OnMenuCommand(int id) override;
 
 protected:
    /// handle M events
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 private:
    // implement base class pure virtual methods
-   virtual void DoCreateToolBar();
-   virtual void DoCreateStatusBar();
+   void DoCreateToolBar() override;
+   void DoCreateStatusBar() override;
 
    /// the message view shown inside this frame
    MessageView *m_MessageView;

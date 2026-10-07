@@ -255,7 +255,7 @@ public:
    class cname##Factory : public MessageViewerFactory                      \
    {                                                                       \
    public:                                                                 \
-      virtual MessageViewer *Create() { return new cname; }                \
+      MessageViewer *Create() override { return new cname; }               \
                                                                            \
       MMODULE_DEFINE();                                                    \
       DEFAULT_ENTRY_FUNC;                                                  \

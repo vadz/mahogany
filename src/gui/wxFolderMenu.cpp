@@ -81,7 +81,7 @@ public:
 #endif // __WXGTK__
 
    // base class generic event handler
-   virtual bool OnMEvent(MEventData& /* data */)
+   bool OnMEvent(MEventData& /* data */) override
    {
       OnFolderTreeChangeEvent();
 

@@ -358,8 +358,8 @@ public:
    virtual ~wxOneFilterDialog();
 
    // transfer data to/from dialog
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    // returns TRUE if the format string was changed
    bool HasChanges() const { return !(*m_FilterData == m_OriginalFilterData);}
@@ -1631,8 +1631,8 @@ public:
    wxAllFiltersDialog(wxWindow *parent);
 
    // transfer data to/from dialog
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // returns TRUE if the format string was changed
    bool HasChanges(void) const { return m_hasChanges; }
@@ -1903,7 +1903,7 @@ public:
       , m_nameNew(nameNew)
    {  }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          MFolder* folder = MFolder::Get(folderName);
          CHECK( folder, false, _T("RenameAFilterTraversal: NULL folder") );
@@ -2103,7 +2103,7 @@ public:
                                  folderName));
       }
 
-   virtual bool TransferDataToWindow()
+   bool TransferDataToWindow() override
    {
       return DoFillWithFilters(m_filterNames);
    }
@@ -2122,8 +2122,8 @@ public:
    wxFolderFiltersDialog(MFolder *folder, wxWindow *parent);
    virtual ~wxFolderFiltersDialog();
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    // event handlers
@@ -2393,13 +2393,13 @@ public:
 
    virtual ~wxQuickFilterDialog();
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    // implement base class pure virtual
-   virtual Profile *GetProfile() const;
-   virtual wxWindow *CreateMainWindow(wxPanel *panel);
+   Profile *GetProfile() const override;
+   wxWindow *CreateMainWindow(wxPanel *panel) override;
 
    void DoUpdateUI() { m_action->UpdateUI(); }
 

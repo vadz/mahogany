@@ -206,7 +206,7 @@ public:
    };
 
    // implement the base class pure virtual
-   virtual int Apply(MailFolder *folder, UIdArray& msgs);
+   int Apply(MailFolder *folder, UIdArray& msgs) override;
 
    static FilterRule * Create(const char* filterrule,
                               MInterface *minterface,
@@ -540,7 +540,7 @@ public:
          ASSERT(m_Rule); ASSERT(m_Next);
       }
    ~SequentialEval(void) { delete m_Rule; delete m_Next; }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
 
@@ -569,7 +569,7 @@ public:
    }
 
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = m_Rule->Debug();
@@ -590,7 +590,7 @@ public:
    Statement(const SyntaxNode *r, const SyntaxNode *n)
       : SequentialEval(r, n) {}
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = m_Rule->Debug();
@@ -605,9 +605,9 @@ class Number : public SyntaxNode
 {
 public:
    Number(long v) { m_value = v; }
-   virtual const Value Evaluate() const { MOcheck(); return m_value; }
+   const Value Evaluate() const override { MOcheck(); return m_value; }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       { MOcheck(); String s; s.Printf(_T("%ld"), m_value); return s; }
 #endif
 private:
@@ -619,11 +619,11 @@ class StringConstant : public SyntaxNode
 {
 public:
    StringConstant(String v) : m_String(v) {}
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       { MOcheck(); return m_String; }
 
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s;
@@ -642,7 +642,7 @@ class Negation : public SyntaxNode
 public:
    Negation(const SyntaxNode *sn) { m_Sn = sn; }
    ~Negation() { MOcheck(); delete m_Sn; }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
          Value v = m_Sn->Evaluate();
@@ -650,7 +650,7 @@ public:
             v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s;
@@ -668,7 +668,7 @@ class Negative : public SyntaxNode
 public:
    Negative(const SyntaxNode *sn) { m_Sn = sn; }
    ~Negative() { MOcheck(); delete m_Sn; }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
          Value v = m_Sn->Evaluate();
@@ -676,7 +676,7 @@ public:
             v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s;
@@ -776,13 +776,13 @@ public:
          MOcheck();
          delete m_args;
       }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
          return (*m_fd->GetFPtr())(m_args, m_Parser);
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String temp;
@@ -813,7 +813,7 @@ public:
          delete m_Left;
          delete m_Right;
       }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          MOcheck();
          return m_Cond->Evaluate().ToNumber()
@@ -821,7 +821,7 @@ public:
               : m_Right->Evaluate();
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = _T("(");
@@ -857,7 +857,7 @@ public:
       }
 #ifdef DEBUG
    virtual const wxChar *OperName(void) const = 0;
-   String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = _T("(");
@@ -902,9 +902,9 @@ public: \
       : Expression(l, r) {} \
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
       { return new Operator##name(l, r); } \
-   virtual const Value Evaluate(void) const \
+   const Value Evaluate(void) const override \
       { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
-   virtual const wxChar *OperName(void) const { return _T(#oper); } \
+   const wxChar *OperName(void) const override { return _T(#oper); } \
 }
 
 #else        // not DEBUGing
@@ -918,7 +918,7 @@ public: \
       : Expression(l, r) {} \
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
       { return new Operator##name(l, r); } \
-   virtual const Value Evaluate(void) const \
+   const Value Evaluate(void) const override \
       { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
 }
 #endif
@@ -944,7 +944,7 @@ public:
    OperatorAnd(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
       { return new OperatorAnd(l, r); }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          Value lv = m_Left->Evaluate();
          if(lv.ToNumber())
@@ -953,7 +953,7 @@ public:
          return lv;
       }
 #ifdef DEBUG
-   virtual const wxChar *OperName(void) const { return _T("&&"); }
+   const wxChar *OperName(void) const override { return _T("&&"); }
 #endif
 };
 
@@ -965,7 +965,7 @@ public:
    OperatorOr(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
       { return new OperatorOr(l, r); }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          Value lv = m_Left->Evaluate();
          if(! lv.ToNumber())
@@ -974,7 +974,7 @@ public:
          return lv;
       }
 #ifdef DEBUG
-   virtual const wxChar *OperName(void) const { return _T("||"); }
+   const wxChar *OperName(void) const override { return _T("||"); }
 #endif
 };
 
@@ -997,7 +997,7 @@ public:
          delete m_IfBlock;
          delete m_ElseBlock;
       }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          MOcheck();
          ASSERT(m_Condition != NULL);
@@ -1011,7 +1011,7 @@ public:
          return rc;
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = _T("if(");
@@ -3205,7 +3205,7 @@ class MModule_FiltersImpl : public MModule_Filters
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
    */
-   virtual FilterRule * GetFilter(const char* filterrule) const;
+   FilterRule * GetFilter(const char* filterrule) const override;
    DEFAULT_ENTRY_FUNC
 protected:
    MModule_FiltersImpl()

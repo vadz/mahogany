@@ -86,9 +86,9 @@ public:
    // get the name and description (shown to the user) of the format imported
    // by this class (these functions are automatically generated during
    // IMPLEMENT_ADB_MODULE macro expansion
-   virtual const char *GetName() const = 0;
+   const char *GetName() const override = 0;
    virtual const char *GetFormatDesc() const = 0;
-   virtual const char *GetDescription() const = 0;
+   const char *GetDescription() const override = 0;
 
    virtual ~AdbModule() { }
 
@@ -106,7 +106,7 @@ private:
 // note that GetName() and GetDescription() declarations are inside
 // MMODULE_DEFINE macro
 #define DECLARE_ADB_MODULE()                                               \
-   virtual const char *GetFormatDesc() const;                              \
+   const char *GetFormatDesc() const override;                             \
    DEFAULT_ENTRY_FUNC                                                      \
    MMODULE_DEFINE()
 

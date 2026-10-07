@@ -174,11 +174,11 @@ public:
 
    // transfer data to/from the controls: derived classes should implement
    // DoTransferOptionsTo/FromWindow() instead of overriding those
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // create controls when the page is shown in the notebook for the first time
-   virtual bool Show(bool show = true);
+   bool Show(bool show = true) override;
 
    // to change the profile associated with the page:
    void SetProfile(Profile *profile);
@@ -565,8 +565,8 @@ public:
    }
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    // ctor for New()
@@ -612,8 +612,8 @@ public:
    void OnButton(wxCommandEvent&);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    // create m_folder for our m_Profile
@@ -697,8 +697,8 @@ public:
    void OnButton(wxCommandEvent&);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    // the names of all available viewers
@@ -718,8 +718,8 @@ public:
    wxOptionsPageFolderView(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnButton(wxCommandEvent&);
 
@@ -735,8 +735,8 @@ public:
    wxOptionsPageFolderTree(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    bool m_isHomeOrig;
@@ -752,8 +752,8 @@ public:
    wxOptionsPageFolders(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnUpdateUIBtns(wxUpdateUIEvent&);
 
@@ -772,7 +772,7 @@ class wxOptionsPagePython : public wxOptionsPageStandard
 public:
    wxOptionsPagePython(MBookCtrl *parent, Profile *profile);
 
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPagePython)
@@ -787,8 +787,8 @@ public:
    wxOptionsPageAdb(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageAdb)
@@ -812,8 +812,8 @@ public:
    wxOptionsPageSync(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnButton(wxCommandEvent& event);
 
@@ -839,8 +839,8 @@ public:
    wxOptionsPageOthers(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnButton(wxCommandEvent&);
 

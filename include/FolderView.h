@@ -95,7 +95,7 @@ public:
    //@}
 
    /// event processing function
-   virtual bool OnMEvent(MEventData& ev);
+   bool OnMEvent(MEventData& ev) override;
 
    /// called when our message viewer changes
    virtual void OnMsgViewerChange(wxWindow *viewerNew) = 0;

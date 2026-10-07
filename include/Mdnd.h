@@ -101,9 +101,9 @@ public:
    MMessagesDropTargetBase(wxWindow *win);
 
    /// overridden base class virtuals
-   virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
-   virtual void OnLeave();
-   virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
+   wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def) override;
+   void OnLeave() override;
+   wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) override;
 
    /// the method to override in the derived classes
    virtual wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
@@ -132,8 +132,8 @@ public:
    MMessagesDropTarget(MMessagesDropWhere *where, wxWindow *win);
 
    /// overridden base class virtuals
-   virtual wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
-                                  MMessagesDataObject *data, wxDragResult def);
+   wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
+                          MMessagesDataObject *data, wxDragResult def) override;
 
    /// will delete the MMessagesDropWhere object
    virtual ~MMessagesDropTarget();

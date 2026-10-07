@@ -606,13 +606,13 @@ public:
 
   MNetscapeImporter();
 
-  virtual bool Applies() const;
-  virtual int  GetFeatures() const;
+  bool Applies() const override;
+  int  GetFeatures() const override;
 
-  virtual bool ImportADB();
-  virtual bool ImportFolders(MFolder *folderParent, int flags);
-  virtual bool ImportSettings();
-  virtual bool ImportFilters();
+  bool ImportADB() override;
+  bool ImportFolders(MFolder *folderParent, int flags) override;
+  bool ImportSettings() override;
+  bool ImportFilters() override;
 
   DECLARE_M_IMPORTER();
 

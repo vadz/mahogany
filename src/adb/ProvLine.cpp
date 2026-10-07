@@ -61,58 +61,58 @@ public:
    // ---------------------------
 
    // AdbElement
-   virtual AdbEntryGroup *GetGroup() const { return NULL; }
+   AdbEntryGroup *GetGroup() const override { return NULL; }
 
    // AdbEntryGroup
-   virtual AdbEntry *GetEntry(const String& name);
+   AdbEntry *GetEntry(const String& name) override;
 
-   virtual bool Exists(const String& path);
+   bool Exists(const String& path) override;
 
-   virtual size_t GetEntryNames(wxArrayString& names) const;
-   virtual size_t GetGroupNames(wxArrayString& names) const
+   size_t GetEntryNames(wxArrayString& names) const override;
+   size_t GetGroupNames(wxArrayString& names) const override
       { names.Empty(); return 0; }
 
-   virtual AdbEntryGroup *GetGroup(const String&) const
+   AdbEntryGroup *GetGroup(const String&) const override
       { FAIL_MSG( _T("LineBook::GetGroup was called.") ); return NULL; }
 
-   virtual AdbEntry *CreateEntry(const String& name);
-   virtual AdbEntryGroup *CreateGroup(const String&)
+   AdbEntry *CreateEntry(const String& name) override;
+   AdbEntryGroup *CreateGroup(const String&) override
    {
       FAIL_MSG(
          _T("Nobody asked LineBook whether it supports CreateGroup.") );
       return NULL;
    }
 
-   virtual void DeleteEntry(const String& name);
-   virtual void DeleteGroup(const String&)
+   void DeleteEntry(const String& name) override;
+   void DeleteGroup(const String&) override
       { FAIL_MSG( _T("LineBook::DeleteGroup was called.") ); }
 
-   virtual AdbEntry *FindEntry(const wxChar *name);
+   AdbEntry *FindEntry(const wxChar *name) override;
 
    // AdbBook
-   virtual bool IsSameAs(const String& name) const;
+   bool IsSameAs(const String& name) const override;
 
-   virtual String GetFileName() const { return m_file; }
+   String GetFileName() const override { return m_file; }
 
-   virtual void SetName(const String&)
+   void SetName(const String&) override
    {
       FAIL_MSG( _T("Nobody asked LineBook whether it supports SetName.") );
    }
-   virtual String GetName() const;
+   String GetName() const override;
 
-   virtual void SetDescription(const String&)
+   void SetDescription(const String&) override
    {
       FAIL_MSG(
          _T("Nobody asked LineBook whether it supports SetDescription.") );
    }
-   virtual String GetDescription() const { return m_file; }
+   String GetDescription() const override { return m_file; }
 
-   virtual size_t GetNumberOfEntries() const { return m_entries.size(); }
+   size_t GetNumberOfEntries() const override { return m_entries.size(); }
 
-   virtual bool IsLocal() const { return true; }
-   virtual bool IsReadOnly() const;
+   bool IsLocal() const override { return true; }
+   bool IsReadOnly() const override;
    
-   virtual bool Flush();
+   bool Flush() override;
    
    bool IsBad() const { return m_bad; }
    
@@ -168,30 +168,30 @@ public:
    // AdbEntry
    
    // Don't call IncRef
-   virtual AdbEntryGroup *GetGroup() const { return m_book.get(); }
+   AdbEntryGroup *GetGroup() const override { return m_book.get(); }
 
-   virtual void GetFieldInternal(size_t n, String *pstr) const
+   void GetFieldInternal(size_t n, String *pstr) const override
       { GetField(n, pstr); }
-   virtual void GetField(size_t n, String *pstr) const
+   void GetField(size_t n, String *pstr) const override
       { m_data->GetField(n, pstr); }
 
-   virtual size_t GetEMailCount() const { return 0; }
-   virtual void GetEMail(size_t, String *) const
+   size_t GetEMailCount() const override { return 0; }
+   void GetEMail(size_t, String *) const override
       { FAIL_MSG( _T("LineEntry::GetEMail was called.") ); }
 
-   virtual void ClearDirty() { m_data->ClearDirty(); }
-   virtual bool IsDirty() const { return m_data->IsDirty(); }
+   void ClearDirty() override { m_data->ClearDirty(); }
+   bool IsDirty() const override { return m_data->IsDirty(); }
 
-   virtual void SetField(size_t n, const String& strValue)
+   void SetField(size_t n, const String& strValue) override
       { m_data->SetField(n, strValue); }
 
-   virtual void AddEMail(const String&)
+   void AddEMail(const String&) override
    {
       FAIL_MSG( _T("Nobody asked LineBook whether it supports AddEMail.") );
    }
-   virtual void ClearExtraEMails() { }
+   void ClearExtraEMails() override { }
 
-   virtual int Matches(const wxChar *str, int where, int how) const
+   int Matches(const wxChar *str, int where, int how) const override
       { return m_data->Matches(str, where, how); }
    
    static String StripSpace(const String &address);
@@ -206,14 +206,14 @@ class LineDataProvider : public AdbDataProvider
 {
 public:
    // implement interface methods
-   virtual AdbBook *CreateBook(const String& name);
-   virtual bool EnumBooks(wxArrayString&) { return false; }
-   virtual bool DeleteBook(AdbBook *book);
-   virtual bool TestBookAccess(const String& name, AdbTests test);
+   AdbBook *CreateBook(const String& name) override;
+   bool EnumBooks(wxArrayString&) override { return false; }
+   bool DeleteBook(AdbBook *book) override;
+   bool TestBookAccess(const String& name, AdbTests test) override;
 
-   virtual bool HasField(AdbField field) const
+   bool HasField(AdbField field) const override
       { return field == AdbField_EMail; }
-   virtual bool HasMultipleEMails() const { return false; }
+   bool HasMultipleEMails() const override { return false; }
 
    DECLARE_ADB_PROVIDER(LineDataProvider);
 };

@@ -58,8 +58,8 @@ public:
    wxModulesDialog(wxWindow *parent);
 
    // check the modules which are been currently loaded
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    void OnListBox(wxCommandEvent & ev);
    bool InternalUpdate(size_t n);

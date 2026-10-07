@@ -121,7 +121,7 @@ public:
       m_eventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
    }
 
-   bool OnMEvent(MEventData& event)
+   bool OnMEvent(MEventData& event) override
    {
       if ( event.GetId() == MEventId_OptionsChange )
       {

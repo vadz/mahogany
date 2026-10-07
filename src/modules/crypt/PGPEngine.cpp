@@ -125,32 +125,32 @@ class PGPEngine : public MCryptoEngine
 {
 public:
    // implement the base class pure virtuals
-   virtual Status Decrypt(const String& messageIn,
+   Status Decrypt(const String& messageIn,
+                  String& messageOut,
+                  MCryptoEngineOutputLog *log) override;
+
+   Status Encrypt(const String& recipient,
+                  const String& messageIn,
+                  String &messageOut,
+                  const String& user,
+                  MCryptoEngineOutputLog *log) override;
+
+   Status Sign(const String& user,
+               const String& messageIn,
+               String& messageOut,
+               MCryptoEngineOutputLog *log) override;
+
+   Status VerifySignature(const String& messageIn,
                           String& messageOut,
-                          MCryptoEngineOutputLog *log);
+                          MCryptoEngineOutputLog *log) override;
 
-   virtual Status Encrypt(const String& recipient,
-                          const String& messageIn,
-                          String &messageOut,
-                          const String& user,
-                          MCryptoEngineOutputLog *log);
+   Status VerifyDetachedSignature(const String& message,
+                                  const String& signature,
+                                  MCryptoEngineOutputLog *log) override;
 
-   virtual Status Sign(const String& user,
-                       const String& messageIn,
-                       String& messageOut,
-                       MCryptoEngineOutputLog *log);
-
-   virtual Status VerifySignature(const String& messageIn,
-                                  String& messageOut,
-                                  MCryptoEngineOutputLog *log);
-
-   virtual Status VerifyDetachedSignature(const String& message,
-                                          const String& signature,
-                                          MCryptoEngineOutputLog *log);
-
-   virtual Status GetPublicKey(const String& pk,
-                               const String& server,
-                               MCryptoEngineOutputLog *log) const;
+   Status GetPublicKey(const String& pk,
+                       const String& server,
+                       MCryptoEngineOutputLog *log) const override;
 
 protected:
    /**
@@ -199,7 +199,7 @@ class PGPProcess : public wxProcess
 public:
    PGPProcess() { m_done = false; Redirect(); }
 
-   virtual void OnTerminate(int /* pid */, int /* status */)
+   void OnTerminate(int /* pid */, int /* status */) override
    {
       m_done = true;
    }

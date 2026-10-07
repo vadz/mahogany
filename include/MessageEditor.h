@@ -379,7 +379,7 @@ public:
    class cname##Factory : public MessageEditorFactory                      \
    {                                                                       \
    public:                                                                 \
-      virtual MessageEditor *Create() { return new cname; }                \
+      MessageEditor *Create() override { return new cname; }               \
                                                                            \
       MMODULE_DEFINE();                                                    \
       DEFAULT_ENTRY_FUNC;                                                  \

@@ -132,8 +132,8 @@ public:
    }
 
    // trivial implementation of base class pure virtuals
-   virtual String GetPath() const { return m_path; }
-   virtual void SetPath(const String& path)
+   String GetPath() const override { return m_path; }
+   void SetPath(const String& path) override
    {
       m_path = path;
 
@@ -147,26 +147,26 @@ public:
 #endif // Windows
    }
 
-   virtual String GetServer() const { return m_server; }
-   virtual void SetServer(const String& server) { m_server = server; }
+   String GetServer() const override { return m_server; }
+   void SetServer(const String& server) override { m_server = server; }
 
-   virtual String GetLogin() const { return m_login; }
-   virtual String GetPassword() const { return m_password; }
-   virtual void SetAuthInfo(const String& login, const String& password)
+   String GetLogin() const override { return m_login; }
+   String GetPassword() const override { return m_password; }
+   void SetAuthInfo(const String& login, const String& password) override
       { m_login = login; m_password = password; }
 
-   virtual void SetFileMboxFormat(FileMailboxFormat format)
+   void SetFileMboxFormat(FileMailboxFormat format) override
    {
       m_format = format;
    }
-   virtual FileMailboxFormat GetFileMboxFormat() const { return m_format; }
+   FileMailboxFormat GetFileMboxFormat() const override { return m_format; }
 
-   virtual String GetName() const { return m_fullname.AfterLast('/'); }
-   virtual wxString GetFullName() const { return m_fullname; }
-   virtual MFolderType GetType() const { return m_type; }
-   virtual String GetClass() const { return GetClassForType(m_type); }
+   String GetName() const override { return m_fullname.AfterLast('/'); }
+   wxString GetFullName() const override { return m_fullname; }
+   MFolderType GetType() const override { return m_type; }
+   String GetClass() const override { return GetClassForType(m_type); }
 
-   virtual SSLSupport GetSSL(SSLCert *cert) const
+   SSLSupport GetSSL(SSLCert *cert) const override
    {
       if ( cert )
          *cert = m_cert;
@@ -174,47 +174,47 @@ public:
       return m_ssl;
    }
 
-   virtual void SetSSL(SSLSupport ssl, SSLCert cert)
+   void SetSSL(SSLSupport ssl, SSLCert cert) override
    {
       m_ssl = ssl;
       m_cert = cert;
    }
 
-   virtual bool ShouldTryToCreate() const { return m_tryToCreate; }
-   virtual void DontTryToCreate() { m_tryToCreate = false; }
+   bool ShouldTryToCreate() const override { return m_tryToCreate; }
+   void DontTryToCreate() override { m_tryToCreate = false; }
 
-   virtual int GetIcon() const { return -1; }
-   virtual void SetIcon(int /* icon */) { }
+   int GetIcon() const override { return -1; }
+   void SetIcon(int /* icon */) override { }
 
-   virtual String GetComment() const { return wxEmptyString; }
-   virtual void SetComment(const String& /* comment */) { }
+   String GetComment() const override { return wxEmptyString; }
+   void SetComment(const String& /* comment */) override { }
 
-   virtual int GetFlags() const { return m_flags; }
-   virtual void SetFlags(int flags) { m_flags = flags; }
+   int GetFlags() const override { return m_flags; }
+   void SetFlags(int flags) override { m_flags = flags; }
 
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       m_profile->IncRef();
       return m_profile;
    }
 
-   virtual wxArrayString GetFilters() const { return wxArrayString(); }
-   virtual void SetFilters(const wxArrayString& /* filters */) { }
-   virtual void PrependFilter(const String& /* filter */) { }
-   virtual void AddFilter(const String& /* filter */) { }
-   virtual void RemoveFilter(const String& /* filter */) { }
+   wxArrayString GetFilters() const override { return wxArrayString(); }
+   void SetFilters(const wxArrayString& /* filters */) override { }
+   void PrependFilter(const String& /* filter */) override { }
+   void AddFilter(const String& /* filter */) override { }
+   void RemoveFilter(const String& /* filter */) override { }
 
    // we're outside the tree, so none of these functions make sense for us
-   virtual size_t GetSubfolderCount() const { return 0; }
-   virtual MFolder *GetSubfolder(size_t) const { return NULL; }
-   virtual MFolder *GetSubfolder(const String&) const { return NULL; }
-   virtual MFolder *GetParent() const { return NULL; }
-   virtual MFolder *CreateSubfolder(const String&,
-                                    MFolderType, bool) { return NULL; }
-   virtual void Delete() { FAIL_MSG(_T("doesn't make sense for MTempFolder")); }
-   virtual bool Rename(const String&)
+   size_t GetSubfolderCount() const override { return 0; }
+   MFolder *GetSubfolder(size_t) const override { return NULL; }
+   MFolder *GetSubfolder(const String&) const override { return NULL; }
+   MFolder *GetParent() const override { return NULL; }
+   MFolder *CreateSubfolder(const String&,
+                            MFolderType, bool) override { return NULL; }
+   void Delete() override { FAIL_MSG(_T("doesn't make sense for MTempFolder")); }
+   bool Rename(const String&) override
       { FAIL_MSG(_T("doesn't make sense for MTempFolder")); return false; }
-   virtual bool Move(MFolder*)
+   bool Move(MFolder*) override
       { FAIL_MSG(_T("doesn't make sense for MTempFolder")); return false; }
 
 private:
@@ -278,63 +278,63 @@ public:
    static bool Create(const String& fullname);
 
    // implement base class pure virtuals
-   virtual String GetPath() const;
-   virtual void SetPath(const String& path);
-   virtual String GetServer() const;
-   virtual void SetServer(const String& server);
-   virtual String GetLogin() const;
-   virtual String GetPassword() const;
-   virtual void SetAuthInfo(const String& login, const String& password);
+   String GetPath() const override;
+   void SetPath(const String& path) override;
+   String GetServer() const override;
+   void SetServer(const String& server) override;
+   String GetLogin() const override;
+   String GetPassword() const override;
+   void SetAuthInfo(const String& login, const String& password) override;
 
-   virtual void SetFileMboxFormat(FileMailboxFormat format);
-   virtual FileMailboxFormat GetFileMboxFormat() const;
+   void SetFileMboxFormat(FileMailboxFormat format) override;
+   FileMailboxFormat GetFileMboxFormat() const override;
 
-   virtual String GetName() const;
-   virtual wxString GetFullName() const { return m_folderName; }
+   String GetName() const override;
+   wxString GetFullName() const override { return m_folderName; }
 
-   virtual MFolderType GetType() const;
-   virtual String GetClass() const;
-   virtual SSLSupport GetSSL(SSLCert *acceptUnsigned) const;
-   virtual void SetSSL(SSLSupport ssl, SSLCert cert);
+   MFolderType GetType() const override;
+   String GetClass() const override;
+   SSLSupport GetSSL(SSLCert *acceptUnsigned) const override;
+   void SetSSL(SSLSupport ssl, SSLCert cert) override;
 
-   virtual bool ShouldTryToCreate() const;
-   virtual void DontTryToCreate();
+   bool ShouldTryToCreate() const override;
+   void DontTryToCreate() override;
 
-   virtual int GetIcon() const;
-   virtual void SetIcon(int icon);
+   int GetIcon() const override;
+   void SetIcon(int icon) override;
 
-   virtual String GetComment() const;
-   virtual void SetComment(const String& comment);
+   String GetComment() const override;
+   void SetComment(const String& comment) override;
 
-   virtual int GetTreeIndex() const;
-   virtual void SetTreeIndex(int pos);
+   int GetTreeIndex() const override;
+   void SetTreeIndex(int pos) override;
 
-   virtual int GetFlags() const;
-   virtual void SetFlags(int flags);
+   int GetFlags() const override;
+   void SetFlags(int flags) override;
 
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       m_profile->IncRef();
       return m_profile;
    }
 
-   virtual wxArrayString GetFilters() const;
-   virtual void SetFilters(const wxArrayString& filters);
-   virtual void PrependFilter(const String& filter);
-   virtual void AddFilter(const String& filter);
-   virtual void RemoveFilter(const String& filter);
+   wxArrayString GetFilters() const override;
+   void SetFilters(const wxArrayString& filters) override;
+   void PrependFilter(const String& filter) override;
+   void AddFilter(const String& filter) override;
+   void RemoveFilter(const String& filter) override;
 
-   virtual size_t GetSubfolderCount() const;
-   virtual MFolder *GetSubfolder(size_t n) const;
-   virtual MFolder *GetSubfolder(const String& name) const;
-   virtual MFolder *GetParent() const;
+   size_t GetSubfolderCount() const override;
+   MFolder *GetSubfolder(size_t n) const override;
+   MFolder *GetSubfolder(const String& name) const override;
+   MFolder *GetParent() const override;
 
-   virtual MFolder *CreateSubfolder(const String& name,
-                                    MFolderType type,
-                                    bool tryCreateLater);
-   virtual void Delete();
-   virtual bool Rename(const String& newName);
-   virtual bool Move(MFolder* newParent);
+   MFolder *CreateSubfolder(const String& name,
+                            MFolderType type,
+                            bool tryCreateLater) override;
+   void Delete() override;
+   bool Rename(const String& newName) override;
+   bool Move(MFolder* newParent) override;
 
 protected:
    /** Get the full name of the subfolder.
@@ -390,28 +390,28 @@ public:
    virtual ~MRootFolderFromProfile() { }
 
    // implement base class pure virtuals (some of them don't make sense to us)
-   virtual MFolderType GetType() const { return MF_ROOT; }
-   virtual bool NeedsNetwork(void) const { return false; }
-   virtual void SetSSL(SSLSupport, SSLCert) { }
+   MFolderType GetType() const override { return MF_ROOT; }
+   bool NeedsNetwork(void) const override { return false; }
+   void SetSSL(SSLSupport, SSLCert) override { }
 
-   virtual bool ShouldTryToCreate() const
+   bool ShouldTryToCreate() const override
       { FAIL_MSG(_T("doesn't make sense for root folder")); return false; }
-   virtual void DontTryToCreate()
+   void DontTryToCreate() override
       { FAIL_MSG(_T("doesn't make sense for root folder")); }
 
-   virtual String GetComment() const { return wxEmptyString; }
-   virtual void SetComment(const String& /* comment */)
+   String GetComment() const override { return wxEmptyString; }
+   void SetComment(const String& /* comment */) override
       { FAIL_MSG(_T("can not set root folder attributes.")); }
 
-   virtual int GetFlags() const { return 0u; }
-   virtual void SetFlags(int /* flags */)
+   int GetFlags() const override { return 0u; }
+   void SetFlags(int /* flags */) override
       { FAIL_MSG(_T("can not set root folder attributes.")); }
 
-   virtual MFolder *GetParent() const { return NULL; }
+   MFolder *GetParent() const override { return NULL; }
 
-   virtual void Delete()
+   void Delete() override
       { FAIL_MSG(_T("can not delete root folder.")); }
-   virtual bool Rename(const String& /* newName */)
+   bool Rename(const String& /* newName */) override
       { FAIL_MSG(_T("can not rename root folder.")); return false; }
    virtual bool Move(const MFolder* /* newParent */)
       { FAIL_MSG(_T("can not move root folder.")); return false; }
@@ -428,7 +428,7 @@ public:
   CountTraversal(const MFolderFromProfile *folder) : MFolderTraversal(*folder)
     { m_count = 0; }
 
-  virtual bool OnVisitFolder(const wxString& /* folderName */)
+  bool OnVisitFolder(const wxString& /* folderName */) override
     { m_count++; return true; }
 
   size_t GetCount() const { return m_count; }
@@ -444,7 +444,7 @@ public:
    IndexTraversal(const MFolderFromProfile *folder, size_t count)
       : MFolderTraversal(*folder) { m_count = count; }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
    {
       if ( m_count-- == 0 )
       {

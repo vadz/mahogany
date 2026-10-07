@@ -45,8 +45,8 @@
 class AdbVCardExporter : public AdbExporter
 {
 public:
-   virtual bool Export(AdbEntryGroup& group, const String& dest);
-   virtual bool Export(const AdbEntry& entry, const String& dest);
+   bool Export(AdbEntryGroup& group, const String& dest) override;
+   bool Export(const AdbEntry& entry, const String& dest) override;
 
 protected:
    // the real workers

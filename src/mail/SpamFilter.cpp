@@ -107,7 +107,7 @@ public:
       Layout();
    }
 
-   virtual wxControl *CreateControlsAbove(wxPanel *panel)
+   wxControl *CreateControlsAbove(wxPanel *panel) override
    {
       wxControl *last = NULL;
 
@@ -133,7 +133,7 @@ public:
       return last;
    }
 
-   virtual void CreateNotebook(wxPanel *panel)
+   void CreateNotebook(wxPanel *panel) override
    {
       m_notebook = new MBookCtrl(panel, wxID_ANY);
       Connect(M_EVT_BOOK_PAGE_CHANGED,
@@ -157,7 +157,7 @@ public:
       wxPersistentRegisterAndRestore(m_notebook, "SpamOptions");
    }
 
-   virtual bool TransferDataFromWindow()
+   bool TransferDataFromWindow() override
    {
       if ( !wxOptionsEditDialog::TransferDataFromWindow() )
          return false;
@@ -176,7 +176,7 @@ public:
    }
 
 protected:
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       SafeIncRef(m_profile);
       return m_profile;

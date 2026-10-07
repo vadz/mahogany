@@ -719,7 +719,7 @@ private:
    void UnregisterForEvents();
 
    /// internal M events processing function
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    /// process the result of an async operation (e.g. message retrieval)
    void OnASFolderResultEvent(MEventASFolderResultData& event);

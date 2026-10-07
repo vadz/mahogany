@@ -724,7 +724,7 @@ GetMessageTemplateNames(MessageTemplateKind kind)
 class StringTemplateSink : public MessageTemplateSink
 {
 public:
-    virtual bool Output(const String& text)
+    bool Output(const String& text) override
     {
          m_output += text;
          return true;

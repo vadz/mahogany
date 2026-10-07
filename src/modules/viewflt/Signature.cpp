@@ -51,7 +51,7 @@ public:
       ReadOptions(m_options, msgView->GetProfile());
    }
 
-   virtual bool UpdateOptions(Profile *profile);
+   bool UpdateOptions(Profile *profile) override;
 
 protected:
    struct Options
@@ -62,9 +62,9 @@ protected:
       bool operator==(const Options& o) const { return SigCol == o.SigCol; }
    };
 
-   virtual void DoProcess(String& text,
-                          MessageViewer *viewer,
-                          MTextStyle& style);
+   void DoProcess(String& text,
+                  MessageViewer *viewer,
+                  MTextStyle& style) override;
 
    // fill m_options using the values from the given profile
    void ReadOptions(Options& options, Profile *profile);

@@ -73,10 +73,10 @@ public:
    const wxString& GetFileName() const { return m_filename; }
 
    // fill the listbox with importer names
-   virtual bool TransferDataToWindow();
+   bool TransferDataToWindow() override;
 
    // save the controls values
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
    // set the controls state
    void DoUpdateUI();
@@ -128,7 +128,7 @@ public:
    // get the index of the selected item in the listbox
    int GetSelection() const { return m_listbox->GetSelection(); }
 
-   virtual bool TransferDataToWindow();
+   bool TransferDataToWindow() override;
 
    // control ids
    enum

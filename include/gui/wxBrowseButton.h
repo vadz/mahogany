@@ -100,7 +100,7 @@ public:
    }
 
    // enable/disable associated text control with us
-   virtual bool Enable(bool enable)
+   bool Enable(bool enable) override
    {
       if ( !wxButton::Enable(enable) )
          return false;
@@ -162,7 +162,7 @@ public:
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file
-   virtual void DoBrowse();
+   void DoBrowse() override;
 
 private:
    bool m_open,
@@ -186,7 +186,7 @@ public:
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected directory
-   virtual void DoBrowse();
+   void DoBrowse() override;
 
 private:
    // a hack for wxFileOrDirBrowseButton convenience
@@ -221,7 +221,7 @@ public:
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file or directory
-   virtual void DoBrowse();
+   void DoBrowse() override;
 
 private:
    // set the tooltip corresponding to our current browse mode
@@ -249,7 +249,7 @@ public:
    virtual ~wxFolderBrowseButton();
 
    // show the folder selection dialog
-   virtual void DoBrowse();
+   void DoBrowse() override;
 
    // get the folder chosen by user (may be NULL)
    MFolder *GetFolder() const;
@@ -274,7 +274,7 @@ public:
    wxColour GetColor() const { return m_color; }
 
    // show the color selection dialog
-   virtual void DoBrowse();
+   void DoBrowse() override;
 
    // get/set the text value: must use these functions instead of wxTextCtrl
    // methods to update the button colour as well!
@@ -308,7 +308,7 @@ public:
    wxFontBrowseButton(wxTextCtrl *text, wxWindow *parent);
 
    // show the font selection dialog
-   virtual void DoBrowse();
+   void DoBrowse() override;
 
 private:
    DECLARE_NO_COPY_CLASS(wxFontBrowseButton)
@@ -367,7 +367,7 @@ public:
    int GetIconIndex() const { return m_nIcon; }
 
    // show the icon selection dialog
-   virtual void DoBrowse();
+   void DoBrowse() override;
 
 protected:
    // common part of all ctors
