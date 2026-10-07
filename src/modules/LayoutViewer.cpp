@@ -114,9 +114,8 @@ private:
    // set the text colour
    void SetTextColour(const wxColour& col);
 
-   // emulate a key press: this is the only way I found to scroll
-   // wxLayoutWindow
-   void EmulateKeyPress(int keycode);
+   // emulate the effect of a wxScrollWinEvent with the given type
+   void EmulateScroll(wxEventType evtType);
 
    // the viewer window
    LayoutViewerWindow *m_window;
@@ -651,16 +650,13 @@ void LayoutViewer::EndBody()
 // scrolling
 // ----------------------------------------------------------------------------
 
-void LayoutViewer::EmulateKeyPress(int keycode)
+void LayoutViewer::EmulateScroll(wxEventType evtType)
 {
-   wxKeyEvent event;
-   event.m_keyCode = keycode;
+   wxScrollWinEvent event(evtType, 0, wxVERTICAL);
+   event.SetEventObject(m_window);
+   event.SetId(m_window->GetId());
 
-#ifdef __WXGTK__
-   m_window->OnChar(event);
-#else
-   m_window->HandleOnChar(event);
-#endif
+   m_window->ProcessWindowEvent(event);
 }
 
 /// scroll down one line:
@@ -669,7 +665,7 @@ LayoutViewer::LineDown()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_DOWN);
+   EmulateScroll(wxEVT_SCROLLWIN_LINEDOWN);
 
    return check.HasChanged();
 }
@@ -680,7 +676,7 @@ LayoutViewer::LineUp()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_UP);
+   EmulateScroll(wxEVT_SCROLLWIN_LINEUP);
 
    return check.HasChanged();
 }
@@ -691,7 +687,7 @@ LayoutViewer::PageDown()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_PAGEDOWN);
+   EmulateScroll(wxEVT_SCROLLWIN_PAGEDOWN);
 
    return check.HasChanged();
 }
@@ -702,7 +698,7 @@ LayoutViewer::PageUp()
 {
    ScrollPositionChangeChecker check(m_window);
 
-   EmulateKeyPress(WXK_PAGEUP);
+   EmulateScroll(wxEVT_SCROLLWIN_PAGEUP);
 
    return check.HasChanged();
 }
