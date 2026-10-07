@@ -26,6 +26,7 @@
  * Last Edited:	13 January 2008
  */
 
+#include <poll.h>
 #include "ip_unix.c"
 
 #undef write			/* don't use redefined write() */
