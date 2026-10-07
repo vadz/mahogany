@@ -22,6 +22,11 @@ distributions even if you manage to install them.
 Note: wxWindows name has been changed to wxWidgets recently. Please
       replace accordingly.
 
+Note: if you build Mahogany from Git, the c-client library sources are
+      in lib/imap submodule, so either clone the repository with
+      --recurse-submodules or run "git submodule update --init" after
+      cloning it.
+
 --------------------------------------------------------------------
 Unix compilation instructions
 --------------------------------------------------------------------
