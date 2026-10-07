@@ -1203,7 +1203,7 @@ private:
 #endif // USE_READ_PROGRESS
 
 // ----------------------------------------------------------------------------
-// LastNewUIDList: stores the UID of the last seen new message permanently,
+// gs_lastNewUIDList: stores the UID of the last seen new message permanently,
 //                 i.e. keeps it even after the folder was closed
 // ----------------------------------------------------------------------------
 
@@ -1229,9 +1229,7 @@ struct LastNewUIDEntry
    UIdType m_uidValidity;
 };
 
-M_LIST_OWN(LastNewUIDList, LastNewUIDEntry);
-
-static LastNewUIDList gs_lastNewUIDList;
+static std::vector<LastNewUIDEntry> gs_lastNewUIDList;
 
 // ============================================================================
 // implementation
@@ -1693,14 +1691,12 @@ void MailFolderCC::Init()
    m_uidValidity = UID_ILLEGAL;
 
    // maybe we had stored the UID of the last new message for this folder?
-   for ( LastNewUIDList::iterator i = gs_lastNewUIDList.begin();
-         i != gs_lastNewUIDList.end();
-         ++i )
+   for ( const LastNewUIDEntry& entry : gs_lastNewUIDList )
    {
-      if ( i->m_folderName == GetName() )
+      if ( entry.m_folderName == GetName() )
       {
-         m_uidLastNew = i->m_uidLastNew;
-         m_uidValidity = i->m_uidValidity;
+         m_uidLastNew = entry.m_uidLastNew;
+         m_uidValidity = entry.m_uidValidity;
 
          break;
       }
@@ -2398,8 +2394,8 @@ MailFolderCC::Close(bool mayLinger)
    // save our last new UID in case this folder is going to be reopened later
    String folderName = GetName();
 
-   LastNewUIDList::iterator i;
-   for ( i = gs_lastNewUIDList.begin(); i != gs_lastNewUIDList.end(); ++i )
+   auto i = gs_lastNewUIDList.begin();
+   for ( ; i != gs_lastNewUIDList.end(); ++i )
    {
       if ( i->m_folderName == folderName )
       {
@@ -2412,13 +2408,7 @@ MailFolderCC::Close(bool mayLinger)
 
    if ( i == gs_lastNewUIDList.end() )
    {
-      // note that the lists take ownership of the entry
-      gs_lastNewUIDList.push_front(new LastNewUIDEntry
-                                       (
-                                          folderName,
-                                          m_uidLastNew,
-                                          m_uidValidity
-                                       ));
+      gs_lastNewUIDList.emplace_back(folderName, m_uidLastNew, m_uidValidity);
    }
 }
 
