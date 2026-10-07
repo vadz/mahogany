@@ -508,7 +508,7 @@ static String ExtractFirstOrLastName(const String& fullname, bool first)
 {
    String value;
 
-   AddressList_obj addrList(fullname);
+   AddressList_obj addrList(AddressList::Create(fullname));
    for ( Address *addr = addrList->GetFirst();
          addr;
          addr = addrList->GetNext(addr) )
@@ -1379,7 +1379,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
          case OriginalHeader_Domain:
             {
-               AddressList_obj addrList(m_msg->From());
+               AddressList_obj addrList(AddressList::Create(m_msg->From()));
                Address *addr = addrList->GetFirst();
                if ( addr )
                {

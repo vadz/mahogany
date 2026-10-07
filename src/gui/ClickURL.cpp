@@ -215,7 +215,8 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_ADD_TO_WHITELIST:
       case WXMENU_ADD_DOMAIN_TO_WHITELIST:
          {
-            AddressList_obj addrList(m_clickableURL->GetUrl());
+            AddressList_obj
+               addrList(AddressList::Create(m_clickableURL->GetUrl()));
             Address *addr = addrList->GetFirst();
             if ( !addr )
             {

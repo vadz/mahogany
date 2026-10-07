@@ -1131,7 +1131,7 @@ GetFilterForFolder(const MFolder *folder)
    size_t countFilters = filters.GetCount();
    for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
    {
-      MFilter_obj filter(filters[nFilter]);
+      MFilter_obj filter(MFilter::CreateFromProfile(filters[nFilter]));
       MFilterDesc fd = filter->GetDesc();
       filterString += fd.GetRule();
    }

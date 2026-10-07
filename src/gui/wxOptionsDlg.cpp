@@ -4421,10 +4421,10 @@ bool wxOptionsPageSync::DoTransferOptionsFromWindow()
             if ( !usingConfigFile )
             {
                // importing to registry, not exporting from it
-               configSrc.Swap(configDst);
+               configSrc.swap(configDst);
             }
 
-            if ( !ConfigSource::Copy(*configDst.Get(), *configSrc.Get()) )
+            if ( !ConfigSource::Copy(*configDst, *configSrc) )
             {
                if ( usingConfigFile )
                   wxLogError(_("Failed to export settings to the file \"%s\"."),

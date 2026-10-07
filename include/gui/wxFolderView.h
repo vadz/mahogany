@@ -34,7 +34,6 @@ class MessageView;
 class MsgCmdProc;
 class ASMailFolder;
 class ASTicketList;
-class HeaderInfoList_obj;
 class FolderViewAsyncStatus;
 
 enum wxFolderListColumn

@@ -726,7 +726,7 @@ wxMFrame::OnMenuCommand(int id)
                configDst(ConfigSourceLocal::CreateFile(path));
             if ( !doExport )
             {
-               configSrc.Swap(configDst);
+               configSrc.swap(configDst);
             }
 
             bool ok = ConfigSource::Copy(*configDst, *configSrc);

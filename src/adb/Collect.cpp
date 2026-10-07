@@ -47,9 +47,9 @@
 // private classes
 // ----------------------------------------------------------------------------
 
-DECLARE_AUTOPTR(AdbEntry);
-DECLARE_AUTOPTR(AdbEntryGroup);
-DECLARE_AUTOPTR(AdbBook);
+using AdbEntry_obj = DecRefPtr<AdbEntry>;
+using AdbEntryGroup_obj = DecRefPtr<AdbEntryGroup>;
+using AdbBook_obj = DecRefPtr<AdbBook>;
 
 // ============================================================================
 // implementation of our public API
@@ -413,7 +413,8 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
          size_t saved = 0;
          for ( size_t n = 0; n < count; n++ )
          {
-            AddressList_obj addrList(addresses[selections[n]]);
+            AddressList_obj
+               addrList(AddressList::Create(addresses[selections[n]]));
 
             for ( Address *addr = addrList->GetFirst();
                   addr;

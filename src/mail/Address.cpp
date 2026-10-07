@@ -95,7 +95,7 @@ bool Address::operator==(const String& address) const
 {
    CHECK( IsValid(), false, _T("can't compare invalid addresses") );
 
-   AddressList_obj addrList(address);
+   AddressList_obj addrList(AddressList::Create(address));
    Address *addr = addrList->GetFirst();
 
    return addr && !addrList->HasNext(addr) && IsSameAs(*addr);
@@ -104,8 +104,8 @@ bool Address::operator==(const String& address) const
 /* static */
 bool Address::Compare(const String& address1, const String& address2)
 {
-   AddressList_obj addrList1(address1),
-                   addrList2(address2);
+   AddressList_obj addrList1(AddressList::Create(address1)),
+                   addrList2(AddressList::Create(address2));
    const Address * const addr1 = addrList1->GetFirst(),
                  * const addr2 = addrList2->GetFirst();
 
@@ -333,7 +333,7 @@ Address::IsInList(const wxArrayString& addresses,
    String mailbox,
           domain;
 
-   AddressList_obj addrList(address);
+   AddressList_obj addrList(AddressList::Create(address));
    for ( Address *addr = addrList->GetFirst();
          addr;
          addr = addrList->GetNext(addr) )

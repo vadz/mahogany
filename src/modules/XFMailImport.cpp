@@ -127,7 +127,7 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
    }
    else if ( var == _T("from") )
    {
-      AddressList_obj addrList(value);
+      AddressList_obj addrList(AddressList::Create(value));
       Address *addr = addrList->GetFirst();
       if ( addr )
       {
@@ -686,7 +686,7 @@ typedef struct _xf_rule {
       }
 
       // now create our rule from this data
-      MFilter_obj filter(name);
+      MFilter_obj filter(MFilter::CreateFromProfile(name));
       MFilterDesc fd;
       MFDialogSettings *settings = MFDialogSettings::Create();
       fd.SetName(name);

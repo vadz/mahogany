@@ -337,13 +337,7 @@ public:
 };
 
 /// smart reference to MFilter
-BEGIN_DECLARE_AUTOPTR(MFilter)
-   public:
-      MFilter_obj(const String& name)
-      {
-         m_ptr = MFilter::CreateFromProfile(name);
-      }
-END_DECLARE_AUTOPTR();
+using MFilter_obj = DecRefPtr<MFilter>;
 
 /**
   Returns the filter program for the given folder. If no filters are specified

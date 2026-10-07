@@ -1624,7 +1624,7 @@ bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
    }
 
    // now copy all the messages from src to dst
-   return CopyMessages(mf, folderDst);
+   return CopyMessages(mf.get(), folderDst);
 }
 
 bool MigrateWizardProgressPage::ProcessAllFolders()

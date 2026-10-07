@@ -1135,7 +1135,7 @@ MailFolder::ReplyMessage(Message *msg,
       if ( ContainsOwnAddress(to, profile, &from) )
       {
          // check if the personal name is missing
-         AddressList_obj addrFrom(from);
+         AddressList_obj addrFrom(AddressList::Create(from));
          Address *addr = addrFrom->GetFirst();
          if ( addr && addr->GetName().empty() )
          {

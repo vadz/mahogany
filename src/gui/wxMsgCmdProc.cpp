@@ -905,7 +905,7 @@ void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
    SendMessage_obj msgCopy(SendMessage::CreateFromMsg
                            (
                                GetProfile(),
-                               msg.Get(),
+                               msg.get(),
                                Prot_SMTP,
                                GetFrame(),
                                &partsRemove
@@ -1138,7 +1138,7 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
       SendMessage_obj sendMsg(SendMessage::CreateResent
                               (
                                   GetProfile(),
-                                  msg.Get(),
+                                  msg.get(),
                                   GetFrame()
                               ));
 
@@ -1527,7 +1527,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    MailFolder_obj mf(GetMailFolder());
    CHECK( mf, false, _T("no mail folder to drag messages from?") );
 
-   MMessagesDataObject dropData(this, mf, selections);
+   MMessagesDataObject dropData(this, mf.get(), selections);
 
    // setting up the dnd icons can't be done in portable way :-(
 #if defined(__WXMSW__) || defined(__WXMAC__)

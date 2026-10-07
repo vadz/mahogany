@@ -3048,7 +3048,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
             {
                String names;
 
-               AddressList_obj addrList(text);
+               AddressList_obj addrList(AddressList::Create(text));
                for ( Address *addr = addrList->GetFirst();
                      addr;
                      addr = addrList->GetNext(addr) )
@@ -3876,7 +3876,7 @@ wxFolderView::Update()
 
    m_nDeleted = UID_ILLEGAL;
 
-   UpdateTitleAndStatusBars(m_Frame, mf);
+   UpdateTitleAndStatusBars(m_Frame, mf.get());
 }
 
 void
@@ -4984,7 +4984,7 @@ wxFolderView::OnFocusChange(long idx, UIdType uid)
       HeaderInfoList_obj hil(GetFolder()->GetHeaders());
       CHECK_RET( hil, _T("failed to get headers") );
 
-      HeaderVarExpander expander(hil[idx],
+      HeaderVarExpander expander((*hil)[idx],
                                  m_settings.dateFormat,
                                  m_settings.dateGMT);
 
@@ -5034,7 +5034,7 @@ void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() == mf )
+   if ( event.GetFolder() == mf.get() )
    {
       wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Clear()"));
 
@@ -5062,7 +5062,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() != mf )
+   if ( event.GetFolder() != mf.get() )
       return;
 
    // deal with the special case when we get the expunge notification before
@@ -5138,7 +5138,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    // we don't have any deleted messages any more
    m_nDeleted = 0;
 
-   UpdateTitleAndStatusBars(m_Frame, mf);
+   UpdateTitleAndStatusBars(m_Frame, mf.get());
 }
 
 // this function gets called when new mail appears in the folder
@@ -5147,7 +5147,7 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() == mf )
+   if ( event.GetFolder() == mf.get() )
    {
       Update();
    }
@@ -5159,7 +5159,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() == mf )
+   if ( event.GetFolder() == mf.get() )
    {
       HeaderInfoList_obj hil(GetFolder()->GetHeaders());
 
@@ -5219,7 +5219,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
       }
 
       // update the number of unread messages showin in the title/status bars
-      UpdateTitleAndStatusBars(m_Frame, mf);
+      UpdateTitleAndStatusBars(m_Frame, mf.get());
    }
 }
 

@@ -1079,8 +1079,10 @@ private:
    MailFolder *m_mf;
 };
 
+#ifndef SWIG
 // MailFolder_obj is a smart reference to MailFolder
-DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
+using MailFolder_obj = DecRefPtr<MailFolder>;
+#endif // SWIG
 
 #endif // _MAILFOLDER_H
 

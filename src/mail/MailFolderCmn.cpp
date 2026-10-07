@@ -858,7 +858,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    // minimize the number of updates by only doing it once
-   SuspendFolderUpdates suspend(mf);
+   SuspendFolderUpdates suspend(mf.get());
 
    bool rc = true;
    for ( int i = 0; i < n; i++ )

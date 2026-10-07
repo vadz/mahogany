@@ -479,7 +479,7 @@ public:
                            Message_obj msg(mf->GetMessage((*uidsMatching)[n]));
                            if ( msg )
                            {
-                              m_mfVirt->AppendMessage(*msg.Get());
+                              m_mfVirt->AppendMessage(*msg);
 
                               nMatches++;
                            }
@@ -1388,7 +1388,7 @@ void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
          if ( mf->Suspend() )
          {
             // Pass ownership to the list of folders to resume.
-            m_foldersToResume.push_back(mfObj.Detach());
+            m_foldersToResume.push_back(mfObj.release());
          }
          //else: this (probably local) folder will survive resume.
       }

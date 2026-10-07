@@ -365,14 +365,11 @@ public:
    // explicitly test if object is valid
    bool IsOk() const { return m_folder != nullptr; }
 
-private:
-   // workaround for g++ bug: see BEGIN_DECLARE_AUTOPTR() definition in
-   // MObject.h for details
-#ifndef NO_PRIVATE_COPY
    // no copy ctor/assignment operator
-   MFolder_obj(const MFolder_obj&);
-   MFolder_obj& operator=(const MFolder_obj&);
-#endif // !NO_PRIVATE_COPY
+   MFolder_obj(const MFolder_obj&) = delete;
+   MFolder_obj& operator=(const MFolder_obj&) = delete;
+
+private:
 
    // create folder by name
    void Init(const String& name) { m_folder = MFolder::Get(name); }

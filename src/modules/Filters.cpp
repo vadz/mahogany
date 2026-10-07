@@ -2007,7 +2007,7 @@ static Value func_python(ArgList *args, FilterRuleImpl *p)
    String funcName = args->GetArg(0)->Evaluate().ToString();
 
    int result = 0;
-   if ( !PythonFunction(funcName, msg.Get(), "Message", "i", &result) )
+   if ( !PythonFunction(funcName, msg.get(), "Message", "i", &result) )
       return 0;
 
    return result;

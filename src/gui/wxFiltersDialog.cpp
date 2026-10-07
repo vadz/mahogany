@@ -2720,7 +2720,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
    const wxString arg = m_action->GetArgument();
    settings->SetAction(action, arg);
 
-   MFilter_obj filter(name);
+   MFilter_obj filter(MFilter::CreateFromProfile(name));
    MFilterDesc fd;
    fd.SetName(name);
    fd.Set(settings);
@@ -2761,7 +2761,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
             profileTargetFolder->writeEntry(MP_COMPOSE_TO, recipient);
          if ( !sender.empty() )
          {
-            AddressList_obj addrList(sender);
+            AddressList_obj addrList(AddressList::Create(sender));
             Address* const addr = addrList->GetFirst();
             if ( !addr )
             {
@@ -2924,7 +2924,7 @@ static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
       }
 
       // create the new filter
-      MFilter_obj filter(name);
+      MFilter_obj filter(MFilter::CreateFromProfile(name));
 
       // ensure that it is saved to the specified config source
       Profile_obj profileFilter(filter->GetProfile());
@@ -2936,7 +2936,7 @@ static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
       // before MFilter one which is where the filter is really saved to config
       {
          MFilter_obj filterNull;
-         filter.Swap(filterNull);
+         filter.swap(filterNull);
       }
    }
    //else: cancelled
@@ -2947,7 +2947,7 @@ static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
 static bool
 EditFilter(const String& name, wxWindow *parent, ConfigSource *config)
 {
-   MFilter_obj filter(name);
+   MFilter_obj filter(MFilter::CreateFromProfile(name));
    CHECK( filter, false, _T("filter unexpectedly missing") );
 
    MFilterDesc fd = filter->GetDesc();
@@ -3017,7 +3017,7 @@ extern bool FindFiltersForFolder(MFolder *folder, wxWindow *parent)
    {
       // examine this filter: we can only really parse simple filters
       const String& filterName = allFilters[n];
-      MFilter_obj filter(filterName);
+      MFilter_obj filter(MFilter::CreateFromProfile(filterName));
       MFilterDesc fdesc(filter->GetDesc());
       if ( fdesc.IsSimple() )
       {

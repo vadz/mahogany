@@ -264,7 +264,8 @@ void PasswdEntry::GetEMail(size_t n, String *pstr) const
 {
    CHECK_RET( !n, _T("we have only one email") );
 
-   AddressList_obj addrList(m_username, READ_APPCONFIG(MP_HOSTNAME));
+   AddressList_obj addrList(AddressList::Create(m_username,
+                                                READ_APPCONFIG(MP_HOSTNAME)));
 
    Address *addr = addrList->GetFirst();
    if ( addr )

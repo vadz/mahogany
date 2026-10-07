@@ -340,7 +340,7 @@ private:
    const String m_type;
 };
 
-DECLARE_AUTOPTR(ConfigSource);
+using ConfigSource_obj = DecRefPtr<ConfigSource>;
 
 
 /**
@@ -474,7 +474,7 @@ public:
                      const String& spec) = 0;
 };
 
-DECLARE_AUTOPTR(ConfigSourceFactory);
+using ConfigSourceFactory_obj = DecRefPtr<ConfigSourceFactory>;
 
 
 /**

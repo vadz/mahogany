@@ -1253,7 +1253,7 @@ MAppBase::SendOutbox(const String & outbox, bool
    {
       nbOfMsgTried++;
 
-      const HeaderInfo *hi = hil[i];
+      const HeaderInfo *hi = (*hil)[i];
       if ( !hi )
       {
          ERRORMESSAGE(( _("Failed to access message #%zu in the outbox."),
@@ -1280,7 +1280,7 @@ MAppBase::SendOutbox(const String & outbox, bool
                       subject));
       wxYield();
       SendMessage_obj
-         sendMsg(SendMessage::CreateFromMsg(mf->GetProfile(), msg.Get()));
+         sendMsg(SendMessage::CreateFromMsg(mf->GetProfile(), msg.get()));
 
       if ( sendMsg && sendMsg->SendOrQueue(SendMessage::NeverQueue) )
       {

@@ -514,6 +514,8 @@ protected:
    MOBJECT_NAME(Message)
 };
 
-DECLARE_AUTOPTR(Message);
+#ifndef SWIG
+using Message_obj = DecRefPtr<Message>;
+#endif // SWIG
 
 #endif // MESSAGE_H

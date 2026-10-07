@@ -29,8 +29,6 @@ class MObjectRC
 #define GCC_DTOR_WARN_OFF
 #define MOBJECT_NAME(x)
 
-#define DECLARE_AUTOPTR(x)
-#define DECLARE_AUTOPTR_WITH_CONVERSION(x)
 
 // define typemaps for mapping our String (same as std::string) to Python
 // string

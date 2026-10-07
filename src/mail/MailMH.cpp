@@ -117,7 +117,7 @@ MHFoldersImporter::~MHFoldersImporter()
 
 // needed to be able to use DECLARE_AUTOREF() macro
 typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
-DECLARE_AUTOPTR(ASFolderExistsResult);
+using ASFolderExistsResult_obj = DecRefPtr<ASFolderExistsResult>;
 
 bool MHFoldersImporter::OnMEvent(MEventData& event)
 {
