@@ -72,6 +72,9 @@
 #include <wx/datetime.h>
 #include <wx/file.h>
 
+#include <memory>
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -190,8 +193,8 @@ private:
    bool m_expires;
 };
 
-// a linked list of MfCloseEntries
-M_LIST_OWN(MfList, MfCloseEntry);
+// a vector of MfCloseEntries
+using MfList = std::vector<std::unique_ptr<MfCloseEntry>>;
 
 // the timer which periodically really closes the previously "closed" folders
 class MfCloser;
@@ -229,9 +232,6 @@ public:
 
    // is this folder in this list?
    bool HasFolder(MailFolderCmn *mf) const { return GetCloseEntry(mf) != NULL; }
-
-   // remove the given entry from list
-   void Remove(MfCloseEntry *entry);
 
    // restart the timer (useful if timer interval changed)
    void RestartTimer();
@@ -419,7 +419,7 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
    wxLogTrace(TRACE_MF_REF, _T("Adding '%s' to gs_MailFolderCloser"),
               mf->GetName());
 
-   m_MfList.push_back(new MfCloseEntry(mf, delay));
+   m_MfList.push_back(std::make_unique<MfCloseEntry>(mf, delay));
 
    if ( delay < m_interval )
    {
@@ -433,15 +433,20 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
 
 void MfCloser::OnTimer(void)
 {
-   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end();)
+   // destroying the entries may result in closing the folders, which can
+   // reenter our code and access m_MfList, so first remove the expired entries
+   // from it and only destroy them afterwards, when m_MfList is consistent
+   MfList expired;
+   for ( auto i = m_MfList.begin(); i != m_MfList.end();)
    {
-      if ( i->HasExpired() )
+      if ( (*i)->HasExpired() )
       {
 #ifdef DEBUG
          wxLogTrace(TRACE_MF_CLOSE, _T("Going to remove '%s' from m_MfList"),
-                    i->GetName());
+                    (*i)->GetName());
 #endif // DEBUG
 
+         expired.push_back(std::move(*i));
          i = m_MfList.erase(i);
       }
       else
@@ -453,36 +458,18 @@ void MfCloser::OnTimer(void)
 
 void MfCloser::CleanUp(void)
 {
-   m_MfList.clear();
-}
-
-void MfCloser::Remove(MfCloseEntry *entry)
-{
-   CHECK_RET( entry, _T("NULL entry in MfCloser::Remove") );
-
-#ifdef DEBUG
-   wxLogTrace(TRACE_MF_REF, _T("Removing '%s' from gs_MailFolderCloser"),
-              entry->GetName());
-#endif // DEBUG
-
-   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
-   {
-      if ( i.operator->() == entry )
-      {
-         m_MfList.erase(i);
-
-         break;
-      }
-   }
+   // see the comment in OnTimer() for why we don't just call clear() here
+   MfList entries;
+   entries.swap(m_MfList);
 }
 
 MfCloseEntry *MfCloser::GetCloseEntry(MailFolderCmn *mf) const
 {
-   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
+   for ( const auto& entry : m_MfList )
    {
-      if ( i->Matches(mf) )
+      if ( entry->Matches(mf) )
       {
-         return *i;
+         return entry.get();
       }
    }
 
