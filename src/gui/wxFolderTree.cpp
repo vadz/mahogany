@@ -52,6 +52,8 @@
 #include "MFCache.h"
 #include "MFStatus.h"
 
+#include <vector>
+
 #if wxUSE_DRAG_AND_DROP
    #include "Mdnd.h"
 #endif // wxUSE_DRAG_AND_DROP
@@ -139,7 +141,7 @@ int CompareFoldersByTreePos(MFolder **pf1, MFolder **pf2)
 // pseudo template classes
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
+using wxArrayFolder = std::vector<MFolder *>;
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -2796,17 +2798,21 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
          }
 
          // remember this one
-         subfolders.Add(subfolder);
+         subfolders.push_back(subfolder);
       }
 
       if ( shouldSort )
       {
          // sort the array by tree item position
-         subfolders.Sort(CompareFoldersByTreePos);
+         std::sort(subfolders.begin(), subfolders.end(),
+                   [](MFolder *f1, MFolder *f2)
+                   {
+                     return CompareFoldersByTreePos(&f1, &f2) < 0;
+                   });
       }
 
       // now do fill the tree
-      nSubfolders = subfolders.GetCount();
+      nSubfolders = subfolders.size();
       for ( n = 0; n < nSubfolders; n++ )
       {
          MFolder *subfolder = subfolders[n];

@@ -38,6 +38,8 @@
 
 #include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
 
+#include <vector>
+
 // only Win32 supports URLs in the text control natively so far, define this to
 // use this possibility
 //
@@ -242,7 +244,7 @@ private:
    ClickableInfo *m_ci;
 };
 
-WX_DEFINE_ARRAY(TextViewerClickable *, ArrayClickables);
+using ArrayClickables = std::vector<TextViewerClickable *>;
 
 // ----------------------------------------------------------------------------
 // TextViewerWindow: the viewer window used by TextViewer
@@ -432,7 +434,7 @@ void TextViewerWindow::InsertClickable(const wxString& text,
 
    TextViewerClickable *clickable =
       new TextViewerClickable(ci, GetLastPosition(), text.length());
-   m_clickables.Add(clickable);
+   m_clickables.push_back(clickable);
 
    AppendText(text);
 
@@ -492,7 +494,7 @@ void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 
 bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 {
-   size_t count = m_clickables.GetCount();
+   size_t count = m_clickables.size();
    for ( size_t n = 0; n < count; n++ )
    {
       TextViewerClickable *clickable = m_clickables[n];

@@ -43,6 +43,8 @@
 #include <wx/calctrl.h>
 #include <wx/spinbutt.h>
 
+#include <vector>
+
 #if wxUSE_DRAG_AND_DROP
    #include "Mdnd.h"
 #endif // wxUSE_DRAG_AND_DROP
@@ -147,7 +149,7 @@ private:
    MOBJECT_NAME(AlarmInfo);
 };
 
-WX_DEFINE_ARRAY(AlarmInfo *, AlarmList);
+using AlarmList = std::vector<AlarmInfo *>;
 
 
 // a timer checking every hour to see if the day has changed:
@@ -865,11 +867,11 @@ CalendarFrame::AddReminder(void)
 void
 CalendarFrame::ClearAlarms(void)
 {
-   for(size_t count = 0; count < m_Alarms.Count(); count++)
+   for(size_t count = 0; count < m_Alarms.size(); count++)
    {
       delete m_Alarms[count];
    }
-   m_Alarms.Clear();
+   m_Alarms.clear();
 }
 
 void
@@ -909,7 +911,7 @@ CalendarFrame::ParseFolder(void)
                                               (*hil)[count]->GetSubject(),
                                               (*hil)[count]->GetUId(),
                                               action);
-               m_Alarms.Add(ai);
+               m_Alarms.push_back(ai);
             }
          }
          msg->DecRef();
@@ -917,7 +919,7 @@ CalendarFrame::ParseFolder(void)
       hil->DecRef();
    }
    // update the listctrl:
-   for(size_t count = 0; count < m_Alarms.Count(); count++)
+   for(size_t count = 0; count < m_Alarms.size(); count++)
    {
       m_ListCtrl->InsertItem(count, m_Alarms[count]->GetDate().Format(m_DateFormat));
       m_ListCtrl->SetItem(count,1, m_Alarms[count]->GetSubject());
@@ -981,7 +983,7 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
       return;
    }
    bool deleted = false;
-   for(size_t count = 0; count < m_Alarms.Count(); count++)
+   for(size_t count = 0; count < m_Alarms.size(); count++)
    {
       if(m_Alarms[count]->GetDate() <= wxDateTime::Now())
       {

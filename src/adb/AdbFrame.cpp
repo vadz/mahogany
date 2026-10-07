@@ -73,6 +73,8 @@
 // our public interface
 #include "adb/AdbFrame.h"
 
+#include <vector>
+
 class MPersMsgBox;
 class MOption;
 class wxPTextEntry;
@@ -289,7 +291,7 @@ protected:
 };
 
 // an array of pointers to the entries
-WX_DEFINE_ARRAY(AdbTreeElement *, ArrayEntries);
+using ArrayEntries = std::vector<AdbTreeElement *>;
 
 // a group of ADB entries
 class AdbTreeNode : public AdbTreeElement
@@ -309,7 +311,7 @@ public:
 
   // accessors
     // access to children
-  size_t GetChildrenCount() const { return m_children.Count(); }
+  size_t GetChildrenCount() const { return m_children.size(); }
   AdbTreeElement *GetChild(size_t n) const { return m_children[n]; }
     // returns TRUE after first call to ExpandFirstTime
   bool WasExpanded() const { return m_bWasExpanded; }
@@ -327,7 +329,7 @@ public:
   // operations
     // child management
   AdbTreeElement *CreateChild(const wxString& strName, bool bGroup);
-  void AddChild(AdbTreeElement *child) { m_children.Add(child); }
+  void AddChild(AdbTreeElement *child) { m_children.push_back(child); }
   void DeleteChild(AdbTreeElement *child);
 
     // find child by name (returns NULL if not found)
@@ -944,11 +946,11 @@ private:
   DECLARE_NO_COPY_CLASS(wxAdbNotebook)
 };
 
-WX_DEFINE_ARRAY(wxControl *, ArrayControls);
+using ArrayControls = std::vector<wxControl *>;
 
 static bool gs_constantTrue = true;
 static bool gs_constantFalse = false;
-WX_DEFINE_ARRAY(bool *, ArrayBoolPtr);
+using ArrayBoolPtr = std::vector<bool *>;
 
 // the base class for all of them
 class wxAdbPage : public wxPanel
@@ -3389,7 +3391,8 @@ wxAdbPage::wxAdbPage(wxNotebook *notebook, const wxString& title, int idImage,
                  &AdbTreeEntry::ms_aFields[m_nFirstField]);
   SetAutoLayout(true);
 
-  m_checkBoxOldValue.Add(&gs_constantFalse, m_aEntries.GetCount());
+  m_checkBoxOldValue.insert(m_checkBoxOldValue.end(),
+                             m_aEntries.size(), &gs_constantFalse);
 }
 
 // we implement the data transfer for the text fields and check boxes
@@ -3617,7 +3620,7 @@ void wxAdbPage::LayoutControls(size_t nCount,
                                ArrayControls& entries,
                                AdbTreeEntry::FieldInfo fields[])
 {
-  wxASSERT( entries.IsEmpty() );  // we create the controls ourselves
+  wxASSERT( entries.empty() );  // we create the controls ourselves
 
   size_t n;
 
@@ -3676,7 +3679,7 @@ void wxAdbPage::LayoutControls(size_t nCount,
 
     wxCHECK_RET( last, _T("control creation failed") );
 
-    entries.Add(last);
+    entries.push_back(last);
   }
 }
 
@@ -3986,7 +3989,7 @@ AdbTreeNode::AdbTreeNode(const wxString& name,
 // recursively copy the data
 void AdbTreeNode::CopyData(const AdbTreeNode& other)
 {
-  wxASSERT( m_children.Count() == 0 ); // we must be empty
+  wxASSERT( m_children.size() == 0 ); // we must be empty
 
   // we're either copying to the clipboard or from it, so if the other item is
   // on the clipboard we're not and ice versa
@@ -3998,7 +4001,7 @@ void AdbTreeNode::CopyData(const AdbTreeNode& other)
   }
 
   AdbTreeElement *child, *current;
-  size_t nCount = other.m_children.Count();
+  size_t nCount = other.m_children.size();
   for ( size_t n = 0; n < nCount; n++ ) {
     current = other.m_children[n];
     if ( current->IsGroup() )
@@ -4011,7 +4014,7 @@ void AdbTreeNode::CopyData(const AdbTreeNode& other)
 
 void AdbTreeNode::ClearDirty()
 {
-  size_t nCount = m_children.Count();
+  size_t nCount = m_children.size();
   for ( size_t n = 0; n < nCount; n++ ) {
     m_children[n]->ClearDirtyFlag();
   }
@@ -4019,19 +4022,19 @@ void AdbTreeNode::ClearDirty()
 
 void AdbTreeNode::FreeChildren()
 {
-  const size_t nCount = m_children.Count();
+  const size_t nCount = m_children.size();
   for ( size_t n = 0; n < nCount; n++ ) {
     AdbTreeElement *child = m_children[n];
     delete child;
   }
 
-  m_children.Clear();
+  m_children.clear();
 }
 
 bool AdbTreeNode::LoadChildren()
 {
   // only load children once
-  if ( !m_children.IsEmpty() )
+  if ( !m_children.empty() )
     return false;
 
   EnsureHasGroup();
@@ -4057,7 +4060,7 @@ void AdbTreeNode::LoadAllData()
   LoadChildren(); // NOP if it was already done
 
   AdbTreeElement *current;
-  size_t nCount = m_children.Count();
+  size_t nCount = m_children.size();
   for ( size_t n = 0; n < nCount; n++ ) {
     current = m_children[n];
     if ( current->IsGroup() )
@@ -4116,7 +4119,7 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
 {
   EnsureHasGroup();
 
-  m_children.Remove(child);
+  std::erase(m_children, child);
 
   switch ( child->GetKind() ) {
     case TreeElement_Entry:
@@ -4151,7 +4154,7 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
 
 void AdbTreeNode::Refresh(wxTreeCtrl& tree)
 {
-  m_children.Empty();
+  m_children.clear();
   tree.DeleteChildren(GetId());
   m_bWasExpanded = false;
   ExpandFirstTime(tree);
@@ -4161,7 +4164,7 @@ AdbTreeElement *AdbTreeNode::FindChild(const wxChar *szName)
 {
   // TODO we should sort the items in alphabetical order and use binary search
   //      instead of linear search
-  size_t nCount = m_children.Count();
+  size_t nCount = m_children.size();
   for ( size_t n = 0; n < nCount; n++ ) {
     if ( m_children[n]->GetName() == szName )
       return m_children[n];
@@ -4231,10 +4234,10 @@ AdbTreeBook::AdbTreeBook(AdbTreeRoot *root,
 AdbTreeBook::~AdbTreeBook()
 {
   // must delete children first to give them the last chance to save changes
-  size_t nCount = m_children.Count();
+  size_t nCount = m_children.size();
   for ( size_t n = 0; n < nCount; n++ )
     ; // delete m_children[n];
-  m_children.Clear();
+  m_children.clear();
 
   SafeDecRef(m_pBook);
   m_pGroup = nullptr;  // prevent it from being unlocked in ~AdbTreeNode
@@ -4258,7 +4261,7 @@ AdbTreeRoot::AdbTreeRoot(wxArrayString& astrAdb, wxArrayString& astrProviders)
 // find the ADB by name
 AdbTreeElement *AdbTreeRoot::FindChild(const wxChar *szName)
 {
-  size_t nCount = m_children.Count();
+  size_t nCount = m_children.size();
   wxString strAdbName;
   for ( size_t n = 0; n < nCount; n++ ) {
     strAdbName = ((AdbTreeBook *)m_children[n])->GetName();
@@ -4274,7 +4277,7 @@ AdbTreeElement *AdbTreeRoot::FindChild(const wxChar *szName)
 bool AdbTreeRoot::LoadChildren()
 {
   // do it only once
-  if ( !m_children.IsEmpty() )
+  if ( !m_children.empty() )
     return false;
 
   wxString strProv;

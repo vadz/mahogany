@@ -60,9 +60,11 @@
 
 #include "modules/Filters.h"    // for FilterRule::Error
 
+#include <vector>
+
 class AsyncStatusHandler;
 
-WX_DEFINE_ARRAY(AsyncStatusHandler *, ArrayAsyncStatus);
+using ArrayAsyncStatus = std::vector<AsyncStatusHandler *>;
 
 // the trace mask for dnd messages
 #define M_TRACE_DND _T("msgdnd")
@@ -1680,7 +1682,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
       // find the corresponding AsyncStatusHandler object, if any
       bool hadStatusObject = false;
-      size_t progressCount = m_arrayAsyncStatus.GetCount();
+      size_t progressCount = m_arrayAsyncStatus.size();
       for ( size_t n = 0; n < progressCount; n++ )
       {
          AsyncStatusHandler *asyncStatus = m_arrayAsyncStatus[n];
@@ -1693,7 +1695,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
             }
 
             delete asyncStatus;
-            m_arrayAsyncStatus.RemoveAt(n);
+            m_arrayAsyncStatus.erase(m_arrayAsyncStatus.begin() + n);
 
             hadStatusObject = true;
 
@@ -1856,12 +1858,12 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
 void MsgCmdProcImpl::RemoveAsyncStatus(AsyncStatusHandler *asyncStatus)
 {
-   size_t progressCount = m_arrayAsyncStatus.GetCount();
+   size_t progressCount = m_arrayAsyncStatus.size();
    for ( size_t n = 0; n < progressCount; n++ )
    {
       if ( asyncStatus == m_arrayAsyncStatus[n] )
       {
-         m_arrayAsyncStatus.RemoveAt(n);
+         m_arrayAsyncStatus.erase(m_arrayAsyncStatus.begin() + n);
 
          return;
       }
@@ -1872,6 +1874,6 @@ void MsgCmdProcImpl::RemoveAsyncStatus(AsyncStatusHandler *asyncStatus)
 
 void MsgCmdProcImpl::AddAsyncStatus(AsyncStatusHandler *asyncStatus)
 {
-   m_arrayAsyncStatus.Add(asyncStatus);
+   m_arrayAsyncStatus.push_back(asyncStatus);
 }
 

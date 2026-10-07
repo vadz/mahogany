@@ -41,6 +41,8 @@
 
 #include "MImport.h"
 
+#include <vector>
+
 class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
@@ -53,7 +55,7 @@ extern const MPersMsgBox *M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT;
 // array classes
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY(MImporter *, wxArrayImporters);
+using wxArrayImporters = std::vector<MImporter *>;
 
 // ----------------------------------------------------------------------------
 // private function prototypes
@@ -399,7 +401,7 @@ static bool FindAllImporters(wxArrayImporters& importers,
       {
          if ( importer->Applies() )
          {
-            importers.Add(importer);
+            importers.push_back(importer);
             prognames.Add(importer->GetProgName());
          }
          else
@@ -415,13 +417,13 @@ static bool FindAllImporters(wxArrayImporters& importers,
 
    listing->DecRef();
 
-   return importers.GetCount() > 0;
+   return importers.size() > 0;
 }
 
 // frees all importers in the array
 static void FreeImporters(const wxArrayImporters& importers)
 {
-   size_t count = importers.GetCount();
+   size_t count = importers.size();
    for ( size_t n = 0; n < count; n++ )
    {
       importers[n]->DecRef();

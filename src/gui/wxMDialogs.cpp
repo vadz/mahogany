@@ -72,6 +72,8 @@
 
 #include <errno.h>
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -2671,7 +2673,7 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
 // ----------------------------------------------------------------------------
 
 class wxIdentCombo;
-WX_DEFINE_ARRAY(wxIdentCombo *, wxIdentComboArray);
+using wxIdentComboArray = std::vector<wxIdentCombo *>;
 
 class wxIdentCombo : public wxChoice
 {
@@ -2681,18 +2683,18 @@ public:
                  wxDefaultPosition, wxDefaultSize,
                  count, choices)
    {
-      ms_allIdentCombos.Add(this);
+      ms_allIdentCombos.push_back(this);
    }
 
    virtual ~wxIdentCombo()
    {
-      ms_allIdentCombos.Remove(this);
+      std::erase(ms_allIdentCombos, this);
    }
 
    void DoDeleteOneItem(unsigned int index) override
    {
       // sync all other combos with this one
-      size_t count = ms_allIdentCombos.GetCount();
+      size_t count = ms_allIdentCombos.size();
       for ( size_t n = 0; n < count; n++ )
       {
          if ( ms_allIdentCombos[n] != this )
@@ -2713,12 +2715,16 @@ public:
       // infinite recursion
       if ( ms_indexOfAppend == wxNOT_FOUND )
       {
-         ms_indexOfAppend = ms_allIdentCombos.Index(this);
+         const auto it = std::find(ms_allIdentCombos.begin(),
+                                   ms_allIdentCombos.end(),
+                                   this);
 
-         CHECK( ms_indexOfAppend != wxNOT_FOUND, -1,
+         CHECK( it != ms_allIdentCombos.end(), -1,
                 _T("all wxIdentCombos should be in the array!") );
 
-         size_t count = ms_allIdentCombos.GetCount();
+         ms_indexOfAppend = it - ms_allIdentCombos.begin();
+
+         size_t count = ms_allIdentCombos.size();
          for ( size_t n = 0; n < count; n++ )
          {
             if ( ms_allIdentCombos[n] != this )

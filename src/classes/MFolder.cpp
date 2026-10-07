@@ -29,7 +29,6 @@
 #  include "Mdefaults.h"
 
 #  include <wx/utils.h>      // for wxRemoveFile
-#  include <wx/dynarray.h>      // for WX_DEFINE_ARRAY
 #endif // USE_PCH
 
 #include "MFolder.h"
@@ -40,11 +39,13 @@
 #include <wx/dir.h>
 #include <wx/confbase.h>    // for wxSplitPath
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // template classes
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
+using wxArrayFolder = std::vector<MFolder *>;
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -494,7 +495,7 @@ private:
    // consistency check
    static void Check()
    {
-      ASSERT_MSG( ms_aFolderNames.GetCount() == ms_aFolders.GetCount(),
+      ASSERT_MSG( ms_aFolderNames.GetCount() == ms_aFolders.size(),
                   _T("folder cache corrupted") );
    }
 
@@ -1288,11 +1289,12 @@ void MFolderCache::Add(MFolder *folder)
    Check();
 
    // the caller should verify that it's not already in the cache
-   ASSERT_MSG( ms_aFolders.Index(folder) == wxNOT_FOUND,
+   ASSERT_MSG( std::find(ms_aFolders.begin(), ms_aFolders.end(), folder) ==
+                  ms_aFolders.end(),
                _T("can't add the folder to the cache - it's already there") );
 
    size_t index = ms_aFolderNames.Add(folder->GetFullName());
-   ms_aFolders.Insert(folder, index);
+   ms_aFolders.insert(ms_aFolders.begin() + index, folder);
 }
 
 void MFolderCache::Remove(MFolder *folder)
@@ -1300,13 +1302,13 @@ void MFolderCache::Remove(MFolder *folder)
    Check();
 
    // don't use name here - the folder might have been renamed
-   int index = ms_aFolders.Index(folder);
-   CHECK_RET( index != wxNOT_FOUND,
+   const auto it = std::find(ms_aFolders.begin(), ms_aFolders.end(), folder);
+   CHECK_RET( it != ms_aFolders.end(),
               _T("can't remove folder from cache because it's not in it") );
 
-   ms_aFolderNames.RemoveAt((size_t)index);
+   ms_aFolderNames.RemoveAt(it - ms_aFolders.begin());
 
-   ms_aFolders.RemoveAt((size_t)index);
+   ms_aFolders.erase(it);
 }
 
 /* static */

@@ -22,12 +22,13 @@
 #ifndef USE_PCH
 #  ifdef DEBUG
 #     include <wx/log.h>
-#     include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
 #  endif
 #endif // USE_PCH
 
 #include "MObject.h"
 #include "pointers.h"
+
+#include <vector>
 
 #ifdef DEBUG
 
@@ -37,11 +38,11 @@
 // ----------------------------------------------------------------------------
 // this module global variables
 // ----------------------------------------------------------------------------
-WX_DEFINE_ARRAY(MObjectRC *, ArrayObjects);
+using ArrayObjects = std::vector<MObjectRC *>;
 
 static ArrayObjects gs_aObjects;
 
-WX_DEFINE_ARRAY(MObject *, ArrayMObjects);
+using ArrayMObjects = std::vector<MObject *>;
 
 static ArrayMObjects gs_aMObjects;
 
@@ -61,7 +62,7 @@ static void *gs_traceObject = nullptr;
 
 void MObjectRC::CheckLeaks()
 {
-   size_t nCount = gs_aObjects.Count();
+   size_t nCount = gs_aObjects.size();
 
    if ( nCount > 0 ) {
       wxLogDebug(_T("MEMORY LEAK: %zu object leaked:"), nCount);
@@ -98,7 +99,7 @@ String MObject::DebugDump() const
 
 MObjectRC::MObjectRC()
 {
-   gs_aObjects.Add(this);
+   gs_aObjects.push_back(this);
    m_nRef = 1;
    m_weakRef = 0;
 }
@@ -131,7 +132,7 @@ bool MObjectRC::DecRef()
 
    if ( m_nRef == 0 )
    {
-      gs_aObjects.Remove(this);
+      std::erase(gs_aObjects, this);
       this->~MObjectRC();
       if( !m_weakRef )
          ::operator delete(this);
@@ -146,13 +147,13 @@ bool MObjectRC::DecRef()
 void MObject::Register(void)
 {
    MOcheck();
-   gs_aMObjects.Add(this);
+   gs_aMObjects.push_back(this);
 }
 
 void MObject::DeRegister(void)
 {
    MOcheck();
-   gs_aMObjects.Remove(this);
+   std::erase(gs_aMObjects, this);
 }
 
 #endif //DEBUG

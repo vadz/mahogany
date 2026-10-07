@@ -40,6 +40,8 @@
 
 #include <wx/confbase.h>
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
@@ -93,7 +95,7 @@ private:
 
    // the popup menu description
    const TemplatePopupMenuItem& m_menuInfo;
-   WX_DEFINE_ARRAY(const TemplatePopupMenuItem *, ArrayPopupMenuItems);
+   using ArrayPopupMenuItems = std::vector<const TemplatePopupMenuItem *>;
    ArrayPopupMenuItems m_items;
 
    // the popup menu itself
@@ -320,7 +322,7 @@ void TemplateEditor::OnRClick(wxMouseEvent& event)
 void TemplateEditor::OnMenu(wxCommandEvent& event)
 {
    size_t id = (size_t)event.GetId();
-   CHECK_RET( id < m_items.GetCount(), _T("unexpected menu event") );
+   CHECK_RET( id < m_items.size(), _T("unexpected menu event") );
 
    const TemplatePopupMenuItem *menuitem = m_items[id];
    CHECK_RET( menuitem, _T("no menu item") );
@@ -421,7 +423,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
          {
             // first create the entry for the submenu
             wxMenu *submenu = new wxMenu;
-            menu->Append(m_items.GetCount(), wxGetTranslation(menuitem.label), submenu);
+            menu->Append(m_items.size(), wxGetTranslation(menuitem.label), submenu);
 
             // next subitems
             for ( size_t n = 0; n < menuitem.nSubItems; n++ )
@@ -440,7 +442,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
       case TemplatePopupMenuItem::Normal:
       case TemplatePopupMenuItem::File:
       case TemplatePopupMenuItem::Text:
-         menu->Append(m_items.GetCount(), wxGetTranslation(menuitem.label));
+         menu->Append(m_items.size(), wxGetTranslation(menuitem.label));
          break;
 
       default:
@@ -448,7 +450,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
          return;
    }
 
-   m_items.Add(&menuitem);
+   m_items.push_back(&menuitem);
 }
 
 void TemplateEditor::CreatePopupMenu()

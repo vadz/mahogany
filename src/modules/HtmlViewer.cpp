@@ -44,9 +44,11 @@
 #include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
 #include <wx/html/m_templ.h>    // for TAG_HANDLER_BEGIN
 
+#include <vector>
+
 class HtmlViewerWindow;
 
-WX_DEFINE_ARRAY(ClickableInfo *, ArrayClickInfo);
+using ArrayClickInfo = std::vector<ClickableInfo *>;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -491,7 +493,10 @@ HtmlViewerWindow::~HtmlViewerWindow()
 
 void HtmlViewerWindow::StoreClickable(ClickableInfo *ci, const String& url)
 {
-   m_clickables.Insert(ci, m_urls.Add(url));
+   // m_urls is sorted, so we need to insert into m_clickables at the same
+   // position to keep them in sync
+   const size_t index = m_urls.Add(url);
+   m_clickables.insert(m_clickables.begin() + index, ci);
 }
 
 void HtmlViewerWindow::ClearClickables()
