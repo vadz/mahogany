@@ -9,6 +9,10 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    env:
+      # This is needed for ccache to work with the precompiled header used by
+      # this build, see the comment for CPPFLAGS below.
+      CCACHE_SLOPPINESS: pch_defines,time_macros
     steps:
     - uses: actions/checkout@v7
     - name: Bootstrap
@@ -21,14 +25,23 @@ jobs:
         create-args: -c conda-forge wxwidgets
         init-shell: none
         cache-downloads: true
+    - name: Set up ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}
+        evict-old-files: job
     - name: Configure
       run: |
         mkdir build-autoconf
         cd build-autoconf
-        ../configure --with-wx-config=${{ steps.wx.outputs.environment-path }}/bin/wx-config
+        # -fpch-preprocess is required by ccache when using precompiled
+        # headers included using #include, as we do.
+        ../configure CC="ccache gcc" CXX="ccache g++" \
+                     CPPFLAGS=-fpch-preprocess \
+                     --with-wx-config=${{ steps.wx.outputs.environment-path }}/bin/wx-config
     - name: Build
       run: |
-        make -j`nproc` -C build-autoconf
+        make -j"$(nproc)" -C build-autoconf
 
   build-linux-cmake:
     runs-on: ubuntu-latest
@@ -42,9 +55,16 @@ jobs:
         create-args: -c conda-forge wxwidgets
         init-shell: none
         cache-downloads: true
+    - name: Set up ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}
+        evict-old-files: job
     - name: Configure
       run: |
         cmake -S . -B build-cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
               -DWX_CONFIG=${{ steps.wx.outputs.environment-path }}/bin/wx-config \
               -DOPENSSL_ROOT_DIR=${{ steps.wx.outputs.environment-path }}
     - name: Build
