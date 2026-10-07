@@ -155,11 +155,11 @@ protected:
                                                int helpId = -1);
 
    // create just the buttons
-   void CreateStdButtons() { (void)CreateStdButtonsAndBox(wxEmptyString, TRUE); }
+   void CreateStdButtons() { (void)CreateStdButtonsAndBox(wxEmptyString, true); }
 
    // set the diaqlog size if it wasn't restored from profile
    virtual void SetDefaultSize(int width, int height,
-                               bool setAsMinimalSizeToo = TRUE);
+                               bool setAsMinimalSizeToo = true);
 
    // these variables are set in the ctor and are the basic measurement unites
    // for us (we allow direct access to them for derived classes for
@@ -189,7 +189,7 @@ public:
                                const wxString& profileKey);
 
    virtual bool HasChanges() const { return m_bDirty; }
-   virtual void SetDirty() { m_bDirty = TRUE; }
+   virtual void SetDirty() { m_bDirty = true; }
 
    void EndModal(int rc) override;
 
@@ -291,11 +291,11 @@ public:
    // notifications from the notebook pages
       // something changed, set the dirty flag (must be called to enable the
       // Apply button)
-   void SetDirty() override { m_bDirty = TRUE; EnableButtons(TRUE); }
+   void SetDirty() override { m_bDirty = true; EnableButtons(true); }
       // something important change
-   virtual void SetDoTest() { SetDirty(); m_bTest = TRUE; }
+   virtual void SetDoTest() { SetDirty(); m_bTest = true; }
       // some setting changed, but won't take effect until restart
-   virtual void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
+   virtual void SetGiveRestartWarning() { m_bRestartWarning = true; }
 
    // get/set the dialog data
    bool TransferDataToWindow() override;
@@ -321,8 +321,8 @@ protected:
    {
       m_bTest =
       m_bRestartWarning =
-      m_bDirty = FALSE;
-      m_btnApply->Enable(FALSE);
+      m_bDirty = false;
+      m_btnApply->Enable(false);
    }
 
    // the helper for the handlers of Apply/Ok buttons, returns TRUE if the
@@ -407,7 +407,7 @@ private:
 class wxEnhancedPanel : public wxPanel
 {
 public:
-   wxEnhancedPanel(wxWindow *parent, bool enableScrolling = TRUE);
+   wxEnhancedPanel(wxWindow *parent, bool enableScrolling = true);
 
    // all these functions create the corresponding control and position it
    // below the "last" which may be NULL in which case the new control is put
@@ -457,7 +457,7 @@ public:
                               wxControl *last,
                               wxCoord nRightMargin = 0)
    {
-      return (wxComboBox *)CreateComboBoxOrChoice(TRUE, label, widthMax,
+      return (wxComboBox *)CreateComboBoxOrChoice(true, label, widthMax,
                                                   last, nRightMargin);
    }
 
@@ -468,7 +468,7 @@ public:
                           wxControl *last,
                           wxCoord nRightMargin = 0)
    {
-      return (wxChoice *)CreateComboBoxOrChoice(FALSE, label, widthMax,
+      return (wxChoice *)CreateComboBoxOrChoice(false, label, widthMax,
                                                 last, nRightMargin);
    }
 
@@ -487,8 +487,8 @@ public:
                                long widthMax,
                                wxControl *last,
                                wxFileBrowseButton **ppButton = nullptr,
-                               bool open = TRUE,
-                               bool existingOnly = TRUE)
+                               bool open = true,
+                               bool existingOnly = true)
    {
       return CreateEntryWithButton(label, widthMax, last,
                                    GetBtnType(FileBtn, open, existingOnly),
@@ -500,8 +500,8 @@ public:
                                     long widthMax,
                                     wxControl *last,
                                     wxFileOrDirBrowseButton **ppButton = nullptr,
-                                    bool open = TRUE,
-                                    bool existingOnly = TRUE)
+                                    bool open = true,
+                                    bool existingOnly = true)
    {
       return CreateEntryWithButton(label, widthMax, last,
                                    GetBtnType(FileOrDirBtn, open, existingOnly),

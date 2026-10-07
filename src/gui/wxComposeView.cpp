@@ -1625,8 +1625,8 @@ void wxTextCtrlProcessingEnter::OnEnter(wxCommandEvent& /* event */)
 {
    // pass to the next control when <Enter> is pressed
    wxNavigationKeyEvent event;
-   event.SetDirection(TRUE);       // forward
-   event.SetWindowChange(FALSE);   // control change
+   event.SetDirection(true);       // forward
+   event.SetWindowChange(false);   // control change
    event.SetEventObject(this);
 
    GetParent()->GetEventHandler()->ProcessEvent(event);
@@ -2359,7 +2359,7 @@ public:
   bool SetData(const wxDataFormat& format, size_t len, const void *buf) override
   {
     m_dataObjectLast = GetObject(format);
-    wxCHECK_MSG( m_dataObjectLast, FALSE, wxT("unsupported format in wxDataObjectCompositeEx"));
+    wxCHECK_MSG( m_dataObjectLast, false, wxT("unsupported format in wxDataObjectCompositeEx"));
     return m_dataObjectLast->SetData(len, buf);
   }
 
@@ -3193,7 +3193,7 @@ wxComposeView::DoInitText(Message *msgOrig)
 
       // we will only run this loop once unless there are erros in the template
       // and the user changed it
-      templateChanged = FALSE;
+      templateChanged = false;
 
       // do parse the template
       if ( !ExpandTemplate
@@ -3227,7 +3227,7 @@ wxComposeView::DoInitText(Message *msgOrig)
                if ( ConfigureTemplates(m_Profile, this) )
                {
                   // ...restart the loop
-                  templateChanged = TRUE;
+                  templateChanged = true;
                }
             }
             else
@@ -3236,7 +3236,7 @@ wxComposeView::DoInitText(Message *msgOrig)
                String templNew = ChooseTemplateFor(kind, this);
                if ( m_template != templNew )
                {
-                  templateChanged = TRUE;
+                  templateChanged = true;
 
                   m_template = templNew;
                }
@@ -3973,7 +3973,7 @@ bool wxComposeView::StartExternalEditor()
 
          // do start the external process
          m_procExtEdit = new wxProcess(this, HelperProcess_Editor);
-         m_pidEditor = wxExecute(command, FALSE, m_procExtEdit);
+         m_pidEditor = wxExecute(command, false, m_procExtEdit);
 
          if ( !m_pidEditor  )
          {
@@ -4709,7 +4709,7 @@ wxComposeView::IsReadyToSend() const
          {
             wxLogError(_("Cannot send message - network is not configured."));
 
-            return FALSE;
+            return false;
          }
       }
       else

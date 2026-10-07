@@ -1975,7 +1975,7 @@ static Value DoMatchRegEx(ArgList *args, FilterRuleImpl *p, int flags = 0)
    String needle = v2.ToString();
    strutil_RegEx * re = p->GetInterface()->
                            strutil_compileRegEx(needle, flags);
-   if(! re) return FALSE;
+   if(! re) return false;
 
    // yes, 0, don't use flags here
    bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, 0);
@@ -2036,7 +2036,7 @@ static Value func_print(ArgList *args, FilterRuleImpl *p)
    // FIXME: this can't work like this!!
 #if 0
    wxMessageViewFrame *mvf = new wxMessageViewFrame(nullptr);
-   mvf->Show(FALSE);
+   mvf->Show(false);
    mvf->ShowMessage(msg);
    msg->DecRef();
    bool rc = mvf->GetMessageView()->Print();

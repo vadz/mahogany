@@ -754,7 +754,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
 
    // truncate the file
    wxFile file;
-   if ( !file.Create(fileName, TRUE /* overwrite */) )
+   if ( !file.Create(fileName, true /* overwrite */) )
    {
       wxLogError(_("Could not truncate the existing file."));
       return false;
@@ -1540,7 +1540,7 @@ bool
 MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections,
                                      int flags)
 {
-   CHECK( CanDeleteMessagesInFolder(GetType()), FALSE,
+   CHECK( CanDeleteMessagesInFolder(GetType()), false,
           _T("can't delete messages in this folder") );
 
    // we can either delete the messages by moving them to the trash folder and
@@ -1578,14 +1578,14 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections,
          //       afterwards: see bug 653 at
          //
          //       http://mahogany.sourceforge.net/cgi-bin/show_bug.cgi?id=653
-         rc = DeleteMessages(selections, TRUE /* expunge */);
+         rc = DeleteMessages(selections, true /* expunge */);
       }
 
    }
    else // delete in place
    {
       // delete without expunging
-      rc = DeleteMessages(selections, FALSE /* don't expunge */);
+      rc = DeleteMessages(selections, false /* don't expunge */);
    }
 
    return rc;

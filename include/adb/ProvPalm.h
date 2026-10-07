@@ -48,7 +48,7 @@ class PalmEntry : public AdbEntryStoredInMemory
 {
 public:
   // ctor
-  PalmEntry(PalmEntryGroup *pGroup, const String& strName, bool bNew = FALSE);
+  PalmEntry(PalmEntryGroup *pGroup, const String& strName, bool bNew = false);
   virtual ~PalmEntry(void);
 
   // implement interface methods
@@ -81,7 +81,7 @@ public:
   // ctors
     // the normal one
   PalmEntryGroup(PalmEntryGroup *pParent, const wxString& strName,
-               bool bNew = FALSE);
+               bool bNew = false);
     // this one is only used for the root group
   PalmEntryGroup(void);
   virtual ~PalmEntryGroup();
@@ -111,9 +111,9 @@ public:
      {
         /*ASSERT(m_pParent); return m_pParent->IsReadOnly();*/
 #ifdef EXPERIMENTAL
-        return FALSE;
+        return false;
 #else
-        return TRUE;
+        return true;
 #endif
      }
 
@@ -176,7 +176,7 @@ public:
 
   // there can be only one PalmADB
   virtual bool IsSameAs(const String& name) const
-    { return TRUE; }
+    { return true; }
   virtual String GetFileName() const;
 
   virtual void SetName(const String& name);
@@ -187,7 +187,7 @@ public:
 
   virtual size_t GetNumberOfEntries() const;
 
-  virtual bool IsLocal() const { return TRUE; }
+  virtual bool IsLocal() const { return true; }
   virtual bool IsReadOnly() const;
 
   virtual bool Flush();

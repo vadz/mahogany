@@ -87,7 +87,7 @@ class FCEntry : public AdbEntryStoredInMemory
 {
 public:
   // ctor
-  FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew = FALSE);
+  FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew = false);
 
   // implement interface methods
     // AdbEntry
@@ -128,7 +128,7 @@ public:
   // ctors
     // the normal one
   FCEntryGroup(FCEntryGroup *pParent, const wxString& strName,
-               bool bNew = FALSE);
+               bool bNew = false);
     // this one is only used for the root group
   FCEntryGroup(wxFileConfig *pConfig);
 
@@ -260,7 +260,7 @@ public:
 
   size_t GetNumberOfEntries() const override;
 
-  bool IsLocal() const override { return TRUE; }
+  bool IsLocal() const override { return true; }
   bool IsReadOnly() const override;
 
   bool Flush() override;
@@ -298,7 +298,7 @@ public:
   DECLARE_ADB_PROVIDER(FCDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(FCDataProvider, TRUE, "Native format", Name_File);
+IMPLEMENT_ADB_PROVIDER(FCDataProvider, true, "Native format", Name_File);
 
 // ============================================================================
 // implementation
@@ -330,7 +330,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
   }
 
   m_pGroup->IncRefRecursively();
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 FCEntry::~FCEntry()
@@ -429,13 +429,13 @@ void FCEntry::Load(const String& strValue)
   }
   //else: no additional email addresses at all
 
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 // save entry to wxFileConfig (doesn't check if it's modified or not)
 bool FCEntry::Save()
 {
-  wxCHECK_MSG( m_bDirty, TRUE, _T("shouldn't save unmodified FCEntry") );
+  wxCHECK_MSG( m_bDirty, true, _T("shouldn't save unmodified FCEntry") );
 
   size_t nFieldMax = m_astrFields.Count();
 
@@ -629,7 +629,7 @@ AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 {
   CHECK( !!name, nullptr, _T("can't create entries with empty names") );
 
-  FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, TRUE /* new */);
+  FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, true /* new */);
   if ( !pEntry->IsOk() ) {
     pEntry->DecRef();
     pEntry = nullptr;
@@ -640,7 +640,7 @@ AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 
 AdbEntryGroup *FCEntryGroup::CreateGroup(const String& name)
 {
-  FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name, TRUE);
+  FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name, true);
   if ( !pGroup->IsOk() ) {
     pGroup->DecRef();
     pGroup = nullptr;
@@ -652,7 +652,7 @@ AdbEntryGroup *FCEntryGroup::CreateGroup(const String& name)
 void FCEntryGroup::DeleteEntry(const String& strName)
 {
   SetOurPath();
-  GetConfig()->DeleteEntry(strName, FALSE /* don't delete group */);
+  GetConfig()->DeleteEntry(strName, false /* don't delete group */);
 }
 
 void FCEntryGroup::DeleteGroup(const String& strName)
@@ -696,7 +696,7 @@ FCBook::FCBook(const String& filename)
 
   // the ADB files contain arbitrary data, don't try to expand env vars in
   // them
-  m_pConfig->SetExpandEnvVars(FALSE);
+  m_pConfig->SetExpandEnvVars(false);
 
   // create the root group
   m_pRootGroup = new FCEntryGroup(m_pConfig);
@@ -743,7 +743,7 @@ String FCBook::GetName() const
 size_t FCBook::GetNumberOfEntries() const
 {
   m_pConfig->SetPath("/" ADB_ENTRIES);
-  return m_pConfig->GetNumberOfEntries(TRUE);
+  return m_pConfig->GetNumberOfEntries(true);
 }
 
 bool FCBook::IsReadOnly() const
@@ -779,14 +779,14 @@ AdbBook *FCDataProvider::CreateBook(const String& name)
 bool FCDataProvider::EnumBooks(wxArrayString& /* aNames */)
 {
   // TODO
-  return FALSE;
+  return false;
 }
 
 bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
   String fullname = FCBook::GetFullAdbPath(name);
 
-  bool ok = FALSE;
+  bool ok = false;
 
   switch ( test )
   {
@@ -823,7 +823,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 
         // it's the only portable way to test for it I can think of
         wxFile file;
-        if ( !file.Create(fullname, FALSE /* !overwrite */) )
+        if ( !file.Create(fullname, false /* !overwrite */) )
         {
           // either it already exists or we don't have permission to create
           // it there. Check whether it exists now.
@@ -833,7 +833,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
         {
           // it hadn't existed an we managed to create it - so we do have
           // permissions. Don't forget to remove it now.
-          ok = TRUE;
+          ok = true;
 
           file.Close();
           wxRemove(fullname);
@@ -859,7 +859,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 bool FCDataProvider::DeleteBook(AdbBook * /* book */)
 {
   // TODO
-  return FALSE;
+  return false;
 }
 
 // ----------------------------------------------------------------------------

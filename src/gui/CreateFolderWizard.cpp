@@ -959,7 +959,7 @@ bool MWizard_CreateFolder_NewMailPage::TransferDataFromWindow()
    if ( (params->m_FolderFlags & MF_FLAGS_MONITOR) &&
          m_checkOnStartup->GetValue() )
    {
-      params->m_CheckOnStartup = TRUE;
+      params->m_CheckOnStartup = true;
    }
 
    return true;

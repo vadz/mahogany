@@ -71,7 +71,7 @@ public:
    bool SelectFolder(MFolder *folder);
       // find the next/previous folder with unread messages, return NULL if
       // there are no more
-   MFolder *FindNextUnreadFolder(bool next = TRUE);
+   MFolder *FindNextUnreadFolder(bool next = true);
 
       // process one of WXMENU_FOLDER_XXX commands
    void ProcessMenuCommand(int id);

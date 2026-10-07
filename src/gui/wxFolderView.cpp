@@ -113,8 +113,8 @@ enum ListCtrlImages
 };
 
 #ifndef wxHAS_RADIO_MENU_ITEMS
-   #define wxITEM_NORMAL FALSE
-   #define wxITEM_RADIO TRUE
+   #define wxITEM_NORMAL false
+   #define wxITEM_RADIO true
 #endif
 
 // ----------------------------------------------------------------------------
@@ -526,7 +526,7 @@ public:
    bool SelectNextUnreadAfter(long indexStart = -1,
                               MailFolder::MessageStatus status =
                                  MailFolder::MSG_STAT_SEEN,
-                              bool isSet = FALSE);
+                              bool isSet = false);
 
    /// return true if we preview this item
    bool IsPreviewed(long item) const
@@ -1285,7 +1285,7 @@ void wxFolderMsgWindow::CreateViewerBar()
 
    // put the layout together
    m_winBar->SetSizer(sizer);
-   m_winBar->SetAutoLayout(TRUE);
+   m_winBar->SetAutoLayout(true);
    sizer->Fit(m_winBar);
 }
 
@@ -1948,7 +1948,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
    // threading
    menu.AppendSeparator();
-   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), wxEmptyString, TRUE);
+   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), wxEmptyString, true);
    menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
 
    // add column-specific entries
@@ -1961,17 +1961,17 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
       case WXFLC_FROM:
          menu.AppendSeparator();
-         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), wxEmptyString, TRUE);
-         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), wxEmptyString, TRUE);
+         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), wxEmptyString, true);
+         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), wxEmptyString, true);
 
          if ( READ_CONFIG(profile, MP_FVIEW_NAMES_ONLY) )
          {
-            menu.Check(WXMENU_FVIEW_FROM_NAMES_ONLY, TRUE);
+            menu.Check(WXMENU_FVIEW_FROM_NAMES_ONLY, true);
          }
 
          if ( READ_CONFIG(profile, MP_FVIEW_FROM_REPLACE) )
          {
-            menu.Check(WXMENU_FVIEW_TO_IN_FROM, TRUE);
+            menu.Check(WXMENU_FVIEW_TO_IN_FROM, true);
          }
          break;
 
@@ -1996,7 +1996,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
                sizeFmt = WXMENU_FVIEW_SIZE_AUTO;
             }
 
-            menu.Check(sizeFmt, TRUE);
+            menu.Check(sizeFmt, true);
          }
          break;
 
@@ -2020,12 +2020,12 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    if ( !READ_CONFIG(profile, MP_MSGS_SORTBY) )
    {
       // we're already unsorted, this command doesn't make sense
-      menu.Enable(WXMENU_FVIEW_RESET_SORT, FALSE);
+      menu.Enable(WXMENU_FVIEW_RESET_SORT, false);
    }
 
    if ( READ_CONFIG(profile, MP_MSGS_USE_THREADING) )
    {
-      menu.Check(WXMENU_FVIEW_TOGGLE_THREAD, TRUE);
+      menu.Check(WXMENU_FVIEW_TOGGLE_THREAD, true);
    }
 
    // and show the menu
@@ -2226,7 +2226,7 @@ void wxFolderListCtrl::PreviewItemDelayed(long idx, UIdType uid)
       m_uidDelayed = uid;
 
       // start (or restart) the timer
-      m_timerPreview.Start(m_PreviewDelay, TRUE /* one shot */);
+      m_timerPreview.Start(m_PreviewDelay, true /* one shot */);
    }
    else // no, preview the item immediately
    {
@@ -4778,11 +4778,11 @@ wxFolderView::DoCommandEvent(int cmd)
          break;
 
       case WXMENU_MSG_NEXT_UNREAD:
-         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
+         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_SEEN, false);
          break;
 
       case WXMENU_MSG_NEXT_FLAGGED:
-         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
+         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, true);
          break;
 
       case WXMENU_MSG_SELECTALL:
@@ -4790,11 +4790,11 @@ wxFolderView::DoCommandEvent(int cmd)
          break;
 
       case WXMENU_MSG_SELECTUNREAD:
-         SelectAllByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
+         SelectAllByStatus(MailFolder::MSG_STAT_SEEN, false);
          break;
 
       case WXMENU_MSG_SELECTFLAGGED:
-         SelectAllByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
+         SelectAllByStatus(MailFolder::MSG_STAT_FLAGGED, true);
          break;
 
       case WXMENU_MSG_DESELECTALL:

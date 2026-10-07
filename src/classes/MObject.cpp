@@ -136,10 +136,10 @@ bool MObjectRC::DecRef()
       if( !m_weakRef )
          ::operator delete(this);
 
-      return FALSE;
+      return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 

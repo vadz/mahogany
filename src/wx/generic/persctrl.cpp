@@ -177,7 +177,7 @@ wxPHelper::wxPHelper(const wxString& path,
     SetConfig(config);
     SetPath(path, prefix);
 
-    m_pathRestored = TRUE;  // it's not changed yet...
+    m_pathRestored = true;  // it's not changed yet...
 }
 
 void wxPHelper::SetConfig(wxConfigBase *config)
@@ -232,14 +232,14 @@ wxPHelper::~wxPHelper()
 
 bool wxPHelper::ChangePath()
 {
-    wxCHECK_MSG( m_config, FALSE, _T("can't change path without config!") );
+    wxCHECK_MSG( m_config, false, _T("can't change path without config!") );
 
     m_oldPath = m_config->GetPath();
     m_config->SetPath(m_path);
 
-    m_pathRestored = FALSE;
+    m_pathRestored = false;
 
-    return TRUE;
+    return true;
 }
 
 void wxPHelper::RestorePath()
@@ -249,7 +249,7 @@ void wxPHelper::RestorePath()
 
         m_config->SetPath(m_oldPath);
 
-        m_pathRestored = TRUE;  // to avoid restoring it next time
+        m_pathRestored = true;  // to avoid restoring it next time
     }
     //else: path wasn't changed or was already restored since then
 }
@@ -327,11 +327,11 @@ bool wxPTextEntry::Create(const wxString& configPath,
    if ( wxComboBox::Create(parent, id, value, pos, size, style) ) {
        RestoreStrings();
 
-       return TRUE;
+       return true;
    }
    else {
        // the control couldn't be created, don't even attempt anything
-       return FALSE;
+       return false;
    }
 }
 
@@ -444,7 +444,7 @@ wxPSplitterWindow::wxPSplitterWindow(const wxString& configPath,
                                      wxConfigBase *config)
                  : wxSplitterWindow(parent, id, pos, size, style)
 {
-    m_wasSplit = FALSE;
+    m_wasSplit = false;
 
     m_persist = new wxPHelper(configPath, ms_path, config);
 }
@@ -457,7 +457,7 @@ bool wxPSplitterWindow::Create(const wxString& configPath,
                                long style,
                                wxConfigBase *config)
 {
-   m_wasSplit = FALSE;
+   m_wasSplit = false;
 
    m_persist->SetConfig(config);
    m_persist->SetPath(configPath, ms_path);
@@ -504,7 +504,7 @@ bool wxPSplitterWindow::SplitVertically(wxWindow *window1,
     int pos;
 
     if ( !m_wasSplit ) {
-        m_wasSplit = TRUE;
+        m_wasSplit = true;
 
         pos = GetStoredPosition(sashPosition);
     }
@@ -522,7 +522,7 @@ bool wxPSplitterWindow::SplitHorizontally(wxWindow *window1,
     int pos;
 
     if ( !m_wasSplit ) {
-        m_wasSplit = TRUE;
+        m_wasSplit = true;
 
         pos = GetStoredPosition(sashPosition);
     }
@@ -537,7 +537,7 @@ void wxPSplitterWindow::OnUnsplit(wxWindow *removed)
 {
     SavePosition();
 
-    m_wasSplit = FALSE;
+    m_wasSplit = false;
 
     wxSplitterWindow::OnUnsplit(removed);
 }
@@ -624,7 +624,7 @@ void wxPListCtrl::OnSize(wxSizeEvent& event)
     if ( m_bFirstTime ) {
         RestoreWidths();
 
-        m_bFirstTime = FALSE;
+        m_bFirstTime = false;
     }
 
     // important things are done in the base class version!
@@ -736,12 +736,12 @@ bool wxPCheckBox::Create(const wxString& configPath,
 
    if ( !wxCheckBox::Create(parent, id, label, pos, size, style, validator) ) {
        // failed to create the control
-       return FALSE;
+       return false;
    }
 
    RestoreValue();
 
-   return TRUE;
+   return true;
 }
 
 // dtor saves the settings
@@ -973,7 +973,7 @@ void wxPChoice::OnSize(wxSizeEvent& event)
     if ( m_bFirstTime ) {
         RestoreSelection();
 
-        m_bFirstTime = FALSE;
+        m_bFirstTime = false;
     }
 
     // important things may be done in the base class version!
@@ -1091,7 +1091,7 @@ void wxPRadioBox::OnSize(wxSizeEvent& event)
     if ( m_bFirstTime ) {
         RestoreSelection();
 
-        m_bFirstTime = FALSE;
+        m_bFirstTime = false;
     }
 
     // important things may be done in the base class version!
@@ -1210,7 +1210,7 @@ void wxPTreeCtrl::OnSize(wxSizeEvent& event)
         {
             // reset the flag first as the calls to Expand() below may generate
             // in other OnSize()s
-            m_bFirstTime = FALSE;
+            m_bFirstTime = false;
 
             RestoreExpandedBranches();
         }
@@ -1232,9 +1232,9 @@ bool wxPTreeCtrl::GetExpandedBranches(const wxTreeItemId& id,
                                       wxArrayString& branches)
 {
     if ( !IsExpanded(id) )
-        return FALSE;
+        return false;
 
-    bool hasExpandedChildren = FALSE;
+    bool hasExpandedChildren = false;
 
     size_t nChild = 0;
     wxTreeItemIdValue cookie;
@@ -1251,7 +1251,7 @@ bool wxPTreeCtrl::GetExpandedBranches(const wxTreeItemId& id,
                 branches.Add(prefix + subbranches[n]);
             }
 
-            hasExpandedChildren = TRUE;
+            hasExpandedChildren = true;
         }
 
         idChild = GetNextChild(id, cookie);
@@ -1266,7 +1266,7 @@ bool wxPTreeCtrl::GetExpandedBranches(const wxTreeItemId& id,
         branches.Add(_T("0"));
     }
 
-    return TRUE;
+    return true;
 }
 
 wxString wxPTreeCtrl::SaveExpandedBranches(const wxTreeItemId& itemRoot)

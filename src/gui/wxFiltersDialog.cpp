@@ -1232,7 +1232,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_initializing = true;
    m_nControls = 0;
    m_FilterData = fd;
-   SetAutoLayout( TRUE );
+   SetAutoLayout( true );
    wxLayoutConstraints *c;
 
    // Remove unimplemented labels for tests and actions
@@ -1241,7 +1241,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    SKIP_UNIMPLEMENTED_LABELS( OAC_Types, OAC_T_Swap, OAC_TypesCountS,
                               FilterActionImplemented );
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), false,
                                              MH_DIALOG_FILTERS_DETAILS);
 
    /// The name of the filter rule:
@@ -1286,14 +1286,14 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_textProgram->SetConstraints(c);
 
-   m_Panel = new wxEnhancedPanel(this, TRUE);
+   m_Panel = new wxEnhancedPanel(this, true);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.Below(m_NameCtrl,  2*LAYOUT_Y_MARGIN);
    c->bottom.Above(m_textProgram, -2*LAYOUT_Y_MARGIN);
    m_Panel->SetConstraints(c);
-   m_Panel->SetAutoLayout(TRUE);
+   m_Panel->SetAutoLayout(true);
 
    m_OriginalFilterData = *m_FilterData;
 
@@ -1566,7 +1566,7 @@ wxOneFilterDialog::TransferDataToWindow()
    // now any updates come from user, not from program
    m_initializing = false;
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1607,7 +1607,7 @@ wxOneFilterDialog::DoTransferDataFromWindow(MFilterDesc *filterData)
       filterData->Set(settings);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1693,7 +1693,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("All &filters:"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("All &filters:"), false,
                                              MH_DIALOG_FILTERS);
 
    /* This dialog is supposed to look like this:
@@ -2272,7 +2272,7 @@ bool wxFolderFiltersDialog::TransferDataToWindow()
       //else: we already have it
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxFolderFiltersDialog::TransferDataFromWindow()
@@ -2300,7 +2300,7 @@ bool wxFolderFiltersDialog::TransferDataFromWindow()
       m_folder->SetFilters(m_filters);
    }
 
-   return TRUE;
+   return true;
 }
 
 void wxFolderFiltersDialog::OnAddButton(wxCommandEvent& event)

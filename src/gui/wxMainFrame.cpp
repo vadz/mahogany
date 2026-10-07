@@ -138,7 +138,7 @@ static bool WaitForNetwork(int timeoutInSec)
    for ( int n = 0; n < timeoutInSec/2; n++ )
    {
       DWORD flags;
-      if ( (*s_pfnInternetGetConnectedState)(&flags, 0) == TRUE )
+      if ( (*s_pfnInternetGetConnectedState)(&flags, 0) == true )
       {
          wxLogDebug("Network is available.");
          return true;
@@ -821,9 +821,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // disable the operations which don't make sense for viewer
    wxMenuBar *menuBar = GetMenuBar();
-   menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
-   menuBar->Enable(WXMENU_EDIT_PASTE, FALSE);
-   menuBar->Enable(WXMENU_EDIT_PASTE_QUOTED, FALSE);
+   menuBar->Enable(WXMENU_EDIT_CUT, false);
+   menuBar->Enable(WXMENU_EDIT_PASTE, false);
+   menuBar->Enable(WXMENU_EDIT_PASTE_QUOTED, false);
 
    m_ModulesMenu = nullptr;
 

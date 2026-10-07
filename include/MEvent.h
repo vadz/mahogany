@@ -500,7 +500,7 @@ public:
    static bool DeregisterAll(void **pHandle, ...);
 
    /// Temporarily suspend (enable/disable) event dispatching:
-   static void Suspend(bool suspended = TRUE);
+   static void Suspend(bool suspended = true);
 };
 
 // ----------------------------------------------------------------------------

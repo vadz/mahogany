@@ -263,12 +263,12 @@ bool
 AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
 {
   AdbManager_obj manager;
-  CHECK( manager, FALSE, _T("can't expand address: no AdbManager") );
+  CHECK( manager, false, _T("can't expand address: no AdbManager") );
 
   results.Empty();
 
   if ( what.empty() )
-     return FALSE;
+     return false;
 
   manager->LoadAll();
 

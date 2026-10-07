@@ -351,7 +351,7 @@ MessageCC::GetHeaderLines(const char **headersOrig,
       String value;
       for ( headers = headersOrig; *headers; headers++ )
       {
-         int n = names.Index(*headers, FALSE /* not case sensitive */);
+         int n = names.Index(*headers, false /* not case sensitive */);
          if ( n != wxNOT_FOUND )
          {
             value = MIME::DecodeHeader(valuesInDisorder[(size_t)n], &encoding);

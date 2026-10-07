@@ -158,7 +158,7 @@ MAppBase::MAppBase()
    m_profile = nullptr;
 
 #ifdef USE_DIALUP
-   m_DialupSupport = FALSE;
+   m_DialupSupport = false;
 #endif // USE_DIALUP
 
    m_mimeManager = nullptr;
@@ -167,7 +167,7 @@ MAppBase::MAppBase()
    m_cycle = Initializing;
 
    m_isAway =
-   m_autoAwayOn = FALSE;
+   m_autoAwayOn = false;
 
    m_cmdLineOptions = new CmdLineOptions;
 
@@ -569,7 +569,7 @@ MAppBase::OnStartup()
                ) )
       {
          // disable it
-         m_profile->writeEntry(MP_USEPYTHON, FALSE);
+         m_profile->writeEntry(MP_USEPYTHON, false);
       }
    }
 #endif //USE_PYTHON
@@ -613,11 +613,11 @@ MAppBase::OnStartup()
    // should never fail...
    m_eventOptChangeReg = MEventManager::Register(*this,
                                                  MEventId_OptionsChange);
-   CHECK( m_eventOptChangeReg, FALSE,
+   CHECK( m_eventOptChangeReg, false,
           _T("failed to register event handler for options change event") );
    m_eventFolderUpdateReg = MEventManager::Register(*this,
                                                     MEventId_FolderUpdate);
-   CHECK( m_eventFolderUpdateReg, FALSE,
+   CHECK( m_eventFolderUpdateReg, false,
           _T("failed to register event handler for folder status event") );
 
    // finish non critical initialization
@@ -643,7 +643,7 @@ MAppBase::OnStartup()
    delete m_cmdLineOptions;
    m_cmdLineOptions = nullptr;
 
-   return TRUE;
+   return true;
 }
 
 void
@@ -944,7 +944,7 @@ MAppBase::OnMEvent(MEventData& event)
       FAIL_MSG(_T("unexpected event in MAppBase"));
    }
 
-   return TRUE;
+   return true;
 }
 
 void
@@ -1138,13 +1138,13 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
             String msg;
             msg.Printf(_("Cannot open outbox '%s'"), outbox);
             ERRORMESSAGE((msg));
-            return FALSE;
+            return false;
          }
       }
       else
       {
          ERRORMESSAGE((_("Outbox folder '%s' doesn't exist"), outbox));
-         return FALSE;
+         return false;
       }
    }
 

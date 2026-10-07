@@ -209,7 +209,7 @@ public:
    wxDeviceLock(const wxString &dev)
       {
          m_Device = dev;
-         m_Locked = FALSE;
+         m_Locked = false;
       }
 
    ~wxDeviceLock()
@@ -244,7 +244,7 @@ public:
 
          if (fd != -1)
          {
-            m_Locked = TRUE;
+            m_Locked = true;
             wxString pidstr;
             pidstr.Printf("%lu", (unsigned long) getpid());
             write(fd, (char *)pidstr,pidstr.Length());
@@ -416,7 +416,7 @@ int MAL_PrintStatusFunc(const char *format, ...)
 {
    va_list ap;
    va_start(ap, format);
-   return MAL_PrintFunc(FALSE, format, ap);
+   return MAL_PrintFunc(false, format, ap);
 }
 
 static
@@ -424,7 +424,7 @@ int MAL_PrintErrorFunc(const char *format, ...)
 {
    va_list ap;
    va_start(ap, format);
-   return MAL_PrintFunc(TRUE, format, ap);
+   return MAL_PrintFunc(true, format, ap);
 }
 #endif
 
@@ -467,21 +467,21 @@ PalmOSModule::ProcessMenuEvent(int id)
    {
    case WXMENU_MODULES_PALMOS_SYNC:
       Synchronise(nullptr);
-      return TRUE;
+      return true;
    case WXMENU_MODULES_PALMOS_BACKUP:
       Backup();
-      return TRUE;
+      return true;
    case WXMENU_MODULES_PALMOS_RESTORE:
       Restore();
-      return TRUE;
+      return true;
    case WXMENU_MODULES_PALMOS_INSTALL:
       Install();
-      return TRUE;
+      return true;
    case WXMENU_MODULES_PALMOS_CONFIG:
       Configure();
-      return TRUE;
+      return true;
    default:
-      return FALSE;
+      return false;
    }
 }
 
@@ -734,7 +734,7 @@ PalmOSModule::Connect(void)
       if(m_Script1.Length())
       {
          int rc;
-         if((rc = wxExecute(m_Script1, TRUE)) != 0)
+         if((rc = wxExecute(m_Script1, true)) != 0)
          {
             String msg;
             msg.Printf(_("Executing command '%s' returned an error code (%d)."),
@@ -793,7 +793,7 @@ PalmOSModule::Connect(void)
       (void) new wxStaticText(p,-1,
                               _("Please press the HotSync button..."));
       p->Fit(); mini->Fit();
-      mini->Show(TRUE);
+      mini->Show(true);
       wxSafeYield(mini);
       m_PiSocket = pi_accept_to(m_PiSocket, 0, 0, 5000);
       delete mini;
@@ -849,7 +849,7 @@ PalmOSModule::Disconnect(void)
       if(m_Script2.Length())
       {
          int rc;
-         if((rc = wxExecute(m_Script2, TRUE)) != 0)
+         if((rc = wxExecute(m_Script2, true)) != 0)
          {
             String msg;
             msg.Printf(_("Executing command '%s' returned an error code (%d)."),

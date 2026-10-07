@@ -410,10 +410,10 @@ void ClickableURL::OpenInBrowser(int options) const
                   // this is a bit naive but should work as -1 can't appear
                   // elsewhere in the DDE topic, normally
                   if ( ddeCmd.Replace("-1", "0",
-                                      FALSE /* only first occurrence */) == 1 )
+                                      false /* only first occurrence */) == 1 )
                   {
                      // and also replace the parameters
-                     if ( ddeCmd.Replace("%1", m_url, FALSE) == 1 )
+                     if ( ddeCmd.Replace("%1", m_url, false) == 1 )
                      {
                         // magic incantation understood by wxMSW
                         command << "WX_DDE#"

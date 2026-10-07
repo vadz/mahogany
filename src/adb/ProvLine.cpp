@@ -578,7 +578,7 @@ bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)
          
          // it's the only portable way to test for it I can think of
          wxFile file;
-         if ( !file.Create(fullname, FALSE /* !overwrite */) )
+         if ( !file.Create(fullname, false /* !overwrite */) )
          {
             // either it already exists or we don't have permission to create
             // it there. Check whether it exists now.

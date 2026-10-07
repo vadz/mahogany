@@ -480,7 +480,7 @@ wxIconView::wxIconView(wxDialog *parent,
 {
    size_t n, count = icons.GetCount();
    wxImageList *imageList = new wxImageList(ms_iconSize, ms_iconSize,
-                                            TRUE, count);
+                                            true, count);
    for ( n = 0; n < count; n++ )
    {
       imageList->Add(*icons[n]);

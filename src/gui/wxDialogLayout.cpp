@@ -1127,7 +1127,7 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
    m_helpId = -1; // no help id by default
 
    // the controls will be positioned with the constraints
-   SetAutoLayout(TRUE);
+   SetAutoLayout(true);
 }
 
 void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
@@ -1348,7 +1348,7 @@ void wxProfileSettingsEditDialog::CreateAllControls(int flags)
    panel->SetName(_T("MainNbookDlgPanel"));
 #endif
 
-   panel->SetAutoLayout(TRUE);
+   panel->SetAutoLayout(true);
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft);
    c->right.SameAs(this, wxRight);
@@ -1428,7 +1428,7 @@ void wxProfileSettingsEditDialog::CreateAllControls(int flags)
    // set dialog size (FIXME these are more or less arbitrary numbers)
    if ( !(flags & ProfileEdit_NoDefSize) )
    {
-      SetDefaultSize(6*wBtn, 27*hBtn, TRUE /* set as min size too */);
+      SetDefaultSize(6*wBtn, 27*hBtn, true /* set as min size too */);
    }
 }
 
@@ -1463,7 +1463,7 @@ bool wxOptionsEditDialog::TransferDataToWindow()
    for ( int nPage = 0; nPage < count; nPage++ ) {
       wxWindow *page = m_notebook->GetPage(nPage);
       if ( !page->TransferDataToWindow() ) {
-         return FALSE;
+         return false;
       }
    }
 
@@ -1474,7 +1474,7 @@ bool wxOptionsEditDialog::TransferDataToWindow()
    if ( m_profileForButtons )
       m_profileForButtons->Suspend();
 
-   return TRUE;
+   return true;
 }
 
 bool wxOptionsEditDialog::TransferDataFromWindow()
@@ -1484,10 +1484,10 @@ bool wxOptionsEditDialog::TransferDataFromWindow()
    {
       wxWindow * const page = m_notebook->GetPage(nPage);
       if ( !page->TransferDataFromWindow() )
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 /*
@@ -1584,12 +1584,12 @@ bool wxOptionsEditDialog::DoApply()
    {
       if ( OnSettingsChange() )
       {
-         m_bDirty = FALSE;
-         m_btnApply->Enable(FALSE);
+         m_bDirty = false;
+         m_btnApply->Enable(false);
 
          SendOptionsChangeEvent();
 
-         return TRUE;
+         return true;
       }
    }
 
@@ -1599,7 +1599,7 @@ bool wxOptionsEditDialog::DoApply()
    // don't do m_profileForButtons->DecRef() neither - this will be done in
    // OnOk or OnCancel later
 
-   return FALSE;
+   return false;
 }
 
 void wxOptionsEditDialog::OnCancel(wxCommandEvent& /* event */)
@@ -1656,13 +1656,13 @@ bool wxOptionsEditDialog::OnSettingsChange()
       {
          if ( !VerifyEMailSendingWorks() )
          {
-            return FALSE;
+            return false;
          }
       }
       else
       {
          // no test was done, assume it's ok...
-         m_bTest = FALSE;
+         m_bTest = false;
       }
    }
 
@@ -1672,10 +1672,10 @@ bool wxOptionsEditDialog::OnSettingsChange()
                         "only take effect when the progam will be run the\n"
                         "next time and not during this session."),
                       this, MDIALOG_MSGTITLE, "WarnRestartOpt");
-      m_bRestartWarning = FALSE;
+      m_bRestartWarning = false;
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

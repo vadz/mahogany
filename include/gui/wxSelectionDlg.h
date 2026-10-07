@@ -72,14 +72,14 @@ protected:
    // event handlers
 
    // check list box event handler
-   void OnCheckLstBoxToggle(wxCommandEvent&) { m_hasChanges = TRUE; }
+   void OnCheckLstBoxToggle(wxCommandEvent&) { m_hasChanges = true; }
 
    // update UI here: disable the buttons when they don't do anything
    void OnCheckLstBoxSelChanged(wxCommandEvent& event);
 
    // up/down buttons notifications
-   void OnButtonUp(wxCommandEvent&) { OnButtonMove(TRUE); }
-   void OnButtonDown(wxCommandEvent&) { OnButtonMove(FALSE); }
+   void OnButtonUp(wxCommandEvent&) { OnButtonMove(true); }
+   void OnButtonDown(wxCommandEvent&) { OnButtonMove(false); }
    void OnButtonMove(bool up);
 
    // handlers for the controls used for adding items: notice that it's ok to

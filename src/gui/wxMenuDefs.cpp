@@ -40,9 +40,9 @@
 #include "gui/wxMenuDefs.h"
 
 #ifndef wxHAS_RADIO_MENU_ITEMS
-   #define wxITEM_NORMAL FALSE
-   #define wxITEM_CHECK TRUE
-   #define wxITEM_RADIO TRUE
+   #define wxITEM_NORMAL false
+   #define wxITEM_CHECK true
+   #define wxITEM_RADIO true
 #endif
 
 class MOption;
@@ -946,7 +946,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
    }
 
 #ifdef wxHAS_RADIO_MENU_ITEMS
-   mb->Check(id, TRUE);
+   mb->Check(id, true);
 #else // !wxHAS_RADIO_MENU_ITEMS
    // emulate the "radio menu items" as wxWin doesn't yet have this
    static const int menuIds[] =

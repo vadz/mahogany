@@ -211,7 +211,7 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
 
    #define INIT_IMPORT(what)                    \
       if ( flags & MImporter::Import_##what )   \
-         m_check##what->SetValue(TRUE);         \
+         m_check##what->SetValue(true);         \
       else                                      \
          m_check##what->Disable()
 
@@ -236,7 +236,7 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
    topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxCENTRE | wxALL, 10 );
    SetOkBtnLabel(_("&Start"));
 
-   SetAutoLayout( TRUE );
+   SetAutoLayout( true );
    SetSizer( topsizer );
 
    topsizer->SetSizeHints( this );
@@ -317,7 +317,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
                                MF_GROUP,
                                0,
                                wxEmptyString,
-                               FALSE
+                               false
                               );
             }
          }

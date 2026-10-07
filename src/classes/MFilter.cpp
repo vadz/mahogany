@@ -115,36 +115,36 @@ MFDialogComponent::ReadSettings(String *str)
    bool success;
    long number = strutil_readNumber(*str, &success);
    if(!success)
-      return FALSE;
+      return false;
    m_Logical = (MFDialogLogical) number;
 
    number = strutil_readNumber(*str, &success);
    if(!success)
-      return FALSE;
+      return false;
    m_Inverted = number != 0;
 
    number = strutil_readNumber(*str, &success);
    if(! success)
-      return FALSE;
+      return false;
    m_Test = (MFDialogTest)number;
 
    m_Argument = strutil_readString(*str, &success);
    if(! success)
-      return FALSE;
+      return false;
 
    number = strutil_readNumber(*str);
    if(!success)
-      return FALSE;
+      return false;
    m_Target = (MFDialogTarget) number;
 
    if ( m_Target == ORC_W_Header )
    {
       m_TargetArgument = strutil_readString(*str, &success);
       if(!success)
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 String
@@ -455,15 +455,15 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       m_Logical = ORC_L_None;
 
    if(*cptr++ != '(')
-      return FALSE;
+      return false;
 
    if(*cptr == '!')
    {
-      m_Inverted = TRUE;
+      m_Inverted = true;
       cptr++;
    }
    else
-      m_Inverted = FALSE;
+      m_Inverted = false;
    // now we need to find the test to be applied:
    m_Test = ORC_T_Illegal;
    for(size_t i = 0; ORC_T_Names[i]; i++)
@@ -477,7 +477,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       }
    }
    if(m_Test == ORC_T_Illegal)
-      return FALSE;
+      return false;
 
    bool needsTarget = FilterTestNeedsTarget(m_Test);
    bool needsArgument = FilterTestNeedsArgument(m_Test);
@@ -496,44 +496,44 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       }
 
       if(m_Target == ORC_W_Illegal)
-         return FALSE;
+         return false;
       if(m_Target == ORC_W_Header)
       {
          // special case: this one has an extra argument which we must extract
          if (*cptr++ != '(')
-            return FALSE;
+            return false;
          bool success;
          String tmp(cptr);
          const size_t lenOrig = tmp.length();
          m_TargetArgument = strutil_readString(tmp, &success);
          if ( !success )
-            return FALSE;
+            return false;
          cptr += lenOrig - tmp.length();
          if (*cptr++ != ')')
-            return FALSE;
+            return false;
       }
    }
    // comma between target and argument:
    if(needsTarget && needsArgument
       && *cptr++ != ',')
-      return FALSE;
+      return false;
 
    m_Argument = wxEmptyString;
    if(needsArgument)
    {
-      if(*cptr != '"') return FALSE;
+      if(*cptr != '"') return false;
       String tmp(cptr);
       const size_t lenOrig = tmp.length();
       bool success;
       m_Argument = strutil_readString(tmp, &success);
-      if(! success) return FALSE;
+      if(! success) return false;
       cptr += lenOrig - tmp.length();
    }
    if(*cptr++ != ')')
-      return FALSE;
+      return false;
    // assign remaining bit
    rule = cptr;
-   return TRUE;
+   return true;
 }
 
 WX_DECLARE_OBJARRAY(MFDialogComponent, MFDComponentArray);
@@ -676,7 +676,7 @@ MFDialogSettingsImpl::operator==(const MFDialogSettings& o) const
    if( wxStrncmp(cptr, what, wxStrlen(what)) == 0) \
      cptr += wxStrlen(what); \
    else \
-     return FALSE \
+     return false \
 
 String
 MFDialogSettingsImpl::WriteAction(void) const
@@ -712,7 +712,7 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
          m_Tests.Add(c);
    }while(rc);
    if(m_Tests.Count() == 0)
-      return FALSE; // could not find any test
+      return false; // could not find any test
    cptr = tmp.c_str();
 
    MATCH_FAIL(_T("){"));
@@ -727,15 +727,15 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
    bool needsArgument = FilterActionNeedsArg(m_Action);
    if(needsArgument)
    {
-      if(*cptr != '"') return FALSE;
+      if(*cptr != '"') return false;
       tmp = cptr;
       m_ActionArgument = strutil_readString(tmp, &rc);
       if(! rc)
-         return FALSE;
+         return false;
    }
    else
       m_ActionArgument = wxEmptyString;
-   return TRUE; // we    made it
+   return true; // we    made it
 }
 
 bool
@@ -753,11 +753,11 @@ MFDialogSettingsImpl::ReadSettings(const String & istr)
          m_Tests.Add(c);
    }
    if(m_Tests.Count() == 0)
-      return FALSE;
+      return false;
 
    // now read the action settings:
    long a = strutil_readNumber(str, &rc);
-   if(! rc) return FALSE;
+   if(! rc) return false;
    m_Action = (MFDialogAction) a;
    m_ActionArgument = strutil_readString(str, &rc);
    return rc;

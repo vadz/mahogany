@@ -206,18 +206,18 @@ class wxFileOrDirBrowseButton : public wxFileBrowseButton
 {
 public:
    wxFileOrDirBrowseButton(wxTextCtrl *text, wxWindow *parent,
-                           bool open = TRUE, bool existingOnly = TRUE)
+                           bool open = true, bool existingOnly = true)
       : wxFileBrowseButton(text, parent, open, existingOnly)
    {
-      m_browseForFile = TRUE;
+      m_browseForFile = true;
    }
 
    // get or change the current browsing mode
       // returns TRUE if in "file" mode, FALSE if in "directory" one
    bool IsBrowsingForFiles() const { return m_browseForFile; }
       // change the current mode
-   void BrowseForFiles() { m_browseForFile = TRUE; UpdateTooltip(); }
-   void BrowseForDirectories() { m_browseForFile = FALSE; UpdateTooltip(); }
+   void BrowseForFiles() { m_browseForFile = true; UpdateTooltip(); }
+   void BrowseForDirectories() { m_browseForFile = false; UpdateTooltip(); }
 
    // show the file selection dialog and fill the associated text control with
    // the name of the selected file or directory

@@ -142,7 +142,7 @@ bool AdbEudoraImporter::ParseTagValue(const char **ppc,
 
    if ( !*pc )
    {
-      return FALSE;
+      return false;
    }
 
    // skip ':'
@@ -155,7 +155,7 @@ bool AdbEudoraImporter::ParseTagValue(const char **ppc,
 
    if ( !*pc )
    {
-      return FALSE;
+      return false;
    }
 
    // skip '>'
@@ -185,7 +185,7 @@ bool AdbEudoraImporter::ParseTagValue(const char **ppc,
 
    *ppc = pc;
 
-   return TRUE;
+   return true;
 }
 
 bool AdbEudoraImporter::ParseEudoraAdbEntry(size_t nLine,
@@ -200,7 +200,7 @@ bool AdbEudoraImporter::ParseEudoraAdbEntry(size_t nLine,
    if ( strncmp(line, "alias ", lenAlias) != 0 )
    {
       // doesn't seem like the good starting line
-      return FALSE;
+      return false;
    }
 
    // skip spaces (normally only one, but be careful)
@@ -273,7 +273,7 @@ bool AdbEudoraImporter::ParseEudoraAdbEntry(size_t nLine,
       // else: it was the last line
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -288,7 +288,7 @@ bool AdbEudoraImporter::CanImport(const String& filename)
    if ( ext != "txt" )
    {
       // Eudora ADB files also have this extension, apparently
-      return FALSE;
+      return false;
    }
 
    // check for existence of the .toc file nearby
@@ -300,14 +300,14 @@ bool AdbEudoraImporter::CanImport(const String& filename)
    if ( !fileToc.IsOpened() )
    {
       // no such file?
-      return FALSE;
+      return false;
    }
 
    char sig[2];
    if ( fileToc.Read(sig, 2) != 2 )
    {
       // can't read?
-      return FALSE;
+      return false;
    }
 
    // check signature
@@ -319,13 +319,13 @@ bool AdbEudoraImporter::StartImport(const String& filename)
    if ( m_textfile.GetName() == filename )
    {
       // already have it
-      return TRUE;
+      return true;
    }
 
    if ( !CanImport(filename) )
    {
       // don't even try
-      return FALSE;
+      return false;
    }
 
    // load the file into memory
@@ -375,12 +375,12 @@ bool AdbEudoraImporter::ImportEntry(const String& /* path */,
                                     size_t index,
                                     AdbEntry *entry)
 {
-   CHECK( index < m_lineNumbers.GetCount(), FALSE, _T("invalid entry index") );
+   CHECK( index < m_lineNumbers.GetCount(), false, _T("invalid entry index") );
 
    wxString nickname;
    if ( !ParseEudoraAdbEntry((size_t)m_lineNumbers[index], &nickname, entry) )
    {
-      return FALSE;
+      return false;
    }
 
 #ifdef DEBUG
@@ -389,7 +389,7 @@ bool AdbEudoraImporter::ImportEntry(const String& /* path */,
    ASSERT_MSG( nicknameReal == nickname, _T("importing wrong entry?") );
 #endif // DEBUG
 
-   return TRUE;
+   return true;
 }
 
 String AdbEudoraImporter::GetDefaultFilename() const

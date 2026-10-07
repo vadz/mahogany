@@ -250,7 +250,7 @@ public:
 class AdbEntryStoredInMemory : public AdbEntryCommon
 {
 public:
-  AdbEntryStoredInMemory() { m_bDirty = m_bEMailDirty = FALSE; }
+  AdbEntryStoredInMemory() { m_bDirty = m_bEMailDirty = false; }
 
   // we can implement some of the base class functions in the manner independent
   // of the exact nature of the derived class
@@ -260,7 +260,7 @@ public:
   void ClearExtraEMails() override;
   size_t GetEMailCount() const override { return m_astrEmails.Count(); }
   void GetEMail(size_t n, String *p) const override { *p = m_astrEmails[n]; }
-  void ClearDirty() override { m_bDirty = FALSE; }
+  void ClearDirty() override { m_bDirty = false; }
   bool IsDirty() const override { return m_bDirty; }
   int Matches(const wxChar *str, int where, int how) const override;
 

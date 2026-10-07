@@ -3463,7 +3463,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          return;
       }
 
-      saved = TRUE;
+      saved = true;
    }
 
    String command;

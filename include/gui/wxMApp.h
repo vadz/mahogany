@@ -74,7 +74,7 @@ public:
    bool StopTimer(Timer timer) override;
 
    bool IsLogShown() const override;
-   void ShowLog(bool doShow = TRUE) override;
+   void ShowLog(bool doShow = true) override;
    void SetLogFile(const String& filename) override;
 
    // program termination helpers
@@ -138,8 +138,8 @@ public:
 
    /** @name Thread control */
    //@{
-   void ThrEnter(SectionId what) override { ThrEnterLeave(TRUE, what, FALSE); }
-   void ThrLeave(SectionId what, bool testing) override { ThrEnterLeave(FALSE, what, testing); }
+   void ThrEnter(SectionId what) override { ThrEnterLeave(true, what, false); }
+   void ThrLeave(SectionId what, bool testing) override { ThrEnterLeave(false, what, testing); }
    //@}
 
    wxHelpControllerBase *GetHelpController(void) const
@@ -178,7 +178,7 @@ public:
                  const wxChar *cond, const wxChar *msg) override;
 #endif // __WXDEBUG__
 
-   virtual bool Yield(bool onlyIfNeeded = FALSE);
+   virtual bool Yield(bool onlyIfNeeded = false);
 
 protected:
    void RecreateStatusBar() override;

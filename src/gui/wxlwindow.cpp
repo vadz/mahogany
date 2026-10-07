@@ -180,14 +180,14 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_llist->SetCaret(caret);
 #endif // WXLAYOUT_USE_CARET
 
-   m_HaveFocus = FALSE;
-   m_HandCursor = FALSE;
+   m_HaveFocus = false;
+   m_HandCursor = false;
    m_CursorVisibility = -1;
    SetCursor(wxCURSOR_IBEAM);
    SetDirty();
 
    // at least under Windows, this should be the default behaviour
-   m_AutoDeleteSelection = TRUE;
+   m_AutoDeleteSelection = true;
 }
 
 wxLayoutWindow::~wxLayoutWindow()
@@ -231,7 +231,7 @@ wxLayoutWindow::DoClearWindow(bool noUpdate)
    ClearBackground();
    ResizeScrollbars(true);
    SetDirty();
-   SetModified(FALSE);
+   SetModified(false);
    if ( m_Editable )
       m_CursorVisibility = 1;
 
@@ -339,7 +339,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
             {
                if(!m_HandCursor)
                   SetCursor(wxCURSOR_HAND);
-               m_HandCursor = TRUE;
+               m_HandCursor = true;
                if(m_StatusBar && m_StatusFieldLabel != -1)
                {
                   const wxString &label = u->GetLabel();
@@ -355,7 +355,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
             {
                if(m_HandCursor)
                   SetCursor(wxCURSOR_IBEAM);
-               m_HandCursor = FALSE;
+               m_HandCursor = false;
                if( m_StatusBar && m_StatusFieldLabel != -1 &&
                    s_hasPutMessageInStatusBar )
                {
@@ -437,7 +437,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
             m_Selecting = false;
             // copy selected text to primary selection without
             // invalidating it:
-            Copy(FALSE,FALSE,TRUE);
+            Copy(false,false,true);
 
             RequestUpdate();     // TODO: we don't have to redraw everything!
          }
@@ -448,7 +448,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
          {
             // paste selected text from primary selection without
             // invalidating it:
-            Paste(FALSE, TRUE);
+            Paste(false, true);
          }
          break;
 
@@ -518,7 +518,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       m_llist->EndSelection();
       //m_llist->DiscardSelection(); //FIXME: correct?
       // VS - no, it would make selecting text with keyboard a NOP
-      Copy(FALSE,FALSE,TRUE);
+      Copy(false,false,true);
    }
 
    // If we deleted the selection here, we must not execute the
@@ -611,7 +611,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          {
          case 'c':
             // this should work even in read-only mode
-            Copy(WXLO_COPY_FORMAT, FALSE);
+            Copy(WXLO_COPY_FORMAT, false);
             break;
          case 's': // search
             Find(wxEmptyString);
@@ -635,7 +635,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             switch(keyCode)
             {
                case WXK_INSERT:
-                  Copy(WXLO_COPY_FORMAT, FALSE);
+                  Copy(WXLO_COPY_FORMAT, false);
                   break;
                case WXK_DELETE :
                   if(! deletedSelection)
@@ -677,13 +677,13 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   SetDirty();
                   break;
                case 'c':
-                  Copy(WXLO_COPY_FORMAT, FALSE);
+                  Copy(WXLO_COPY_FORMAT, false);
                   break;
                case 'v':
-                  Paste( WXLO_COPY_FORMAT, FALSE );
+                  Paste( WXLO_COPY_FORMAT, false );
                   break;
                case 'x':
-                  Cut( WXLO_COPY_FORMAT, FALSE );
+                  Cut( WXLO_COPY_FORMAT, false );
                   break;
                case 'w':
                   if(m_WrapMargin > 0)
@@ -698,7 +698,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   m_llist->SetFont(-1,-1,-1,-1,true);  // underlined
                   break;
                case 'l':
-                  Refresh(TRUE);
+                  Refresh(true);
                   break;
 #endif
                default:
@@ -732,7 +732,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   break;
                case WXK_DELETE :
                   if(event.ShiftDown())
-                     Cut(WXLO_COPY_FORMAT, FALSE);
+                     Cut(WXLO_COPY_FORMAT, false);
                   else
                      if(! deletedSelection)
                      {
@@ -1007,13 +1007,13 @@ wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
          WXLO_DEBUG(("UpdateRegion: %ld,%ld, %ld,%ld",
                      ri.GetX(),ri.GetY(),ri.GetW(),ri.GetH()));
          dc.Blit(x0+ri.GetX(),y0+ri.GetY(),ri.GetW(),ri.GetH(),
-                 dcMem,ri.GetX(),ri.GetY(),wxCOPY,FALSE);
+                 dcMem,ri.GetX(),ri.GetY(),wxCOPY,false);
          ri++;
       }
    else
 #endif
    {
-      dc.Blit(x0, y0, x1, y1, &dcMem, 0, 0, wxCOPY, FALSE);
+      dc.Blit(x0, y0, x1, y1, &dcMem, 0, 0, wxCOPY, false);
    }
    WXLO_TIMER_STOP(BlitTimer);
 
@@ -1109,18 +1109,18 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
          max.y += WXLO_BOFFSET;
       }
 
-      bool done = FALSE;
+      bool done = false;
       if(max.x < X_SCROLL_PAGE && m_hasHScrollbar)
       {
          SetScrollbars(0,-1,0,-1,0,-1,true);
-         m_hasHScrollbar = FALSE;
-         done = TRUE;
+         m_hasHScrollbar = false;
+         done = true;
       }
       if(max.y < Y_SCROLL_PAGE && m_hasVScrollbar)
       {
          SetScrollbars(-1,0,-1,0,-1,0,true);
-         m_hasVScrollbar = FALSE;
-         done = TRUE;
+         m_hasVScrollbar = false;
+         done = true;
       }
       if(! done &&
 //         (max.x > X_SCROLL_PAGE || max.y > Y_SCROLL_PAGE)
@@ -1224,7 +1224,7 @@ wxLayoutWindow::Copy(bool invalidate, bool privateFormat, bool primary)
    if(! llist)
    {
       delete wldo;
-      return FALSE;
+      return false;
    }
 
    // Export selection as text:
@@ -1277,7 +1277,7 @@ if(! primary) // always copy as text-only to primary selection
    else
       delete wldo;
 
-   return FALSE;
+   return false;
 }
 
 bool
@@ -1287,10 +1287,10 @@ wxLayoutWindow::Cut(bool privateFormat, bool usePrimary)
    {
       m_llist->DeleteSelection();
       SetDirty();
-      return TRUE;
+      return true;
    }
    else
-      return FALSE;
+      return false;
 }
 
 // ----------------------------------------------------------------------------

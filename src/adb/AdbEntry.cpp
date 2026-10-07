@@ -132,7 +132,7 @@ void AdbEntryStoredInMemory::SetField(size_t n, const wxString& strValue)
 
   if ( m_astrFields[n] != strValue ) {
     m_astrFields[n] = strValue;
-    m_bDirty = TRUE;
+    m_bDirty = true;
   }
 }
 
@@ -141,7 +141,7 @@ void AdbEntryStoredInMemory::AddEMail(const String& strEMail)
   m_astrEmails.Add(strEMail);
 
   m_bDirty =
-  m_bEMailDirty = TRUE;
+  m_bEMailDirty = true;
 }
 
 void AdbEntryStoredInMemory::ClearExtraEMails()
@@ -150,7 +150,7 @@ void AdbEntryStoredInMemory::ClearExtraEMails()
     m_astrEmails.Empty();
 
     m_bDirty =
-    m_bEMailDirty = TRUE;
+    m_bEMailDirty = true;
   }
   //else: don't set dirty flag if it didn't change anything
 }

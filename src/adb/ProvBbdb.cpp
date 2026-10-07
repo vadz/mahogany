@@ -249,7 +249,7 @@ public:
 
    size_t GetNumberOfEntries() const override;
 
-   bool IsLocal() const override { return TRUE; }
+   bool IsLocal() const override { return true; }
    bool IsReadOnly() const override;
 
    /** Return the icon name if set. The numeric return value must be -1
@@ -286,7 +286,7 @@ public:
    DECLARE_ADB_PROVIDER(BbdbDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, "BBDB version 2", Name_File);
+IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, true, "BBDB version 2", Name_File);
 
 // ============================================================================
 // implementation
@@ -299,13 +299,13 @@ IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, "BBDB version 2", Name_File);
 BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup, const String& strName)
 {
    m_pGroup = pGroup;
-   m_bDirty = FALSE;
+   m_bDirty = false;
 }
 
 BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup)
 {
    m_pGroup = pGroup;
-   m_bDirty = FALSE;
+   m_bDirty = false;
 }
 
 bool
@@ -1043,7 +1043,7 @@ BbdbDataProvider::CreateBook(const String& name)
 bool
 BbdbDataProvider::EnumBooks(wxArrayString& aNames)
 {
-   return FALSE;
+   return false;
 }
 
 bool
@@ -1075,5 +1075,5 @@ BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
 bool
 BbdbDataProvider::DeleteBook(AdbBook *book)
 {
-   return FALSE;
+   return false;
 }

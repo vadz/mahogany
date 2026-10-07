@@ -125,7 +125,7 @@ public:
      Terminates the application (unless ask == TRUE and the user cancels
      shutdown)
     */
-   void Exit(bool ask = TRUE);
+   void Exit(bool ask = true);
 
    /**
      Called just before the application terminates, it is impossible to prevent
@@ -381,7 +381,7 @@ public:
    bool IsMailDebuggingEnabled() const;
 
    /// show or hide the log window
-   virtual void ShowLog(bool doShow = TRUE) = 0;
+   virtual void ShowLog(bool doShow = true) = 0;
 
    /// set the name of the file to use for logging (disable if empty)
    virtual void SetLogFile(const String& filename) = 0;

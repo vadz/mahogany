@@ -651,7 +651,7 @@ void wxSubfoldersTree::OnNoMoreFolders()
    if ( !m_nFoldersRetrieved && m_idParent.IsOk() )
    {
       // this item doesn't have any subfolders
-      SetItemHasChildren(m_idParent, FALSE);
+      SetItemHasChildren(m_idParent, false);
    }
 
    m_idParent.Unset();
@@ -1028,7 +1028,7 @@ void wxSubscriptionDialog::OnAddAll(wxCommandEvent& WXUNUSED(event))
 bool wxSubscriptionDialog::TransferDataFromWindow()
 {
    // will be set to TRUE if we need to refresh the tree
-   bool createdSomething = FALSE;
+   bool createdSomething = false;
 
    wxTreeItemId idRoot = m_treectrl->GetRootItem();
 
@@ -1129,7 +1129,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             folderNew->SetFlags(flags);
 
             // we created a new folder, set the flag to refresh the tree
-            createdSomething = TRUE;
+            createdSomething = true;
          }
 
          fullpath += name;
@@ -1155,7 +1155,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
    // show all errors which could have been accumulated
    wxLog::FlushActive();
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1179,7 +1179,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    (void)mailFolder->ListFolders
                      (
                         _T("*"),     // everything
-                        FALSE,       // subscribed only?
+                        false,       // subscribed only?
                         wxEmptyString,      // path relative to the folder
                         this         // data to pass to the callback
                      );
@@ -1331,7 +1331,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       // how did we get here at all?
       wxLogMessage(_("The folder '%s' has no subfolders."), folder->GetPath());
 
-      return FALSE;
+      return false;
    }
 
    // The folder must be half opened because we don't really want to read any
@@ -1356,7 +1356,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       //else: the user didn't want to open the folder (for example because it
       //      requires going online and he didn't want it)
 
-      return FALSE;
+      return false;
    }
 
    if ( MDialog_YesNoDialog
@@ -1384,7 +1384,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       dlg.ShowModal();
    }
 
-   return TRUE;
+   return true;
 }
 
 // add all subfolders to the tree

@@ -468,7 +468,7 @@ wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &coords,
    if ( m_Icon )
    {
       dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight(),
-                    (m_Icon->GetMask() == nullptr) ? FALSE : TRUE);
+                    (m_Icon->GetMask() == nullptr) ? false : true);
    }
 }
 
@@ -1398,12 +1398,12 @@ bool
 wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
 {
    if(GetLength() < wrapmargin)
-      return FALSE; // nothing to do
+      return false; // nothing to do
 
    // find the object which covers the wrapmargin:
    CoordType offset;
    wxLOiterator i = FindObject(wrapmargin, &offset);
-   wxCHECK_MSG( i != m_ObjectList.end(), FALSE,
+   wxCHECK_MSG( i != m_ObjectList.end(), false,
       _T("Cannot find object covering wrapmargin."));
 
    // from this object on, the rest of the line must be copied to the
@@ -1428,7 +1428,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    }
    else
    {
-      bool foundSpace = FALSE;
+      bool foundSpace = false;
       do
       {
 //         while(i != m_ObjectList.begin() && (**i).GetType() != WXLO_TYPE_TEXT)
@@ -1454,7 +1454,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
          if(! foundSpace) // breakpos == 0!
          {
             if(i == m_ObjectList.begin())
-               return FALSE; // could not break line
+               return false; // could not break line
             else
             {
                --i;
@@ -1527,7 +1527,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
                                 ((xpos > breakpos) ? 1 : 0 ));
       llist->MoveCursorTo( wxPoint( xpos, m_Next->GetLineNumber()) );
    }
-   return TRUE; // we wrapped the line
+   return true; // we wrapped the line
 }
 
 void
@@ -1736,15 +1736,15 @@ wxLayoutList::wxLayoutList()
 
    m_numLines = 0;
    m_FirstLine = nullptr;
-   SetAutoFormatting(TRUE);
-   ForceTotalLayout(TRUE);  // for the first time, do all
+   SetAutoFormatting(true);
+   ForceTotalLayout(true);  // for the first time, do all
    InvalidateUpdateRect();
    Clear();
 }
 
 wxLayoutList::~wxLayoutList()
 {
-   SetAutoFormatting(FALSE);
+   SetAutoFormatting(false);
    InternalClear();
    Empty();
    m_FirstLine->DeleteLine(false, this);
@@ -1779,9 +1779,9 @@ wxLayoutList::InternalClear(void)
    m_DefaultStyleInfo.style = wxNORMAL;
    m_DefaultStyleInfo.weight = wxNORMAL;
    m_DefaultStyleInfo.underline = 0;
-   m_DefaultStyleInfo.m_fg_valid = TRUE;
+   m_DefaultStyleInfo.m_fg_valid = true;
    m_DefaultStyleInfo.m_fg = *wxBLACK;
-   m_DefaultStyleInfo.m_bg_valid = TRUE;
+   m_DefaultStyleInfo.m_bg_valid = true;
    m_DefaultStyleInfo.m_bg = *wxWHITE;
 
    m_CurrentStyleInfo = m_DefaultStyleInfo;
@@ -2269,7 +2269,7 @@ bool
 wxLayoutList::Insert(wxLayoutList *llist)
 {
    wxASSERT(llist);
-   bool rc = TRUE;
+   bool rc = true;
 
    for(wxLayoutLine *line = llist->GetFirstLine();
        line;
@@ -2333,8 +2333,8 @@ wxLayoutList::WrapAll(CoordType column)
 {
    wxLayoutLine *line = m_FirstLine;
    if(! line)
-      return FALSE;
-   bool rc = FALSE;
+      return false;
+   bool rc = false;
    while(line)
    {
       rc |= line->Wrap(column, this);
@@ -2495,10 +2495,10 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
 
    if(m_ReLayoutAll)
    {
-      forceAll = TRUE;
+      forceAll = true;
       bottom = -1;
    }
-   ForceTotalLayout(FALSE);
+   ForceTotalLayout(false);
 
 
    // If one line was dirty, we need to re-calculate all
@@ -2549,7 +2549,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
                if ( csize )
                   *csize = m_CursorSize;
             }
-            cursorReached = TRUE;
+            cursorReached = true;
          }
          else
          {
@@ -2558,7 +2558,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
                line->Layout(dc, this,
                             cpos,
                             csize, nullptr, cpos->x);
-               cursorReached = TRUE;
+               cursorReached = true;
             }
             else
                line->Layout(dc, this);
@@ -3168,10 +3168,10 @@ wxLayoutList::ApplyStyle(wxLayoutStyleInfo const &si, wxDC &dc)
       if(si.what != -1) \
       { \
          m_CurrentStyleInfo.what = si.what; \
-         fontChanged = TRUE; \
+         fontChanged = true; \
       }
 
-      bool fontChanged = FALSE;
+      bool fontChanged = false;
       COPY_SI(family);
       COPY_SI(size);
       COPY_SI(style);
@@ -3282,18 +3282,18 @@ bool wxLayoutPrintout::Print(wxWindow *window, wxLayoutList *llist)
    wxPrinter printer(& pdd);
    wxLayoutPrintout printout(llist);
 
-   if ( !printer.Print(window, &printout, TRUE)
+   if ( !printer.Print(window, &printout, true)
         && printer.GetLastError() != wxPRINTER_CANCELLED )
    {
       wxMessageBox(_("There was a problem with printing the message:\n"
                      "perhaps your current printer is not set up correctly?"),
                    _("Printing"), wxOK);
-      return FALSE;
+      return false;
    }
 
    mApplication->SetPrintData(printer.GetPrintDialogData().GetPrintData());
 
-   return TRUE;
+   return true;
 }
 
 /* static */
@@ -3329,7 +3329,7 @@ bool wxLayoutPrintout::PrintPreview(wxLayoutList *llist)
                                );
    frame->Centre(wxBOTH);
    frame->Initialize();
-   frame->Show(TRUE);
+   frame->Show(true);
 
    return true;
 #else // !wxUSE_PRINTING_ARCHITECTURE
@@ -3414,11 +3414,11 @@ bool
 wxLayoutPrintout::OnBeginDocument(int startPage, int endPage)
 {
    if (!wxPrintout::OnBeginDocument(startPage, endPage))
-      return FALSE;
+      return false;
 
    ScaleDC(GetDC());
 
-   return TRUE;
+   return true;
 }
 
 bool wxLayoutPrintout::OnPrintPage(int page)
@@ -3441,8 +3441,8 @@ bool wxLayoutPrintout::OnPrintPage(int page)
    // SetDeviceOrigin() doesn't work here, so we need to manually
    // translate all coordinates.
    wxPoint translate(marginX, - top + marginY);  // HACK ALERT
-   m_llist->ForceTotalLayout(TRUE);  // for the first time, do all
-   m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly */);
+   m_llist->ForceTotalLayout(true);  // for the first time, do all
+   m_llist->Draw(*dc, translate, top, bottom, true /* clip strictly */);
 
    return true;
 }

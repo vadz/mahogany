@@ -218,7 +218,7 @@ bool AdbTextExporter::DoExportGroup(AdbEntryGroup& group,
 
       if ( !ok )
       {
-         return FALSE;
+         return false;
       }
    }
 
@@ -233,12 +233,12 @@ bool AdbTextExporter::DoExportGroup(AdbEntryGroup& group,
 
       if ( !ok )
       {
-         return FALSE;
+         return false;
       }
    }
 
 
-   return TRUE;
+   return true;
 }
 
 bool AdbTextExporter::Export(AdbEntryGroup& group, const String& dest)
@@ -256,7 +256,7 @@ bool AdbTextExporter::Export(AdbEntryGroup& group, const String& dest)
    {
       // cancelled...
 
-      return FALSE;
+      return false;
    }
 
    // create the file
@@ -270,20 +270,20 @@ bool AdbTextExporter::Export(AdbEntryGroup& group, const String& dest)
          wxLogMessage(_("Successfully exported address book data to "
                         "file '%s'"), filename);
 
-         return TRUE;
+         return true;
       }
    }
 
    wxLogError(_("Export failed."));
 
-   return FALSE;
+   return false;
 }
 
 bool AdbTextExporter::Export(const AdbEntry& /* entry */,
                              const String& /* dest */)
 {
    // TODO
-   return FALSE;
+   return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -308,11 +308,11 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
 
    // don't create the box because we have another one already and boxes inside
    // boxes look ugly
-   (void)CreateStdButtonsAndBox(_("Configure export"), TRUE /* no box */);
+   (void)CreateStdButtonsAndBox(_("Configure export"), true /* no box */);
 
    // put the items into an enhanced panel - even if we don't use scrolling
    // here, we may use functions like CreateFileEntry() like this
-   wxEnhancedPanel *panel = new wxEnhancedPanel(this, FALSE /* no scrolling */);
+   wxEnhancedPanel *panel = new wxEnhancedPanel(this, false /* no scrolling */);
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft);
    c->right.SameAs(this, wxRight);
@@ -376,7 +376,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
    int width;
    GetTextExtent(label, &width, nullptr);
    m_textFileName = panel->CreateFileEntry(label, width, dummy,
-                                           nullptr, FALSE /* save */);
+                                           nullptr, false /* save */);
 
    wxString filename = filenameOrig;
    if ( !filename )
@@ -398,7 +398,7 @@ bool wxAdbTextExporterConfigDialog::TransferDataFromWindow()
    {
       wxLogError(_("Please specify the file name!"));
 
-      return FALSE;
+      return false;
    }
 
    mApplication->GetProfile()->writeEntry(ms_profilePathLastFile,
@@ -421,12 +421,12 @@ bool wxAdbTextExporterConfigDialog::TransferDataFromWindow()
             wxLogError(_("Please enter specify the delimiter character!"));
             wxLog::GetActiveTarget()->Flush();
 
-            return FALSE;
+            return false;
          }
          break;
    }
 
-   return TRUE;
+   return true;
 }
 
 void wxAdbTextExporterConfigDialog::Update(int selection)

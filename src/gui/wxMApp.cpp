@@ -224,10 +224,10 @@ private:
 class AutoSaveTimer : public wxTimer
 {
 public:
-   AutoSaveTimer() { m_started = FALSE; }
+   AutoSaveTimer() { m_started = false; }
 
-   bool Start( int millisecs = -1, bool oneShot = FALSE ) override
-      { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
+   bool Start( int millisecs = -1, bool oneShot = false ) override
+      { m_started = true; return wxTimer::Start(millisecs, oneShot); }
 
    void Notify() override
    {
@@ -284,7 +284,7 @@ public:
    {
       wxLogTrace(TRACE_TIMER, _T("Going away on timer"));
 
-      mApplication->SetAwayMode(TRUE);
+      mApplication->SetAwayMode(true);
    }
 
 private:
@@ -306,7 +306,7 @@ static struct WatchDog
 
    static DWORD WINAPI Run(void *)
    {
-      HANDLE hEvent = ::CreateEvent(nullptr, FALSE, FALSE, _T("Mahogany_Die"));
+      HANDLE hEvent = ::CreateEvent(nullptr, false, false, _T("Mahogany_Die"));
       if ( !hEvent )
          return (DWORD)-1;
 
@@ -373,7 +373,7 @@ void MailCollectionTimer::Notify()
 // ----------------------------------------------------------------------------
 
 wxMLogWindow::wxMLogWindow(wxFrame *pParent, const wxChar *szTitle)
-            : wxLogWindow(pParent, szTitle, FALSE)
+            : wxLogWindow(pParent, szTitle, false)
 {
    int x, y, w, h;
    bool i;
@@ -575,12 +575,12 @@ wxMApp::wxMApp(void)
 {
    m_IconManager = nullptr;
    m_HelpController = nullptr;
-   m_CanClose = FALSE;
+   m_CanClose = false;
    m_IdleTimer = nullptr;
 
 #ifdef USE_DIALUP
    m_OnlineManager = nullptr;
-   m_DialupSupport = FALSE;
+   m_DialupSupport = false;
 #endif // USE_DIALUP
 
    m_PrintData = nullptr;
@@ -940,7 +940,7 @@ wxMApp::OnClose()
          wxMFrame *frame = (wxMFrame *)win;
 
          // force closing the frame
-         frame->Close(TRUE);
+         frame->Close(true);
       }
    }
 #endif // 0
@@ -1166,7 +1166,7 @@ wxMApp::OnInit()
    // run for the first time and show a modal dialog before opening the main
    // frame - if we don't do it, when the dialog (which is the last app window
    // at this moment) disappears, the app will close.
-   SetExitOnFrameDelete(FALSE);
+   SetExitOnFrameDelete(false);
 
    // create timers -- are accessed by OnStartup()
    gs_timerAutoSave = new AutoSaveTimer;
@@ -1243,7 +1243,7 @@ wxMApp::OnInit()
    m_IdleTimer = new IdleTimer;
 
    // restore the normal behaviour (see the comments above)
-   SetExitOnFrameDelete(TRUE);
+   SetExitOnFrameDelete(true);
 
 #ifdef USE_DIALUP
    // reflect settings in menu and statusbar:
@@ -1998,7 +1998,7 @@ wxMApp::OnConnected(wxDialUpEvent&)
 {
    if(! m_DialupSupport)
       return;
-   m_IsOnline = TRUE;
+   m_IsOnline = true;
    UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network connection established."),
                    m_topLevelFrame,
@@ -2011,7 +2011,7 @@ wxMApp::OnDisconnected(wxDialUpEvent&)
 {
    if(! m_DialupSupport)
       return;
-   m_IsOnline = FALSE;
+   m_IsOnline = false;
    UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network shut down."),
                    m_topLevelFrame,
@@ -2064,7 +2064,7 @@ wxMApp::SetupOnlineManager(void)
       delete m_OnlineManager;
       m_OnlineManager = nullptr; // Cleanup will try to delete it.
 
-      m_IsOnline = TRUE;
+      m_IsOnline = true;
    }
 
    UpdateOnlineDisplay();
@@ -2074,7 +2074,7 @@ bool
 wxMApp::IsOnline(void) const
 {
    if(! m_DialupSupport)
-      return TRUE; // no dialup--> always connected
+      return true; // no dialup--> always connected
 
    // make sure we always have the very latest value:
    ((wxMApp*)this)->m_IsOnline = m_OnlineManager->IsOnline();
@@ -2089,7 +2089,7 @@ wxMApp::GoOnline(void) const
 
    if(m_OnlineManager->IsOnline())
    {
-      ((wxMApp *)this)->m_IsOnline = TRUE;
+      ((wxMApp *)this)->m_IsOnline = true;
       ERRORMESSAGE((_("Dial-up network is already online.")));
       return;
    }
@@ -2104,7 +2104,7 @@ wxMApp::GoOffline(void) const
 
    if(! m_OnlineManager->IsOnline())
    {
-      ((wxMApp *)this)->m_IsOnline = FALSE;
+      ((wxMApp *)this)->m_IsOnline = false;
       ERRORMESSAGE((_("Dial-up network is already offline.")));
       return;
    }
@@ -2129,8 +2129,8 @@ wxMApp::UpdateOnlineDisplay(void)
 
    if(! m_DialupSupport)
    {
-      mbar->Enable(WXMENU_FILE_NET_ON, FALSE);
-      mbar->Enable(WXMENU_FILE_NET_OFF, FALSE);
+      mbar->Enable(WXMENU_FILE_NET_ON, false);
+      mbar->Enable(WXMENU_FILE_NET_OFF, false);
    }
    else // we do have dialup support
    {

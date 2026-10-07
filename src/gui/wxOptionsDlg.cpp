@@ -704,7 +704,7 @@ public:
 
    // return TRUE if this dialog edits global options for the program, FALSE
    // if this is another kind of dialog
-   virtual bool IsGlobalOptionsDialog() const { return TRUE; }
+   virtual bool IsGlobalOptionsDialog() const { return true; }
 
 protected:
    // implement base class pure virtual
@@ -840,7 +840,7 @@ public:
    void SetGiveRestartWarning() override { }
 
    // we're not the global options dialog
-   bool IsGlobalOptionsDialog() const override { return FALSE; }
+   bool IsGlobalOptionsDialog() const override { return false; }
 
 protected:
    enum
@@ -2466,7 +2466,7 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
    m_nFirst = nFirst;
    m_nLast = nLast;
 
-   notebook->AddPage(this, title, FALSE /* don't select */, image);
+   notebook->AddPage(this, title, false /* don't select */, image);
 
    // don't create controls yet, this will be done in Show() when we become the
    // notebook current page
@@ -2722,7 +2722,7 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    {
       // we can get events from the text controls from "file open" dialog here
       // too - just skip them silently
-      return FALSE;
+      return false;
    }
 
    // mark this control as being dirty
@@ -2744,7 +2744,7 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    if ( m_aRestartControls.Index(control) != -1 )
       dialog->SetGiveRestartWarning();
 
-   return TRUE;
+   return true;
 }
 
 void wxOptionsPage::OnTextChange(wxCommandEvent& event)
@@ -3247,7 +3247,7 @@ bool wxOptionsPage::DoTransferOptionsFromWindow()
    }
 
    // TODO life is easy as we don't check for errors...
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -3337,7 +3337,7 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
                    lboxData.m_lboxDlgPrompt,
                    GET_PARENT_OF_CLASS(this, wxDialog),
                    lboxData.m_lboxDlgPers) ) {
-      return FALSE;
+      return false;
    }
 
    // check that it's not already there
@@ -3346,7 +3346,7 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
       wxLogError(_("String '%s' is already present in the list, not added."),
                  str);
 
-      return FALSE;
+      return false;
    }
 
    // ok, do add it
@@ -3354,14 +3354,14 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
 
    wxOptionsPage::OnChangeCommon(lbox);
 
-   return TRUE;
+   return true;
 }
 
 bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
 {
    int nSel = lbox->GetSelection();
 
-   wxCHECK_MSG( nSel != -1, FALSE, _T("should be disabled") );
+   wxCHECK_MSG( nSel != -1, false, _T("should be disabled") );
 
    wxString val = wxGetTextFromUser
                   (
@@ -3374,14 +3374,14 @@ bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
    if ( !val || val == lbox->GetString(nSel) )
    {
       // cancelled or unchanged
-      return FALSE;
+      return false;
    }
 
    lbox->SetString(nSel, val);
 
    wxOptionsPage::OnChangeCommon(lbox);
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -3389,13 +3389,13 @@ wxOptionsPage::OnListBoxDelete(wxListBox *lbox, const LboxData& /* lboxData */)
 {
    int nSel = lbox->GetSelection();
 
-   wxCHECK_MSG( nSel != -1, FALSE, _T("should be disabled") );
+   wxCHECK_MSG( nSel != -1, false, _T("should be disabled") );
 
    lbox->Delete(nSel);
 
    wxOptionsPage::OnChangeCommon(lbox);
 
-   return TRUE;
+   return true;
 }
 
 void wxOptionsPage::OnUpdateUIListboxBtns(wxUpdateUIEvent& event)
@@ -4779,14 +4779,14 @@ bool
 wxGlobalOptionsDialog::TransferDataToWindow()
 {
    if ( !wxOptionsEditDialog::TransferDataToWindow() )
-      return FALSE;
+      return false;
 
    int nPageCount = m_notebook->GetPageCount();
    for ( int nPage = 0; nPage < nPageCount; nPage++ ) {
       ((wxOptionsPage *)m_notebook->GetPage(nPage))->UpdateUI();
    }
 
-   return TRUE;
+   return true;
 }
 
 void wxGlobalOptionsDialog::CreateNotebook(wxPanel *panel)
@@ -5048,7 +5048,7 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(Profile *profile,
    }
 
    // set the initial and minimal size
-   SetDefaultSize(4*wBtn, 10*hBtn, FALSE /* not minimal size */);
+   SetDefaultSize(4*wBtn, 10*hBtn, false /* not minimal size */);
 }
 
 bool wxRestoreDefaultsDialog::TransferDataFromWindow()
@@ -5067,7 +5067,7 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

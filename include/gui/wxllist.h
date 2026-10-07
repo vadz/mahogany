@@ -679,7 +679,7 @@ public:
                wxPoint *cursorSize = nullptr,
                wxLayoutStyleInfo *cursorStyle = nullptr,
                int cx = 0,
-               bool suppressStyleUpdate = FALSE);
+               bool suppressStyleUpdate = false);
    /** This function finds an object belonging to a given cursor
        position. It assumes that Layout() has been called before.
        @param dc the wxDC to use for calculations
@@ -850,7 +850,7 @@ public:
        disable this.
        @param enable TRUE to enable, FALSE to disable
    */
-   void SetAutoFormatting(bool enable = TRUE)
+   void SetAutoFormatting(bool enable = true)
       { m_AutoFormat = enable; }
    /**@name Cursor Management */
    //@{
@@ -1088,7 +1088,7 @@ public:
        to Layout() or Draw().
        @param redrawAll TRUE or FALSE to reset it
    */
-   void ForceTotalLayout(bool redrawAll = TRUE)
+   void ForceTotalLayout(bool redrawAll = true)
       { m_ReLayoutAll = redrawAll; }
    
    /** Returns the screen coordinates relating to a given cursor
@@ -1202,7 +1202,7 @@ public:
        @param invalidate if true, the selection will be invalidated after this and can no longer be used.
        @return Another layout list object holding the selection, must be freed by caller
    */
-   wxLayoutList *GetSelection(class wxLayoutDataObject *wxldo = nullptr, bool invalidate = TRUE);
+   wxLayoutList *GetSelection(class wxLayoutDataObject *wxldo = nullptr, bool invalidate = true);
    /// Delete selected bit
    void DeleteSelection(void);
 

@@ -133,7 +133,7 @@ public:
       }
 
       // propagate further
-      return TRUE;
+      return true;
    }
 
    virtual ~PythonOptionChangeHandler()
@@ -374,7 +374,7 @@ bool wxMFrame::RestorePosition(const char *name,
                                bool *i, bool *m)
 {
    // only i and m might be NULL
-   CHECK( x && y && w && h, FALSE,
+   CHECK( x && y && w && h, false,
           _T("NULL pointer in wxMFrame::RestorePosition") );
 
    wxConfigBase * const pConf = GetFrameOptionsConfig(name);
@@ -406,7 +406,7 @@ bool wxMFrame::RestorePosition(const char *name,
       if ( m )
          *m = GetNumericDefault(MP_MAXIMISED) != 0;
 
-      return FALSE;
+      return false;
    }
 }
 
@@ -1199,7 +1199,7 @@ void wxMFrame::OnPrintSetupPS()
    wxPrintDialogData printDialogData(* ((wxMApp *)mApplication)->GetPrintData());
    wxPrintDialog printerDialog(this, & printDialogData);
 
-   printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
+   printerDialog.GetPrintDialogData().SetSetupDialog(true);
    if ( printerDialog.ShowModal() == wxID_OK )
    {
       (*((wxMApp *)mApplication)->GetPrintData())
@@ -1215,10 +1215,10 @@ bool
 wxMFrame::ProcessModulesMenu(int id)
 {
 #ifndef USE_MODULES
-   return FALSE;
+   return false;
 #else
    if(id < WXMENU_MODULES_BEGIN || id > WXMENU_MODULES_END)
-      return FALSE;
+      return false;
 
    MModuleListing *listing = MModule::ListLoadedModules();
    MModule *mptr = nullptr;
@@ -1229,12 +1229,12 @@ wxMFrame::ProcessModulesMenu(int id)
       {
          listing->DecRef();
          mptr->DecRef();
-         return TRUE;
+         return true;
       }
       mptr->DecRef();
    }
    listing->DecRef();
-   return FALSE;
+   return false;
 #endif
 }
 

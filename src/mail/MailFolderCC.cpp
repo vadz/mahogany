@@ -1487,7 +1487,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
                                   MFolderType folderType,
                                   String *pName)
 {
-   CHECK( pName, FALSE, _T("NULL name in MailFolderCC::SpecToFolderName") );
+   CHECK( pName, false, _T("NULL name in MailFolderCC::SpecToFolderName") );
 
    String& name = *pName;
    switch ( folderType )
@@ -1499,7 +1499,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
       {
          FAIL_MSG(_T("invalid MH folder specification - no #mh/ prefix"));
 
-         return FALSE;
+         return false;
       }
 
       // make sure that the folder name does not start with s;ash
@@ -1546,7 +1546,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
       {
          FAIL_MSG(_T("invalid folder specification - no {nntp/...}"));
 
-         return FALSE;
+         return false;
       }
 
       name = specification.c_str() + (size_t)startIndex + 1;
@@ -1554,13 +1554,13 @@ bool MailFolder::SpecToFolderName(const String& specification,
    break;
    case MF_IMAP:
       name = specification.AfterFirst('}');
-      return TRUE;
+      return true;
    default:
       FAIL_MSG(_T("not done yet"));
-      return FALSE;
+      return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 // This does not return driver prefixes such as #mh/ which are

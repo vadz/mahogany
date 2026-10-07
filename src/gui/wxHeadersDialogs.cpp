@@ -262,11 +262,11 @@ private:
                                       wxLIST_STATE_SELECTED);
 
       if ( s == -1 )
-         return FALSE;
+         return false;
 
       *sel = (size_t)s;
 
-      return TRUE;
+      return true;
    }
 
    // finds header by name in the listctrl, returns wxNOT_FOUND if not found
@@ -470,7 +470,7 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
       m_textvalues[header]->DiscardEdits();
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxComposeHeadersDialog::TransferDataFromWindow()
@@ -483,13 +483,13 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
       {
          def = m_textvalues[header]->GetValue();
 
-         m_hasChanges = TRUE;
+         m_hasChanges = true;
 
          m_profile->writeEntry(ms_profileNamesDefault[header], def);
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -577,7 +577,7 @@ bool wxMsgViewHeadersDialog::TransferDataToWindow()
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxMsgViewHeadersDialog::TransferDataFromWindow()
@@ -602,7 +602,7 @@ bool wxMsgViewHeadersDialog::TransferDataFromWindow()
    m_hasChanges = shownHeaders != READ_CONFIG(m_profile, MP_MSGVIEW_HEADERS);
    if ( m_hasChanges )
    {
-      m_hasChanges = TRUE;
+      m_hasChanges = true;
 
       m_profile->writeEntry(MP_MSGVIEW_HEADERS, shownHeaders);
    }
@@ -614,7 +614,7 @@ bool wxMsgViewHeadersDialog::TransferDataFromWindow()
       m_profile->writeEntry(MP_MSGVIEW_ALL_HEADERS, allHeaders);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -777,7 +777,7 @@ bool wxCustomHeaderDialog::TransferDataToWindow()
       m_radioboxType->SetSelection(m_headerType);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxCustomHeaderDialog::TransferDataFromWindow()
@@ -810,7 +810,7 @@ bool wxCustomHeaderDialog::TransferDataFromWindow()
    if ( m_radioboxType )
       m_headerType = (CustomHeaderType)m_radioboxType->GetSelection();
 
-   return TRUE;
+   return true;
 }
 
 void wxCustomHeaderDialog::OnUpdateUI(wxUpdateUIEvent& event)
@@ -895,7 +895,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    };
 
    wxIconManager *iconmanager = mApplication->GetIconManager();
-   wxImageList *imagelist = new wxImageList(16, 16, FALSE, CustomHeader_Max);
+   wxImageList *imagelist = new wxImageList(16, 16, false, CustomHeader_Max);
    for ( size_t nImage = 0; nImage < CustomHeader_Max; nImage++ )
    {
       imagelist->Add(iconmanager->GetBitmap(iconNames[nImage]));
@@ -1014,7 +1014,7 @@ bool wxCustomHeadersDialog::TransferDataToWindow()
                 (CustomHeaderType)headerTypes[nHeader]);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxCustomHeadersDialog::TransferDataFromWindow()
@@ -1104,7 +1104,7 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
       m_profile->DeleteEntry(MP_ORGANIZATION);
    }
 
-   return TRUE;
+   return true;
 }
 
 void wxCustomHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
@@ -1117,7 +1117,7 @@ void wxCustomHeadersDialog::OnEdit(wxCommandEvent& WXUNUSED(event))
    size_t sel = 0; // inititialize it to fix compiler warnings
    CHECK_RET( GetSelection(&sel), _T("button should be disabled") );
 
-   wxCustomHeaderDialog dlg(m_profile, GetParent(), TRUE);
+   wxCustomHeaderDialog dlg(m_profile, GetParent(), true);
 
    String headerName, headerValue;
    GetHeader(sel, &headerName, &headerValue);
@@ -1135,7 +1135,7 @@ void wxCustomHeadersDialog::OnEdit(wxCommandEvent& WXUNUSED(event))
 
 void wxCustomHeadersDialog::OnAdd(wxCommandEvent& WXUNUSED(event))
 {
-   wxCustomHeaderDialog dlg(m_profile, GetParent(), TRUE);
+   wxCustomHeaderDialog dlg(m_profile, GetParent(), true);
 
    if ( dlg.ShowModal() == wxID_OK )
    {
@@ -1206,7 +1206,7 @@ bool ConfigureCustomHeader(Profile *profile,
       type = dlg.GetHeaderType();
    }
 
-   bool remember = letUserChooseType ? TRUE : dlg.RememberHeader();
+   bool remember = letUserChooseType ? true : dlg.RememberHeader();
 
    if ( storedInProfile )
       *storedInProfile = remember;

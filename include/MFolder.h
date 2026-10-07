@@ -446,7 +446,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                                       MFolderType folderType,
                                       long folderFlags,
                                       const String& path,
-                                      bool notify = TRUE);
+                                      bool notify = true);
 
 /**
    Add all subfolders of the given folder to the tree.

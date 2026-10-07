@@ -1110,12 +1110,12 @@ MailFolder::ReplyMessage(Message *msg,
 
    wxArrayString headersOrig = msg->GetHeaderLines(headers);
 
-   String messageid = headersOrig[0].Trim(TRUE).Trim(FALSE);
+   String messageid = headersOrig[0].Trim(true).Trim(false);
 
    // some message don't contain Message-Id at all
    if ( !messageid.empty() )
    {
-      String references = headersOrig[1].Trim(TRUE).Trim(FALSE);
+      String references = headersOrig[1].Trim(true).Trim(false);
       if ( !references.empty() )
          references += ' ';
       references += messageid;

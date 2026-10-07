@@ -193,11 +193,11 @@ public:
    {
       MOcheck();
       if ( --m_nRef )
-         return TRUE;
+         return true;
       this->~MObjectRC();
       if( !m_weakRef )
          ::operator delete(this);
-      return FALSE;
+      return false;
    }
 #endif ///debug/release
 

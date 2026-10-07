@@ -127,11 +127,11 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
          if ( m_expander )
             *value = _T('$');
          *ppc = ++pc;
-         return TRUE;
+         return true;
 
       case '\0':
          wxLogWarning(_("Unexpected end of file '%s'."), m_filename);
-         return FALSE;
+         return false;
 
       default:
          if ( isalpha(bracketOpen) )
@@ -148,7 +148,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                          m_nLine,
                          m_filename);
 
-            return FALSE;
+            return false;
          }
    }
 
@@ -164,7 +164,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
    const int Center = 3;
    int alignment = None;
    unsigned int alignWidth = 0;
-   bool truncate = FALSE;
+   bool truncate = false;
    String name;
    wxArrayString arguments;
 
@@ -176,7 +176,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
    }
    else
    {
-      bool stop = FALSE;
+      bool stop = false;
       while ( !stop )
       {
          switch ( *pc )
@@ -198,7 +198,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                                pc - m_pStartOfLine,
                                m_filename);
 
-                  return FALSE;
+                  return false;
                }
                break;
 
@@ -235,7 +235,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                            String subarg;
                            if ( !ExpandTemplate(&pc, &subarg) )
                            {
-                              return FALSE;
+                              return false;
                            }
 
                            pc--; // compensate for the increment below
@@ -307,7 +307,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                                pc - m_pStartOfLine,
                                m_filename);
 
-                  return FALSE;
+                  return false;
                }
 
                // skip until the end of number
@@ -317,7 +317,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                if ( *pc == '!' )
                {
                   // truncate the field to fit in given width
-                  truncate = TRUE;
+                  truncate = true;
                   pc++;
                }
                break;
@@ -326,7 +326,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                if ( *pc == bracketClose )
                {
                   // end of expression reached
-                  stop = TRUE;
+                  stop = true;
 
                   // the extracted word was the name
                   if ( !name )
@@ -350,7 +350,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                                m_filename,
                                bracketClose);
 
-                  return FALSE;
+                  return false;
                }
          }
       }
@@ -376,7 +376,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
          }
          //else: message should have been already given
 
-         return FALSE;
+         return false;
       }
 
       // align if necessary
@@ -436,7 +436,7 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
 
    *ppc = pc;
 
-   return TRUE;
+   return true;
 }
 
 bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
@@ -481,13 +481,13 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       if ( !ExpandTemplate(&pc, &value) )
       {
          // error message already given
-         return FALSE;
+         return false;
       }
 
       sink.Output(value);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

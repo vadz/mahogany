@@ -37,7 +37,7 @@ static void SetEncoding(wxLayoutList *list,
 {
    // check that we have fonts available for this encoding if it is a non
    // default one
-   *useConverter = FALSE;
+   *useConverter = false;
    if ( encoding != wxFONTENCODING_SYSTEM )
    {
       if ( !wxFontMapper::Get()->IsEncodingAvailable(encoding) )
@@ -48,7 +48,7 @@ static void SetEncoding(wxLayoutList *list,
          {
             if ( conv->Init(encoding, encAlt) )
             {
-               *useConverter = TRUE;
+               *useConverter = true;
                encoding = encAlt;
             }
             else
@@ -129,19 +129,19 @@ void wxLayoutImportHTML(wxLayoutList *list,
   // Strip URLs:
   wxString filtered;
   const wxChar *cptr = str.c_str();
-  bool inTag = FALSE;
+  bool inTag = false;
   while(*cptr)
   {
      if(*cptr == '<')
      {
-        inTag = TRUE;
+        inTag = true;
         cptr++;
         // process known tags
         continue;
      }
      if(inTag && *cptr == '>')
      {
-        inTag = FALSE;
+        inTag = false;
         cptr++;
         continue;
      }
@@ -173,7 +173,7 @@ void wxLayoutImportText(wxLayoutList *list,
    if ( str.empty() )
       return;
 
-   bool useConverter = FALSE;
+   bool useConverter = false;
    wxEncodingConverter conv;
    SetEncoding(list, encoding, &useConverter, &conv);
    wxLayoutImportTextInternal(list, str, useConverter, conv);
@@ -273,7 +273,7 @@ wxLayoutExportStatus::wxLayoutExportStatus(wxLayoutList *list)
    m_si = list->GetDefaultStyleInfo();
    m_line = list->GetFirstLine();
    m_iterator = m_line->GetFirstObject();
-   m_FirstTime = TRUE;
+   m_FirstTime = true;
 }
 
 
@@ -360,7 +360,7 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
             *str += wxLayoutExportCmdAsHTML(
                *(wxLayoutObjectCmd const *)status->m_iterator->get(),
                & status->m_si, status->m_FirstTime);
-         status->m_FirstTime = FALSE;
+         status->m_FirstTime = false;
          break;
       default:  // ignore icons
          ;

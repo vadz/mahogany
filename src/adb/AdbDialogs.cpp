@@ -212,7 +212,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    //    buttons
 
    // buttons
-   (void)CreateStdButtonsAndBox(wxEmptyString, TRUE /* no box please */);
+   (void)CreateStdButtonsAndBox(wxEmptyString, true /* no box please */);
    m_btnOk = (wxButton *)FindWindow(wxID_OK);
 
    // panel for all other items
@@ -224,7 +224,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    c->bottom.Above(m_btnOk, -2*LAYOUT_Y_MARGIN);
    m_panel->SetConstraints(c);
 
-   m_panel->SetAutoLayout(TRUE);
+   m_panel->SetAutoLayout(true);
 
    // all items must be created on the canvas, not the panel itself
    wxWindow *canvas = m_panel->GetCanvas();
@@ -362,7 +362,7 @@ bool wxAdbImportDialog::TransferDataToWindow()
       wxLogError(_("Sorry, no import filters found - importing address "
                    "books is not available in this version of the program."));
 
-      return FALSE;
+      return false;
    }
 
    for ( size_t n = 0; n < nCount; n++ )
@@ -370,7 +370,7 @@ bool wxAdbImportDialog::TransferDataToWindow()
       m_listbox->Append(m_importerDescs[n]);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxAdbImportDialog::TransferDataFromWindow()
@@ -389,7 +389,7 @@ bool wxAdbImportDialog::TransferDataFromWindow()
       m_desc = m_importerDescs[index];
    }
 
-   return TRUE;
+   return true;
 }
 
 wxAdbImportDialog::~wxAdbImportDialog()
@@ -556,7 +556,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    if ( dlg.ShowModal() != wxID_OK )
    {
       // cancelled
-      return FALSE;
+      return false;
    }
 
    wxString importerName = dlg.GetImporterName(),
@@ -572,7 +572,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    if ( !filename )
    {
       // we can't guess everything!
-      CHECK( importer, FALSE, _T("should have either importer or filename") );
+      CHECK( importer, false, _T("should have either importer or filename") );
 
       filename = importer->GetDefaultFilename();
       if ( !filename )
@@ -604,7 +604,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
          // cancelled by user
          SafeDecRef(importer);
 
-         return FALSE;
+         return false;
       }
    }
 
@@ -631,7 +631,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
       // cancelled by user
       SafeDecRef(importer);
 
-      return FALSE;
+      return false;
    }
 
    if ( nameOfNativeAdb )
@@ -666,13 +666,13 @@ bool AdbShowExportDialog(AdbEntryGroup& group)
             &descs[0],
             nullptr,
             -1, -1, // x,y
-            TRUE,   //centre
+            true,   //centre
             w, h
             );
       if(idx >= 0)
          name = names[idx];
       else
-         return FALSE; // cancelled
+         return false; // cancelled
 
    }
    else
@@ -688,7 +688,7 @@ bool AdbShowExportDialog(AdbEntryGroup& group)
       wxLogError(_("Cannot export address book - the functionality "
                    "is missing in this version of the program."));
 
-      return FALSE;
+      return false;
    }
 
    bool ok = AdbExport(group, *exporter);

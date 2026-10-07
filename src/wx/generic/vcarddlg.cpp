@@ -319,7 +319,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
     sizerPanel->Add(sizerBirthDay, 0, wxGROW | wxALL, 5);
     sizerPanel->Add(sizerOrg, 0, wxGROW | wxALL, 5);
 
-    panel->SetAutoLayout(TRUE);
+    panel->SetAutoLayout(true);
     panel->SetSizer(sizerPanel);
 
     notebook->AddPage(panel, _("Identity"));
@@ -344,7 +344,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
 
     sizerPanel->Add(sizerEmail, 1, wxGROW | wxALL, 5);
 
-    panel->SetAutoLayout(TRUE);
+    panel->SetAutoLayout(true);
     panel->SetSizer(sizerPanel);
 
     notebook->AddPage(panel, _("Network"));
@@ -368,7 +368,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
 
     sizerPanel->Add(sizerAddr, 1, wxGROW | wxALL, 5);
 
-    panel->SetAutoLayout(TRUE);
+    panel->SetAutoLayout(true);
     panel->SetSizer(sizerPanel);
 
     notebook->AddPage(panel, _("Address"));
@@ -376,7 +376,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
     // do use the sizer
     // ----------------
 
-    SetAutoLayout( TRUE );
+    SetAutoLayout( true );
     SetSizer( sizerTop );
     sizerTop->Fit( this );
     sizerTop->SetSizeHints( this );
@@ -489,7 +489,7 @@ bool wxVCardDialog::TransferDataToWindow()
 
     #undef PROP_TO_CTRL
 
-    return TRUE;
+    return true;
 }
 
 // transfer data to vCard from the window
@@ -503,7 +503,7 @@ bool wxVCardDialog::TransferDataFromWindow()
         wxLogError(_("Invalid birthday date: '%s'"),
                    m_birthday->GetValue());
 
-        return FALSE;
+        return false;
     }
 
     wxString value;
@@ -557,7 +557,7 @@ bool wxVCardDialog::TransferDataFromWindow()
 
     #undef CTRL_TO_PROP
 
-    return TRUE;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -724,7 +724,7 @@ wxVCardAddressDialog::wxVCardAddressDialog(wxWindow *parent,
     sizerTop->Add(CreateButtonSizer(wxOK | wxCANCEL), 0,
                   wxALIGN_RIGHT | (wxALL & ~wxRIGHT), 10);
 
-    SetAutoLayout(TRUE);
+    SetAutoLayout(true);
     SetSizer(sizerTop);
     sizerTop->Fit(this);
     sizerTop->SetSizeHints(this);
@@ -745,7 +745,7 @@ bool wxVCardAddressDialog::TransferDataToWindow()
     ADDR_TO_DLG(country);
 
     #define SET_ADDR_FLAG(flag, ctrl) \
-        if ( m_data.flags & wxVCardAddress::flag ) ctrl->SetValue(TRUE)
+        if ( m_data.flags & wxVCardAddress::flag ) ctrl->SetValue(true)
 
     SET_ADDR_FLAG(Domestic, m_domesticAddr);
     SET_ADDR_FLAG(Intl, m_internationalAddr);
@@ -757,7 +757,7 @@ bool wxVCardAddressDialog::TransferDataToWindow()
     #undef SET_ADDR_FLAG
     #undef ADDR_TO_DLG
 
-    return TRUE;
+    return true;
 }
 
 bool wxVCardAddressDialog::TransferDataFromWindow()
@@ -787,7 +787,7 @@ bool wxVCardAddressDialog::TransferDataFromWindow()
     #undef GET_ADDR_FLAG
     #undef DLG_TO_ADDR
 
-    return TRUE;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -796,7 +796,7 @@ bool wxVCardAddressDialog::TransferDataFromWindow()
 
 extern bool wxEditVCard(wxVCard *vcard)
 {
-    wxCHECK_MSG( vcard, FALSE, _T("NULL vCard not allowed in wxEditVCard") );
+    wxCHECK_MSG( vcard, false, _T("NULL vCard not allowed in wxEditVCard") );
 
     wxVCardDialog dlg(vcard);
     return dlg.ShowModal() == wxID_OK;

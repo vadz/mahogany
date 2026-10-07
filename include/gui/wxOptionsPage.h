@@ -53,10 +53,10 @@ enum
 struct ConfigValueDefault
 {
    ConfigValueDefault(const char *name_, long value)
-      { bNumeric = TRUE; name = name_; lValue = value; }
+      { bNumeric = true; name = name_; lValue = value; }
 
    ConfigValueDefault(const char *name_, const char *value)
-      { bNumeric = FALSE; name = name_; szValue = value; }
+      { bNumeric = false; name = name_; szValue = value; }
 
    long GetLong() const { wxASSERT( bNumeric ); return lValue; }
    const char *GetString() const { wxASSERT( !bNumeric ); return szValue; }

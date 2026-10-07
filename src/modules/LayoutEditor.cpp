@@ -194,14 +194,14 @@ wxComposerLayoutWindow::wxComposerLayoutWindow(LayoutEditor *editor,
    SetMouseTracking();
 
    m_firstTimeModify =
-   m_firstTimeFocus = TRUE;
+   m_firstTimeFocus = true;
 }
 
 void wxComposerLayoutWindow::OnKeyDown(wxKeyEvent& event)
 {
    if ( m_firstTimeModify )
    {
-      m_firstTimeModify = FALSE;
+      m_firstTimeModify = false;
 
       m_editor->OnFirstTimeModify();
    }
@@ -213,13 +213,13 @@ void wxComposerLayoutWindow::OnFocus(wxFocusEvent& event)
 {
    if ( m_firstTimeFocus )
    {
-      m_firstTimeFocus = FALSE;
+      m_firstTimeFocus = false;
 
       if ( m_editor->OnFirstTimeFocus() )
       {
          // composer doesn't need first modification notification any more
          // because it modified the text itself
-         m_firstTimeModify = FALSE;
+         m_firstTimeModify = false;
       }
    }
 
@@ -436,19 +436,19 @@ void LayoutEditor::SetFocus()
 
 void LayoutEditor::Copy()
 {
-   m_LayoutWindow->Copy( WXLO_COPY_FORMAT, FALSE );
+   m_LayoutWindow->Copy( WXLO_COPY_FORMAT, false );
    m_LayoutWindow->Refresh();
 }
 
 void LayoutEditor::Cut()
 {
-   m_LayoutWindow->Cut( WXLO_COPY_FORMAT, FALSE );
+   m_LayoutWindow->Cut( WXLO_COPY_FORMAT, false );
    m_LayoutWindow->Refresh();
 }
 
 void LayoutEditor::Paste()
 {
-   m_LayoutWindow->Paste( WXLO_COPY_FORMAT, FALSE );
+   m_LayoutWindow->Paste( WXLO_COPY_FORMAT, false );
    m_LayoutWindow->Refresh();
 }
 

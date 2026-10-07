@@ -241,7 +241,7 @@ public:
   AdbTreeElement(TreeElement kind,
                  const wxString& name,
                  AdbTreeNode *parent,
-                 bool onClipboard = FALSE);
+                 bool onClipboard = false);
   virtual ~AdbTreeElement()
   {
     if ( IsOnClipboard() )
@@ -299,10 +299,10 @@ public:
     // the usual ctor which creates a subgroup of the parent
   AdbTreeNode(const wxString& name,
               AdbTreeNode *parent,
-              bool onClipboard = FALSE);
+              bool onClipboard = false);
     // a special ctor used by derived classes
   AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, wxEmptyString, nullptr)
-    { m_bWasExpanded = FALSE; m_pGroup = nullptr; }
+    { m_bWasExpanded = false; m_pGroup = nullptr; }
 
     // dtor deletes all children
   virtual ~AdbTreeNode();
@@ -471,7 +471,7 @@ public:
   // ctor
   AdbTreeEntry(const wxString& name,
                AdbTreeNode *parent,
-               bool onClipboard = FALSE);
+               bool onClipboard = false);
 
   // operations
     // TODO renaming not implemented
@@ -716,7 +716,7 @@ public:
   // return TRUE if the user can perform the corresponding operation (the menu
   // items are disabled automatically, these functions are for the tree control
   // which has an independent keyboard interface only)
-  bool AllowCreate() const { return TRUE;                 }
+  bool AllowCreate() const { return true;                 }
   bool AllowDelete() const { return !m_current->IsRoot(); }
   bool AllowShowProp() const { return m_current->IsBook(); }
 
@@ -725,7 +725,7 @@ public:
 
   // create/delete/rename items (entries, groups, address books...)
   void DoCreateNode();
-  void DoDeleteNode(bool bAskConfirmation = TRUE);
+  void DoDeleteNode(bool bAskConfirmation = true);
   void DoRenameNode();
 
   // copy/paste the entry or group to/from the "clipboard"
@@ -912,7 +912,7 @@ public:
     // must be saved?
   bool IsDirty() const { return m_bDirty; }
     // should be called when our data becomes dirty
-  void SetDirty() { m_bDirty = TRUE; }
+  void SetDirty() { m_bDirty = true; }
 
   // operations
     // saves the changes and loads the new entry
@@ -1058,7 +1058,7 @@ class wxAdbOfficeAddrPage : public wxAdbAddrPage
 {
 public:
   wxAdbOfficeAddrPage(wxNotebook *notebook)
-    : wxAdbAddrPage(notebook, _("Office"), wxAdbNotebook::Work, TRUE) { }
+    : wxAdbAddrPage(notebook, _("Office"), wxAdbNotebook::Work, true) { }
 
 private:
   DECLARE_NO_COPY_CLASS(wxAdbOfficeAddrPage)
@@ -1069,7 +1069,7 @@ class wxAdbHomeAddrPage : public wxAdbAddrPage
 {
 public:
   wxAdbHomeAddrPage(wxNotebook *notebook)
-    : wxAdbAddrPage(notebook, _("Home"), wxAdbNotebook::Home, FALSE) { }
+    : wxAdbAddrPage(notebook, _("Home"), wxAdbNotebook::Home, false) { }
 
 private:
   DECLARE_NO_COPY_CLASS(wxAdbHomeAddrPage)
@@ -1196,7 +1196,7 @@ void ShowAdbFrame(wxFrame *parent)
 {
   new wxAdbEditFrame(parent);
 
-  mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, TRUE);
+  mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, true);
 }
 
 void AddBookToAdbEditor(const String& adbname, const String& provname)
@@ -1248,7 +1248,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   m_current = nullptr;
   m_clipboard = nullptr;
   m_pImageList = nullptr;
-  m_bFindDone = FALSE;
+  m_bFindDone = false;
   m_btnCancel =
   m_btnDelete = nullptr;
 
@@ -1321,7 +1321,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
   c->bottom.Above(buttons[0], -LAYOUT_Y_MARGIN);
   m_notebook->SetConstraints(c);
-  m_notebook->Show(FALSE);
+  m_notebook->Show(false);
 
   c = new wxLayoutConstraints;
   c->top.SameAs(this, wxTop);
@@ -1330,8 +1330,8 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   c->bottom.SameAs(this, wxBottom);
   panel->SetConstraints(c);
 
-  panel->SetAutoLayout(TRUE);
-  SetAutoLayout(TRUE);
+  panel->SetAutoLayout(true);
+  SetAutoLayout(true);
 
   // all buttons have the same size and we use them as length unit
   int widthBtn, heightBtn;
@@ -1418,13 +1418,13 @@ void wxAdbEditFrame::SaveSettings()
   m_astrBranches.Empty();
   SaveExpandedBranches(m_root);
 
-  TransferSettings(TRUE /* save */);
+  TransferSettings(true /* save */);
 }
 
 // "undo" SaveSettings()
 void wxAdbEditFrame::RestoreSettings1()
 {
-  TransferSettings(FALSE /* load */);
+  TransferSettings(false /* load */);
 
   if ( m_FindWhere == 0 ) {
     // look at least somewhere...
@@ -1471,7 +1471,7 @@ void wxAdbEditFrame::RestoreSettings1()
   // now, m_astrAdb contains all previously opened ADBs: then copy the ones
   // which really exist to a temporary array and assign it to m_astrAdb
   wxArrayString astrAdb, astrProviders;
-  bool bAllAdbOk = TRUE;
+  bool bAllAdbOk = true;
   wxString strFile, strProv;
   size_t nCountAdb = m_astrAdb.Count();
 
@@ -1515,7 +1515,7 @@ void wxAdbEditFrame::RestoreSettings1()
         wxLogWarning(_("Address book '%s' couldn't be opened:\n"
                        "this format is not supported."),
                      strFile);
-        bAllAdbOk = FALSE;
+        bAllAdbOk = false;
       }
     }
     else {
@@ -1540,7 +1540,7 @@ void wxAdbEditFrame::RestoreSettings1()
 void wxAdbEditFrame::RestoreSettings2()
 {
   // expand all previously expanded tree branches
-  bool bAllBranchesOk = TRUE;
+  bool bAllBranchesOk = true;
   size_t nCountBranches = m_astrBranches.Count();
 
   AdbTreeElement *current;
@@ -1548,7 +1548,7 @@ void wxAdbEditFrame::RestoreSettings2()
     current = ExpandBranch(m_astrBranches[nBranch]);
     if ( current == nullptr ) {
       // it didn't find it
-      bAllBranchesOk = FALSE;
+      bAllBranchesOk = false;
     }
     else {
       // ExpandBranch won't expand the group itself
@@ -1621,7 +1621,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
   if ( IsAdbOpened(strPath) ) {
     wxLogError(_("The address book '%s' is already opened."), strPath);
 
-    return FALSE;
+    return false;
   }
 
   // loading of a big file might take quite some time
@@ -1653,7 +1653,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
 
   MEndBusyCursor();
 
-  return TRUE;
+  return true;
 }
 
 void wxAdbEditFrame::AddNewTreeElement(AdbTreeElement *element)
@@ -1676,7 +1676,7 @@ void wxAdbEditFrame::DoCreateNode()
 {
   // only the address books can be created at top level
   if ( m_current->IsRoot() ) {
-    CreateOrOpenAdb(TRUE /* bDoCreate */);
+    CreateOrOpenAdb(true /* bDoCreate */);
     return;
   }
 
@@ -1903,7 +1903,7 @@ void wxAdbEditFrame::DoFind()
                   this);
 
   DoFind(m_strFind, m_root);
-  m_bFindDone = TRUE;
+  m_bFindDone = true;
   AdvanceToNextFound();
 }
 
@@ -1997,11 +1997,11 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
 {
   switch ( event.GetId() ) {
     case WXMENU_ADBBOOK_NEW:
-      CreateOrOpenAdb(TRUE /* create */);
+      CreateOrOpenAdb(true /* create */);
       break;
 
     case WXMENU_ADBBOOK_OPEN:
-      CreateOrOpenAdb(FALSE /* open */);
+      CreateOrOpenAdb(false /* open */);
       break;
 
     case WXMENU_ADBBOOK_IMPORT:
@@ -2059,7 +2059,7 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
 
     case WXMENU_ADBEDIT_CUT:
       DoCopy();
-      DoDeleteNode(FALSE /* don't ask for confirmation */);
+      DoDeleteNode(false /* don't ask for confirmation */);
       break;
 
     case WXMENU_ADBEDIT_COPY:
@@ -2160,7 +2160,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
   if ( nChoice == -1 ) {
     // cancelled
-    return FALSE;
+    return false;
   }
 
   // find the adb name format for this provider
@@ -2203,7 +2203,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
         if ( strAdbName.IsEmpty() ) {
            // cancelled by user
-           return FALSE;
+           return false;
         }
       }
       break;
@@ -2212,7 +2212,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
       {
         wxString strMsg = _("Enter the address book name");
         if ( !MInputBox(&strAdbName, strTitle, strMsg, this, "LastAdbName") )
-          return FALSE;
+          return false;
       }
       break;
 
@@ -2327,7 +2327,7 @@ void wxAdbEditFrame::ExportVCardEntry()
 bool wxAdbEditFrame::ImportVCardEntry()
 {
   // check that we have a group to import it under
-  wxCHECK_MSG( GetCurNode() && GetCurNode()->AdbGroup(), FALSE,
+  wxCHECK_MSG( GetCurNode() && GetCurNode()->AdbGroup(), false,
                _T("should be disabled as there is no current group") );
 
   // check that we have the importer for vCards
@@ -2336,7 +2336,7 @@ bool wxAdbEditFrame::ImportVCardEntry()
   {
     wxLogError(_("Sorry, importing vCards is unavailable."));
 
-    return FALSE;
+    return false;
   }
 
   // choose the file
@@ -2359,12 +2359,12 @@ bool wxAdbEditFrame::ImportVCardEntry()
       // refresh the group to show the new entry
       node->Refresh(*m_treeAdb);
 
-      return TRUE;
+      return true;
     }
   }
   //else: cancelled by user
 
-  return FALSE;
+  return false;
 }
 
 void wxAdbEditFrame::DoShowAdbProperties()
@@ -2398,13 +2398,13 @@ void wxAdbEditFrame::DoCopy()
 
     m_clipboard = new AdbTreeNode(group->GetName(),
                                   nullptr,    // no parent
-                                  TRUE);   // on clipboard
+                                  true);   // on clipboard
   }
   else {
     // just one entry to copy
     m_clipboard = new AdbTreeEntry(m_current->GetName(),
                                    nullptr,    // no parent
-                                   TRUE);   // on clipboard
+                                   true);   // on clipboard
   }
 
   // save data to clipboard
@@ -2518,7 +2518,7 @@ void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
 
   if ( !parent->ExpandFirstTime(*m_treeAdb) ) {
     // if this group has no entries don't put [+] near it
-    m_treeAdb->SetItemHasChildren(parent->GetId(), FALSE);
+    m_treeAdb->SetItemHasChildren(parent->GetId(), false);
 
     wxLogStatus(this, _("This group has no entries"));
   }
@@ -2682,35 +2682,35 @@ bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
 {
   AdbTreeElement *current = ExpandBranch(strEntry);
   if ( !current )
-    return FALSE;
+    return false;
 
   m_treeAdb->SetFocus();
   m_treeAdb->SelectAndShow(current->GetId());
 
-  return TRUE;
+  return true;
 }
 
 bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
 {
   if ( m_treeAdb->IsExpanded(group->GetId()) ) {
     // recursively save the expanded branches of our children
-    bool bHasExpandedChild = FALSE;
+    bool bHasExpandedChild = false;
     size_t nChildren = group->GetChildrenCount();
     for ( size_t n = 0; n < nChildren; n++ ) {
       AdbTreeElement *child = group->GetChild(n);
       if ( child->IsGroup() && SaveExpandedBranches((AdbTreeNode *)child) )
-        bHasExpandedChild = TRUE;
+        bHasExpandedChild = true;
     }
 
     // if we have an expanded child we'll be expanded anyhow
     if ( !bHasExpandedChild )
       m_astrBranches.Add(group->GetFullName());
 
-    return TRUE;
+    return true;
   }
 
   // not expanded
-  return FALSE;
+  return false;
 }
 
 wxAdbEditFrame::~wxAdbEditFrame()
@@ -2723,7 +2723,7 @@ wxAdbEditFrame::~wxAdbEditFrame()
   if ( mApplication->IsRunning() )
   {
     // app continues to run => only this frame is being closed
-    mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, FALSE);
+    mApplication->GetProfile()->writeEntry(MP_SHOWADBEDITOR, false);
   }
   //else: we had already written TRUE there when we showed the ADB editor
 
@@ -2878,7 +2878,7 @@ bool wxADBFindDialog::TransferDataToWindow()
   m_checkCase->SetValue((*m_how & AdbLookup_CaseSensitive) != 0);
   m_checkSub->SetValue((*m_how & AdbLookup_Substring) != 0);
 
-  return TRUE;
+  return true;
 }
 
 bool wxADBFindDialog::TransferDataFromWindow()
@@ -2903,12 +2903,12 @@ bool wxADBFindDialog::TransferDataFromWindow()
 
   if ( *m_where == 0 ) {
     wxLogError(_("Please specify where to search!"));
-    return FALSE;
+    return false;
   }
 
   m_text->SetValue(m_textWhat->GetValue());
 
-  return TRUE;
+  return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -2986,7 +2986,7 @@ bool wxADBCreateDialog::TransferDataToWindow()
 
   m_checkGroup->SetValue(m_bGroup);
 
-  return TRUE;
+  return true;
 }
 
 bool wxADBCreateDialog::TransferDataFromWindow()
@@ -2996,10 +2996,10 @@ bool wxADBCreateDialog::TransferDataFromWindow()
   if ( m_strName.IsEmpty() ) {
     wxLogError(_("Please specify a name for the new %s!"),
                m_bGroup ? _("group") : _("entry"));
-    return FALSE;
+    return false;
   }
 
-  return TRUE;
+  return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -3137,7 +3137,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
   m_textName->SetValue(m_book->GetBook()->GetName());
   m_textDescription->SetValue(m_book->GetBook()->GetDescription());
 
-  return TRUE;
+  return true;
 }
 
 bool wxADBPropertiesDialog::TransferDataFromWindow()
@@ -3147,7 +3147,7 @@ bool wxADBPropertiesDialog::TransferDataFromWindow()
   adbbook->SetName(m_textName->GetValue());
   adbbook->SetDescription(m_textDescription->GetValue());
 
-  return TRUE;
+  return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -3174,7 +3174,7 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
     "adb_bbdb"
   };
 
-  wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
+  wxImageList *imageList = new wxImageList(16, 16, false, WXSIZEOF(aszImages));
 
   for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
     imageList->Add(mApplication->GetIconManager()->GetBitmap(aszImages[n]));
@@ -3273,7 +3273,7 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   m_pTreeEntry = nullptr;
   m_pAdbEntry = nullptr;
   m_bDirty =
-  m_bReadOnly = FALSE;
+  m_bReadOnly = false;
 
   // add images to our image list
   static const char *aszImages[] =
@@ -3282,7 +3282,7 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
     "general", "email", "home", "work"
   };
 
-  wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
+  wxImageList *imageList = new wxImageList(32, 32, true, WXSIZEOF(aszImages));
   for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
     imageList->Add(mApplication->GetIconManager()->GetBitmap(aszImages[n]));
   }
@@ -3302,7 +3302,7 @@ void wxAdbNotebook::ChangeData(AdbTreeEntry *pEntry)
 {
   SaveChanges();
   SetData(pEntry);
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 // save changes i.e. transfer all data from our controls to AdbEntry
@@ -3361,7 +3361,7 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
   m_box->Show(pEntry == nullptr);
   m_message->Show(pEntry == nullptr);
   Show(pEntry != nullptr);
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 wxAdbNotebook::~wxAdbNotebook()
@@ -3383,11 +3383,11 @@ wxAdbPage::wxAdbPage(wxNotebook *notebook, const wxString& title, int idImage,
   m_nLastField  = nLastField;
 
   notebook->AddPage(this, wxGetTranslation(title),
-                    FALSE /* don't select */, idImage);
+                    false /* don't select */, idImage);
 
   LayoutControls(m_nLastField - m_nFirstField, m_aEntries,
                  &AdbTreeEntry::ms_aFields[m_nFirstField]);
-  SetAutoLayout(TRUE);
+  SetAutoLayout(true);
 
   m_checkBoxOldValue.Add(&gs_constantFalse, m_aEntries.GetCount());
 }
@@ -3717,7 +3717,7 @@ void wxAdbEMailPage::SetData(const AdbEntry& data)
     listbox->Append(str);
   }
 
-  m_bListboxModified = FALSE;
+  m_bListboxModified = false;
 }
 
 void wxAdbEMailPage::SaveChanges(AdbEntry& data)
@@ -3749,7 +3749,7 @@ void wxAdbEMailPage::OnNewEMail(wxCommandEvent&)
     GetListBox()->Append(str);
 
     SetDirty();
-    m_bListboxModified = TRUE;
+    m_bListboxModified = true;
   }
 }
 
@@ -3768,7 +3768,7 @@ void wxAdbEMailPage::OnModifyEMail(wxCommandEvent&)
     listbox->SetString(nSel, str);
 
     SetDirty();
-    m_bListboxModified = TRUE;
+    m_bListboxModified = true;
   }
 }
 
@@ -3784,7 +3784,7 @@ void wxAdbEMailPage::OnDeleteEMail(wxCommandEvent&)
 
   SetDirty();
   listbox->Delete(nSel);
-  m_bListboxModified = TRUE;
+  m_bListboxModified = true;
 }
 
 wxAdbAddrPage::wxAdbAddrPage(wxNotebook *notebook, const wxString& title,
@@ -3979,7 +3979,7 @@ AdbTreeNode::AdbTreeNode(const wxString& name,
                          bool onClipboard)
            : AdbTreeElement(TreeElement_Group, name, parent, onClipboard)
 {
-  m_bWasExpanded = FALSE;
+  m_bWasExpanded = false;
   m_pGroup = nullptr;
 }
 
@@ -4153,7 +4153,7 @@ void AdbTreeNode::Refresh(wxTreeCtrl& tree)
 {
   m_children.Empty();
   tree.DeleteChildren(GetId());
-  m_bWasExpanded = FALSE;
+  m_bWasExpanded = false;
   ExpandFirstTime(tree);
 }
 
@@ -4172,9 +4172,9 @@ AdbTreeElement *AdbTreeNode::FindChild(const wxChar *szName)
 
 bool AdbTreeNode::ExpandFirstTime(wxTreeCtrl& tree)
 {
-  wxCHECK( !m_bWasExpanded, TRUE );  // must be only called once
+  wxCHECK( !m_bWasExpanded, true );  // must be only called once
 
-  m_bWasExpanded = TRUE;
+  m_bWasExpanded = true;
   m_idLastGroup = nullptr;
 
   LoadChildren();
@@ -4250,7 +4250,7 @@ AdbTreeRoot::AdbTreeRoot(wxArrayString& astrAdb, wxArrayString& astrProviders)
   m_kind = TreeElement_Root;
   m_name = _T("root entry");
 
-  m_bWasExpanded = FALSE;
+  m_bWasExpanded = false;
 
   m_pManager = AdbManager::Get();
 }

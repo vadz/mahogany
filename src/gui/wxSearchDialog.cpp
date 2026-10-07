@@ -272,7 +272,7 @@ bool wxMessageSearchDialog::TransferDataToWindow()
 
    m_textWhat->SetFocus();
 
-   return TRUE;
+   return true;
 }
 
 bool wxMessageSearchDialog::TransferDataFromWindow()
@@ -304,7 +304,7 @@ bool wxMessageSearchDialog::TransferDataFromWindow()
       m_CritStruct->m_Folders.Add(s.c_str() + 1); // skip leading slash
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -166,7 +166,7 @@ bool MXFMailImporter::ImportSettings()
       wxLogError(_("Failed to open %s configuration file '%s'."),
                  "XFMail",filename);
 
-      return FALSE;
+      return false;
    }
 
    size_t nLines = file.GetLineCount();
@@ -192,7 +192,7 @@ bool MXFMailImporter::ImportSettings()
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
    {
       wxLogError(_("Failed to open %s folders file"), "XFMail");
 
-      return FALSE;
+      return false;
    }
 
    // find the directory where XFMail folders live by default (i.e. the
@@ -246,7 +246,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
    if ( m_mailDir.Last() != '/' )
       m_mailDir += '/';
 
-   bool error = FALSE;
+   bool error = false;
    size_t nImported = 0;
    size_t nLines = foldersfile.GetLineCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
@@ -408,7 +408,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
                          type,      //            type
                          0,         //            flags
                          path,      //            path
-                         FALSE      // don't notify
+                         false      // don't notify
                         );
       if ( folder )
       {
@@ -421,7 +421,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       else
       {
          // set the error flag, but continue with the other folders
-         error = TRUE;
+         error = true;
          wxLogError(_("Error importing folder '%s'."), folderName);
       }
    }
@@ -433,7 +433,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
          wxLogError(_("%s folder import from '%s' failed."), "XFMail",
                     m_mailDir.BeforeLast('/'));
 
-         return FALSE;
+         return false;
       }
       else
       {
@@ -460,7 +460,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       wxLogMessage(_("Successfully imported %u %s folders."), nImported, "XFMail");
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -494,7 +494,7 @@ bool MXFMailImporter::ImportADB()
       wxLogError(_("Couldn't find any %s address books in '%s'."),
                  "XFMail", dirname);
 
-      return FALSE;
+      return false;
    }
 
    AdbImporter *importer = AdbImporter::GetImporterByName(_T("AdbXFMailImporter"));
@@ -502,7 +502,7 @@ bool MXFMailImporter::ImportADB()
    {
       wxLogError(_("%s address book import module not found."),"XFMail");
 
-      return FALSE;
+      return false;
    }
 
    dirname += '/';
@@ -549,7 +549,7 @@ bool MXFMailImporter::ImportFilters()
    {
       wxLogError(_("Failed to open %s filter rules file."), "XFMail");
 
-      return FALSE;
+      return false;
    }
 
    size_t nFilter = 0;
@@ -704,12 +704,12 @@ typedef struct _xf_rule {
    {
       wxLogMessage(_("No filters were imported."));
 
-      return FALSE;
+      return false;
    }
    else
    {
       wxLogMessage(_("Successfully imported %u filters."), nFilter);
 
-      return TRUE;
+      return true;
    }
 }

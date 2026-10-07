@@ -260,7 +260,7 @@ public:
 
    // override some base class virtuals
    void Clear() override;
-   bool AcceptsFocusFromKeyboard() const override { return FALSE; }
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 
 private:
 #ifdef USE_AUTO_URL_DETECTION

@@ -223,10 +223,10 @@ bool AdbVCardExporter::DoExportEntry(const AdbEntry& entry,
    {
       wxLogError(_("Failed to write vCard to the file '%s'."), filename);
 
-      return FALSE;
+      return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
@@ -240,7 +240,7 @@ bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
          wxLogError(_("Failed to export address book to '%s'."),
                     dirname);
 
-         return FALSE;
+         return false;
       }
    }
 
@@ -256,7 +256,7 @@ bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
 
       if ( !ok )
       {
-         return FALSE;
+         return false;
       }
    }
 
@@ -273,12 +273,12 @@ bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
 
       if ( !ok )
       {
-         return FALSE;
+         return false;
       }
    }
 
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -295,7 +295,7 @@ bool AdbVCardExporter::Export(AdbEntryGroup& group, const String& dest)
       if ( dlg.ShowModal() != wxID_OK )
       {
          // cancelled
-         return FALSE;
+         return false;
       }
 
       dirname = dlg.GetPath();
@@ -307,12 +307,12 @@ bool AdbVCardExporter::Export(AdbEntryGroup& group, const String& dest)
       wxLogMessage(_("Successfully exported address book data to "
                      "directory '%s'"), dirname);
 
-      return TRUE;
+      return true;
    }
 
    wxLogError(_("Export failed."));
 
-   return FALSE;
+   return false;
 }
 
 bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
@@ -331,7 +331,7 @@ bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
       if ( !filename )
       {
          // cancelled
-         return FALSE;
+         return false;
       }
    }
 

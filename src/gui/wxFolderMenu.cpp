@@ -86,7 +86,7 @@ public:
       OnFolderTreeChangeEvent();
 
       // continue processing the event
-      return TRUE;
+      return true;
    }
 
 protected:

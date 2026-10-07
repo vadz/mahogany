@@ -56,7 +56,7 @@ void Parse_Debug(const wxChar * WXUNUSED_UNLESS_DEBUG(s))
 class wxVCardModule : public wxModule
 {
 public:
-    bool OnInit() override { return TRUE; }
+    bool OnInit() override { return true; }
     void OnExit() override { cleanStrTbl(); }
 
 private:
@@ -203,37 +203,37 @@ bool wxVCardObject::GetValue(wxString *val) const
         *val = vObjectUStringZValue(m_vObj);
 #endif // wxUSE_WCHAR_T
     else
-        return FALSE;
+        return false;
 #else // 1
     if ( GetType() != UString )
-        return FALSE;
+        return false;
 
     char *s = fakeCString(vObjectUStringZValue(m_vObj));
     *val = wxConvertMB2WX(s);
     deleteStr(s);
 #endif // 0/1
 
-    return TRUE;
+    return true;
 }
 
 bool wxVCardObject::GetValue(unsigned int *val) const
 {
     if ( GetType() != Int )
-        return FALSE;
+        return false;
 
     *val = vObjectIntegerValue(m_vObj);
 
-    return TRUE;
+    return true;
 }
 
 bool wxVCardObject::GetValue(unsigned long *val) const
 {
     if ( GetType() != Long )
-        return FALSE;
+        return false;
 
     *val = vObjectLongValue(m_vObj);
 
-    return TRUE;
+    return true;
 }
 
 bool wxVCardObject::GetNamedPropValue(const char *name, wxString *val) const
@@ -244,12 +244,12 @@ bool wxVCardObject::GetNamedPropValue(const char *name, wxString *val) const
         vcObj->GetValue(val);
         delete vcObj;
 
-        return TRUE;
+        return true;
     }
 
     val->clear();
 
-    return FALSE;
+    return false;
 }
 
 wxString wxVCardObject::GetValue() const
@@ -413,7 +413,7 @@ bool wxVCard::GetName(wxString *familyName,
 {
     wxVCardObject *vcobjName = GetProperty(wxConvertMB2WX(VCNameProp));
     if ( !vcobjName )
-        return FALSE;
+        return false;
 
     if ( familyName )
         vcobjName->GetNamedPropValue(VCFamilyNameProp, familyName);
@@ -426,21 +426,21 @@ bool wxVCard::GetName(wxString *familyName,
     if ( nameSuffix )
         vcobjName->GetNamedPropValue(VCNameSuffixesProp, nameSuffix);
 
-    return TRUE;
+    return true;
 }
 
 bool wxVCard::GetOrganization(wxString *name, wxString *unit) const
 {
     wxVCardObject *vcobjOrg = GetProperty(wxConvertMB2WX(VCOrgProp));
     if ( !vcobjOrg )
-        return FALSE;
+        return false;
 
     if ( name )
         vcobjOrg->GetNamedPropValue(VCOrgNameProp, name);
     if ( unit )
         vcobjOrg->GetNamedPropValue(VCOrgUnitProp, unit);
 
-    return TRUE;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -451,14 +451,14 @@ bool wxVCard::GetBirthDay(wxDateTime *datetime) const
 {
     wxString value;
     if ( !GetBirthDayString(&value) )
-        return FALSE;
+        return false;
 
     if ( !datetime->ParseDate(value) )
     {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -498,14 +498,14 @@ bool wxVCardObject::DeleteProperty(const wxString& name)
 {
     VObject *vObj = isAPropertyOf(m_vObj, wxConvertWX2MB(name));
     if ( !vObj )
-        return FALSE;
+        return false;
 
     if ( !delVObjectProp(m_vObj, vObj) )
     {
         wxFAIL_MSG(_T("failed to delete VObject property?"));
     }
 
-    return TRUE;
+    return true;
 }
 
 void wxVCard::ClearAddresses()
@@ -689,7 +689,7 @@ bool wxVCardObject::Write(const wxString& filename) const
 {
     writeVObjectToFile(filename, m_vObj);
 
-    return TRUE; // writeVObjectToFile() is void @#$@#$@!!
+    return true; // writeVObjectToFile() is void @#$@#$@!!
 }
 
 // write out the internal representation

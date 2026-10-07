@@ -64,12 +64,12 @@ public:
   size_t GetEMailCount() const override           { return m_astrEmails.Count(); }
   void GetEMail(size_t n, String *pstr) const override { *pstr = m_astrEmails[n]; }
 
-  void ClearDirty() override    { m_bDirty = FALSE; }
+  void ClearDirty() override    { m_bDirty = false; }
   bool IsDirty() const override { return m_bDirty; }
 
   void SetField(size_t n, const String& strValue) override;
   void AddEMail(const String& strEMail) override
-    { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
+    { m_astrEmails.Add(strEMail); m_bDirty = true; }
   void ClearExtraEMails() override;
 
   int Matches(const wxChar *str, int where, int how) const override;
@@ -180,7 +180,7 @@ public:
 
   size_t GetNumberOfEntries() const override;
 
-  bool IsLocal() const override { return TRUE; }
+  bool IsLocal() const override { return true; }
   bool IsReadOnly() const override;
 
 private:
@@ -210,7 +210,7 @@ public:
   DECLARE_ADB_PROVIDER(DummyDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(DummyDataProvider, TRUE, "Dummy", Name_String);
+IMPLEMENT_ADB_PROVIDER(DummyDataProvider, true, "Dummy", Name_String);
 
 // ============================================================================
 // implementation
@@ -230,7 +230,7 @@ DummyEntry::DummyEntry(DummyEntryGroup *pGroup, const String& strName)
   SetField(AdbField_Comments, _T("some\ndummy\ncomments"));
   SetField(AdbField_EMail, _T("email@nowhere"));
 
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 AdbEntryGroup *DummyEntry::GetGroup() const
@@ -258,7 +258,7 @@ void DummyEntry::SetField(size_t n, const wxString& strValue)
 
   if ( m_astrFields[n] != strValue ) {
     m_astrFields[n] = strValue;
-    m_bDirty = TRUE;
+    m_bDirty = true;
   }
 }
 
@@ -394,7 +394,7 @@ size_t DummyBook::GetNumberOfEntries() const
 
 bool DummyBook::IsReadOnly() const
 {
-  return TRUE;
+  return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -408,7 +408,7 @@ AdbBook *DummyDataProvider::CreateBook(const String& name)
 
 bool DummyDataProvider::EnumBooks(wxArrayString& /* aNames */)
 {
-  return FALSE;
+  return false;
 }
 
 #ifdef EXPERIMENTAL_adbtest
@@ -427,12 +427,12 @@ bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
 bool
 DummyDataProvider::TestBookAccess(const String& /* name*/, AdbTests /* test */)
 {
-  return FALSE;
+  return false;
 }
 
 #endif // EXPERIMENTAL_adbtest/!EXPERIMENTAL_adbtest
 
 bool DummyDataProvider::DeleteBook(AdbBook * /* book */)
 {
-  return FALSE;
+  return false;
 }

@@ -132,7 +132,7 @@ class LayoutViewerWindow : public wxLayoutWindow
 public:
    LayoutViewerWindow(LayoutViewer *viewer, wxWindow *parent);
 
-   bool AcceptsFocusFromKeyboard() const override { return FALSE; }
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 
 private:
    void OnMouseEvent(wxCommandEvent& event);
@@ -306,7 +306,7 @@ void LayoutViewer::Clear()
                    true /* no update */);
 
    // speeds up insertion of text
-   m_window->GetLayoutList()->SetAutoFormatting(FALSE);
+   m_window->GetLayoutList()->SetAutoFormatting(false);
 }
 
 void LayoutViewer::Update()
@@ -626,7 +626,7 @@ void LayoutViewer::EndBody()
 
    // re-enable auto-formatting, seems safer for selection
    // highlighting, not sure if needed, though
-   llist->SetAutoFormatting(TRUE);
+   llist->SetAutoFormatting(true);
 
    // setup the line wrap
    CoordType wrapMargin = READ_CONFIG(GetProfile(), MP_VIEW_WRAPMARGIN);
@@ -636,7 +636,7 @@ void LayoutViewer::EndBody()
 
    // yes, we allow the user to edit the buffer, in case he wants to
    // modify it for pasting or wrap lines manually:
-   m_window->SetEditable(FALSE);
+   m_window->SetEditable(false);
    m_window->SetCursorVisibility(-1);
    llist->ForceTotalLayout();
 

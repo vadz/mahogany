@@ -413,7 +413,7 @@ strutil_compare_filenames(const String& path1, const String& path2)
    strutil_squeeze_slashes(file1);
    strutil_squeeze_slashes(file2);
 
-   return file1.IsSameAs(file2, FALSE /* no case */);
+   return file1.IsSameAs(file2, false /* no case */);
 }
 
 String
@@ -863,7 +863,7 @@ strutil_encrypt_initialise(void)
       gs_GlobalPassword = _T("testPassword");
       String test = _T("This is a test, in cleartext.");
       String cipher = strutil_encrypt_tf(test);
-      strutil_has_twofish = TRUE; // assume or it will fail
+      strutil_has_twofish = true; // assume or it will fail
       String clearagain = strutil_decrypt_tf(cipher);
       if(clearagain != test)
       {
@@ -876,11 +876,11 @@ strutil_encrypt_initialise(void)
             nullptr,
             _("Missing feature"),
             "EncryptionAlgoBroken");
-         strutil_has_twofish = FALSE;
+         strutil_has_twofish = false;
       }
       else
       {
-         strutil_has_twofish = TRUE;
+         strutil_has_twofish = true;
       }
 
       gs_GlobalPassword = oldPassword;
@@ -1218,7 +1218,7 @@ strutil_matchRegEx(const class strutil_RegEx *regex,
                    const String &pattern,
                    int flags)
 {
-   CHECK( regex, FALSE, _T("NULL regex") );
+   CHECK( regex, false, _T("NULL regex") );
 
    return regex->Matches(pattern, flags);
 }
@@ -1242,7 +1242,7 @@ bool
 strutil_matchRegEx(const class strutil_RegEx *regex, const String
                    &pattern, int flags)
 {
-   return FALSE;
+   return false;
 }
 
 void

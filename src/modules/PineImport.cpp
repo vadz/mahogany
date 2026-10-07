@@ -114,7 +114,7 @@ bool MPineImporter::ImportADB()
    {
       wxLogError(_("%s address book import module not found."), "PINE");
 
-      return FALSE;
+      return false;
    }
 
    wxString filename = importer->GetDefaultFilename();
@@ -185,7 +185,7 @@ bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
                             MF_FILE,   //            type
                             0,         //            flags
                             path,      //            path
-                            FALSE      // don't notify
+                            false      // don't notify
                            );
          if ( folder )
          {
@@ -205,7 +205,7 @@ bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
       {
          wxLogError(_("Folder import failed."));
 
-         return FALSE;
+         return false;
       }
       else
       {
@@ -224,7 +224,7 @@ bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -345,7 +345,7 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
       wxLogError(_("Couldn't open %s configuration file '%s'."),
                  "PINE", filename);
 
-      return FALSE;
+      return false;
    }
 
    size_t nLines = file.GetLineCount();
@@ -379,7 +379,7 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -388,5 +388,5 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
 
 bool MPineImporter::ImportFilters()
 {
-   return FALSE;
+   return false;
 }

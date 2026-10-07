@@ -198,7 +198,7 @@ public:
    virtual MInterface *GetMInterface() { return m_MInterface; }
 
    virtual void IncRef() { m_nRef++; }
-   virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+   virtual bool DecRef() { if ( --m_nRef ) return true; delete this; return false; }
 
 protected:
    /// Removes the module from the global list

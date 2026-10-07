@@ -384,7 +384,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
       phone = vcard->GetNextPhoneNumber(&cookie);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

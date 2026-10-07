@@ -357,12 +357,12 @@ bool AsyncStatusHandler::Monitor(Ticket ticket, const wxString& msgError)
 
       delete this;
 
-      return FALSE;
+      return false;
    }
 
    m_msgCmdProc->AddASyncOperation(ticket);
 
-   return TRUE;
+   return true;
 }
 
 void AsyncStatusHandler::SetSuccessMsg(const wxString& msgOk)

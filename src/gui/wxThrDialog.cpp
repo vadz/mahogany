@@ -375,7 +375,7 @@ bool wxMessageThreadingDialog::TransferDataToWindow()
 
    DoUpdateUI();
 
-   return TRUE;
+   return true;
 }
 
 bool wxMessageThreadingDialog::TransferDataFromWindow()
@@ -412,7 +412,7 @@ bool wxMessageThreadingDialog::TransferDataFromWindow()
 
 #undef WRITE_IF_CHANGE
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

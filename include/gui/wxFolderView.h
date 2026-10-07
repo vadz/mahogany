@@ -144,7 +144,7 @@ public:
       {
          OnOptionsChange((MEventOptionsChangeData &)event);
 
-         return TRUE;
+         return true;
       }
 
       return FolderView::OnMEvent(event);
