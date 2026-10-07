@@ -21,7 +21,7 @@
  *		Internet: MRC@Washington.EDU
  *
  * Date:	5 November 1990
- * Last Edited:	3 March 2008
+ * Last Edited:	22 July 2011
  */
 
 /* Parameter files */
@@ -1300,15 +1300,6 @@ int main (int argc,char *argv[])
 	    unsigned long donefake = 0;
 	    PSOUT ("+ Waiting for DONE\015\012");
 	    PFLUSH ();		/* dump output buffer */
-				/* maybe do a checkpoint if not anonymous */
-	    if (!anonymous && stream && (time (0) > lastcheck + CHECKTIMER)) {
-	      mail_check (stream);
-				/* cancel likely altwin from mail_check() */
-	      if (lsterr) fs_give ((void **) &lsterr);
-	      if (lstwrn) fs_give ((void **) &lstwrn);
-				/* remember last checkpoint */
-	      lastcheck = time (0);
-	    }
 				/* inactivity countdown */
 	    i = ((TIMEOUT) / (IDLETIMER)) + 1;
 	    do {		/* main idle loop */
@@ -1316,6 +1307,15 @@ int main (int argc,char *argv[])
 		mail_parameters (stream,SET_ONETIMEEXPUNGEATPING,
 				 (void *) stream);
 		ping_mailbox (uid);
+				/* maybe do a checkpoint if not anonymous */
+		if (!anonymous && stream && (time (0) > lastcheck + CHECKTIMER)) {
+		  mail_check (stream);
+				/* cancel likely altwin from mail_check() */
+		  if (lsterr) fs_give ((void **) &lsterr);
+		  if (lstwrn) fs_give ((void **) &lstwrn);
+				/* remember last checkpoint */
+		  lastcheck = time (0);
+		}
 	      }
 	      if (lstwrn) {	/* have a warning? */
 		PSOUT ("* NO ");
@@ -2141,7 +2141,7 @@ unsigned char *snarf_base64 (unsigned char **arg)
 				/* must be at least one BASE64 char */
   else if (!base64mask[*ret]) return NIL;
   else {			/* quick and dirty */
-    while (base64mask[*s++]);	/* scan until end of BASE64 */
+    while (base64mask[*s]) s++;	/* scan until end of BASE64 */
     if (*s == '=') ++s;		/* allow up to two padding chars */
     if (*s == '=') ++s;
   }
