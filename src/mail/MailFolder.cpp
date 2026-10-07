@@ -348,7 +348,7 @@ MailFolder::CloseAll(MFolderList *opened)
       MEventManager::Send(new MEventFolderClosedData(mf));
 
       if ( opened )
-         opened->push_back(folder);
+         opened->emplace_back(folder);
 
       mf->DecRef();
    }

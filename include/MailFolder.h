@@ -18,9 +18,12 @@
 #endif // USE_PCH
 
 #include "MObject.h"
+#include "pointers.h"
 
 #include "FolderType.h"         // for MFolderType
 #include <wx/fontenc.h>         // for wxFontEncoding
+
+#include <vector>
 
 // forward declarations
 class ArrayHeaderInfo;
@@ -31,12 +34,13 @@ class HeaderInfoList;
 class Message;
 class MessageView;
 class MFolder;
-class MFolderList;
 class MLogCircle;
 class Profile;
 class Sequence;
 class ServerInfoEntry;
 class UIdArray;
+
+using MFolderList = std::vector<RefCounter<MFolder>>;
 
 struct MailFolderStatus;
 struct SearchCriterium;
