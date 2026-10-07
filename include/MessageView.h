@@ -24,6 +24,9 @@
 
 #include "MEvent.h"
 
+#include <memory>
+#include <vector>
+
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 class WXDLLIMPEXP_FWD_CORE wxPoint;
 class WXDLLIMPEXP_FWD_CORE wxWindow;
@@ -932,8 +935,8 @@ private:
    //@}
 
 
-   /// list of all virtual MIME parts, created on demand
-   class VirtualMimePartsList *m_virtualMimeParts;
+   /// all virtual MIME parts
+   std::vector<std::unique_ptr<MimePart>> m_virtualMimeParts;
 
    /// all Content-IDs which we keep in memory during multipart/related parsing
    wxArrayString *m_cidsInMemory;

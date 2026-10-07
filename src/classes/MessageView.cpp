@@ -91,8 +91,6 @@
    #include <wx/dcps.h> // for wxThePrintSetupData
 #endif
 
-M_LIST_OWN(VirtualMimePartsList, MimePart);
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -636,7 +634,6 @@ MessageView::Init()
    m_viewerOld = NULL;
    m_filters = NULL;
    m_nullFilter = NULL;
-   m_virtualMimeParts = NULL;
    m_cidsInMemory = NULL;
 
    m_uid = UID_ILLEGAL;
@@ -650,8 +647,6 @@ MessageView::Init()
 
 MessageView::~MessageView()
 {
-   delete m_virtualMimeParts;
-
    delete m_cidsInMemory;
 
    UnregisterForEvents();
@@ -2797,10 +2792,7 @@ MessageView::ProcessPart(const MimePart *mimepart, MimePartAction action)
 void
 MessageView::AddVirtualMimePart(MimePart *mimepart)
 {
-   if ( !m_virtualMimeParts )
-      m_virtualMimeParts = new VirtualMimePartsList;
-
-   m_virtualMimeParts->push_back(mimepart);
+   m_virtualMimeParts.emplace_back(mimepart);
 }
 
 bool MessageView::StoreMIMEPartData(const MimePart *part, const String& cidOrig)
@@ -3106,8 +3098,7 @@ MessageView::Update()
 void
 MessageView::DisplayMessageInViewer()
 {
-   if ( m_virtualMimeParts )
-      m_virtualMimeParts->clear();
+   m_virtualMimeParts.clear();
 
    m_textBody.clear();
 
