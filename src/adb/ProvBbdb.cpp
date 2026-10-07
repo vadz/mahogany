@@ -410,23 +410,15 @@ BbdbEntry::ReadString(String * line, bool *success)
 void
 BbdbEntry::WriteString(std::ostream &out, String const &string)
 {
-   const wxChar *cptr;
-
    if(string.empty())
    {
       out << "nil";
       return;
    }
-   out << '"';
-   cptr = string.c_str();
-   while(*cptr)
-   {
-      if(*cptr == '"')
-         out << '\\';
-      out << *cptr;
-      cptr++;
-   }
-   out << "\" ";
+
+   String escaped(string);
+   escaped.Replace("\"", "\\\"");
+   out << '"' << escaped.mb_str() << "\" ";
 }
 
 StringList
