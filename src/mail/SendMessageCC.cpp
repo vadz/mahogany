@@ -470,7 +470,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    if ( READ_CONFIG_BOOL(profile, MP_USE_OUTBOX) )
       m_OutboxName = READ_CONFIG_TEXT(profile,MP_OUTBOX_NAME);
    if ( READ_CONFIG(profile,MP_USEOUTGOINGFOLDER) )
-      m_FccList.push_back(new String(READ_CONFIG_TEXT(profile,MP_OUTGOINGFOLDER)));
+      m_FccList.push_back(READ_CONFIG_TEXT(profile,MP_OUTGOINGFOLDER));
 
    // initialize the message body, unless it's going to be done by our caller
    // for resent/cloned messages
@@ -978,7 +978,7 @@ SendMessageCC::SetFcc(const String& fcc)
          return false;
       }
 
-      m_FccList.push_back(new String(folderName));
+      m_FccList.push_back(folderName);
    }
 
    return true;
@@ -2023,13 +2023,11 @@ SendMessageCC::SendNow(String *errGeneral, String *errDetailed)
 void
 SendMessageCC::AfterSending()
 {
-   for ( StringList::iterator i = m_FccList.begin();
-         i != m_FccList.end();
-         i++ )
+   for ( const String& folderName : m_FccList )
    {
-      wxLogTrace(TRACE_SEND, "FCCing message to %s", **i);
+      wxLogTrace(TRACE_SEND, "FCCing message to %s", folderName);
 
-      WriteToFolder(**i);
+      WriteToFolder(folderName);
    }
 }
 

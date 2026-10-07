@@ -310,7 +310,7 @@ private:
    bool m_cloneOfExisting;
 
    /// a list of folders to save copies of the message in after sending
-   M_LIST_OWN(StringList, String) m_FccList;
+   std::vector<String> m_FccList;
 
    //@}
 
