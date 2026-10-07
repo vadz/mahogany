@@ -62,6 +62,9 @@
 #include <wx/textbuf.h>
 #include <wx/fontmap.h>
 #include <wx/scopeguard.h>
+
+#include <vector>
+
 #ifdef __WINE__
 // it includes wrapwin.h which includes windows.h which defines SendMessage under Windows
 #undef SendMessage
@@ -195,9 +198,7 @@ enum
 // globals
 // ----------------------------------------------------------------------------
 
-M_LIST(ComposerList, wxComposeView *);
-
-static ComposerList gs_listOfAllComposers;
+static std::vector<wxComposeView *> gs_listOfAllComposers;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -1991,10 +1992,8 @@ Composer *Composer::CheckForExistingReply(Message *original)
 {
    CHECK( original, NULL, _T("original message is NULL") );
 
-   for ( ComposerList::iterator i = gs_listOfAllComposers.begin(),
-                              end = gs_listOfAllComposers.end(); i!= end ; ++i )
+   for ( wxComposeView *cv : gs_listOfAllComposers )
    {
-      wxComposeView *cv = *i;
       if ( cv->IsReplyTo(*original) )
       {
          if ( !MDialog_YesNoDialog
@@ -2135,21 +2134,9 @@ wxComposeView::~wxComposeView()
    SafeDecRef(m_OriginalMessage);
    SafeDecRef(m_DraftMessage);
 
-   for ( ComposerList::iterator i = gs_listOfAllComposers.begin(); ; ++i )
+   if ( !std::erase(gs_listOfAllComposers, this) )
    {
-      if ( i == gs_listOfAllComposers.end() )
-      {
-         FAIL_MSG( _T("composer not in the list of all composers?") );
-
-         break;
-      }
-
-      if ( *i == this )
-      {
-         gs_listOfAllComposers.erase(i);
-
-         break;
-      }
+      FAIL_MSG( _T("composer not in the list of all composers?") );
    }
 
    // clean up the autosave file: if m_filenameAutoSave is set we must have it,
@@ -5969,11 +5956,9 @@ wxComposeView::AutoSave()
 int Composer::SaveAll()
 {
    int rc = 0;
-   for ( ComposerList::iterator i = gs_listOfAllComposers.begin();
-         i != gs_listOfAllComposers.end();
-         ++i )
+   for ( wxComposeView *cv : gs_listOfAllComposers )
    {
-      if ( (*i)->AutoSave() )
+      if ( cv->AutoSave() )
          rc++;
       else
          rc = -1;
