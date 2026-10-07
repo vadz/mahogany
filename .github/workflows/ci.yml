@@ -24,7 +24,6 @@ jobs:
         environment-name: wxenv
         create-args: -c conda-forge wxwidgets
         init-shell: none
-        cache-downloads: true
     - name: Set up ccache
       uses: hendrikmuhs/ccache-action@v1.2.24
       with:
@@ -54,7 +53,6 @@ jobs:
         environment-name: wxenv
         create-args: -c conda-forge wxwidgets
         init-shell: none
-        cache-downloads: true
     - name: Set up ccache
       uses: hendrikmuhs/ccache-action@v1.2.24
       with:
@@ -84,7 +82,6 @@ jobs:
         environment-name: wxenv
         create-args: -c conda-forge wxwidgets
         init-shell: none
-        cache-downloads: true
     - name: Build
       env:
         WXWIN: '${{ steps.wx.outputs.environment-path }}\Library'
@@ -101,7 +98,6 @@ jobs:
         environment-name: wxenv
         create-args: -c conda-forge wxwidgets
         init-shell: none
-        cache-downloads: true
     - name: Configure
       env:
         WXWIN: '${{ steps.wx.outputs.environment-path }}\Library'
