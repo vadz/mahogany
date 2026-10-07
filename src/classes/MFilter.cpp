@@ -25,8 +25,6 @@
 #   include "Mcommon.h"
 #   include "Profile.h"
 #   include "strutil.h"
-
-#   include <wx/dynarray.h>        // for WX_DECLARE_OBJARRAY
 #endif // USE_PCH
 
 #include <wx/recguard.h>

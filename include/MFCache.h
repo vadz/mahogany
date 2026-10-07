@@ -13,10 +13,6 @@
 #ifndef  _MFCACHE_H_
 #define  _MFCACHE_H_
 
-#ifndef   USE_PCH
-#  include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
-#endif // USE_PCH
-
 #include "CacheFile.h"           // base class
 
 #include "MEvent.h"
