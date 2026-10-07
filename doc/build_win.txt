@@ -17,7 +17,9 @@ a) Microsoft Visual C++ compiler: currently, version 2013 is used for building
    please contact us and we will try to help you.
 
 b) Git: you need to have access to Mahogany (and sometimes wxWidgets) source
-   tree.
+   tree. Note that c-client library sources are in lib/imap submodule, so
+   either clone Mahogany with --recurse-submodules or run
+   "git submodule update --init" after cloning it.
 
 c) GNU m4 from cygwin tools: this is not an absolute requirement, however you
    will not be able to compile *.mid (Mahogany Interface Description) files if

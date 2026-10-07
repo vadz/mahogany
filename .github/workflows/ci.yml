@@ -15,6 +15,8 @@ jobs:
       CCACHE_SLOPPINESS: pch_defines,time_macros
     steps:
     - uses: actions/checkout@v7
+      with:
+        submodules: true
     - name: Bootstrap
       run: ./bootstrap
     - name: Install wxWidgets
@@ -46,6 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
+      with:
+        submodules: true
     - name: Install wxWidgets
       id: wx
       uses: mamba-org/setup-micromamba@v3
@@ -73,6 +77,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v7
+      with:
+        submodules: true
     - name: Set up MSBuild
       uses: microsoft/setup-msbuild@v3
     - name: Install wxWidgets
@@ -91,6 +97,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v7
+      with:
+        submodules: true
     - name: Install wxWidgets
       id: wx
       uses: mamba-org/setup-micromamba@v3
