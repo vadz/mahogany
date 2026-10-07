@@ -99,9 +99,6 @@
     <ClCompile Include="src\classes\FolderView.cpp">
       <Filter>Source Files\classes</Filter>
     </ClCompile>
-    <ClCompile Include="src\classes\kbList.cpp">
-      <Filter>Source Files\classes</Filter>
-    </ClCompile>
     <ClCompile Include="src\classes\ListReceiver.cpp">
       <Filter>Source Files\classes</Filter>
     </ClCompile>
@@ -685,13 +682,7 @@
     <ClInclude Include="include\InitPython.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\kbList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\ListReceiver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\lists.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\LogCircle.h">

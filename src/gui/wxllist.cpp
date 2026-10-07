@@ -751,7 +751,7 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
 
 wxLayoutLine::~wxLayoutLine()
 {
-   // kbList cleans itself
+   // m_ObjectList deletes the objects it contains itself
 }
 
 wxPoint

@@ -13,7 +13,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "Mcommon.h"
-#include "kbList.h"
 
 // this is used in src/gui/wxl*.cpp to detect whether it's being built inside M
 // or not, #undef it to show that we're building it separately
