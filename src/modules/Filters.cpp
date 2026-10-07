@@ -46,6 +46,8 @@
 
 #include <wx/regex.h>   // wxRegEx::Flags
 
+#include <vector>
+
 #ifdef USE_PYTHON
 #    include "MPython.h"      // Python fix for PyObject / presult
 #    include "PythonHelp.h"   // Python fix for PythonCallback
@@ -705,7 +707,7 @@ private:
    String          m_Name;
    FunctionPointer m_FunctionPtr;
 };
-M_LIST(FunctionList, FunctionDefinition);
+using FunctionList = std::vector<FunctionDefinition>;
 
 /** These classes represents a function call. */
 
@@ -1037,10 +1039,9 @@ const FunctionDefinition *
 FilterRuleImpl::FindFunction(const String &name)
 {
    // SOMEDAY: when user-defined functions, search that list, too
-   const FunctionList *list = BuiltinFunctions();
-   for (FunctionList::iterator i = list->begin(); i != list->end(); ++i)
+   for ( const FunctionDefinition& fd : *BuiltinFunctions() )
    {
-      if ( name == i->GetName() )
+      if ( name == fd.GetName() )
       {
          // remember if we have some particular functions - we use it to
          // optimize filter execution in Apply()
@@ -1053,7 +1054,7 @@ FilterRuleImpl::FindFunction(const String &name)
          else if ( name == _T("header") )
             m_hasHeaderFunc = true;
 
-         return i.operator->();
+         return &fd;
       }
    }
 
