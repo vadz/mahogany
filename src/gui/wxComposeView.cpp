@@ -4488,7 +4488,7 @@ private:
       // We need to bind to this event to update m_names immediately as m_text
       // can't be used any more once the dialog is closed.
       m_text->Bind(wxEVT_TEXT,
-                   [=](wxCommandEvent&) { m_names = m_text->GetValue(); });
+                   [this](wxCommandEvent&) { m_names = m_text->GetValue(); });
 
       return panel;
    }

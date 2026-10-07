@@ -83,8 +83,6 @@
    #include <wx/stopwatch.h>
 #endif
 
-wxALLOW_COMBINING_ENUMS(wxOptionsPage::FieldType, wxOptionsPage::FieldFlags)
-
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------

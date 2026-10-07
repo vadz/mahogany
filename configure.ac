@@ -235,10 +235,10 @@ dnl   defines GXX with yes if using gxx, else empty
 dnl   defines CXXFLAGS
 AC_PROG_CXX
 
-dnl We need C++11 support, so check for it.
-AX_CXX_CHECK_FLAG([-std=c++11],,,[CXXFLAGS="$CXXFLAGS -std=c++11"], [
+dnl We need C++20 support, so check for it.
+AX_CXX_CHECK_FLAG([-std=c++20],,,[CXXFLAGS="$CXXFLAGS -std=c++20"], [
 	AC_MSG_ERROR([
-Sorry, $CXX doesn't support -std=c++11 option and can't be used to compile this program.
+Sorry, $CXX doesn't support -std=c++20 option and can't be used to compile this program.
 	])
 ])
 

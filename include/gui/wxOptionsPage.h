@@ -90,7 +90,7 @@ class wxOptionsPage : public MBookCtrlPageBase
 public:
    // FieldType and FieldFlags are stored in one 'int', so the bits should be
    // shared...
-   enum FieldType
+   enum FieldType : unsigned
    {
       Field_Text   = 0x0001, // one line text field
       Field_Number = 0x0002, // the same as text but accepts only digits
@@ -110,7 +110,7 @@ public:
       Field_Type   = 0xffff  // bit mask selecting the type
    };
 
-   enum FieldFlags
+   enum FieldFlags : unsigned
    {
       Field_Vital    = 0x10000000, // vital setting, test after change
       Field_Restart  = 0x20000000, // will only take effect during next run
@@ -126,18 +126,7 @@ public:
    struct FieldInfo
    {
       const char   *label;   // which is shown in the dialog
-      // We have a problem with the type of FieldFlags enum elements: MSVC (up
-      // to version 10) treats Field_Global as negative int and warns when
-      // initializing flags with it if it's declared as unsigned. OTOH g++ 4.7
-      // treats all FieldFlags constants as unsigned (why?) and warns when
-      // initializing flags with them if it's defined as int. So there doesn't
-      // seem to be any way to avoid warnings without conditional compilation.
-#ifdef _MSC_VER
-      int
-#else
-      unsigned      
-#endif
-                    flags;   // contains the type and the flags (see above)
+      unsigned      flags;   // contains the type and the flags (see above)
       int           enable;  // enable this field depending on the value of
                              // the "enable" one if != -1 (using negative ids
                              // != -1 negates the condition, i.e. this field is
@@ -336,6 +325,21 @@ private:
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxOptionsPage)
 };
+
+// Combining elements of different enums is deprecated in C++20, so define the
+// operators for doing it explicitly. They must be constexpr to allow using
+// them in the initializers of FieldInfo::flags without narrowing.
+constexpr unsigned
+operator|(wxOptionsPage::FieldType type, wxOptionsPage::FieldFlags flags)
+{
+   return static_cast<unsigned>(type) | static_cast<unsigned>(flags);
+}
+
+constexpr unsigned
+operator|(wxOptionsPage::FieldFlags flags, wxOptionsPage::FieldType type)
+{
+   return type | flags;
+}
 
 // ----------------------------------------------------------------------------
 // a page which gets the information about its controls from the static array
