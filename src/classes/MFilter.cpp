@@ -35,6 +35,7 @@
 #include "MFolder.h"
 #include "modules/Filters.h"
 
+#include <unordered_map>
 #include <vector>
 
 // ----------------------------------------------------------------------------
@@ -66,8 +67,7 @@ static void InvalidateFilter(const MFilter *filter);
 
 // filter rules are relatively expensive to construct, so we cache them once we
 // created them in this hash map (its keys are the folder names)
-#include "wx/hashmap.h"
-WX_DECLARE_STRING_HASH_MAP(FilterRule *, FolderFiltersMap);
+using FolderFiltersMap = std::unordered_map<wxString, FilterRule *>;
 
 static FolderFiltersMap gs_folderFilters;
 

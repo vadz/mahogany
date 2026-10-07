@@ -28,13 +28,13 @@
    #include "MApplication.h"
 #endif // USE_PCH
 
-#include <wx/hashmap.h>
+#include <unordered_map>
 
 #include "Address.h"
 
 // hash type associates the list of the address equivalent to the given one
 // (used as the key)
-WX_DECLARE_STRING_HASH_MAP(wxArrayString, AddressHash);
+using AddressHash = std::unordered_map<wxString, wxArrayString>;
 
 // ----------------------------------------------------------------------------
 // options we use here

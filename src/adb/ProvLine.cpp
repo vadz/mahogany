@@ -29,7 +29,8 @@
 #endif //USE_PCH
 
 #include <wx/file.h>
-#include <wx/hashmap.h>
+
+#include <unordered_map>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
@@ -46,7 +47,7 @@ DECLARE_REF_COUNTER(LineBook)
 DECLARE_REF_COUNTER(LineEntry)
 DECLARE_REF_COUNTER(LineEntryData)
 
-WX_DECLARE_STRING_HASH_MAP(RefCounter<LineEntryData>,LineEntryArray);
+using LineEntryArray = std::unordered_map<wxString, RefCounter<LineEntryData>>;
 
 class LineBook : public AdbBook
 {

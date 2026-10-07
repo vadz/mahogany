@@ -29,8 +29,9 @@
    #include "MApplication.h"
 
    #include <wx/textdlg.h>
-   #include <wx/hashmap.h>
 #endif //USE_PCH
+
+#include <unordered_map>
 
 #include "modules/MCrypt.h"
 #include "gui/wxMDialogs.h"
@@ -83,7 +84,7 @@ String ReadNumber(const wxChar *& pc)
 //                    again (and again...)
 // ----------------------------------------------------------------------------
 
-WX_DECLARE_STRING_HASH_MAP(String, UserPassMap);
+using UserPassMap = std::unordered_map<wxString, String>;
 
 class PassphraseManager
 {
