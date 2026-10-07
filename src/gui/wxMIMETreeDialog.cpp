@@ -29,10 +29,11 @@
    #include <gui/wxIconManager.h>
    #include <wx/sizer.h>
    #include "guidef.h"
-   #include "pointers.h"
    #include <wx/filename.h>
    #include <wx/filedlg.h>
 #endif // USE_PCH
+
+#include <vector>
 
 #include <wx/imaglist.h>
 #include <gui/wxDialogLayout.h>
@@ -281,8 +282,8 @@ void wxMIMETreeDialog::OnSave(wxCommandEvent& WXUNUSED(event))
 
    // get all MIME parts to save and also check if all of them are messages
    bool allMsgs = true;
-   size_t nParts = 0;
-   scoped_array<const MimePart *> parts(new const MimePart *[count]);
+   std::vector<const MimePart *> parts;
+   parts.reserve(count);
    for ( size_t n = 0; n < count; n++ )
    {
       const MimePart *mimepart = m_treectrl->GetMIMEData(selections[n]);
@@ -293,7 +294,7 @@ void wxMIMETreeDialog::OnSave(wxCommandEvent& WXUNUSED(event))
          continue;
       }
 
-      parts[nParts++] = mimepart;
+      parts.push_back(mimepart);
 
       allMsgs &= mimepart->GetType().GetPrimary() == MimeType::MESSAGE;
    }
@@ -302,11 +303,11 @@ void wxMIMETreeDialog::OnSave(wxCommandEvent& WXUNUSED(event))
    // saving them to file(s)
    if ( allMsgs )
    {
-      SaveMessages(nParts, parts.get());
+      SaveMessages(parts.size(), parts.data());
    }
    else // save attachments to file(s)
    {
-      SaveAttachments(nParts, parts.get());
+      SaveAttachments(parts.size(), parts.data());
    }
 }
 

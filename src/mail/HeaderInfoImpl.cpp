@@ -35,7 +35,7 @@
 #include "UIdArray.h"
 #include "Address.h"
 
-#include "pointers.h"
+#include <memory>
 
 #include "gui/wxMDialogs.h"         // for MProgressInfo
 
@@ -1487,7 +1487,7 @@ void HeaderInfoListImpl::BuildTables()
    // this also makes sense because the server side sorting/threading seems to
    // be much faster the subsequent times (the server probably keeps some data
    // alive) but the first time it's really slow
-   scoped_ptr<BusyIndicator> busy;
+   std::unique_ptr<BusyIndicator> busy;
 
    // no tables, check if we need them
 

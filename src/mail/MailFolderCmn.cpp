@@ -763,7 +763,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    // save the messages
    int n = selections->Count();
 
-   scoped_ptr<MProgressDialog> pd;
+   std::unique_ptr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(GetProfile());
 
    if ( threshold > 0 && n > threshold )
@@ -839,7 +839,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   scoped_ptr<MProgressDialog> pd;
+   std::unique_ptr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(mf->GetProfile());
 
    if ( threshold > 0 && n > threshold )

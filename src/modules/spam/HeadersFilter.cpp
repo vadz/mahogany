@@ -46,6 +46,8 @@
 #include "SpamFilter.h"
 #include "gui/SpamOptionsPage.h"
 
+#include <vector>
+
 #ifdef OS_MAC
    #undef USE_RBL
 #endif
@@ -244,7 +246,7 @@ IMPLEMENT_SPAM_FILTER(HeadersFilter,
 // SpamOption and derived classes, used by HeadersOptionsPage
 // ----------------------------------------------------------------------------
 
-typedef scoped_array<wxOptionsPage::FieldInfo> ArrayFieldInfo;
+using ArrayFieldInfo = std::vector<wxOptionsPage::FieldInfo>;
 
 /*
    Represents a single spam option.
@@ -424,7 +426,7 @@ private:
 
    size_t GetConfigEntryCount();
 
-   scoped_array<ConfigValueDefault> m_configValues;
+   std::vector<ConfigValueDefault> m_configValues;
    ArrayFieldInfo m_fieldInfo;
 
    SpamOptionAssassin m_checkSpamAssassin;
@@ -1332,9 +1334,9 @@ void HeadersOptionsPage::SetFalse()
 
 ConfigValueDefault *HeadersOptionsPage::GetConfigValues()
 {
-   // ConfigValueDefault doesn't have default ctor, so use this hack knowing
-   // that ConfigValueNone has exactly the same binary layout as ValueDefault
-   m_configValues.reset(new ConfigValueNone[GetConfigEntryCount()]);
+   // ConfigValueDefault doesn't have default ctor, so fill the vector with
+   // copies of ConfigValueNone, which are overwritten below
+   m_configValues.assign(GetConfigEntryCount(), ConfigValueNone());
 
    size_t n = 1;
    for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
@@ -1348,12 +1350,12 @@ ConfigValueDefault *HeadersOptionsPage::GetConfigValues()
       n += option->GetEntriesCount();
    }
 
-   return m_configValues.get();
+   return m_configValues.data();
 }
 
 wxOptionsPage::FieldInfo *HeadersOptionsPage::GetFieldInfo()
 {
-   m_fieldInfo.reset(new wxOptionsPage::FieldInfo[GetConfigEntryCount()]);
+   m_fieldInfo.assign(GetConfigEntryCount(), wxOptionsPage::FieldInfo());
 
    m_fieldInfo[0].label
       = gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
@@ -1370,6 +1372,6 @@ wxOptionsPage::FieldInfo *HeadersOptionsPage::GetFieldInfo()
       n += option->BuildFieldInfo(m_fieldInfo, n);
    }
 
-   return m_fieldInfo.get();
+   return m_fieldInfo.data();
 }
 
