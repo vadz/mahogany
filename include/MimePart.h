@@ -18,10 +18,9 @@
 
 #include <wx/fontenc.h>         // for wxFontEncoding
 
-// for MimeParameterList
-#include "lists.h"
-
 #include "MimeType.h"
+
+#include <vector>
 
 // ----------------------------------------------------------------------------
 // MimeParameter
@@ -40,8 +39,8 @@ public:
    String value;
 };
 
-/// a linked list of parameters
-M_LIST_OWN(MimeParameterList, MimeParameter);
+/// a vector of parameters
+using MimeParameterList = std::vector<MimeParameter>;
 
 // ----------------------------------------------------------------------------
 // MimeXferEncoding: transfer encoding as defined by RFC 2045

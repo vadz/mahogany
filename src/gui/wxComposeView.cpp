@@ -4966,18 +4966,15 @@ wxComposeView::BuildMessage(int flags) const
                      }
 
                      MessageParameterList plist, dlist;
-                     MessageParameter *p;
 
                      // newer mailers look for "FILENAME" in disposition
                      // parameters according to RFC 2183
-                     p = new MessageParameter(_T("FILENAME"), name);
-                     dlist.push_back(p);
+                     dlist.emplace_back(_T("FILENAME"), name);
 
                      // but some old mailers still use "NAME" in content-type
                      // parameters (per obsolete RFC 1521), so put it there as
                      // well
-                     p = new MessageParameter(_T("NAME"), name);
-                     plist.push_back(p);
+                     plist.emplace_back(_T("NAME"), name);
 
                      const MimeType& mt = part->GetMimeType();
                      msg->AddPart
@@ -5020,18 +5017,12 @@ wxComposeView::BuildMessage(int flags) const
 
                if ( !name.empty() )
                {
-                  MessageParameter *p;
-
-                  p = new MessageParameter(_T("FILENAME"), wxFileNameFromPath(name));
-                  dlist.push_back(p);
+                  dlist.emplace_back(_T("FILENAME"), wxFileNameFromPath(name));
                }
 
                if ( !filename.empty() )
                {
-                  MessageParameter *p;
-
-                  p = new MessageParameter(_T("NAME"), filename);
-                  plist.push_back(p);
+                  plist.emplace_back(_T("NAME"), filename);
                }
 
                const MimeType& mt = part->GetMimeType();

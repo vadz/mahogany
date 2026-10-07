@@ -3169,17 +3169,16 @@ MessageView::MimeInfo(const MimePart *mimepart)
 
    // debug output with all parameters
    const MessageParameterList &plist = mimepart->GetParameters();
-   MessageParameterList::iterator plist_it;
    if ( !plist.empty() )
    {
       message += _("\nParameters:\n");
-      for ( plist_it = plist.begin(); plist_it != plist.end(); plist_it++ )
+      for ( const MessageParameter& param : plist )
       {
-         name = plist_it->name;
+         name = param.name;
          message << NormalizeString(name) << ": ";
 
          // filenames are case-sensitive, don't modify them
-         value = plist_it->value;
+         value = param.value;
          if ( name.CmpNoCase("name") != 0 )
          {
             value.MakeLower();
@@ -3199,12 +3198,12 @@ MessageView::MimeInfo(const MimePart *mimepart)
    if ( !dlist.empty() )
    {
       message += _("\nDisposition parameters:\n");
-      for ( plist_it = dlist.begin(); plist_it != dlist.end(); plist_it++ )
+      for ( const MessageParameter& param : dlist )
       {
-         name = plist_it->name;
+         name = param.name;
          message << NormalizeString(name) << ": ";
 
-         value = plist_it->value;
+         value = param.value;
          if ( name.CmpNoCase("filename") != 0 )
          {
             value.MakeLower();

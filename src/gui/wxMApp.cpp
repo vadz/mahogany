@@ -542,15 +542,15 @@ protected:
          // notice that more and more mail servers (including the one at
          // sf.net) block attachments with .zip extension, so use another one
          MimeParameterList paramsDisp;
-         paramsDisp.push_back(new MimeParameter
-                                  (
-                                    _T("FILENAME"),
-                                    wxString::Format
-                                    (
-                                       _T("M-%s-debugrpt.mz"),
-                                       M_VERSION
-                                    )
-                                  ));
+         paramsDisp.emplace_back
+                    (
+                      _T("FILENAME"),
+                      wxString::Format
+                      (
+                         _T("M-%s-debugrpt.mz"),
+                         M_VERSION
+                      )
+                    );
          sm->AddPart(MimeType::APPLICATION, buf, len,
                      _T("X-ZIP-COMPRESSED"), _T("ATTACHMENT"),
                      &paramsDisp);

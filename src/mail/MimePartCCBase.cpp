@@ -196,14 +196,13 @@ MimePartCCBase::FindParam(const MimeParameterList& list, const String& name)
 {
    String value;
 
-   MimeParameterList::iterator i;
-   for ( i = list.begin(); i != list.end(); i++ )
+   for ( const MimeParameter& param : list )
    {
       // parameter names are not case-sensitive, i.e. "charset" == "CHARSET"
-      if ( name.CmpNoCase(i->name) == 0 )
+      if ( name.CmpNoCase(param.name) == 0 )
       {
          // found
-         value = i->value;
+         value = param.value;
          break;
       }
    }
@@ -230,7 +229,7 @@ void MimePartCCBase::InitParamList(MimeParameterList *list, PARAMETER *par)
 {
    while ( par )
    {
-      list->push_back(new MimeParameter(par->attribute, par->value));
+      list->emplace_back(par->attribute, par->value);
 
       par = par->next;
    }

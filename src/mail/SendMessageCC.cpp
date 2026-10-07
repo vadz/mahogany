@@ -1539,12 +1539,11 @@ SendMessageCC::AddPart(MimeType::Primary type,
 
    if( plist )
    {
-      MessageParameterList::iterator i;
-      for( i = plist->begin(); i != plist->end(); i++ )
+      for ( const MessageParameter& param : *plist )
       {
          PARAMETER *par = mail_newbody_parameter();
 
-         String name = i->name;
+         String name = param.name;
          if ( name.Lower() == "charset" )
          {
             if ( hasCharset )
@@ -1557,7 +1556,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
          }
 
          par->attribute = strdup(name.ToAscii());
-         par->value     = strdup(MIME::EncodeHeader(i->value).c_str());
+         par->value     = strdup(MIME::EncodeHeader(param.value).c_str());
          par->next      = lastpar;
          lastpar = par;
       }
@@ -1604,12 +1603,11 @@ SendMessageCC::AddPart(MimeType::Primary type,
    {
       lastpar = NULL;
 
-      MessageParameterList::iterator i;
-      for ( i = dlist->begin(); i != dlist->end(); i++ )
+      for ( const MessageParameter& param : *dlist )
       {
          PARAMETER *par = mail_newbody_parameter();
-         par->attribute = strdup(i->name.ToAscii());
-         par->value     = strdup(MIME::EncodeHeader(i->value).c_str());
+         par->attribute = strdup(param.name.ToAscii());
+         par->value     = strdup(MIME::EncodeHeader(param.value).c_str());
          par->next      = NULL;
          if(lastpar)
             lastpar->next = par;
