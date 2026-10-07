@@ -73,6 +73,8 @@
 // wxFile::Exists() too
 #include <wx/file.h>
 
+#include <vector>
+
 class MPersMsgBox;
 
 // windows.h included from fontutil.h defines ERROR
@@ -308,9 +310,6 @@ long MailCreate(MAILSTREAM *stream, const String& mailbox)
 // private classes
 // ============================================================================
 
-/// a list of MAILSTREAM pointers
-M_LIST_PTR(StreamList, MAILSTREAM);
-
 // we extend ServerInfoEntry with connection caching
 class ServerInfoEntryCC : public ServerInfoEntry
 {
@@ -386,15 +385,20 @@ private:
    // folder
    NETMBX m_netmbx;
 
+   // a connection which may be reused
+   struct CachedConnection
+   {
+      MAILSTREAM *stream;
+
+      // the moment when we should close this connection
+      time_t timeout;
+   };
+
    // the pool of connections to this server which may be reused (may be empty,
    // of course)
    //
-   // this list is used as a FIFO queue, in fact
-   StreamList m_connections;
-
-   // the timeouts for each of the connections, i.e. the moment when we should
-   // close them
-   M_LIST(TimeList, time_t) m_timeouts;
+   // this vector is used as a FIFO queue, in fact
+   std::vector<CachedConnection> m_connections;
 
    /**
      A small class to close the cached connections periodically.
@@ -589,7 +593,7 @@ public:
    ~CCStreamCleaner();
 
 private:
-   StreamList m_List;
+   std::vector<MAILSTREAM *> m_List;
 };
 
 #endif // USE_DIALUP
@@ -4824,10 +4828,8 @@ CCStreamCleaner::~CCStreamCleaner()
 
    bool isOnline = mApplication->IsOnline();
 
-   for ( StreamList::iterator i = m_List.begin(); i != m_List.end(); ++i )
+   for ( MAILSTREAM *stream : m_List )
    {
-      MAILSTREAM *stream = *i;
-
       if ( isOnline )
       {
          // we are online, so we can close it properly:
@@ -6092,11 +6094,9 @@ ServerInfoEntryCC::~ServerInfoEntryCC()
               m_netmbx.host, m_netmbx.user);
 
    // close all connections we may still have
-   for ( StreamList::iterator i = m_connections.begin();
-         i != m_connections.end();
-         ++i )
+   for ( const CachedConnection& conn : m_connections )
    {
-      mail_close(*i);
+      mail_close(conn.stream);
    }
 }
 
@@ -6158,17 +6158,14 @@ MAILSTREAM *ServerInfoEntryCC::GetStream()
    if ( m_connections.empty() )
       return NULL;
 
-   MAILSTREAM *stream = *m_connections.begin();
-   m_connections.pop_front();
-   m_timeouts.pop_front();
+   MAILSTREAM *stream = m_connections.front().stream;
+   m_connections.erase(m_connections.begin());
 
    return stream;
 }
 
 void ServerInfoEntryCC::KeepStream(MAILSTREAM *stream, const MFolder *folder)
 {
-   m_connections.push_back(stream);
-
    Profile_obj profile(folder->GetProfile());
    time_t t = time(NULL);
    time_t delay = READ_CONFIG(profile, MP_CONN_CLOSE_DELAY);
@@ -6177,7 +6174,7 @@ void ServerInfoEntryCC::KeepStream(MAILSTREAM *stream, const MFolder *folder)
               _T("Keeping connection to %s alive for %d seconds."),
               stream->mailbox, (int)delay);
 
-   m_timeouts.push_back(t + delay);
+   m_connections.push_back({stream, t + delay});
 
    if ( !ms_connCloseTimer )
    {
@@ -6203,20 +6200,17 @@ bool ServerInfoEntryCC::CheckTimeout()
 
    // close the connection even if the timeout hasn't expired yet but expires
    // in less than 1 second: this helps when we have a really big timeout (i.e.
-   // 30 minutes) and if the timer comes up slightly before the moment *j
+   // 30 minutes) and if the timer comes up slightly before the timeout
    // (which does happen in practice): we don't want to wait for another 30
    // minutes before closing the connection
    time_t t = time(NULL) + 1;
 
-   // iterate in parallel over both lists
-   StreamList::iterator i = m_connections.begin();
-   TimeList::iterator j = m_timeouts.begin();
-   while ( i != m_connections.end() )
+   for ( auto i = m_connections.begin(); i != m_connections.end(); )
    {
-      if ( *j <= t )
+      if ( i->timeout <= t )
       {
          // timed out
-         MAILSTREAM *stream = *i;
+         MAILSTREAM *stream = i->stream;
 
          wxLogTrace(TRACE_SERVER_CACHE,
                     _T("Connection to %s timed out, closing."), stream->mailbox);
@@ -6227,12 +6221,10 @@ bool ServerInfoEntryCC::CheckTimeout()
          mail_close(stream);
 
          i = m_connections.erase(i);
-         j = m_timeouts.erase(j);
       }
       else
       {
          ++i;
-         ++j;
       }
    }
 
