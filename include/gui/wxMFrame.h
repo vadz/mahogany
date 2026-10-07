@@ -41,7 +41,7 @@ public:
       // if there is no config object to read settings from
    static bool RestorePosition(const char *name,
                                int *x, int *y, int *w, int *h,
-                               bool *iconised = NULL, bool *maximised = NULL);
+                               bool *iconised = nullptr, bool *maximised = nullptr);
 
       //  save the given frame's position and size in config file
    static void SavePosition(const char *name, wxFrame *frame);
@@ -50,9 +50,9 @@ public:
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
    wxMFrame() : MFrameBase(M_EMPTYSTRING) { FAIL_MSG(_T("unreachable")); }
    /// Constructor
-   wxMFrame(const String &iname, wxWindow *parent = NULL);
+   wxMFrame(const String &iname, wxWindow *parent = nullptr);
    /// Creates an object
-   void Create(const String &iname, wxWindow *parent = NULL);
+   void Create(const String &iname, wxWindow *parent = nullptr);
    /// Destructor
    ~wxMFrame();
 

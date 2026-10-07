@@ -198,7 +198,7 @@ wxMessageView::wxMessageView(wxWindow *parent,
 {
    // set it to NULL initially to avoid sending notification in
    // OnViewerChange() for the initial dummy viewer
-   m_FolderView = NULL;
+   m_FolderView = nullptr;
 
    m_viewerParent = new wxPanel(parent);
    m_infobar = new wxInfoBar(m_viewerParent);
@@ -230,7 +230,7 @@ MessageView *MessageView::Create(wxWindow *parent, FolderView *folderView)
 MessageView *
 MessageView::CreateStandalone(wxWindow *parent, Profile *profile)
 {
-   return new wxMessageView(parent, NULL, profile);
+   return new wxMessageView(parent, nullptr, profile);
 }
 
 // ----------------------------------------------------------------------------
@@ -271,7 +271,7 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
    if ( m_FolderView )
    {
       m_FolderView->OnMsgViewerChange(viewerNew ? viewerNew->GetWindow()
-                                                : NULL);
+                                                : nullptr);
    }
 
    if ( viewerOld )
@@ -635,7 +635,7 @@ extern MessageView *ShowMessageViewFrame(wxWindow *parent,
                                          ASMailFolder *asmf,
                                          UIdType uid)
 {
-   CHECK( asmf, NULL, _T("NULL folder in ShowMessageViewFrame()?") );
+   CHECK( asmf, nullptr, _T("NULL folder in ShowMessageViewFrame()?") );
 
    wxMessageViewFrame *frame = new wxMessageViewFrame(parent, asmf, uid);
 

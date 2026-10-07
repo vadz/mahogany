@@ -153,7 +153,7 @@ long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
    size_t nCount = labels.Count();
    for ( size_t n = 0; n < nCount; n++ )
    {
-      dc.GetTextExtent(labels[n], &width, NULL);
+      dc.GetTextExtent(labels[n], &width, nullptr);
       if ( width > widthMax )
          widthMax = width;
    }
@@ -166,7 +166,7 @@ static void SetTopConstraint(wxWindow *parent,
                              wxControl *last,
                              int extraSpace)
 {
-   if ( last == NULL )
+   if ( last == nullptr )
    {
       c->top.SameAs(parent, wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
    }
@@ -397,7 +397,7 @@ CreateEntryWithButton(wxWindow *parent,
 
       default:
          wxFAIL_MSG(_T("unknown browse button kind"));
-         return NULL;
+         return nullptr;
    }
 
    wxLayoutConstraints *c = new wxLayoutConstraints;
@@ -441,7 +441,7 @@ void EnableWindowLabel(wxWindow *parent, wxWindow *control, bool bEnable)
 {
    wxWindow *win = control->GetPrevSibling();
 
-   if ( win == NULL ) {
+   if ( win == nullptr ) {
       wxFAIL_MSG(_T("can't find label for the text entry zone"));
    }
    else {
@@ -465,7 +465,7 @@ void EnableTextWithButton(wxWindow *parent, wxTextCtrl *control, bool bEnable)
 {
    wxWindow *win = control->GetNextSibling();
 
-   if ( win == NULL ) {
+   if ( win == nullptr ) {
       wxFAIL_MSG(_T("can't find browse button for the text entry zone"));
    }
    else {
@@ -587,7 +587,7 @@ wxNotebookWithImages::~wxNotebookWithImages()
 // ----------------------------------------------------------------------------
 
 wxEnhancedPanel::wxEnhancedPanel(wxWindow *parent, bool enableScrolling)
-               : wxPanel(parent, -1), m_canvas(NULL)
+               : wxPanel(parent, -1), m_canvas(nullptr)
 {
    if ( enableScrolling )
    {
@@ -1230,7 +1230,7 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
 
    // a box around all the other controls
    if ( flags & StdBtn_NoBox )
-      return NULL;
+      return nullptr;
 
    wxStaticBox *box = new wxStaticBox(this, -1, boxTitle);
    c = new wxLayoutConstraints();
@@ -1422,7 +1422,7 @@ void wxProfileSettingsEditDialog::CreateAllControls(int flags)
    }
    else
    {
-      m_btnApply = NULL;
+      m_btnApply = nullptr;
    }
 
    // set dialog size (FIXME these are more or less arbitrary numbers)
@@ -1442,9 +1442,9 @@ wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
                    : wxProfileSettingsEditDialog(parent, title, profileKey)
 {
    m_btnOk =
-   m_btnApply = NULL;
+   m_btnApply = nullptr;
 
-   m_profileForButtons = NULL;
+   m_profileForButtons = nullptr;
 
    m_lastBtn = MEventOptionsChangeData::Invalid;
 
@@ -1559,7 +1559,7 @@ void wxOptionsEditDialog::OnOK(wxCommandEvent& /* event */)
       {
          m_profileForButtons->Commit();
          m_profileForButtons->DecRef();
-         m_profileForButtons = NULL;
+         m_profileForButtons = nullptr;
       }
 
       EndModal(wxID_OK);
@@ -1627,7 +1627,7 @@ void wxOptionsEditDialog::OnCancel(wxCommandEvent& /* event */)
    {
       m_profileForButtons->DecRef();
 
-      m_profileForButtons = NULL;
+      m_profileForButtons = nullptr;
    }
 
    EndModal(wxID_CANCEL);

@@ -65,7 +65,7 @@ static AdbImporter *FindImporter(const String& filename,
 static bool DoAdbImport(const String& filename,
                         AdbEntryGroup *group,
                         AdbImporter *importer,
-                        String *errMsg = NULL);
+                        String *errMsg = nullptr);
 
 // ============================================================================
 // implementation
@@ -161,7 +161,7 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
          }
 
          importer->DecRef();
-         importer = NULL;
+         importer = nullptr;
 
          info = info->next;
       }
@@ -180,14 +180,14 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
                       "do you still want to try to import it?"),
                     filename, importer->GetFormatDesc());
 
-         if ( !MDialog_YesNoDialog(msg, NULL, _("Address book import"),
+         if ( !MDialog_YesNoDialog(msg, nullptr, _("Address book import"),
                                    M_DLG_NO_DEFAULT,
                                    M_MSGBOX_CONFIRM_ADB_IMPORTER) )
          {
             // cancelled by user
             mApplication->SetLastError(M_ERROR_CANCEL);
 
-            return NULL;
+            return nullptr;
          }
       }
 
@@ -236,7 +236,7 @@ bool AdbImport(const String& filename,
 
    importer = FindImporter(filename, importer);
 
-   AdbBook *adbBook = NULL;
+   AdbBook *adbBook = nullptr;
 
    bool ok = TRUE;
    wxString errMsg, provname;

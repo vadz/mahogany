@@ -109,12 +109,12 @@ public:
    //@{
       /// Read a character entry.
    String readEntry(const String & key,
-                    const String & defaultvalue = (const wxChar *)NULL,
-                    ReadResult * found = NULL) const override;
+                    const String & defaultvalue = (const wxChar *)nullptr,
+                    ReadResult * found = nullptr) const override;
    /// Read an integer value.
    long readEntry(const String & key,
                   long defaultvalue,
-                  ReadResult * found = NULL) const override;
+                  ReadResult * found = nullptr) const override;
    /// read entry without recursing upwards
    int readEntryFromHere(const String& key, int defvalue) const override;
 
@@ -183,7 +183,7 @@ protected:
    ProfileImpl()
       {
          m_Suspended = 0;
-         m_Identity = NULL;
+         m_Identity = nullptr;
       }
 
    /// Destructor, writes back those entries that got changed.
@@ -379,7 +379,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // the unique AllConfigSources object
-static AllConfigSources *gs_allConfigSources = NULL;
+static AllConfigSources *gs_allConfigSources = nullptr;
 
 
 // ============================================================================
@@ -549,7 +549,7 @@ Profile::CreateGlobalConfig(const String& filename)
 
    gs_allConfigSources = AllConfigSources::Init(filename);
 
-   Profile *p = ProfileImpl::CreateProfile(wxEmptyString,NULL);
+   Profile *p = ProfileImpl::CreateProfile(wxEmptyString,nullptr);
    EnforcePolicy(p);
    return p;
 }
@@ -560,7 +560,7 @@ Profile::DeleteGlobalConfig()
    if ( gs_allConfigSources )
    {
       AllConfigSources::Cleanup();
-      gs_allConfigSources = NULL;
+      gs_allConfigSources = nullptr;
    }
 }
 
@@ -652,7 +652,7 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
    if(iName.Length())
       m_ProfileName << _T('/') << iName;
    m_Suspended = 0;
-   m_Identity = NULL;
+   m_Identity = nullptr;
 
    String id = readEntry(GetOptionName(MP_PROFILE_IDENTITY),
                          GetStringDefault(MP_PROFILE_IDENTITY));
@@ -673,7 +673,7 @@ ProfileImpl::CreateProfile(const String & iClassName,
 Profile *
 ProfileImpl::GetParent(void) const
 {
-   return CreateProfile(GetName().BeforeLast(_T('/')), NULL);
+   return CreateProfile(GetName().BeforeLast(_T('/')), nullptr);
 }
 
 ProfileImpl::~ProfileImpl()
@@ -773,7 +773,7 @@ ProfileImpl::ClearIdentity(void)
    if ( m_Identity )
    {
       m_Identity->DecRef();
-      m_Identity = NULL;
+      m_Identity = nullptr;
    }
 }
 

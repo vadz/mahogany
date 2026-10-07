@@ -457,7 +457,7 @@ public:
    void UpdateListing(HeaderInfoList *headers);
 
    /// do we have headers at all?
-   bool HasHeaders() const { return m_headers != NULL; }
+   bool HasHeaders() const { return m_headers != nullptr; }
 
    /// get the number of items we show
    size_t GetHeadersCount() const { return m_headers ? m_headers->Count() : 0; }
@@ -555,7 +555,7 @@ public:
    }
 
    /// get the UID and, optionally, the index of the focused item
-   UIdType GetFocusedUId(long *idx = NULL) const;
+   UIdType GetFocusedUId(long *idx = nullptr) const;
 
    /// get the only selected item, return -1 if 0 or >= 2 items are selected
    long GetUniqueSelection() const;
@@ -681,7 +681,7 @@ protected:
    void UpdateItemCount() { SetItemCount(GetHeadersCount()); }
 
    /// do we have a folder opened?
-   bool HasFolder() const { return m_FolderView->GetFolder() != NULL; }
+   bool HasFolder() const { return m_FolderView->GetFolder() != nullptr; }
 
    /// get the folder view settings we use
    const wxFolderView::AllProfileSettings& GetSettings() const
@@ -1138,14 +1138,14 @@ wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent,
                             wxDefaultPosition, wxDefaultSize,
                             folderView ? wxBORDER_NONE : wxBORDER_DEFAULT)
 {
-   m_winViewer = NULL;
+   m_winViewer = nullptr;
 #ifdef USE_VIEWER_BAR
-   m_winBar = NULL;
+   m_winBar = nullptr;
 #endif // USE_VIEWER_BAR
    m_folderView = folderView;
    m_listCtrl = listCtrl;
-   m_winViewerContainer = NULL;
-   m_evtHandlerMsgView = NULL;
+   m_winViewerContainer = nullptr;
+   m_evtHandlerMsgView = nullptr;
 }
 
 void wxFolderMsgWindow::SetViewerContainerWindow(wxWindow *winViewerContainer)
@@ -1295,7 +1295,7 @@ void wxFolderMsgWindow::DeleteViewerBar()
    ASSERT_MSG( m_winBar, _T("deleting non existent viewer bar?") );
 
    delete m_winBar;
-   m_winBar = NULL;
+   m_winBar = nullptr;
 }
 
 void wxFolderMsgWindow::UpdateViewerBar()
@@ -1337,7 +1337,7 @@ void wxFolderMsgWindow::UpdateOptions()
       return;
    }
 
-   bool hasBar = m_winBar != NULL;
+   bool hasBar = m_winBar != nullptr;
    bool toggleBar;
    if ( m_folderView->GetFolder() )
    {
@@ -1500,10 +1500,10 @@ END_EVENT_TABLE()
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
                 : m_timerPreview(this)
 {
-   m_headers = NULL;
+   m_headers = nullptr;
    m_indexHI = (size_t)-1;
-   m_hiCached = NULL;
-   m_attr = NULL;
+   m_hiCached = nullptr;
+   m_attr = nullptr;
 
    m_PreviewOnSingleClick = false;
    m_PreviewDelay = 0;
@@ -1511,8 +1511,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_FolderView = fv;
    m_enableOnSelect = true;
    m_countSelected = 0;
-   m_menu = NULL;
-   m_menuFolders = NULL;
+   m_menu = nullptr;
+   m_menuFolders = nullptr;
 
    m_colSort = WXFLC_NONE;
    for (size_t i = 0; i < WXFLC_NUMENTRIES; ++i)
@@ -1573,7 +1573,7 @@ void wxFolderListCtrl::OnFolderChange()
    if ( m_headers )
    {
       m_headers->DecRef();
-      m_headers = NULL;
+      m_headers = nullptr;
 
       InvalidateCache();
    }
@@ -1718,13 +1718,13 @@ void wxFolderListCtrl::OnContextMenu(wxContextMenuEvent& event)
    if ( m_menu )
    {
       delete m_menu;
-      m_menu = NULL;
+      m_menu = nullptr;
    }
 
    if ( m_menuFolders )
    {
       delete m_menuFolders;
-      m_menuFolders = NULL;
+      m_menuFolders = nullptr;
    }
 #endif // __WXGTK__
 
@@ -2375,7 +2375,7 @@ void wxFolderListCtrl::InvalidateCache()
 {
    m_indexHI = (size_t)-1;
 
-   m_hiCached = NULL;
+   m_hiCached = nullptr;
 
    m_headersToGet.Empty();
 }
@@ -2407,7 +2407,7 @@ void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
 
 HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 {
-   CHECK( m_headers, NULL, _T("no listing hence no header info") );
+   CHECK( m_headers, nullptr, _T("no listing hence no header info") );
 
    wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
 
@@ -2420,7 +2420,7 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
       if ( !m_headers->Count() )
       {
          // this probably means that we lost the connection unexpectedly
-         return NULL;
+         return nullptr;
       }
    }
 
@@ -2444,7 +2444,7 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
             self->m_headersToGet.Add(index);
          }
 
-         return NULL;
+         return nullptr;
       }
 
       // if the header is already cached, check if it's not the focused one
@@ -2575,7 +2575,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
             // here we can call it with the last parameter being true which
             // allows it to use interactive message boxes
             wxFontEncoding encoding = hi->GetEncoding();
-            if ( !EnsureAvailableTextEncoding(&encoding, NULL, true) )
+            if ( !EnsureAvailableTextEncoding(&encoding, nullptr, true) )
             {
                // no such encoding, don't try to show it
                hi->SetEncoding(wxFONTENCODING_SYSTEM);
@@ -3185,20 +3185,20 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    // see comment in the beginning of OnGetItemText()
    if ( (size_t)item >= GetHeadersCount() )
    {
-      return NULL;
+      return nullptr;
    }
 
    HeaderInfo *hi = GetHeaderInfo((size_t)item);
    if ( !hi )
    {
       // will get it later
-      return NULL;
+      return nullptr;
    }
 
    if ( !hi->IsValid() )
    {
       // no attributes for the headers we didn't retrieve
-      return NULL;
+      return nullptr;
    }
 
    if ( !m_attr )
@@ -3348,19 +3348,19 @@ wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
 wxFolderView *
 wxFolderView::Create(wxWindow *parent)
 {
-   wxCHECK_MSG(parent, NULL, _T("NULL parent frame in wxFolderView ctor"));
+   wxCHECK_MSG(parent, nullptr, _T("NULL parent frame in wxFolderView ctor"));
    wxFolderView *fv = new wxFolderView(parent);
    return fv;
 }
 
 wxFolderView::wxFolderView(wxWindow *parent)
 {
-   m_Profile = NULL;
+   m_Profile = nullptr;
    m_Parent = parent;
 
    m_Frame = GetFrame(m_Parent);
 
-   m_ASMailFolder = NULL;
+   m_ASMailFolder = nullptr;
    m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
 
    m_TicketList = ASTicketList::Create();
@@ -3404,7 +3404,7 @@ wxFolderView::~wxFolderView()
 
    // set it to NULL so that Clear() knows we are being destroyed - see the
    // code there
-   m_MessagePreview = NULL;
+   m_MessagePreview = nullptr;
 
    Clear();
 
@@ -3958,16 +3958,16 @@ wxFolderView::DoClear(bool keepTheViewer)
 
       // this folder is not associated with our frame any more
       MailFolder_obj mf(m_ASMailFolder->GetMailFolder());
-      mf->SetInteractiveFrame(NULL);
+      mf->SetInteractiveFrame(nullptr);
 
       m_ASMailFolder->DecRef();
-      m_ASMailFolder = NULL;
+      m_ASMailFolder = nullptr;
 
-      m_msgCmdProc->SetFolder(NULL);
+      m_msgCmdProc->SetFolder(nullptr);
 
       if ( !keepTheViewer && m_MessagePreview )
       {
-         m_MessagePreview->SetFolder(NULL);
+         m_MessagePreview->SetFolder(nullptr);
          m_MessageWindow->UpdateOptions();
       }
    }
@@ -3981,7 +3981,7 @@ wxFolderView::DoClear(bool keepTheViewer)
    {
       m_Profile->DecRef();
 
-      m_Profile = NULL;
+      m_Profile = nullptr;
    }
 
    if ( !keepTheViewer && m_MessagePreview )
@@ -4075,7 +4075,7 @@ wxFolderView::SetFolder(MailFolder *mf)
    // keep the viewer (by passing true to Clear()) only if we're going to open
    // a new folder soon: this avoids flicker but still ensures that we close
    // the current viewer if we are not going to open any folder
-   DoClear(mf != NULL);
+   DoClear(mf != nullptr);
 
    if ( mf )
    {
@@ -4283,7 +4283,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
       folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
    }
 
-   return mf != NULL;
+   return mf != nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -5413,7 +5413,7 @@ wxFolderViewFrame::Create(MFolder *folder,
    if ( !fv->OpenFolder(folder, openmode == MailFolder::ReadOnly) )
    {
       delete frame;
-      return NULL;
+      return nullptr;
    }
 
    // can only do it now, after the folder had been opened
@@ -5425,7 +5425,7 @@ wxFolderViewFrame::Create(MFolder *folder,
 wxFolderViewFrame::wxFolderViewFrame(const String& name, wxMFrame *parent)
                  : wxMFrame(name, parent)
 {
-   m_FolderView = NULL;
+   m_FolderView = nullptr;
 }
 
 void wxFolderViewFrame::DoCreateToolBar()
@@ -5506,7 +5506,7 @@ bool OpenFolderViewFrame(MFolder *folder,
 {
    return wxFolderViewFrame::Create(folder,
                                     (wxMFrame *)GetFrame(parent),
-                                    openmode) != NULL;
+                                    openmode) != nullptr;
 }
 
 extern

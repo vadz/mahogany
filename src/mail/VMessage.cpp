@@ -38,7 +38,7 @@ MessageVirt *MessageVirt::Create(MailFolder *mf,
                                  int *flags,
                                  Message *message)
 {
-    CHECK( mf && flags && message, NULL, _T("NULL pointer in MessageVirt::Create") );
+    CHECK( mf && flags && message, nullptr, _T("NULL pointer in MessageVirt::Create") );
 
     return new MessageVirt(mf, uid, flags, message);
 }

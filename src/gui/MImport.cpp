@@ -280,7 +280,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
 
       if ( m_checkFolders->GetValue() )
       {
-         MFolder *folderParent = NULL;
+         MFolder *folderParent = nullptr;
          int flags = 0;
 
          String msg;
@@ -312,7 +312,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
             {
                folderParent = CreateFolderTreeEntry
                               (
-                               NULL,
+                               nullptr,
                                folderName,
                                MF_GROUP,
                                0,

@@ -152,7 +152,7 @@ public:
    wxFrame *GetFrame() const { return m_frame; }
 
    MailFolder *GetMailFolder() const
-      { return m_asmf ? m_asmf->GetMailFolder() : NULL; }
+      { return m_asmf ? m_asmf->GetMailFolder() : nullptr; }
 
 protected:
    /** @name Menu command handlers
@@ -175,8 +175,8 @@ protected:
    void ToggleMessagesFlag(const UIdArray& messages, MailFolder::MessageStatus f);
    void MarkRead(const UIdArray& messages, bool read);
 
-   Ticket SaveMessagesToFolder(const UIdArray& selections, MFolder *folder = NULL);
-   Ticket MoveMessagesToFolder(const UIdArray& messages, MFolder *folder = NULL);
+   Ticket SaveMessagesToFolder(const UIdArray& selections, MFolder *folder = nullptr);
+   Ticket MoveMessagesToFolder(const UIdArray& messages, MFolder *folder = nullptr);
    Ticket SaveMessagesToFile(const UIdArray& selections);
 
    void ExtractAddresses(const UIdArray& selections);
@@ -184,7 +184,7 @@ protected:
    void ApplyFilters(const UIdArray& selections);
 
    bool DragAndDropMessages(const UIdArray& selections);
-   void DropMessagesToFolder(const UIdArray& selections, MFolder *folder = NULL);
+   void DropMessagesToFolder(const UIdArray& selections, MFolder *folder = nullptr);
 
    /// Show the raw text of the specified message
    void ShowRawText(UIdType uid);
@@ -216,7 +216,7 @@ protected:
    {
       // do it synchronously (FIXME should we?)
       MailFolder_obj mf(GetMailFolder());
-      CHECK( mf, NULL, _T("no folder in MsgCmdProcImpl::GetMessage()") );
+      CHECK( mf, nullptr, _T("no folder in MsgCmdProcImpl::GetMessage()") );
 
       return mf->GetMessage(uid);
    }
@@ -399,7 +399,7 @@ AsyncStatusHandler::~AsyncStatusHandler()
 /* static */
 MsgCmdProc *MsgCmdProc::Create(MessageView *msgView, wxWindow *winForDnd)
 {
-   CHECK( msgView, NULL, _T("must have an associated message view") );
+   CHECK( msgView, nullptr, _T("must have an associated message view") );
 
    return new MsgCmdProcImpl(msgView, winForDnd);
 }
@@ -410,15 +410,15 @@ MsgCmdProcImpl::MsgCmdProcImpl(MessageView *msgView, wxWindow *winForDnd)
 
    m_msgView = msgView;
    m_winForDnd = winForDnd;
-   m_asmf = NULL;
+   m_asmf = nullptr;
    m_regASyncResult = MEventManager::Register(*this, MEventId_ASFolderResult);
 
    m_TicketList = ASTicketList::Create();
 
    // these are created on demand
-   m_TicketsToDeleteList = NULL;
-   m_TicketsDroppedList = NULL;
-   m_TicketsToEditList = NULL;
+   m_TicketsToDeleteList = nullptr;
+   m_TicketsDroppedList = nullptr;
+   m_TicketsToEditList = nullptr;
 }
 
 MsgCmdProcImpl::~MsgCmdProcImpl()
@@ -804,7 +804,7 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
    CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ShowMIMEDialog") );
 
    Message_obj msg(mf->GetMessage(uid));
-   const MimePart *part = msg ? msg->GetTopMimePart() : NULL;
+   const MimePart *part = msg ? msg->GetTopMimePart() : nullptr;
 
    if ( !part )
    {
@@ -816,7 +816,7 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
    // only pass message view to the dialog to allow showing the context menu
    // for the MIME parts - but for this we must be previewing this message!
    ShowMIMETreeDialog(part, GetFrame(),
-                           m_msgView->GetUId() == uid ? m_msgView : NULL);
+                           m_msgView->GetUId() == uid ? m_msgView : nullptr);
 }
 
 void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
@@ -923,7 +923,7 @@ void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
       bool flagsOk = false;
 
       HeaderInfoList_obj headers(HeaderInfoList::Create(mf));
-      const HeaderInfo * const hi = headers ? headers->GetEntryUId(uid) : NULL;
+      const HeaderInfo * const hi = headers ? headers->GetEntryUId(uid) : nullptr;
       if ( hi )
       {
          const int flags = hi->GetStatus();
@@ -1448,7 +1448,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
    }
    else
    {
-      dlg = NULL;
+      dlg = nullptr;
    }
 
    for ( size_t n = 0; n < count; n++ )
@@ -1602,7 +1602,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
       didDrop = true;
 
       m_TicketsDroppedList->DecRef();
-      m_TicketsDroppedList = NULL;
+      m_TicketsDroppedList = nullptr;
 
       wxLogTrace(M_TRACE_DND, _T("DragAndDropMessages() done ok"));
    }

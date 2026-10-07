@@ -251,7 +251,7 @@ private:
    class classname##_obj                                                      \
    {                                                                          \
    public:                                                                    \
-      classname##_obj(classname *ptr = NULL) { m_ptr = ptr; }                 \
+      classname##_obj(classname *ptr = nullptr) { m_ptr = ptr; }              \
                                                                               \
       void Attach(classname *ptr)                                             \
       {                                                                       \
@@ -263,7 +263,7 @@ private:
       classname *Detach()                                                     \
       {                                                                       \
          classname *ptr = m_ptr;                                              \
-         m_ptr = NULL;                                                        \
+         m_ptr = nullptr;                                                     \
          return ptr;                                                          \
       }                                                                       \
                                                                               \
@@ -294,7 +294,7 @@ private:
    BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                 \
    public:                                                  \
       ~classname##_obj() { if ( m_ptr ) m_ptr->DecRef(); }  \
-      operator bool() const { return m_ptr != NULL; }
+      operator bool() const { return m_ptr != nullptr; }
 
 // finish the class decl
 #define END_DECLARE_AUTOPTR() }
@@ -318,9 +318,9 @@ private:
 // ----------------------------------------------------------------------------
 
 // lock the pointer only if it's !NULL
-inline void SafeIncRef(MObjectRC *p) { if ( p != NULL ) p->IncRef(); }
+inline void SafeIncRef(MObjectRC *p) { if ( p != nullptr ) p->IncRef(); }
 
 // unlock the pointer only if it's !NULL
-inline void SafeDecRef(MObjectRC *p) { if ( p != NULL ) p->DecRef(); }
+inline void SafeDecRef(MObjectRC *p) { if ( p != nullptr ) p->DecRef(); }
 
 #endif  //MOBJECT_H

@@ -45,7 +45,7 @@ public:
       if ( !config->InitDefault(filename) )
       {
          delete config;
-         config = NULL;
+         config = nullptr;
       }
 
       return config;
@@ -64,7 +64,7 @@ public:
       if ( !config->InitFile(filename) )
       {
          delete config;
-         config = NULL;
+         config = nullptr;
       }
 
       return config;
@@ -82,7 +82,7 @@ public:
       if ( !config->InitRegistry() )
       {
          delete config;
-         config = NULL;
+         config = nullptr;
       }
 
       return config;

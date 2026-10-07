@@ -194,11 +194,11 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
                               ? MailFolder::ReplyMessage
                               : MailFolder::ForwardMessage)
                                 (
-                                  msgview ? msgview->GetMessage() : NULL,
+                                  msgview ? msgview->GetMessage() : nullptr,
                                   params,
                                   m_clickableURL->GetProfile(),
-                                  msgview ? msgview->GetWindow() : NULL,
-                                  NULL
+                                  msgview ? msgview->GetWindow() : nullptr,
+                                  nullptr
                                 );
 
             if ( cv )

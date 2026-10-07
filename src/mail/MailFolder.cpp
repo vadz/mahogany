@@ -87,7 +87,7 @@ extern const MPersMsgBox *M_MSGBOX_REMEMBER_PWD;
 
 std::vector<std::unique_ptr<ServerInfoEntry>> ServerInfoEntry::ms_servers;
 
-MFSubSystem *MFSubSystem::ms_initilizers = NULL;
+MFSubSystem *MFSubSystem::ms_initilizers = nullptr;
 
 // ============================================================================
 // MailFolder implementation
@@ -170,9 +170,9 @@ MailFolder::CleanUp()
 static MFDriver *GetFolderDriver(const MFolder *folder)
 {
    if ( !MailFolder::Init() )
-      return NULL;
+      return nullptr;
 
-   CHECK( folder, NULL, _T("MailFolder: NULL folder object") );
+   CHECK( folder, nullptr, _T("MailFolder: NULL folder object") );
 
    const String kind = folder->GetClass();
 
@@ -192,7 +192,7 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
 {
    MFDriver *driver = GetFolderDriver(folder);
    if ( !driver )
-      return NULL;
+      return nullptr;
 
    // ensure that we have the authentication information for this folder
    // before trying to open it
@@ -201,7 +201,7 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
    if ( !GetAuthInfoForFolder(folder, login, password, frame, &userEnteredPwd) )
    {
       // can't continue without login/password
-      return NULL;
+      return nullptr;
    }
 
    // look if we don't already have it opened
@@ -215,7 +215,7 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
       // check whether this folder is accessible
       if ( !CheckNetwork(folder, frame) )
       {
-         return NULL;
+         return nullptr;
       }
 
       // and now do [try to] open the folder
@@ -332,13 +332,13 @@ MailFolder::CloseAll(MFolderList *opened)
    size_t n = 0;
 
    // if requested, also return the folders we closed
-   MFolder *folder = NULL;
-   MFolder ** const pFolder = opened ? &folder : NULL;
+   MFolder *folder = nullptr;
+   MFolder ** const pFolder = opened ? &folder : nullptr;
 
    MFPool::Cookie cookie;
-   for ( MailFolder *mf = MFPool::GetFirst(cookie, NULL, pFolder);
+   for ( MailFolder *mf = MFPool::GetFirst(cookie, nullptr, pFolder);
          mf;
-         mf = MFPool::GetNext(cookie, NULL, pFolder), n++ )
+         mf = MFPool::GetNext(cookie, nullptr, pFolder), n++ )
    {
       // if we want to close all folders we almost surely don't want to keep
       // any outgoing network connections neither
@@ -366,7 +366,7 @@ MailFolder::GetOpenedFolderFor(const MFolder *folder)
 {
    MFDriver *driver = GetFolderDriver(folder);
    if ( !driver )
-      return NULL;
+      return nullptr;
 
    // FIXME: login problem again
    return MFPool::Find(driver, folder, folder->GetLogin());
@@ -382,7 +382,7 @@ bool MailFolder::PingAllOpened(wxFrame *frame)
          mf;
          mf = MFPool::GetNext(cookie) )
    {
-      NonInteractiveLock noInter(mf, frame != NULL);
+      NonInteractiveLock noInter(mf, frame != nullptr);
 
       if ( !mf->Ping() )
       {
@@ -405,7 +405,7 @@ MailFolder::CheckFolder(const MFolder *folder, wxFrame *frame)
    MailFolder *mf = MailFolder::GetOpenedFolderFor(folder);
    if ( mf )
    {
-      NonInteractiveLock noInter(mf, frame != NULL);
+      NonInteractiveLock noInter(mf, frame != nullptr);
 
       // just pinging it is enough
       rc = mf->Ping();
@@ -941,7 +941,7 @@ MailFolder::ReplyMessage(Message *msg,
                          wxWindow * /* parent */,
                          Composer *cv)
 {
-   CHECK( msg, NULL, _T("no message to reply to") );
+   CHECK( msg, nullptr, _T("no message to reply to") );
 
    if(! profile)
       profile = mApplication->GetProfile();
@@ -967,7 +967,7 @@ MailFolder::ReplyMessage(Message *msg,
          cv = Composer::CreateReplyMessage(params, profile, msg);
       }
 
-      CHECK( cv, NULL, _T("failed to create composer") );
+      CHECK( cv, nullptr, _T("failed to create composer") );
    }
 
    InitRecipients(cv, msg, params, profile);
@@ -1105,7 +1105,7 @@ MailFolder::ReplyMessage(Message *msg,
    {
       "Message-Id",
       "References",
-      NULL
+      nullptr
    };
 
    wxArrayString headersOrig = msg->GetHeaderLines(headers);
@@ -1167,7 +1167,7 @@ MailFolder::ForwardMessage(Message *msg,
                            wxWindow * /* parent */,
                            Composer *cv)
 {
-   CHECK(msg, NULL, _T("no message to forward"));
+   CHECK(msg, nullptr, _T("no message to forward"));
 
    if ( !profile )
       profile = mApplication->GetProfile();
@@ -1175,7 +1175,7 @@ MailFolder::ForwardMessage(Message *msg,
    if ( !cv )
    {
       cv = Composer::CreateFwdMessage(params, profile, msg);
-      CHECK( cv, NULL, _T("failed to create composer") );
+      CHECK( cv, nullptr, _T("failed to create composer") );
    }
 
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) +
@@ -1384,7 +1384,7 @@ MailFolder::ProposeSavePassword(MailFolder *mf,
             "(WARNING: don't do it if you are concerned about security)"),
             mf->GetName()
          ),
-         NULL,
+         nullptr,
          MDIALOG_YESNOTITLE,
          M_DLG_YES_DEFAULT,
          M_MSGBOX_REMEMBER_PWD,
@@ -1402,7 +1402,7 @@ MailFolder::ProposeSavePassword(MailFolder *mf,
                  "session only (it won't be saved to a disk file)?\n"
                  "If you answer \"No\", you will be asked for the password\n"
                  "each time when the folder is accessed."),
-               NULL,
+               nullptr,
                MDIALOG_YESNOTITLE,
                M_DLG_YES_DEFAULT,
                M_MSGBOX_KEEP_PWD,

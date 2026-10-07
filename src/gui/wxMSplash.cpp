@@ -69,7 +69,7 @@ extern void ReallyCloseTopLevelWindow(wxFrame *frame);
 // globals
 // ----------------------------------------------------------------------------
 
-wxFrame *g_pSplashScreen = NULL;
+wxFrame *g_pSplashScreen = nullptr;
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -122,7 +122,7 @@ public:
      if ( m_pTimer )
      {
         delete m_pTimer;
-        m_pTimer = NULL;
+        m_pTimer = nullptr;
      }
   }
 
@@ -336,19 +336,19 @@ AboutWindow::AboutWindow(wxFrame *parent, wxBitmap bmp, bool bCloseOnTimeout)
    bottom->SetFocus();
 
    // start a timer which will close us (if not disabled)
-   m_pTimer = bCloseOnTimeout ? new SplashCloseTimer(this) : NULL;
+   m_pTimer = bCloseOnTimeout ? new SplashCloseTimer(this) : nullptr;
 }
 
 void AboutWindow::ConnectMouseAndKeyEvents(wxWindow *win)
 {
    win->Connect(wxEVT_CHAR,
-                wxKeyEventHandler(AboutWindow::OnChar), NULL, this);
+                wxKeyEventHandler(AboutWindow::OnChar), nullptr, this);
    win->Connect(wxEVT_LEFT_UP,
-                wxMouseEventHandler(AboutWindow::OnClick), NULL, this);
+                wxMouseEventHandler(AboutWindow::OnClick), nullptr, this);
    win->Connect(wxEVT_RIGHT_UP,
-                wxMouseEventHandler(AboutWindow::OnClick), NULL, this);
+                wxMouseEventHandler(AboutWindow::OnClick), nullptr, this);
    win->Connect(wxEVT_MIDDLE_UP,
-                wxMouseEventHandler(AboutWindow::OnClick), NULL, this);
+                wxMouseEventHandler(AboutWindow::OnClick), nullptr, this);
 }
 
 // ----------------------------------------------------------------------------
@@ -392,11 +392,11 @@ BEGIN_EVENT_TABLE(wxAboutFrame, wxFrame)
 END_EVENT_TABLE()
 
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
-            : wxFrame(NULL, -1, _("Welcome"),
+            : wxFrame(nullptr, -1, _("Welcome"),
                       wxDefaultPosition, wxDefaultSize,
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
-   wxCHECK_RET( g_pSplashScreen == NULL, _T("one splash is more than enough") );
+   wxCHECK_RET( g_pSplashScreen == nullptr, _T("one splash is more than enough") );
 
    g_pSplashScreen = (wxMFrame *)this;
 
@@ -415,7 +415,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 
 wxAboutFrame::~wxAboutFrame()
 {
-   g_pSplashScreen = NULL;
+   g_pSplashScreen = nullptr;
 }
 
 // ----------------------------------------------------------------------------

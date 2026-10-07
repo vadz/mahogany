@@ -282,7 +282,7 @@ public:
          // normally the base class version DecRef()s it but as we're going to
          // pass NULL to it, do it ourselves
          folder->DecRef();
-         folder = NULL;
+         folder = nullptr;
       }
 
       wxFolderTree::OnOpenHere(folder);
@@ -295,7 +295,7 @@ public:
       if ( !m_frame->OpenFolder(folder, true /* RO */) )
       {
          folder->DecRef();
-         folder = NULL;
+         folder = nullptr;
       }
 
       wxFolderTree::OnView(folder);
@@ -397,9 +397,9 @@ public:
    // default ctor
    AsyncSearchData()
    {
-      m_mfVirt = NULL;
+      m_mfVirt = nullptr;
 
-      m_folderVirt = NULL;
+      m_folderVirt = nullptr;
 
       m_nMatchingMessages =
       m_nMatchingFolders = 0;
@@ -575,7 +575,7 @@ private:
             if ( !m_mfVirt )
             {
                m_folderVirt->DecRef();
-               m_folderVirt = NULL;
+               m_folderVirt = nullptr;
             }
          }
       }
@@ -662,7 +662,7 @@ public:
       // note that we can't keep the iterators into m_listAsyncSearch while
       // calling AsyncSearchData methods as they may dispatch events and
       // result in modifying the vector, so just remember the pointer
-      AsyncSearchData *search = NULL;
+      AsyncSearchData *search = nullptr;
       for ( const auto& s : m_listAsyncSearch )
       {
          if ( s->HandleSearchResult(result) )
@@ -750,9 +750,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #endif // wx 3.3.0+
 {
    // init members
-   m_searchData = NULL;
-   m_FolderTree = NULL;
-   m_FolderView = NULL;
+   m_searchData = nullptr;
+   m_FolderTree = nullptr;
+   m_FolderView = nullptr;
 
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
@@ -825,7 +825,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    menuBar->Enable(WXMENU_EDIT_PASTE, FALSE);
    menuBar->Enable(WXMENU_EDIT_PASTE_QUOTED, FALSE);
 
-   m_ModulesMenu = NULL;
+   m_ModulesMenu = nullptr;
 
    // update the menu to match the initial selection
    MFolder_obj folder(m_FolderTree->GetSelection());
@@ -871,7 +871,7 @@ wxMainFrame::CloseFolder(MFolder *folder)
 {
    if ( !folder || folder->GetFullName() == m_folderName )
    {
-      m_FolderView->SetFolder(NULL);
+      m_FolderView->SetFolder(nullptr);
 
       //m_folderName.clear(); -- now done in our ClearFolderName()
    }
@@ -957,7 +957,7 @@ wxMainFrame::CanClose() const
    }
 
    // make sure folder is closed before we close the window
-   m_FolderView->SetFolder(NULL);
+   m_FolderView->SetFolder(nullptr);
 
    // tell all the others that we're going away
    mApplication->OnClose();
@@ -988,7 +988,7 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    static bool s_hasPreview = true;
    static bool s_hasFolder = true;
 
-   bool hasFolder = m_FolderView->GetFolder() != NULL;
+   bool hasFolder = m_FolderView->GetFolder() != nullptr;
    if ( hasFolder != s_hasFolder )
    {
       EnableMMenu(MMenu_Message, this, hasFolder);
@@ -1070,7 +1070,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                MFolder_obj folder(MDialog_FolderChoose
                                   (
                                       this, // parent window
-                                      NULL, // parent folder
+                                      nullptr, // parent folder
                                       true  // open
                                   ));
                if ( folder )
@@ -1325,10 +1325,10 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                wxArrayString folderNames;
 
                MFPool::Cookie cookie;
-               MFolder *folder = NULL;
-               for ( MailFolder *mf = MFPool::GetFirst(cookie, NULL, &folder);
+               MFolder *folder = nullptr;
+               for ( MailFolder *mf = MFPool::GetFirst(cookie, nullptr, &folder);
                      mf;
-                     mf = MFPool::GetNext(cookie, NULL, &folder) )
+                     mf = MFPool::GetNext(cookie, nullptr, &folder) )
                {
                   folderNames.push_back(folder->GetFullName());
 
@@ -1458,7 +1458,7 @@ void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
          // In case we failed to reopen the folder shown in the main frame,
          // stop showing its old (pre-suspend) state now.
          if ( mf->GetName() == m_folderName )
-            m_FolderView->SetFolder(NULL);
+            m_FolderView->SetFolder(nullptr);
       }
       else
       {
@@ -1483,7 +1483,7 @@ void wxMainFrame::DoFolderSearch()
    MFolder_obj folderSel(m_FolderTree->GetSelection());
    if ( ConfigureSearchMessages(&crit, profile, folderSel, this) )
    {
-      AsyncSearchData *searchData = NULL;
+      AsyncSearchData *searchData = nullptr;
 
       const wxArrayString& folderNames = crit.m_Folders;
       size_t count = folderNames.GetCount();

@@ -303,7 +303,7 @@ public:
     */
    virtual bool CopyEntry(const String& nameSrc,
                           const String& nameDst,
-                          ConfigSource *configDst = NULL) = 0;
+                          ConfigSource *configDst = nullptr) = 0;
 
    /**
       Rename a group.

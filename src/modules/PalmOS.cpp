@@ -331,9 +331,9 @@ private:
    void InstallFromDir(wxString directory, bool delFiles);
 
    inline void ErrorMessage(const String &msg)
-      { m_MInterface->MessageDialog(msg,NULL,"PalmOS module error!");wxYield(); }
+      { m_MInterface->MessageDialog(msg,nullptr,"PalmOS module error!");wxYield(); }
    inline void Message(const String &msg)
-      { m_MInterface->MessageDialog(msg,NULL,"PalmOS module"); wxYield(); }
+      { m_MInterface->MessageDialog(msg,nullptr,"PalmOS module"); wxYield(); }
    inline void StatusMessage(const String &msg)
       { m_MInterface->StatusMessage(msg);wxYield();}
 
@@ -374,7 +374,7 @@ private:
    class wxDeviceLock *m_Lock;
 };
 
-static MInterface *gs_MInterface = NULL;
+static MInterface *gs_MInterface = nullptr;
 
 #ifdef HAVE_LIBMAL
 
@@ -385,7 +385,7 @@ extern "C" { int register_printErrorHook (printErrorHook); }
 static
 int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
 {
-   CHECK(gs_MInterface != NULL, 0, _T("no MInterface"));
+   CHECK(gs_MInterface != nullptr, 0, _T("no MInterface"));
    static wxString msg;
    int rc;
    if(! errorflag && format[0] == '.')
@@ -401,7 +401,7 @@ int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
    }
 
    if(errorflag)
-      gs_MInterface->MessageDialog(msg,NULL,"MAL synchronisation error!");
+      gs_MInterface->MessageDialog(msg,nullptr,"MAL synchronisation error!");
    else
    {
 
@@ -466,7 +466,7 @@ PalmOSModule::ProcessMenuEvent(int id)
    switch(id)
    {
    case WXMENU_MODULES_PALMOS_SYNC:
-      Synchronise(NULL);
+      Synchronise(nullptr);
       return TRUE;
    case WXMENU_MODULES_PALMOS_BACKUP:
       Backup();
@@ -499,7 +499,7 @@ PalmOSModule::Entry(int arg, ...)
 
          // Main():
       case MMOD_FUNC_MAIN:
-         Synchronise(NULL);
+         Synchronise(nullptr);
          return 0;
 
          // Configure():
@@ -541,7 +541,7 @@ PalmOSModule::GetConfig(void)
    Profile * appConf = m_MInterface->GetGlobalProfile();
 
    // mail related values get read from the PALMBOX mailfolder profile:
-   if(m_Profile == NULL)
+   if(m_Profile == nullptr)
    {
       m_Profile = m_MInterface->CreateProfile(
          appConf->readEntry(MP_MOD_PALMOS_BOX,MP_MOD_PALMOS_BOX_D));
@@ -637,7 +637,7 @@ PalmOSModule::Init(int version_major, int version_minor,
    {
       if(errorCode)
          *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
-      return NULL;
+      return nullptr;
    }
 
    return new PalmOSModule(minterface);
@@ -650,10 +650,10 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    SetMInterface(minterface);
 
    m_PiSocket = -1;
-   m_Profile = NULL;
-   m_Lock = NULL;
+   m_Profile = nullptr;
+   m_Lock = nullptr;
 
-   ASSERT(gs_MInterface == NULL);
+   ASSERT(gs_MInterface == nullptr);
    gs_MInterface = m_MInterface;
 }
 
@@ -688,8 +688,8 @@ PalmOSModule::~PalmOSModule()
 
    if(m_Lock) delete m_Lock;
    if(m_Profile) m_Profile->DecRef();
-   ASSERT(gs_MInterface != NULL);
-   gs_MInterface = NULL;
+   ASSERT(gs_MInterface != nullptr);
+   gs_MInterface = nullptr;
 }
 
 #if 0
@@ -710,7 +710,7 @@ public:
          *m_PiSocketPtr = -2;
          m_NewSocket = pi_accept(m_NewSocket, 0, 0);
          *m_PiSocketPtr = m_NewSocket;
-         return NULL;
+         return nullptr;
       }
 
 private:
@@ -788,7 +788,7 @@ PalmOSModule::Connect(void)
 
       StatusMessage(_("Please press HotSync button and click on OK!"));
 #if HAVE_PI_ACCEPT_TO
-      wxMiniFrame *mini = new wxMiniFrame(NULL,-1, "Mahogany");
+      wxMiniFrame *mini = new wxMiniFrame(nullptr,-1, "Mahogany");
       wxPanel *p = new wxPanel(mini, -1);
       (void) new wxStaticText(p,-1,
                               _("Please press the HotSync button..."));
@@ -899,7 +899,7 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
       synchronisation via the menu and we don't ask for
       confirmation. If pBook != NULL, we check before trying to sync
       as we are called from adb code. */
-   if(pBook == NULL ||
+   if(pBook == nullptr ||
       m_MInterface->YesNoDialog(
          _("Do you want synchronise with your PalmOS device?")))
    {
@@ -907,7 +907,7 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
       if(! IsConnected())
          return;
 
-      if(pBook != NULL)
+      if(pBook != nullptr)
          // only asked to synchronise the addressbook
          SyncAddresses(pBook);
       else
@@ -929,7 +929,7 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
 #endif
       }
       m_Profile->DecRef();
-      m_Profile=NULL;
+      m_Profile=nullptr;
    }
 }
 
@@ -1503,7 +1503,7 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
       // create Name for entry
       String e_name = a.entry[0];                 // familyname
 
-      if (a.entry[1] != NULL) {
+      if (a.entry[1] != nullptr) {
          if (e_name == "")
             e_name = a.entry[1];
          else
@@ -1833,7 +1833,7 @@ PalmOSModule::SyncMAL(void)
       return;
 
    PalmSyncInfo * pInfo = syncInfoNew();
-   if (NULL == pInfo)
+   if (nullptr == pInfo)
       return;
 
    /* set up MAL status reporting callback */
@@ -2007,7 +2007,7 @@ void
 PalmOSModule::Configure(void)
 {
    Profile * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
-   ShowCustomOptionsDialog(2,g_Pages, p, NULL);
+   ShowCustomOptionsDialog(2,g_Pages, p, nullptr);
    p->DecRef();
 }
 

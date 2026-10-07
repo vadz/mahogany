@@ -79,21 +79,21 @@ Message::Create(const char *text, UIdType uid, Profile *profile)
 MessageCC *
 MessageCC::Create(MailFolderCC *folder, const HeaderInfo& hi)
 {
-   CHECK(folder, NULL, _T("NULL m_folder"));
+   CHECK(folder, nullptr, _T("NULL m_folder"));
 
    return new MessageCC(folder, hi);
 }
 
 void MessageCC::Init()
 {
-   m_mimePartTop = NULL;
-   m_mailFullText = NULL;
-   m_Body = NULL;
-   m_Envelope = NULL;
-   m_msgText = NULL;
+   m_mimePartTop = nullptr;
+   m_mailFullText = nullptr;
+   m_Body = nullptr;
+   m_Envelope = nullptr;
+   m_msgText = nullptr;
 
-   m_folder = NULL;
-   m_Profile = NULL;
+   m_folder = nullptr;
+   m_Profile = nullptr;
    m_uid = UID_ILLEGAL;
 }
 
@@ -249,7 +249,7 @@ String MessageCC::GetHeader(void) const
       {
          unsigned long len = 0;
          const char *cptr = mail_fetchheader_full(m_folder->Stream(), m_uid,
-                                                  NULL, &len, FT_UID);
+                                                  nullptr, &len, FT_UID);
          m_folder->UnLock();
          str = String::From8BitData(cptr, len);
       }
@@ -389,7 +389,7 @@ ADDRESS *
 MessageCC::GetAddressStruct(MessageAddressType type) const
 {
    if ( !CheckEnvelope() )
-      return NULL;
+      return nullptr;
 
    ADDRESS *addr;
 
@@ -404,7 +404,7 @@ MessageCC::GetAddressStruct(MessageAddressType type) const
       case MAT_RETURNPATH: addr = m_Envelope->return_path; break;
       default:
          FAIL_MSG( _T("unknown address type") );
-         addr = NULL;
+         addr = nullptr;
    }
 
    return addr;
@@ -597,7 +597,7 @@ const MimePart *MessageCC::GetMimePart(int n) const
 {
    CheckMIME();
 
-   CHECK( n >= 0 && n < CountParts(), NULL, _T("invalid part number") );
+   CHECK( n >= 0 && n < CountParts(), nullptr, _T("invalid part number") );
 
    MimePart *mimepart = m_mimePartTop;
 
@@ -628,7 +628,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
                                            unsigned long *,
                                            long))
 {
-   CHECK( m_folder, NULL, _T("MessageCC::GetPartData() without folder?") );
+   CHECK( m_folder, nullptr, _T("MessageCC::GetPartData() without folder?") );
 
    CheckMIME();
 
@@ -638,7 +638,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
       ERRORMESSAGE((_("Impossible to retrieve message text: "
                       "folder '%s' is closed."),
                     m_folder->GetName()));
-      return NULL;
+      return nullptr;
    }
 
    if ( !m_folder->Lock() )
@@ -646,7 +646,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
       ERRORMESSAGE((_("Impossible to retrieve message text: "
                       "failed to lock folder '%s'."),
                     m_folder->GetName()));
-      return NULL;
+      return nullptr;
    }
 
    unsigned long size = mimepart.GetSize();
@@ -666,7 +666,7 @@ MessageCC::DoGetPartAny(const MimePart& mimepart,
       *lenptr = len;
 
    // have we succeeded in retrieveing anything?
-   return len ? cptr : NULL;
+   return len ? cptr : nullptr;
 }
 
 const char *
@@ -701,7 +701,7 @@ MessageCC::GetEnvelope()
       return;
 
    // Forget what we know and re-fetch the body, it is cached anyway.
-   m_Envelope = NULL;
+   m_Envelope = nullptr;
 
    // reopen the folder if needed
    CHECK_DEAD();
@@ -715,7 +715,7 @@ MessageCC::GetEnvelope()
 
    m_Envelope = mail_fetch_structure(m_folder->Stream(),
                                      m_uid,
-                                     NULL, // without body
+                                     nullptr, // without body
                                      FT_UID);
    m_folder->UnLock();
 
@@ -729,7 +729,7 @@ MessageCC::GetBody(void)
       return;
 
    // Forget what we know and re-fetch the body, it is cached anyway.
-   m_Body = NULL;
+   m_Body = nullptr;
 
    // reopen the folder if needed
    CHECK_DEAD();
@@ -756,7 +756,7 @@ MessageCC::GetBody(void)
 MESSAGECACHE *
 MessageCC::GetCacheElement() const
 {
-   MESSAGECACHE *mc = NULL;
+   MESSAGECACHE *mc = nullptr;
 
    if ( m_folder && m_folder->Lock() )
    {

@@ -50,7 +50,7 @@ size_t AdbModule::EnumModules(const char *kind,
    names.Empty();
    descs.Empty();
 
-   AdbModule *importer = NULL;
+   AdbModule *importer = nullptr;
    AdbModule::AdbModuleInfo *info = AdbModule::GetAdbModuleInfo(kind);
    while ( info )
    {
@@ -61,7 +61,7 @@ size_t AdbModule::EnumModules(const char *kind,
          descs.Add(importer->GetFormatDesc());
 
          importer->DecRef();
-         importer = NULL;
+         importer = nullptr;
       }
       else
       {
@@ -78,7 +78,7 @@ size_t AdbModule::EnumModules(const char *kind,
 
 AdbModule *AdbModule::GetModuleByName(const char *kind, const String& name)
 {
-   AdbModule *importer = NULL;
+   AdbModule *importer = nullptr;
    AdbModule::AdbModuleInfo *info = AdbModule::GetAdbModuleInfo(kind);
    while ( info )
    {
@@ -96,7 +96,7 @@ AdbModule *AdbModule::GetModuleByName(const char *kind, const String& name)
          wxLogDebug(_T("Failed to load ADB importer '%s'."), info->name);
       }
 
-      importer = NULL;
+      importer = nullptr;
 
       info = info->next;
    }
@@ -146,7 +146,7 @@ void AdbModule::FreeAdbModuleInfo(AdbModule::AdbModuleInfo *info)
       info = next;
    }
 
-   ms_listModules = NULL;
+   ms_listModules = nullptr;
 #else // !USE_ADB_MODULES
    // nothing to do, the struct is static and no memory is allocated or freed
 #endif // USE_ADB_MODULES/!USE_ADB_MODULES
@@ -156,7 +156,7 @@ void AdbModule::FreeAdbModuleInfo(AdbModule::AdbModuleInfo *info)
 // AdbModuleInfo
 // ----------------------------------------------------------------------------
 
-AdbModule::AdbModuleInfo *AdbModule::ms_listModules = NULL;
+AdbModule::AdbModuleInfo *AdbModule::ms_listModules = nullptr;
 
 AdbModule::AdbModuleInfo::AdbModuleInfo(const char *name_,
 #ifndef USE_ADB_MODULES

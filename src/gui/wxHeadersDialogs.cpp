@@ -408,7 +408,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    msg2->SetConstraints(c);
 
    // create a checkbox and a text field for each header
-   wxControl *last = NULL;
+   wxControl *last = nullptr;
    for ( size_t header = 0; header < Header_Max; header++ )
    {
       wxStaticText *label = new wxStaticText(this, -1, wxGetTranslation(ms_headerNames[header]));
@@ -651,8 +651,8 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
             labelValue = _("&Value: ");
 
    int widthName, widthValue;
-   GetTextExtent(labelName, &widthName, NULL);
-   GetTextExtent(labelValue, &widthValue, NULL);
+   GetTextExtent(labelName, &widthName, nullptr);
+   GetTextExtent(labelValue, &widthValue, nullptr);
 
    int widthLabel = wxMax(widthName, widthValue);
 
@@ -730,7 +730,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
 
       m_headerType = CustomHeader_Both;
 
-      m_checkboxRemember = (wxCheckBox *)NULL;
+      m_checkboxRemember = (wxCheckBox *)nullptr;
 
       extraHeight = 3;
    }
@@ -750,7 +750,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
 
       m_checkboxRemember->SetConstraints(c);
 
-      m_radioboxType = (wxRadioBox *)NULL;
+      m_radioboxType = (wxRadioBox *)nullptr;
 
       extraHeight = 0;
    }

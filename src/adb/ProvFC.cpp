@@ -109,7 +109,7 @@ public:
   wxString GetPath() const;
 
   // if it's not, we will be deleted, so it really must be something fatal
-  bool IsOk() const { return m_pGroup != NULL; }
+  bool IsOk() const { return m_pGroup != nullptr; }
 
   MOBJECT_DEBUG(FCEntry)
 
@@ -163,7 +163,7 @@ public:
   void SetOurPath() const { GetConfig()->SetPath(GetPath()); }
 
   // if it's not, we will be deleted, so it really must be something fatal
-  bool IsOk() const { return m_pConfig != NULL; }
+  bool IsOk() const { return m_pConfig != nullptr; }
 
   // recursively call Inc/DecRef() on this group and all its parents: this is
   // necessary to ensure that the group stays alive as long as it has any
@@ -218,7 +218,7 @@ public:
 
   // implement interface methods
     // AdbElement
-  AdbEntryGroup *GetGroup() const override { return NULL; }
+  AdbEntryGroup *GetGroup() const override { return nullptr; }
 
     // AdbEntryGroup
   AdbEntry *GetEntry(const String& name) override
@@ -319,7 +319,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
     if ( !pGroup->GetConfig()->Write(GetPath(), wxString(_T(":"))) ) {
       // also if it fails it means that something is wrong and this entry
       // can't be created, so be sure that our IsOk() will return FALSE
-      m_pGroup = NULL;
+      m_pGroup = nullptr;
     }
   }
   else {
@@ -513,7 +513,7 @@ bool FCEntry::Save()
 FCEntryGroup::FCEntryGroup(wxFileConfig *pConfig)
 {
   m_pConfig = pConfig;
-  m_pParent = NULL;
+  m_pParent = nullptr;
 }
 
 FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
@@ -532,7 +532,7 @@ FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
     if ( !m_pConfig->Write(path, wxEmptyString) ) {
       // something went wrong, don't create this group, the next line ensures
       // that IsOk() will return FALSE
-      m_pConfig = NULL;
+      m_pConfig = nullptr;
     }
   }
 
@@ -549,7 +549,7 @@ FCEntryGroup::~FCEntryGroup()
 wxString FCEntryGroup::GetPath() const
 {
   wxString strPath;
-  if ( m_pParent == NULL )
+  if ( m_pParent == nullptr )
     strPath = _T("/ADB_Entries");
   else
     strPath << m_pParent->GetPath() << _T("/") << m_strName;
@@ -602,7 +602,7 @@ AdbEntry *FCEntryGroup::GetEntry(const String& name)
   FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name);
   if ( !pEntry->IsOk() ) {
     pEntry->DecRef();
-    pEntry = NULL;
+    pEntry = nullptr;
   }
 
   return pEntry;
@@ -619,7 +619,7 @@ AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
   FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name);
   if ( !pGroup->IsOk() ) {
     pGroup->DecRef();
-    pGroup = NULL;
+    pGroup = nullptr;
   }
 
   return pGroup;
@@ -627,12 +627,12 @@ AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
 
 AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 {
-  CHECK( !!name, NULL, _T("can't create entries with empty names") );
+  CHECK( !!name, nullptr, _T("can't create entries with empty names") );
 
   FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, TRUE /* new */);
   if ( !pEntry->IsOk() ) {
     pEntry->DecRef();
-    pEntry = NULL;
+    pEntry = nullptr;
   }
 
   return pEntry;
@@ -643,7 +643,7 @@ AdbEntryGroup *FCEntryGroup::CreateGroup(const String& name)
   FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name, TRUE);
   if ( !pGroup->IsOk() ) {
     pGroup->DecRef();
-    pGroup = NULL;
+    pGroup = nullptr;
   }
 
   return pGroup;
@@ -663,7 +663,7 @@ void FCEntryGroup::DeleteGroup(const String& strName)
 
 AdbEntry *FCEntryGroup::FindEntry(const wxChar * /* szName */)
 {
-  return NULL;
+  return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -795,7 +795,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
       {
         // the test is not 100% fool proof...
         FILE *fp = wxFopen(fullname, _T("rt"));
-        if ( fp != NULL )
+        if ( fp != nullptr )
         {
           char buf[1024];
           while ( fgets(buf, WXSIZEOF(buf), fp) ) {

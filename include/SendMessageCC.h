@@ -88,8 +88,8 @@ public:
                 const void *buf, size_t len,
                 const String &subtype = M_EMPTYSTRING,
                 const String &disposition = "INLINE",
-                MessageParameterList const *dlist = NULL,
-                MessageParameterList const *plist = NULL,
+                MessageParameterList const *dlist = nullptr,
+                MessageParameterList const *plist = nullptr,
                 wxFontEncoding enc = wxFONTENCODING_SYSTEM) override;
 
    void EnableSigning(const String& user = "") override;
@@ -100,11 +100,11 @@ public:
 
    bool WriteToFolder(const String &foldername) override;
 
-   Result PrepareForSending(int flags = 0, String *outbox = NULL) override;
+   Result PrepareForSending(int flags = 0, String *outbox = nullptr) override;
    bool SendNow(String *errGeneral, String *errDetailed) override;
    void AfterSending() override;
 
-   void Preview(String *text = NULL) override;
+   void Preview(String *text = nullptr) override;
 
    /// destructor
    virtual ~SendMessageCC();
@@ -121,7 +121,7 @@ protected:
    SendMessageCC(const Profile *profile,
                  Protocol protocol,
                  wxFrame *frame,
-                 const Message *message = NULL);
+                 const Message *message = nullptr);
 
    /// init the fields for a new message
    void InitNew();

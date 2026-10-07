@@ -99,7 +99,7 @@ protected:
    // the data in nickname and, if it's not NULL, in entry.
    bool ParseEudoraAdbEntry(size_t index,
                             wxString *nickname,
-                            AdbEntry *entry = NULL) const;
+                            AdbEntry *entry = nullptr) const;
 
    wxArrayInt m_lineNumbers;
    wxTextFile m_textfile;

@@ -96,7 +96,7 @@ wxVCardObject::wxVCardObject(wxVCardObject *parent, const wxString& name)
     {
         wxFAIL_MSG(_T("NULL parent in wxVCardObject ctor"));
 
-        m_vObj = NULL;
+        m_vObj = nullptr;
     }
 }
 
@@ -149,12 +149,12 @@ wxVCard::wxVCard(const wxString& filename)
     size_t nCards = vcards.GetCount();
     if ( nCards == 0 )
     {
-        m_vObj = NULL;
+        m_vObj = nullptr;
     }
     else
     {
         m_vObj = vcards[0]->m_vObj;
-        vcards[0]->m_vObj = NULL;
+        vcards[0]->m_vObj = nullptr;
 
         WX_CLEAR_ARRAY(vcards);
     }
@@ -284,9 +284,9 @@ wxVCardObject *wxVCardObject::GetNextProp(void **cookie) const
     {
         delete iter;
 
-        *cookie = NULL;
+        *cookie = nullptr;
 
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -294,7 +294,7 @@ wxVCardObject *wxVCardObject::GetProperty(const wxString& name) const
 {
     VObject *vObj = isAPropertyOf(m_vObj, wxConvertWX2MB(name));
 
-    return vObj ? new wxVCardObject(vObj) : NULL;
+    return vObj ? new wxVCardObject(vObj) : nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -330,9 +330,9 @@ VObject *wxVCard::GetNextPropOfName(const char *name, void **cookie) const
     // no more properties with this name
     delete iter;
 
-    *cookie = NULL;
+    *cookie = nullptr;
 
-    return NULL;
+    return nullptr;
 }
 
 // this macro implements GetFirst/Next function for the properties of given
@@ -341,13 +341,13 @@ VObject *wxVCard::GetNextPropOfName(const char *name, void **cookie) const
     wxVCard##classname *wxVCard::GetFirst##classname(void **cookie) const   \
     {                                                                       \
         VObject *vObj = GetFirstPropOfName(propname, cookie);               \
-        return vObj ? new wxVCard##classname(vObj) : NULL;                  \
+        return vObj ? new wxVCard##classname(vObj) : nullptr;               \
     }                                                                       \
                                                                             \
     wxVCard##classname *wxVCard::GetNext##classname(void **cookie) const    \
     {                                                                       \
         VObject *vObj = GetNextPropOfName(propname, cookie);                \
-        return vObj ? new wxVCard##classname(vObj) : NULL;                  \
+        return vObj ? new wxVCard##classname(vObj) : nullptr;               \
     }
 
 IMPLEMENT_ENUM_PROPERTIES(Address, VCAdrProp)
@@ -677,7 +677,7 @@ wxVCard::AddEMail(const wxString& email,
 // write out the object
 wxString wxVCardObject::Write() const
 {
-    char* p = writeMemVObject(NULL, 0, m_vObj);
+    char* p = writeMemVObject(nullptr, nullptr, m_vObj);
     wxString s = wxConvertMB2WX(p);
     free(p);
 

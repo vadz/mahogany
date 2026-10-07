@@ -40,7 +40,7 @@ class wxMainFrame : public wxMFrame, public MEventReceiver
 public:
    /// constructor & dtor
    wxMainFrame(const String &iname = String(_T("wxMainFrame")),
-               wxFrame *parent = NULL);
+               wxFrame *parent = nullptr);
 
    virtual ~wxMainFrame();
 
@@ -53,7 +53,7 @@ public:
 
    // close the given folder if it is opened or the currently opened one if
    // folder is NULL
-   void CloseFolder(MFolder *folder = NULL);
+   void CloseFolder(MFolder *folder = nullptr);
 
    // add the folder menu to the menu bar
    void AddFolderMenu(void);

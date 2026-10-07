@@ -159,7 +159,7 @@ PGPFilter::DoProcess(String& text,
    // do we have something looking like a PGP message?
    //
    // there should be a BEGIN line near the start of the message
-   const wxChar *beginNext = NULL;
+   const wxChar *beginNext = nullptr;
    const wxChar *start = text.c_str();
    for ( size_t numLines = 0; numLines < 10; numLines++ )
    {
@@ -206,8 +206,8 @@ PGPFilter::DoProcess(String& text,
       }
 
       // end of the PGP part
-      const wxChar *end = NULL; // unneeded but suppresses the compiler warning
-      const wxChar *endNext = NULL; // same
+      const wxChar *end = nullptr; // unneeded but suppresses the compiler warning
+      const wxChar *endNext = nullptr; // same
       if ( ok ) // ok, it starts with something valid
       {
          // now locate the end line
@@ -284,7 +284,7 @@ PGPFilter::DoProcess(String& text,
 
          CHECK_RET( m_engine, _T("PGP filter can't work without PGP engine") );
 
-         ClickablePGPInfo *pgpInfo = NULL;
+         ClickablePGPInfo *pgpInfo = nullptr;
          MCryptoEngineOutputLog *
             log = new MCryptoEngineOutputLog(m_msgView->GetWindow());
 

@@ -86,8 +86,8 @@ public:
     //  if providerName != NULL it's filled with the name of provider used
     //  to create the book
   AdbBook *CreateBook(const String& name,
-                      AdbDataProvider *provider = NULL,
-                      String *providerName = NULL);
+                      AdbDataProvider *provider = nullptr,
+                      String *providerName = nullptr);
     /// delete the given book
   void DeleteBook(size_t n);
 
@@ -148,7 +148,7 @@ public:
    AdbManager *operator->() const { return m_manager; }
 
    // testing for validity
-   operator bool() const { return m_manager != NULL; }
+   operator bool() const { return m_manager != nullptr; }
 
 private:
    AdbManager *m_manager;
@@ -175,7 +175,7 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
                                   AdbLookup_FullName |
                                   AdbLookup_EMail,
                       int how = AdbLookup_Substring,
-                      AdbEntryGroup *group = NULL);
+                      AdbEntryGroup *group = nullptr);
 
 /**
   Expand the abbreviated address: i.e. looks for an address entry which starts

@@ -226,7 +226,7 @@ protected:
    //@}
 
    /// protected ctor as the objects of this class are never created directly
-   MessageViewer() { m_msgView = NULL; }
+   MessageViewer() { m_msgView = nullptr; }
 
    // back pointer to the message view (we need its profile)
    MessageView *m_msgView;

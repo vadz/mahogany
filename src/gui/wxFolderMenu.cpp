@@ -45,7 +45,7 @@ public:
    {
       m_eventCookie = MEventManager::Register(*this, MEventId_FolderTreeChange);
 
-      m_menu = NULL;
+      m_menu = nullptr;
    }
 
    virtual ~wxFolderMenuData()
@@ -76,7 +76,7 @@ public:
 #ifdef __WXGTK__
    void Detach()
    {
-      m_menu = NULL;
+      m_menu = nullptr;
    }
 #endif // __WXGTK__
 
@@ -99,7 +99,7 @@ protected:
       if ( m_menu )
       {
          delete m_menu;
-         m_menu = NULL;
+         m_menu = nullptr;
       }
    }
 
@@ -218,7 +218,7 @@ wxMenu *wxFolderMenu::GetMenu() const
 
 MFolder *wxFolderMenu::GetFolder(int id) const
 {
-   CHECK( m_data, NULL, _T("must call wxFolderMenu::GetMenu() first") );
+   CHECK( m_data, nullptr, _T("must call wxFolderMenu::GetMenu() first") );
 
    ASSERT_MSG( id >= WXMENU_POPUP_FOLDER_MENU, _T("bad id in wxFolderMenu::GetFolder") );
 
@@ -227,7 +227,7 @@ MFolder *wxFolderMenu::GetFolder(int id) const
    if ( idx >= names.GetCount() )
    {
       // don't assert - just not our menu item
-      return NULL;
+      return nullptr;
    }
 
    return MFolder::Get(names[idx]);

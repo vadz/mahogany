@@ -182,7 +182,7 @@ InitPython(void)
          PyObject *minit = PyObject_GetAttrString(moduleInit, "Init");
          if ( minit )
          {
-            PyObject_CallObject(minit, NULL);
+            PyObject_CallObject(minit, nullptr);
             rc = CheckPyError();
          }
          //else: no Init() function, ignore it

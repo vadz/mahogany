@@ -79,7 +79,7 @@ protected:
    // mailing list.
    size_t SplitMailingListAddresses(const wxString& addresses,
                                     wxArrayString *nicks,
-                                    wxArrayString *emails = NULL) const;
+                                    wxArrayString *emails = nullptr) const;
 
    // parses one addressbook file entry (it may be one or more lines), returns
    // FALSE if the syntax is invalid (although most errors are just silently
@@ -88,10 +88,10 @@ protected:
    // line is continued and corresponds to the index of the last continuation
    // line in the file.
    bool ParsePineADBEntry(size_t *index,
-                          wxString *nickname = NULL,
-                          wxString *addresses = NULL,
-                          wxString *fullname = NULL,
-                          wxString *comment = NULL) const;
+                          wxString *nickname = nullptr,
+                          wxString *addresses = nullptr,
+                          wxString *fullname = nullptr,
+                          wxString *comment = nullptr) const;
 
    // ParsePineADBEntry helper: checks whether the entry in line "*index"
    // continues to the next line: if it does, return TRUE and change index and
@@ -398,7 +398,7 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
 
    wxString addresses;
    size_t indexLine = m_groupLineNumbers[(size_t)indexGroup];
-   if ( !ParsePineADBEntry(&indexLine, NULL, &addresses) )
+   if ( !ParsePineADBEntry(&indexLine, nullptr, &addresses) )
    {
       return wxEmptyString;
    }

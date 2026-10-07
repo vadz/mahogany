@@ -183,7 +183,7 @@ public:
    //@{
 
    /// get the raw (un-decoded) contents of this part
-   virtual const void *GetRawContent(unsigned long *len = NULL) const = 0;
+   virtual const void *GetRawContent(unsigned long *len = nullptr) const = 0;
 
    /// get the raw (un-decoded) contents of this part as a string
    String GetRawContentAsString() const

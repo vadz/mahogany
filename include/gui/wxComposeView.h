@@ -142,17 +142,17 @@ public:
 
 
    // implement Composer pure virtuals
-   void InitText(Message *msg = NULL, const MessageView *msgview = NULL) override;
+   void InitText(Message *msg = nullptr, const MessageView *msgview = nullptr) override;
    void Launch() override;
    void InsertFile(const wxChar *filename,
-                   const wxChar *mimetype = NULL,
-                   const wxChar *name     = NULL) override;
+                   const wxChar *mimetype = nullptr,
+                   const wxChar *name     = nullptr) override;
 
    void InsertData(void *data,
                    size_t length,
-                   const wxChar *mimetype = NULL,
-                   const wxChar *name     = NULL,
-                   const wxChar *filename = NULL) override;
+                   const wxChar *mimetype = nullptr,
+                   const wxChar *name     = nullptr,
+                   const wxChar *filename = nullptr) override;
 
    void InsertText(const String &txt) override;
 
@@ -346,7 +346,7 @@ protected:
        @param parent parent window
        @param parentProfile parent profile
    */
-   void Create(wxWindow *parent = NULL, Profile *parentProfile = NULL);
+   void Create(wxWindow *parent = nullptr, Profile *parentProfile = nullptr);
 
    /** Constructor
        @param name  name of windowclass
@@ -357,7 +357,7 @@ protected:
    wxComposeView(const String& name,
                  Mode mode,
                  MessageKind kind,
-                 wxWindow *parent = NULL);
+                 wxWindow *parent = nullptr);
 
    // helpers
    // -------
@@ -379,7 +379,7 @@ protected:
       we're called directly from InitText()), otherwise the previously
       remembered (by InitText() itself) m_textToQuote is used.
     */
-   void DoInitText(Message *msgOrig = NULL);
+   void DoInitText(Message *msgOrig = nullptr);
 
    /// InsertData() and InsertFile() helper
    void DoInsertAttachment(EditorContentPart *mc, const wxChar *mimetype);
@@ -426,7 +426,7 @@ protected:
    bool StartExternalEditor();
 
    /// Return true if the external editor is currently running
-   bool IsExternalEditorRunning() const { return m_procExtEdit != NULL; }
+   bool IsExternalEditorRunning() const { return m_procExtEdit != nullptr; }
 
    /**
      Return a SendMessage object filled with all data we have. It must be

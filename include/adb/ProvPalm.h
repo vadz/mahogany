@@ -62,7 +62,7 @@ public:
   const wxChar *GetName() const { return m_astrFields[0]; }
 
   // if it's not, we will be deleted, so it really must be something fatal
-  bool IsOk() const { return m_pGroup != NULL; }
+  bool IsOk() const { return m_pGroup != nullptr; }
     /// is the entry read-only?
   virtual bool IsReadOnly() const;
 

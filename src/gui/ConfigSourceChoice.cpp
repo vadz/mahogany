@@ -41,7 +41,7 @@ ConfigSourceChoice::Create(wxWindow *parent, int hExtra)
 {
    const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
    if ( sources.size() == 1 )
-      return NULL;
+      return nullptr;
 
    ConfigSourceChoice * const chcSources = new ConfigSourceChoice(parent);
 
@@ -81,7 +81,7 @@ ConfigSourceChoice::Create(wxWindow *parent, int hExtra)
 ConfigSource *ConfigSourceChoice::GetSelectedSource() const
 {
    const int sel = GetSelection();
-   ConfigSource *config = NULL;
+   ConfigSource *config = nullptr;
    if ( sel != wxNOT_FOUND )
    {
       config = AllConfigSources::Get().GetSources()[sel].get();

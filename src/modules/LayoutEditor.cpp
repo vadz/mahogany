@@ -269,9 +269,9 @@ void wxComposerLayoutWindow::OnMouseRClick(wxCommandEvent& event)
 
 LayoutEditor::LayoutEditor()
 {
-   m_LayoutWindow = NULL;
+   m_LayoutWindow = nullptr;
 
-   m_exportStatus = NULL;
+   m_exportStatus = nullptr;
 }
 
 LayoutEditor::~LayoutEditor()
@@ -353,7 +353,7 @@ unsigned long LayoutEditor::ComputeHash() const
    wxLayoutExportObject *exp;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
-   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != NULL )
+   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != nullptr )
    {
       // non text objects get ignored
       if (exp->type == WXLO_EXPORT_TEXT )
@@ -498,7 +498,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
 {
    // insert the text in the beginning of the message replacing the old
    // text if asked for this, otherwise just append it at the end
-   wxLayoutList *listNonTextObjects = NULL;
+   wxLayoutList *listNonTextObjects = nullptr;
    if ( insMode == Insert_Replace )
    {
       // VZ: I don't know why exactly does this happen but exporting text and
@@ -531,7 +531,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
       wxLayoutObject *obj;
       wxLayoutExportStatus status(layoutList);
       wxLayoutExportObject *exp;
-      while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_OBJECTS)) != NULL )
+      while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_OBJECTS)) != nullptr )
       {
          if ( exp->type == WXLO_EXPORT_OBJECT )
          {
@@ -562,7 +562,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
       wxLayoutExportObject *exp;
       wxLayoutExportStatus status2(listNonTextObjects);
       while((exp = wxLayoutExport( &status2,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
+                                      WXLO_EXPORT_AS_OBJECTS)) != nullptr)
          if(exp->type == WXLO_EXPORT_EMPTYLINE)
             layoutList->LineBreak();
          else
@@ -581,7 +581,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
 
 EditorContentPart *LayoutEditor::GetFirstPart()
 {
-   CHECK( !m_exportStatus, NULL,
+   CHECK( !m_exportStatus, nullptr,
           _T("GetNextPart() should be called, not GetFirstPart()") );
 
    m_exportStatus = new wxLayoutExportStatus(m_LayoutWindow->GetLayoutList());
@@ -591,7 +591,7 @@ EditorContentPart *LayoutEditor::GetFirstPart()
 
 EditorContentPart *LayoutEditor::GetNextPart()
 {
-   CHECK( m_exportStatus, NULL, _T("must call GetFirstPart() first!") );
+   CHECK( m_exportStatus, nullptr, _T("must call GetFirstPart() first!") );
 
    for ( ;; )
    {
@@ -647,8 +647,8 @@ EditorContentPart *LayoutEditor::GetNextPart()
    }
 
    delete m_exportStatus;
-   m_exportStatus = NULL;
+   m_exportStatus = nullptr;
 
-   return NULL;
+   return nullptr;
 }
 

@@ -204,7 +204,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
 
    // now transfer name properties
    wxString familyName, givenName, namePrefix;
-   if ( vcard->GetName(&familyName, &givenName, NULL, &namePrefix) )
+   if ( vcard->GetName(&familyName, &givenName, nullptr, &namePrefix) )
    {
       if ( !!familyName )
          entry->SetField(AdbField_FamilyName, familyName);
@@ -250,8 +250,8 @@ bool AdbVCardImporter::ImportEntry(const String& path,
    // and with addresses: the problem here is that vCard has an arbitrary number
    // of addresses each of them being a home one, work one or may be both at
    // once, and we want exactly one of each
-   wxVCardAddress *addrHome = NULL,
-                  *addrWork = NULL;
+   wxVCardAddress *addrHome = nullptr,
+                  *addrWork = nullptr;
    wxVCardAddress *addr = vcard->GetFirstAddress(&cookie);
    while ( addr && (!addrHome || !addrWork) )
    {
@@ -328,10 +328,10 @@ bool AdbVCardImporter::ImportEntry(const String& path,
    // FIXME well, so I decided to do it simply instead of thinking about how to
    //       do it really well... if someone ever complains about it, this should
    //       be fixed
-   wxVCardPhoneNumber *phoneWork = NULL,
-                      *phoneHome = NULL,
-                      *faxWork = NULL,
-                      *faxHome = NULL;
+   wxVCardPhoneNumber *phoneWork = nullptr,
+                      *phoneHome = nullptr,
+                      *faxWork = nullptr,
+                      *faxHome = nullptr;
    wxVCardPhoneNumber *phone = vcard->GetFirstPhoneNumber(&cookie);
    while ( phone )
    {

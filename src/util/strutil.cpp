@@ -222,9 +222,9 @@ strutil_strsep(char **stringp, const char *delim)
    * nextdelim = strpbrk(*stringp, delim);
 
    if(**stringp == '\0')
-      return NULL;
+      return nullptr;
 
-   if(nextdelim == NULL)
+   if(nextdelim == nullptr)
    {
       *stringp = *stringp + strlen(*stringp);// put in on the \0
       return cptr;
@@ -593,7 +593,7 @@ struct CryptData
    BYTE  *data;
 
    CryptData()
-      {  len = 0; data = NULL; }
+      {  len = 0; data = nullptr; }
    CryptData(const char *str)
       {
          len = strlen(str)+1;
@@ -653,13 +653,13 @@ int TwoFishCrypt(
    BYTE * output = (BYTE *) calloc(byteCnt,1);
    memcpy(input, data_in->data, byteCnt);
 
-   if ( !makeKey(&ki,DIR_ENCRYPT,keySize,NULL) )
+   if ( !makeKey(&ki,DIR_ENCRYPT,keySize,nullptr) )
    {
       free(input);
       free(output);
       return 0;
    }
-   if ( !cipherInit(&ci,MODE_ECB,NULL) )
+   if ( !cipherInit(&ci,MODE_ECB,nullptr) )
    {
       free(input);
       free(output);
@@ -716,7 +716,7 @@ setup_twofish(void)
         "If you do not want to use a global password, just cancel\n"
         "the next dialog.\n\n"
         "(Tick the box below to never see this message again.)"),
-      NULL,
+      nullptr,
       _("Global Password"),
       GetPersMsgBoxName(M_MSGBOX_EXPLAIN_GLOBALPASSWD));
 
@@ -726,8 +726,8 @@ setup_twofish(void)
       MInputBox(&gs_GlobalPassword,
                 _("Global Password:"),
                 _("Please enter the global password:"),
-                NULL,
-                NULL,
+                nullptr,
+                nullptr,
                 "",
                 true /* password */);
 
@@ -758,7 +758,7 @@ setup_twofish(void)
       retry = MDialog_YesNoDialog
               (
                _("The password is wrong.\nDo you want to try again?"),
-               NULL,
+               nullptr,
                MDIALOG_YESNOTITLE,
                M_DLG_YES_DEFAULT
               );
@@ -873,7 +873,7 @@ strutil_encrypt_initialise(void)
               "insecure weak encryption.\n"
               "Please report this as a bug to the Mahogany developers,\n"
               "so that we can fix it."),
-            NULL,
+            nullptr,
             _("Missing feature"),
             "EncryptionAlgoBroken");
          strutil_has_twofish = FALSE;
@@ -1207,7 +1207,7 @@ strutil_compileRegEx(const String &pattern, int flags)
    if( !re->IsValid() )
    {
       delete re;
-      re = NULL;
+      re = nullptr;
    }
 
    return re;
@@ -1235,7 +1235,7 @@ class strutil_RegEx *
 strutil_compileRegEx(const String &pattern, int flags)
 {
    ERRORMESSAGE((_("Regular expression matching not implemented.")));
-   return NULL;
+   return nullptr;
 }
 
 bool
@@ -1446,7 +1446,7 @@ wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
          //     awfully wasteful but currently it's possible for wxCSConv::
          //     WC2MB() to return successfully when it's used for just testing
          //     and not real conversion under Win32
-         if ( wxCSConv(enc).FromWChar(NULL, 0, pwz) > 0 )
+         if ( wxCSConv(enc).FromWChar(nullptr, 0, pwz) > 0 )
             break;
       }
    }

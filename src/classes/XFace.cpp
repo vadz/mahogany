@@ -46,8 +46,8 @@ extern const MOption MP_ICONPATH;
 XFace::XFace()
 {
    initialised  = false;
-   data = NULL;
-   xface = NULL;
+   data = nullptr;
+   xface = nullptr;
 }
 
 bool
@@ -66,7 +66,7 @@ XFace::CreateFromData(const char *idata)
    {
       delete [] xface;
       delete [] data;
-      xface = data = NULL;
+      xface = data = nullptr;
       return false;
    }
    //convert it:
@@ -213,7 +213,7 @@ XFace::GetXFaceImg(const String& filename,
    }
    return img;
 #else // CYGWIN
-   return NULL;
+   return nullptr;
 #endif
 }
 
@@ -328,7 +328,7 @@ XFace::CreateFromXFace(const char *xfacedata)
    {
       delete [] data;
       delete [] xface;
-      data = xface = NULL;
+      data = xface = nullptr;
       return false;
    }
    String out = strutil_enforceCRLF(wxString::FromAscii(xface));
@@ -505,7 +505,7 @@ XFace::CreateXpm(char ***xpm)
       (*xpm)[line++] = strutil_strdup(tmp.ToAscii());
    }
    delete [] buf;
-   (*xpm)[line++] = NULL;
+   (*xpm)[line++] = nullptr;
    return true;
 #endif
 }

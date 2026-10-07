@@ -270,7 +270,7 @@ PGPEngine::ExecCommand(const String& options,
                "\n"
                "If you don't, the current operation will be cancelled.");
 
-      wxWindow * const parent = log ? log->GetParent() : NULL;
+      wxWindow * const parent = log ? log->GetParent() : nullptr;
       if ( !MDialog_YesNoDialog
             (
                msg,
@@ -376,7 +376,7 @@ PGPEngine::ExecCommand(const String& options,
          {
             // we don't have anything more to write, so close the stream
             process.CloseOutput();
-            in = NULL;
+            in = nullptr;
          }
          else
          {
@@ -992,7 +992,7 @@ PassphraseManager::Get(const String& user, String& passphrase)
    //
    // note that we can't directly use wxGetPasswordFromUser() because it
    // doesn't distinguish between cancelling and enteting an empty string
-   wxTextEntryDialog dialog(NULL,
+   wxTextEntryDialog dialog(nullptr,
                             wxString::Format
                             (
                               _("Passphrase is required to unlock the "
@@ -1032,7 +1032,7 @@ PassphraseManager::Unget(const String& user, String& passphrase)
                _("Would you like to keep the passphrase for the "
                  "user \"%s\" in memory?"), user
             ),
-            NULL,
+            nullptr,
             _("Mahogany: Remember the passphrase?"),
             M_DLG_NO_DEFAULT,
             M_MSGBOX_REMEMBER_PGP_PASSPHRASE

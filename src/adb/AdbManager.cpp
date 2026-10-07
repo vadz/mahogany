@@ -71,8 +71,8 @@ static void GroupLookup(
                         const String& what,
                         int where,
                         int how,
-                        ArrayAdbGroups *aGroups = NULL,
-                        wxSortedArrayString *entriesToIgnore = NULL
+                        ArrayAdbGroups *aGroups = nullptr,
+                        wxSortedArrayString *entriesToIgnore = nullptr
                        );
 
 // search in the books specified or in all loaded books otherwise
@@ -85,7 +85,7 @@ static bool AdbLookupForEntriesOrGroups(
                                         int where,
                                         int how,
                                         const ArrayAdbBooks *paBooks,
-                                        ArrayAdbGroups *aGroups = NULL
+                                        ArrayAdbGroups *aGroups = nullptr
                                        );
 
 #define CLEAR_ADB_ARRAY(entries)            \
@@ -228,7 +228,7 @@ AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
 {
   wxASSERT( aEntries.IsEmpty() );
 
-  if ( paBooks == NULL || paBooks->IsEmpty() )
+  if ( paBooks == nullptr || paBooks->IsEmpty() )
     paBooks = &gs_booksCache;
 
   wxSortedArrayString entriesToIgnore;
@@ -251,10 +251,10 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
                AdbEntryGroup *group)
 {
    if ( !group )
-      return AdbLookupForEntriesOrGroups(aEntries, NULL, what, where, how, NULL);
+      return AdbLookupForEntriesOrGroups(aEntries, nullptr, what, where, how, nullptr);
 
    // look just in this group
-   GroupLookup(aEntries, NULL, group, what, where, how);
+   GroupLookup(aEntries, nullptr, group, what, where, how);
 
    return !aEntries.IsEmpty();
 }
@@ -292,7 +292,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
   MBusyCursor bc;
 
   if ( AdbLookupForEntriesOrGroups(aEntries, &aMoreEntries, what, lookupMode,
-                                   how, NULL, &aGroups ) ) {
+                                   how, nullptr, &aGroups ) ) {
     // first of all, if we had any nick name matches, ignore all the other ones
     // but otherwise use them as well
     if ( aEntries.IsEmpty() ) {
@@ -645,12 +645,12 @@ AdbExpandAllRecipients(const String& text,
 // AdbManager static functions and variables
 // ----------------------------------------------------------------------------
 
-AdbManager *AdbManager::ms_pManager = NULL;
+AdbManager *AdbManager::ms_pManager = nullptr;
 
 // create the manager object if it doesn't exist yet and return it
 AdbManager *AdbManager::Get()
 {
-  if ( ms_pManager ==  NULL ) {
+  if ( ms_pManager ==  nullptr ) {
     // create it
     ms_pManager = new AdbManager;
 
@@ -665,7 +665,7 @@ AdbManager *AdbManager::Get()
     ms_pManager->IncRef();
   }
 
-  wxASSERT( ms_pManager != NULL );
+  wxASSERT( ms_pManager != nullptr );
 
   return ms_pManager;
 }
@@ -678,7 +678,7 @@ void AdbManager::Unget()
 
   if ( !ms_pManager->DecRef() ) {
     // the object deleted itself
-    ms_pManager = NULL;
+    ms_pManager = nullptr;
 
     wxLogTrace(_T("adb"), _T("AdbManager deleted."));
   }
@@ -718,7 +718,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
                                 AdbDataProvider *provider,
                                 String *providerName)
 {
-   AdbBook *book = NULL;
+   AdbBook *book = nullptr;
 
    // first see if we don't already have it
    book = FindInCache(name, provider);
@@ -729,17 +729,17 @@ AdbBook *AdbManager::CreateBook(const String& name,
    }
 
    // no, must create a new one
-   AdbDataProvider *prov = NULL;
+   AdbDataProvider *prov = nullptr;
    if ( provider )
    {
       prov = provider;
       prov->IncRef();
    }
-   if ( prov == NULL )
+   if ( prov == nullptr )
       prov = AutodetectFormat(name);
-   if ( prov == NULL )
+   if ( prov == nullptr )
       prov = CreateNative(name);
-   if ( prov == NULL )
+   if ( prov == nullptr )
       prov = MatchBookName(name);
 
    if ( providerName && prov )
@@ -752,7 +752,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
       book = prov->CreateBook(name);
    }
 
-   if ( book == NULL ) {
+   if ( book == nullptr ) {
       wxLogError(_("Can't open the address book '%s'."), name);
    }
    else {
@@ -784,7 +784,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
       prov->DecRef();
    }
    
-   return NULL;
+   return nullptr;
 }
 
 /*static*/ AdbDataProvider *AdbManager::CreateNative(const String& name)
@@ -795,7 +795,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
       return prov;
       
    prov->DecRef();
-   return NULL;
+   return nullptr;
 }
 
 /*static*/ AdbDataProvider *AdbManager::MatchBookName(const String& name)
@@ -812,7 +812,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
       prov->DecRef();
    }
    
-   return NULL;
+   return nullptr;
 }
 
 size_t AdbManager::GetBookCount() const
@@ -853,7 +853,7 @@ void AdbManager::LoadAll()
       strProv.Empty();
 
     if ( strProv.empty() )
-      pProvider = NULL;
+      pProvider = nullptr;
     else
       pProvider = AdbDataProvider::GetProviderByName(strProv);
 
@@ -903,7 +903,7 @@ AdbBook *AdbManager::FindInCache(const String& name,
       return book;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 // ----------------------------------------------------------------------------

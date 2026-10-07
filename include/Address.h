@@ -122,7 +122,7 @@ public:
     */
    static bool IsInList(const wxArrayString& addresses,
                         const String& address,
-                        String *match = NULL);
+                        String *match = nullptr);
 
    /**
        Returns user-friendly address form.
@@ -227,7 +227,7 @@ extern bool operator==(const AddressList_obj& addrList1,
  */
 extern bool ContainsOwnAddress(const String& str,
                                Profile *profile,
-                               String *own = NULL);
+                               String *own = nullptr);
 
 #endif // _ADDRESS_H_
 

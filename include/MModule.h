@@ -175,12 +175,12 @@ class MModuleCommon
 {
 public:
    /// ctor sets the ref count to 1 to make the object alive
-   MModuleCommon(MInterface *minterface = NULL)
+   MModuleCommon(MInterface *minterface = nullptr)
    {
       m_nRef = 1;
       m_MInterface = minterface;
 #ifndef USE_MODULES_STATIC
-      m_dll = NULL;
+      m_dll = nullptr;
 #endif // !USE_MODULES_STATIC
    }
 
@@ -217,8 +217,8 @@ private:
 };
 
 // for "compatibility" with MObjectRC
-inline void SafeIncRef(MModuleCommon *p) { if ( p != NULL ) p->IncRef(); }
-inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
+inline void SafeIncRef(MModuleCommon *p) { if ( p != nullptr ) p->IncRef(); }
+inline void SafeDecRef(MModuleCommon *p) { if ( p != nullptr ) p->DecRef(); }
 
 /**
    This is the interface for Mahogany extension modules.
@@ -229,7 +229,7 @@ inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
 class MModule : public MModuleCommon
 {
 public:
-   MModule(MInterface *minterface = NULL) : MModuleCommon(minterface) { }
+   MModule(MInterface *minterface = nullptr) : MModuleCommon(minterface) { }
 
    /** MModule interface, this needs to be implemented by the actual modules. */
    //@{
@@ -407,7 +407,7 @@ extern "C" \
             (version_minor < M_VERSION_MINOR)) ) \
       {\
          *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS; \
-         return NULL; \
+         return nullptr; \
       } \
       \
       MModule *module = ClassName::Init(version_major,  version_minor, \
@@ -430,7 +430,7 @@ const ModuleProperty ClassName::ms_properties[] = \
 #define MMODULE_PROP(name, value) { name, value },
 
 #define MMODULE_END_IMPLEMENT(ClassName) \
-   { NULL, NULL }, \
+   { nullptr, nullptr }, \
    }; \
 \
 MMODULE_DEFINE_GET_PROPERTIES(ClassName) \

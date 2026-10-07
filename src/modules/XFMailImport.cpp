@@ -364,7 +364,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       }
 
       // find the parent for the folder we're going to import
-      MFolder *parent = NULL;
+      MFolder *parent = nullptr;
       if ( (flags & SYSTEM) ||
             folderName == _T("inbox") ||
             folderName == _T("outbox") ||

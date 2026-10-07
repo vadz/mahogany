@@ -50,7 +50,7 @@ public:
       @param file if non-NULL, the file to open (for writing) with the
                   temporary file name
     */
-   MTempFileName(wxFile *file = NULL)
+   MTempFileName(wxFile *file = nullptr)
       : m_name(wxFileName::CreateTempFileName(_T("Mahogany"), file))
    {
       m_keepFile = false;

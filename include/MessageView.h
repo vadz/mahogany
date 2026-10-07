@@ -70,7 +70,7 @@ protected:
    MessageView();
 
    /// same arguments as in ctor(s)
-   void Init(wxWindow *parent, Profile *profile = NULL);
+   void Init(wxWindow *parent, Profile *profile = nullptr);
 
 public:
    /**
@@ -124,7 +124,7 @@ public:
    Message *GetMessage() const { return m_mailMessage; }
 
    /// return true if we're showing a message
-   bool HasMessage() const { return m_mailMessage != NULL; }
+   bool HasMessage() const { return m_mailMessage != nullptr; }
 
    //@}
 
@@ -212,7 +212,7 @@ public:
    void MimeOpenWith(const MimePart *part);
 
    /// saves the currently selected MIME content
-   bool MimeSave(const MimePart *part, const wxChar *filename = NULL);
+   bool MimeSave(const MimePart *part, const wxChar *filename = nullptr);
 
    /// view attachment as text
    void MimeViewText(const MimePart *part);
@@ -821,7 +821,7 @@ private:
     */
    void SetViewer(MessageViewer *viewer,
                   const String& viewerName,
-                  wxWindow *parent = NULL);
+                  wxWindow *parent = nullptr);
 
    /**
       Initializes and sets the given non-NULL viewer.
@@ -835,16 +835,16 @@ private:
     */
    void DoSetViewer(MessageViewer *viewer,
                     const String& viewerName,
-                    wxWindow *parent = NULL);
+                    wxWindow *parent = nullptr);
 
    /**
       Reset the viewer to the default one.
 
       @param parent the parent window, may be NULL
     */
-   void ResetViewer(wxWindow *parent = NULL)
+   void ResetViewer(wxWindow *parent = nullptr)
    {
-      SetViewer(NULL, String(), parent);
+      SetViewer(nullptr, String(), parent);
    }
 
    /**

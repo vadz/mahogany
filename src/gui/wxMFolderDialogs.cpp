@@ -287,7 +287,7 @@ class wxFolderPropertiesPage : public MBookCtrlPageBase
 public:
    wxFolderPropertiesPage(MBookCtrl *notebook,
                           Profile *profile,
-                          wxFolderCreateDialog *dlg = NULL);
+                          wxFolderCreateDialog *dlg = nullptr);
 
    ~wxFolderPropertiesPage() { m_profile->DecRef(); }
 
@@ -334,7 +334,7 @@ protected:
    // or just showing the properties for it. Ultimately, it shouldn't be
    // necessary, but for now we use it to adjust our behaviour depending on
    // what we're doing
-   bool IsCreating() const { return m_dlgCreate != NULL; }
+   bool IsCreating() const { return m_dlgCreate != nullptr; }
 
    // the radiobox indices
    enum RadioIndex
@@ -422,7 +422,7 @@ protected:
    // inverse function of the above one: get the radiobox and choice indices
    // (if any) from the folder type
    RadioIndex GetRadioIndexFromFolderType(MFolderType type,
-                                          int *choiceIndex = NULL) const;
+                                          int *choiceIndex = nullptr) const;
 
    // enable the controls which make sense for a NNTP/News folder
    void EnableControlsForNewsGroup(bool isNNTP = TRUE);
@@ -540,7 +540,7 @@ public:
    static const char *s_aszImages[];
    static const char *s_aszImagesAdvanced[];
 
-   wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = NULL);
+   wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = nullptr);
 
 private:
    DECLARE_NO_COPY_CLASS(wxFolderCreateNotebook)
@@ -604,11 +604,11 @@ wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
                                      title,
                                      _T("FolderProperties"))
 {
-   m_notebook = NULL;
-   m_parentFolder = NULL;
-   m_newFolder = NULL;
+   m_notebook = nullptr;
+   m_parentFolder = nullptr;
+   m_newFolder = nullptr;
    m_mayEnableOk = false;
-   m_profile = NULL;
+   m_profile = nullptr;
 }
 
 wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
@@ -786,7 +786,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolderType folderType)
       // tell the other pages that we now have a folder (and hence a profile)
       String folderName = m_newFolder->GetFullName();
       m_profile = Profile::CreateProfile(folderName);
-      CHECK( m_profile, NULL, "failed to create profile for new folder" );
+      CHECK( m_profile, nullptr, "failed to create profile for new folder" );
 
       ApplyConfigSourceSelectedByUser(*m_profile);
       SetPagesProfile(m_profile);
@@ -1298,7 +1298,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
       wxString folderName;
 
       // the control whose value we will automatically set
-      wxTextCtrl *textToSet = NULL;
+      wxTextCtrl *textToSet = nullptr;
 
       MFolderType folderType = GetCurrentFolderType();
       switch ( folderType )
@@ -2075,7 +2075,7 @@ wxFolderPropertiesPage::SetDefaultValues()
                m_browsePath->BrowseForFiles();
 
             // don't need to set anything
-            textToSet = NULL;
+            textToSet = nullptr;
             break;
          }
 
@@ -2107,7 +2107,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 
       default:
          // nothing special to do
-         textToSet = NULL;
+         textToSet = nullptr;
    }
 
    if ( textToSet )
@@ -2375,7 +2375,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
             wxString what;    // what did the user forget to specify
 
             // the key to use for MDialog_YesNoDialog
-            const MPersMsgBox *msgbox = NULL; // suppress compiler warning
+            const MPersMsgBox *msgbox = nullptr; // suppress compiler warning
 
             if ( !loginName )
             {
@@ -2675,7 +2675,7 @@ const char *wxFolderCreateNotebook::s_aszImages[] =
 #ifdef USE_PYTHON
    "python",
 #endif // USE_PYTHON
-   NULL
+   nullptr
 };
 
 // create the control and add pages too
@@ -2732,7 +2732,7 @@ static MFolder *DoShowFolderDialog(wxFolderBaseDialog& dlg,
    }
    else
    {
-      return (MFolder *)NULL;
+      return (MFolder *)nullptr;
    }
 }
 
@@ -2809,7 +2809,7 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
    wxFolderPropertiesDialog dlg(parent, folder);
 
    MFolder *folderNew = DoShowFolderDialog(dlg, FolderCreatePage_Default);
-   if ( folderNew != NULL )
+   if ( folderNew != nullptr )
    {
       // what else can it return?
       ASSERT_MSG( folderNew == folder, _T("unexpected folder change") );

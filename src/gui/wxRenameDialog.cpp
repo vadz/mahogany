@@ -251,7 +251,7 @@ void wxFolderRenameDialog::DoUpdateMboxPath(const String& folderName)
       case MF_MH:
          // the file names are more complicated: we have to deal with different
          // delimiters depending on platform and so on
-         wxFileName::SplitPath(path, &mboxName, NULL, NULL);
+         wxFileName::SplitPath(path, &mboxName, nullptr, nullptr);
          break;
 
       default:

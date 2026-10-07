@@ -333,11 +333,11 @@ static bool FilterExists(const String& name);
 
 // create a new filter, return its name (or an empty string if the filter
 // creation was cancelled)
-static String CreateNewFilter(wxWindow *parent, ConfigSource *config = NULL);
+static String CreateNewFilter(wxWindow *parent, ConfigSource *config = nullptr);
 
 // edit the filter with given name, return TRUE if anything changed
 static bool
-EditFilter(const String& name, wxWindow *parent, ConfigSource *config = NULL);
+EditFilter(const String& name, wxWindow *parent, ConfigSource *config = nullptr);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -591,7 +591,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    m_Parent = parent;
 
    // don't create it yet as it might be not needed at all, so postpone it
-   m_btnSpam = NULL;
+   m_btnSpam = nullptr;
 
    // only create the logical condition (And/Or) control if we have
    // something to combine this one with
@@ -615,7 +615,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
                               : ORC_L_Or);
    }
    else
-      m_Logical = NULL;
+      m_Logical = nullptr;
 
    m_Not = new wxCheckBox(parent, -1, _("Not"));
 
@@ -1332,7 +1332,7 @@ wxOneFilterDialog::LayoutControls()
 
    if ( m_isSimple )
    {
-      wxWindow *last = NULL;
+      wxWindow *last = nullptr;
 
       c = new wxLayoutConstraints;
       c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -1382,7 +1382,7 @@ wxOneFilterDialog::AddOneControl()
 {
    ASSERT_MSG( m_nControls < MAX_CONTROLS, _T("too many filter controls") );
 
-   OneCritControl *prev = m_nControls == 0 ? NULL
+   OneCritControl *prev = m_nControls == 0 ? nullptr
                                            : m_CritControl[m_nControls - 1];
    m_CritControl[m_nControls] = new OneCritControl(m_Panel->GetCanvas(), prev);
    m_nControls++;
@@ -1763,7 +1763,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
    m_lboxFilters = new wxPListBox(_T("FiltersList"),
                                   this, -1,
                                   wxDefaultPosition, wxDefaultSize,
-                                  0, NULL,
+                                  0, nullptr,
                                   wxLB_SORT);
    m_lboxFilters->SetConstraints(c);
 
@@ -1795,7 +1795,7 @@ wxAllFiltersDialog::OnAddFiter(wxCommandEvent& /* event */)
    // ensure that we save changes to the selected config source, if any
    ConfigSource * const config = m_chcSources
                                     ? m_chcSources->GetSelectedSource()
-                                    : NULL;
+                                    : nullptr;
 
    const String name = CreateNewFilter(this, config);
    if ( name.empty() )
@@ -1882,7 +1882,7 @@ wxAllFiltersDialog::OnEditFiter(wxCommandEvent& /* event */)
    CHECK_RET( !!name, _T("must have selection in the listbox") );
 
    if ( EditFilter(name, this, m_chcSources ? m_chcSources->GetSelectedSource()
-                                            : NULL) )
+                                            : nullptr) )
    {
       // filter changed
       m_hasChanges = true;
@@ -2481,7 +2481,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    // this is used in OnText() to check if we had finished with initializing
    // the dialog
-   m_action = NULL;
+   m_action = nullptr;
 
    CreateAllControls(ProfileEdit_WithoutApply | ProfileEdit_NoDefSize);
 
@@ -2705,7 +2705,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
       return false;
 
    // construct the object we use to initialize the filter
-   MFDialogSettings *settings = NULL;
+   MFDialogSettings *settings = nullptr;
    String name = _("quick filter ");
 
    for ( size_t n = 0; n < Filter_Max; n++ )

@@ -47,7 +47,7 @@ public:
    //@{
 
    wxArrayString GetHeaderLines(const char **headers,
-                                wxArrayInt *encodings = NULL) const override
+                                wxArrayInt *encodings = nullptr) const override
       { return m_message->GetHeaderLines(headers, encodings); }
 
    String GetHeader() const override

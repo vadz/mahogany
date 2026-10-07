@@ -110,7 +110,7 @@ public:
       {
          MailFolder *mf = MailFolder::OpenFolder(mfolder, openmode);
          if ( !mf )
-            return NULL;
+            return nullptr;
 
          ASMailFolder *asmf = Create(mf);
          mf->DecRef();
@@ -146,7 +146,7 @@ public:
        @param uid message uid
        @return ResultInt with boolean success value
    */
-   virtual Ticket GetMessage(unsigned long uid, UserData ud = 0) = 0;
+   virtual Ticket GetMessage(unsigned long uid, UserData ud = nullptr) = 0;
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
@@ -174,13 +174,13 @@ public:
        @param msg the message to append
        @return ResultInt with boolean success value
    */
-   virtual Ticket AppendMessage(const Message *msg, UserData ud = 0) = 0;
+   virtual Ticket AppendMessage(const Message *msg, UserData ud = nullptr) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
        @return ResultInt with boolean success value
    */
-   virtual Ticket AppendMessage(const String &msg, UserData ud = 0) = 0;
+   virtual Ticket AppendMessage(const String &msg, UserData ud = nullptr) = 0;
 
    /** Expunge messages.
      */
@@ -212,7 +212,7 @@ public:
    */
    virtual Ticket SaveMessages(const UIdArray *selections,
                                String const & folderName,
-                               UserData ud = 0) = 0;
+                               UserData ud = nullptr) = 0;
 
    /** Save the messages to a file.
        @param selections the message indices which will be converted using the current listing
@@ -221,7 +221,7 @@ public:
    */
    virtual Ticket SaveMessagesToFile(const UIdArray *selections,
                                      String const & folderName,
-                                     UserData ud = 0) = 0;
+                                     UserData ud = nullptr) = 0;
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -229,7 +229,7 @@ public:
    */
    virtual Ticket DeleteOrTrashMessages(const UIdArray *messages,
                                         int flags = MailFolder::DELETE_ALLOW_TRASH,
-                                        UserData ud = 0) = 0;
+                                        UserData ud = nullptr) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
@@ -238,13 +238,13 @@ public:
    */
    virtual Ticket DeleteMessages(const UIdArray *messages,
                                  int flags = MailFolder::DELETE_NO_EXPUNGE,
-                                 UserData ud = 0) = 0;
+                                 UserData ud = nullptr) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket UnDeleteMessages(const UIdArray *messages, UserData ud = 0) = 0;
+   virtual Ticket UnDeleteMessages(const UIdArray *messages, UserData ud = nullptr) = 0;
 
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
@@ -252,8 +252,8 @@ public:
        @return ResultInt boolean
    */
    virtual Ticket SaveMessagesToFile(const UIdArray *messages,
-                                     wxWindow *parent = NULL,
-                                     UserData ud = 0) = 0;
+                                     wxWindow *parent = nullptr,
+                                     UserData ud = nullptr) = 0;
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
@@ -262,9 +262,9 @@ public:
        @return true if messages got saved
    */
    virtual Ticket SaveMessagesToFolder(const UIdArray *messages,
-                                       wxWindow *parent = NULL,
-                                       MFolder *folder = NULL,
-                                       UserData ud = 0) = 0;
+                                       wxWindow *parent = nullptr,
+                                       MFolder *folder = nullptr,
+                                       UserData ud = nullptr) = 0;
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
@@ -273,8 +273,8 @@ public:
    */
    virtual Ticket ReplyMessages(const UIdArray *messages,
                                 const MailFolder::Params& params,
-                                wxWindow *parent = NULL,
-                                UserData ud = 0) = 0;
+                                wxWindow *parent = nullptr,
+                                UserData ud = nullptr) = 0;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
@@ -282,15 +282,15 @@ public:
    */
    virtual Ticket ForwardMessages(const UIdArray *messages,
                                   const MailFolder::Params& params,
-                                  wxWindow *parent = NULL,
-                                  UserData ud = 0) = 0;
+                                  wxWindow *parent = nullptr,
+                                  UserData ud = nullptr) = 0;
 
    /** Apply filter rules to the folder.
        Applies the rule to all messages listed in msgs.
        @return a ResultInt object
    */
    virtual Ticket ApplyFilterRules(const UIdArray *msgs,
-                                   UserData ud = 0) = 0;
+                                   UserData ud = nullptr) = 0;
 
    /**@name Subscription management.
       These functions are statically defined and are implemented in
@@ -308,7 +308,7 @@ public:
                            MFolderType protocol,
                            const String &mailboxname,
                            bool subscribe = true,
-                           UserData ud = 0);
+                           UserData ud = nullptr);
    /** Get a listing of all mailboxes.
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
@@ -317,7 +317,7 @@ public:
    Ticket ListFolders(const String &pattern = _T("*"),
                       bool subscribed_only = false,
                       const String &reference = wxEmptyString,
-                      UserData ud = 0);
+                      UserData ud = nullptr);
 
    //@}
    //@}
@@ -540,7 +540,7 @@ protected:
    ASMailFolderResultFolderExists(ASMailFolder *mf,
                                   Ticket t,
                                   UserData ud)
-      : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_ListFolders, NULL, ud)
+      : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_ListFolders, nullptr, ud)
    {
       m_NoMore = true;
    }
@@ -552,7 +552,7 @@ protected:
                                   char delimiter,
                                   long attrib,
                                   UserData ud)
-      : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_ListFolders, NULL, ud)
+      : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_ListFolders, nullptr, ud)
    {
       m_Name = name;
       m_Delim = delimiter;

@@ -55,7 +55,7 @@ public:
 
    // query the status info: return true and fill the provided pointer with
    // info if we have it (and the pointer is not NULL), return false otherwise
-   bool GetStatus(const String& folderName, MailFolderStatus *status = NULL);
+   bool GetStatus(const String& folderName, MailFolderStatus *status = nullptr);
 
    // update the status info 
    void UpdateStatus(const String& folderName, const MailFolderStatus& status);

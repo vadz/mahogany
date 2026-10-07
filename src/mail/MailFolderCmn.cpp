@@ -231,7 +231,7 @@ public:
    MfCloseEntry *GetCloseEntry(MailFolderCmn *mf) const;
 
    // is this folder in this list?
-   bool HasFolder(MailFolderCmn *mf) const { return GetCloseEntry(mf) != NULL; }
+   bool HasFolder(MailFolderCmn *mf) const { return GetCloseEntry(mf) != nullptr; }
 
    // restart the timer (useful if timer interval changed)
    void RestartTimer();
@@ -299,7 +299,7 @@ protected:
 // ----------------------------------------------------------------------------
 
 // the unique MfCloser object
-static MfCloser *gs_MailFolderCloser = NULL;
+static MfCloser *gs_MailFolderCloser = nullptr;
 
 // ============================================================================
 // implementation
@@ -473,7 +473,7 @@ MfCloseEntry *MfCloser::GetCloseEntry(MailFolderCmn *mf) const
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 
 void MfCloser::RestartTimer()
@@ -512,7 +512,7 @@ void MailFolderCmn::Close(bool /* mayLinger */)
 
       m_headers->DecRef();
 
-      m_headers = NULL;
+      m_headers = nullptr;
    }
 
    if ( m_keepAliveTimer )
@@ -634,17 +634,17 @@ MailFolderCmn::RealDecRef()
 
 MailFolderCmn::MailFolderCmn()
 {
-   m_keepAliveTimer = NULL;
+   m_keepAliveTimer = nullptr;
 
    m_suspendUpdates = 0;
 
-   m_headers = NULL;
+   m_headers = nullptr;
 
-   m_frame = NULL;
+   m_frame = nullptr;
    m_shouldKeepAlive = false;
 
-   m_statusChangeData = NULL;
-   m_expungeData = NULL;
+   m_statusChangeData = nullptr;
+   m_expungeData = nullptr;
 
    m_msgnoLastNotified = MSGNO_ILLEGAL;
 
@@ -915,7 +915,7 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
                              const MailFolder::Params& params,
                              wxWindow *parent)
 {
-   Composer *composer = NULL;
+   Composer *composer = nullptr;
 
    int n = selections->Count();
    for( int i = 0; i < n; i++ )
@@ -938,7 +938,7 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
                                const MailFolder::Params& params,
                                wxWindow *parent)
 {
-   Composer *composer = NULL;
+   Composer *composer = nullptr;
 
    int n = selections->Count();
    for ( int i = 0; i < n; i++ )
@@ -962,7 +962,7 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
 {
    HeaderInfoList_obj hil(GetHeaders());
-   CHECK( hil, NULL, _T("no listing in SearchMessages") );
+   CHECK( hil, nullptr, _T("no listing in SearchMessages") );
 
    // the search results
    UIdArray *results = new UIdArray;
@@ -970,7 +970,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
    // how many did we find?
    unsigned long countFound = 0;
 
-   MProgressDialog *progDlg = NULL;
+   MProgressDialog *progDlg = nullptr;
 
    MsgnoType nMessages = GetMessageCount();
 
@@ -1042,7 +1042,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
          }
       }
 
-      bool found = wxStrstr(what, crit->m_Key) != NULL;
+      bool found = wxStrstr(what, crit->m_Key) != nullptr;
       if ( found != crit->m_Invert )
       {
          // really found, remember its UID or msgno depending on the flags
@@ -1310,7 +1310,7 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
    qsort(msgnos, count, sizeof(MsgnoType), SortComparisonFunction);
 
    // don't leave dangling pointers around
-   gs_SortData.hil = NULL;
+   gs_SortData.hil = nullptr;
 
    return true;
 }
@@ -1783,7 +1783,7 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
          mf->DecRef();
 
          // important for test below
-         mf = NULL;
+         mf = nullptr;
 
          ok = true;
       }
@@ -1908,7 +1908,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
    return DoProcessNewMail
           (
             folderWithNewMail,
-            folderDst ? NULL : this,   // folder where new mail is
+            folderDst ? nullptr : this,   // folder where new mail is
             &uidsNew,
             0,                         // count of new messages is unused
             this                       // folder contains UIDs from uidsNew
@@ -2024,7 +2024,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
          flags |= SND_FILENAME;
       }
 
-      if ( !::PlaySound(sound, NULL, flags) )
+      if ( !::PlaySound(sound, nullptr, flags) )
 #elif defined(OS_UNIX) || defined(__CYGWIN__)
       String soundCmd = READ_CONFIG(profile, MP_NEWMAIL_SOUND_PROGRAM);
 
@@ -2343,7 +2343,7 @@ MailFolderCmn::SendMsgStatusChangeEvent()
    MEventManager::Send(new MEventMsgStatusData(this, m_statusChangeData));
 
    // MEventMsgStatusData will delete them
-   m_statusChangeData = NULL;
+   m_statusChangeData = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -2356,7 +2356,7 @@ void MailFolderCmn::DiscardExpungeData()
    {
       delete m_expungeData;
 
-      m_expungeData = NULL;
+      m_expungeData = nullptr;
    }
 }
 
@@ -2406,7 +2406,7 @@ void MailFolderCmn::RequestUpdateAfterExpunge()
    }
 
    // MEventFolderExpungeData() will delete the data
-   m_expungeData = NULL;
+   m_expungeData = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -2424,7 +2424,7 @@ wxFrame *MailFolderCmn::SetInteractiveFrame(wxFrame *frame)
    // we still keep the flag set to true as the user may return to this folder
    // in the UI and doesn't expect it to close because of inactivity in the
    // meanwhile
-   if ( m_frame != NULL && !m_shouldKeepAlive )
+   if ( m_frame != nullptr && !m_shouldKeepAlive )
    {
       m_shouldKeepAlive = true;
 
@@ -2442,7 +2442,7 @@ wxFrame *MailFolderCmn::SetInteractiveFrame(wxFrame *frame)
 wxFrame *MailFolderCmn::GetInteractiveFrame() const
 {
    // no interactivity at all in away mode
-   return mApplication->IsInAwayMode() ? NULL : m_frame;
+   return mApplication->IsInAwayMode() ? nullptr : m_frame;
 }
 
 // ----------------------------------------------------------------------------
@@ -2501,7 +2501,7 @@ void MailFolderCmnCleanup()
       // any MailFolderCmn::DecRef() shouldn't add folders to
       // gs_MailFolderCloser from now on, so NULL it immediately
       MfCloser *mfCloser = gs_MailFolderCloser;
-      gs_MailFolderCloser = NULL;
+      gs_MailFolderCloser = nullptr;
 
       delete mfCloser;
    }

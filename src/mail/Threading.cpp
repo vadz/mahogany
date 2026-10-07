@@ -106,7 +106,7 @@ ThreadData::ThreadData(MsgnoType count)
    m_tableThread = new MsgnoType[count];
    m_children = new MsgnoType[count];
    m_indents = new size_t[count];
-   m_root = 0;
+   m_root = nullptr;
 }
 
 void ThreadData::killTree()
@@ -114,7 +114,7 @@ void ThreadData::killTree()
    if ( m_root )
    {
       mail_free_threadnode(&m_root);
-      m_root = NULL;
+      m_root = nullptr;
    }
 }
 

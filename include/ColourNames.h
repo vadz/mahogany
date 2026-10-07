@@ -18,7 +18,7 @@ class MOption;
 class Profile;
 
 /// get the colour by name which may be either a colour or RGB specification
-extern bool ParseColourString(const String& name, wxColour* colour = NULL);
+extern bool ParseColourString(const String& name, wxColour* colour = nullptr);
 
 /// get the colour name - pass it to ParseColorString to get the same colour
 extern String GetColourName(const wxColour& color);

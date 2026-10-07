@@ -256,7 +256,7 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
          else
          {
             // real EOT
-            t = NULL;
+            t = nullptr;
          }
       }
       else // normal line

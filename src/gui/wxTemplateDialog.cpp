@@ -75,7 +75,7 @@ public:
                    wxTE_MULTILINE),
         m_menuInfo(menu)
    {
-      m_menu = NULL;
+      m_menu = nullptr;
    }
 
    virtual ~TemplateEditor() { if ( m_menu ) delete m_menu; }
@@ -488,7 +488,7 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
 
    m_kind = MessageTemplate_Max;
    m_profile = profile;
-   m_textctrl = NULL;
+   m_textctrl = nullptr;
 
    // layout the controls
    // -------------------
@@ -665,7 +665,7 @@ void wxTemplatesDialogBase::SaveChanges()
 {
    wxASSERT_MSG( !m_name.empty(), _T("shouldn't try to save") );
 
-   SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, NULL);
+   SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, nullptr);
 }
 
 void wxTemplatesDialogBase::UpdateText()

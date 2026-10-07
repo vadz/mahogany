@@ -56,7 +56,7 @@ class TextViewerWindow;
 class wxTextEasyPrinting : public wxHtmlEasyPrinting
 {
 public:
-   wxTextEasyPrinting(const wxString& name, wxWindow *parent = NULL)
+   wxTextEasyPrinting(const wxString& name, wxWindow *parent = nullptr)
       : wxHtmlEasyPrinting(name, GetFrame(parent)) { }
 
    bool Print(wxTextCtrl *text) { return PrintText(ControlToHtml(text)); }
@@ -564,11 +564,11 @@ IMPLEMENT_MESSAGE_VIEWER
 
 TextViewer::TextViewer()
 {
-   m_window = NULL;
+   m_window = nullptr;
    m_posFind = -1;
 
 #if wxUSE_PRINTING_ARCHITECTURE
-   m_printText = NULL;
+   m_printText = nullptr;
 #endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
@@ -645,7 +645,7 @@ bool TextViewer::FindAgain()
       p += m_posFind + 1;
    }
 
-   p = *p != '\0' ? wxStrstr(p, m_textFind) : NULL;
+   p = *p != '\0' ? wxStrstr(p, m_textFind) : nullptr;
 
    if ( p )
    {
@@ -658,7 +658,7 @@ bool TextViewer::FindAgain()
       m_window->SetSelection(0, 0);
    }
 
-   return p != NULL;
+   return p != nullptr;
 }
 
 void TextViewer::Copy()

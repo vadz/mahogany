@@ -262,7 +262,7 @@ inline bool IsLocalQuickFolder(MFolderType type)
  */
 extern bool CanHaveSubfolders(MFolderType folderType,
                               int flags,
-                              MFolderType *subtype = NULL);
+                              MFolderType *subtype = nullptr);
 
 /// can a folder of this type be (physically) deleted by the user?
 inline bool CanDeleteFolderOfType(MFolderType folderType)

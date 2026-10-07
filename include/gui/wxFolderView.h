@@ -59,7 +59,7 @@ public:
    /** Constructor
        @param parent   the parent window
    */
-   static wxFolderView *Create(wxWindow *parent = NULL);
+   static wxFolderView *Create(wxWindow *parent = nullptr);
 
    /// first time constructor
    wxFolderView(wxWindow *parent);
@@ -202,7 +202,7 @@ protected:
    void DoClear(bool keepTheViewer);
 
    /// call DoClear() but via SetFolder() which allows overriding it
-   void Clear() { SetFolder(NULL); }
+   void Clear() { SetFolder(nullptr); }
 
    /// set the folder to show, can't be NULL (unlike in SetFolder)
    void ShowFolder(MailFolder *mf);
@@ -419,7 +419,7 @@ public:
       @return pointer to FolderViewFrame or NULL
    */
    static wxFolderViewFrame *Create(MFolder *folder,
-                                    wxMFrame *parent = NULL,
+                                    wxMFrame *parent = nullptr,
                                     MailFolder::OpenMode openmode =
                                        MailFolder::Normal);
 
@@ -446,7 +446,7 @@ private:
    void DoCreateToolBar() override;
    void DoCreateStatusBar() override;
 
-   void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
+   void InternalCreate(wxFolderView *fv, wxMFrame *parent = nullptr);
 
    /// ctor
    wxFolderViewFrame(String const &name, wxMFrame *parent);

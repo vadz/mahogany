@@ -138,7 +138,7 @@ public:
 
   // implement interface methods
     // AdbElement
-  AdbEntryGroup *GetGroup() const override { return NULL; }
+  AdbEntryGroup *GetGroup() const override { return nullptr; }
 
     // AdbEntryGroup
   AdbEntry *GetEntry(const String& name) override
@@ -313,7 +313,7 @@ bool DummyEntryGroup::Exists(const String& path)
 
 AdbEntryGroup *DummyEntryGroup::GetGroup(const String& /* name */) const
 {
-  return NULL;
+  return nullptr;
 }
 
 AdbEntry *DummyEntryGroup::CreateEntry(const String& strName)
@@ -338,7 +338,7 @@ void DummyEntryGroup::DeleteGroup(const String& /* strName */)
 
 AdbEntry *DummyEntryGroup::FindEntry(const wxChar * /* szName */)
 {
-  return NULL;
+  return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -349,7 +349,7 @@ DummyBook::DummyBook(const String& name)
          : m_strName(name), m_strDesc(name)
 {
   // create the root group
-  m_pRootGroup = new DummyEntryGroup(NULL, _T("Dummy group"));
+  m_pRootGroup = new DummyEntryGroup(nullptr, _T("Dummy group"));
 }
 
 DummyBook::~DummyBook()

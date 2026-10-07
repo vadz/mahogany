@@ -83,7 +83,7 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 // ----------------------------------------------------------------------------
 
 // the main config source
-static ConfigSource *gs_configSourceGlobal = NULL;
+static ConfigSource *gs_configSourceGlobal = nullptr;
 
 // ============================================================================
 // ConfigSource implementation
@@ -121,7 +121,7 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
    {
       wxLogError(_("Invalid config source \"%s\" without type."), name);
 
-      return NULL;
+      return nullptr;
    }
 
    // find the factory for the objects of this type
@@ -131,7 +131,7 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
       wxLogError(_("Unknown type \"%s\" for config source \"%s\"."),
                  type, name);
 
-      return NULL;
+      return nullptr;
    }
 
    ConfigSource *configNew = factory->Create(config, name);
@@ -139,7 +139,7 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
    {
       // creation failed, don't return an invalid object
       configNew->DecRef();
-      configNew = NULL;
+      configNew = nullptr;
    }
 
    return configNew;
@@ -204,7 +204,7 @@ ConfigSource::Copy(ConfigSource& configDst,
 
 ConfigSourceFactory::EnumData::EnumData()
 {
-   m_listing = NULL;
+   m_listing = nullptr;
 }
 
 void ConfigSourceFactory::EnumData::Reset()
@@ -212,7 +212,7 @@ void ConfigSourceFactory::EnumData::Reset()
    if ( m_listing )
    {
       m_listing->DecRef();
-      m_listing = NULL;
+      m_listing = nullptr;
    }
 }
 
@@ -225,7 +225,7 @@ const MModuleListingEntry *ConfigSourceFactory::EnumData::GetNext()
       if ( !m_listing )
       {
          // no config source modules at all
-         return NULL;
+         return nullptr;
       }
 
       m_current = 0;
@@ -234,7 +234,7 @@ const MModuleListingEntry *ConfigSourceFactory::EnumData::GetNext()
    if ( m_current == m_listing->Count() )
    {
       // no more
-      return NULL;
+      return nullptr;
    }
 
    return &(*m_listing)[m_current++];
@@ -266,11 +266,11 @@ ConfigSourceFactory::GetNext(EnumData& data)
 {
    const MModuleListingEntry * const entry = data.GetNext();
    if ( !entry )
-      return NULL;
+      return nullptr;
 
    MModule *module = MModule::LoadModule(entry->GetName());
    if ( !module )
-      return NULL;
+      return nullptr;
 
    ConfigSourceFactory *
       fact = static_cast<ConfigSourceFactoryModule *>(module)->CreateFactory();
@@ -300,7 +300,7 @@ ConfigSourceFactory::Find(const String& type)
       fact->DecRef();
    }
 
-   return NULL;
+   return nullptr;
 }
 
 // ============================================================================
@@ -314,7 +314,7 @@ ConfigSourceFactory::Find(const String& type)
 ConfigSourceLocal::ConfigSourceLocal(const String& name)
                  : ConfigSource(name, ConfigSourceLocalFactory::Type())
 {
-   m_config = NULL;
+   m_config = nullptr;
 }
 
 bool ConfigSourceLocal::InitDefault(const String& filename)
@@ -498,7 +498,7 @@ bool ConfigSourceLocal::InitDefault(const String& filename)
          {
             // we want to use wxFileConfig finally...
             delete m_config;
-            m_config = NULL; // not really needed now, but safer
+            m_config = nullptr; // not really needed now, but safer
             rc = false;
          }
          else // do use wxRegConfig created above
@@ -633,7 +633,7 @@ String ConfigSourceLocal::GetFilePath()
 ConfigSourceLocal::~ConfigSourceLocal()
 {
    if ( this == gs_configSourceGlobal )
-      gs_configSourceGlobal = NULL;
+      gs_configSourceGlobal = nullptr;
 
    delete m_config;
 }
@@ -649,7 +649,7 @@ String ConfigSourceLocal::GetSpec() const
 
 bool ConfigSourceLocal::IsOk() const
 {
-   return m_config != NULL;
+   return m_config != nullptr;
 }
 
 bool ConfigSourceLocal::IsLocal() const
@@ -811,14 +811,14 @@ ConfigSourceLocalFactory::Create(const ConfigSource& config, const String& name)
    {
       wxLogError(_("No filename for local config source \"%s\"."),
                  name);
-      return NULL;
+      return nullptr;
    }
 
    ConfigSource *configNew = ConfigSourceLocal::CreateFile(filename, name);
    if ( !configNew->IsOk() )
    {
       configNew->DecRef();
-      configNew = NULL;
+      configNew = nullptr;
    }
 
    return configNew;

@@ -93,10 +93,10 @@ public:
        @return pointer to the new compose view
     */
    static Composer *CreateNewArticle(const MailFolder::Params& params,
-                                     Profile *profile = NULL);
+                                     Profile *profile = nullptr);
 
    /// short cut
-   static Composer *CreateNewArticle(Profile *profile = NULL)
+   static Composer *CreateNewArticle(Profile *profile = nullptr)
       { return CreateNewArticle(MailFolder::Params(), profile); }
 
    /**
@@ -109,7 +109,7 @@ public:
     */
    static Composer *CreateFollowUpArticle(const MailFolder::Params& params,
                                           Profile *profile,
-                                          Message * original = NULL);
+                                          Message * original = nullptr);
 
    /**
        Constructor for sending mail.
@@ -119,10 +119,10 @@ public:
        @return pointer to the new compose view
     */
    static Composer *CreateNewMessage(const MailFolder::Params& params,
-                                     Profile *profile = NULL);
+                                     Profile *profile = nullptr);
 
    /// short cut
-   static Composer *CreateNewMessage(Profile *profile = NULL)
+   static Composer *CreateNewMessage(Profile *profile = nullptr)
       { return CreateNewMessage(MailFolder::Params(), profile); }
 
    /** Constructor for sending a reply to a message.
@@ -134,7 +134,7 @@ public:
     */
    static Composer *CreateReplyMessage(const MailFolder::Params& params,
                                        Profile *profile,
-                                       Message * original = NULL);
+                                       Message * original = nullptr);
 
    /** Constructor for forwarding a message.
 
@@ -145,7 +145,7 @@ public:
     */
    static Composer *CreateFwdMessage(const MailFolder::Params& params,
                                      Profile *profile,
-                                     Message *original = NULL);
+                                     Message *original = nullptr);
 
    /**
      Create a composer window initialized with an existing message.
@@ -264,8 +264,8 @@ public:
        @param msg the message we're replying to or forwarding
        @param msgview the message viewer to query for selection
     */
-   virtual void InitText(Message *msg = NULL,
-                         const MessageView *msgview = NULL) = 0;
+   virtual void InitText(Message *msg = nullptr,
+                         const MessageView *msgview = nullptr) = 0;
 
    /** Finishes the composer initialization and shows the composer frame,
        should be called after all calls to InitText()
@@ -278,8 +278,8 @@ public:
        @param name name in the attachment (same as file name if NULL)
     */
    virtual void InsertFile(const wxChar *filename,
-                           const wxChar *mimetype = NULL,
-                           const wxChar *name     = NULL) = 0;
+                           const wxChar *mimetype = nullptr,
+                           const wxChar *name     = nullptr) = 0;
 
    /** Insert MIME content data
        @param data pointer to data (we will free() it later)
@@ -290,9 +290,9 @@ public:
     */
    virtual void InsertData(void *data,
                            size_t length,
-                           const wxChar *mimetype = NULL,
-                           const wxChar *name     = NULL,
-                           const wxChar *filename = NULL) = 0;
+                           const wxChar *mimetype = nullptr,
+                           const wxChar *name     = nullptr,
+                           const wxChar *filename = nullptr) = 0;
 
    /// inserts a text
    virtual void InsertText(const String& txt) = 0;

@@ -72,7 +72,7 @@ public:
    */
    MProgressDialog(wxString const &title, wxString const &message,
                    int maximum = 100,
-                   wxWindow *parent = NULL,
+                   wxWindow *parent = nullptr,
                    int flags = wxPD_APP_MODAL | wxPD_CAN_ABORT)
       : wxProgressDialog
         (
@@ -134,7 +134,7 @@ extern "C"
        @param modal   true to make messagebox modal
    */
 void   MDialog_ErrorMessage(const wxString& message,
-                            const wxWindow *parent = NULL,
+                            const wxWindow *parent = nullptr,
                             const wxString& title = MDIALOG_ERRTITLE,
                             bool modal = false);
 
@@ -145,7 +145,7 @@ void   MDialog_ErrorMessage(const wxString& message,
        @param modal   true to make messagebox modal
    */
 void   MDialog_SystemErrorMessage(const wxString& message,
-                                  const wxWindow *parent = NULL,
+                                  const wxWindow *parent = nullptr,
                                   const wxString& title = MDIALOG_SYSERRTITLE,
                                   bool modal = false);
 
@@ -155,7 +155,7 @@ void   MDialog_SystemErrorMessage(const wxString& message,
        @param parent   the parent frame
    */
 void   MDialog_FatalErrorMessage(const wxString& message,
-                                 const wxWindow *parent = NULL,
+                                 const wxWindow *parent = nullptr,
                                  const wxString& title = MDIALOG_FATALERRTITLE);
 
 /** display normal message and, if configPath != NULL, give a user a checkbox
@@ -169,9 +169,9 @@ void   MDialog_FatalErrorMessage(const wxString& message,
        @return TRUE if Ok was pressed, FALSE if Cancel
    */
 bool   MDialog_Message(const wxString& message,
-                       const wxWindow *parent = NULL,
+                       const wxWindow *parent = nullptr,
                        const wxString& title = MDIALOG_MSGTITLE,
-                       const char *configPath = NULL,
+                       const char *configPath = nullptr,
                        int flags = 0);
 
 /** profile-aware Yes/No dialog: if persMsg is not NULL, it has a "don't show
@@ -188,11 +188,11 @@ bool   MDialog_Message(const wxString& message,
     @return true if yes was selected
 */
 bool   MDialog_YesNoDialog(const wxString& message,
-                           const wxWindow *parent = NULL,
+                           const wxWindow *parent = nullptr,
                            const wxString& title = MDIALOG_YESNOTITLE,
                            int flags = M_DLG_YES_DEFAULT,
-                           const MPersMsgBox *persMsg = NULL,
-                           const wxChar *folderName = NULL);
+                           const MPersMsgBox *persMsg = nullptr,
+                           const wxChar *folderName = nullptr);
 
 /**
   This is a 3 choice dialog: it has Yes, No and Cancel buttons. Unlile
@@ -207,10 +207,10 @@ bool   MDialog_YesNoDialog(const wxString& message,
   @return M_DLG_ if yes was chosen, 0 if no and -1 if cancel
  */
 MDlgResult MDialog_YesNoCancel(const wxString& message,
-                               const wxWindow *parent = NULL,
+                               const wxWindow *parent = nullptr,
                                const wxString& title = MDIALOG_YESNOTITLE,
                                int flags = M_DLG_YES_DEFAULT,
-                               const MPersMsgBox *persMsg = NULL);
+                               const MPersMsgBox *persMsg = nullptr);
 
 /** show a (modal) dialog with the given text
 
@@ -222,7 +222,7 @@ MDlgResult MDialog_YesNoCancel(const wxString& message,
 void MDialog_ShowText(wxWindow *parent,
                       const wxString& title,
                       const wxString& text,
-                      const char *configPath = NULL);
+                      const char *configPath = nullptr);
 
 } // extern "C"
 
@@ -255,13 +255,13 @@ bool MDialog_Message(const wxString& message,
        @return string with the filename or empty if cancelled
    */
 String MDialog_FileRequester(const String &message,
-                             wxWindow *parent = NULL,
+                             wxWindow *parent = nullptr,
                              String path = NULLstring,
                              String filename = NULLstring,
                              String extension = NULLstring,
                              String wildcard = NULLstring,
                              bool save = false,
-                             Profile *profile = NULL);
+                             Profile *profile = nullptr);
 
 /** Ask user for a directory
 
@@ -273,8 +273,8 @@ String MDialog_FileRequester(const String &message,
  */
 String MDialog_DirRequester(const String& message,
                             const String& path = NULLstring,
-                            wxWindow *parent = NULL,
-                            const char *configPath = NULL);
+                            wxWindow *parent = nullptr,
+                            const char *configPath = nullptr);
 
 /**
   Ask the user to enter some text and remember the last value in the "Prompt"
@@ -302,8 +302,8 @@ String MDialog_DirRequester(const String& message,
 bool MInputBox(wxString *pstr,
                const wxString& caption,
                const wxString& prompt,
-               const wxWindow *parent = NULL,
-               const char *key = NULL,
+               const wxWindow *parent = nullptr,
+               const char *key = nullptr,
                const wxString& def = wxEmptyString,
                bool passwordflag = false);
 
@@ -326,7 +326,7 @@ MGetNumberFromUser(const wxString& message,
                    long value = 0,
                    long min = 0,
                    long max = 100,
-                   wxWindow *parent = (wxWindow *)NULL,
+                   wxWindow *parent = (wxWindow *)nullptr,
                    const wxPoint& pos = wxDefaultPosition);
 
 /// simple AboutDialog to be displayed at startup
@@ -367,7 +367,7 @@ enum
   @return the folder selected by user (must be DecRef()'d) or NULL if cancelled
  */
 MFolder *MDialog_FolderChoose(const wxWindow *parent,
-                              MFolder *folder = NULL,
+                              MFolder *folder = nullptr,
                               int flags = MDlg_Folder_Save);
 
 /// choose a folder and open a view on it
@@ -387,7 +387,7 @@ extern bool PickGlobalPasswdDialog(Profile *profile, wxWindow *parent);
 
 /** Asks the user if he wants to expunge the deleted messages. */
 extern
-void CheckExpungeDialog(class ASMailFolder *mf, wxWindow *parent = NULL);
+void CheckExpungeDialog(class ASMailFolder *mf, wxWindow *parent = nullptr);
 
 /** Read a filter program from the data.
  This takes the sub-groups under "Filters/" and assembles a filter
@@ -397,10 +397,10 @@ String GetFilterProgram(Profile *profile);
 
 /// Shows the dialog allowing to reenable disabled wxPMesageBox()es
 extern
-bool ReenablePersistentMessageBoxes(wxWindow *parent = NULL);
+bool ReenablePersistentMessageBoxes(wxWindow *parent = nullptr);
 
 /// Returns true if the license was accepted:
-extern bool ShowLicenseDialog(wxWindow *parent = NULL);
+extern bool ShowLicenseDialog(wxWindow *parent = nullptr);
 
 /// Run a wizard for folder creation:
 extern
@@ -431,7 +431,7 @@ extern "C"
 int MDialog_GetSelection(const wxString& message,
                          const wxString& caption,
                          const wxArrayString& choices,
-                         wxWindow *parent = NULL);
+                         wxWindow *parent = nullptr);
 
 /**
   Propose the user to choose one or several of the strings in the choices
@@ -448,7 +448,7 @@ size_t MDialog_GetSelections(const wxString& message,
                              const wxString& caption,
                              const wxArrayString& choices,
                              wxArrayInt *selections,
-                             wxWindow *parent = NULL,
+                             wxWindow *parent = nullptr,
                              const wxString& confpath = wxEmptyString,
                              const wxSize& sizeDef = wxDefaultSize);
 
@@ -471,7 +471,7 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
                                   wxArrayString* choices,
                                   wxArrayInt* status,
                                   const wxString& profileKey,
-                                  wxWindow *parent = NULL);
+                                  wxWindow *parent = nullptr);
 
 /**
   Show a dialog asking for two text values
@@ -483,7 +483,7 @@ bool MDialog_GetText2FromUser(const wxString& message,
                               String *value1,
                               const wxString& prompt2,
                               String *value2,
-                              wxWindow *parent = NULL);
+                              wxWindow *parent = nullptr);
 
 /**
   Show a dialog asking the user for password and also, optionally, the
@@ -494,7 +494,7 @@ bool MDialog_GetText2FromUser(const wxString& message,
 bool MDialog_GetPassword(const wxString& folderName,
                          wxString *password,
                          wxString *username,
-                         wxWindow *parent = NULL);
+                         wxWindow *parent = nullptr);
 
 /**
   Show a dialog asking the user for the password and username needed to
@@ -506,7 +506,7 @@ bool MDialog_GetPassword(Protocol protocol,
                          const wxString& server,
                          wxString *password,
                          wxString *username,
-                         wxWindow *parent = NULL);
+                         wxWindow *parent = nullptr);
 
 /**
   The base class for all Mahogany dialogs.

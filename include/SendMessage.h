@@ -85,7 +85,7 @@ public:
    */
    static SendMessage *Create(const Profile *profile,
                               Protocol protocol = Prot_Default,
-                              wxFrame *frame = NULL);
+                              wxFrame *frame = nullptr);
 
    /**
       Creates a duplicate of an existing message.
@@ -100,7 +100,7 @@ public:
    */
    static SendMessage *CreateResent(const Profile *profile,
                                     const Message *message,
-                                    wxFrame *frame = NULL);
+                                    wxFrame *frame = nullptr);
 
    /**
       Creates a new SendMessage object and initializes it with the existing
@@ -117,8 +117,8 @@ public:
    static SendMessage *CreateFromMsg(const Profile *profile,
                                      const Message *message,
                                      Protocol protocol = Prot_Default,
-                                     wxFrame *frame = NULL,
-                                     const wxArrayInt *partsToOmit = NULL);
+                                     wxFrame *frame = nullptr,
+                                     const wxArrayInt *partsToOmit = nullptr);
 
    //@}
 
@@ -134,7 +134,7 @@ public:
    static bool Bounce(const String& address,
                       const Profile *profile,
                       const Message& message,
-                      wxFrame *frame = NULL);
+                      wxFrame *frame = nullptr);
 
    //@}
 
@@ -238,8 +238,8 @@ public:
                         const void *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
                         const String &disposition = "INLINE",
-                        MessageParameterList const *dlist = NULL,
-                        MessageParameterList const *plist = NULL,
+                        MessageParameterList const *dlist = nullptr,
+                        MessageParameterList const *plist = nullptr,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM) = 0;
 
    /**
@@ -289,7 +289,7 @@ public:
       @return One of Result enum elements. Notice that SendNow() should only be
          called if this method returns @c Result_Prepared.
     */
-   virtual Result PrepareForSending(int flags = 0, String *outbox = NULL) = 0;
+   virtual Result PrepareForSending(int flags = 0, String *outbox = nullptr) = 0;
 
    /**
        Do send the message.
@@ -335,7 +335,7 @@ public:
 
      @param text the pointer to the string receiving the text, may be NULL
    */
-   virtual void Preview(String *text = NULL) = 0;
+   virtual void Preview(String *text = nullptr) = 0;
 
    /// virtual destructor
    virtual ~SendMessage();

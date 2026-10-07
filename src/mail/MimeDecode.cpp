@@ -632,7 +632,7 @@ std::string MIME::EncodeHeader(const String& in, wxFontEncoding enc)
    // if not fall back to the same UTF-8 (which can always be used) as we use
    // by default if no encoding was specified in the first place.
    if ( enc == wxFONTENCODING_SYSTEM ||
-         wxCSConv(enc).FromWChar(NULL, 0, in.wc_str()) == wxCONV_FAILED )
+         wxCSConv(enc).FromWChar(nullptr, 0, in.wc_str()) == wxCONV_FAILED )
    {
       enc = wxFONTENCODING_UTF8;
    }

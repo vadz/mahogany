@@ -262,13 +262,13 @@ const wxChar *
 QuoteURLFilter::FindURLIfNeeded(const wxChar *s, int& len)
 {
    if ( !m_options.highlightURLs )
-      return NULL;
+      return nullptr;
 
    extern int FindURL(const wxChar *s, int& len);
 
    int pos = FindURL(s, len);
 
-   return pos == -1 ? NULL : s + pos;
+   return pos == -1 ? nullptr : s + pos;
 }
 
 void

@@ -67,7 +67,7 @@ public:
 protected:
    // split one field from the line, modify the pointer to point at the start
    // of the next field if !NULL
-   wxString SplitField(const wxChar *start, const wxChar **next = NULL) const;
+   wxString SplitField(const wxChar *start, const wxChar **next = nullptr) const;
 
    // split the line of the input file into fields using our delimiter, return
    // the number of fields

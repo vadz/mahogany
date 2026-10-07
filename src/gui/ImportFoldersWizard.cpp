@@ -116,7 +116,7 @@ MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wiza
                              : MWizardPage(wizard,
                                            MWizard_ImportFolders_Choice)
 {
-   m_checkMH = NULL;
+   m_checkMH = nullptr;
 
    bool hasMH = false,
         hasSomethingToImport = false;
@@ -152,7 +152,7 @@ MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wiza
 
    if ( hasMH )
    {
-      m_checkMH = panel->CreateCheckBox(labels[0], maxwidth, NULL);
+      m_checkMH = panel->CreateCheckBox(labels[0], maxwidth, nullptr);
 
       // by default, import them all
       m_checkMH->SetValue(true);
@@ -221,7 +221,7 @@ MWizard_ImportFolders_MHPage::MWizard_ImportFolders_MHPage(MWizard *wizard)
 
    maxwidth += 5;
 
-   m_textTop = panel->CreateDirEntry(labels[0], maxwidth, NULL);
+   m_textTop = panel->CreateDirEntry(labels[0], maxwidth, nullptr);
    m_checkAll = panel->CreateCheckBox(labels[1], maxwidth, m_textTop);
 
    // init controls
@@ -257,7 +257,7 @@ ImportFoldersWizard::DoCreatePage(MWizardPageId id)
    }
 #undef CREATE_PAGE
 
-   return NULL;
+   return nullptr;
 }
 
 void RunImportFoldersWizard()

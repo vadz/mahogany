@@ -137,11 +137,11 @@ WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 // implementation
 // ============================================================================
 
-MAppBase *mApplication = NULL;
+MAppBase *mApplication = nullptr;
 
 // there is no MAtExit.cpp (it wouldn't contain anything but this line) so do
 // it here
-MRunAtExit *MRunAtExit::ms_first = NULL;
+MRunAtExit *MRunAtExit::ms_first = nullptr;
 
 // ----------------------------------------------------------------------------
 // MAppBase - the class which defines the "application object" interface
@@ -149,19 +149,19 @@ MRunAtExit *MRunAtExit::ms_first = NULL;
 
 MAppBase::MAppBase()
 {
-   m_eventOptChangeReg = NULL;
-   m_eventFolderUpdateReg = NULL;
+   m_eventOptChangeReg = nullptr;
+   m_eventFolderUpdateReg = nullptr;
 
-   m_topLevelFrame = NULL;
-   m_framesOkToClose = NULL;
-   m_FolderMonitor = NULL;
-   m_profile = NULL;
+   m_topLevelFrame = nullptr;
+   m_framesOkToClose = nullptr;
+   m_FolderMonitor = nullptr;
+   m_profile = nullptr;
 
 #ifdef USE_DIALUP
    m_DialupSupport = FALSE;
 #endif // USE_DIALUP
 
-   m_mimeManager = NULL;
+   m_mimeManager = nullptr;
    m_statusPanes[0] = SF_ILLEGAL; // will be really initialized later
 
    m_cycle = Initializing;
@@ -185,7 +185,7 @@ MAppBase::~MAppBase()
    if ( m_profile )
    {
       m_profile->DecRef();
-      m_profile = NULL;
+      m_profile = nullptr;
    }
 
    Profile::DeleteGlobalConfig();
@@ -201,7 +201,7 @@ MAppBase::~MAppBase()
    MObjectRC::CheckLeaks();
    MObject::CheckLeaks();
 
-   mApplication = NULL;
+   mApplication = nullptr;
 }
 
 bool
@@ -218,7 +218,7 @@ MAppBase::ProcessSendCmdLineOptions(const CmdLineOptions& cmdLineOpts)
    }
    else
    {
-      composer = NULL;
+      composer = nullptr;
    }
 
    if ( composer )
@@ -241,7 +241,7 @@ MAppBase::ProcessSendCmdLineOptions(const CmdLineOptions& cmdLineOpts)
       composer->GetFrame()->Raise();
    }
 
-   return composer != NULL;
+   return composer != nullptr;
 }
 
 void
@@ -480,7 +480,7 @@ MAppBase::OnStartup()
               "exit the program now and run it as an ordinary user\n"
               "instead.\n\n"
               "Are you sure you want to continue?"),
-            NULL,
+            nullptr,
             _("Run as root?"),
             M_DLG_NO_DEFAULT,
             M_MSGBOX_ASK_RUNASROOT) )
@@ -513,7 +513,7 @@ MAppBase::OnStartup()
       if ( !m_cmdLineOptions->safe )
       {
          // no parent because no frames created yet
-         MDialog_AboutDialog(NULL);
+         MDialog_AboutDialog(nullptr);
       }
    }
 
@@ -641,7 +641,7 @@ MAppBase::OnStartup()
 
    // we won't need the command line options any more
    delete m_cmdLineOptions;
-   m_cmdLineOptions = NULL;
+   m_cmdLineOptions = nullptr;
 
    return TRUE;
 }
@@ -684,18 +684,18 @@ MAppBase::OnShutDown()
       if ( m_eventOptChangeReg )
       {
          MEventManager::Deregister(m_eventOptChangeReg);
-         m_eventOptChangeReg = NULL;
+         m_eventOptChangeReg = nullptr;
       }
       if ( m_eventFolderUpdateReg )
       {
          MEventManager::Deregister(m_eventFolderUpdateReg);
-         m_eventFolderUpdateReg = NULL;
+         m_eventFolderUpdateReg = nullptr;
       }
 
       if (m_FolderMonitor)
       {
          delete m_FolderMonitor;
-         m_FolderMonitor = NULL;
+         m_FolderMonitor = nullptr;
       }
 
       // clean up
@@ -730,7 +730,7 @@ MAppBase::OnShutDown()
    if ( m_profile )
    {
       m_profile->DecRef();
-      m_profile = NULL;
+      m_profile = nullptr;
    }
 
    if ( initialized )
@@ -768,7 +768,7 @@ MAppBase::OnShutDown()
    if ( m_cmdLineOptions )
    {
       delete m_cmdLineOptions;
-      m_cmdLineOptions = NULL;
+      m_cmdLineOptions = nullptr;
    }
 }
 
@@ -782,7 +782,7 @@ MAppBase::CanClose() const
            (
             _("You still have messages queued to be sent.\n"
               "Do you want to send them before exiting the application?"),
-            NULL,
+            nullptr,
             MDIALOG_YESNOTITLE,
             M_DLG_YES_DEFAULT,
             M_MSGBOX_SEND_OUTBOX_ON_EXIT)
@@ -813,7 +813,7 @@ MAppBase::CanClose() const
                           "the trash mailbox (%s)?"),
                         trashName
                      ),
-                     NULL,
+                     nullptr,
                      _("Empty trash?"),
                      M_DLG_NO_DEFAULT,
                      M_MSGBOX_EMPTY_TRASH_ON_EXIT
@@ -839,7 +839,7 @@ MAppBase::CanClose() const
       msg += folders;
       msg += _("Do you want to exit anyway?");
 
-      if ( !MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+      if ( !MDialog_YesNoDialog(msg, nullptr, MDIALOG_YESNOTITLE,
                                 M_DLG_NO_DEFAULT,
                                 M_MSGBOX_ABANDON_CRITICAL) )
          return false;
@@ -956,7 +956,7 @@ MAppBase::OnChangeCreateInternalMessage(MEventData& event)
    if( optionsChange->GetChangeKind() == MEventOptionsChangeData::Ok
          || optionsChange->GetChangeKind() == MEventOptionsChangeData::Apply )
    {
-      bool original = !env_parameters(GET_USERHASNOLIFE, NULL);
+      bool original = !env_parameters(GET_USERHASNOLIFE, nullptr);
       bool current = READ_APPCONFIG_BOOL(MP_CREATE_INTERNAL_MESSAGE);
       if ( original != current )
       {
@@ -1051,11 +1051,11 @@ MAppBase::InitDirectories()
                       "Would you like to specify its location now?"),
                     MAHOGANY_DATADIR,
                     stdPrefixes);
-         if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+         if ( MDialog_YesNoDialog(msg, nullptr, MDIALOG_YESNOTITLE,
                                   M_DLG_YES_DEFAULT,
                                   M_MSGBOX_ASK_SPECIFY_DIR) )
          {
-            wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
+            wxDirDialog dlg(nullptr, _("Specify global directory for Mahogany"));
             if ( dlg.ShowModal() == wxID_OK )
             {
                m_globalDir = dlg.GetPath();
@@ -1071,7 +1071,7 @@ MAppBase::InitDirectories()
 #elif defined(OS_WIN)
       // use the program installation directory under Windows
       wxString path;
-      if ( ::GetModuleFileName(NULL, wxStringBuffer(path, MAX_PATH), MAX_PATH) )
+      if ( ::GetModuleFileName(nullptr, wxStringBuffer(path, MAX_PATH), MAX_PATH) )
       {
          // get just the directory
          m_globalDir = wxFileName(path).GetPath();
@@ -1121,7 +1121,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
    if(nSMTP) *nSMTP = 0;
    if(nNNTP) *nNNTP = 0;
 
-   MailFolder *mf = NULL;
+   MailFolder *mf = nullptr;
    if(mfi)
    {
       mf = mfi;
@@ -1133,7 +1133,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
       if ( folderOutbox )
       {
          mf = MailFolder::OpenFolder(folderOutbox);
-         if(mf == NULL)
+         if(mf == nullptr)
          {
             String msg;
             msg.Printf(_("Cannot open outbox '%s'"), outbox);
@@ -1219,7 +1219,7 @@ MAppBase::SendOutbox(const String & outbox, bool
             (
              _("Cannot send queued messages while dialup network is down.\n"
                "Do you want to go online now?"),
-             NULL,
+             nullptr,
              MDIALOG_YESNOTITLE,
              M_DLG_YES_DEFAULT,
              M_MSGBOX_GO_ONLINE_TO_SEND_OUTBOX

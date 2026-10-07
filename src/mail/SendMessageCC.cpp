@@ -153,7 +153,7 @@ PARAMETER *CreateBodyParameter(const char *name, const char *value)
    PARAMETER * const par = mail_newbody_parameter();
    par->attribute = strdup(name);
    par->value = strdup(value);
-   par->next = NULL;
+   par->next = nullptr;
 
    return par;
 }
@@ -247,7 +247,7 @@ SendMessage::CreateResent(const Profile *profile,
                           const Message *message,
                           wxFrame *frame)
 {
-   CHECK( message, NULL, "no Message in SendMessage::CreateResent()" );
+   CHECK( message, nullptr, "no Message in SendMessage::CreateResent()" );
 
    SendMessageCC *msg = new SendMessageCC(profile, Prot_Default, frame, message);
    if ( msg )
@@ -263,7 +263,7 @@ SendMessage::CreateFromMsg(const Profile *profile,
                            wxFrame *frame,
                            const wxArrayInt *partsToOmit)
 {
-   CHECK( message, NULL, "no Message in SendMessage::CreateFromMsg()" );
+   CHECK( message, nullptr, "no Message in SendMessage::CreateFromMsg()" );
 
    SendMessageCC *msg = new SendMessageCC(profile, protocol, frame, message);
    if ( msg )
@@ -365,7 +365,7 @@ SendMessageCC::SendMessageCC(const Profile *profile,
    m_wasBuilt = false;
 
    m_Envelope = mail_newenvelope();
-   m_partTop = NULL;
+   m_partTop = nullptr;
 
    if ( !profile )
    {
@@ -588,10 +588,10 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
    // VZ: I'm not sure at all about what exactly we're trying to do here so
    //     this is almost surely wrong (FIXME)
    AddressList_obj addrListReplyTo(message->GetAddressList(MAT_REPLYTO));
-   Address *addrReplyTo = addrListReplyTo ? addrListReplyTo->GetFirst() : NULL;
+   Address *addrReplyTo = addrListReplyTo ? addrListReplyTo->GetFirst() : nullptr;
 
    AddressList_obj addrListFrom(message->GetAddressList(MAT_FROM));
-   Address *addrFrom = addrListFrom ? addrListFrom->GetFirst() : NULL;
+   Address *addrFrom = addrListFrom ? addrListFrom->GetFirst() : nullptr;
    if ( !addrFrom )
       addrFrom = addrReplyTo;
 
@@ -614,7 +614,7 @@ SendMessageCC::InitFromMsg(const Message *message, const wxArrayInt *partsToOmit
                "To",
                "Cc",
                "Bcc",
-               NULL
+               nullptr
             };
             wxArrayString recipients = message->GetHeaderLines(headers);
 
@@ -900,7 +900,7 @@ void SendMessageCC::CheckAddressFieldForErrors(ADDRESS *adrStart)
                     AddressCC(adr).GetAddress()));
 
          // prevent mail_free_address() from freeing the entire list tail
-         adr->next = NULL;
+         adr->next = nullptr;
 
          mail_free_address(&adr);
       }
@@ -1126,7 +1126,7 @@ SendMessageCC::Sign()
 {
    // get the text to sign
    BODY * const bodyOrig = GetBody();
-   rfc822_encode_body_7bit(NULL /* env is unused */, bodyOrig);
+   rfc822_encode_body_7bit(nullptr /* env is unused */, bodyOrig);
 
    String textToSign;
    char tmp[MAILTMPLEN + 1];
@@ -1532,7 +1532,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
    bdy->contents.text.size = len;
 
 
-   PARAMETER *lastpar = NULL;
+   PARAMETER *lastpar = nullptr;
 
    // do we already have CHARSET parameter?
    bool hasCharset = false;
@@ -1601,14 +1601,14 @@ SendMessageCC::AddPart(MimeType::Primary type,
       bdy->disposition.type = strdup(disposition.ToAscii());
    if ( dlist )
    {
-      lastpar = NULL;
+      lastpar = nullptr;
 
       for ( const MessageParameter& param : *dlist )
       {
          PARAMETER *par = mail_newbody_parameter();
          par->attribute = strdup(param.name.ToAscii());
          par->value     = strdup(MIME::EncodeHeader(param.value).c_str());
-         par->next      = NULL;
+         par->next      = nullptr;
          if(lastpar)
             lastpar->next = par;
          else
@@ -2083,7 +2083,7 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
    {
       // we need a valid "From " line or c-client wouldn't recognize this file
       // as a MBOX one
-      time_t t = time(NULL);
+      time_t t = time(nullptr);
       ostr << "From Mahogany-AutoSave " << ctime(&t);
       ok = !ostr.fail();
    }
@@ -2165,13 +2165,13 @@ Rfc822OutputRedirector::Rfc822OutputRedirector(const MessageHeaders& headers,
    ms_outputBcc = (flags & AddBcc) != 0;
    ms_Headers = headers;
 
-   m_oldRfc822Output = mail_parameters(NULL, GET_RFC822OUTPUT, NULL);
-   (void)mail_parameters(NULL, SET_RFC822OUTPUT, (void *)FullRfc822Output);
+   m_oldRfc822Output = mail_parameters(nullptr, GET_RFC822OUTPUT, nullptr);
+   (void)mail_parameters(nullptr, SET_RFC822OUTPUT, (void *)FullRfc822Output);
 }
 
 Rfc822OutputRedirector::~Rfc822OutputRedirector()
 {
-   (void)mail_parameters(NULL, SET_RFC822OUTPUT, m_oldRfc822Output);
+   (void)mail_parameters(nullptr, SET_RFC822OUTPUT, m_oldRfc822Output);
 
    ms_Headers.clear();
 

@@ -126,12 +126,12 @@ wxMDialog::ShowModal()
    /* Disable all other windows apart from the help frame and this
       one. */
 
-   wxFrame *hf = NULL;
+   wxFrame *hf = nullptr;
    wxHelpController *hc = ((wxMApp *)mApplication)->GetHelpController();
    if(hc && hc->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
       hf = ((wxHelpControllerHtml *)hc)->GetFrameParameters();
 #else
-   wxWindow *hf = NULL;
+   wxWindow *hf = nullptr;
 #endif
 
    wxWindowList::Node *node;
@@ -437,7 +437,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                                wxSize(widthText, heightText));
      m_text->SetFocus();
-     m_passwd = NULL; // signal that it's not used
+     m_passwd = nullptr; // signal that it's not used
   }
 
   // buttons
@@ -459,7 +459,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
 
 bool MTextInputDialog::TransferDataToWindow()
 {
-   if ( m_passwd == NULL )
+   if ( m_passwd == nullptr )
    {
       if ( m_strText.empty() )
       {
@@ -618,7 +618,7 @@ MDialog_Message(const wxString& message,
             String(M_TITLE_PREFIX) + title,
             style,
             GetDialogParent(parent),
-            NULL,
+            nullptr,
             &params
           ) != wxCANCEL;
 }
@@ -635,7 +635,7 @@ bool MDialog_Message(const wxString& message,
 
    return MDialog_Message(message, parent, title,
                           persMsg ? (const char *)configPath.c_str()
-                                  : (const char *)NULL,
+                                  : (const char *)nullptr,
                           flags);
 }
 
@@ -754,7 +754,7 @@ MDialog_YesNoDialog(const wxString& message,
                String(M_TITLE_PREFIX) + title,
                GetYesNoMsgBoxStyle(flags),
                GetDialogParent(parent),
-               NULL,
+               nullptr,
                &params
             );
 
@@ -813,7 +813,7 @@ MDialog_FileRequester(String const & message,
    CloseSplash();
 
 
-   if(parent == NULL)
+   if(parent == nullptr)
       parent = mApplication->TopLevelFrame();
 
    // TODO we save only one file name for all "open file" dialogs and one for
@@ -897,8 +897,8 @@ MDialog_FolderProfile(const wxWindow *parent, const String& folderName)
 void
 MDialog_FolderOpen(const wxWindow *parent)
 {
-   MFolder *folder = MDialog_FolderChoose(parent, NULL, true /* open */);
-   if ( folder != NULL )
+   MFolder *folder = MDialog_FolderChoose(parent, nullptr, true /* open */);
+   if ( folder != nullptr )
    {
       // open a view on this folder
       OpenFolderViewFrame(folder, (wxWindow *)parent);
@@ -987,7 +987,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
                       (
                         "FolderDialogFile",
                         _("Mahogany: Please choose a folder file"),
-                        NULL, NULL, NULL, NULL,
+                        nullptr, nullptr, nullptr, nullptr,
                         m_flags & MDlg_Folder_Open
                            ? wxFD_OPEN | wxFD_FILE_MUST_EXIST
                            : wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
@@ -1053,7 +1053,7 @@ bool MFolderDialog::TransferDataFromWindow()
    {
       SafeDecRef(m_folder);
       m_folder = m_tree->GetSelection();
-      if ( m_folder != NULL )
+      if ( m_folder != nullptr )
       {
          // save the folder name to config
          wxConfigBase *config = wxConfigBase::Get();
@@ -1084,7 +1084,7 @@ MDialog_FolderChoose(const wxWindow *parent, MFolder *folder, int flags)
    // TODO store the last folder in config
    MFolderDialog dlg((wxWindow *)parent, folder, flags);
 
-   return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : NULL;
+   return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : nullptr;
 }
 
 
@@ -1497,7 +1497,7 @@ wxXFaceDialog::OnButton(wxCommandEvent & event )
                   this,
                   GetProfile()->GetName() + _T("/xfacefilerequester"),
                   _("Please pick an image file"),
-                  path, file, NULL
+                  path, file, nullptr
                 );
       m_Button->SetFile(newface);
    }
@@ -1553,7 +1553,7 @@ public:
             MP_FOLDER_PASSWORD,
             MP_SMTPHOST_PASSWORD,
             MP_NNTPHOST_LOGIN,
-            NULL
+            nullptr
          };
          for(int idx = 0; keys[idx]; idx++)
          {
@@ -1714,7 +1714,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    }
    else
    {
-      m_oPassword = NULL;
+      m_oPassword = nullptr;
    }
 
    m_text1 = new wxStaticText(this, -1, _("New password:"));
@@ -2141,7 +2141,7 @@ extern "C"
            << '\n'
            << _("Do you accept this certificate?");
       return (int) MDialog_YesNoDialog(info,
-                                       NULL, _("SSL certificate verification"),
+                                       nullptr, _("SSL certificate verification"),
                                        M_DLG_YES_DEFAULT);
    }
 }
@@ -2432,7 +2432,7 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
                        : wxManuallyLaidOutDialog(parent, caption, profileKey)
 {
    m_hasChanges = false;
-   m_textAdd = NULL;
+   m_textAdd = nullptr;
 
    // layout the controls
    // -------------------
@@ -2462,7 +2462,7 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    m_btnUp->SetConstraints(c);
 
    // optional controls for string editing below the list box
-   wxControl *ctrlBelow = NULL;
+   wxControl *ctrlBelow = nullptr;
    if ( extraFeatures & Allow_Add )
    {
       wxStaticText *labelAdd = new wxStaticText(this, -1, _("&Add another:"));
@@ -2752,7 +2752,7 @@ extern wxChoice *CreateIdentCombo(wxWindow *parent)
    wxArrayString identities = Profile::GetAllIdentities();
    size_t count = identities.GetCount();
    if ( !count )
-      return (wxChoice *)NULL;
+      return (wxChoice *)nullptr;
 
    // first one is always the default identity, i.e. no identity at all
    wxString *choices = new wxString[count + 1];
@@ -3127,7 +3127,7 @@ bool MDialog_GetPassword(Protocol protocol,
 
 extern wxWindow *GetDialogParent(const wxWindow *parent)
 {
-  return parent == NULL ? mApplication->TopLevelFrame()
+  return parent == nullptr ? mApplication->TopLevelFrame()
                         : GetFrame(parent);
 }
 

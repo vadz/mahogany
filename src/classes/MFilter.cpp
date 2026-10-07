@@ -184,7 +184,7 @@ const wxChar * ORC_T_Names[] =
    _T("istome()"),          // ORC_T_IsToMe
    _T("hasflag("),          // ORC_T_HasFlag
    _T("isfromme()"),        // ORC_T_IsFromMe
-   NULL
+   nullptr
 };
 
 /// this array tells us if the tests need arguments
@@ -259,7 +259,7 @@ const wxChar * ORC_W_Names[] =
    _T("headerline(\"Sender\")"),// ORC_W_Sender
    _T("recipients()"),          // ORC_W_Recipients
    _T("headerline"),            // ORC_W_Header: parentheses treated specially
-   NULL
+   nullptr
 };
 
 static const wxChar * OAC_T_Names[] =
@@ -279,7 +279,7 @@ static const wxChar * OAC_T_Names[] =
    _T("clearflag("),    // OAC_T_ClearFlag
    _T("setscore("),     // OAC_T_SetScore
    _T("nop("),          // OAC_T_NOP
-   NULL
+   nullptr
 };
 
 #define OAC_F_NeedsArg      0x01
@@ -840,7 +840,7 @@ public:
       }
       else
       {
-         m_Settings = NULL;
+         m_Settings = nullptr;
          m_Rule = fd.GetProgram();
       }
 
@@ -863,7 +863,7 @@ protected:
       {
          m_Profile = p;
          m_Name = p->readEntry(MP_FILTER_NAME, "");
-         m_Settings = NULL;
+         m_Settings = nullptr;
 
          // use the filter program if we have it
          m_Rule = p->readEntry(MP_FILTER_RULE, "");
@@ -930,7 +930,7 @@ private:
             {
                // oops, failed...
                m_Settings->DecRef();
-               m_Settings = NULL;
+               m_Settings = nullptr;
             }
             else
                m_Rule = m_Settings->WriteRule();
@@ -942,7 +942,7 @@ private:
             if(!rc)
             {
                m_Settings->DecRef();
-               m_Settings = NULL;
+               m_Settings = nullptr;
             }
          }
       }
@@ -1111,7 +1111,7 @@ InvalidateFilter(const MFilter * /* filter */)
 extern FilterRule *
 GetFilterForFolder(const MFolder *folder)
 {
-   CHECK( folder, NULL, _T("GetFilterForFolder: NULL parameter") );
+   CHECK( folder, nullptr, _T("GetFilterForFolder: NULL parameter") );
 
    // check if we already have it in the cache
    const String folderName = folder->GetFullName();
@@ -1140,9 +1140,9 @@ GetFilterForFolder(const MFolder *folder)
    if ( filterString.empty() )
    {
       // no, nothing to do
-      gs_folderFilters[folderName] = NULL;
+      gs_folderFilters[folderName] = nullptr;
 
-      return NULL;
+      return nullptr;
    }
 
    MModule_Filters *filterModule = MModule_Filters::GetModule();
@@ -1152,7 +1152,7 @@ GetFilterForFolder(const MFolder *folder)
 
       // don't cache this failure: maybe we'll be able to load the module the
       // next time
-      return NULL;
+      return nullptr;
    }
 
    // compile the filter rule into the real filter

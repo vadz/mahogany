@@ -108,7 +108,7 @@ public:
     */
    static MFolder *CreateTemp(const String& fullname,
                               MFolderType type,
-                              Profile *profile = NULL);
+                              Profile *profile = nullptr);
 
    /**
      Create a temp folder representing a file.
@@ -239,7 +239,7 @@ public:
       { return FolderNeedsNetwork(GetType(), GetFlags()); }
 
       /// SSL mode for this folder (this is a NOP for temp folders)
-   virtual SSLSupport GetSSL(SSLCert *acceptUnsigned = NULL) const = 0;
+   virtual SSLSupport GetSSL(SSLCert *acceptUnsigned = nullptr) const = 0;
    virtual void SetSSL(SSLSupport ssl, SSLCert cert) = 0;
 
       /**
@@ -336,7 +336,7 @@ public:
          {
             wxFAIL_MSG( _T("attempt to create MFolder from non folder profile") );
 
-            m_folder = NULL;
+            m_folder = nullptr;
          }
       }
       // takes ownership of the existing object
@@ -363,7 +363,7 @@ public:
    }
 
    // explicitly test if object is valid
-   bool IsOk() const { return m_folder != NULL; }
+   bool IsOk() const { return m_folder != nullptr; }
 
 private:
    // workaround for g++ bug: see BEGIN_DECLARE_AUTOPTR() definition in

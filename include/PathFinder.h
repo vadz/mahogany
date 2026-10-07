@@ -58,7 +58,7 @@ public:
        @return full path or an empty string
    */
    String Find(const String & filename,
-               bool *found = NULL,
+               bool *found = nullptr,
                int mode = R_OK) const;
 
    /** 
@@ -69,7 +69,7 @@ public:
        @return full path or an empty string
    */
    String FindFile(const String & filename,
-                   bool *found = NULL,
+                   bool *found = nullptr,
                    int mode = R_OK) const;
 
    /** 
@@ -80,7 +80,7 @@ public:
        @return full path or an empty string
    */
    String FindDir(const String & filename,
-                  bool *found = NULL,
+                  bool *found = nullptr,
                   int mode = R_OK) const;
 
    /** 
@@ -91,7 +91,7 @@ public:
        @return full path or an empty string
    */
    String FindDirFile(const String & filename,
-                      bool *found = NULL,
+                      bool *found = nullptr,
                       int mode = R_OK) const;
 
    /**

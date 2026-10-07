@@ -80,7 +80,7 @@ static const char *headersRecipients[] =
    "Resent-To",
    "Resent-Cc",
    "Resent-Bcc",
-   NULL
+   nullptr
 };
 
 // forward declare all of our classes
@@ -254,7 +254,7 @@ public:
 #endif
    void Error(const String &error);
    void Output(const String &msg)
-      { m_MInterface->MessageDialog(msg,NULL,_("Filters output")); }
+      { m_MInterface->MessageDialog(msg,nullptr,_("Filters output")); }
    void Log(const String &imsg, int level = M_LOG_DEFAULT)
       {
          String msg = _("Filters: ");
@@ -1000,8 +1000,8 @@ public:
    const Value Evaluate(void) const override
       {
          MOcheck();
-         ASSERT(m_Condition != NULL);
-         ASSERT(m_IfBlock != NULL);
+         ASSERT(m_Condition != nullptr);
+         ASSERT(m_IfBlock != nullptr);
          const Value rc = m_Condition->Evaluate();
          if(rc.ToNumber())
             return m_IfBlock->Evaluate();
@@ -1058,7 +1058,7 @@ FilterRuleImpl::FindFunction(const String &name)
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 
 void
@@ -1073,7 +1073,7 @@ FilterRuleImpl::Error(const String &error)
    // FIXME: this should be wxLogError() call as otherwise we get several
    //        message boxes for each error instead of only one combining all
    //        messages!
-   m_MInterface->MessageDialog(tmp,NULL,_("Parse error!"));
+   m_MInterface->MessageDialog(tmp,nullptr,_("Parse error!"));
 }
 
 /** Reads the next token from the string and removes it from it.
@@ -1303,10 +1303,10 @@ FilterRuleImpl::ParseProgram(void)
    if(token.IsEOF())
    {
       Error(_("No filter program found"));
-      return NULL;
+      return nullptr;
    }
    const SyntaxNode * pgm = ParseFilters();
-   if(pgm == NULL)
+   if(pgm == nullptr)
       Error(_("Parse error, cannot find valid program."));
    return pgm;
 }
@@ -1315,7 +1315,7 @@ const SyntaxNode *
 FilterRuleImpl::ParseFilters(void)
 {
    MOcheck();
-   const SyntaxNode * filter = NULL;
+   const SyntaxNode * filter = nullptr;
    if(token.IsIdentifier(_T("if")))
    {
       filter = ParseIfElse();
@@ -1324,14 +1324,14 @@ FilterRuleImpl::ParseFilters(void)
    {
       filter = ParseBlock();
    }
-   if (filter == NULL)
-      return NULL;
+   if (filter == nullptr)
+      return nullptr;
    if(token.IsEOF())
       return filter;
    const SyntaxNode * next = ParseFilters();
-   if (next == NULL) {
+   if (next == nullptr) {
       delete filter;
-      return NULL;
+      return nullptr;
    }
    return new Filter(filter, next);
 }
@@ -1346,29 +1346,29 @@ FilterRuleImpl::ParseIfElse(void)
    if(!token.IsChar('('))
    {
       Error(_("expected '(' after 'if'."));
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '('
 
    const SyntaxNode *condition = ParseCondition();
    if(! condition)
-      return NULL;
+      return nullptr;
 
    if(!token.IsChar(')'))
    {
       Error(_("expected ')' after condition in if statement."));
       delete condition;
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow ')'
 
    const SyntaxNode *ifBlock = ParseBlock();
    if(! ifBlock) {
       delete condition;
-      return NULL;
+      return nullptr;
    }
 
-   const SyntaxNode *elseBlock = NULL;
+   const SyntaxNode *elseBlock = nullptr;
    if(token.IsIdentifier(_T("else")))
    {
       // we must parse the else branch, too:
@@ -1381,7 +1381,7 @@ FilterRuleImpl::ParseIfElse(void)
       {
          delete condition;
          delete ifBlock;
-         return NULL;
+         return nullptr;
       }
    }
    // if we reach here, everything was parsed OK:
@@ -1396,7 +1396,7 @@ FilterRuleImpl::ParseBlock(void)
    if(!token.IsChar('{'))
    {
       Error(_("Expected '{' at start of block."));
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '{'
    const SyntaxNode * stmt;
@@ -1404,16 +1404,16 @@ FilterRuleImpl::ParseBlock(void)
       stmt = ParseBlock(); // it can generate {{{ ... }}}
    else
       stmt = ParseStmts();
-   if(stmt == NULL)
+   if(stmt == nullptr)
    {
       Error(_("Expected statements after '{'"));
-      return NULL;
+      return nullptr;
    }
    if(!token.IsChar('}'))
    {
       Error(_("Expected '}' after block."));
       delete stmt;
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '}'
    return stmt;
@@ -1427,34 +1427,34 @@ FilterRuleImpl::ParseStmts(void)
    if(token.IsIdentifier(_T("if")))
    {
       stmt = ParseIfElse();
-      if(stmt == NULL)
-         return NULL;
+      if(stmt == nullptr)
+         return nullptr;
    }
    else if(token.GetType() == Token::TT_Identifier)
    {
       Token id = GetToken();
       stmt = ParseFunctionCall(id);
-      if(stmt == NULL)
-         return NULL;
+      if(stmt == nullptr)
+         return nullptr;
       if(!token.IsChar(';'))
       {
          Error(_("Expected ';' at end of statement."));
          delete stmt;
-         return NULL;
+         return nullptr;
       }
       NextToken();
    }
    else
    {
       Error(_("Expected a statement."));
-      return NULL;
+      return nullptr;
    }
    if(token.IsChar('}'))
       return stmt;
    const SyntaxNode * next = ParseStmts();
-   if(next == NULL) {
+   if(next == nullptr) {
       delete stmt;
-      return NULL;
+      return nullptr;
    }
    return new Statement(stmt, next);
 }
@@ -1471,10 +1471,10 @@ FilterRuleImpl::ParseCondition(void)
 {
    MOcheck();
    const SyntaxNode *sn = ParseQueryOp();
-   if (sn != NULL)
+   if (sn != nullptr)
       return sn;
    Error(_("Invalid conditional expression"));
-   return NULL;
+   return nullptr;
 }
 
 const SyntaxNode *
@@ -1482,29 +1482,29 @@ FilterRuleImpl::ParseQueryOp(void)
 {
    MOcheck();
    const SyntaxNode *sn = ParseOrs();
-   if(sn == NULL)
-      return NULL;
+   if(sn == nullptr)
+      return nullptr;
    if(!token.IsChar('?'))
            return sn;
    NextToken();
    const SyntaxNode *left = ParseExpression();
-   if(left == NULL) {
+   if(left == nullptr) {
       Error(_("Expected expression after '?'"));
       delete sn;
-      return NULL;
+      return nullptr;
    }
    if(!token.IsChar(':'))
    {
       Error(_("Expected ':' after '?' expression."));
       delete left; delete sn;
-      return NULL;
+      return nullptr;
    }
    NextToken();
    const SyntaxNode *right = ParseExpression();
-   if (right == NULL) {
+   if (right == nullptr) {
       Error(_("Expected expression after ':'"));
       delete left; delete sn;
-      return NULL;
+      return nullptr;
    }
    return new QueryOp(sn, left, right);
 }
@@ -1526,19 +1526,19 @@ FilterRuleImpl::Parse##name(void) \
 { \
    MOcheck(); \
    const SyntaxNode *expr = Parse##part(); \
-   if (expr == NULL) \
-      return NULL; \
+   if (expr == nullptr) \
+      return nullptr; \
    for (;;) \
    { \
       OpCreate op = opers(token); \
-      if (op == NULL) \
+      if (op == nullptr) \
          break; \
       NextToken(); \
       const SyntaxNode *exp = Parse##part(); \
-      if (exp == NULL) { \
+      if (exp == nullptr) { \
          delete expr; \
          Error(msg); \
-         return NULL; \
+         return nullptr; \
       } \
       expr = (*op)(expr, exp); \
    } \
@@ -1552,11 +1552,11 @@ OrOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(Or);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier(_T("or")))
       return OperatorOr::Create;
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Ors,OrOp,Iffs,_("Expected expression after OR operator"))
 
@@ -1568,12 +1568,12 @@ IffOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(Iff);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier("iff"))
    return OperatorIff::Create;
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Iffs,IffOp,Ands,_("Expected expression after IFF operator"))
 
@@ -1584,11 +1584,11 @@ AndOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(And);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier(_T("and")))
       return OperatorAnd::Create;
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Ands,AndOp,BOrs,_("Expected expression after AND operator"))
 
@@ -1600,10 +1600,10 @@ BOrOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(BOr);
-         default: return NULL;
+         default: return nullptr;
       }
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(BOrs,BOrOp,Xors,_("Expected expression after bit OR operator"))
 
@@ -1615,12 +1615,12 @@ XorOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(Xor);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier("xor"))
       return OperatorXor::Create;
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Xors,XorOp,BAnds,_("Expected expression after XOR operator"))
 
@@ -1632,10 +1632,10 @@ BAndOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(BAnd);
-         default: return NULL;
+         default: return nullptr;
       }
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(BAnds,BAndOp,Relational,
           _("Expected expression after bit AND operator"))
@@ -1644,7 +1644,7 @@ static inline OpCreate
 RelOp(Token t)
 {
    if (!t.IsOperator())
-      return NULL;
+      return nullptr;
    switch (t.GetOperator())
    {
       OPERATOR_VALUE(Less);
@@ -1658,7 +1658,7 @@ RelOp(Token t)
       default:
          ;
    }
-   return NULL;
+   return nullptr;
 }
 // Relationals are a special case; they don't associate.
 const SyntaxNode *
@@ -1666,17 +1666,17 @@ FilterRuleImpl::ParseRelational(void)
 {
    MOcheck();
    const SyntaxNode *expr = ParseTerm();
-   if (expr == NULL)
-      return NULL;
+   if (expr == nullptr)
+      return nullptr;
    OpCreate op = RelOp(token);
-   if (op == NULL)
+   if (op == nullptr)
       return expr;
    NextToken();
    const SyntaxNode *exp = ParseTerm();
-   if (exp == NULL) {
+   if (exp == nullptr) {
       delete expr;
       Error(_("Expected expression after relational operator"));
-      return NULL;
+      return nullptr;
    }
    return (*op)(expr, exp);
 }
@@ -1685,7 +1685,7 @@ static inline OpCreate
 AddOp(Token t)
 {
    if (!t.IsOperator())
-      return NULL;
+      return nullptr;
    switch (t.GetOperator())
    {
       OPERATOR_VALUE(Plus);
@@ -1696,7 +1696,7 @@ AddOp(Token t)
          ;
    }
 
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Term,AddOp,Factor,_("Expected term after plus/minus operator"))
 
@@ -1704,7 +1704,7 @@ static inline OpCreate
 MulOp(Token t)
 {
    if (!t.IsOperator())
-      return NULL;
+      return nullptr;
    switch (t.GetOperator())
    {
       OPERATOR_VALUE(Times);
@@ -1715,7 +1715,7 @@ MulOp(Token t)
       default:
          ;
    }
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Factor,MulOp,Unary,
           _("Expected factor after multiply/divide/modulus operator"))
@@ -1724,7 +1724,7 @@ const SyntaxNode *
 FilterRuleImpl::ParseUnary(void)
 {
    MOcheck();
-   const SyntaxNode *sn = NULL;
+   const SyntaxNode *sn = nullptr;
    if(token.GetType() == Token::TT_Char)
    {
       /* expression in parenthesis */
@@ -1736,7 +1736,7 @@ FilterRuleImpl::ParseUnary(void)
          {
             delete sn;
             Error(_("Expected ')' after expression."));
-            return NULL;
+            return nullptr;
          }
          NextToken();
       }
@@ -1744,10 +1744,10 @@ FilterRuleImpl::ParseUnary(void)
       {
          NextToken();
          sn = ParseUnary();
-         if(sn == NULL)
+         if(sn == nullptr)
          {
             Error(_("Expected unary after negation operator."));
-            return NULL;
+            return nullptr;
          }
          sn = new Negation(sn);
       }
@@ -1770,8 +1770,8 @@ FilterRuleImpl::ParseUnary(void)
          else
          {
             sn = ParseUnary();
-            if (sn == NULL)
-               return NULL;
+            if (sn == nullptr)
+               return nullptr;
             sn = new Negative(sn);
          }
       }
@@ -1798,7 +1798,7 @@ FilterRuleImpl::ParseUnary(void)
       NextToken();
    }
    // sn == NULL, illegal unary value
-   if(sn == NULL)
+   if(sn == nullptr)
       Error(_("Expected a number or a function call."));
    return sn;
 }
@@ -1816,7 +1816,7 @@ FilterRuleImpl::ParseFunctionCall(Token id)
       err.Printf(_("Functioncall expected '(' after '%s'."),
                  id.GetIdentifier());
       Error(err);
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '('
 
@@ -1833,13 +1833,13 @@ FilterRuleImpl::ParseFunctionCall(Token id)
          {
             Error(_("Expected an expression in argument list."));
             delete args;
-            return NULL;
+            return nullptr;
          }
          if(token.GetType() != Token::TT_Char)
          {
             Error(_("Expected ',' or ')' after argument."));
             delete args;
-            return NULL;
+            return nullptr;
          }
          else if(token.GetChar() == ')')
             break;
@@ -1850,14 +1850,14 @@ FilterRuleImpl::ParseFunctionCall(Token id)
    NextToken(); // swallow ')'
 
    const FunctionDefinition *fd = FindFunction(id.GetIdentifier());
-   if(fd == NULL)
+   if(fd == nullptr)
    {
       String err;
       err.Printf(_("Attempt to call undefined function '%s'."),
                  id.GetIdentifier());
       Error(err);
       delete args;
-      return NULL;
+      return nullptr;
    }
    return new FunctionCall(fd, args, this);
 }
@@ -2035,7 +2035,7 @@ static Value func_print(ArgList *args, FilterRuleImpl *p)
 
    // FIXME: this can't work like this!!
 #if 0
-   wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL);
+   wxMessageViewFrame *mvf = new wxMessageViewFrame(nullptr);
    mvf->Show(FALSE);
    mvf->ShowMessage(msg);
    msg->DecRef();
@@ -2314,7 +2314,7 @@ static Value func_now(ArgList *args, FilterRuleImpl *)
 {
    if(args->Count() != 0)
       return Value(-1);
-   time_t today = time(NULL) / 60 / 60 / 24;
+   time_t today = time(nullptr) / 60 / 60 / 24;
    return Value(today);
 }
 
@@ -2598,7 +2598,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
       rc = apply.Run();
 
       m_MailFolder->DecRef();
-      m_MailFolder = NULL;
+      m_MailFolder = nullptr;
    }
 #endif // !TEST
 
@@ -2623,8 +2623,8 @@ FilterRuleImpl::FilterRuleImpl(const char* filterrule,
 
    m_Program = Parse(filterrule);
    m_MessageUId = UID_ILLEGAL;
-   m_MailMessage = NULL;
-   m_MailFolder = NULL;
+   m_MailMessage = nullptr;
+   m_MailFolder = nullptr;
 }
 
 FilterRuleImpl::~FilterRuleImpl()
@@ -2652,7 +2652,7 @@ void FilterRuleImpl::Debug(void)
 FilterRuleApply::FilterRuleApply(FilterRuleImpl *parent, UIdArray& msgs)
                : m_parent(parent), m_msgs(msgs)
 {
-   m_pd = NULL;
+   m_pd = nullptr;
    m_doExpunge = false;
 }
 
@@ -2911,7 +2911,7 @@ void FilterRuleApply::GetSenderSubject(String& from, String& subject, bool full)
    subject = MIME::DecodeHeader(msg->Subject());
 
    AddressList_obj addrList(msg->GetAddressList(MAT_FROM));
-   Address *addr = addrList ? addrList->GetFirst() : NULL;
+   Address *addr = addrList ? addrList->GetFirst() : nullptr;
    if ( addr )
    {
       if ( full )
@@ -3244,7 +3244,7 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
    if(! MMODULE_SAME_VERSION(vmajor, vminor, vrelease))
    {
       if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
-      return NULL;
+      return nullptr;
    }
    return new MModule_FiltersImpl();
 }
@@ -3287,7 +3287,7 @@ TestExprFail(const char *s)
 {
    MyParser p(s, true);
    const SyntaxNode *exp = p.ParseExpression();
-   if (exp == NULL)
+   if (exp == nullptr)
    {
       Rejected(p);
       return 0;
@@ -3303,7 +3303,7 @@ TestExpr(int arg, const char *s)
 {
    MyParser p(s);
    const SyntaxNode *exp = p.ParseExpression();
-   if (exp == NULL)
+   if (exp == nullptr)
    {
       Rejected(p);
       return 1;
@@ -3323,7 +3323,7 @@ TestReject(const char *s)
 {
    MyParser p(s, true);
    const SyntaxNode *pgm = p.ParseProgram();
-   if (pgm == NULL)
+   if (pgm == nullptr)
    {
       Rejected(p);
       return 0;
@@ -3339,7 +3339,7 @@ TestAccept(const char *s)
 {
    MyParser p(s);
    const SyntaxNode *pgm = p.ParseProgram();
-   if (pgm == NULL)
+   if (pgm == nullptr)
    {
       Rejected(p);
       return 1;
@@ -3353,7 +3353,7 @@ TestPgm(int arg, const char *s)
 {
    MyParser p(s);
    const SyntaxNode *pgm = p.ParseProgram();
-   if (pgm == NULL)
+   if (pgm == nullptr)
    {
       Rejected(p);
       return 1;

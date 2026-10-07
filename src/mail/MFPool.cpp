@@ -124,7 +124,7 @@ public:
    MailFolder *GetAndAdvance(String *driverName, MFolder **pFolder)
    {
       if ( m_iterPool == gs_pool.end() )
-         return NULL;
+         return nullptr;
 
       if ( m_iterConn == m_iterPool->connections.end() )
       {
@@ -142,7 +142,7 @@ public:
 
       ++m_iterConn;
 
-      CHECK( mf, NULL, _T("NULL mailfolder in MFPool?") );
+      CHECK( mf, nullptr, _T("NULL mailfolder in MFPool?") );
 
       if ( driverName )
       {
@@ -184,7 +184,7 @@ MFClassPool *MFClassPool::Find(const String& driverName)
          return &pool;
    }
 
-   return NULL;
+   return nullptr;
 }
 
 MFConnection *MFClassPool::FindConnection(const String& spec)
@@ -195,7 +195,7 @@ MFConnection *MFClassPool::FindConnection(const String& spec)
          return &conn;
    }
 
-   return NULL;
+   return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -250,23 +250,23 @@ MFPool::Find(MFDriver *driver,
              const MFolder *folder,
              const String& login)
 {
-   CHECK( driver, NULL, _T("MFPool::Find(): NULL driver") );
+   CHECK( driver, nullptr, _T("MFPool::Find(): NULL driver") );
 
    MFClassPool *pool = MFClassPool::Find(driver->GetName());
    if ( !pool )
    {
       // no cached folders of this class at all
-      return NULL;
+      return nullptr;
    }
 
    MFConnection * const
       conn = pool->FindConnection(driver->GetFullSpec(folder, login));
 
    if ( !conn )
-      return NULL;
+      return nullptr;
 
    MailFolder *mf = conn->mf;
-   CHECK( mf, NULL, _T("NULL mailfolder in MFPool?") );
+   CHECK( mf, nullptr, _T("NULL mailfolder in MFPool?") );
 
    mf->IncRef();
    return mf;

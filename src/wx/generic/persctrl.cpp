@@ -127,7 +127,7 @@ public:
         // used instead.
     wxPHelper(const wxString& path,
               const wxString& prefix,
-              wxConfigBase *config = NULL);
+              wxConfigBase *config = nullptr);
         // dtor automatically restores the path if not done yet
     ~wxPHelper();
 
@@ -282,7 +282,7 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
                            const wxSize& size,
                            long style,
                            wxConfigBase *config)
-           : wxComboBox(parent, id, value, pos, size, 0, NULL, style)
+           : wxComboBox(parent, id, value, pos, size, 0, nullptr, style)
 {
     Init();
 
@@ -1428,7 +1428,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                                    const wxPMessageBoxParams& params)
                 : wxDialog(parent, -1, caption)
 {
-    m_chkDisable = NULL;
+    m_chkDisable = nullptr;
     m_countRadioBtns = 0;
     m_dontDisableOnNo = params.dontDisableOnNo;
 
@@ -1760,7 +1760,7 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
                                               wxWindow *parent,
                                               wxConfigBase *config)
 {
-    wxCHECK_MSG( !!configPath, NULL, _T("configPath can't be empty") );
+    wxCHECK_MSG( !!configPath, nullptr, _T("configPath can't be empty") );
 
     wxString ourPath,           // path in the config
              configValueFile,   // name of the entry where filename is stored
@@ -1817,7 +1817,7 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
         // cancelled
         dialog->Destroy();
 
-        dialog = NULL;
+        dialog = nullptr;
     }
     else {
         // remember the last filename/path chosen

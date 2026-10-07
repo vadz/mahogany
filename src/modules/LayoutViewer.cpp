@@ -181,13 +181,13 @@ public:
    {
       m_window = window;
 
-      m_window->GetViewStart(NULL, &m_y);
+      m_window->GetViewStart(nullptr, &m_y);
    }
 
    bool HasChanged() const
    {
       wxCoord y;
-      m_window->GetViewStart(NULL, &y);
+      m_window->GetViewStart(nullptr, &y);
 
       return m_y != y;
    }
@@ -267,7 +267,7 @@ IMPLEMENT_MESSAGE_VIEWER(LayoutViewer,
 
 LayoutViewer::LayoutViewer()
 {
-   m_window = NULL;
+   m_window = nullptr;
 }
 
 void LayoutViewer::SetTextColour(const wxColour& colToSet)
@@ -359,11 +359,11 @@ String LayoutViewer::GetSelection() const
    wxLayoutList *llist = m_window->GetLayoutList();
    if ( llist->HasSelection() )
    {
-      wxLayoutList *llistSel = llist->GetSelection(NULL, false);
+      wxLayoutList *llistSel = llist->GetSelection(nullptr, false);
 
       wxLayoutExportStatus status(llistSel);
       wxLayoutExportObject *exp;
-      while( (exp = wxLayoutExport(&status)) != NULL )
+      while( (exp = wxLayoutExport(&status)) != nullptr )
       {
          switch ( exp->type )
          {
@@ -552,8 +552,8 @@ void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
    else
       colBg = GetOptions().BgCol;
 
-   llist->SetFontColour(colFg.Ok() ? &colFg : NULL,
-                        colBg.Ok() ? &colBg : NULL);
+   llist->SetFontColour(colFg.Ok() ? &colFg : nullptr,
+                        colBg.Ok() ? &colBg : nullptr);
 
    wxFontEncoding enc = hasFont ? style.GetFont().GetEncoding()
                                 : wxFONTENCODING_SYSTEM;

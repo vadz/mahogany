@@ -61,7 +61,7 @@ public:
    // ---------------------------
 
    // AdbElement
-   AdbEntryGroup *GetGroup() const override { return NULL; }
+   AdbEntryGroup *GetGroup() const override { return nullptr; }
 
    // AdbEntryGroup
    AdbEntry *GetEntry(const String& name) override;
@@ -73,14 +73,14 @@ public:
       { names.Empty(); return 0; }
 
    AdbEntryGroup *GetGroup(const String&) const override
-      { FAIL_MSG( _T("LineBook::GetGroup was called.") ); return NULL; }
+      { FAIL_MSG( _T("LineBook::GetGroup was called.") ); return nullptr; }
 
    AdbEntry *CreateEntry(const String& name) override;
    AdbEntryGroup *CreateGroup(const String&) override
    {
       FAIL_MSG(
          _T("Nobody asked LineBook whether it supports CreateGroup.") );
-      return NULL;
+      return nullptr;
    }
 
    void DeleteEntry(const String& name) override;
@@ -281,7 +281,7 @@ LineBook::~LineBook()
 AdbEntry *LineBook::GetEntry(const String& name)
 {
    AdbEntry *found = FindEntry(name.c_str());
-   CHECK( found != NULL, NULL, _T("Asked for non-existent entry.") );
+   CHECK( found != nullptr, nullptr, _T("Asked for non-existent entry.") );
    return found;
 }
 
@@ -334,7 +334,7 @@ AdbEntry *LineBook::FindEntry(const wxChar *name)
 {
    LineEntryArray::iterator found = m_entries.find(name);
    if( found == m_entries.end() )
-      return NULL;
+      return nullptr;
       
    RefCounter<LineEntry> entry(found->second->m_handle);
    if( !entry )
@@ -547,7 +547,7 @@ std::ostream& operator << (std::ostream& out, const LineEntryData& entry)
 AdbBook *LineDataProvider::CreateBook(const String& name)
 {
    RefCounter<LineBook> book(new LineBook(name));
-   CHECK ( !book->IsBad(), NULL, _T("Cannot create LineBook") );
+   CHECK ( !book->IsBad(), nullptr, _T("Cannot create LineBook") );
    return book.release();
 }
 
@@ -563,7 +563,7 @@ bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)
       case Test_OpenReadOnly:
       {
          FILE *fp = fopen(fullname.fn_str(), test == Test_Open ? "a" : "r");
-         if ( fp != NULL )
+         if ( fp != nullptr )
          {
             fclose(fp);
             ok = true;

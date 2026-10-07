@@ -261,7 +261,7 @@ EditAttachmentProperties(wxWindow *parent, AttachmentProperties *properties)
 {
    CHECK( properties, false, _T("NULL properties in EditAttachmentProperties") );
 
-   wxAttachmentDialog dlg(parent, properties, NULL /* no "don't show" box */);
+   wxAttachmentDialog dlg(parent, properties, nullptr /* no "don't show" box */);
 
    return dlg.ShowModal() == wxID_OK && dlg.HasChanges();
 }

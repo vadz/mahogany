@@ -299,7 +299,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
                                )
                              : wxManuallyLaidOutDialog
                                (
-                                NULL,
+                                nullptr,
                                 _("Mahogany: Exporting address book"),
                                 _T("AdbTextExport")
                                )
@@ -374,9 +374,9 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
    // export to
    wxString label = _("&Filename to export to: ");
    int width;
-   GetTextExtent(label, &width, NULL);
+   GetTextExtent(label, &width, nullptr);
    m_textFileName = panel->CreateFileEntry(label, width, dummy,
-                                           NULL, FALSE /* save */);
+                                           nullptr, FALSE /* save */);
 
    wxString filename = filenameOrig;
    if ( !filename )

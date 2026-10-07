@@ -301,8 +301,8 @@ public:
               AdbTreeNode *parent,
               bool onClipboard = FALSE);
     // a special ctor used by derived classes
-  AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, wxEmptyString, 0)
-    { m_bWasExpanded = FALSE; m_pGroup = NULL; }
+  AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, wxEmptyString, nullptr)
+    { m_bWasExpanded = FALSE; m_pGroup = nullptr; }
 
     // dtor deletes all children
   virtual ~AdbTreeNode();
@@ -375,7 +375,7 @@ protected:
     // check that we have an associated ADB group, but notice that the book
     // itself is the same as the root group and the root doesn't have any
     // associated ADB data structure
-    if ( (m_pGroup == NULL) && !IsRoot() && !IsBook() ) {
+    if ( (m_pGroup == nullptr) && !IsRoot() && !IsBook() ) {
       wxASSERT( IsGroup() );
 
       // create our AdbEntryGroup
@@ -397,8 +397,8 @@ class AdbTreeBook : public AdbTreeNode
 public:
   AdbTreeBook(AdbTreeRoot *root,
               const wxString& filename,
-              AdbDataProvider *pProvider = NULL,
-              wxString *pstrProviderName = NULL);
+              AdbDataProvider *pProvider = nullptr,
+              wxString *pstrProviderName = nullptr);
   virtual ~AdbTreeBook();
 
   // accessors
@@ -720,7 +720,7 @@ public:
   bool AllowDelete() const { return !m_current->IsRoot(); }
   bool AllowShowProp() const { return m_current->IsBook(); }
 
-  bool AllowPaste() const { return m_clipboard != NULL; }
+  bool AllowPaste() const { return m_clipboard != nullptr; }
   bool AllowCopy() const { return !(m_current->IsRoot() || m_current->IsBook()); }
 
   // create/delete/rename items (entries, groups, address books...)
@@ -739,7 +739,7 @@ public:
   void DoFind();
   // find all entries which match the string under "root" (or the current
   // entry if root == NULL). '*' and '?' are recognized, case sensitive.
-  void DoFind(const wxChar *szFindWhat, AdbTreeNode *root = NULL);
+  void DoFind(const wxChar *szFindWhat, AdbTreeNode *root = nullptr);
   // moves selection to the next item (previously found by DoFind())
   void AdvanceToNextFound();
 
@@ -751,8 +751,8 @@ public:
   // load the data from file and add the ADB to the tree control using
   // the specified (or any for the default NULL value) provider
   bool OpenAdb(const wxString& strPath,
-               AdbDataProvider *pProvider = NULL,
-               const char *szProvName = NULL);
+               AdbDataProvider *pProvider = nullptr,
+               const char *szProvName = nullptr);
   // ask the user for filename and create or open the address book
   bool CreateOrOpenAdb(bool bDoCreate);
 
@@ -1242,15 +1242,15 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
 
   // NULL everything
   // ---------------
-  m_treeAdb = NULL;
-  m_notebook = NULL;
-  m_textKey = NULL;
-  m_current = NULL;
-  m_clipboard = NULL;
-  m_pImageList = NULL;
+  m_treeAdb = nullptr;
+  m_notebook = nullptr;
+  m_textKey = nullptr;
+  m_current = nullptr;
+  m_clipboard = nullptr;
+  m_pImageList = nullptr;
   m_bFindDone = FALSE;
   m_btnCancel =
-  m_btnDelete = NULL;
+  m_btnDelete = nullptr;
 
   m_eventNewADB = MEventManager::Register(*this, MEventId_NewADB);
   ASSERT_MSG( m_eventNewADB, _T("ADB editor failed to register with event manager") );
@@ -1496,7 +1496,7 @@ void wxAdbEditFrame::RestoreSettings1()
     // GetProviderByName would return NULL anyhow, but why call it in the
     // first place?
     if ( wxIsEmpty(strProv) )
-      pProvider = NULL;
+      pProvider = nullptr;
     else
       pProvider = AdbDataProvider::GetProviderByName(strProv);
 
@@ -1546,7 +1546,7 @@ void wxAdbEditFrame::RestoreSettings2()
   AdbTreeElement *current;
   for ( size_t nBranch = 0; nBranch < nCountBranches; nBranch++ ) {
     current = ExpandBranch(m_astrBranches[nBranch]);
-    if ( current == NULL ) {
+    if ( current == nullptr ) {
       // it didn't find it
       bAllBranchesOk = FALSE;
     }
@@ -1576,7 +1576,7 @@ void wxAdbEditFrame::RestoreSettings2()
 
 void wxAdbEditFrame::UpdateNotebook()
 {
-  m_notebook->ChangeData(m_current->IsGroup() ? NULL : GetEntry());
+  m_notebook->ChangeData(m_current->IsGroup() ? nullptr : GetEntry());
 }
 
 void wxAdbEditFrame::LayoutButtons(wxPanel *panel,
@@ -1590,7 +1590,7 @@ void wxAdbEditFrame::LayoutButtons(wxPanel *panel,
   dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
   wxCoord width, widthMax = 0;
   for ( n = 0; n < nButtons; n++ ) {
-    dc.GetTextExtent(aButtons[n]->GetLabel(), &width, NULL);
+    dc.GetTextExtent(aButtons[n]->GetLabel(), &width, nullptr);
     if ( width > widthMax )
       widthMax = width;
   }
@@ -1685,7 +1685,7 @@ void wxAdbEditFrame::DoCreateNode()
 
 ask_name:
   wxLog *log = wxLog::GetActiveTarget();
-  if ( log != NULL )
+  if ( log != nullptr )
     log->Flush();
 
   // block outside which wxADBCreateDialog doesn't exist
@@ -1717,7 +1717,7 @@ ask_name:
   // do create it
   AdbTreeElement *element = group->CreateChild(m_strLastNewEntry,
                                                m_bLastNewWasGroup != 0);
-  if ( element == NULL ) {
+  if ( element == nullptr ) {
     wxLogError(_("Can't create %s named '%s' %s."),
                strWhat, m_strLastNewEntry, strWhere);
     goto ask_name;
@@ -1738,7 +1738,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   wxCHECK_RET( !m_current->IsRoot(), _T("command should be disabled") );
 
   AdbTreeNode *parent = m_current->GetParent();
-  wxASSERT( parent != NULL ); // impossible if !m_current->IsRoot()
+  wxASSERT( parent != nullptr ); // impossible if !m_current->IsRoot()
 
   wxString strName, strWhat;
   if ( m_current->IsBook() ) {
@@ -1808,7 +1808,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       // delete groups without confirmation, we only enable this for simple
       // entries, not groups.
       const MPersMsgBox *msgbox = m_current->IsGroup()
-                                    ? NULL
+                                    ? nullptr
                                     : M_MSGBOX_ADB_DELETE_ENTRY;
 
       // construct the message
@@ -1911,7 +1911,7 @@ void wxAdbEditFrame::DoFind()
 void wxAdbEditFrame::DoFind(const wxChar *szFindWhat, AdbTreeNode *root)
 {
   // start from the current group if root is not specified
-  if ( root == NULL )
+  if ( root == nullptr )
     root = GetCurNode();
 
   bool loaded = root->LoadChildren();
@@ -1962,7 +1962,7 @@ bool wxAdbEditFrame::OnMEvent(MEventData& d)
       wxString adbname = data.GetAdbName(),
                provname = data.GetProviderName();
 
-      AdbBook *adbBook = NULL;
+      AdbBook *adbBook = nullptr;
       AdbDataProvider *provider = AdbDataProvider::GetProviderByName(provname);
 
       {
@@ -2397,13 +2397,13 @@ void wxAdbEditFrame::DoCopy()
     group->LoadAllData();
 
     m_clipboard = new AdbTreeNode(group->GetName(),
-                                  NULL,    // no parent
+                                  nullptr,    // no parent
                                   TRUE);   // on clipboard
   }
   else {
     // just one entry to copy
     m_clipboard = new AdbTreeEntry(m_current->GetName(),
-                                   NULL,    // no parent
+                                   nullptr,    // no parent
                                    TRUE);   // on clipboard
   }
 
@@ -2415,7 +2415,7 @@ void wxAdbEditFrame::DoCopy()
 void wxAdbEditFrame::DoPaste()
 {
   // we must have something to paste and we can't paste address books (yet?)
-  wxCHECK_RET( m_clipboard != NULL && !m_current->IsRoot(),
+  wxCHECK_RET( m_clipboard != nullptr && !m_current->IsRoot(),
                _T("command should be disabled") );
 
   AdbTreeNode *group = GetCurNode();
@@ -2431,7 +2431,7 @@ void wxAdbEditFrame::DoPaste()
   // first add it to our internal data
   AdbTreeElement *copy = group->CreateChild(m_clipboard->GetName(),
                                             m_clipboard->IsGroup());
-  if ( copy == NULL ) {
+  if ( copy == nullptr ) {
     wxLogError(_("Cannot paste the clipboard contents here."));
     return;
   }
@@ -2656,19 +2656,19 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
       if ( !curGroup->WasExpanded() )
         m_treeAdb->Expand(current->GetId());
       current = curGroup->FindChild(aComponents[n]);
-      if ( current == NULL ) {
+      if ( current == nullptr ) {
         wxLogError(_("No entry '%s':\n'%s' has no entry/subgroup '%s'."),
                    strEntry,
                    curGroup->GetName(),
                    aComponents[n]);
-        return NULL;
+        return nullptr;
       }
     }
     else { // current item is an entry
       wxLogError(_("Entry '%s' cannot have subgroup/entry '%s'!"),
                  current->GetName(), aComponents[n]);
 
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -2731,7 +2731,7 @@ wxAdbEditFrame::~wxAdbEditFrame()
   m_strSelection = m_current->GetFullName();
 
   // if the notebook had unsaved data they will be saved now
-  m_notebook->ChangeData(NULL);
+  m_notebook->ChangeData(nullptr);
 
   // save all settings
   SaveSettings();
@@ -3159,7 +3159,7 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
                       wxTR_DEFAULT_STYLE | wxSUNKEN_BORDER)
 {
   m_frame = frame;
-  m_menu = NULL;
+  m_menu = nullptr;
 
   // add images to our image list
   static const char *aszImages[] =
@@ -3270,8 +3270,8 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   m_message->SetConstraints(c);
 
   // no data yet
-  m_pTreeEntry = NULL;
-  m_pAdbEntry = NULL;
+  m_pTreeEntry = nullptr;
+  m_pAdbEntry = nullptr;
   m_bDirty =
   m_bReadOnly = FALSE;
 
@@ -3334,7 +3334,7 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
     m_pAdbEntry = m_pTreeEntry->GetAdbEntry();
   }
   else {
-    m_pAdbEntry = NULL;
+    m_pAdbEntry = nullptr;
   }
 
   // if we have got some data - show it
@@ -3358,15 +3358,15 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
   }
 
   // hide notebook if nothing to edit
-  m_box->Show(pEntry == NULL);
-  m_message->Show(pEntry == NULL);
-  Show(pEntry != NULL);
+  m_box->Show(pEntry == nullptr);
+  m_message->Show(pEntry == nullptr);
+  Show(pEntry != nullptr);
   m_bDirty = FALSE;
 }
 
 wxAdbNotebook::~wxAdbNotebook()
 {
-  wxASSERT( m_pAdbEntry == NULL );
+  wxASSERT( m_pAdbEntry == nullptr );
 
   delete GetImageList();
 }
@@ -3479,7 +3479,7 @@ void wxAdbPage::OnTextChange(wxCommandEvent&)
 // positioned from top to bottom, i.e. under the last one
 void wxAdbPage::SetTopConstraint(wxLayoutConstraints *c, wxControl *last)
 {
-  if ( last == NULL )
+  if ( last == nullptr )
     c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN);
   else
     c->top.Below(last, LAYOUT_Y_MARGIN);
@@ -3544,7 +3544,7 @@ wxListBox *wxAdbPage::CreateListBox(const wxString& label, wxControl *last)
   box->SetConstraints(c);
 
   // the buttons vertically on the right of listbox
-  wxButton *button = NULL;
+  wxButton *button = nullptr;
   static const wxString aszLabels[] =
   {
     _("&Add"),
@@ -3565,7 +3565,7 @@ wxListBox *wxAdbPage::CreateListBox(const wxString& label, wxControl *last)
   wxCoord width, widthMax = 0;
   for ( nBtn = 0; nBtn < WXSIZEOF(aszLabels); nBtn++ ) {
     aszLabelsT[nBtn] = wxGetTranslation(aszLabels[nBtn]);
-    dc.GetTextExtent(aszLabelsT[nBtn], &width, NULL);
+    dc.GetTextExtent(aszLabelsT[nBtn], &width, nullptr);
     if ( width > widthMax )
       widthMax = width;
   }
@@ -3640,13 +3640,13 @@ void wxAdbPage::LayoutControls(size_t nCount,
         continue;
     }
 
-    dc.GetTextExtent(wxGetTranslation(fields[n].label), &width, NULL);
+    dc.GetTextExtent(wxGetTranslation(fields[n].label), &width, nullptr);
     if ( width > widthMax )
       widthMax = width;
   }
 
   // now create the controls
-  wxControl *last = NULL; // last control created
+  wxControl *last = nullptr; // last control created
   for ( n = 0; n < nCount; n++ ) {
     switch ( fields[n].type ) {
       case AdbTreeEntry::FieldDate:
@@ -3980,7 +3980,7 @@ AdbTreeNode::AdbTreeNode(const wxString& name,
            : AdbTreeElement(TreeElement_Group, name, parent, onClipboard)
 {
   m_bWasExpanded = FALSE;
-  m_pGroup = NULL;
+  m_pGroup = nullptr;
 }
 
 // recursively copy the data
@@ -4071,7 +4071,7 @@ void AdbTreeNode::LoadAllData()
 
 AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
 {
-  wxCHECK_MSG( !IsRoot(), NULL, _T("only address books can be created at root") );
+  wxCHECK_MSG( !IsRoot(), nullptr, _T("only address books can be created at root") );
 
   wxString strWhat = bGroup ? _("Group") : _("Entry");
 
@@ -4082,7 +4082,7 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
     wxLogError(_("%s '%s' already exists in this group."),
                strWhat, name);
 
-    return NULL;
+    return nullptr;
   }
 
   // if the entries which already exist in the config file now were not yet
@@ -4092,8 +4092,8 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
 
   // create the new entry in the ADB and if it succeeds also create the tree
   // element corresponding to it
-  AdbTreeElement *pTreeEntry = NULL;
-  AdbElement *pAdbEntry = NULL;
+  AdbTreeElement *pTreeEntry = nullptr;
+  AdbElement *pAdbEntry = nullptr;
   if ( bGroup ) {
     pAdbEntry = m_pGroup->CreateGroup(name);
     if ( pAdbEntry )
@@ -4135,7 +4135,7 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
         // unfortunately, we don't have the old valu any more, so we must search
         // for it ourselves - TODO. For now we will just insert it in the
         // beginning...
-        m_idLastGroup = 0l;
+        m_idLastGroup = nullptr;
       }
 
       // do nothing for address books (could delete the file...)
@@ -4167,7 +4167,7 @@ AdbTreeElement *AdbTreeNode::FindChild(const wxChar *szName)
       return m_children[n];
   }
 
-  return NULL;
+  return nullptr;
 }
 
 bool AdbTreeNode::ExpandFirstTime(wxTreeCtrl& tree)
@@ -4175,7 +4175,7 @@ bool AdbTreeNode::ExpandFirstTime(wxTreeCtrl& tree)
   wxCHECK( !m_bWasExpanded, TRUE );  // must be only called once
 
   m_bWasExpanded = TRUE;
-  m_idLastGroup = 0l;
+  m_idLastGroup = nullptr;
 
   LoadChildren();
 
@@ -4220,7 +4220,7 @@ AdbTreeBook::AdbTreeBook(AdbTreeRoot *root,
   m_parent = root;
   m_parent->AddChild(this);
 
-  m_data = NULL;
+  m_data = nullptr;
 
   m_pGroup = m_pBook = root->GetAdbManager()->
     CreateBook(filename, pProvider, pstrProviderName);
@@ -4237,7 +4237,7 @@ AdbTreeBook::~AdbTreeBook()
   m_children.Clear();
 
   SafeDecRef(m_pBook);
-  m_pGroup = NULL;  // prevent it from being unlocked in ~AdbTreeNode
+  m_pGroup = nullptr;  // prevent it from being unlocked in ~AdbTreeNode
 }
 
 // -----------------------------------------------------------------------------
@@ -4267,7 +4267,7 @@ AdbTreeElement *AdbTreeRoot::FindChild(const wxChar *szName)
       return m_children[n];
   }
 
-  return NULL;
+  return nullptr;
 }
 
 // create all address books
@@ -4283,13 +4283,13 @@ bool AdbTreeRoot::LoadChildren()
   for ( size_t nAdb = 0; nAdb < nAdbCount; nAdb++ ) {
     strProv = m_astrProviders[nAdb];
     if ( strProv.empty() )
-      pProvider = NULL;
+      pProvider = nullptr;
     else
       pProvider = AdbDataProvider::GetProviderByName(strProv);
 
     (void)new AdbTreeBook(this, m_astrAdb[nAdb], pProvider, &strProv);
 
-    if ( pProvider == NULL ) {
+    if ( pProvider == nullptr ) {
       // now we have the name of provider which was used for creation
       m_astrProviders[nAdb] = strProv;
     }
@@ -4326,7 +4326,7 @@ AdbTreeElement::AdbTreeElement(TreeElement kind,
    if ( onClipboard )
       m_kind = (TreeElement)(m_kind | TreeElement_Clipboard);
 
-   m_data = NULL;
+   m_data = nullptr;
 }
 
 /* vi: set cin ts=2 sw=2 et list tw=80: */

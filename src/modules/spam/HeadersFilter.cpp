@@ -1026,7 +1026,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
 }
 
 static const wxChar * gs_RblSites[] =
-{ _T("rbl.maps.vix.com"), _T("relays.orbs.org"), _T("rbl.dorkslayers.com"), NULL };
+{ _T("rbl.maps.vix.com"), _T("relays.orbs.org"), _T("rbl.dorkslayers.com"), nullptr };
 
 static bool findIP(String &header,
                    char openChar, char closeChar,

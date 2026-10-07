@@ -150,7 +150,7 @@ public:
    // ---------------------------
 
    // AdbElement
-   AdbEntryGroup *GetGroup() const override { return NULL; }
+   AdbEntryGroup *GetGroup() const override { return nullptr; }
 
    // AdbEntryGroup
    AdbEntry *GetEntry(const String& name) override
@@ -315,7 +315,7 @@ int PasswdEntry::Matches(const wxChar *what, int where, int how) const
 void PasswdEntryGroup::ReadPasswdDb()
 {
    struct passwd *pwd;
-   while ( (pwd = getpwent()) != NULL )
+   while ( (pwd = getpwent()) != nullptr )
    {
       size_t index = m_names.Add(wxSafeConvertMB2WX(pwd->pw_name));
 
@@ -355,7 +355,7 @@ AdbEntry *PasswdEntryGroup::GetEntry(const String& name)
 {
    int n = m_names.Index(name);
    if ( n == wxNOT_FOUND )
-      return NULL;
+      return nullptr;
 
    return new PasswdEntry((PasswdEntryGroup *)this,
                           m_names[(size_t)n],
@@ -369,19 +369,19 @@ bool PasswdEntryGroup::Exists(const String& name)
 
 AdbEntryGroup *PasswdEntryGroup::GetGroup(const String& name) const
 {
-   return NULL;
+   return nullptr;
 }
 
 AdbEntry *PasswdEntryGroup::CreateEntry(const String& strName)
 {
    // we're read only
-   return NULL;
+   return nullptr;
 }
 
 AdbEntryGroup *PasswdEntryGroup::CreateGroup(const String& strName)
 {
    // we're read only
-   return NULL;
+   return nullptr;
 }
 
 void PasswdEntryGroup::DeleteEntry(const String& strName)
@@ -397,7 +397,7 @@ void PasswdEntryGroup::DeleteGroup(const String& strName)
 AdbEntry *PasswdEntryGroup::FindEntry(const wxChar *szName)
 {
    // TODO
-   return NULL;
+   return nullptr;
 }
 
 // ----------------------------------------------------------------------------

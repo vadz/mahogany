@@ -76,7 +76,7 @@ public:
    */
    bool SaveMessagesToFile(const UIdArray *selections,
                            const String& fileName,
-                           wxWindow *parent = NULL) override;
+                           wxWindow *parent = nullptr) override;
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -117,7 +117,7 @@ public:
    */
    void ReplyMessages(const UIdArray *messages,
                       const Params& params,
-                      wxWindow *parent = NULL) override;
+                      wxWindow *parent = nullptr) override;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
@@ -126,7 +126,7 @@ public:
    */
    void ForwardMessages(const UIdArray *messages,
                         const Params& params,
-                        wxWindow *parent = NULL) override;
+                        wxWindow *parent = nullptr) override;
 
    UIdArray *SearchMessages(const SearchCriterium *crit, int flags) override;
    bool ThreadMessages(const ThreadParams& thrParams,
@@ -139,7 +139,7 @@ public:
    HeaderInfoList *GetHeaders(void) const override;
 
    bool ProcessNewMail(UIdArray& uidsNew,
-                       const MFolder *folderDst = NULL) override;
+                       const MFolder *folderDst = nullptr) override;
 
    /**
      Process new mail in some other folder when it appeared there independently
@@ -151,7 +151,7 @@ public:
     */
    static bool ProcessNewMail(const MFolder *folder, MsgnoType countNew)
    {
-      return DoProcessNewMail(folder, NULL, NULL, countNew, NULL);
+      return DoProcessNewMail(folder, nullptr, nullptr, countNew, nullptr);
    }
 
    int ApplyFilterRules(const UIdArray& msgs) override;

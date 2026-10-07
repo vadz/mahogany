@@ -168,7 +168,7 @@ bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
 
       // the parent for all folders
       MFolder *parent = (flags & ImportFolder_AllUseParent)
-                           == ImportFolder_AllUseParent ? folderParent : NULL;
+                           == ImportFolder_AllUseParent ? folderParent : nullptr;
 
       // create the folder tree entries for them
       size_t nImported = 0;

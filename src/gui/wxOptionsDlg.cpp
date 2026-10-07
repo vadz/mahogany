@@ -730,8 +730,8 @@ public:
       : wxGlobalOptionsDialog(parent, configForDialog),
         m_configForNotebook(configForNotebook)
    {
-      SetProfile(NULL);
-      SetPagesDesc(0, NULL);
+      SetProfile(nullptr);
+      SetPagesDesc(0, nullptr);
    }
 
    // full ctor specifying everything we need
@@ -2448,7 +2448,7 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
                            int image)
 {
    // no listbox by default
-   m_lboxData = NULL;
+   m_lboxData = nullptr;
 
    m_aFields = aFields;
    m_aDefaults = aDefaults;
@@ -2610,7 +2610,7 @@ void wxOptionsPage::CreateControls()
 
    // now create the controls
    int styleText = wxTE_LEFT;
-   wxControl *last = NULL; // last control created
+   wxControl *last = nullptr; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       int flags = GetFieldFlags(n);
       if ( (!isAdvanced && (flags & Field_Advanced)) ||
@@ -2619,7 +2619,7 @@ void wxOptionsPage::CreateControls()
            (!isFolderDialog && (flags & Field_NotApp)) )
       {
          // skip this one
-         m_aControls.push_back(NULL);
+         m_aControls.push_back(nullptr);
          m_aDirtyFlags.push_back(false);
 
          continue;
@@ -2632,7 +2632,7 @@ void wxOptionsPage::CreateControls()
 
          case Field_File:
             last = CreateFileEntry(wxGetTranslation(m_aFields[n].label), widthMax, last,
-                                   NULL, !(flags & Field_FileSave));
+                                   nullptr, !(flags & Field_FileSave));
             break;
 
          case Field_Folder:
@@ -2973,7 +2973,7 @@ bool wxOptionsPage::DoTransferOptionsToWindow()
       if ( !control )
          continue;
 
-      wxControl *label = NULL;
+      wxControl *label = nullptr;
       switch ( GetFieldType(n) )
       {
          case Field_Text:
@@ -3922,7 +3922,7 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(MBookCtrl *parent,
 void wxOptionsPageNetwork::FillDialupConnections()
 {
    wxControl *control = GetControl(ConfigField_NetConnection);
-   wxChoice *choice = control ? wxStaticCast(control, wxChoice) : NULL;
+   wxChoice *choice = control ? wxStaticCast(control, wxChoice) : nullptr;
 
    // may be NULL if we don't use dial up manager at all
    if ( !choice )
@@ -4048,7 +4048,7 @@ wxOptionsPageNewMail::wxOptionsPageNewMail(MBookCtrl *parent,
 {
    m_nIncomingDelayOld = -1;
 
-   m_folder = NULL;
+   m_folder = nullptr;
 }
 
 wxOptionsPageNewMail::~wxOptionsPageNewMail()
@@ -4063,7 +4063,7 @@ bool wxOptionsPageNewMail::GetFolderFromProfile()
 
    m_folder = MFolder::Get(GetFolderName());
 
-   return m_folder != NULL;
+   return m_folder != nullptr;
 }
 
 bool wxOptionsPageNewMail::DoTransferOptionsToWindow()
@@ -4848,7 +4848,7 @@ wxCustomOptionsNotebook::GetImagesArray(size_t nPages,
       m_aImages[n] = pageDesc[n].GetImage();
    }
 
-   m_aImages[nPages] = NULL;
+   m_aImages[nPages] = nullptr;
 
    return m_aImages;
 }
@@ -4879,7 +4879,7 @@ const char *wxOptionsNotebook::ms_aszImages[] =
    "unknown",
 #endif // USE_TEST_PAGE
    "miscopt",
-   NULL
+   nullptr
 };
 
 // don't forget to update both the array above and the enum when modifying
@@ -5279,7 +5279,7 @@ bool wxConfigSourcesDialog::TransferDataFromWindow()
 
    MDialog_Message(_("Please notice that changes to configuration sources "
                      "will only take effect during next program run."),
-                   NULL,
+                   nullptr,
                    _("Configuration Sources Updated"),
                    GetPersMsgBoxName(M_MSGBOX_WARN_RESTART_OPT));
 

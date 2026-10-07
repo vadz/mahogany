@@ -72,7 +72,7 @@ inline wxFrame *GetFrame(const wxWindow *win)
   @return true if this or equivalent encoding is available, false otherwise
  */
 extern bool EnsureAvailableTextEncoding(wxFontEncoding *encoding,
-                                        wxString *text = NULL,
+                                        wxString *text = nullptr,
                                         bool mayAskUser = false);
 
 #endif // !wxUSE_UNICODE

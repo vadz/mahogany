@@ -232,7 +232,7 @@ wxColorBrowseButton::wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
                 (
                   wxEVT_COMMAND_TEXT_UPDATED,
                   wxCommandEventHandler(wxColorBrowseButton::OnTextChanged),
-                  NULL,
+                  nullptr,
                   this
                 );
 }

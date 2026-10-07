@@ -147,7 +147,7 @@ void AutoCollectAddress(const String& email,
       String providerName;
 
       AdbBook *autocollectbook = manager->CreateBook(
-         bookName, NULL, &providerName );
+         bookName, nullptr, &providerName );
 
       RefCounter<AdbDataProvider> bookProvider(
          AdbDataProvider::GetProviderByName(providerName));
@@ -184,7 +184,7 @@ void AutoCollectAddress(const String& email,
          group = autocollectbook->CreateGroup(adbGroupName);
       }
       else
-         group = NULL;
+         group = nullptr;
 
       if ( !group )
       {

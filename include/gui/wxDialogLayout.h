@@ -125,7 +125,7 @@ class wxManuallyLaidOutDialog : public wxPDialog
 public:
    // this class should have default ctor for the derived class convenience,
    // although this makes absolutely no sense for us
-   wxManuallyLaidOutDialog(wxWindow *parent = NULL,
+   wxManuallyLaidOutDialog(wxWindow *parent = nullptr,
                            const wxString& title = wxEmptyString,
                            const wxString& profileKey = wxEmptyString);
 
@@ -205,7 +205,7 @@ protected:
 
    // create the controls above the main window, return the last control
    // created (in the top-to-bottom order)
-   virtual wxControl *CreateControlsAbove(wxPanel * /* panel */) { return NULL; }
+   virtual wxControl *CreateControlsAbove(wxPanel * /* panel */) { return nullptr; }
 
    // create the main window itself
    virtual wxWindow *CreateMainWindow(wxPanel *panel) = 0;
@@ -486,7 +486,7 @@ public:
    wxTextCtrl *CreateFileEntry(const wxChar *label,
                                long widthMax,
                                wxControl *last,
-                               wxFileBrowseButton **ppButton = NULL,
+                               wxFileBrowseButton **ppButton = nullptr,
                                bool open = TRUE,
                                bool existingOnly = TRUE)
    {
@@ -499,7 +499,7 @@ public:
    wxTextCtrl *CreateFileOrDirEntry(const wxChar *label,
                                     long widthMax,
                                     wxControl *last,
-                                    wxFileOrDirBrowseButton **ppButton = NULL,
+                                    wxFileOrDirBrowseButton **ppButton = nullptr,
                                     bool open = TRUE,
                                     bool existingOnly = TRUE)
    {
@@ -512,7 +512,7 @@ public:
    wxTextCtrl *CreateDirEntry(const wxChar *label,
                               long widthMax,
                               wxControl *last,
-                              wxDirBrowseButton **ppButton = NULL)
+                              wxDirBrowseButton **ppButton = nullptr)
    {
       return CreateEntryWithButton(label, widthMax, last,
                                    DirBtn,
@@ -534,7 +534,7 @@ public:
    wxTextCtrl *CreateFolderEntry(const wxChar *label,
                                  long widthMax,
                                  wxControl *last,
-                                 wxFolderBrowseButton **ppButton = NULL)
+                                 wxFolderBrowseButton **ppButton = nullptr)
    {
       return CreateEntryWithButton(label, widthMax, last,
                                    FolderBtn,
@@ -546,7 +546,7 @@ public:
    wxTextCtrl *CreateFontEntry(const wxChar *label,
                                long widthMax,
                                wxControl *last,
-                               wxFontBrowseButton **ppButton = NULL)
+                               wxFontBrowseButton **ppButton = nullptr)
    {
       return CreateEntryWithButton(label, widthMax, last,
                                    FontBtn,
@@ -626,7 +626,7 @@ private:
                                      long widthMax,
                                      wxControl *last,
                                      BtnKind kind,
-                                     wxTextBrowseButton **ppButton = NULL);
+                                     wxTextBrowseButton **ppButton = nullptr);
 
    // create a wxComboBox or wxChoice
    wxControl *CreateComboBoxOrChoice(bool createCombobox,
@@ -743,14 +743,14 @@ extern wxTextCtrl *CreateEntryWithButton(wxWindow *parent,
                                          wxControl *last,
                                          wxCoord nRightMargin = 0,
                                          BtnKind kind = FileBtn,
-                                         wxTextBrowseButton **ppButton = NULL);
+                                         wxTextBrowseButton **ppButton = nullptr);
 
 extern wxTextCtrl *CreateFileEntry(wxWindow *parent,
                                    const wxChar *label,
                                    long widthMax,
                                    wxControl *last,
                                    wxCoord nRightMargin = 0,
-                                   wxFileBrowseButton **ppButton = NULL,
+                                   wxFileBrowseButton **ppButton = nullptr,
                                    int flags = FileEntry_Open |
                                                FileEntry_ExistingOnly);
 

@@ -205,7 +205,7 @@ private:
 
    bool ProcessMenuEvent(int id);
    inline void ErrorMessage(const String &msg)
-      { m_MInterface->MessageDialog(msg,NULL,"Calendar module error!");wxYield(); }
+      { m_MInterface->MessageDialog(msg,nullptr,"Calendar module error!");wxYield(); }
 
    bool OnMEvent(MEventData &event);
    class CalEventReceiver *m_EventReceiver;
@@ -214,7 +214,7 @@ private:
    void CreateFrame(void);
    void TellDeleteFrame(void)
       {
-         m_Frame = NULL;
+         m_Frame = nullptr;
       }
    friend class CalendarFrame;
    class CalendarFrame *m_Frame;
@@ -465,7 +465,7 @@ wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
 
 extern
 bool PickDateDialog(wxDateTimeWithRepeat &dt,
-                    wxWindow *parent = NULL)
+                    wxWindow *parent = nullptr)
 {
    wxDateDialog dlg(dt, parent);
    bool rc = dlg.ShowModal() == wxID_OK;
@@ -494,7 +494,7 @@ public:
    /** checks if anything needs to be done:
        @param mf if non-NULL, react to change in this folder if is ours
    */
-   void CheckUpdate(MailFolder *mf = NULL);
+   void CheckUpdate(MailFolder *mf = nullptr);
    /// re-reads config
    void GetConfig(void);
 
@@ -623,7 +623,7 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    m_Module = module;
    m_MInterface = module->GetMInterface();
    m_Profile = m_MInterface->CreateModuleProfile(MODULE_NAME);
-   m_Folder = NULL;
+   m_Folder = nullptr;
 
    AddFileMenu();
    AddHelpMenu();
@@ -975,7 +975,7 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
    }
 
    // we react to an event which isn't ours, abort
-   if(eventFolder != NULL && eventFolder != mf)
+   if(eventFolder != nullptr && eventFolder != mf)
    {
       mf->DecRef();
       return;
@@ -1108,7 +1108,7 @@ CalendarModule::Init(int version_major, int version_minor,
    {
       if(errorCode)
          *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
-      return NULL;
+      return nullptr;
    }
 
    return new CalendarModule(minterface);
@@ -1117,10 +1117,10 @@ CalendarModule::Init(int version_major, int version_minor,
 CalendarModule::CalendarModule(MInterface *minterface)
 {
    SetMInterface(minterface);
-   m_Frame = NULL;
-   m_Timer = NULL;
-   m_EventReceiver = NULL;
-   m_CalendarMenu = NULL;
+   m_Frame = nullptr;
+   m_Timer = nullptr;
+   m_EventReceiver = nullptr;
+   m_CalendarMenu = nullptr;
 }
 
 CalendarModule::~CalendarModule()
@@ -1308,6 +1308,6 @@ void
 CalendarModule::Configure(void)
 {
    Profile *p = m_MInterface->CreateModuleProfile(MODULE_NAME);
-   ShowCustomOptionsDialog(gs_OptionsPageDesc, p, NULL);
+   ShowCustomOptionsDialog(gs_OptionsPageDesc, p, nullptr);
    p->DecRef();
 }

@@ -244,7 +244,7 @@ class wxFolderBrowseButton : public wxTextBrowseButton
 public:
    // we may be optionally given a default folder
    wxFolderBrowseButton(wxTextCtrl *text, wxWindow *parent,
-                        MFolder *folder = NULL);
+                        MFolder *folder = nullptr);
 
    virtual ~wxFolderBrowseButton();
 
@@ -331,7 +331,7 @@ public:
    wxIconBrowseButton(wxWindow *parent,
                       const wxString& tooltip,
                       const wxArrayString& iconNames,
-                      wxStaticBitmap *staticBitmap = NULL)
+                      wxStaticBitmap *staticBitmap = nullptr)
       : wxBrowseButton(parent, tooltip)
    {
       Init();
@@ -342,7 +342,7 @@ public:
       // SetIcons should be called if you use this ctor
    wxIconBrowseButton(wxWindow *parent,
                       const wxString& tooltip,
-                      wxStaticBitmap *staticBitmap = NULL)
+                      wxStaticBitmap *staticBitmap = nullptr)
       : wxBrowseButton(parent, tooltip)
    {
       Init();

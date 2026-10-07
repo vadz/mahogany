@@ -44,14 +44,14 @@ void MimePartCCBase::Init()
 {
    m_parent =
    m_nested =
-   m_next = NULL;
+   m_next = nullptr;
 
-   m_body = NULL;
+   m_body = nullptr;
 
    m_parameterList =
-   m_dispositionParameterList = NULL;
+   m_dispositionParameterList = nullptr;
 
-   m_content = NULL;
+   m_content = nullptr;
    m_lenContent = 0;
    m_ownsContent = false;
 
@@ -313,7 +313,7 @@ const void *MimePartCCBase::GetContent(unsigned long *lenptr) const
 
    const void *cptr = GetRawContent(lenptr);
    if ( !cptr || !*lenptr )
-      return NULL;
+      return nullptr;
 
    return self->DecodeRawContent(cptr, lenptr);
 }
@@ -362,7 +362,7 @@ MimePartCCBase::DecodeRawContent(const void *cptr, unsigned long *lenptr)
       case ENCBASE64:      // base-64 encoded data
          // the size of possible extra non Base64 encoded text following a
          // Base64 encoded part
-         const unsigned char *startSlack = NULL;
+         const unsigned char *startSlack = nullptr;
          size_t sizeSlack = 0;
 
          // there is a frequent problem with mail list software appending the

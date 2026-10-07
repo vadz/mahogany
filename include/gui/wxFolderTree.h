@@ -52,7 +52,7 @@ public:
    };
    // ctor(s) and dtor
       // Init() must be called if you use default ctor
-   wxFolderTree() { m_tree = NULL; }
+   wxFolderTree() { m_tree = nullptr; }
       // normal ctor
    wxFolderTree(wxWindow *parent, wxWindowID id = -1,
                 const wxPoint& pos = wxDefaultPosition,

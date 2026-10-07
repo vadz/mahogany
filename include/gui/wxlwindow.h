@@ -63,24 +63,24 @@ public:
               int style = wxNORMAL,
               int weight = wxNORMAL,
               int underline = 0,
-              wxColour *fg = NULL,
-              wxColour *bg = NULL,
+              wxColour *fg = nullptr,
+              wxColour *bg = nullptr,
               bool noUpdate = false);
 
    /// Clear taking an explicit font
    void Clear(const wxFont& font,
-              wxColour *fg = NULL,
-              wxColour *bg = NULL,
+              wxColour *fg = nullptr,
+              wxColour *bg = nullptr,
               bool noUpdate = false);
 
    /// override base class virtual to also refresh the scrollbar position
    void Refresh(bool eraseBackground = TRUE,
-                const wxRect *rect = (const wxRect *)NULL) override;
+                const wxRect *rect = (const wxRect *)nullptr) override;
 
    /** Sets a background image, only used on screen, not on printouts.
        @param bitmap a pointer to a wxBitmap or NULL to remove it
    */
-   void SetBackgroundBitmap(wxBitmap *bitmap = NULL)
+   void SetBackgroundBitmap(wxBitmap *bitmap = nullptr)
       {
          if(m_BGbitmap) delete m_BGbitmap;
          m_BGbitmap = bitmap;
@@ -111,7 +111,7 @@ public:
 
    /// find string in buffer
    bool Find(const wxString &needle,
-             wxPoint * fromWhere = NULL,
+             wxPoint * fromWhere = nullptr,
              const wxString &configPath = _T("MsgViewFindString"));
    /// find the same string again
    bool FindAgain(void);

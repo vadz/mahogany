@@ -60,7 +60,7 @@ public:
       m_ctx = dspam_create
               (
                   DSPAM_USER_NAME,  // user name used as base file name
-                  NULL,             // no group
+                  nullptr,             // no group
                   mApplication->GetLocalDir(),
                   mode,
                   flags
@@ -80,7 +80,7 @@ public:
       if ( dspam_attach(m_ctx, ms_hashMap) != 0 )
       {
          dspam_destroy(m_ctx);
-         m_ctx = NULL;
+         m_ctx = nullptr;
       }
       else if ( !ms_hashMap )
       {
@@ -112,7 +112,7 @@ public:
       {
          _hash_drv_close(ms_hashMap);
          free(ms_hashMap);
-         ms_hashMap = NULL;
+         ms_hashMap = nullptr;
 
          _hash_drv_lock_free(&ms_hashLock, DSPAM_USER_NAME);
       }
@@ -128,8 +128,8 @@ private:
    DECLARE_NO_COPY_CLASS(DspamCtx);
 };
 
-hash_drv_map_t DspamCtx::ms_hashMap = NULL;
-_ds_lock_t DspamCtx::ms_hashLock = NULL;
+hash_drv_map_t DspamCtx::ms_hashMap = nullptr;
+_ds_lock_t DspamCtx::ms_hashLock = nullptr;
 
 MMODULE_CLEANUP(DspamCtx::CloseHashStorage)
 
@@ -293,7 +293,7 @@ END_EVENT_TABLE()
 
 DspamFilter::DspamFilter()
 {
-   m_ctx = NULL;
+   m_ctx = nullptr;
 }
 
 DspamFilter::~DspamFilter()
@@ -312,7 +312,7 @@ DSPAM_CTX *DspamFilter::GetCtx() const
    {
       ERRORMESSAGE((_("DSPAM: library initialization failed.")));
 
-      return NULL;
+      return nullptr;
    }
 
    return *m_ctx;
@@ -455,7 +455,7 @@ void DspamFilter::ShowStats(wxWindow *parent)
 
 void DspamFilter::Train(wxWindow *parent)
 {
-   MFolder_obj folder(MDialog_FolderChoose(parent, NULL, MDlg_Folder_Open));
+   MFolder_obj folder(MDialog_FolderChoose(parent, nullptr, MDlg_Folder_Open));
    if ( !folder )
       return;
 
@@ -530,7 +530,7 @@ void DspamFilter::Train(wxWindow *parent)
          Message_obj msg(mf->GetMessage(hi->GetUId()));
          if ( msg )
          {
-            DoTrain(NULL /* unused */, *msg, isSpam);
+            DoTrain(nullptr /* unused */, *msg, isSpam);
 
             continue;
          }

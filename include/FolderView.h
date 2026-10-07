@@ -90,7 +90,7 @@ public:
    MailFolder *GetMailFolder() const;
 
    /// Return true if we have an opened folder.
-   bool HasFolder() const { return m_ASMailFolder != NULL; }
+   bool HasFolder() const { return m_ASMailFolder != nullptr; }
 
    //@}
 

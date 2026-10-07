@@ -49,7 +49,7 @@ extern size_t GetCustomHeaders(Profile *profile,
                                CustomHeaderType type,
                                wxArrayString *names,
                                wxArrayString *values,
-                               wxArrayInt *types = NULL);
+                               wxArrayInt *types = nullptr);
 
 /** Show the dialog to configure outgoing headers for given profile
 
@@ -85,7 +85,7 @@ extern bool ConfigureMsgViewHeaders(Profile *profile, wxWindow *parent);
  */
 extern bool ConfigureCustomHeader(Profile *profile, wxWindow *parent,
                                   String *headerName, String *headerValue,
-                                  bool *storedInProfile = (bool *)NULL,
+                                  bool *storedInProfile = (bool *)nullptr,
                                   CustomHeaderType type = CustomHeader_Both);
 
 /** Show the dialog allowing the user to change all custom headers which will

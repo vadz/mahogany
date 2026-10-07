@@ -94,7 +94,7 @@ static MProgressInfo *CreateProgressInfo()
 {
    // intentionally make the label long to avoid clipping it when it is changed
    // later
-   return new MProgressInfo(NULL,
+   return new MProgressInfo(nullptr,
                             _("Checking for new mail, please wait..."),
                             _("Checking for new mail"));
 }
@@ -125,7 +125,7 @@ public:
 
       m_failcount = 0;
       m_state = Folder_Ok;
-      m_timeNext = time(NULL);
+      m_timeNext = time(nullptr);
    }
 
    ~FolderMonitorFolderEntry()
@@ -156,7 +156,7 @@ public:
    // next check time
    void UpdateCheckTime()
    {
-      m_timeNext = time(NULL) + (time_t)GetPollInterval();
+      m_timeNext = time(nullptr) + (time_t)GetPollInterval();
 
       wxLogTrace(TRACE_MONITOR, _T("Next check for %s scheduled for %s"),
                  m_folder->GetFullName(),
@@ -304,9 +304,9 @@ FolderMonitor::~FolderMonitor()
 FolderMonitor *
 FolderMonitor::Create(void)
 {
-   static FolderMonitor *s_folderMonitor = NULL;
+   static FolderMonitor *s_folderMonitor = nullptr;
 
-   CHECK( !s_folderMonitor, NULL, _T("FolderMonitor::Create() called twice!") );
+   CHECK( !s_folderMonitor, nullptr, _T("FolderMonitor::Create() called twice!") );
 
    // do create it
    s_folderMonitor = new FolderMonitorImpl;
@@ -327,7 +327,7 @@ FolderMonitorImpl::FolderMonitorImpl()
    {
       MLocker lockNewMailCheck(m_inNewMailCheck);
 
-      MProgressInfo *progInfo = NULL;
+      MProgressInfo *progInfo = nullptr;
 
       // see the comment in DoCheckNewMail() for why we use indices here
       for ( int n = 0; n < std::ssize(m_list); n++ )
@@ -352,7 +352,7 @@ FolderMonitorImpl::FolderMonitorImpl()
 
 FolderMonitorImpl::~FolderMonitorImpl(void)
 {
-   MEventManager::DeregisterAll(&m_regFolderDelete, &m_regOptionsChange, NULL);
+   MEventManager::DeregisterAll(&m_regFolderDelete, &m_regOptionsChange, nullptr);
 }
 
 // ----------------------------------------------------------------------------
@@ -512,7 +512,7 @@ FolderMonitorImpl::DoCheckNewMail(int flags)
    }
    else // not interactive
    {
-      progInfo = NULL;
+      progInfo = nullptr;
    }
 
    // check all opened folders if requested
@@ -521,7 +521,7 @@ FolderMonitorImpl::DoCheckNewMail(int flags)
       if ( progInfo )
          progInfo->SetLabel(_("Checking all opened folders..."));
 
-      if ( !MailFolder::PingAllOpened(progInfo ? progInfo->GetFrame() : NULL) )
+      if ( !MailFolder::PingAllOpened(progInfo ? progInfo->GetFrame() : nullptr) )
          rc = false;
    }
 
@@ -531,7 +531,7 @@ FolderMonitorImpl::DoCheckNewMail(int flags)
    // the folder dispatches the events and this may result in adding new
    // folders to m_list, invalidating the iterators (but not in removing them,
    // as this is prevented by m_inNewMailCheck being locked)
-   time_t timeCur = time(NULL);
+   time_t timeCur = time(nullptr);
    for ( int n = 0; n < std::ssize(m_list); n++ )
    {
       FolderMonitorFolderEntry * const entry = m_list[n].get();
@@ -631,7 +631,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
 
    // don't show the dialogs in non-interactive mode
    if ( !MailFolder::CheckFolder(folder,
-                                 progInfo ? progInfo->GetFrame() : NULL) )
+                                 progInfo ? progInfo->GetFrame() : nullptr) )
    {
       if ( !i->IncreaseFailCount() )
       {
@@ -643,7 +643,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
          if ( MDialog_YesNoDialog
               (
                msg,
-               NULL,
+               nullptr,
                _("Check for new mail failed"),
                M_DLG_YES_DEFAULT,
                M_MSGBOX_SUSPENDAUTOCOLLECT

@@ -134,8 +134,8 @@ public:
    /**@name the parser */
    //@{
    enum FieldTypes { Field_String, Field_Integer};
-   static const String ReadString(String *string, bool *success = NULL);
-   static StringList ReadListOfStrings(String *string, bool *success = NULL);
+   static const String ReadString(String *string, bool *success = nullptr);
+   static StringList ReadListOfStrings(String *string, bool *success = nullptr);
    static StringListList ReadVector(String *string);
    static StringListListList ReadListOfVectors(String *string);
 
@@ -207,7 +207,7 @@ public:
 
    // implement interface methods
    // AdbElement
-   AdbEntryGroup *GetGroup() const override { return NULL; }
+   AdbEntryGroup *GetGroup() const override { return nullptr; }
 
    // AdbEntryGroup
    AdbEntry *GetEntry(const String& name) override
@@ -515,7 +515,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
 
    // line must start with '['
    if(! ReadToken('[', line))
-      return NULL;
+      return nullptr;
 
    static int count = 0;
    String tmp;
@@ -527,7 +527,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
    if(first_name.empty() && last_name.empty())
    {
       if(m_IgnoreAnonymous)
-         return NULL;
+         return nullptr;
       else
          alias = m_AnonymousName;
    }
@@ -537,7 +537,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
    if(m_EnforceUnique)
    {
       temp = alias;
-      while((e_exists = pGroup->GetEntry(alias)) != NULL) // duplicate entry
+      while((e_exists = pGroup->GetEntry(alias)) != nullptr) // duplicate entry
       {
          e_exists->DecRef(); // GetEntry() does an IncRef()
          tmp.Printf(_T("%d"), count);
@@ -659,7 +659,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    m_entries = new BbdbEntryList(false);
 
    m_strName = strName; // there is only one group so far
-   m_pParent = NULL;
+   m_pParent = nullptr;
 
    BbdbEntry *e;
    wxString line, version;
@@ -690,7 +690,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
                      _T("BBDB import"),
                      _T("Importing..."),
                      length,
-                     NULL,
+                     nullptr,
                      wxPD_APP_MODAL
                    );
    do
@@ -744,7 +744,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          str.Printf(_("Save BBDB address book '%s'?\n"
                       "This might lead to loss of some of the original data."),
                     m_strName);
-         save = MDialog_YesNoDialog(str,NULL,_("BBDB"),
+         save = MDialog_YesNoDialog(str,nullptr,_("BBDB"),
                                     M_DLG_YES_DEFAULT,
                                     M_MSGBOX_BBDB_SAVE_DIALOG);
          break;
@@ -762,7 +762,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          for(i = m_entries->begin(); i != m_entries->end(); i++)
             length++;
          MProgressDialog status_frame(_T("BBDB"), _T("Saving..."),
-                                      length, NULL, wxPD_APP_MODAL);
+                                      length, nullptr, wxPD_APP_MODAL);
 
          String str;
          std::ofstream out(m_strName.mb_str());
@@ -890,21 +890,21 @@ BbdbEntryGroup::GetEntry(const String& name)
          return *i;
       }
    }
-   return NULL;
+   return nullptr;
 }
 
 bool
 BbdbEntryGroup::Exists(const String& path)
 {
    MOcheck();
-   return GetEntry(path) != NULL;
+   return GetEntry(path) != nullptr;
 }
 
 AdbEntryGroup *BbdbEntryGroup::GetGroup(const String& name) const
 {
    MOcheck();
 //   wxLogDebug(_T("BbdbEntryGroup::GetGroup() called with: %s"), name);
-   return NULL;
+   return nullptr;
 }
 
 AdbEntry *
@@ -918,7 +918,7 @@ BbdbEntryGroup::CreateEntry(const String& strName)
 AdbEntryGroup *BbdbEntryGroup::CreateGroup(const String& strName)
 {
    MOcheck();
-   return NULL;
+   return nullptr;
 }
 
 void
@@ -949,7 +949,7 @@ BbdbEntryGroup::FindEntry(const wxChar *szName)
 {
    MOcheck();
 //   wxLogDebug(_T("BbdbEntryGroup::FindEntry() called with: %s"), szName);
-   return NULL;
+   return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -962,12 +962,12 @@ BbdbBook::BbdbBook(const String& name)
 
    m_strFileName = name;
 
-   wxFileName::SplitPath(m_strFileName, NULL, &m_strName, NULL);
+   wxFileName::SplitPath(m_strFileName, nullptr, &m_strName, nullptr);
 
    m_strDesc << m_strName << _(" (Emacs BBDB addressbook)");
 
    // create the root group
-   m_pRootGroup = new BbdbEntryGroup(NULL, name); // there is only one group
+   m_pRootGroup = new BbdbEntryGroup(nullptr, name); // there is only one group
 }
 
 BbdbBook::~BbdbBook()
@@ -1061,7 +1061,7 @@ BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
             std::ifstream file(name.mb_str());
             String line;
             strutil_getstrline(file, line);
-            return BbdbEntry::ReadHeader(NULL, &line);
+            return BbdbEntry::ReadHeader(nullptr, &line);
          }
          return false;
       case Test_AutodetectCapable:

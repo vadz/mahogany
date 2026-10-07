@@ -100,7 +100,7 @@ public:
    {
       m_profile = profile;
       m_imagelist = imagelist;
-      m_chkEnable = NULL;
+      m_chkEnable = nullptr;
 
       CreateAllControls();
       Fit();
@@ -109,7 +109,7 @@ public:
 
    wxControl *CreateControlsAbove(wxPanel *panel) override
    {
-      wxControl *last = NULL;
+      wxControl *last = nullptr;
 
       last = CreateMessage(panel,
             _("This dialog is used to configure the options of the individual "
@@ -260,7 +260,7 @@ static MRunFunctionAtExit gs_runFilterCleanup(SpamFilter::UnloadAll);
 // SpamFilter implementation
 // ============================================================================
 
-SpamFilter *SpamFilter::ms_first = NULL;
+SpamFilter *SpamFilter::ms_first = nullptr;
 bool SpamFilter::ms_loaded = false;
 
 // ----------------------------------------------------------------------------
@@ -276,7 +276,7 @@ SpamFilter *SpamFilter::FindByName(const String& name)
          return filter;
    }
 
-   return NULL;
+   return nullptr;
 }
 
 /* static */
@@ -288,7 +288,7 @@ SpamFilter *SpamFilter::FindByLongName(const String& lname)
          return filter;
    }
 
-   return NULL;
+   return nullptr;
 }
 
 /* static */
@@ -460,7 +460,7 @@ bool SpamFilter::Configure(Profile *profile, wxFrame *parent)
    // first get all the icon names: we need them to create the notebook
    wxImageList *imagelist = wxNotebookWithImages::ShouldShowIcons()
                               ? new wxImageList(32, 32)
-                              : NULL;
+                              : nullptr;
 
    size_t nPages = 0;
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
@@ -676,7 +676,7 @@ SpamOptionsPage *
 SpamFilter::CreateOptionPage(MBookCtrl * /* notebook */,
                              Profile * /* profile */) const
 {
-   return NULL;
+   return nullptr;
 }
 
 SpamFilter::~SpamFilter()

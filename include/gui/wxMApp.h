@@ -68,7 +68,7 @@ public:
    /// implement base class virtuals
    wxMFrame *CreateTopLevelFrame() override;
    void OnFatalException() override { OnAbnormalTermination(); }
-   void OnAbnormalTermination(const wxChar *msg = NULL) override;
+   void OnAbnormalTermination(const wxChar *msg = nullptr) override;
 
    bool StartTimer(Timer timer) override;
    bool StopTimer(Timer timer) override;
@@ -116,7 +116,7 @@ public:
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
    */
-   void Help(int id, wxWindow *parent = NULL) override;
+   void Help(int id, wxWindow *parent = nullptr) override;
 
    /// return a pointer to the IconManager:
    wxIconManager *GetIconManager(void) const override;
@@ -159,7 +159,7 @@ public:
    void LeaveCritical() override;
 
    /// updates display of outbox status
-   void UpdateOutboxStatus(class MailFolder *mf = NULL) const override;
+   void UpdateOutboxStatus(class MailFolder *mf = nullptr) const override;
 
    void SetAwayMode(bool isAway = true) override;
 

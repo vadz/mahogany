@@ -31,7 +31,7 @@ class MessageCC : public Message
 public:
    // get specfied header lines
    wxArrayString GetHeaderLines(const char **headers,
-                                wxArrayInt *encodings = NULL) const override;
+                                wxArrayInt *encodings = nullptr) const override;
 
    String GetHeader(void) const override;
 
@@ -78,7 +78,7 @@ public:
 
    /** get the raw part text
     */
-   const char *GetRawPartData(const MimePart& mimepart, unsigned long *len = NULL);
+   const char *GetRawPartData(const MimePart& mimepart, unsigned long *len = nullptr);
 
    /**
       Get all headers of this message part.
@@ -125,7 +125,7 @@ public:
 
    static MessageCC *Create(const char *text,
                             UIdType uid = UID_ILLEGAL,
-                            Profile *profile = NULL)
+                            Profile *profile = nullptr)
    {
       return new MessageCC(text, uid, profile);
    }
@@ -146,7 +146,7 @@ protected:
    MessageCC(MailFolderCC *folder, const HeaderInfo& hi);
    MessageCC(const char *text,
              UIdType uid = UID_ILLEGAL,
-             Profile *profile = NULL);
+             Profile *profile = nullptr);
 
    /** destructor */
    ~MessageCC();
@@ -186,7 +186,7 @@ private:
          return true;
 
       const_cast<MessageCC*>(this)->GetEnvelope();
-      return m_Envelope != NULL;
+      return m_Envelope != nullptr;
    }
 
    /// get the cache element for this message

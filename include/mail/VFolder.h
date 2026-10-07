@@ -108,7 +108,7 @@ public:
                     const String &pattern = _T("*"),
                     bool subscribed_only = false,
                     const String &reference = wxEmptyString,
-                    UserData ud = 0,
+                    UserData ud = nullptr,
                     Ticket ticket = ILLEGAL_TICKET) override;
    //@}
 
@@ -137,7 +137,7 @@ public:
                                  const String& login,
                                  const String& password,
                                  OpenMode openmode = Normal,
-                                 wxFrame *frame = NULL);
+                                 wxFrame *frame = nullptr);
 
    /// update the status of a virtual folder
    static bool CheckStatus(const MFolder *folder);

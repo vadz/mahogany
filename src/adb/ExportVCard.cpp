@@ -291,7 +291,7 @@ bool AdbVCardExporter::Export(AdbEntryGroup& group, const String& dest)
    if ( !dirname )
    {
       // choose the initial directory for the vCard files to create
-      wxDirDialog dlg(NULL, _("Choose the directory for vCard files"));
+      wxDirDialog dlg(nullptr, _("Choose the directory for vCard files"));
       if ( dlg.ShowModal() != wxID_OK )
       {
          // cancelled
@@ -322,10 +322,10 @@ bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
    {
       filename = wxPSaveFileSelector
                  (
-                     NULL, // no parent
+                     nullptr, // no parent
                      "vcard",
                      _("Choose the name for vCard file"),
-                     NULL, NULL, _T(".vcf"),
+                     nullptr, nullptr, _T(".vcf"),
                      _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*")
                  );
       if ( !filename )

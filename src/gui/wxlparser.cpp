@@ -237,7 +237,7 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
 
    html += _T(">");
 
-   if(styleInfo != NULL && ! firstTime)
+   if(styleInfo != nullptr && ! firstTime)
       html = _T("</font>") + html; // terminate any previous font command
 
    if((si->weight == wxBOLD) && ( (!styleInfo) || (styleInfo->weight != wxBOLD)))
@@ -292,12 +292,12 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
    wxLayoutExportObject * exp;
 
    if (!status->m_line)
-      return NULL;
+      return nullptr;
    if(status->NULLIT()) // end of line
    {
-      if(status->m_line->GetNextLine() == NULL)
+      if(status->m_line->GetNextLine() == nullptr)
          // reached end of list
-         return NULL;
+         return nullptr;
    }
    exp = new wxLayoutExportObject();
    wxLayoutObjectType type;
@@ -317,7 +317,7 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
       if(mode == WXLO_EXPORT_AS_OBJECTS)
       {
          exp->type = WXLO_EXPORT_EMPTYLINE;
-         exp->content.object = NULL; //empty line
+         exp->content.object = nullptr; //empty line
          status->m_line = status->m_line->GetNextLine();
          if(status->m_line)
             status->m_iterator = status->m_line->GetFirstObject();

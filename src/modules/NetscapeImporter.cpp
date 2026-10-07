@@ -531,8 +531,8 @@ MyHashTable::~MyHashTable()
 {
   // should delete the strings hier;
   m_tbl.BeginFind();
-  wxHashTable::Node* node = NULL;
-  while ( (node = m_tbl.Next()) != NULL )
+  wxHashTable::Node* node = nullptr;
+  while ( (node = m_tbl.Next()) != nullptr )
    delete (wxString*)node->GetData();
 
   //  m_tbl.DeleteContents(FALSE);  // just ot make sure, they are deleted
@@ -554,7 +554,7 @@ void MyHashTable::Delete(const wxString& key)
 bool MyHashTable::Exist(const wxString& key) const
 {
   wxString* tmp = (wxString *)m_tbl.Get(key);
-  return ( tmp != NULL );
+  return ( tmp != nullptr );
 }
 
 bool MyHashTable::GetValue(const wxString& key, bool& value) const
@@ -833,8 +833,8 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
       }
   }    
 
-  MFolder *folder = NULL;
-  MFolder *subFolder = NULL;
+  MFolder *folder = nullptr;
+  MFolder *subFolder = nullptr;
   MyFolderArray folderList;
   wxString dirFldName;
 
@@ -854,7 +854,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
   // - [DONE] find out the type (MF_?) of FoFs [DONE]
 
   // in the next for loop no system folders will be treated anyway
-  MFolder *tmpParent = NULL;
+  MFolder *tmpParent = nullptr;
   if (level == 0) {
     if ( (flags & ImportFolder_AllUseParent)
          == ImportFolder_AllUseParent )
@@ -946,7 +946,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
 
      // find out the folder type (system or not) by walking the list
      // to know how to set the parent folder (accordig to flags)
-    tmpParent = NULL;
+    tmpParent = nullptr;
      
     if (level == 0) {
       // look mum, I'm making fire with two stones!

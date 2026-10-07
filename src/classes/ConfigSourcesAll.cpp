@@ -232,7 +232,7 @@ protected:
       }
       else // can be shared
       {
-         config = NULL;
+         config = nullptr;
       }
 
       return m_configSources.Write(m_path, ld, config);
@@ -295,7 +295,7 @@ private:
 // AllConfigSources implementation
 // ============================================================================
 
-AllConfigSources *AllConfigSources::ms_theInstance = NULL;
+AllConfigSources *AllConfigSources::ms_theInstance = nullptr;
 
 // ----------------------------------------------------------------------------
 // AllConfigSources creation
@@ -373,7 +373,7 @@ AllConfigSources::AllConfigSources(const String& filename)
 AllConfigSources::~AllConfigSources()
 {
    // we can't allow wxConfigMultiplexer to live any longer
-   delete wxConfig::Set(NULL);
+   delete wxConfig::Set(nullptr);
 }
 
 // ----------------------------------------------------------------------------
@@ -684,7 +684,7 @@ bool AllConfigSources::DeleteGroup(const String& path)
 wxConfigBase *AllConfigSources::GetLocalConfig() const
 {
    if ( m_sources.empty() )
-      return NULL;
+      return nullptr;
 
    // we know that the first config source is the local one...
    ConfigSourceLocal *

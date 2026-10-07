@@ -93,7 +93,7 @@ extern bool
 CclientParseMessage(const char *msgText,
                     ENVELOPE **ppEnv,
                     BODY **ppBody,
-                    size_t *pHdrLen = NULL);
+                    size_t *pHdrLen = nullptr);
 
 
 /**

@@ -27,7 +27,7 @@ public:
       m_mf = mf;
       if ( m_mf )
       {
-         m_frameOld = mf->SetInteractiveFrame(NULL);
+         m_frameOld = mf->SetInteractiveFrame(nullptr);
       }
       else
       {
@@ -115,7 +115,7 @@ public:
       }
       else // no need to do anything
       {
-         m_suspender = NULL;
+         m_suspender = nullptr;
       }
    }
 

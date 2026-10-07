@@ -62,7 +62,7 @@ public:
     };
 
     // is this object valid?
-    bool IsOk() { return m_vObj != NULL; }
+    bool IsOk() { return m_vObj != nullptr; }
 
     // return the object name
     wxString GetName() const;
@@ -117,7 +117,7 @@ protected:
     friend class wxVCard; // uses GetNamedPropValue()
 
     // ctors
-    wxVCardObject(VObject *vObj = NULL);
+    wxVCardObject(VObject *vObj = nullptr);
     wxVCardObject(wxVCardObject *parent, const wxString& name);
 
     // get out string value (protected, shouldn't be called by user)
@@ -311,10 +311,10 @@ public:
 
     bool GetFullName(wxString *fullName) const;
     bool GetName(wxString *familyName,
-                 wxString *givenName = NULL,
-                 wxString *additionalNames = NULL,
-                 wxString *namePrefix = NULL,
-                 wxString *nameSuffix = NULL) const;
+                 wxString *givenName = nullptr,
+                 wxString *additionalNames = nullptr,
+                 wxString *namePrefix = nullptr,
+                 wxString *nameSuffix = nullptr) const;
     bool GetPhoto(wxVCardImage *image) const;
     bool GetBirthDay(wxDateTime *birthday) const;
     bool GetBirthDayString(wxString *birthday) const;

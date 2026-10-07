@@ -54,9 +54,9 @@
 #include <unistd.h>
 
 #   define WXLO_TIMER_DEFINE(x)    static struct timeval  x
-#   define WXLO_TIMER_START(x)     gettimeofday(&x,NULL)
+#   define WXLO_TIMER_START(x)     gettimeofday(&x,nullptr)
 #   define WXLO_TIMER_STOP(x)      { struct timeval y; \
-                                gettimeofday(&y,NULL); \
+                                gettimeofday(&y,nullptr); \
                                 x.tv_sec -= y.tv_sec; x.tv_usec -= y.tv_usec; }
 #   define   WXLO_TIMER_PRINT(x)   wxLogDebug("Timer " #x " elapsed: %ld", \
                                          (long)(x.tv_sec * -1000 - x.tv_usec));
@@ -189,7 +189,7 @@ public:
       { return 0; }
 
    /// constructor
-   wxLayoutObject() { m_UserData = NULL; }
+   wxLayoutObject() { m_UserData = nullptr; }
    /// delete the user data
    virtual ~wxLayoutObject() { if(m_UserData) m_UserData->DecRef(); }
 
@@ -318,7 +318,7 @@ private:
 class wxLayoutObjectIcon : public wxLayoutObject
 {
 public:
-   wxLayoutObjectIcon(wxBitmap *icon = NULL);
+   wxLayoutObjectIcon(wxBitmap *icon = nullptr);
    wxLayoutObjectIcon(wxBitmap const &icon);
 
    ~wxLayoutObjectIcon() { if(m_Icon) delete m_Icon; }
@@ -354,16 +354,16 @@ private:
 struct wxLayoutStyleInfo
 {
    wxLayoutStyleInfo(const wxFont& font,
-                     wxColour *fg = NULL,
-                     wxColour *bg = NULL);
+                     wxColour *fg = nullptr,
+                     wxColour *bg = nullptr);
 
    wxLayoutStyleInfo(int ifamily = -1,
                      int isize = -1,
                      int istyle = -1,
                      int iweight = -1,
                      int iul = -1,
-                     wxColour *fg = NULL,
-                     wxColour *bg = NULL,
+                     wxColour *fg = nullptr,
+                     wxColour *bg = nullptr,
                      wxFontEncoding enc = wxFONTENCODING_DEFAULT);
 
    wxLayoutStyleInfo(const wxLayoutStyleInfo&) = default;
@@ -467,8 +467,8 @@ public:
                      int style = -1,
                      int weight = -1,
                      int underline = -1,
-                     wxColour *fg = NULL,
-                     wxColour *bg = NULL,
+                     wxColour *fg = nullptr,
+                     wxColour *bg = nullptr,
                      wxFontEncoding enc = wxFONTENCODING_DEFAULT);
    wxLayoutObjectCmd(const wxLayoutStyleInfo &si);
    ~wxLayoutObjectCmd();
@@ -510,7 +510,7 @@ public:
        @param len  effective length of the new object is stored here if not NULL
        @return true if that xpos existed and the object was inserted
    */
-   bool Insert(CoordType xpos, wxLayoutObject *obj, CoordType *len = NULL);
+   bool Insert(CoordType xpos, wxLayoutObject *obj, CoordType *len = nullptr);
 
    /** This function inserts text at cursor position xpos.
        @param xpos where to insert
@@ -608,7 +608,7 @@ public:
                                                  wxLayoutList *llist,
                                                  CoordType xpos,
                                                  CoordType *offset,
-                                                 bool *found = NULL);
+                                                 bool *found = nullptr);
 
    /** Finds text in this line.
        @param needle the text to find
@@ -675,9 +675,9 @@ public:
    */
    void Layout(wxDC &dc,
                wxLayoutList *llist,
-               wxPoint *cursorPos = NULL,
-               wxPoint *cursorSize = NULL,
-               wxLayoutStyleInfo *cursorStyle = NULL,
+               wxPoint *cursorPos = nullptr,
+               wxPoint *cursorSize = nullptr,
+               wxLayoutStyleInfo *cursorStyle = nullptr,
                int cx = 0,
                bool suppressStyleUpdate = FALSE);
    /** This function finds an object belonging to a given cursor
@@ -691,7 +691,7 @@ public:
    */
    wxLayoutObject * FindObjectScreen(wxDC &dc,
                                      CoordType xpos,
-                                     bool *found = NULL);
+                                     bool *found = nullptr);
    /** This sets the style info for the beginning of this line.
        @param si styleinfo structure
     */
@@ -832,14 +832,14 @@ public:
               int style=wxNORMAL,
               int weight=wxNORMAL,
               int underline=0,
-              wxColour *fg=NULL,
-              wxColour *bg=NULL,
+              wxColour *fg=nullptr,
+              wxColour *bg=nullptr,
               wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
    /// Clear with epxlicit font
    void Clear(const wxFont& font,
-              wxColour *fg = NULL,
-              wxColour *bg = NULL);
+              wxColour *fg = nullptr,
+              wxColour *bg = nullptr);
 
    /// Empty: clear the list but leave font settings.
    void Empty(void);
@@ -990,8 +990,8 @@ public:
    /// sets font parameters, colours by name
    void SetFont(int family=-1, int size = -1, int style=-1,
                 int weight=-1, int underline = -1,
-                wxChar const *fg = NULL,
-                wxChar const *bg = NULL,
+                wxChar const *fg = nullptr,
+                wxChar const *bg = nullptr,
                 wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
    /// changes to the next larger font size
@@ -1013,12 +1013,12 @@ public:
    inline void SetFontUnderline(bool ul) { SetFont(-1,-1,-1,-1,(int)ul); }
    /// sets the font encoding
    void SetFontEncoding(wxFontEncoding enc)
-      { SetFont(-1,-1,-1,-1,-1,(wxColour *)NULL,(wxColour *)NULL,enc); }
+      { SetFont(-1,-1,-1,-1,-1,(wxColour *)nullptr,(wxColour *)nullptr,enc); }
    /// set font colours by name
-   inline void SetFontColour(wxChar const *fg, wxChar const *bg = NULL)
+   inline void SetFontColour(wxChar const *fg, wxChar const *bg = nullptr)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }
    /// set font colours by colour
-   inline void SetFontColour(wxColour *fg, wxColour *bg = NULL)
+   inline void SetFontColour(wxColour *fg, wxColour *bg = nullptr)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }
 
    /// set font explicitly
@@ -1081,8 +1081,8 @@ public:
        @param csize Will hold the cursor size relating to cpos.
    */
    void Layout(wxDC &dc, CoordType bottom = -1, bool forceAll = false,
-               wxPoint *cpos = NULL,
-               wxPoint *csize = NULL);
+               wxPoint *cpos = nullptr,
+               wxPoint *csize = nullptr);
 
    /** Ensure that the whole list will be recalculate on the next call 
        to Layout() or Draw().
@@ -1098,7 +1098,7 @@ public:
        @param csize If non-NULL, will be set to the cursor size.
        @return The cursor position on the DC.
    */
-   wxPoint GetScreenPos(wxDC &dc, const wxPoint &cpos, wxPoint *csize = NULL);
+   wxPoint GetScreenPos(wxDC &dc, const wxPoint &cpos, wxPoint *csize = nullptr);
 
    /** Calculates new sizes for everything in the list, like Layout()
        but this is needed after the list got changed.
@@ -1138,8 +1138,8 @@ public:
    */
    wxLayoutObject * FindObjectScreen(wxDC &dc,
                                      wxPoint const pos,
-                                     wxPoint *cursorPos = NULL,
-                                     bool *found = NULL);
+                                     wxPoint *cursorPos = nullptr,
+                                     bool *found = nullptr);
 
    /** Called by the objects to update the update rectangle.
        @param x horizontal coordinate to include in rectangle
@@ -1202,7 +1202,7 @@ public:
        @param invalidate if true, the selection will be invalidated after this and can no longer be used.
        @return Another layout list object holding the selection, must be freed by caller
    */
-   wxLayoutList *GetSelection(class wxLayoutDataObject *wxldo = NULL, bool invalidate = TRUE);
+   wxLayoutList *GetSelection(class wxLayoutDataObject *wxldo = nullptr, bool invalidate = TRUE);
    /// Delete selected bit
    void DeleteSelection(void);
 

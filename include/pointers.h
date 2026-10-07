@@ -81,7 +81,7 @@ public:
    /**
       Default constructor creates NULL pointer.
     */
-   RefCounter() : m_pointer(NULL) {}
+   RefCounter() : m_pointer(nullptr) {}
 
    /**
       Constructor from a raw pointer.
@@ -170,7 +170,7 @@ public:
     */
    operator unspecified_bool_type() const // never throws
    {
-       return m_pointer ? &RefCounter<T>::get : NULL;
+       return m_pointer ? &RefCounter<T>::get : nullptr;
    }
 
    /**
@@ -181,7 +181,7 @@ public:
    void reset()
    {
       RefCounterDecrement(m_pointer);
-      m_pointer = NULL;
+      m_pointer = nullptr;
    }
 
    /**
@@ -205,7 +205,7 @@ public:
    T *release()
    {
       T *pointer = m_pointer;
-      m_pointer = NULL;
+      m_pointer = nullptr;
 
       return pointer;
    }
@@ -263,7 +263,7 @@ public:
    typedef T element_type;
 
    /// Default constructor creates NULL pointer.
-   WeakRef() : m_pointer(NULL) {}
+   WeakRef() : m_pointer(nullptr) {}
 
    /// Copy constructor.
    WeakRef(const WeakRef<T> &copy)

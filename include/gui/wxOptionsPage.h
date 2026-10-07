@@ -269,7 +269,7 @@ protected:
    // for all this mess to work at all
    struct LboxData
    {
-      LboxData() { m_next = NULL; }
+      LboxData() { m_next = nullptr; }
 
       int m_idListbox;           // id
       wxString m_lboxDlgTitle,   // the title for Add/Modifydialogs
@@ -299,7 +299,7 @@ protected:
    // the pointers being returned are valid
    bool GetListboxFromButtonEvent(const wxEvent& event,
                                   wxListBox **pLbox,
-                                  LboxData **pData = NULL) const;
+                                  LboxData **pData = nullptr) const;
 
    // array of LboxData or NULL if we have no listboxes
    LboxData *m_lboxData;

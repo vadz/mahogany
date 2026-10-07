@@ -49,7 +49,7 @@ static ArrayMObjects gs_aMObjects;
 // sometimes we want to trace the lifetime of a selected object. For this, you
 // should change these variable under debugger - all operations on this object
 // will be logged.
-static void *gs_traceObject = NULL;
+static void *gs_traceObject = nullptr;
 
 // ============================================================================
 // implementation
@@ -208,7 +208,7 @@ extern void WeakRefAssign(MObjectRC *target,MObjectRC *source)
 extern void *WeakRefConvert(MObjectRC *pointer)
 {
    if( !pointer->m_nRef )
-      return NULL;
+      return nullptr;
 
    pointer->IncRef();
    return pointer;

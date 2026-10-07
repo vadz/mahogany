@@ -246,7 +246,7 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 wxVCardDialog::wxVCardDialog(wxVCard *vcard)
-             : wxDialog(NULL, -1, _("Edit vCard"),
+             : wxDialog(nullptr, -1, _("Edit vCard"),
                         wxDefaultPosition, wxDefaultSize,
                         wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER )
 {
@@ -610,7 +610,7 @@ void wxVCardDialog::OnEmailDelete(wxCommandEvent& WXUNUSED(event))
 
 void wxVCardDialog::OnAddrAdd(wxCommandEvent& WXUNUSED(event))
 {
-    wxVCardAddressDialog dlg(this, wxVCardAddressData(NULL));
+    wxVCardAddressDialog dlg(this, wxVCardAddressData(nullptr));
     if ( dlg.ShowModal() == wxID_OK )
     {
         AddAddress(dlg.GetData());
@@ -673,7 +673,7 @@ void wxVCardDialog::AddAddress(const wxVCardAddressData& data)
 
 wxVCardAddressDialog::wxVCardAddressDialog(wxWindow *parent,
                                            const wxVCardAddressData& data)
-                    : wxDialog(NULL, -1, _("Edit Address"),
+                    : wxDialog(nullptr, -1, _("Edit Address"),
                                wxDefaultPosition, wxDefaultSize,
                                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER ),
                       m_data(data)
@@ -813,6 +813,6 @@ extern wxVCard *wxCreateVCard()
     {
         delete vcard;
 
-        return NULL;
+        return nullptr;
     }
 }

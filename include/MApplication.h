@@ -83,7 +83,7 @@ public:
                   application detected that some unrecoverable error occured
                   or NULL if caused because we have crashed
    */
-   virtual void OnAbnormalTermination(const wxChar *msg = NULL);
+   virtual void OnAbnormalTermination(const wxChar *msg = nullptr);
 
    /**
      @name Exiting the application
@@ -139,7 +139,7 @@ public:
        @param id help id from MHelp.h
        @param parent parent window pointer
    */
-   virtual void Help(int id, wxWindow *parent = NULL) = 0;
+   virtual void Help(int id, wxWindow *parent = nullptr) = 0;
 
    /// Returns the main frame.
    virtual class MainFrameBase *GetMainFrame(void)
@@ -198,7 +198,7 @@ public:
    virtual class wxIconManager *GetIconManager(void) const = 0;
 
    /// called by the main frame when it's closed
-   void OnMainFrameClose() { m_topLevelFrame = NULL; m_cycle = ShuttingDown; }
+   void OnMainFrameClose() { m_topLevelFrame = nullptr; m_cycle = ShuttingDown; }
 
    /// @name What are we doing?
    //@{
@@ -337,9 +337,9 @@ public:
    virtual void SendOutbox(void) const;
 
    /// Check if we have messages to send.
-   virtual bool CheckOutbox(UIdType *nSMTP = NULL,
-                            UIdType *nNNTP = NULL,
-                            class MailFolder *mf = NULL) const;
+   virtual bool CheckOutbox(UIdType *nSMTP = nullptr,
+                            UIdType *nNNTP = nullptr,
+                            class MailFolder *mf = nullptr) const;
 
    //@}
 
@@ -453,7 +453,7 @@ public:
    //@}
 
    /// updates display of outbox status
-   virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const = 0;
+   virtual void UpdateOutboxStatus(class MailFolder *mf = nullptr) const = 0;
 
    /// Report a fatal error:
    virtual void FatalError(const wxChar *message) = 0;
@@ -658,6 +658,6 @@ CopyEntries(wxConfigBase *src,
             const wxString &from,
             const wxString &to,
             bool recursive = true,
-            wxConfigBase *dest = NULL);
+            wxConfigBase *dest = nullptr);
 
 #endif   // MAPPLICATION_H

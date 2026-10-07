@@ -57,7 +57,7 @@ enum CacheFileFormat
 // globals
 // ----------------------------------------------------------------------------
 
-static MfStatusCache *gs_mfStatusCache = NULL;
+static MfStatusCache *gs_mfStatusCache = nullptr;
 
 // ============================================================================
 // implementation
@@ -84,7 +84,7 @@ void MfStatusCache::CleanUp()
    if ( gs_mfStatusCache )
    {
       delete gs_mfStatusCache;
-      gs_mfStatusCache = NULL;
+      gs_mfStatusCache = nullptr;
    }
 }
 

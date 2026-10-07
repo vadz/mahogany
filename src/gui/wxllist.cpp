@@ -204,7 +204,7 @@ wxLayoutObject::Read(wxString &istr)
       return wxLayoutObjectIcon::Read(istr);
    }
 
-   return NULL;
+   return nullptr;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -400,7 +400,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap const &icon)
    {
       wxFAIL_MSG(_T("invalid icon"));
 
-      m_Icon = NULL;
+      m_Icon = nullptr;
 
       return;
    }
@@ -434,13 +434,13 @@ wxLayoutObjectIcon::Read(wxString &istr)
    ReadString(file, istr);
 
    if(! wxFileExists(file))
-      return NULL;
+      return nullptr;
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon;
 
    if(!obj->m_Icon->LoadFile(file, WXLO_BITMAP_FORMAT))
    {
       delete obj;
-      return NULL;
+      return nullptr;
    }
 
    return obj;
@@ -468,7 +468,7 @@ wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &coords,
    if ( m_Icon )
    {
       dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight(),
-                    (m_Icon->GetMask() == NULL) ? FALSE : TRUE);
+                    (m_Icon->GetMask() == nullptr) ? FALSE : TRUE);
    }
 }
 
@@ -532,8 +532,8 @@ wxLayoutStyleInfo::wxLayoutStyleInfo(const wxFont& ifont,
 
 void wxLayoutStyleInfo::InitColours(wxColour *fg, wxColour *bg)
 {
-   m_fg_valid = fg != NULL;
-   m_bg_valid = bg != NULL;
+   m_fg_valid = fg != nullptr;
+   m_bg_valid = bg != nullptr;
    m_fg = m_fg_valid ? *fg : *wxBLACK;
    m_bg = m_bg_valid ? *bg : *wxWHITE;
 }
@@ -600,8 +600,8 @@ wxLayoutObjectCmd::Copy(void)
       m_StyleInfo->style,
       m_StyleInfo->weight,
       m_StyleInfo->underline,
-      m_StyleInfo->m_fg_valid ? &m_StyleInfo->m_fg : NULL,
-      m_StyleInfo->m_bg_valid ? &m_StyleInfo->m_bg : NULL);
+      m_StyleInfo->m_fg_valid ? &m_StyleInfo->m_fg : nullptr,
+      m_StyleInfo->m_bg_valid ? &m_StyleInfo->m_bg : nullptr);
    obj->SetUserData(m_UserData);
    return obj;
 }
@@ -724,7 +724,7 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
 
    m_updateLeft = -1;
    m_Previous = prev;
-   m_Next = NULL;
+   m_Next = nullptr;
    MarkDirty(0);
 
    m_LineNumber = 0;
@@ -914,7 +914,7 @@ bool
 wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj, CoordType *pLenOrig)
 {
    wxASSERT(xpos >= 0);
-   wxASSERT(obj != NULL);
+   wxASSERT(obj != nullptr);
 
    MarkDirty(xpos);
 
@@ -1731,11 +1731,11 @@ wxLayoutLine::Copy(wxLayoutList *llist,
 wxLayoutList::wxLayoutList()
 {
 #ifdef WXLAYOUT_USE_CARET
-   m_caret = NULL;
+   m_caret = nullptr;
 #endif // WXLAYOUT_USE_CARET
 
    m_numLines = 0;
-   m_FirstLine = NULL;
+   m_FirstLine = nullptr;
    SetAutoFormatting(TRUE);
    ForceTotalLayout(TRUE);  // for the first time, do all
    InvalidateUpdateRect();
@@ -1762,7 +1762,7 @@ wxLayoutList::Empty(void)
    m_CursorScreenPos = wxPoint(0,0);
    m_CursorSize = wxPoint(0,0);
    m_movedCursor = true;
-   m_FirstLine = new wxLayoutLine(NULL, this); // empty first line
+   m_FirstLine = new wxLayoutLine(nullptr, this); // empty first line
    m_CursorLine = m_FirstLine;
    InvalidateUpdateRect();
 }
@@ -1868,7 +1868,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
       cbg = wxTheColourDatabase->Find(bg);
 
    SetFont(family, size, style, weight, underline,
-           fg ? &cfg : NULL, bg ? &cbg : NULL, encoding);
+           fg ? &cfg : nullptr, bg ? &cbg : nullptr, encoding);
 }
 
 void
@@ -1954,7 +1954,7 @@ wxLayoutList::MoveCursorTo(wxPoint const &p)
 bool
 wxLayoutList::MoveCursorVertically(int n)
 {
-   if(m_CursorLine == NULL)
+   if(m_CursorLine == nullptr)
       return m_movedCursor = false;
 
    AddCursorPosToUpdateRect();
@@ -1967,7 +1967,7 @@ wxLayoutList::MoveCursorVertically(int n)
       while(n < 0)
       {
          wxLayoutLine *next = m_CursorLine->GetPreviousLine();
-         if (next == NULL)
+         if (next == nullptr)
          {
             m_CursorPos.x = 0;
             m_CursorPos.y = 0;
@@ -1983,7 +1983,7 @@ wxLayoutList::MoveCursorVertically(int n)
       while(n > 0)
       {
          wxLayoutLine *next = m_CursorLine->GetNextLine();
-         if (next == NULL)
+         if (next == nullptr)
          {
             m_CursorPos.x = m_CursorLine->GetLength();
             wxASSERT(m_CursorPos.x >= 0);
@@ -2299,7 +2299,7 @@ wxLayoutList::LineBreak(void)
       height = m_CursorLine->GetHeight();
 
    m_CursorLine = m_CursorLine->Break(m_CursorPos.x, this);
-   if(m_CursorLine->GetPreviousLine() == NULL)
+   if(m_CursorLine->GetPreviousLine() == nullptr)
       m_FirstLine = m_CursorLine;
    m_CursorPos.y++;
    m_CursorPos.x = 0;
@@ -2557,7 +2557,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
             {
                line->Layout(dc, this,
                             cpos,
-                            csize, NULL, cpos->x);
+                            csize, nullptr, cpos->x);
                cursorReached = TRUE;
             }
             else
@@ -2570,7 +2570,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
 #ifndef WXLAYOUT_USE_CARET
    // can only be 0 if we are on the first line and have no next line
    wxASSERT(m_CursorSize.x != 0 || (m_CursorLine &&
-                                    m_CursorLine->GetNextLine() == NULL &&
+                                    m_CursorLine->GetNextLine() == nullptr &&
                                     m_CursorLine == m_FirstLine));
 #endif // WXLAYOUT_USE_CARET
    AddCursorPosToUpdateRect();
@@ -2665,7 +2665,7 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
       line = line->GetNextLine();
    }
 
-   bool didFind = line != NULL;
+   bool didFind = line != nullptr;
 
    if ( !line )
    {
@@ -2694,12 +2694,12 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
    else
      i = line->FindObjectScreen(dc, this,
                                     pos.x,
-                                    NULL,
+                                    nullptr,
                                     &foundinline);
    if ( found )
       *found = didFind && foundinline;
 
-   return (i == line->NULLIT()) ? NULL : i->get();
+   return (i == line->NULLIT()) ? nullptr : i->get();
 }
 
 wxPoint
@@ -3070,22 +3070,22 @@ wxLayoutList::Copy(const wxPoint &from,
                    const wxPoint &to)
 {
    wxLayoutLine
-      * firstLine = NULL,
-      * lastLine = NULL;
+      * firstLine = nullptr,
+      * lastLine = nullptr;
 
    for(firstLine = m_FirstLine;
        firstLine && firstLine->GetLineNumber() < from.y;
        firstLine=firstLine->GetNextLine())
       ;
    if(!firstLine || firstLine->GetLineNumber() != from.y)
-      return NULL;
+      return nullptr;
 
    for(lastLine = m_FirstLine;
        lastLine && lastLine->GetLineNumber() < to.y;
        lastLine=lastLine->GetNextLine())
       ;
    if(!lastLine || lastLine->GetLineNumber() != to.y)
-      return NULL;
+      return nullptr;
 
    if(to <= from)
    {
@@ -3127,7 +3127,7 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
       if(m_Selection.m_selecting)
          EndSelection();
       else
-         return NULL;
+         return nullptr;
    }
 
    if(invalidate) m_Selection.m_valid = false;
@@ -3141,7 +3141,7 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
 
       wxLayoutExportObject *exp;
       wxLayoutExportStatus status(llist);
-      while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_OBJECTS)) != NULL)
+      while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_OBJECTS)) != nullptr)
       {
          if(exp->type == WXLO_EXPORT_EMPTYLINE)
             string << (int) WXLO_TYPE_LINEBREAK << '\n';
@@ -3322,7 +3322,7 @@ bool wxLayoutPrintout::PrintPreview(wxLayoutList *llist)
    wxPreviewFrame *frame = new wxPreviewFrame
                                (
                                  preview,
-                                 NULL, //GetFrame(m_Parent),
+                                 nullptr, //GetFrame(m_Parent),
                                  _("Print Preview"),
                                  wxPoint(100, 100),
                                  wxSize(600, 650)

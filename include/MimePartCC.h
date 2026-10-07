@@ -26,7 +26,7 @@ class MimePartCC : public MimePartCCBase
 {
 public:
    // data access
-   const void *GetRawContent(unsigned long *len = NULL) const override;
+   const void *GetRawContent(unsigned long *len = nullptr) const override;
    String GetHeaders() const override;
 
 protected:

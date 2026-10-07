@@ -44,8 +44,8 @@ public:
       @param profile our profile (may be NULL if not standalone)
    */
    wxMessageView(wxWindow *parent,
-                 FolderView *folderView = NULL,
-                 Profile *profile = NULL);
+                 FolderView *folderView = nullptr,
+                 Profile *profile = nullptr);
 
    /// Destructor
    ~wxMessageView();

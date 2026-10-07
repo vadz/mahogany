@@ -70,7 +70,7 @@ PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
             nextfile = wxFindNextFile();
          }
       }
-      found = wxStrtok(NULL, PATHFINDER_DELIMITER, &save_ptr);
+      found = wxStrtok(nullptr, PATHFINDER_DELIMITER, &save_ptr);
    }
    delete[] work;
    if(subdirList.length() > 0)

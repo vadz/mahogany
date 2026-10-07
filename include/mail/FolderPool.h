@@ -127,8 +127,8 @@ public:
      @return IncRef()'d pointer to an opened folder or NULL if none
     */
    static MailFolder *GetFirst(Cookie& cookie,
-                               String *driverName = NULL,
-                               MFolder **pFolder = NULL);
+                               String *driverName = nullptr,
+                               MFolder **pFolder = nullptr);
 
    /**
      Returns the next opened folder
@@ -139,8 +139,8 @@ public:
      @return IncRef()'d pointer to an opened folder or NULL if no more
     */
    static MailFolder *GetNext(Cookie& cookie,
-                              String *driverName = NULL,
-                              MFolder **pFolder = NULL);
+                              String *driverName = nullptr,
+                              MFolder **pFolder = nullptr);
 
    //@}
 };

@@ -85,7 +85,7 @@ public:
                  _T("No server entry for %s found."),
                  folder->GetFullName());
 
-      return NULL;
+      return nullptr;
    }
 
    /**
@@ -109,7 +109,7 @@ public:
 
          serverInfo = mf->CreateServerInfo(folder);
 
-         CHECK( serverInfo, NULL, _T("CreateServerInfo() failed?") );
+         CHECK( serverInfo, nullptr, _T("CreateServerInfo() failed?") );
 
          ms_servers.emplace_back(serverInfo);
       }

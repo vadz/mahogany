@@ -28,7 +28,7 @@ class wxRegEx;
 inline bool strutil_isempty(const String &s) { return s.empty(); }
 
 /// return true if string is empty
-inline bool strutil_isempty(const wxChar *s) { return s == NULL || *s == _T('\0'); }
+inline bool strutil_isempty(const wxChar *s) { return s == nullptr || *s == _T('\0'); }
 
 /** Read a NL terminated line into a string.
 
@@ -265,11 +265,11 @@ String strutil_ftime(time_t time, const String & format = _T("%c"),
 
 /* Read and remove the next number from string. */
 long
-strutil_readNumber(String &string, bool *success = NULL);
+strutil_readNumber(String &string, bool *success = nullptr);
 
 /* Read and remove the next quoted string from string. */
 String
-strutil_readString(String &string, bool *success = NULL);
+strutil_readString(String &string, bool *success = nullptr);
 /* Return an escaped string. */
 String
 strutil_escapeString(const String &string);

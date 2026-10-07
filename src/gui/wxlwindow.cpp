@@ -149,17 +149,17 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
                                  wxHSCROLL | wxVSCROLL |
                                  wxBORDER |
                                  wxWANTS_CHARS),
-                m_llist(NULL)
+                m_llist(nullptr)
 {
-   SetStatusBar(NULL); // don't use statusbar
+   SetStatusBar(nullptr); // don't use statusbar
    m_Editable = false;
    m_doSendEvents = false;
    m_ViewStartX = 0; m_ViewStartY = 0;
    m_DoPopupMenu = true;
    m_PopupMenu = MakeFormatMenu();
-   m_bitmap = NULL;
+   m_bitmap = nullptr;
    m_llist = new wxLayoutList();
-   m_BGbitmap = NULL;
+   m_BGbitmap = nullptr;
    m_ScrollToCursor = false;
 #if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    m_FocusFollowMode = false;
@@ -195,7 +195,7 @@ wxLayoutWindow::~wxLayoutWindow()
    delete m_bitmap;
    delete m_llist;
    delete m_PopupMenu;
-   SetBackgroundBitmap(NULL);
+   SetBackgroundBitmap(nullptr);
 }
 
 void
@@ -321,7 +321,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    bool found;
    wxLayoutObject *obj = m_llist->FindObjectScreen(dc, findPos,
                                                    &cursorPos, &found);
-   wxLayoutObject::UserData *u = obj ? obj->GetUserData() : NULL;
+   wxLayoutObject::UserData *u = obj ? obj->GetUserData() : nullptr;
 
    // has the mouse only been moved?
    switch ( eventId )
@@ -379,7 +379,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
          if ( u )
          {
             u->DecRef();
-            u = NULL;
+            u = nullptr;
          }
          break;
 
@@ -470,7 +470,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
       // only do the menu if activated, editable and not on a clickable object
       if(eventId == WXLOWIN_MENU_RCLICK
          && IsEditable()
-         && (! obj || u == NULL))
+         && (! obj || u == nullptr))
       {
          PopupMenu(m_PopupMenu, m_ClickPosition.x, m_ClickPosition.y);
          if(u) u->DecRef();
@@ -1231,7 +1231,7 @@ wxLayoutWindow::Copy(bool invalidate, bool privateFormat, bool primary)
    wxString text;
    wxLayoutExportObject *exp;
    wxLayoutExportStatus status(llist);
-   while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != NULL)
+   while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != nullptr)
    {
       if(exp->type == WXLO_EXPORT_TEXT)
          text << *(exp->content.text);
@@ -1307,7 +1307,7 @@ wxLayoutWindow::Find(const wxString &needle,
 
    wxPoint found;
 
-   if(fromWhere == NULL)
+   if(fromWhere == nullptr)
       found = m_llist->FindText(m_FindString, wxPoint(0, 0));
    else
       found = m_llist->FindText(m_FindString, *fromWhere);

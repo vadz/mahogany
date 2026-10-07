@@ -90,8 +90,8 @@ public:
 extern bool HasImporters();
 
 // functions to show import dialog for all importers or the specified one
-extern bool ShowImportDialog(MImporter& importer, wxWindow *parent = NULL);
-extern bool ShowImportDialog(wxWindow *parent = NULL);
+extern bool ShowImportDialog(MImporter& importer, wxWindow *parent = nullptr);
+extern bool ShowImportDialog(wxWindow *parent = nullptr);
 
 // ----------------------------------------------------------------------------
 // macros for importers declaration/implementation

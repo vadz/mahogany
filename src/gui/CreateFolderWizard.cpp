@@ -110,8 +110,8 @@ class CreateFolderWizard : public MWizard
 {
 public:
    CreateFolderWizard(MFolder *parentFolder,
-                      wxWindow *parent = NULL)
-      : MWizard(MWizard_CreateFolder_Max, _("Create a new folder"), NULL, parent)
+                      wxWindow *parent = nullptr)
+      : MWizard(MWizard_CreateFolder_Max, _("Create a new folder"), nullptr, parent)
       {
          m_wantsDialog = false;
          m_ParentFolder = parentFolder;
@@ -239,7 +239,7 @@ MWizard_CreateFolder_WelcomePage(MWizard *wizard)
 
    long wMax = GetMaxLabelWidth(labels, panel->GetCanvas());
 
-   m_checkNoWizard = panel->CreateCheckBox(labels[0], wMax, NULL);
+   m_checkNoWizard = panel->CreateCheckBox(labels[0], wMax, nullptr);
    m_checkNeverWizard = panel->CreateCheckBox(labels[1], wMax, m_checkNoWizard);
 
    panel->Layout();
@@ -355,7 +355,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
                                       "NNTP Newsgroup:"
                                       "Local Newsgroup:"
                                       "Folder Group"),
-                                    maxwidth, NULL);
+                                    maxwidth, nullptr);
 
    // should be always in sync
    ASSERT_MSG( m_TypeCtrl->GetCount() == FOLDERTYPE_MAX,
@@ -587,13 +587,13 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
       last = m_##name; \
    } \
    else \
-      m_##name = NULL
+      m_##name = nullptr
 
    // if we ask for login name, we ask for password as well
    // (and we do need this var to be able to use the macro above)
    bool needsPassword = needsUserId;
 
-   wxControl *last = NULL;
+   wxControl *last = nullptr;
    CREATE_CTRL(Server,
                panel->CreateTextWithLabel(labels[Label_Server],
                                           maxwidth,
@@ -614,7 +614,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
                panel->CreateFileOrDirEntry(labels[Label_Mailbox],
                                            maxwidth,
                                            last,
-                                           canBrowse ? &m_browsePath : NULL,
+                                           canBrowse ? &m_browsePath : nullptr,
                                            true,
                                            false));
 
@@ -932,7 +932,7 @@ MWizard_CreateFolder_NewMailPage(MWizard *wizard)
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
    m_checkMonitor = panel->CreateCheckBox(labels[0],
-                                          maxwidth, NULL);
+                                          maxwidth, nullptr);
    m_checkOnStartup = panel->CreateCheckBox(labels[1],
                                             maxwidth, m_checkMonitor);
 
@@ -1058,7 +1058,7 @@ wxWizardPage *CreateFolderWizard::DoCreatePage(MWizardPageId id)
    }
 #undef CREATE_PAGE
 
-   return NULL;
+   return nullptr;
 }
 
 
@@ -1069,7 +1069,7 @@ wxWizardPage *CreateFolderWizard::DoCreatePage(MWizardPageId id)
 MFolder *
 RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
 {
-   MFolder *newfolder = NULL;
+   MFolder *newfolder = nullptr;
 
    // ensure that the pointer is always valid
    bool dummyWantsDialog;

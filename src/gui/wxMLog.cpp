@@ -30,7 +30,7 @@
 // wxMLog implementation
 // ============================================================================
 
-wxMLog* wxMLog::ms_MLog = NULL;
+wxMLog* wxMLog::ms_MLog = nullptr;
 
 void
 wxMLog::Activate()

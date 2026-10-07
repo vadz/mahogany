@@ -451,13 +451,13 @@ public:
    {
       m_window = window;
 
-      m_window->GetViewStart(NULL, &m_y);
+      m_window->GetViewStart(nullptr, &m_y);
    }
 
    bool HasChanged() const
    {
       wxCoord y;
-      m_window->GetViewStart(NULL, &y);
+      m_window->GetViewStart(nullptr, &y);
 
       return m_y != y;
    }
@@ -505,7 +505,7 @@ ClickableInfo *HtmlViewerWindow::GetClickable(const String& url) const
 {
    int index = m_urls.Index(url);
 
-   return index == wxNOT_FOUND ? NULL : m_clickables[(size_t)index];
+   return index == wxNOT_FOUND ? nullptr : m_clickables[(size_t)index];
 }
 
 void HtmlViewerWindow::OnSetTitle(const wxString& /* title */)
@@ -590,13 +590,13 @@ HtmlViewer::HtmlViewer()
 
    wxFileSystem::AddHandler(new wxInternetFSHandler);
 
-   m_window = NULL;
+   m_window = nullptr;
 
    m_nPart =
    m_nImage = 0;
 
 #if wxUSE_PRINTING_ARCHITECTURE
-   m_printHtml = NULL;
+   m_printHtml = nullptr;
 #endif // wxUSE_PRINTING_ARCHITECTURE
 
    m_hasHtmlContents = false;
@@ -1133,7 +1133,7 @@ void HtmlViewer::InsertRawContents(const String& data)
       BodyParser() { }
 
       // provide stubs for base class pure virtual methods which we don't use
-      wxObject* GetProduct() override { return NULL; }
+      wxObject* GetProduct() override { return nullptr; }
       void AddText(const wxString& WXUNUSED(txt)) override { }
    };
 

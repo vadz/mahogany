@@ -113,7 +113,7 @@ public:
     */
    static bool CheckIfSpam(const Message& msg,
                            const String& param = wxEmptyString,
-                           String *result = NULL);
+                           String *result = nullptr);
 
    /**
       Show a GUI dialog allowing the user to configure all spam filters.
@@ -156,7 +156,7 @@ protected:
    /**
       Default ctor.
     */
-   SpamFilter() { m_next = NULL; }
+   SpamFilter() { m_next = nullptr; }
 
    /**
       Virtual dtor for the base class.
@@ -246,7 +246,7 @@ protected:
 
       @return the name of the icon to use or NULL
     */
-   virtual const char *GetOptionPageIconName() const { return NULL; }
+   virtual const char *GetOptionPageIconName() const { return nullptr; }
 
    /**
       Return a pointer to the option page used for editing this spam filter

@@ -702,7 +702,7 @@ void InstallWizardPage::OnWizardCancel(wxWizardEvent& event)
 wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 {
    if ( id == InstallWizard_Done )
-      return (wxWizardPage *)NULL;
+      return (wxWizardPage *)nullptr;
 
    if ( !gs_wizardPages[id] )
    {
@@ -877,7 +877,7 @@ InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
            "want to do it."));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
-   panel->CreateButton(_("&Import..."), NULL);
+   panel->CreateButton(_("&Import..."), nullptr);
 
    GetSizer()->Fit(this);
 }
@@ -916,7 +916,7 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   m_name = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
+   m_name = panel->CreateTextWithLabel(labels[0], widthMax, nullptr);
    m_organization = panel->CreateTextWithLabel(labels[1], widthMax, m_name);
    m_login = panel->CreateTextWithLabel(labels[2], widthMax, m_organization);
    m_email = panel->CreateTextWithLabel(labels[3], widthMax, m_login);
@@ -1009,7 +1009,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   m_imap = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
+   m_imap = panel->CreateTextWithLabel(labels[0], widthMax, nullptr);
    m_pop = panel->CreateTextWithLabel(labels[1], widthMax, m_imap);
    m_leaveOnServer = panel->CreateCheckBox(labels[2], widthMax, m_pop);
    m_smtp = panel->CreateTextWithLabel(labels[3], widthMax, m_leaveOnServer);
@@ -1174,7 +1174,7 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    long widthMax = GetMaxLabelWidth(labels, panel);
 
    m_connections = panel->CreateComboBox(_("&Dial up connection to use"),
-      widthMax, NULL);
+      widthMax, nullptr);
 
    m_firstShow = true;
 #elif defined(OS_UNIX)
@@ -1183,7 +1183,7 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   m_connect = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
+   m_connect = panel->CreateTextWithLabel(labels[0], widthMax, nullptr);
    m_disconnect = panel->CreateTextWithLabel(labels[1], widthMax, m_connect);
 #endif // platform
 
@@ -1299,7 +1299,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   wxControl *last = NULL;
+   wxControl *last = nullptr;
 
 #ifdef USE_INBOX
    wxStaticText *text = panel->CreateMessage(_(
@@ -1447,7 +1447,7 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
          "Finally, it is advised that you test your\n"
          "configuration by sending a test message to\n"
          "yourself. Please uncheck the checkbox below\n"
-         "if you don't want to do it."), NULL);
+         "if you don't want to do it."), nullptr);
       m_checkboxSendTestMsg = panel->CreateCheckBox(labels[0], widthMax, text);
    }
    else
@@ -1458,9 +1458,9 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
 #endif // OS_UNIX
       msg += _("to be able to send the outgoing messages!");
 
-      text = panel->CreateMessage(msg, NULL);
+      text = panel->CreateMessage(msg, nullptr);
 
-      m_checkboxSendTestMsg = NULL;
+      m_checkboxSendTestMsg = nullptr;
    }
 
    GetSizer()->Fit(this);
@@ -1593,7 +1593,7 @@ bool RunInstallWizard(
    wxIconManager *iconManager = mApplication->GetIconManager();
    wxWizard *wizard = new wxWizard
                       (
-                        NULL,                         // parent
+                        nullptr,                         // parent
                         -1,                           // id
                         _("Mahogany Installation"),   // title
                         iconManager->GetBitmap(_T("install_welcome")), // def image
@@ -1731,7 +1731,7 @@ bool RunInstallWizard(
       {
          VerifyEMailSendingWorks(new MProgressInfo
                                      (
-                                        NULL,
+                                        nullptr,
                                         _("Sending the test message...")
                                      ));
       }
@@ -1745,7 +1745,7 @@ bool RunInstallWizard(
       {
          // this might take a long time if the new mail folder already exists
          // and has a lot of messages
-         MProgressInfo proginfo(NULL, _("Creating the welcome message..."));
+         MProgressInfo proginfo(nullptr, _("Creating the welcome message..."));
 
          // make the lines short enough to ensure they're not wrapped with the
          // default line wrap setting (60 columns)
@@ -3158,7 +3158,7 @@ VerifyStdFolders(void)
                "will remain in INBOX and you need to check that\n"
                "folder manually."
               ),
-             NULL,
+             nullptr,
              _("Collect mail from INBOX?"),
              M_DLG_YES_DEFAULT
            ) )
@@ -3175,7 +3175,7 @@ VerifyStdFolders(void)
             "You can change this in the INBOX folder's preferences\n"
             "dialog at any time."
            ),
-          NULL,
+          nullptr,
           MDIALOG_MSGTITLE,
           "WarnInbox"
          );
@@ -3379,7 +3379,7 @@ VerifyEMailSendingWorks(MProgressInfo *proginfo)
    msg << _("Sent email message to:\n")
        << me
        << _("\n\nPlease check whether it arrives.");
-   MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
+   MDialog_Message(msg, nullptr, _("Testing your configuration"), "TestMailSent");
 
    return true; // till we know something better
 }
@@ -3392,7 +3392,7 @@ static inline MFolder *CreateServerEntry(const String& name,
                                          MFolderType type,
                                          int flags)
 {
-   return CreateFolderTreeEntry(NULL, name, type, flags, wxEmptyString, false);
+   return CreateFolderTreeEntry(nullptr, name, type, flags, wxEmptyString, false);
 }
 
 /**
@@ -3530,7 +3530,7 @@ void SetupMinimalConfig(void)
    // DNS lookup in wxGetFullHostName() may take quite some time (especially
    // if the DNS doesn't work...), show something to the user while we're
    // blocking in it
-   MProgressInfo proginfo(NULL, _("One time only environment setup..."));
+   MProgressInfo proginfo(nullptr, _("One time only environment setup..."));
 
    wxYield(); // to show proginfo
 
@@ -3611,7 +3611,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
 
       if ( !MDialog_YesNoDialog
             (
-             _("Retrieve remote configuration settings now?"), NULL,
+             _("Retrieve remote configuration settings now?"), nullptr,
              _("Retrieve remote settings?"),
              M_DLG_YES_DEFAULT,
             M_MSGBOX_RETRIEVE_REMOTE ) )
@@ -3656,7 +3656,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    }
    HeaderInfoList *hil = mf->GetHeaders();
    Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );
-   if( msg == NULL)
+   if( msg == nullptr)
       return false; // what happened?
    if(msg->Subject() != M_SYNCMAIL_SUBJECT)
    {
@@ -3768,7 +3768,7 @@ bool SaveRemoteConfigSettings(bool confirm)
 
       if ( !MDialog_YesNoDialog
             (
-             _("Store remote configuration settings now?"), NULL,
+             _("Store remote configuration settings now?"), nullptr,
              _("Store remote settings?"),
              M_DLG_YES_DEFAULT,
              M_MSGBOX_STORE_REMOTE
@@ -3805,7 +3805,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );
       time_t storedDate = (*hil)[0]->GetDate();
       hil->DecRef();
-      if( msg == NULL)
+      if( msg == nullptr)
          return false; // what happened?
       if(msg->Subject() != M_SYNCMAIL_SUBJECT)
       {
@@ -3825,7 +3825,7 @@ bool SaveRemoteConfigSettings(bool confirm)
                 _("The remotely stored configuration information seems to have changed\n"
                   "since it was retrieved.\n"
                   "Are you sure you want to overwrite it with the current settings?"),
-                NULL,
+                nullptr,
                 _("Overwrite remote settings?"),
                 M_DLG_YES_DEFAULT,
                 M_MSGBOX_OVERWRITE_REMOTE
@@ -3934,7 +3934,7 @@ bool SaveRemoteConfigSettings(bool confirm)
       msg.Printf(
          _("Successfully stored shared configuration info in folder '%s'."),
          mf->GetName());
-      MDialog_Message(msg, NULL, _("Saved settings"),
+      MDialog_Message(msg, nullptr, _("Saved settings"),
                       GetPersMsgBoxName(M_MSGBOX_CONFIG_SAVED_REMOTELY));
    }
    return rc;

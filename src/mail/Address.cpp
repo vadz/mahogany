@@ -297,7 +297,7 @@ String Address::BuildFullForm(const String& name, const String& email)
 
    // we need to quote the personal part if it's not an atext as defined by RFC
    // 2822 (TODO: reuse IsATextChar() from matchurl.cpp!)
-   bool doQuote = wxStrpbrk(name, ",;\"") != NULL;
+   bool doQuote = wxStrpbrk(name, ",;\"") != nullptr;
    if ( doQuote )
    {
       address = _T('"');
@@ -349,7 +349,7 @@ Address::IsInList(const wxArrayString& addresses,
          //     can't use AddressList here as this might be just a domain name
          //     and not a valid address
          const wxChar *startAddr = wxStrchr(start, _T('<')),
-                      *endAddr = NULL;
+                      *endAddr = nullptr;
          if ( startAddr )
             endAddr = wxStrchr(++startAddr, _T('>'));
          else
@@ -433,7 +433,7 @@ Address::GetDisplayAddress(const String& address)
 
 bool AddressList::HasNext(const Address *addr) const
 {
-   return GetNext(addr) != NULL;
+   return GetNext(addr) != nullptr;
 }
 
 bool

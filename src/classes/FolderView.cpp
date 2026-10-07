@@ -74,7 +74,7 @@ void FolderView::DeregisterEvents(void)
                                  &m_regCookieMsgStatus,
                                  &m_regCookieASFolderResult,
                                  &m_regCookieAppExit,
-                                 NULL);
+                                 nullptr);
 }
 
 FolderView::~FolderView()
@@ -134,7 +134,7 @@ Profile *FolderView::GetFolderProfile() const
    {
       profile = mApplication->GetProfile();
 
-      CHECK( profile, NULL, _T("no global profile?") );
+      CHECK( profile, nullptr, _T("no global profile?") );
    }
 
    profile->IncRef();
@@ -144,5 +144,5 @@ Profile *FolderView::GetFolderProfile() const
 
 MailFolder *FolderView::GetMailFolder() const
 {
-   return m_ASMailFolder ? m_ASMailFolder->GetMailFolder() : NULL;
+   return m_ASMailFolder ? m_ASMailFolder->GetMailFolder() : nullptr;
 }

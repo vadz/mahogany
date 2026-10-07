@@ -206,11 +206,11 @@ public:
 
    // we're outside the tree, so none of these functions make sense for us
    size_t GetSubfolderCount() const override { return 0; }
-   MFolder *GetSubfolder(size_t) const override { return NULL; }
-   MFolder *GetSubfolder(const String&) const override { return NULL; }
-   MFolder *GetParent() const override { return NULL; }
+   MFolder *GetSubfolder(size_t) const override { return nullptr; }
+   MFolder *GetSubfolder(const String&) const override { return nullptr; }
+   MFolder *GetParent() const override { return nullptr; }
    MFolder *CreateSubfolder(const String&,
-                            MFolderType, bool) override { return NULL; }
+                            MFolderType, bool) override { return nullptr; }
    void Delete() override { FAIL_MSG(_T("doesn't make sense for MTempFolder")); }
    bool Rename(const String&) override
       { FAIL_MSG(_T("doesn't make sense for MTempFolder")); return false; }
@@ -407,7 +407,7 @@ public:
    void SetFlags(int /* flags */) override
       { FAIL_MSG(_T("can not set root folder attributes.")); }
 
-   MFolder *GetParent() const override { return NULL; }
+   MFolder *GetParent() const override { return nullptr; }
 
    void Delete() override
       { FAIL_MSG(_T("can not delete root folder.")); }
@@ -566,21 +566,21 @@ MFolder::Create(const String& fullname, MFolderType type, bool tryCreateLater)
 
       folder->DecRef();
 
-      return NULL;
+      return nullptr;
    }
 
    if ( !MFolderFromProfile::Create(fullname) )
    {
       // error message already given
-      return NULL;
+      return nullptr;
    }
 
    folder = Get(fullname);
 
-   CHECK( folder, NULL, _T("Get() must succeed if Create() succeeded!") );
+   CHECK( folder, nullptr, _T("Get() must succeed if Create() succeeded!") );
 
    Profile_obj profile(folder->GetFullName());
-   CHECK( profile, NULL, _T("panic in MFolder: no profile") );
+   CHECK( profile, nullptr, _T("panic in MFolder: no profile") );
 
    profile->writeEntry(MP_FOLDER_TYPE, type);
 
@@ -1000,7 +1000,7 @@ MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
    {
       FAIL_MSG( _T("invalid index in MFolderFromProfile::GetSubfolder()") );
 
-      return NULL;
+      return nullptr;
    }
    //else: not all folders traversed, i.e. the right one found
 
@@ -1031,7 +1031,7 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name,
 
       folder->DecRef();
 
-      return NULL;
+      return nullptr;
    }
 
    // ok, it is: do create it
@@ -1280,7 +1280,7 @@ MFolder *MFolderCache::Get(const String& name)
    Check();
 
    int index = ms_aFolderNames.Index(name);
-   return index == wxNOT_FOUND ? NULL : ms_aFolders[(size_t)index];
+   return index == wxNOT_FOUND ? nullptr : ms_aFolders[(size_t)index];
 }
 
 void MFolderCache::Add(MFolder *folder)
@@ -1409,13 +1409,13 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
 
    MFolder *folder = MFolder::Create(fullname, folderType);
 
-   if ( folder == NULL )
+   if ( folder == nullptr )
    {
       wxLogError(_("Cannot create a folder '%s'.\n"
                    "Maybe a folder of this name already exists?"),
                  fullname);
 
-      return NULL;
+      return nullptr;
    }
 
    Profile_obj profile(folder->GetFullName());

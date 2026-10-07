@@ -101,17 +101,17 @@ public:
 
    /// Create a normal Profile object
    static Profile * CreateProfile(const String & classname,
-                                  const Profile *parent = NULL);
+                                  const Profile *parent = nullptr);
 
    /// Create a Profile object for a plugin module
    static Profile * CreateModuleProfile(const String & classname,
-                                        const Profile *parent = NULL);
+                                        const Profile *parent = nullptr);
 
    /// Create a profile object for a folder with the given (full) name
    static Profile * CreateFolderProfile(const String& foldername);
 
    /// Create a dummy Profile just inheriting from the top level
-   static Profile * CreateEmptyProfile(const Profile *parent = NULL);
+   static Profile * CreateEmptyProfile(const Profile *parent = nullptr);
 
    /// creates/gets an Identity entry in the configuration
    static Profile * CreateIdentity(const String &name);
@@ -136,7 +136,7 @@ public:
       @return a temporary profile object which can be used as any other and
               must be DecRef()'d by caller or NULL if creation failed
     */
-   static Profile *CreateTemp(Profile *parent = NULL);
+   static Profile *CreateTemp(Profile *parent = nullptr);
 
 
    /// Delete the global config object
@@ -155,24 +155,24 @@ public:
    /// Read a character entry.
    virtual String readEntry(const String & key,
                             const String & defaultvalue,
-                            ReadResult *found = NULL) const = 0;
+                            ReadResult *found = nullptr) const = 0;
    /// Read a character entry.
    String readEntry(const String &  key,
-                    const char *defaultvalue = NULL,
-                    ReadResult *found = NULL) const;
+                    const char *defaultvalue = nullptr,
+                    ReadResult *found = nullptr) const;
    /// Read an integer value.
    virtual long readEntry(const String & key,
                           long defaultvalue,
-                          ReadResult *found = NULL) const = 0;
+                          ReadResult *found = nullptr) const = 0;
    /// Read an integer value.
    int readEntry(const String & key,
                  int defaultvalue,
-                 ReadResult *found = NULL) const
+                 ReadResult *found = nullptr) const
       { return (int)readEntry(key, (long)defaultvalue, found); }
    /// Read a bool value.
    bool readEntry(const String & key,
                   bool defaultvalue,
-                  ReadResult *found = NULL) const
+                  ReadResult *found = nullptr) const
       { return readEntry(key, (long)defaultvalue, found) != 0; }
 
    /// Read an integer entry from this profile only, don't look upwards
@@ -383,7 +383,7 @@ public:
 
 protected:
    /// ctor is protected, we're only created with CreateXXX() static methods
-   Profile() { m_configForWriting = NULL; m_expandEnvVars = false; }
+   Profile() { m_configForWriting = nullptr; m_expandEnvVars = false; }
 
    /// provide access to ProfileEnumDataImpl for the derived classes
    ProfileEnumDataImpl& GetEnumData(EnumData& cookie) const
@@ -503,7 +503,7 @@ public:
    ProfileConfigSourceChange(Profile *profile, ConfigSource *config)
       : m_profile(profile)
    {
-      m_changed = config != NULL;
+      m_changed = config != nullptr;
       if ( m_changed )
          m_config = profile->SetConfigSourceForWriting(config);
    }

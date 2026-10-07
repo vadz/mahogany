@@ -205,7 +205,7 @@ public:
                    const wxArrayString& specs);
 
    /// Delete the global AllConfigSources object returned by Get()
-   static void Cleanup() { delete ms_theInstance; ms_theInstance = NULL; }
+   static void Cleanup() { delete ms_theInstance; ms_theInstance = nullptr; }
 
    //@}
 

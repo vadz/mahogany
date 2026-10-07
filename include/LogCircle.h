@@ -68,7 +68,7 @@ public:
    String GuessError() const;
 
 private:
-   bool Find(const String needle, String *store = NULL) const;
+   bool Find(const String needle, String *store = nullptr) const;
 
    int m_N,
        m_Next;

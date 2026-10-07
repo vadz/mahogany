@@ -136,7 +136,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
    // init members
    // ------------
 
-   m_dlgFind = NULL;
+   m_dlgFind = nullptr;
 
    m_posFind = 0;
 
@@ -346,7 +346,7 @@ void MTextDialog::OnFindDialogNext(wxFindDialogEvent& event)
 void MTextDialog::OnFindDialogClose(wxFindDialogEvent&)
 {
    m_dlgFind->Destroy();
-   m_dlgFind = NULL;
+   m_dlgFind = nullptr;
 }
 
 // ----------------------------------------------------------------------------

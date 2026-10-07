@@ -85,9 +85,9 @@ MFolder* TryToCreateFolderOrAskUser(wxWindow* parent, const String& fullname);
 */
 extern MFolder *ShowFolderCreateDialog
                 (
-                  wxWindow *parent = NULL,
+                  wxWindow *parent = nullptr,
                   FolderCreatePage page = FolderCreatePage_Default,
-                  MFolder *parentFolder = NULL
+                  MFolder *parentFolder = nullptr
                 );
 
 /**
@@ -96,7 +96,7 @@ extern MFolder *ShowFolderCreateDialog
 */
 
 extern bool ShowFolderPropertiesDialog(MFolder *folder,
-                                       wxWindow *parent = NULL);
+                                       wxWindow *parent = nullptr);
 
 /**
   shows all existing subfolders (not in the program, but on the server) of the
@@ -105,7 +105,7 @@ extern bool ShowFolderPropertiesDialog(MFolder *folder,
   @return TRUE if any folders were created, FALSE otherwise
 */
 extern bool ShowFolderSubfoldersDialog(MFolder *folder,
-                                       wxWindow *parent = NULL);
+                                       wxWindow *parent = nullptr);
 
 /**
   asks the user for the new name of the folder: returns new name to show in
@@ -121,6 +121,6 @@ extern bool ShowFolderSubfoldersDialog(MFolder *folder,
 extern bool ShowFolderRenameDialog(const MFolder *folder,
                                    String *folderName,
                                    String *mboxName,
-                                   wxWindow *parent = NULL);
+                                   wxWindow *parent = nullptr);
 
 #endif // _MFOLDERDIALOGS_H

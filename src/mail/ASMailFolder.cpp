@@ -91,7 +91,7 @@ public:
       {
          m_ASMailFolder = mf;
          SafeIncRef(mf);
-         m_MailFolder = mf ? mf->GetMailFolder() : NULL;
+         m_MailFolder = mf ? mf->GetMailFolder() : nullptr;
          m_UserData = ud;
       }
 
@@ -155,7 +155,7 @@ MailThread::Entry()
    //LockFolder();
    WorkFunction();
    //UnLockFolder();
-   return NULL; // no return value
+   return nullptr; // no return value
 }
 
 
@@ -191,7 +191,7 @@ public:
          // We don't delete the m_Seq array, this will be deleted by
          // the Result object when no longer needed.
          // After passing it to the Result, we set it to NULL to check.
-         ASSERT(m_Seq == NULL);
+         ASSERT(m_Seq == nullptr);
       }
 protected:
    UIdArray *m_Seq;
@@ -276,7 +276,7 @@ public:
          m_MailFolder->SetFlag(m_Seq, m_Flag, m_Set);
          delete m_Seq;
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 protected:
@@ -309,7 +309,7 @@ public:
                     )
                    );
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 
@@ -341,7 +341,7 @@ public:
                     )
                    );
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 
@@ -367,7 +367,7 @@ public:
                    (
                      m_ASMailFolder,
                      m_Ticket,
-                     NULL,
+                     nullptr,
                      msg,
                      m_UId,
                      m_UserData
@@ -397,7 +397,7 @@ public:
 
       : MailThread(mf, ud)
       {
-         m_Message = NULL;
+         m_Message = nullptr;
          m_MsgString = msgstr;
       }
    ~MT_AppendMessage()
@@ -410,7 +410,7 @@ public:
                             : m_MailFolder->AppendMessage(m_MsgString);
          SendEvent(ASMailFolder::ResultInt::
                    Create(m_ASMailFolder, m_Ticket,
-                          ASMailFolder::Op_AppendMessage,  NULL,
+                          ASMailFolder::Op_AppendMessage,  nullptr,
                           rc,
                           m_UserData));
       }
@@ -423,7 +423,7 @@ class MT_Expunge : public MailThread
 {
 public:
    MT_Expunge(ASMailFolder *mf)
-      : MailThread(mf, NULL) {}
+      : MailThread(mf, nullptr) {}
    void WorkFunction(void) override
       { m_MailFolder->ExpungeMessages(); }
 };
@@ -455,7 +455,7 @@ public:
                  )
                );
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
    }
 };
@@ -499,7 +499,7 @@ public:
                             m_Seq,
                             rc, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -525,7 +525,7 @@ public:
                                                    m_Seq,
                                                    rc, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -540,7 +540,7 @@ public:
                                  ASMailFolder::OperationId op,
                                  const UIdArray *selections,
                                  wxWindow *parent,
-                                 MFolder *folder = NULL)
+                                 MFolder *folder = nullptr)
       : MailThreadSeq(mf, ud, selections)
       {
          m_Parent = parent;
@@ -559,7 +559,7 @@ public:
                                                    m_Seq,
                                                    rc, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -591,7 +591,7 @@ public:
             m_MailFolder->ForwardMessages(m_Seq, m_Params, m_Parent);
          delete m_Seq;
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -614,7 +614,7 @@ public:
             m_ASMailFolder, m_Ticket, ASMailFolder::Op_ApplyFilterRules, m_Seq,
             result, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -646,7 +646,7 @@ public:
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket,
                                                    ASMailFolder::Op_Subscribe,
-                                                   NULL, rc, m_UserData));
+                                                   nullptr, rc, m_UserData));
       }
 private:
    String  m_Host;
@@ -721,7 +721,7 @@ public:
        @return void, but causes update events to be sent if necessary.
    */
    void Ping(void) override
-      { (void) (new MT_Ping(this, NULL))->Start(); }
+      { (void) (new MT_Ping(this, nullptr))->Start(); }
 
 
    /** get the message with unique id uid
@@ -735,7 +735,7 @@ public:
 
    Ticket SetFlagForAll(int flag, bool set = true) override
       {
-         return (new MT_SetFlagForAll(this, NULL, flag, set))->Start();
+         return (new MT_SetFlagForAll(this, nullptr, flag, set))->Start();
       }
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
@@ -748,7 +748,7 @@ public:
                           int flag,
                           bool set) override
       {
-         return (new MT_SetSequenceFlag(this, NULL,
+         return (new MT_SetSequenceFlag(this, nullptr,
                                         kind,sequence,flag,set))->Start();
       }
 
@@ -759,7 +759,7 @@ public:
    */
    virtual Ticket SetFlag(const UIdArray *sequence, int flag, bool set)
       {
-         return (new MT_SetFlag(this, NULL, sequence, flag, set))->Start();
+         return (new MT_SetFlag(this, nullptr, sequence, flag, set))->Start();
       }
 
 
@@ -818,7 +818,7 @@ public:
       {
          UIdArray uids;
          uids.Add(uid);
-         return DeleteMessages(&uids, false, NULL);
+         return DeleteMessages(&uids, false, nullptr);
       }
 
    /** UnDelete a message.
@@ -829,7 +829,7 @@ public:
       {
          UIdArray uids;
          uids.Add(uid);
-         return UnDeleteMessages(&uids, NULL);
+         return UnDeleteMessages(&uids, nullptr);
       }
 
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
@@ -998,7 +998,7 @@ public:
                            bool subscribe,
                            UserData ud)
       {
-         return (new MT_Subscribe(NULL, ud, host, protocol,
+         return (new MT_Subscribe(nullptr, ud, host, protocol,
                                   mailboxname, subscribe))->Start();
       }
 #endif // USE_SUBSCRIBE

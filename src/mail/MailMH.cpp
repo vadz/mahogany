@@ -215,7 +215,7 @@ MailFolder::InitializeMH()
 #endif // Unix/!Unix
 
          // const_cast is harmless
-         mail_parameters(NULL, SET_MHPATH, pathMH.char_str());
+         mail_parameters(nullptr, SET_MHPATH, pathMH.char_str());
       }
 
       // force cclient to init the MH driver
@@ -229,7 +229,7 @@ MailFolder::InitializeMH()
          // retrieve the MH path (notice that we don't always find it ourself
          // as sometimes it's found only by the call to mh_isvalid)
          gs_MHRootDir = static_cast<char *>(
-                           mail_parameters(NULL, GET_MHPATH, &tmp));
+                           mail_parameters(nullptr, GET_MHPATH, &tmp));
 
          // the path should have a trailing [back]slash
          if ( !!gs_MHRootDir && !wxIsPathSeparator(gs_MHRootDir.Last()) )
@@ -307,11 +307,11 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
    if ( root != InitializeMH() )
    {
       // const_cast is harmless
-      mail_parameters(NULL, SET_MHPATH, root.char_str());
+      mail_parameters(nullptr, SET_MHPATH, root.char_str());
    }
 
    // first create the root MH folder
-   MFolder *folderMH = CreateFolderTreeEntry(NULL,    // top level folder
+   MFolder *folderMH = CreateFolderTreeEntry(nullptr,    // top level folder
                                              _("MH folders"),
                                              MF_MH,
                                              0,       // flags

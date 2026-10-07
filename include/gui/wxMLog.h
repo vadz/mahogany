@@ -63,7 +63,7 @@ class wxMLogTargetSetter
 {
 public:
    explicit wxMLogTargetSetter(wxInfoBarBase* infobar)
-      : m_infobarOrig(wxMLog::ms_MLog ? wxMLog::ms_MLog->m_activeInfoBar : NULL)
+      : m_infobarOrig(wxMLog::ms_MLog ? wxMLog::ms_MLog->m_activeInfoBar : nullptr)
    {
       if ( wxMLog::ms_MLog )
          wxMLog::ms_MLog->SetInfoBarToUse(infobar);

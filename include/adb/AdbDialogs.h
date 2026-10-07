@@ -25,8 +25,8 @@ class ArrayAdbEntries;
   of the native book used for import in the out parameter and return TRUE if
   the import succeeded - FALSE and log the error message(s) if it failed.
  */
-extern bool AdbShowImportDialog(wxWindow *parent = NULL,
-                                String *nameOfNativeAdb = NULL);
+extern bool AdbShowImportDialog(wxWindow *parent = nullptr,
+                                String *nameOfNativeAdb = nullptr);
 
 /**
   Show the dialog allowing the user to export the given address book

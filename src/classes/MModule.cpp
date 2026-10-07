@@ -112,7 +112,7 @@ struct MModuleListEntry
 typedef std::list<MModuleListEntry> MModuleList;
 
 /// The actual list of all loaded modules.
-static MModuleList *gs_MModuleList = NULL;
+static MModuleList *gs_MModuleList = nullptr;
 
 // ============================================================================
 // implementation
@@ -209,7 +209,7 @@ void MModule_Cleanup(void)
       }
 
       delete gs_MModuleList;
-      gs_MModuleList = NULL;
+      gs_MModuleList = nullptr;
    }
 }
 
@@ -227,7 +227,7 @@ MModule *FindModule(const String & name)
 #ifdef USE_MODULES_STATIC
          int errorCode = 0; //for now we ignore it
          // on-the-fly initialisation for static modules:
-         if( i->m_Module == NULL )
+         if( i->m_Module == nullptr )
          {
             // initialise the module:
             i->m_Module = (*(i->m_InitFunc))(
@@ -240,7 +240,7 @@ MModule *FindModule(const String & name)
 
          return i->m_Module;
       }
-   return NULL; // not found
+   return nullptr; // not found
 }
 
 
@@ -257,7 +257,7 @@ void MModule_AddStaticModule(const char *Name,
    me.m_Version = Version;
    me.m_Description = Description;
    me.m_Interface = Interface;
-   me.m_Module = NULL;
+   me.m_Module = nullptr;
    me.m_InitFunc = initFunc;
    GetMModuleList()->push_back(me);
 }
@@ -271,7 +271,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       wxLogTrace(M_TRACE_MODULES, _T("Failed to load module '%s' from '%s'."),
                  name, pathname);
 
-      return NULL;
+      return nullptr;
    }
 
    wxLogTrace(M_TRACE_MODULES, _T("Successfully loaded module '%s' from '%s'."),
@@ -282,7 +282,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
 
 
    int errorCode = 255;
-   MModule *module = NULL;
+   MModule *module = nullptr;
    if(initFunc)
    {
       module = (*initFunc)
@@ -341,7 +341,7 @@ MModule::LoadModule(const String & name)
       return module;
    }
 #ifdef USE_MODULES_STATIC
-   return NULL;
+   return nullptr;
 #else // !USE_MODULES_STATIC
 
    wxArrayString dirs = BuildListOfModulesDirs();
@@ -368,7 +368,7 @@ MModule::LoadModule(const String & name)
       pathname << name << moduleExt;
       if(wxFileExists(pathname))
       {
-         if ((module = LoadModuleInternal(name, pathname)) != NULL)
+         if ((module = LoadModuleInternal(name, pathname)) != nullptr)
             break;
       }
    }
@@ -385,7 +385,7 @@ MModule::GetProvider(const wxString &interfaceName)
    {
       wxLogWarning(_("No modules implementing \"%s\" interface found."),
                    interfaceName);
-      return NULL;
+      return nullptr;
    }
 
    if ( listing->Count() > 1 )
@@ -427,7 +427,7 @@ public:
                            const String &desc = wxEmptyString,
                            const String &version = wxEmptyString,
                            const String &author = wxEmptyString,
-                           MModule *module = NULL)
+                           MModule *module = nullptr)
       {
          m_Name = name;
          m_Interface = interfaceName;
@@ -499,7 +499,7 @@ protected:
          m_count = n;
 
          // avoid allocating 0 sized array
-         m_entries = m_count > 0 ? new MModuleListingEntryImpl[m_count] : NULL;
+         m_entries = m_count > 0 ? new MModuleListingEntryImpl[m_count] : nullptr;
       }
    ~MModuleListingImpl()
       { delete [] m_entries; }
@@ -673,7 +673,7 @@ MModule::ListAvailableModules(const String& interfaceName)
       MModule_GetModulePropFuncType
          getProps = dll.IsLoaded() ?
             (MModule_GetModulePropFuncType)
-            dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION) : NULL;
+            dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION) : nullptr;
 
       if ( !getProps )
       {

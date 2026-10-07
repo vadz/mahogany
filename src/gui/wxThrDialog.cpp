@@ -209,7 +209,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    }
    long widthMax = GetMaxLabelWidth(aLabels, this);
 
-   wxControl *last = NULL;
+   wxControl *last = nullptr;
 
    last = m_panel->CreateMessage
           (

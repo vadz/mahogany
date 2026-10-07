@@ -250,7 +250,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
                      &lines
                     );
 
-   wxStaticText *msg = NULL;
+   wxStaticText *msg = nullptr;
    size_t nLines = lines.GetCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
@@ -287,7 +287,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    // text and browse button
    int widthMax;
    wxString label(_("&File:"));
-   GetTextExtent(label, &widthMax, NULL);
+   GetTextExtent(label, &widthMax, nullptr);
    m_text = m_panel->CreateFileEntry(label, (long)widthMax, msg, &m_browseBtn);
 
    // checkboxes
@@ -430,7 +430,7 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
 
    // don't show the "More" button if there are no more matches
    m_btnMore = aMoreEntries.IsEmpty()
-                  ? NULL
+                  ? nullptr
                   : new wxButton(this, Btn_More, _("&More matches"));
 
    m_btnDelete = new wxButton(this, Btn_Delete, _("&Delete"));
@@ -563,7 +563,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
             importerDesc = dlg.GetImporterDesc(),
             filename = dlg.GetFileName();
 
-   AdbImporter *importer = NULL;
+   AdbImporter *importer = nullptr;
    if ( !!importerName )
    {
       importer = AdbImporter::GetImporterByName(importerName);
@@ -610,7 +610,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
 
    // ask for the name of the ADB to import data in
    wxString adbname, ext;
-   wxFileName::SplitPath(filename, NULL, &adbname, &ext);
+   wxFileName::SplitPath(filename, nullptr, &adbname, &ext);
    if ( !adbname )
    {
       // this means that the file starts with '.' in which case just take the
@@ -664,7 +664,7 @@ bool AdbShowExportDialog(AdbEntryGroup& group)
             wxString(_T("Mahogany : "))+_("ADB export options"),
             n,
             &descs[0],
-            NULL,
+            nullptr,
             -1, -1, // x,y
             TRUE,   //centre
             w, h

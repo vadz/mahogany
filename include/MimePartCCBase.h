@@ -54,7 +54,7 @@ public:
    size_t GetNumberOfLines() const override;
 
    // data access
-   const void *GetContent(unsigned long *len = NULL) const override;
+   const void *GetContent(unsigned long *len = nullptr) const override;
    String GetTextContent() const override;
 
 
@@ -77,7 +77,7 @@ protected:
       @param nPart the order among our siblings
     */
    void Create(struct mail_bodystruct *body,
-               MimePartCCBase *parent = NULL,
+               MimePartCCBase *parent = nullptr,
                size_t nPart = 1u);
 
    /// common part of all ctors
@@ -88,7 +88,7 @@ protected:
 
    /// full ctor, same argument as for Create()
    MimePartCCBase(struct mail_bodystruct *body,
-                  MimePartCCBase *parent = NULL,
+                  MimePartCCBase *parent = nullptr,
                   size_t nPart = 1u)
    {
       Init();

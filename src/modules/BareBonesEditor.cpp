@@ -863,7 +863,7 @@ wxBareBonesTextControl::GetUnicodeText() const
 
 BareBonesEditor::BareBonesEditor()
 {
-   m_textControl = NULL;
+   m_textControl = nullptr;
 
    m_encoding = wxFONTENCODING_SYSTEM;
 
@@ -1238,14 +1238,14 @@ EditorContentPart *BareBonesEditor::GetNextPart()
 {
    const int count = m_attachments->GetItemCount();
 
-   CHECK( m_getNextAttachement >= 0 || m_getNextAttachement < count, NULL,
+   CHECK( m_getNextAttachement >= 0 || m_getNextAttachement < count, nullptr,
             _T("forgot to call BareBonesEditor::GetFirstPart()?") );
 
    if ( m_getNextAttachement == count )
    {
       // no more parts
       m_getNextAttachement = -1;
-      return NULL;
+      return nullptr;
    }
 
    wxListItem item;

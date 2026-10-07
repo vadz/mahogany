@@ -49,7 +49,7 @@ MimePartVirtual::MimePartVirtual(const wxCharBuffer& msgText)
 {
    m_pStart = m_msgText;
 
-   m_env = NULL;
+   m_env = nullptr;
 
    m_lenHeader =
    m_lenBody = 0;
@@ -77,7 +77,7 @@ MimePartVirtual::MimePartVirtual(BODY *body,
                                  size_t nPart,
                                  const char *pHeader)
 {
-   m_env = NULL;
+   m_env = nullptr;
 
    Create(body, parent, nPart);
 

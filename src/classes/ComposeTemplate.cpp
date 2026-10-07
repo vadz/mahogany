@@ -1520,7 +1520,7 @@ String VarExpander::GetSignature() const
                                  m_cv.GetFrame(),
                                  "sig",
                                  _("Choose signature file"),
-                                 NULL, _T(".signature"), NULL
+                                 nullptr, _T(".signature"), nullptr
                              );
             }
             else

@@ -669,7 +669,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
       const wxString label(wxGetTranslation(GetMenuItem(n).label));
       if ( !label.empty() ) {
          const wxChar *p = wxStrchr(label, _T('&'));
-         if ( p == NULL ) {
+         if ( p == nullptr ) {
             wxLogWarning(_T("Menu label '%s' doesn't have keyboard accelerator."),
                          label);
          }
@@ -836,15 +836,15 @@ extern wxMenu *
 FindSubmenu(wxWindow *win, int id)
 {
    wxFrame *frame = GetFrame(win);
-   CHECK( frame, NULL, _T("no parent frame in FindSubmenu") );
+   CHECK( frame, nullptr, _T("no parent frame in FindSubmenu") );
 
    wxMenuBar *mb = frame->GetMenuBar();
-   CHECK( mb, NULL, _T("no menu bar in FindSubmenu") );
+   CHECK( mb, nullptr, _T("no menu bar in FindSubmenu") );
 
    // we use the index in the array/enum as id for the submenus, see
    // AppendToMenu()
    wxMenuItem *menuitem = mb->FindItem(SubmenuId(id));
-   CHECK( menuitem, NULL, _T("no such menuitem in FindSubmenu") );
+   CHECK( menuitem, nullptr, _T("no such menuitem in FindSubmenu") );
 
    ASSERT_MSG( menuitem->IsSubMenu(),
                _T("this menuitem is not a submenu in FindSubmenu") );

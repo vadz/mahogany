@@ -69,7 +69,7 @@ protected:
    // parsed.
    bool ParseMailrcAliasLine(const wxString& line,
                              wxString *nickname,
-                             wxArrayString *addresses = NULL) const;
+                             wxArrayString *addresses = nullptr) const;
 
    // the indices of the alias line in m_textfile
    wxArrayInt m_lineNumbers;

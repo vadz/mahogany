@@ -84,7 +84,7 @@ public:
    bool Suspend() override;
    bool Resume() override;
 
-   bool IsOpened(void) const override { return m_MailStream != NULL; }
+   bool IsOpened(void) const override { return m_MailStream != nullptr; }
 
    bool IsReadOnly(void) const override;
    bool CanSetFlag(int flags) const override;
@@ -192,7 +192,7 @@ public:
                     const String &pattern = _T("*"),
                     bool subscribed_only = false,
                     const String &reference = wxEmptyString,
-                    UserData ud = 0,
+                    UserData ud = nullptr,
                     Ticket ticket = ILLEGAL_TICKET) override;
 
    /**@name Access control */
@@ -368,7 +368,7 @@ private:
    */
    static bool CreateIfNeeded(const MFolder *folder,
                               wxFrame *parent,
-                              MAILSTREAM **pStream = NULL);
+                              MAILSTREAM **pStream = nullptr);
 
    /// just do mail_ping() on the opened folder, return TRUE if ok
    bool PingOpenedFolder();
@@ -431,7 +431,7 @@ private:
    /// set login data (possibly asking the user about it) if needed, return
    /// false if we don't have login/password and so can't continue
    static bool SetLoginDataIfNeeded(const MFolder *mfolder,
-                                    String *login = NULL);
+                                    String *login = nullptr);
 
    //@}
 
@@ -638,7 +638,7 @@ public:
        @param errflg   error level
        @param mf if non-NULL the folder
        */
-   static void mm_log(const String& str, long errflg, MailFolderCC *mf = NULL);
+   static void mm_log(const String& str, long errflg, MailFolderCC *mf = nullptr);
 
    /** log a debugging message
        @param str    message string
