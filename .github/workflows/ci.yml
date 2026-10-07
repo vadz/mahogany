@@ -26,7 +26,7 @@ jobs:
         init-shell: none
         cache-downloads: true
     - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@v1.2.24
       with:
         key: ${{ github.job }}
         evict-old-files: job
@@ -56,7 +56,7 @@ jobs:
         init-shell: none
         cache-downloads: true
     - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@v1.2.24
       with:
         key: ${{ github.job }}
         evict-old-files: job
