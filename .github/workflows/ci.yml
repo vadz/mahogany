@@ -10,7 +10,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Bootstrap
       run: ./bootstrap
     - name: Set up Miniconda
@@ -35,7 +35,7 @@ jobs:
   build-linux-cmake:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v3
       with:
@@ -58,9 +58,9 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up MSBuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v3
       with:
@@ -79,7 +79,7 @@ jobs:
   build-windows-cmake:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v3
       with:
