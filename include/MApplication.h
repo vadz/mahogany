@@ -83,7 +83,7 @@ public:
                   application detected that some unrecoverable error occured
                   or NULL if caused because we have crashed
    */
-   virtual void OnAbnormalTermination(const char *msg = NULL);
+   virtual void OnAbnormalTermination(const wxChar *msg = NULL);
 
    /**
      @name Exiting the application

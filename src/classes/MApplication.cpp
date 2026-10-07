@@ -647,7 +647,7 @@ MAppBase::OnStartup()
 }
 
 void
-MAppBase::OnAbnormalTermination(const char *)
+MAppBase::OnAbnormalTermination(const wxChar *)
 {
    // no more event processing as it may lead to unexpected results in the
    // state we are in

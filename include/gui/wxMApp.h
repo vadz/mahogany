@@ -68,7 +68,7 @@ public:
    /// implement base class virtuals
    wxMFrame *CreateTopLevelFrame() override;
    void OnFatalException() override { OnAbnormalTermination(); }
-   virtual void OnAbnormalTermination(const wxChar *msg = NULL);
+   void OnAbnormalTermination(const wxChar *msg = NULL) override;
 
    bool StartTimer(Timer timer) override;
    bool StopTimer(Timer timer) override;
