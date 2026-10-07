@@ -33,10 +33,12 @@
 #endif   // USE_PCH
 
 #include "MThread.h"
-#include "lists.h"
 #include "MFolder.h"
 #include "MailFolder.h"
 #include "NewMailNotifier.h"
+
+#include <memory>
+#include <vector>
 
 #include "FolderMonitor.h"
 
@@ -181,8 +183,9 @@ private:
    int m_failcount;
 };
 
-// declare a list (owning the objects in it) of FolderMonitorFolderEntries
-M_LIST_OWN(FolderMonitorFolderList, FolderMonitorFolderEntry);
+// a vector (owning the objects in it) of FolderMonitorFolderEntries
+using FolderMonitorFolderList =
+   std::vector<std::unique_ptr<FolderMonitorFolderEntry>>;
 
 // ----------------------------------------------------------------------------
 // FolderMonitorTraversal used by FolderMonitor to find all incoming folders
@@ -208,7 +211,7 @@ public:
             wxLogTrace(TRACE_MONITOR, _T("Found folder to monitor: %s"),
                        folderName);
 
-            m_list.push_back(new FolderMonitorFolderEntry(folder));
+            m_list.push_back(std::make_unique<FolderMonitorFolderEntry>(folder));
          }
 
          return true;
@@ -309,17 +312,18 @@ FolderMonitorImpl::FolderMonitorImpl()
 
    MProgressInfo *progInfo = NULL;
 
-   for ( FolderMonitorFolderList::iterator i = m_list.begin();
-         i != m_list.end();
-         ++i )
+   // see the comment in CheckNewMail() for why we use indices here
+   for ( int n = 0; n < std::ssize(m_list); n++ )
    {
       if ( !progInfo )
          progInfo = CreateProgressInfo();
 
-      Profile_obj profile(i->GetFolder()->GetProfile());
+      FolderMonitorFolderEntry * const entry = m_list[n].get();
+
+      Profile_obj profile(entry->GetFolder()->GetProfile());
       if ( READ_CONFIG_BOOL(profile, MP_COLLECTATSTARTUP) )
       {
-         (void)CheckOneFolder(*i, progInfo);
+         (void)CheckOneFolder(entry, progInfo);
       }
    }
 
@@ -350,11 +354,9 @@ FolderMonitorImpl::BuildList(void)
 bool
 FolderMonitorImpl::IsBeingMonitored(const MFolder *folder) const
 {
-   for ( FolderMonitorFolderList::iterator i = m_list.begin();
-         i != m_list.end();
-         ++i )
+   for ( const auto& entry : m_list )
    {
-      if ( i->GetFolder() == folder )
+      if ( entry->GetFolder() == folder )
          return true;
    }
 
@@ -366,11 +368,9 @@ FolderMonitorImpl::GetMinCheckTimeout(void) const
 {
    long min_delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY);
    
-   for ( FolderMonitorFolderList::iterator i = m_list.begin();
-         i != m_list.end();
-         ++i )
+   for ( const auto& entry : m_list )
    {
-      long delay = i->GetPollInterval();
+      long delay = entry->GetPollInterval();
       if ((delay > 0) && (delay < min_delay))
          min_delay = delay;
    }
@@ -396,7 +396,7 @@ FolderMonitorImpl::AddOrRemoveFolder(MFolder *folder, bool monitor)
 
    if ( monitor )
    {
-      m_list.push_back(new FolderMonitorFolderEntry(folder));
+      m_list.push_back(std::make_unique<FolderMonitorFolderEntry>(folder));
       folder->AddFlags(MF_FLAGS_MONITOR);
    }
    else
@@ -421,11 +421,9 @@ FolderMonitorImpl::RemoveFolder(const String& name)
    // this could lead to a crash in CheckNewMail()
    CHECK( !m_inNewMailCheck.IsLocked(), false, _T("can't remove it now") );
 
-   for ( FolderMonitorFolderList::iterator i = m_list.begin();
-         i != m_list.end();
-         ++i )
+   for ( auto i = m_list.begin(); i != m_list.end(); ++i )
    {
-      if ( i->GetFolder()->GetFullName() == name )
+      if ( (*i)->GetFolder()->GetFullName() == name )
       {
          m_list.erase(i);
 
@@ -476,20 +474,25 @@ FolderMonitorImpl::CheckNewMail(int flags)
    }
 
    // check all incoming folders
+   //
+   // note that we must use indices and not iterators here because checking
+   // the folder dispatches the events and this may result in adding new
+   // folders to m_list, invalidating the iterators
    time_t timeCur = time(NULL);
-   FolderMonitorFolderList::iterator i;
-   for ( i = m_list.begin(); i != m_list.end(); ++i )
+   for ( int n = 0; n < std::ssize(m_list); n++ )
    {
+      FolderMonitorFolderEntry * const entry = m_list[n].get();
+
       // force the check now if it was done by the user, even if the timeout
       // hasn't expired yet
-      if ( (flags & Interactive) || (i->GetCheckTime() <= timeCur) )
+      if ( (flags & Interactive) || (entry->GetCheckTime() <= timeCur) )
       {
-         if ( !CheckOneFolder(*i, progInfo) )
+         if ( !CheckOneFolder(entry, progInfo) )
             rc = false;
          // update the time of the next check only now, i.e. after CheckFolder() call
          // as if it takes time longer than the check interval we might keep checking
          // it all the time without doing anything else
-         i->UpdateCheckTime();
+         entry->UpdateCheckTime();
       }
       //else: don't check this folder yet
    }
