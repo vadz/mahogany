@@ -58,6 +58,9 @@
 
 #include "mail/FolderPool.h"
 
+#include <algorithm>
+#include <memory>
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -421,7 +424,7 @@ public:
       CHECK( mf && t != ILLEGAL_TICKET, false,
              _T("invalid params in AsyncSearchData::AddSearchFolder") );
 
-      m_listSingleSearch.push_back(new SingleSearchData(t, mf));
+      m_listSingleSearch.push_back(std::make_unique<SingleSearchData>(t, mf));
 
       return true;
    }
@@ -436,12 +439,19 @@ public:
    bool HandleSearchResult(const ASMailFolder::Result& result)
    {
       const Ticket t = result.GetTicket();
-      for ( SingleSearchDataList::iterator i = m_listSingleSearch.begin();
+      for ( auto i = m_listSingleSearch.begin();
             i != m_listSingleSearch.end();
             ++i )
       {
-         if ( i->GetTicket() == t )
+         if ( (*i)->GetTicket() == t )
          {
+            // we don't care about this one any more after processing it, so
+            // remove it from the list right now: this is also necessary as
+            // the code below may dispatch events and result in modifying the
+            // list, which would invalidate the iterator
+            const std::unique_ptr<SingleSearchData> search = std::move(*i);
+            m_listSingleSearch.erase(i);
+
             if ( ((const ASMailFolder::ResultInt&)result).GetValue() )
             {
                const UIdArray *uidsMatching = result.GetSequence();
@@ -455,7 +465,7 @@ public:
                   // yet
                   if ( GetResultsVFolder() )
                   {
-                     const MailFolder *mf = i->GetMailFolder();
+                     const MailFolder *mf = search->GetMailFolder();
 
                      // and append all matching messages to the results folder
                      HeaderInfoList_obj hil(mf->GetHeaders());
@@ -485,9 +495,6 @@ public:
                }
             }
             //else: nothing found at all in this folder, nothing to do
-
-            // we don't care about this one any more
-            m_listSingleSearch.erase(i);
 
             // it was our result
             return true;
@@ -612,7 +619,7 @@ private:
 
    // the list containing the individual search records for all folders we're
    // searching in
-   M_LIST_OWN(SingleSearchDataList, SingleSearchData) m_listSingleSearch;
+   std::vector<std::unique_ptr<SingleSearchData>> m_listSingleSearch;
 
    // the virtual folder we show the search results in and the associated
    // MFolder object for it
@@ -643,40 +650,57 @@ public:
    // create a record for a new search operation
    AsyncSearchData *StartNewSearch()
    {
-      AsyncSearchData *ssd = new AsyncSearchData;
-      m_listAsyncSearch.push_back(ssd);
-      return ssd;
+      m_listAsyncSearch.push_back(std::make_unique<AsyncSearchData>());
+      return m_listAsyncSearch.back().get();
    }
 
    // process the result of the async search operation
    void HandleSearchResult(const ASMailFolder::Result& result)
    {
       // leave the real handling to the search this result concerns
-      for ( AsyncSearchDataList::iterator i = m_listAsyncSearch.begin();
-            i != m_listAsyncSearch.end();
-            ++i )
+      //
+      // note that we can't keep the iterators into m_listAsyncSearch while
+      // calling AsyncSearchData methods as they may dispatch events and
+      // result in modifying the vector, so just remember the pointer
+      AsyncSearchData *search = NULL;
+      for ( const auto& s : m_listAsyncSearch )
       {
-         if ( i->HandleSearchResult(result) )
+         if ( s->HandleSearchResult(result) )
          {
-            // was it the last search result for this search
-            if ( i->IsSearchCompleted() )
-            {
-               // yes, show the results ...
-               i->ShowSearchResults(m_frame);
-
-               // ... and delete the stale stale search record
-               m_listAsyncSearch.erase(i);
-            }
-
-            return;
+            search = s.get();
+            break;
          }
       }
 
-      FAIL_MSG( _T("got search result for a search we hadn't ever started?") );
+      if ( !search )
+      {
+         FAIL_MSG( _T("got search result for a search we hadn't ever started?") );
+         return;
+      }
+
+      // was it the last search result for this search?
+      if ( !search->IsSearchCompleted() )
+         return;
+
+      // yes, remove the stale search record from the list before showing the
+      // results, as this may show a modal dialog ...
+      const auto i = std::find_if(m_listAsyncSearch.begin(),
+                                  m_listAsyncSearch.end(),
+                                  [search](const auto& s)
+                                  {
+                                     return s.get() == search;
+                                  });
+      CHECK_RET( i != m_listAsyncSearch.end(), _T("search record disappeared?") );
+
+      const std::unique_ptr<AsyncSearchData> searchOwner = std::move(*i);
+      m_listAsyncSearch.erase(i);
+
+      // ... and show the results
+      search->ShowSearchResults(m_frame);
    }
 
 private:
-   M_LIST_OWN(AsyncSearchDataList, AsyncSearchData) m_listAsyncSearch;
+   std::vector<std::unique_ptr<AsyncSearchData>> m_listAsyncSearch;
 
    wxFrame *m_frame;
 };
