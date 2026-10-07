@@ -413,7 +413,7 @@ public:
       { FAIL_MSG(_T("can not delete root folder.")); }
    bool Rename(const String& /* newName */) override
       { FAIL_MSG(_T("can not rename root folder.")); return false; }
-   virtual bool Move(const MFolder* /* newParent */)
+   bool Move(MFolder* /* newParent */) override
       { FAIL_MSG(_T("can not move root folder.")); return false; }
 };
 
