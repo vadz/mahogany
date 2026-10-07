@@ -46,6 +46,10 @@
 #include "MFolder.h"
 #include "MEvent.h"
 
+#include "pointers.h"
+
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -475,25 +479,6 @@ static const wxChar   g_CommentChar   = '/';
 // - makefile infrastructure to create .so and .a
 
 
-// ----------------------------------------------------------------------------
-// class MyFolderArray
-//   simply a wxArray of MFolder pointers that calls DecRef for the items
-//   in the array when destroyed. Simplifies cleanup
-// ----------------------------------------------------------------------------
-
-WX_DEFINE_ARRAY(MFolder *, FolderArray);
-
-class MyFolderArray: public FolderArray
-{
-public:
-
-  ~MyFolderArray()
-   {
-     for (unsigned k = 0; k < GetCount(); k++ )
-      Item(k)->DecRef();
-   }
-};
-
 
 // ----------------------------------------------------------------------------
 // class MyHashTable
@@ -835,10 +820,11 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
 
   MFolder *folder = nullptr;
   MFolder *subFolder = nullptr;
-  MyFolderArray folderList;
+  // the folders are DecRef()'d when this vector is destroyed
+  std::vector<RefCounter<MFolder>> folderList;
   wxString dirFldName;
 
-  folderList.Alloc(25);
+  folderList.reserve(25);
 
   // loop through the found directories
   // for each one,
@@ -890,7 +876,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
 
      if ( folder )
       {
-        folderList.Add(folder);
+        folderList.emplace_back(folder);
         wxLogMessage(_("Imported group folder: %s."),dirFldName);
       }
      else
@@ -917,7 +903,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
         if ( subFolder )
          {
            subFolder->SetTreeIndex(10);   // popsition folder after system folders
-           folderList.Add(subFolder);
+           folderList.emplace_back(subFolder);
            fileList.RemoveAt(i);      // this one has been created, remove from filelist
            wxLogMessage(_("NOTE: >>>>>> Created 'AAA Misc' folder to contain the msgs currently in group folder %s."),
                         dirFldName);
@@ -979,7 +965,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
                                      );
     if ( folder )
       {
-        folderList.Add(folder);
+        folderList.emplace_back(folder);
         wxLogMessage(_("Imported mail folder: %s "), name);
       }
     else
