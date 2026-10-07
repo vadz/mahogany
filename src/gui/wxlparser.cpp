@@ -307,7 +307,7 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
       if( mode == WXLO_EXPORT_AS_OBJECTS || ! WXLO_IS_TEXT(type)) // simple case
       {
          exp->type = WXLO_EXPORT_OBJECT;
-         exp->content.object = *status->m_iterator;
+         exp->content.object = status->m_iterator->get();
          status->m_iterator++;
          return exp;
       }
@@ -353,12 +353,12 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
       switch(type)
       {
       case WXLO_TYPE_TEXT:
-         *str += ((wxLayoutObjectText *)*status->m_iterator)->GetText();
+         *str += ((wxLayoutObjectText *)status->m_iterator->get())->GetText();
          break;
       case WXLO_TYPE_CMD:
          if(mode == WXLO_EXPORT_AS_HTML)
             *str += wxLayoutExportCmdAsHTML(
-               *(wxLayoutObjectCmd const *)*status->m_iterator,
+               *(wxLayoutObjectCmd const *)status->m_iterator->get(),
                & status->m_si, status->m_FirstTime);
          status->m_FirstTime = FALSE;
          break;

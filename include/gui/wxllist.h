@@ -26,8 +26,8 @@
 #   include "MObject.h"
 #endif
 
-#include   "kbList.h"
-
+#include <list>
+#include <memory>
 #include <vector>
 
 // use the wxWindows caret class instead of home grown cursor whenever possible
@@ -243,11 +243,11 @@ protected:
 #endif
 };
 
-/// Define a list type of wxLayoutObject pointers.
-KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObject);
+/// Define a list type owning wxLayoutObjects.
+using wxLayoutObjectList = std::list<std::unique_ptr<wxLayoutObject>>;
 
 /// The iterator type.
-typedef wxLayoutObjectList::iterator wxLOiterator;
+using wxLOiterator = wxLayoutObjectList::iterator;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -525,7 +525,7 @@ public:
    void Append(wxLayoutObject * obj)
       {
          wxASSERT(obj);
-         m_ObjectList.push_back(obj);
+         m_ObjectList.emplace_back(obj);
          m_Length += obj->GetLength();
       }
 
@@ -533,7 +533,7 @@ public:
    void Prepend(wxLayoutObject * obj)
       {
          wxASSERT(obj);
-         m_ObjectList.push_front(obj);
+         m_ObjectList.emplace_front(obj);
          m_Length += obj->GetLength();
       }
        
@@ -582,7 +582,7 @@ public:
 
    /** A cursor used to indicate boundry conditions
    */
-   inline wxLayoutObjectList::iterator NULLIT(void) const
+   inline wxLayoutObjectList::iterator NULLIT(void)
       { return m_ObjectList.end(); }
 
    /** Finds the object which covers the cursor position xpos in this
@@ -593,7 +593,7 @@ public:
        @return iterator to the object or NULLIT
    */
    wxLayoutObjectList::iterator FindObject(CoordType xpos, CoordType
-                                           *offset) const ;
+                                           *offset);
 
    /** Finds the object which covers the screen position xpos in this
        line.
@@ -608,7 +608,7 @@ public:
                                                  wxLayoutList *llist,
                                                  CoordType xpos,
                                                  CoordType *offset,
-                                                 bool *found = NULL) const ;
+                                                 bool *found = NULL);
 
    /** Finds text in this line.
        @param needle the text to find
@@ -621,16 +621,18 @@ public:
        functions to export the list.
        @return iterator to the first object
    */
-   wxLayoutObjectList::iterator GetFirstObject(void) const
+   wxLayoutObjectList::iterator GetFirstObject(void)
       {
          return m_ObjectList.begin();
       }
 
    /** Get the last object in the list.
+       @return iterator to the last object or NULLIT if the line is empty
     */
-   wxLayoutObjectList::iterator GetLastObject(void) const
+   wxLayoutObjectList::iterator GetLastObject(void)
       {
-         return m_ObjectList.tail();
+         return m_ObjectList.empty() ? m_ObjectList.end()
+                                     : std::prev(m_ObjectList.end());
       }
 
    /** Deletes this line, returns pointer to next line.
