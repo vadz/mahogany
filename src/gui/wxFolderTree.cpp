@@ -162,9 +162,7 @@ struct ItemWithChangedIcon
 };
 
 // and the array of such things
-WX_DECLARE_OBJARRAY(ItemWithChangedIcon, ArrayOfItemsWithChangedIcon);
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(ArrayOfItemsWithChangedIcon);
+using ArrayOfItemsWithChangedIcon = std::vector<ItemWithChangedIcon>;
 
 // tree element
 class wxFolderTreeNode : public wxTreeItemData
@@ -3513,7 +3511,7 @@ void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
    if ( tmp )
    {
       int imageOld = GetItemImage(item);
-      m_itemsWithChangedIcons.Add(new ItemWithChangedIcon(item, imageOld));
+      m_itemsWithChangedIcons.emplace_back(item, imageOld);
    }
    else
    {
@@ -3522,7 +3520,7 @@ void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
       size_t n;
       if ( FindItemWithChangedIcon(item, &n) )
       {
-         m_itemsWithChangedIcons.RemoveAt(n);
+         m_itemsWithChangedIcons.erase(m_itemsWithChangedIcons.begin() + n);
       }
    }
 
@@ -3542,7 +3540,7 @@ void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
       SetItemImage(item, m_itemsWithChangedIcons[n].image);
 
       // and delete the record - can't cancel the same action more than once
-      m_itemsWithChangedIcons.RemoveAt(n);
+      m_itemsWithChangedIcons.erase(m_itemsWithChangedIcons.begin() + n);
    }
    //else: the icon wasn't changed, so nothing to do
 }
@@ -3552,7 +3550,7 @@ void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
 bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
                                                size_t *index)
 {
-   size_t nCount = m_itemsWithChangedIcons.GetCount();
+   size_t nCount = m_itemsWithChangedIcons.size();
    for ( size_t n = 0; n < nCount; n++ )
    {
       if ( m_itemsWithChangedIcons[n].item == item )

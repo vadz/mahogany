@@ -57,6 +57,8 @@
 
 #include "wx/persctrl.h"
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -107,7 +109,7 @@ struct AttachmentInfo
            filename;
 };
 
-WX_DECLARE_OBJARRAY(AttachmentInfo, ArrayAttachmentInfo);
+using ArrayAttachmentInfo = std::vector<AttachmentInfo>;
 
 // ----------------------------------------------------------------------------
 // implementation of template sink which stores the data internally and then
@@ -770,9 +772,6 @@ ExpandOriginalText(const String& text,
 // ExpansionSink - the sink used with wxComposeView
 // ----------------------------------------------------------------------------
 
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(ArrayAttachmentInfo);
-
 bool
 ExpansionSink::Output(const String& text)
 {
@@ -821,9 +820,8 @@ ExpansionSink::InsertAttachment(void *data,
       m_x++;
    }
 
-   // create a new attachment info object (NB: it will be deleted by the array
-   // automatically because we pass it by pointer and not by reference)
-   m_attachments.Add(new AttachmentInfo(data, len, mimetype, filename));
+   // remember the attachment info
+   m_attachments.emplace_back(data, len, mimetype, filename);
 
    // the last component of text becomes the text before this attachment
    m_texts.Add(m_text);
@@ -836,14 +834,14 @@ void
 ExpansionSink::InsertTextInto(Composer& cv) const
 {
    size_t nCount = m_texts.GetCount();
-   ASSERT_MSG( m_attachments.GetCount() == nCount,
+   ASSERT_MSG( m_attachments.size() == nCount,
                _T("something is very wrong in template expansion sink") );
 
    for ( size_t n = 0; n < nCount; n++ )
    {
       cv.InsertText(m_texts[n]);
 
-      AttachmentInfo& attInfo = m_attachments[n];
+      const AttachmentInfo& attInfo = m_attachments[n];
       cv.InsertData(attInfo.data, attInfo.len,
                     attInfo.mimetype,
                     attInfo.filename);

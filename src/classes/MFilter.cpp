@@ -35,6 +35,8 @@
 #include "MFolder.h"
 #include "modules/Filters.h"
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -85,12 +87,12 @@ struct MFDialogComponent
    /// reads settings from a string
    bool ReadSettings(String *str);
    /// writes settings to a string
-   String WriteSettings();
+   String WriteSettings() const;
    /// attempt to parse filter rule string
    bool ReadSettingsFromRule(String & str);
 
    /// Writes a rule
-   String WriteTest();
+   String WriteTest() const;
 
    bool operator==(const MFDialogComponent& other) const
    {
@@ -148,7 +150,7 @@ MFDialogComponent::ReadSettings(String *str)
 }
 
 String
-MFDialogComponent::WriteSettings(void)
+MFDialogComponent::WriteSettings(void) const
 {
    String s = wxString::Format(_T("%d %d %d \"%s\" %d"),
                                (int) m_Logical,
@@ -372,7 +374,7 @@ bool FilterActionImplemented(MFDialogAction action)
 }
 
 String
-MFDialogComponent::WriteTest(void)
+MFDialogComponent::WriteTest(void) const
 {
    String program;
 
@@ -536,9 +538,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    return true;
 }
 
-WX_DECLARE_OBJARRAY(MFDialogComponent, MFDComponentArray);
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(MFDComponentArray);
+using MFDComponentArray = std::vector<MFDialogComponent>;
 
 
 /** This is a set of dialog settings representing a filter rule. A
@@ -549,7 +549,7 @@ class MFDialogSettingsImpl : public MFDialogSettings
 public:
    /// The number of tests in the rule:
    size_t CountTests() const override
-      { return m_Tests.Count(); }
+      { return m_Tests.size(); }
 
    /// Return the n-th test:
    MFDialogTest GetTest(size_t n) const override
@@ -617,12 +617,12 @@ public:
          MOcheck();
          MFDialogComponent c;
          c.m_Inverted = isInverted;
-         c.m_Logical = (m_Tests.Count() == 0) ? ORC_L_None : l;
+         c.m_Logical = (m_Tests.size() == 0) ? ORC_L_None : l;
          c.m_Test = test;
          c.m_Target = target;
          c.m_TargetArgument = targetArg;
          c.m_Argument = argument;
-         m_Tests.Add(c);
+         m_Tests.push_back(c);
       }
 
    void SetAction(MFDialogAction action, const String& arg) override
@@ -658,8 +658,8 @@ MFDialogSettingsImpl::operator==(const MFDialogSettings& o) const
    // FIXME urgh
    const MFDialogSettingsImpl& other = (const MFDialogSettingsImpl &)o;
 
-   size_t count = m_Tests.GetCount();
-   if ( count != other.m_Tests.GetCount() )
+   size_t count = m_Tests.size();
+   if ( count != other.m_Tests.size() )
       return false;
 
    for ( size_t n = 0; n < count; n++ )
@@ -709,9 +709,9 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
       MFDialogComponent c;
       rc = c.ReadSettingsFromRule(tmp);
       if(rc)
-         m_Tests.Add(c);
+         m_Tests.push_back(c);
    }while(rc);
-   if(m_Tests.Count() == 0)
+   if(m_Tests.size() == 0)
       return false; // could not find any test
    cptr = tmp.c_str();
 
@@ -750,9 +750,9 @@ MFDialogSettingsImpl::ReadSettings(const String & istr)
       MFDialogComponent c;
       rc = c.ReadSettings(&str);
       if(rc)
-         m_Tests.Add(c);
+         m_Tests.push_back(c);
    }
-   if(m_Tests.Count() == 0)
+   if(m_Tests.size() == 0)
       return false;
 
    // now read the action settings:
@@ -767,8 +767,8 @@ String
 MFDialogSettingsImpl::WriteSettings(void) const
 {
    String str;
-   str << m_Tests.Count() << ' ';
-   for(size_t i = 0; i < m_Tests.Count(); i++)
+   str << m_Tests.size() << ' ';
+   for(size_t i = 0; i < m_Tests.size(); i++)
       str << m_Tests[i].WriteSettings() << ' ';
    str << WriteActionSettings();
    return str;
@@ -785,10 +785,10 @@ MFDialogSettingsImpl::WriteActionSettings(void) const
 String
 MFDialogSettingsImpl::WriteRule(void) const
 {
-   ASSERT(m_Tests.Count() > 0);
+   ASSERT(m_Tests.size() > 0);
    String program = _T("if(");
 
-   for(size_t i = 0; i < m_Tests.Count(); i++)
+   for(size_t i = 0; i < m_Tests.size(); i++)
       program << m_Tests[i].WriteTest();
 
    program << ')'

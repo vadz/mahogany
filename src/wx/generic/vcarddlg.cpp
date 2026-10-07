@@ -43,6 +43,8 @@
 
 #include "wx/vcard.h"
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -116,11 +118,7 @@ struct wxVCardAddressData
     int flags;
 };
 
-WX_DECLARE_OBJARRAY(wxVCardAddressData, wxVCardAddresses);
-
-#include "wx/arrimpl.cpp"
-
-WX_DEFINE_OBJARRAY(wxVCardAddresses);
+using wxVCardAddresses = std::vector<wxVCardAddressData>;
 
 // ----------------------------------------------------------------------------
 // vCard editing dialog
@@ -540,7 +538,7 @@ bool wxVCardDialog::TransferDataFromWindow()
 
     // address page
     {
-        size_t count = m_addrData.GetCount();
+        size_t count = m_addrData.size();
         for ( size_t n = 0; n < count; n++ )
         {
             const wxVCardAddressData& d = m_addrData[n];
@@ -635,7 +633,7 @@ void wxVCardDialog::OnAddrDelete(wxCommandEvent& WXUNUSED(event))
     int sel = m_addresses->GetSelection();
     wxCHECK_RET( sel != -1, _T("button should be disabled") );
 
-    m_addrData.RemoveAt(sel);
+    m_addrData.erase(m_addrData.begin() + sel);
     m_addresses->Delete(sel);
 }
 
@@ -663,7 +661,7 @@ wxString wxVCardDialog::GetAddressLabel(const wxVCardAddressData& data) const
 
 void wxVCardDialog::AddAddress(const wxVCardAddressData& data)
 {
-    m_addrData.Add(data);
+    m_addrData.push_back(data);
     m_addresses->Append(GetAddressLabel(data));
 }
 
