@@ -19,6 +19,8 @@
 
 #include "RecipientType.h"
 
+#include <vector>
+
 #ifndef USE_PCH
 #  include "Profile.h"      // for Profile
 #  include <wx/dynarray.h>
@@ -31,10 +33,10 @@ class AdbDataProvider;
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 // arrays
-WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
-WX_DEFINE_ARRAY(AdbEntryGroup *, ArrayAdbGroups);
-WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
-WX_DEFINE_ARRAY(AdbElement *, ArrayAdbElements);
+using ArrayAdbBooks = std::vector<AdbBook *>;
+using ArrayAdbGroups = std::vector<AdbEntryGroup *>;
+using ArrayAdbEntries = std::vector<AdbEntry *>;
+using ArrayAdbElements = std::vector<AdbElement *>;
 
 /**
   A book corresponds to a physical medium (disk file, database...), the

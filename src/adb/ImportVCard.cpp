@@ -90,13 +90,13 @@ IMPLEMENT_ADB_IMPORTER(AdbVCardImporter,
 
 void AdbVCardImporter::DeleteCards()
 {
-   size_t count = m_cards.GetCount();
+   size_t count = m_cards.size();
    for ( size_t n = 0; n < count; n++ )
    {
       delete m_cards[n];
    }
 
-   m_cards.Empty();
+   m_cards.clear();
 }
 
 bool AdbVCardImporter::CanImport(const String& filename)
@@ -114,7 +114,7 @@ bool AdbVCardImporter::CanImport(const String& filename)
    }
    // else: we already tried loading cards from this file
 
-   return !m_cards.IsEmpty();
+   return !m_cards.empty();
 }
 
 bool AdbVCardImporter::StartImport(const String& filename)
@@ -133,7 +133,7 @@ size_t AdbVCardImporter::GetEntryNames(const String& path,
    // natural choice for this, so just take the family name instead
    wxString familyname, givenname;
    size_t countImported = 0,
-          countAll = m_cards.GetCount();
+          countAll = m_cards.size();
    for ( size_t n = 0; n < countAll; n++ )
    {
       if ( m_cards[n]->GetName(&familyname, &givenname) )
@@ -184,7 +184,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
                                    size_t index,
                                    AdbEntry *entry)
 {
-   wxCHECK_MSG( !path && (index < m_cards.GetCount()), false,
+   wxCHECK_MSG( !path && (index < m_cards.size()), false,
                 _T("unexpected params in AdbVCardImporter") );
 
    // set all simple fields

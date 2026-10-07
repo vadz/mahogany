@@ -90,7 +90,7 @@ static bool AdbLookupForEntriesOrGroups(
 
 #define CLEAR_ADB_ARRAY(entries)            \
   {                                         \
-    size_t nCount = entries.GetCount();     \
+    size_t nCount = entries.size();         \
     for ( size_t n = 0; n < nCount; n++ ) { \
       entries[n]->DecRef();                 \
     }                                       \
@@ -128,7 +128,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
        if ( book->GetName().Lower().Matches(nameMatch) ) {
          pGroup->IncRef();
 
-         aGroups->Add(pGroup);
+         aGroups->push_back(pGroup);
        }
      }
   }
@@ -147,7 +147,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
 
     // groups are matched by name only (case-insensitive)
     if ( aGroups && aNames[nGroup].Lower().Matches(nameMatch) ) {
-      aGroups->Add(pSubGroup);
+      aGroups->push_back(pSubGroup);
     }
     else {
       pSubGroup->DecRef();
@@ -189,13 +189,13 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
     switch ( pEntry->Matches(what, where, how) ) {
       default:                  // matches elsewhere
         if ( aMoreEntries ) {
-          aMoreEntries->Add(pEntry);
+          aMoreEntries->push_back(pEntry);
           break;
         }
         // else: fall through
 
       case AdbLookup_NickName:  // match in the entry name
-        aEntries.Add(pEntry);
+        aEntries.push_back(pEntry);
         break;
 
       case 0:                   // not found at all
@@ -226,22 +226,22 @@ AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
                             const ArrayAdbBooks *paBooks,
                             ArrayAdbGroups *aGroups)
 {
-  wxASSERT( aEntries.IsEmpty() );
+  wxASSERT( aEntries.empty() );
 
-  if ( paBooks == nullptr || paBooks->IsEmpty() )
+  if ( paBooks == nullptr || paBooks->empty() )
     paBooks = &gs_booksCache;
 
   wxSortedArrayString entriesToIgnore;
-  size_t nBookCount = paBooks->Count();
+  size_t nBookCount = paBooks->size();
   for ( size_t nBook = 0; nBook < nBookCount; nBook++ ) {
     GroupLookup(aEntries, aMoreEntries,
                 (*paBooks)[nBook], what, where, how, aGroups, &entriesToIgnore);
   }
 
   // return true if something found
-  return !aEntries.IsEmpty() ||
-         (aMoreEntries && !aMoreEntries->IsEmpty()) ||
-         (aGroups && !aGroups->IsEmpty());
+  return !aEntries.empty() ||
+         (aMoreEntries && !aMoreEntries->empty()) ||
+         (aGroups && !aGroups->empty());
 }
 
 bool AdbLookup(ArrayAdbEntries& aEntries,
@@ -256,7 +256,7 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
    // look just in this group
    GroupLookup(aEntries, nullptr, group, what, where, how);
 
-   return !aEntries.IsEmpty();
+   return !aEntries.empty();
 }
 
 bool
@@ -295,32 +295,32 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
                                    how, nullptr, &aGroups ) ) {
     // first of all, if we had any nick name matches, ignore all the other ones
     // but otherwise use them as well
-    if ( aEntries.IsEmpty() ) {
+    if ( aEntries.empty() ) {
       aEntries = aMoreEntries;
 
       // prevent the dialog below from showing "more matches" button
-      aMoreEntries.Clear();
+      aMoreEntries.clear();
     }
 
     // merge both arrays into one big one: notice that the order is important,
     // the groups should come first (see below)
     ArrayAdbElements aEverything;
 
-    size_t nGroupCount = aGroups.GetCount();
+    size_t nGroupCount = aGroups.size();
     for ( size_t n = 0; n < nGroupCount; n++ ) {
-      aEverything.Add(aGroups[n]);
+      aEverything.push_back(aGroups[n]);
     }
 
     wxArrayString emails;
     wxString email;
-    size_t nEntryCount = aEntries.GetCount();
+    size_t nEntryCount = aEntries.size();
     for ( size_t n = 0; n < nEntryCount; n++ ) {
       AdbEntry *entry = aEntries[n];
 
       entry->GetField(AdbField_EMail, &email);
       if ( emails.Index(email) == wxNOT_FOUND ) {
         emails.Add(email);
-        aEverything.Add(entry);
+        aEverything.push_back(entry);
       }
       else { // don't propose duplicate entries
         // need to free it here as it won't be freed with all other entries
@@ -356,7 +356,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
       }
       else {
         // one entry, but in which array?
-        size_t count = aEverything.GetCount();
+        size_t count = aEverything.size();
         AdbEntry *entry = index < count ? (AdbEntry *)aEverything[index]
                                         : aMoreEntries[index - count];
         results.Add(entry->GetDescription());
@@ -757,7 +757,7 @@ AdbBook *AdbManager::CreateBook(const String& name,
    }
    else {
       book->IncRef();
-      gs_booksCache.Add(book);
+      gs_booksCache.push_back(book);
       gs_provCache.Add(prov->GetProviderName());
    }
 
@@ -817,10 +817,10 @@ AdbBook *AdbManager::CreateBook(const String& name,
 
 size_t AdbManager::GetBookCount() const
 {
-  ASSERT_MSG( gs_provCache.Count() == gs_booksCache.Count(),
+  ASSERT_MSG( gs_provCache.Count() == gs_booksCache.size(),
               _T("mismatch between gs_booksCache and gs_provCache!") );
 
-  return gs_booksCache.Count();
+  return gs_booksCache.size();
 }
 
 AdbBook *AdbManager::GetBook(size_t n) const
@@ -868,12 +868,12 @@ void AdbManager::LoadAll()
 
 void AdbManager::ClearCache()
 {
-  size_t nCount = gs_booksCache.Count();
+  size_t nCount = gs_booksCache.size();
   for ( size_t n = 0; n < nCount; n++ ) {
     gs_booksCache[n]->DecRef();
   }
 
-  gs_booksCache.Clear();
+  gs_booksCache.clear();
 
   gs_provCache.Clear();
 }
@@ -891,7 +891,7 @@ AdbBook *AdbManager::FindInCache(const String& name,
                                  const AdbDataProvider *provider) const
 {
   AdbBook *book;
-  size_t nCount = gs_booksCache.Count();
+  size_t nCount = gs_booksCache.size();
   for ( size_t n = 0; n < nCount; n++ ) {
     if ( provider && provider->GetProviderName() != gs_provCache[n] ) {
       // don't compare books belonging to different providers
@@ -915,7 +915,7 @@ AdbBook *AdbManager::FindInCache(const String& name,
 String AdbManager::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << (int)gs_booksCache.Count() << _T("books in cache");
+  str << (int)gs_booksCache.size() << _T("books in cache");
 
   return str;
 }

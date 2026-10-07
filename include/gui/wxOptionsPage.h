@@ -22,7 +22,9 @@
 
 #include "gui/wxDialogLayout.h"         // for MBookCtrlPageBase
 
-WX_DEFINE_ARRAY(wxControl *, ArrayControls);
+#include <vector>
+
+using ArrayControls = std::vector<wxControl *>;
 
 // We can't use WX_DEFINE_ARRAY_INT(bool) as this doesn't compile when using
 // STL containers because of the differences between std::vector<bool>

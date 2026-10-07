@@ -22,7 +22,9 @@
 #include "MEvent.h"
 #include "MFStatus.h"
 
-WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
+#include <vector>
+
+using MfStatusArray = std::vector<MailFolderStatus *>;
 
 // trace mask for logging MfStatusCache methods and other mailfolder
 // status-related activity

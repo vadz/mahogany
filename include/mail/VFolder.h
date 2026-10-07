@@ -22,6 +22,8 @@
 
 #include <set>
 
+#include <vector>
+
 class MailFolderVirt : public MailFolderCmn
 {
 public:
@@ -192,7 +194,7 @@ protected:
       ~Msg() { mf->DecRef(); }
    };
 
-   WX_DEFINE_ARRAY(Msg *, MsgArray);
+   using MsgArray = std::vector<Msg *>;
 
    /// the array of messages in the folder
    MsgArray m_messages;
@@ -228,7 +230,7 @@ protected:
    //@{
 
    /// get the number of messages in this folder
-   size_t GetMsgCount() const { return m_messages.GetCount(); }
+   size_t GetMsgCount() const { return m_messages.size(); }
 
    /// get the Msg corresponding to the given msgno or NULL
    Msg *GetMsgFromMsgno(MsgnoType msgno) const;

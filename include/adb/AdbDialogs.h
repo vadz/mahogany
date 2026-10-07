@@ -13,12 +13,12 @@
 #ifndef _ADB_DIALOGS_H
 #define _ADB_DIALOGS_H
 
+#include "adb/AdbManager.h"     // for ArrayAdbElements and ArrayAdbEntries
+
 class WXDLLIMPEXP_FWD_CORE wxWindow;
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 class AdbEntryGroup;
-class ArrayAdbElements;
-class ArrayAdbEntries;
 
 /**
   Show the dialog allowing the user to import any address book, return the name

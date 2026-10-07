@@ -18,8 +18,9 @@
 
 #ifndef USE_PCH
 #  include "wx/string.h"
-#  include "wx/dynarray.h"
 #endif // USE_PCH
+
+#include <vector>
 
 // we can be compiled inside wxWin or not
 #ifdef WXMAKINGDLL
@@ -38,7 +39,7 @@ class WXDLLMAYEXP wxVCard;
    #define VOBJECT_DEFINED
 #endif // VOBJECT_DEFINED
 
-WX_DEFINE_ARRAY(wxVCard *, wxArrayCards);
+using wxArrayCards = std::vector<wxVCard *>;
 
 // ----------------------------------------------------------------------------
 // wxVCardObject has a name, a value and a list of associated properties which

@@ -452,7 +452,7 @@ inline bool HeaderInfoListImpl::IsThreading() const
 
 inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
 {
-   return (n < m_headers.GetCount()) && (m_headers[n] != nullptr);
+   return (n < m_headers.size()) && (m_headers[n] != nullptr);
 }
 
 inline bool HeaderInfoListImpl::HasTransTable() const
@@ -529,7 +529,7 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
 
    // preallocate the memory for headers
    m_count = mf->GetMessageCount();
-   m_headers.Alloc(m_count);
+   m_headers.reserve(m_count);
 
    // no sorting/threading yet
    m_sizeTables = 0;
@@ -744,10 +744,10 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
    ASSERT_MSG( m_count, _T("removing a message from empty folder?") );
 
-   if ( n < m_headers.GetCount() )
+   if ( n < m_headers.size() )
    {
       delete m_headers[n];
-      m_headers.RemoveAt(n);
+      m_headers.erase(m_headers.begin() + n);
 
       // the indices are shifted (and one is even removed completely), so
       // invalidate the pointers into m_headers
@@ -1892,7 +1892,7 @@ void HeaderInfoListImpl::ExpandToMakeIndexValid(MsgnoType n)
    // it up to n with NULLs
    //
    // TODO: add SetCount() to wxArray instead
-   size_t count = m_headers.GetCount();
+   size_t count = m_headers.size();
    if ( count <= n )
    {
       // adding elements to array may need realloc()ing and invalidate the
@@ -1901,7 +1901,7 @@ void HeaderInfoListImpl::ExpandToMakeIndexValid(MsgnoType n)
 
       while ( count++ <= n )
       {
-         m_headers.Add(nullptr);
+         m_headers.push_back(nullptr);
       }
    }
 }
@@ -2015,7 +2015,7 @@ bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
    CHECK( idx < m_count, false,
           _T("HeaderInfoListImpl::IsInCache(): invalid position") );
 
-   return (idx < m_headers.GetCount()) && (m_headers[idx] != nullptr);
+   return (idx < m_headers.size()) && (m_headers[idx] != nullptr);
 }
 
 bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)

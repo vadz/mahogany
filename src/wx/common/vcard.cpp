@@ -128,7 +128,7 @@ wxVCard::~wxVCard()
         {
             if ( wxStricmp(vObjectName(vObj), VCCardProp) == 0 )
             {
-                vcards.Add(new wxVCard(vObj));
+                vcards.push_back(new wxVCard(vObj));
             }
             //else: it is not a vCard
 
@@ -146,7 +146,7 @@ wxVCard::wxVCard(const wxString& filename)
     // that the file will in general contain only one vObject if the user code
     // uses this ctor
     wxArrayCards vcards = CreateFromFile(filename);
-    size_t nCards = vcards.GetCount();
+    size_t nCards = vcards.size();
     if ( nCards == 0 )
     {
         m_vObj = nullptr;

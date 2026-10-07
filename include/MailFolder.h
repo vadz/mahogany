@@ -26,7 +26,6 @@
 #include <vector>
 
 // forward declarations
-class ArrayHeaderInfo;
 class Composer;
 class FolderView;
 class HeaderInfo;
@@ -40,7 +39,10 @@ class Sequence;
 class ServerInfoEntry;
 class UIdArray;
 
+#ifndef SWIG
 using MFolderList = std::vector<RefCounter<MFolder>>;
+using ArrayHeaderInfo = std::vector<HeaderInfo *>;
+#endif // SWIG
 
 struct MailFolderStatus;
 struct SearchCriterium;

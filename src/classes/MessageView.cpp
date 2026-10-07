@@ -4067,7 +4067,7 @@ MessageView::LaunchProcess(const String& command,
 
    if ( process )
    {
-      m_processes.Add(new ProcessInfo(process, pid, errormsg, filename));
+      m_processes.push_back(new ProcessInfo(process, pid, errormsg, filename));
    }
 
    return true;
@@ -4078,7 +4078,7 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
 {
    // find the corresponding entry in m_processes
    size_t n,
-          procCount = m_processes.GetCount();
+          procCount = m_processes.size();
    for ( n = 0; n < procCount; n++ )
    {
       if ( m_processes[n]->GetPid() == pid )
@@ -4102,7 +4102,7 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
                   exitcode);
    }
 
-   m_processes.RemoveAt(n);
+   m_processes.erase(m_processes.begin() + n);
    delete info;
 }
 
@@ -4112,7 +4112,7 @@ void MessageView::DetachAllProcesses()
 
    // delete all process info objects, we don't need notifications about
    // process termination any more
-   const size_t procCount = m_processes.GetCount();
+   const size_t procCount = m_processes.size();
    for ( size_t n = 0; n < procCount; n++ )
    {
       ProcessInfo *info = m_processes[n];
@@ -4123,7 +4123,7 @@ void MessageView::DetachAllProcesses()
       delete info;
    }
 
-   m_processes.Empty();
+   m_processes.clear();
 
    if ( !removedAll )
    {

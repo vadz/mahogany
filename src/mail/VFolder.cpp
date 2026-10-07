@@ -315,7 +315,7 @@ void MailFolderVirt::AddMsg(MailFolderVirt::Msg *msg)
 
    m_underlyingMFs.insert(msg->mf);
 
-   m_messages.Add(msg);
+   m_messages.push_back(msg);
 }
 
 MailFolderVirt::Msg *MailFolderVirt::GetFirstMsg(MsgCookie& cookie) const
@@ -366,7 +366,7 @@ void MailFolderVirt::DeleteMsg(MsgCookie& cookie)
    // finally, really delete the message
    delete m_messages[cookie];
 
-   m_messages.RemoveAt(cookie);
+   m_messages.erase(m_messages.begin() + cookie);
 }
 
 void MailFolderVirt::ClearMsgs()

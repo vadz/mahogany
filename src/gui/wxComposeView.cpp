@@ -2207,7 +2207,7 @@ void wxComposeView::DoCreateStatusBar()
 
 void wxComposeView::CreatePlaceHolder()
 {
-   CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
+   CHECK_RET( m_sizerRcpts && m_rcptExtra.empty(),
               _T("can't or shouldn't create the place holder now!") );
 
    m_sizerRcpts->Add(0, 0, 1);
@@ -2223,7 +2223,7 @@ void wxComposeView::CreatePlaceHolder()
 
 void wxComposeView::DeletePlaceHolder()
 {
-   CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
+   CHECK_RET( m_sizerRcpts && m_rcptExtra.empty(),
               _T("can't or shouldn't delete the place holder now!") );
 
    // remove the spacers and the static text we had added to it
@@ -2665,7 +2665,7 @@ void
 wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
 {
    // remove the place holder we had there before
-   if ( m_rcptExtra.IsEmpty() )
+   if ( m_rcptExtra.empty() )
    {
       DeletePlaceHolder();
    }
@@ -2689,7 +2689,7 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    // insert the control in the beginning, like this the controls inserted
    // later stay visible even if the controls added earlier might be scrolled
    // off
-   m_rcptExtra.Insert(rcpt, 0);
+   m_rcptExtra.insert(m_rcptExtra.begin(), rcpt);
 
    m_sizerRcpts->Prepend(sizerRcpt, wxSizerFlags().Expand());
 
@@ -2699,7 +2699,7 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    m_numNewRcpts++;
 
    // adjust the indexes of all the existing controls after adding a new one
-   const size_t count = m_rcptExtra.GetCount();
+   const size_t count = m_rcptExtra.size();
    for ( size_t n = 1; n < count; n++ )
    {
       m_rcptExtra[n]->IncIndex();
@@ -2718,10 +2718,10 @@ wxComposeView::OnRemoveRcpt(size_t index)
    delete m_rcptExtra[index];
 
    // remove them from the arrays too
-   m_rcptExtra.RemoveAt(index);
+   m_rcptExtra.erase(m_rcptExtra.begin() + index);
 
    // and don't forget to adjust the indices of all the others
-   size_t count = m_rcptExtra.GetCount();
+   size_t count = m_rcptExtra.size();
    while ( index < count )
    {
       m_rcptExtra[index++]->DecIndex();
@@ -2798,7 +2798,7 @@ wxComposeView::AddRecipients(const String& addressOrig,
 
          if ( address == _T("none") )
          {
-            size_t count = m_rcptExtra.GetCount();
+            size_t count = m_rcptExtra.size();
             for ( size_t n = 0; n < count; n++ )
             {
                wxRcptControl * const rcpt = m_rcptExtra[n];
@@ -2830,7 +2830,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
               _T("invalid parameter in AddRecipient()") );
 
    // look if we don't already have it
-   size_t count = m_rcptExtra.GetCount();
+   size_t count = m_rcptExtra.size();
 
    for ( size_t n = 0; n < count; n++ )
    {
@@ -2945,7 +2945,7 @@ void wxComposeView::GetRecipients(RecipientType type, wxArrayString& list) const
 
    GetRecipientFromControl(type, m_rcptMain, list);
 
-   size_t count = m_rcptExtra.GetCount();
+   size_t count = m_rcptExtra.size();
    for ( size_t n = 0; n < count; n++ )
    {
       GetRecipientFromControl(type, m_rcptExtra[n], list);

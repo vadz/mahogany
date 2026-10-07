@@ -27,6 +27,8 @@
 
 #include "strlist.h"
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // forward declarations
 // ----------------------------------------------------------------------------
@@ -49,7 +51,7 @@ class WXDLLIMPEXP_FWD_BASE wxProcessEvent;
 class WXDLLIMPEXP_FWD_CORE wxSplitterWindow;
 class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
 
-WX_DEFINE_ARRAY(wxRcptExtraControl *, ArrayRcptControls);
+using ArrayRcptControls = std::vector<wxRcptExtraControl *>;
 
 // ----------------------------------------------------------------------------
 // constants

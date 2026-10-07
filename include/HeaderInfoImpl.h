@@ -17,12 +17,9 @@
    #include "Sorting.h"
    #include "Threading.h"
 
-   #include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
 #endif // USE_PCH
 
 #include "HeaderInfo.h"
-
-WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
 
 /**
   This is a very simple HeaderInfoList implementation. It preallocates an

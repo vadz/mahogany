@@ -429,7 +429,7 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
    m_listbox = new wxListBox(this, -1);
 
    // don't show the "More" button if there are no more matches
-   m_btnMore = aMoreEntries.IsEmpty()
+   m_btnMore = aMoreEntries.empty()
                   ? nullptr
                   : new wxButton(this, Btn_More, _("&More matches"));
 
@@ -440,7 +440,7 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
 #endif // wxUSE_TOOLTIPS
 
    // we have to fill the listbox here or it won't have the correct size
-   size_t nEntryCount = aEverything.GetCount();
+   size_t nEntryCount = aEverything.size();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
       m_listbox->Append(aEverything[nEntry]->GetDescription());
@@ -497,7 +497,7 @@ bool wxAdbExpandDialog::TransferDataToWindow()
 
 void wxAdbExpandDialog::OnBtnMore(wxCommandEvent&)
 {
-   size_t nEntryCount = m_aMoreEntries.GetCount();
+   size_t nEntryCount = m_aMoreEntries.size();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
       m_listbox->Append(m_aMoreEntries[nEntry]->GetDescription());
@@ -525,18 +525,18 @@ void wxAdbExpandDialog::OnBtnDelete(wxCommandEvent& WXUNUSED(event))
    // now remove it from the internal data as well
    AdbEntry *entry;
 
-   size_t countMain = m_aEverything.GetCount();
+   size_t countMain = m_aEverything.size();
    if ( n < countMain )
    {
       entry = (AdbEntry *)m_aEverything[n];
-      m_aEverything.RemoveAt(n);
+      m_aEverything.erase(m_aEverything.begin() + n);
    }
    else // an additional entry
    {
       n -= countMain;
 
       entry = m_aMoreEntries[n];
-      m_aMoreEntries.RemoveAt(n);
+      m_aMoreEntries.erase(m_aMoreEntries.begin() + n);
    }
 
    // remember to not use it for the expansion again
@@ -705,7 +705,7 @@ AdbShowExpandDialog(ArrayAdbElements& aEverything,
 {
    int choice;
 
-   size_t count = aEverything.GetCount();
+   size_t count = aEverything.size();
    switch ( count )
    {
       case 0:

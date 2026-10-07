@@ -2716,9 +2716,9 @@ void wxOptionsPage::CreateControls()
 
 bool wxOptionsPage::OnChangeCommon(wxControl *control)
 {
-   int index = m_aControls.Index(control);
+   const auto it = std::ranges::find(m_aControls, control);
 
-   if ( index == wxNOT_FOUND )
+   if ( it == m_aControls.end() )
    {
       // we can get events from the text controls from "file open" dialog here
       // too - just skip them silently
@@ -2726,7 +2726,7 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    }
 
    // mark this control as being dirty
-   m_aDirtyFlags[(size_t)index] = true;
+   m_aDirtyFlags[it - m_aControls.begin()] = true;
 
    // update this page controls state
    UpdateUI();
@@ -2736,12 +2736,14 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    if ( !dialog )
       return false;
 
-   if ( m_aVitalControls.Index(control) != -1 )
+   if ( std::ranges::find(m_aVitalControls, control) !=
+            m_aVitalControls.end() )
       dialog->SetDoTest();
    else
       dialog->SetDirty();
 
-   if ( m_aRestartControls.Index(control) != -1 )
+   if ( std::ranges::find(m_aRestartControls, control) !=
+            m_aRestartControls.end() )
       dialog->SetGiveRestartWarning();
 
    return true;

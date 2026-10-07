@@ -170,7 +170,7 @@ void MfStatusCache::UpdateStatus(const String& folderName,
 
       // add it
       n = m_folderNames.Add(folderName);
-      m_folderData.Insert(new MailFolderStatus, (size_t)n);
+      m_folderData.insert(m_folderData.begin() + n, new MailFolderStatus);
    }
    else // already have it
    {
@@ -340,7 +340,8 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
 
          // do add the entry to the cache
          size_t entry = m_folderNames.Add(name);
-         m_folderData.Insert(new MailFolderStatus(status), entry);
+         m_folderData.insert(m_folderData.begin() + entry,
+                         new MailFolderStatus(status));
       }
       else
       {

@@ -282,7 +282,7 @@ void AutoCollectAddress(const String& email,
             }
          }
       }
-      else if ( matches.GetCount() == 1 )
+      else if ( matches.size() == 1 )
       {
          // there is already an entry which has this e-mail, don't create
          // another one (even if the name is different it's more than likely
@@ -312,7 +312,7 @@ void AutoCollectAddress(const String& email,
       }
 
       // release the found items (if any)
-      size_t count = matches.Count();
+      size_t count = matches.size();
       for ( size_t n = 0; n < count; n++ )
       {
          matches[n]->DecRef();

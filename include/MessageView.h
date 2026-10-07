@@ -50,7 +50,7 @@ class FolderView;
 // extracted from the headers by ShowXXXHeaders() functions
 struct ViewableInfoFromHeaders;
 
-WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
+using ArrayProcessInfo = std::vector<ProcessInfo *>;
 
 // ----------------------------------------------------------------------------
 // MessageView: this class does MIME handling and uses ViewFilters (which, in
