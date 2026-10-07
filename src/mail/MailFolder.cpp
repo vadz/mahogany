@@ -85,7 +85,7 @@ extern const MPersMsgBox *M_MSGBOX_REMEMBER_PWD;
 // global static variables
 // ----------------------------------------------------------------------------
 
-ServerInfoEntry::ServerInfoList ServerInfoEntry::ms_servers;
+std::vector<std::unique_ptr<ServerInfoEntry>> ServerInfoEntry::ms_servers;
 
 MFSubSystem *MFSubSystem::ms_initilizers = NULL;
 

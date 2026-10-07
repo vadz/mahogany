@@ -331,7 +331,7 @@ public:
       if ( !serverInfo )
       {
          serverInfo = new ServerInfoEntryCC(folder);
-         ms_servers.push_back(serverInfo);
+         ms_servers.emplace_back(serverInfo);
       }
 
       return serverInfo;
@@ -362,8 +362,8 @@ public:
 
    //@}
 
-   // dtor must be public in order to use M_LIST_OWN() but nobody should delete
-   // us directly!
+   // dtor must be public in order to allow ms_servers to delete us, but
+   // nobody else should do it!
    virtual ~ServerInfoEntryCC();
 
 private:
@@ -6227,11 +6227,9 @@ void ServerInfoEntryCC::CheckTimeoutAll()
 {
    bool hasAnyConns = false;
 
-   for ( ServerInfoList::iterator i = ms_servers.begin();
-         i != ms_servers.end();
-         ++i )
+   for ( const auto& server : ms_servers )
    {
-      if ( i->CheckTimeout() )
+      if ( server->CheckTimeout() )
       {
          hasAnyConns = true;
       }
