@@ -21,7 +21,7 @@ class wxFolderMenu
 {
 public:
    // we're not ref counted (should we?), so use normal ctor/dtor
-   wxFolderMenu() { m_data = NULL; }
+   wxFolderMenu() { m_data = nullptr; }
    virtual ~wxFolderMenu();
 
    /// get the "real" menu: you MUST Remove() it or call Detach() later

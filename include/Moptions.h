@@ -1762,7 +1762,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// Delete the drafts automatically after the message was sent?
 #define MP_DRAFTS_AUTODELETE_DEFVAL  1L
 /// the filename for a mailbox
-#define   MP_FOLDER_PATH_DEFVAL      ((const char *)NULL) // don't change this!
+#define   MP_FOLDER_PATH_DEFVAL      ((const char *)nullptr) // don't change this!
 /// comment
 #define   MP_FOLDER_COMMENT_DEFVAL      ""
 /// update interval for folders in seconds

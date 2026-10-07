@@ -87,11 +87,11 @@ class FCEntry : public AdbEntryStoredInMemory
 {
 public:
   // ctor
-  FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew = FALSE);
+  FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew = false);
 
   // implement interface methods
     // AdbEntry
-  virtual AdbEntryGroup *GetGroup() const;
+  AdbEntryGroup *GetGroup() const override;
 
   // pack/unpack data: we store it as a colon delimited list of values, but
   // it's too slow to modify it in place, so we unpack it to an array of
@@ -109,7 +109,7 @@ public:
   wxString GetPath() const;
 
   // if it's not, we will be deleted, so it really must be something fatal
-  bool IsOk() const { return m_pGroup != NULL; }
+  bool IsOk() const { return m_pGroup != nullptr; }
 
   MOBJECT_DEBUG(FCEntry)
 
@@ -128,30 +128,30 @@ public:
   // ctors
     // the normal one
   FCEntryGroup(FCEntryGroup *pParent, const wxString& strName,
-               bool bNew = FALSE);
+               bool bNew = false);
     // this one is only used for the root group
   FCEntryGroup(wxFileConfig *pConfig);
 
   // implement interface methods
     // AdbEntryGroup
-  virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
-  virtual String GetName() const { return m_strName; }
+  AdbEntryGroup *GetGroup() const override { return m_pParent; }
+  String GetName() const override { return m_strName; }
 
-  virtual size_t GetEntryNames(wxArrayString& aNames) const;
-  virtual size_t GetGroupNames(wxArrayString& aNames) const;
+  size_t GetEntryNames(wxArrayString& aNames) const override;
+  size_t GetGroupNames(wxArrayString& aNames) const override;
 
-  virtual AdbEntry *GetEntry(const String& name);
-  virtual AdbEntryGroup *GetGroup(const String& name) const;
+  AdbEntry *GetEntry(const String& name) override;
+  AdbEntryGroup *GetGroup(const String& name) const override;
 
-  virtual bool Exists(const String& path);
+  bool Exists(const String& path) override;
 
-  virtual AdbEntry *CreateEntry(const String& strName);
-  virtual AdbEntryGroup *CreateGroup(const String& strName);
+  AdbEntry *CreateEntry(const String& strName) override;
+  AdbEntryGroup *CreateGroup(const String& strName) override;
 
-  virtual void DeleteEntry(const String& strName);
-  virtual void DeleteGroup(const String& strName);
+  void DeleteEntry(const String& strName) override;
+  void DeleteGroup(const String& strName) override;
 
-  virtual AdbEntry *FindEntry(const wxChar *szName);
+  AdbEntry *FindEntry(const wxChar *szName) override;
 
   // gte the config object
   wxFileConfig *GetConfig() const { return m_pConfig; }
@@ -163,7 +163,7 @@ public:
   void SetOurPath() const { GetConfig()->SetPath(GetPath()); }
 
   // if it's not, we will be deleted, so it really must be something fatal
-  bool IsOk() const { return m_pConfig != NULL; }
+  bool IsOk() const { return m_pConfig != nullptr; }
 
   // recursively call Inc/DecRef() on this group and all its parents: this is
   // necessary to ensure that the group stays alive as long as it has any
@@ -218,52 +218,52 @@ public:
 
   // implement interface methods
     // AdbElement
-  virtual AdbEntryGroup *GetGroup() const { return NULL; }
+  AdbEntryGroup *GetGroup() const override { return nullptr; }
 
     // AdbEntryGroup
-  virtual AdbEntry *GetEntry(const String& name)
+  AdbEntry *GetEntry(const String& name) override
     { return m_pRootGroup->GetEntry(name); }
 
-  virtual bool Exists(const String& path)
+  bool Exists(const String& path) override
     { return m_pRootGroup->Exists(path); }
 
-  virtual size_t GetEntryNames(wxArrayString& aNames) const
+  size_t GetEntryNames(wxArrayString& aNames) const override
     { return m_pRootGroup->GetEntryNames(aNames); }
-  virtual size_t GetGroupNames(wxArrayString& aNames) const
+  size_t GetGroupNames(wxArrayString& aNames) const override
     { return m_pRootGroup->GetGroupNames(aNames); }
 
-  virtual AdbEntryGroup *GetGroup(const String& name) const
+  AdbEntryGroup *GetGroup(const String& name) const override
     { return m_pRootGroup->GetGroup(name); }
 
-  virtual AdbEntry *CreateEntry(const String& strName)
+  AdbEntry *CreateEntry(const String& strName) override
     { return m_pRootGroup->CreateEntry(strName); }
-  virtual AdbEntryGroup *CreateGroup(const String& strName)
+  AdbEntryGroup *CreateGroup(const String& strName) override
     { return m_pRootGroup->CreateGroup(strName); }
 
-  virtual void DeleteEntry(const String& strName)
+  void DeleteEntry(const String& strName) override
     { m_pRootGroup->DeleteEntry(strName); }
-  virtual void DeleteGroup(const String& strName)
+  void DeleteGroup(const String& strName) override
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const wxChar *szName)
+  AdbEntry *FindEntry(const wxChar *szName) override
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
-  virtual bool IsSameAs(const String& name) const;
-  virtual String GetFileName() const;
+  bool IsSameAs(const String& name) const override;
+  String GetFileName() const override;
 
-  virtual void SetName(const String& name);
-  virtual String GetName() const;
+  void SetName(const String& name) override;
+  String GetName() const override;
 
-  virtual void SetDescription(const String& desc);
-  virtual String GetDescription() const;
+  void SetDescription(const String& desc) override;
+  String GetDescription() const override;
 
-  virtual size_t GetNumberOfEntries() const;
+  size_t GetNumberOfEntries() const override;
 
-  virtual bool IsLocal() const { return TRUE; }
-  virtual bool IsReadOnly() const;
+  bool IsLocal() const override { return true; }
+  bool IsReadOnly() const override;
 
-  virtual bool Flush();
+  bool Flush() override;
 
   MOBJECT_DEBUG(FCBook)
 
@@ -284,21 +284,21 @@ class FCDataProvider : public AdbDataProvider
 {
 public:
   // implement interface methods
-  virtual AdbBook *CreateBook(const String& name);
-  virtual bool EnumBooks(wxArrayString& aNames);
-  virtual bool DeleteBook(AdbBook *book);
-  virtual bool TestBookAccess(const String& name, AdbTests test);
+  AdbBook *CreateBook(const String& name) override;
+  bool EnumBooks(wxArrayString& aNames) override;
+  bool DeleteBook(AdbBook *book) override;
+  bool TestBookAccess(const String& name, AdbTests test) override;
    
   // Our entry is derived from AdbEntryStoredInMemory
-  virtual bool HasField(AdbField /* field */) const { return true; }
-  virtual bool HasMultipleEMails() const { return true; }
+  bool HasField(AdbField /* field */) const override { return true; }
+  bool HasMultipleEMails() const override { return true; }
 
   MOBJECT_DEBUG(FCDataProvider)
 
   DECLARE_ADB_PROVIDER(FCDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(FCDataProvider, TRUE, "Native format", Name_File);
+IMPLEMENT_ADB_PROVIDER(FCDataProvider, true, "Native format", Name_File);
 
 // ============================================================================
 // implementation
@@ -319,7 +319,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
     if ( !pGroup->GetConfig()->Write(GetPath(), wxString(_T(":"))) ) {
       // also if it fails it means that something is wrong and this entry
       // can't be created, so be sure that our IsOk() will return FALSE
-      m_pGroup = NULL;
+      m_pGroup = nullptr;
     }
   }
   else {
@@ -330,7 +330,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
   }
 
   m_pGroup->IncRefRecursively();
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 FCEntry::~FCEntry()
@@ -429,13 +429,13 @@ void FCEntry::Load(const String& strValue)
   }
   //else: no additional email addresses at all
 
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 // save entry to wxFileConfig (doesn't check if it's modified or not)
 bool FCEntry::Save()
 {
-  wxCHECK_MSG( m_bDirty, TRUE, _T("shouldn't save unmodified FCEntry") );
+  wxCHECK_MSG( m_bDirty, true, _T("shouldn't save unmodified FCEntry") );
 
   size_t nFieldMax = m_astrFields.Count();
 
@@ -513,7 +513,7 @@ bool FCEntry::Save()
 FCEntryGroup::FCEntryGroup(wxFileConfig *pConfig)
 {
   m_pConfig = pConfig;
-  m_pParent = NULL;
+  m_pParent = nullptr;
 }
 
 FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
@@ -532,7 +532,7 @@ FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
     if ( !m_pConfig->Write(path, wxEmptyString) ) {
       // something went wrong, don't create this group, the next line ensures
       // that IsOk() will return FALSE
-      m_pConfig = NULL;
+      m_pConfig = nullptr;
     }
   }
 
@@ -549,7 +549,7 @@ FCEntryGroup::~FCEntryGroup()
 wxString FCEntryGroup::GetPath() const
 {
   wxString strPath;
-  if ( m_pParent == NULL )
+  if ( m_pParent == nullptr )
     strPath = _T("/ADB_Entries");
   else
     strPath << m_pParent->GetPath() << _T("/") << m_strName;
@@ -602,7 +602,7 @@ AdbEntry *FCEntryGroup::GetEntry(const String& name)
   FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name);
   if ( !pEntry->IsOk() ) {
     pEntry->DecRef();
-    pEntry = NULL;
+    pEntry = nullptr;
   }
 
   return pEntry;
@@ -619,7 +619,7 @@ AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
   FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name);
   if ( !pGroup->IsOk() ) {
     pGroup->DecRef();
-    pGroup = NULL;
+    pGroup = nullptr;
   }
 
   return pGroup;
@@ -627,12 +627,12 @@ AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
 
 AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 {
-  CHECK( !!name, NULL, _T("can't create entries with empty names") );
+  CHECK( !!name, nullptr, _T("can't create entries with empty names") );
 
-  FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, TRUE /* new */);
+  FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, true /* new */);
   if ( !pEntry->IsOk() ) {
     pEntry->DecRef();
-    pEntry = NULL;
+    pEntry = nullptr;
   }
 
   return pEntry;
@@ -640,10 +640,10 @@ AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 
 AdbEntryGroup *FCEntryGroup::CreateGroup(const String& name)
 {
-  FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name, TRUE);
+  FCEntryGroup *pGroup = new FCEntryGroup((FCEntryGroup *)this, name, true);
   if ( !pGroup->IsOk() ) {
     pGroup->DecRef();
-    pGroup = NULL;
+    pGroup = nullptr;
   }
 
   return pGroup;
@@ -652,7 +652,7 @@ AdbEntryGroup *FCEntryGroup::CreateGroup(const String& name)
 void FCEntryGroup::DeleteEntry(const String& strName)
 {
   SetOurPath();
-  GetConfig()->DeleteEntry(strName, FALSE /* don't delete group */);
+  GetConfig()->DeleteEntry(strName, false /* don't delete group */);
 }
 
 void FCEntryGroup::DeleteGroup(const String& strName)
@@ -663,7 +663,7 @@ void FCEntryGroup::DeleteGroup(const String& strName)
 
 AdbEntry *FCEntryGroup::FindEntry(const wxChar * /* szName */)
 {
-  return NULL;
+  return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -696,7 +696,7 @@ FCBook::FCBook(const String& filename)
 
   // the ADB files contain arbitrary data, don't try to expand env vars in
   // them
-  m_pConfig->SetExpandEnvVars(FALSE);
+  m_pConfig->SetExpandEnvVars(false);
 
   // create the root group
   m_pRootGroup = new FCEntryGroup(m_pConfig);
@@ -743,7 +743,7 @@ String FCBook::GetName() const
 size_t FCBook::GetNumberOfEntries() const
 {
   m_pConfig->SetPath("/" ADB_ENTRIES);
-  return m_pConfig->GetNumberOfEntries(TRUE);
+  return m_pConfig->GetNumberOfEntries(true);
 }
 
 bool FCBook::IsReadOnly() const
@@ -779,14 +779,14 @@ AdbBook *FCDataProvider::CreateBook(const String& name)
 bool FCDataProvider::EnumBooks(wxArrayString& /* aNames */)
 {
   // TODO
-  return FALSE;
+  return false;
 }
 
 bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
   String fullname = FCBook::GetFullAdbPath(name);
 
-  bool ok = FALSE;
+  bool ok = false;
 
   switch ( test )
   {
@@ -795,7 +795,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
       {
         // the test is not 100% fool proof...
         FILE *fp = wxFopen(fullname, _T("rt"));
-        if ( fp != NULL )
+        if ( fp != nullptr )
         {
           char buf[1024];
           while ( fgets(buf, WXSIZEOF(buf), fp) ) {
@@ -823,7 +823,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 
         // it's the only portable way to test for it I can think of
         wxFile file;
-        if ( !file.Create(fullname, FALSE /* !overwrite */) )
+        if ( !file.Create(fullname, false /* !overwrite */) )
         {
           // either it already exists or we don't have permission to create
           // it there. Check whether it exists now.
@@ -833,7 +833,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
         {
           // it hadn't existed an we managed to create it - so we do have
           // permissions. Don't forget to remove it now.
-          ok = TRUE;
+          ok = true;
 
           file.Close();
           wxRemove(fullname);
@@ -859,7 +859,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 bool FCDataProvider::DeleteBook(AdbBook * /* book */)
 {
   // TODO
-  return FALSE;
+  return false;
 }
 
 // ----------------------------------------------------------------------------

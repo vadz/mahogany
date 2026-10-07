@@ -56,17 +56,17 @@ enum OptionsPage
 // -----------------------------------------------------------------------------
 
 /// creates and shows the (modal) options dialog
-extern void ShowOptionsDialog(wxFrame *parent = NULL,
+extern void ShowOptionsDialog(wxFrame *parent = nullptr,
                               OptionsPage page = OptionsPage_Default);
 
 /// creates and shows the edit identity dialog
-extern void ShowIdentityDialog(const wxString& ident, wxFrame *parent = NULL);
+extern void ShowIdentityDialog(const wxString& ident, wxFrame *parent = nullptr);
 
 /// creates and shows the dialog allowing to restore default settings
-extern bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent = NULL);
+extern bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent = nullptr);
 
 /// shows the dialog allowing to edit config sources
-extern void ShowConfigSourcesDialog(wxFrame *parent = NULL);
+extern void ShowConfigSourcesDialog(wxFrame *parent = nullptr);
 
 /**
   creates and shows the options dialog with several custom options page
@@ -75,13 +75,13 @@ extern void ShowConfigSourcesDialog(wxFrame *parent = NULL);
  */
 extern bool ShowCustomOptionsDialog(size_t nPages,
                                     const wxOptionsPageDesc *pageDesc,
-                                    Profile *profile = NULL,
-                                    wxFrame *parent = NULL);
+                                    Profile *profile = nullptr,
+                                    wxFrame *parent = nullptr);
 
 /// creates and shows the options dialog with the given (single) options page
 inline bool ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
-                                    Profile *profile = NULL,
-                                    wxFrame *parent = NULL)
+                                    Profile *profile = nullptr,
+                                    wxFrame *parent = nullptr)
 {
    return ShowCustomOptionsDialog(1, &pageDesc, profile, parent);
 }

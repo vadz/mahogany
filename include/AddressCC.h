@@ -30,15 +30,15 @@ public:
    AddressCC(mail_address *adr);
 
    // implement the base class pure virtuals
-   virtual bool IsValid() const;
-   virtual String GetAddress() const;
-   virtual String GetName() const;
-   virtual String GetMailbox() const;
-   virtual String GetDomain() const;
-   virtual String GetEMail() const;
+   bool IsValid() const override;
+   String GetAddress() const override;
+   String GetName() const override;
+   String GetMailbox() const override;
+   String GetDomain() const override;
+   String GetEMail() const override;
 
 protected:
-   virtual bool IsSameAs(const Address& addr) const;
+   bool IsSameAs(const Address& addr) const override;
 
 private:
    // the cclient ADDRESS struct we correspond to (we own and will delete it!)
@@ -65,10 +65,10 @@ public:
    static AddressList *Create(const mail_address *adr);
 
    // implement the base class pure virtuals
-   virtual Address *GetFirst() const;
-   virtual Address *GetNext(const Address *addr) const;
-   virtual String GetAddresses() const;
-   virtual bool IsSameAs(const AddressList *addr) const;
+   Address *GetFirst() const override;
+   Address *GetNext(const Address *addr) const override;
+   String GetAddresses() const override;
+   bool IsSameAs(const AddressList *addr) const override;
 
 private:
    // create the address from cclient ADDRESS struct, we take ownership of it!

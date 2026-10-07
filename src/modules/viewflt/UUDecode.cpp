@@ -49,9 +49,9 @@ public:
    UUDecodeFilter(MessageView *msgView, ViewFilter *next, bool enable);
 
 protected:
-   virtual void DoProcess(String& text,
-                          MessageViewer *viewer,
-                          MTextStyle& style);
+   void DoProcess(String& text,
+                  MessageViewer *viewer,
+                  MTextStyle& style) override;
 };
 
 // ----------------------------------------------------------------------------
@@ -150,7 +150,7 @@ UUdecodeFile(const wxChar *input,
 
    int decodedBytesInLine;
    const wxChar *startOfLine = input;
-   const wxChar *endOfLine = 0; // init not needed
+   const wxChar *endOfLine = nullptr; // init not needed
    char buffer[MAX_UU_LINE_LEN];
    while ( (decodedBytesInLine =
                UUdecodeLine(startOfLine, buffer, &endOfLine)) > 0 )
@@ -328,7 +328,7 @@ UUDecodeFilter::DoProcess(String& text,
 
       virtData = header.ToAscii();
 
-      const wxChar *endOfEncodedStream = NULL;
+      const wxChar *endOfEncodedStream = nullptr;
       bool ok = UUdecodeFile(start_data, virtData, &endOfEncodedStream);
       if ( ok )
       {

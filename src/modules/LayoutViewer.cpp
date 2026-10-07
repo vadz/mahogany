@@ -59,56 +59,56 @@ public:
    LayoutViewer();
 
    // creation &c
-   virtual void Create(MessageView *msgView, wxWindow *parent);
-   virtual void Clear();
-   virtual void Update();
-   virtual void UpdateOptions();
-   virtual wxWindow *GetWindow() const;
+   void Create(MessageView *msgView, wxWindow *parent) override;
+   void Clear() override;
+   void Update() override;
+   void UpdateOptions() override;
+   wxWindow *GetWindow() const override;
 
    // operations
-   virtual bool Find(const String& text);
-   virtual bool FindAgain();
-   virtual void SelectAll();
-   virtual String GetSelection() const;
-   virtual void Copy();
-   virtual bool Print();
-   virtual void PrintPreview();
+   bool Find(const String& text) override;
+   bool FindAgain() override;
+   void SelectAll() override;
+   String GetSelection() const override;
+   void Copy() override;
+   bool Print() override;
+   void PrintPreview() override;
 
    // header showing
-   virtual void StartHeaders();
-   virtual void ShowRawHeaders(const String& header);
-   virtual void ShowHeaderName(const String& name);
-   virtual void ShowHeaderValue(const String& value,
-                                wxFontEncoding encoding);
-   virtual void ShowHeaderURL(const String& text,
-                              const String& url);
-   virtual void EndHeader();
-   virtual void ShowXFace(const wxBitmap& bitmap);
-   virtual void EndHeaders();
+   void StartHeaders() override;
+   void ShowRawHeaders(const String& header) override;
+   void ShowHeaderName(const String& name) override;
+   void ShowHeaderValue(const String& value,
+                        wxFontEncoding encoding) override;
+   void ShowHeaderURL(const String& text,
+                      const String& url) override;
+   void EndHeader() override;
+   void ShowXFace(const wxBitmap& bitmap) override;
+   void EndHeaders() override;
 
    // body showing
-   virtual void StartBody();
-   virtual void StartPart();
-   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
-   virtual void InsertClickable(const wxBitmap& icon,
-                                ClickableInfo *ci,
-                                const wxColour& col);
-   virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
-   virtual void InsertRawContents(const String& data);
-   virtual void InsertText(const String& text, const MTextStyle& style);
-   virtual void InsertURL(const String& text, const String& url);
-   virtual void EndPart();
-   virtual void EndBody();
+   void StartBody() override;
+   void StartPart() override;
+   void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) override;
+   void InsertClickable(const wxBitmap& icon,
+                        ClickableInfo *ci,
+                        const wxColour& col) override;
+   void InsertImage(const wxImage& image, ClickableInfo *ci) override;
+   void InsertRawContents(const String& data) override;
+   void InsertText(const String& text, const MTextStyle& style) override;
+   void InsertURL(const String& text, const String& url) override;
+   void EndPart() override;
+   void EndBody() override;
 
    // scrolling
-   virtual bool LineDown();
-   virtual bool LineUp();
-   virtual bool PageDown();
-   virtual bool PageUp();
+   bool LineDown() override;
+   bool LineUp() override;
+   bool PageDown() override;
+   bool PageUp() override;
 
    // capabilities querying
-   virtual bool CanInlineImages() const;
-   virtual bool CanProcess(const String& mimetype) const;
+   bool CanInlineImages() const override;
+   bool CanProcess(const String& mimetype) const override;
 
 private:
    // set the text colour
@@ -132,7 +132,7 @@ class LayoutViewerWindow : public wxLayoutWindow
 public:
    LayoutViewerWindow(LayoutViewer *viewer, wxWindow *parent);
 
-   virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 
 private:
    void OnMouseEvent(wxCommandEvent& event);
@@ -181,13 +181,13 @@ public:
    {
       m_window = window;
 
-      m_window->GetViewStart(NULL, &m_y);
+      m_window->GetViewStart(nullptr, &m_y);
    }
 
    bool HasChanged() const
    {
       wxCoord y;
-      m_window->GetViewStart(NULL, &y);
+      m_window->GetViewStart(nullptr, &y);
 
       return m_y != y;
    }
@@ -267,7 +267,7 @@ IMPLEMENT_MESSAGE_VIEWER(LayoutViewer,
 
 LayoutViewer::LayoutViewer()
 {
-   m_window = NULL;
+   m_window = nullptr;
 }
 
 void LayoutViewer::SetTextColour(const wxColour& colToSet)
@@ -306,7 +306,7 @@ void LayoutViewer::Clear()
                    true /* no update */);
 
    // speeds up insertion of text
-   m_window->GetLayoutList()->SetAutoFormatting(FALSE);
+   m_window->GetLayoutList()->SetAutoFormatting(false);
 }
 
 void LayoutViewer::Update()
@@ -359,11 +359,11 @@ String LayoutViewer::GetSelection() const
    wxLayoutList *llist = m_window->GetLayoutList();
    if ( llist->HasSelection() )
    {
-      wxLayoutList *llistSel = llist->GetSelection(NULL, false);
+      wxLayoutList *llistSel = llist->GetSelection(nullptr, false);
 
       wxLayoutExportStatus status(llistSel);
       wxLayoutExportObject *exp;
-      while( (exp = wxLayoutExport(&status)) != NULL )
+      while( (exp = wxLayoutExport(&status)) != nullptr )
       {
          switch ( exp->type )
          {
@@ -552,8 +552,8 @@ void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
    else
       colBg = GetOptions().BgCol;
 
-   llist->SetFontColour(colFg.Ok() ? &colFg : NULL,
-                        colBg.Ok() ? &colBg : NULL);
+   llist->SetFontColour(colFg.Ok() ? &colFg : nullptr,
+                        colBg.Ok() ? &colBg : nullptr);
 
    wxFontEncoding enc = hasFont ? style.GetFont().GetEncoding()
                                 : wxFONTENCODING_SYSTEM;
@@ -626,7 +626,7 @@ void LayoutViewer::EndBody()
 
    // re-enable auto-formatting, seems safer for selection
    // highlighting, not sure if needed, though
-   llist->SetAutoFormatting(TRUE);
+   llist->SetAutoFormatting(true);
 
    // setup the line wrap
    CoordType wrapMargin = READ_CONFIG(GetProfile(), MP_VIEW_WRAPMARGIN);
@@ -636,7 +636,7 @@ void LayoutViewer::EndBody()
 
    // yes, we allow the user to edit the buffer, in case he wants to
    // modify it for pasting or wrap lines manually:
-   m_window->SetEditable(FALSE);
+   m_window->SetEditable(false);
    m_window->SetCursorVisibility(-1);
    llist->ForceTotalLayout();
 

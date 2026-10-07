@@ -95,7 +95,7 @@ public:
       {
       }
 
-   virtual bool Layout() { return wxScrolledWindow::Layout(); }
+   bool Layout() override { return wxScrolledWindow::Layout(); }
 
 private:
    DECLARE_NO_COPY_CLASS(wxEnhScrolledWindow)
@@ -153,7 +153,7 @@ long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
    size_t nCount = labels.Count();
    for ( size_t n = 0; n < nCount; n++ )
    {
-      dc.GetTextExtent(labels[n], &width, NULL);
+      dc.GetTextExtent(labels[n], &width, nullptr);
       if ( width > widthMax )
          widthMax = width;
    }
@@ -166,7 +166,7 @@ static void SetTopConstraint(wxWindow *parent,
                              wxControl *last,
                              int extraSpace)
 {
-   if ( last == NULL )
+   if ( last == nullptr )
    {
       c->top.SameAs(parent, wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
    }
@@ -397,7 +397,7 @@ CreateEntryWithButton(wxWindow *parent,
 
       default:
          wxFAIL_MSG(_T("unknown browse button kind"));
-         return NULL;
+         return nullptr;
    }
 
    wxLayoutConstraints *c = new wxLayoutConstraints;
@@ -441,7 +441,7 @@ void EnableWindowLabel(wxWindow *parent, wxWindow *control, bool bEnable)
 {
    wxWindow *win = control->GetPrevSibling();
 
-   if ( win == NULL ) {
+   if ( win == nullptr ) {
       wxFAIL_MSG(_T("can't find label for the text entry zone"));
    }
    else {
@@ -465,7 +465,7 @@ void EnableTextWithButton(wxWindow *parent, wxTextCtrl *control, bool bEnable)
 {
    wxWindow *win = control->GetNextSibling();
 
-   if ( win == NULL ) {
+   if ( win == nullptr ) {
       wxFAIL_MSG(_T("can't find browse button for the text entry zone"));
    }
    else {
@@ -587,7 +587,7 @@ wxNotebookWithImages::~wxNotebookWithImages()
 // ----------------------------------------------------------------------------
 
 wxEnhancedPanel::wxEnhancedPanel(wxWindow *parent, bool enableScrolling)
-               : wxPanel(parent, -1), m_canvas(NULL)
+               : wxPanel(parent, -1), m_canvas(nullptr)
 {
    if ( enableScrolling )
    {
@@ -1127,7 +1127,7 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
    m_helpId = -1; // no help id by default
 
    // the controls will be positioned with the constraints
-   SetAutoLayout(TRUE);
+   SetAutoLayout(true);
 }
 
 void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
@@ -1230,7 +1230,7 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
 
    // a box around all the other controls
    if ( flags & StdBtn_NoBox )
-      return NULL;
+      return nullptr;
 
    wxStaticBox *box = new wxStaticBox(this, -1, boxTitle);
    c = new wxLayoutConstraints();
@@ -1348,7 +1348,7 @@ void wxProfileSettingsEditDialog::CreateAllControls(int flags)
    panel->SetName(_T("MainNbookDlgPanel"));
 #endif
 
-   panel->SetAutoLayout(TRUE);
+   panel->SetAutoLayout(true);
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft);
    c->right.SameAs(this, wxRight);
@@ -1422,13 +1422,13 @@ void wxProfileSettingsEditDialog::CreateAllControls(int flags)
    }
    else
    {
-      m_btnApply = NULL;
+      m_btnApply = nullptr;
    }
 
    // set dialog size (FIXME these are more or less arbitrary numbers)
    if ( !(flags & ProfileEdit_NoDefSize) )
    {
-      SetDefaultSize(6*wBtn, 27*hBtn, TRUE /* set as min size too */);
+      SetDefaultSize(6*wBtn, 27*hBtn, true /* set as min size too */);
    }
 }
 
@@ -1442,9 +1442,9 @@ wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
                    : wxProfileSettingsEditDialog(parent, title, profileKey)
 {
    m_btnOk =
-   m_btnApply = NULL;
+   m_btnApply = nullptr;
 
-   m_profileForButtons = NULL;
+   m_profileForButtons = nullptr;
 
    m_lastBtn = MEventOptionsChangeData::Invalid;
 
@@ -1463,7 +1463,7 @@ bool wxOptionsEditDialog::TransferDataToWindow()
    for ( int nPage = 0; nPage < count; nPage++ ) {
       wxWindow *page = m_notebook->GetPage(nPage);
       if ( !page->TransferDataToWindow() ) {
-         return FALSE;
+         return false;
       }
    }
 
@@ -1474,7 +1474,7 @@ bool wxOptionsEditDialog::TransferDataToWindow()
    if ( m_profileForButtons )
       m_profileForButtons->Suspend();
 
-   return TRUE;
+   return true;
 }
 
 bool wxOptionsEditDialog::TransferDataFromWindow()
@@ -1484,10 +1484,10 @@ bool wxOptionsEditDialog::TransferDataFromWindow()
    {
       wxWindow * const page = m_notebook->GetPage(nPage);
       if ( !page->TransferDataFromWindow() )
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 /*
@@ -1559,7 +1559,7 @@ void wxOptionsEditDialog::OnOK(wxCommandEvent& /* event */)
       {
          m_profileForButtons->Commit();
          m_profileForButtons->DecRef();
-         m_profileForButtons = NULL;
+         m_profileForButtons = nullptr;
       }
 
       EndModal(wxID_OK);
@@ -1584,12 +1584,12 @@ bool wxOptionsEditDialog::DoApply()
    {
       if ( OnSettingsChange() )
       {
-         m_bDirty = FALSE;
-         m_btnApply->Enable(FALSE);
+         m_bDirty = false;
+         m_btnApply->Enable(false);
 
          SendOptionsChangeEvent();
 
-         return TRUE;
+         return true;
       }
    }
 
@@ -1599,7 +1599,7 @@ bool wxOptionsEditDialog::DoApply()
    // don't do m_profileForButtons->DecRef() neither - this will be done in
    // OnOk or OnCancel later
 
-   return FALSE;
+   return false;
 }
 
 void wxOptionsEditDialog::OnCancel(wxCommandEvent& /* event */)
@@ -1627,7 +1627,7 @@ void wxOptionsEditDialog::OnCancel(wxCommandEvent& /* event */)
    {
       m_profileForButtons->DecRef();
 
-      m_profileForButtons = NULL;
+      m_profileForButtons = nullptr;
    }
 
    EndModal(wxID_CANCEL);
@@ -1656,13 +1656,13 @@ bool wxOptionsEditDialog::OnSettingsChange()
       {
          if ( !VerifyEMailSendingWorks() )
          {
-            return FALSE;
+            return false;
          }
       }
       else
       {
          // no test was done, assume it's ok...
-         m_bTest = FALSE;
+         m_bTest = false;
       }
    }
 
@@ -1672,10 +1672,10 @@ bool wxOptionsEditDialog::OnSettingsChange()
                         "only take effect when the progam will be run the\n"
                         "next time and not during this session."),
                       this, MDIALOG_MSGTITLE, "WarnRestartOpt");
-      m_bRestartWarning = FALSE;
+      m_bRestartWarning = false;
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -81,7 +81,7 @@ public:
    bool IsOk() const { return m_ok; }
 
    // event processing function
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 private:
    // called when a new folder must be added
@@ -117,12 +117,12 @@ MHFoldersImporter::~MHFoldersImporter()
 
 // needed to be able to use DECLARE_AUTOREF() macro
 typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
-DECLARE_AUTOPTR(ASFolderExistsResult);
+using ASFolderExistsResult_obj = DecRefPtr<ASFolderExistsResult>;
 
 bool MHFoldersImporter::OnMEvent(MEventData& event)
 {
    // we're only subscribed to the ASFolder events
-   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
+   CHECK( event.GetId() == MEventId_ASFolderResult, false,
           _T("unexpected event type") );
 
    MEventASFolderResultData &data = (MEventASFolderResultData &)event;
@@ -133,7 +133,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
    if ( result->GetUserData() != this )
    {
       // no: continue with other event handlers
-      return TRUE;
+      return true;
    }
 
    if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
@@ -141,14 +141,14 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
       FAIL_MSG( _T("unexpected operation notification") );
 
       // eat the event - it was for us but we didn't process it...
-      return FALSE;
+      return false;
    }
 
    // is it the special event which signals that there will be no more of
    // folders?
    if ( !result->GetDelimiter() )
    {
-      m_ok = TRUE;
+      m_ok = true;
    }
    else
    {
@@ -168,7 +168,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
    }
 
    // we don't want anyone else to receive this message - it was for us only
-   return FALSE;
+   return false;
 }
 
 void MHFoldersImporter::OnNewFolder(String& name)
@@ -215,12 +215,12 @@ MailFolder::InitializeMH()
 #endif // Unix/!Unix
 
          // const_cast is harmless
-         mail_parameters(NULL, SET_MHPATH, pathMH.char_str());
+         mail_parameters(nullptr, SET_MHPATH, pathMH.char_str());
       }
 
       // force cclient to init the MH driver
       char tmp[MAILTMPLEN];
-      if ( !mh_isvalid(CONST_CCAST("#MHINBOX"), tmp, TRUE /* syn only check */) )
+      if ( !mh_isvalid(CONST_CCAST("#MHINBOX"), tmp, true /* syn only check */) )
       {
          wxLogError(_("Sorry, support for MH folders is disabled."));
       }
@@ -229,7 +229,7 @@ MailFolder::InitializeMH()
          // retrieve the MH path (notice that we don't always find it ourself
          // as sometimes it's found only by the call to mh_isvalid)
          gs_MHRootDir = static_cast<char *>(
-                           mail_parameters(NULL, GET_MHPATH, &tmp));
+                           mail_parameters(nullptr, GET_MHPATH, &tmp));
 
          // the path should have a trailing [back]slash
          if ( !!gs_MHRootDir && !wxIsPathSeparator(gs_MHRootDir.Last()) )
@@ -252,7 +252,7 @@ MailFolder::GetMHFolderName(String *path)
       if ( !InitializeMH() ) // it's harmless to call it more than once
       {
          // no MH support
-         return FALSE;
+         return false;
       }
 
       wxString pathFolder(name, gs_MHRootDir.length());
@@ -268,12 +268,12 @@ MailFolder::GetMHFolderName(String *path)
                     name,
                     gs_MHRootDir);
 
-         return FALSE;
+         return false;
       }
    }
    //else: relative path - leave as is
 
-   return TRUE;
+   return true;
 }
 
 bool MailFolder::ExistsMH()
@@ -283,7 +283,7 @@ bool MailFolder::ExistsMH()
    if ( !rootMH )
    {
       // no MH support
-      return FALSE;
+      return false;
    }
 
    // is the dir empty?
@@ -292,37 +292,37 @@ bool MailFolder::ExistsMH()
    if ( dir.GetFirst(&dummy) )
    {
       // we have something, assume it's a valid MH folder
-      return TRUE;
+      return true;
    }
 
    // empty directory
-   return FALSE;
+   return false;
 }
 
 bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
 {
-   bool ok = TRUE;
+   bool ok = true;
 
    // change the MH path if it's different from the default one
    if ( root != InitializeMH() )
    {
       // const_cast is harmless
-      mail_parameters(NULL, SET_MHPATH, root.char_str());
+      mail_parameters(nullptr, SET_MHPATH, root.char_str());
    }
 
    // first create the root MH folder
-   MFolder *folderMH = CreateFolderTreeEntry(NULL,    // top level folder
+   MFolder *folderMH = CreateFolderTreeEntry(nullptr,    // top level folder
                                              _("MH folders"),
                                              MF_MH,
                                              0,       // flags
                                              wxEmptyString,
-                                             FALSE);  // don't notify
+                                             false);  // don't notify
    if ( !folderMH )
    {
       wxLogError(_("Failed to create root MH folder at '%s'."),
                  root);
 
-      ok = FALSE;
+      ok = false;
    }
 
    if ( ok && allUnder )
@@ -331,12 +331,12 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
       ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folderMH);
       if ( !asmf )
       {
-         ok = FALSE;
+         ok = false;
       }
       else
       {
          MHFoldersImporter importer;
-         asmf->ListFolders(_T("*"), FALSE, wxEmptyString, &importer);
+         asmf->ListFolders(_T("*"), false, wxEmptyString, &importer);
 
          ok = importer.IsOk();
 

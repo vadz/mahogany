@@ -15,6 +15,8 @@
 #ifndef   MOBJECT_H
 #define   MOBJECT_H
 
+#include <memory>
+
 class MObjectRC;
 
 // ----------------------------------------------------------------------------
@@ -171,11 +173,11 @@ public:
     /// override this function (see also MOBJECT_DEBUG macro) to provide
     /// some rich information about your object (MObjectRC::Dump() prints
     /// the base information such as name, pointer and ref count only)
-    virtual String DebugDump() const;
+    String DebugDump() const override;
 
     /// this function just returns the class name (also overriden by
     /// MOBJECT_DEBUG macro)
-    virtual const char *DebugGetClassName() const { return "<<Unknown>>"; }
+    const char *DebugGetClassName() const override { return "<<Unknown>>"; }
 #else
     static void CheckLeaks() { }
 #endif
@@ -193,11 +195,11 @@ public:
    {
       MOcheck();
       if ( --m_nRef )
-         return TRUE;
+         return true;
       this->~MObjectRC();
       if( !m_weakRef )
          ::operator delete(this);
-      return FALSE;
+      return false;
    }
 #endif ///debug/release
 
@@ -226,8 +228,8 @@ private:
      /// declare all diagnostic functions (you must implement DebugDump)
 #   define MOBJECT_DEBUG(classname)                                           \
       public:                                                                 \
-         virtual const char *DebugGetClassName() const { return #classname; } \
-         virtual String DebugDump() const;
+         const char *DebugGetClassName() const override { return #classname; } \
+         String DebugDump() const override;
 
 #   define MOBJECT_NAME(classname) \
       public:                                                                 \
@@ -238,89 +240,33 @@ private:
 #endif
 
 // ----------------------------------------------------------------------------
-// smart references classes: for an MObjectRC-derived class Foo we provide
-// macros to define a class Foo_obj which is a smart reference to Foo and also
-// more flexible macros to allow adding arbitrary code to Foo_obj declaration
+// smart references to ref counted objects: for an MObjectRC-derived class Foo
+// we provide Foo_obj type which is a smart reference to Foo, i.e. a pointer
+// owning a single reference to it and calling DecRef() when it's destroyed.
 //
 // in fact, this works for any class which has a DecRef() method, not just
 // MObjectRC
 // ----------------------------------------------------------------------------
 
-// start auto ptr class declaration
-#define BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                              \
-   class classname##_obj                                                      \
-   {                                                                          \
-   public:                                                                    \
-      classname##_obj(classname *ptr = NULL) { m_ptr = ptr; }                 \
-                                                                              \
-      void Attach(classname *ptr)                                             \
-      {                                                                       \
-         ASSERT_MSG( !m_ptr, _T("should have used Detach() first") );         \
-                                                                              \
-         m_ptr = ptr;                                                         \
-      }                                                                       \
-                                                                              \
-      classname *Detach()                                                     \
-      {                                                                       \
-         classname *ptr = m_ptr;                                              \
-         m_ptr = NULL;                                                        \
-         return ptr;                                                          \
-      }                                                                       \
-                                                                              \
-      classname *Get() const { return m_ptr; }                                \
-                                                                              \
-      classname& operator*() const { return *Get(); }                         \
-      classname *operator->() const { return Get(); }                         \
-                                                                              \
-      void Swap(classname##_obj& other)                                       \
-      {                                                                       \
-         classname *tmp = other.m_ptr;                                        \
-         other.m_ptr = m_ptr;                                                 \
-         m_ptr = tmp;                                                         \
-      }                                                                       \
-                                                                              \
-   private:                                                                   \
-      classname *m_ptr;                                                       \
-                                                                              \
-      classname##_obj(const classname##_obj &);                               \
-      classname##_obj& operator=(const classname##_obj &);
+/// Deleter for std::unique_ptr<> calling DecRef() instead of deleting.
+template <typename T>
+struct DecRefDeleter
+{
+   void operator()(T *ptr) const { ptr->DecRef(); }
+};
 
-// normally our autoptr class has an implicit conversion to bool for truth
-// testing but we can't have both conversion to bool and to a pointer type as
-// in DECLARE_AUTOPTR_WITH_CONVERSION() because of ambiguity between them, so
-// we have a separate macro for the part without bool conversion and another
-// one for the whole declaration
-#define BEGIN_DECLARE_AUTOPTR(classname)                    \
-   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                 \
-   public:                                                  \
-      ~classname##_obj() { if ( m_ptr ) m_ptr->DecRef(); }  \
-      operator bool() const { return m_ptr != NULL; }
-
-// finish the class decl
-#define END_DECLARE_AUTOPTR() }
-
-// declare a class which is an auto ptr to the given MObjectRC-derived type
-#define DECLARE_AUTOPTR(classname)                    \
-   BEGIN_DECLARE_AUTOPTR(classname)                   \
-   END_DECLARE_AUTOPTR()
-
-// declare an auto ptr with implicit conversion to its real pointer class:
-// dangerous but needed for backwards compatibility
-#define DECLARE_AUTOPTR_WITH_CONVERSION(classname)          \
-   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                 \
-   public:                                                  \
-      ~classname##_obj() { if ( m_ptr ) m_ptr->DecRef(); }  \
-      operator classname *() const { return m_ptr; }        \
-   END_DECLARE_AUTOPTR()
+/// Unique pointer owning a reference to a ref counted object.
+template <typename T>
+using DecRefPtr = std::unique_ptr<T, DecRefDeleter<T>>;
 
 // ----------------------------------------------------------------------------
 // utility functions
 // ----------------------------------------------------------------------------
 
 // lock the pointer only if it's !NULL
-inline void SafeIncRef(MObjectRC *p) { if ( p != NULL ) p->IncRef(); }
+inline void SafeIncRef(MObjectRC *p) { if ( p != nullptr ) p->IncRef(); }
 
 // unlock the pointer only if it's !NULL
-inline void SafeDecRef(MObjectRC *p) { if ( p != NULL ) p->DecRef(); }
+inline void SafeDecRef(MObjectRC *p) { if ( p != nullptr ) p->DecRef(); }
 
 #endif  //MOBJECT_H

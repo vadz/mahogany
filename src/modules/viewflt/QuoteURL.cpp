@@ -83,7 +83,7 @@ public:
       ReadOptions(m_options, msgView->GetProfile());
    }
 
-   virtual bool UpdateOptions(Profile *profile);
+   bool UpdateOptions(Profile *profile) override;
 
 protected:
    struct Options
@@ -132,9 +132,9 @@ protected:
    };
 
    // the main work function
-   virtual void DoProcess(String& text,
-                          MessageViewer *viewer,
-                          MTextStyle& style);
+   void DoProcess(String& text,
+                  MessageViewer *viewer,
+                  MTextStyle& style) override;
 
    // fill m_options using the values from the given profile
    void ReadOptions(Options& options, Profile *profile);
@@ -262,13 +262,13 @@ const wxChar *
 QuoteURLFilter::FindURLIfNeeded(const wxChar *s, int& len)
 {
    if ( !m_options.highlightURLs )
-      return NULL;
+      return nullptr;
 
    extern int FindURL(const wxChar *s, int& len);
 
    int pos = FindURL(s, len);
 
-   return pos == -1 ? NULL : s + pos;
+   return pos == -1 ? nullptr : s + pos;
 }
 
 void

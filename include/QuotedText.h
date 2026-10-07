@@ -21,7 +21,7 @@ class Profile;
 class QuoteData
 {
 public:
-   QuoteData() { levelWrapped = 0; linePrev = NULL; }
+   QuoteData() { levelWrapped = 0; linePrev = nullptr; }
 
    // functions for querying/setting quote prefix for the given (0-based) level
    bool HasQuoteAtLevel(size_t level) const

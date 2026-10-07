@@ -81,7 +81,7 @@ public:
    /**
       Default constructor creates NULL pointer.
     */
-   RefCounter() : m_pointer(NULL) {}
+   RefCounter() : m_pointer(nullptr) {}
 
    /**
       Constructor from a raw pointer.
@@ -116,6 +116,35 @@ public:
    }
 
    /**
+      Move constructor.
+
+      Takes the pointer from the other object, which becomes @c NULL, without
+      changing the reference count.
+
+      Note that it is important for this constructor to be noexcept, as
+      otherwise std::vector<> would copy, rather than move, the elements when
+      reallocating.
+    */
+   RefCounter(RefCounter<T>&& other) noexcept
+      : m_pointer(other.release())
+   {
+   }
+
+   /**
+      Move assignment operator.
+
+      Releases the currently held pointer, if any, and takes the pointer from
+      the other object, which becomes @c NULL.
+
+      This works correctly for self-assignment too.
+    */
+   RefCounter<T>& operator=(RefCounter<T>&& other) noexcept
+   {
+      attach(other.release());
+      return *this;
+   }
+
+   /**
       Destructor releases the pointer possibly destroying it.
 
       Destructor is not virtual, this class can't be used polymorphically.
@@ -141,7 +170,7 @@ public:
     */
    operator unspecified_bool_type() const // never throws
    {
-       return m_pointer ? &RefCounter<T>::get : NULL;
+       return m_pointer ? &RefCounter<T>::get : nullptr;
    }
 
    /**
@@ -152,7 +181,7 @@ public:
    void reset()
    {
       RefCounterDecrement(m_pointer);
-      m_pointer = NULL;
+      m_pointer = nullptr;
    }
 
    /**
@@ -176,7 +205,7 @@ public:
    T *release()
    {
       T *pointer = m_pointer;
-      m_pointer = NULL;
+      m_pointer = nullptr;
 
       return pointer;
    }
@@ -234,7 +263,7 @@ public:
    typedef T element_type;
 
    /// Default constructor creates NULL pointer.
-   WeakRef() : m_pointer(NULL) {}
+   WeakRef() : m_pointer(nullptr) {}
 
    /// Copy constructor.
    WeakRef(const WeakRef<T> &copy)
@@ -279,119 +308,6 @@ public:
    operator RefCounter<T>() const { return lock(); }
 
 private:
-   T *m_pointer;
-};
-
-
-/// Mostly boost::scoped_ptr clone.
-template <class T>
-class scoped_ptr
-{
-public:
-   /// same as auto_ptr<>::element_type
-   typedef T element_type;
-
-   /// a scalar type which doesn't risk to be converted to anything
-   typedef T *(scoped_ptr<T>::*unspecified_bool_type)() const;
-
-   /// Default constructor initializes to @c NULL.
-   scoped_ptr() : m_pointer(NULL) {}
-
-   /// Takes ownership of raw pointer
-   scoped_ptr(T *copy) : m_pointer(copy) {}
-
-   /// Destructor deletes held pointer if it is not @c NULL.
-   ~scoped_ptr() { delete m_pointer; }
-
-   /// Late construction. Delete previously help pointer.
-   void reset(T *copy = NULL)
-   {
-      delete m_pointer;
-      m_pointer = copy;
-   }
-
-   /// Return stored pointer.
-   T *get() const { return m_pointer; }
-
-   /// Allow use of this class as pointer.
-   T *operator->() const { return get(); }
-
-   /**
-      Implicit, but safe, conversion to bool.
-
-      It's copy of similar method in RefCounter.
-    */
-   operator unspecified_bool_type() const // never throws
-   {
-      return m_pointer ? &scoped_ptr<T>::get : NULL;
-   }
-
-private:
-   /// Copy constructor is private.
-   scoped_ptr(const scoped_ptr<T>& copy) {}
-
-   /// Assignment operator is private.
-   void operator=(const scoped_ptr<T>& copy) {}
-
-   T *m_pointer;
-};
-
-/// Mostly boost::scoped_array clone.
-template <class T>
-class scoped_array
-{
-public:
-   /// same as auto_ptr<>::element_type
-   typedef T element_type;
-
-   /// a scalar type which doesn't risk to be converted to anything
-   typedef T *(scoped_array<T>::*unspecified_bool_type)() const;
-
-   /// Default constructor initializes to @c NULL.
-   scoped_array() : m_pointer(NULL) {}
-
-   /// Takes ownership of raw pointer
-   scoped_array(T *copy) : m_pointer(copy) {}
-
-   /// Destructor deletes held pointer if it is not @c NULL.
-   ~scoped_array() { delete [] m_pointer; }
-
-   /// Late construction. Delete previously help pointer.
-   void reset(T *copy = NULL)
-   {
-      delete[] m_pointer;
-      m_pointer = copy;
-   }
-
-   /// Return the n-th element
-   T& operator[](size_t n) const
-   {
-      return m_pointer[n];
-   }
-
-   /// Return stored pointer.
-   T *get() const { return m_pointer; }
-
-   /// Allow use of this class as pointer.
-   T *operator->() const { return get(); }
-
-   /**
-      Implicit, but safe, conversion to bool.
-
-      It's copy of similar method in RefCounter.
-    */
-   operator unspecified_bool_type() const // never throws
-   {
-      return m_pointer ? &scoped_array<T>::get : NULL;
-   }
-
-private:
-   /// Copy constructor is private.
-   scoped_array(const scoped_array<T>& copy) {}
-
-   /// Assignment operator is private.
-   void operator=(const scoped_array<T>& copy) {}
-
    T *m_pointer;
 };
 

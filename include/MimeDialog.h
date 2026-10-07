@@ -32,7 +32,7 @@ class wxWindow;
 extern String
 GetCommandForMimeType(wxWindow *parent,
                       const String& mimetype,
-                      bool *openAsMsg = NULL);
+                      bool *openAsMsg = nullptr);
 
 #endif //  _M_MIMEDIALOG_H_
 

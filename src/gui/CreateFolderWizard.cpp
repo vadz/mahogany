@@ -110,8 +110,8 @@ class CreateFolderWizard : public MWizard
 {
 public:
    CreateFolderWizard(MFolder *parentFolder,
-                      wxWindow *parent = NULL)
-      : MWizard(MWizard_CreateFolder_Max, _("Create a new folder"), NULL, parent)
+                      wxWindow *parent = nullptr)
+      : MWizard(MWizard_CreateFolder_Max, _("Create a new folder"), nullptr, parent)
       {
          m_wantsDialog = false;
          m_ParentFolder = parentFolder;
@@ -173,7 +173,7 @@ protected:
    bool m_wantsDialog;
 
 private:
-   virtual wxWizardPage *DoCreatePage(MWizardPageId id);
+   wxWizardPage *DoCreatePage(MWizardPageId id) override;
 
    DECLARE_NO_COPY_CLASS(CreateFolderWizard)
 };
@@ -189,11 +189,11 @@ class MWizard_CreateFolder_WelcomePage : public MWizardPage
 public:
    MWizard_CreateFolder_WelcomePage(MWizard *wizard);
 
-   virtual MWizardPageId GetPreviousPageId() const { return MWizard_PageNone; }
-   virtual MWizardPageId GetNextPageId() const;
+   MWizardPageId GetPreviousPageId() const override { return MWizard_PageNone; }
+   MWizardPageId GetNextPageId() const override;
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    void OnCheckbox(wxCommandEvent& event);
@@ -239,7 +239,7 @@ MWizard_CreateFolder_WelcomePage(MWizard *wizard)
 
    long wMax = GetMaxLabelWidth(labels, panel->GetCanvas());
 
-   m_checkNoWizard = panel->CreateCheckBox(labels[0], wMax, NULL);
+   m_checkNoWizard = panel->CreateCheckBox(labels[0], wMax, nullptr);
    m_checkNeverWizard = panel->CreateCheckBox(labels[1], wMax, m_checkNoWizard);
 
    panel->Layout();
@@ -316,7 +316,7 @@ class MWizard_CreateFolder_TypePage : public MWizardPage
 public:
    MWizard_CreateFolder_TypePage(MWizard *wizard);
 
-   virtual MWizardPageId GetNextPageId() const;
+   MWizardPageId GetNextPageId() const override;
 
 private:
    wxChoice *m_TypeCtrl;
@@ -355,7 +355,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
                                       "NNTP Newsgroup:"
                                       "Local Newsgroup:"
                                       "Folder Group"),
-                                    maxwidth, NULL);
+                                    maxwidth, nullptr);
 
    // should be always in sync
    ASSERT_MSG( m_TypeCtrl->GetCount() == FOLDERTYPE_MAX,
@@ -403,10 +403,10 @@ public:
                                    MWizardPageId id,
                                    FolderEntryType type);
 
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
-   virtual MWizardPageId GetNextPageId() const
+   MWizardPageId GetNextPageId() const override
    {
       CreateFolderWizard *wiz = (CreateFolderWizard*)GetWizard();
 
@@ -414,7 +414,7 @@ public:
                                    : MWizard_CreateFolder_Final;
    }
 
-   virtual MWizardPageId GetPreviousPageId() const
+   MWizardPageId GetPreviousPageId() const override
    {
       return MWizard_CreateFolder_Type;
    }
@@ -587,13 +587,13 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
       last = m_##name; \
    } \
    else \
-      m_##name = NULL
+      m_##name = nullptr
 
    // if we ask for login name, we ask for password as well
    // (and we do need this var to be able to use the macro above)
    bool needsPassword = needsUserId;
 
-   wxControl *last = NULL;
+   wxControl *last = nullptr;
    CREATE_CTRL(Server,
                panel->CreateTextWithLabel(labels[Label_Server],
                                           maxwidth,
@@ -614,7 +614,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
                panel->CreateFileOrDirEntry(labels[Label_Mailbox],
                                            maxwidth,
                                            last,
-                                           canBrowse ? &m_browsePath : NULL,
+                                           canBrowse ? &m_browsePath : nullptr,
                                            true,
                                            false));
 
@@ -882,12 +882,12 @@ class MWizard_CreateFolder_NewMailPage : public MWizardPage
 public:
    MWizard_CreateFolder_NewMailPage(MWizard *wizard);
 
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
-   virtual MWizardPageId GetPreviousPageId() const
+   MWizardPageId GetPreviousPageId() const override
       { return ((CreateFolderWizard *)GetWizard())->GetServerPageId(); }
 
-   virtual MWizardPageId GetNextPageId() const
+   MWizardPageId GetNextPageId() const override
       { return MWizard_CreateFolder_Final; }
 
 protected:
@@ -932,7 +932,7 @@ MWizard_CreateFolder_NewMailPage(MWizard *wizard)
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
    m_checkMonitor = panel->CreateCheckBox(labels[0],
-                                          maxwidth, NULL);
+                                          maxwidth, nullptr);
    m_checkOnStartup = panel->CreateCheckBox(labels[1],
                                             maxwidth, m_checkMonitor);
 
@@ -959,7 +959,7 @@ bool MWizard_CreateFolder_NewMailPage::TransferDataFromWindow()
    if ( (params->m_FolderFlags & MF_FLAGS_MONITOR) &&
          m_checkOnStartup->GetValue() )
    {
-      params->m_CheckOnStartup = TRUE;
+      params->m_CheckOnStartup = true;
    }
 
    return true;
@@ -974,8 +974,8 @@ class MWizard_CreateFolder_FinalPage : public MWizardPage
 public:
    MWizard_CreateFolder_FinalPage(MWizard *wizard);
 
-   virtual MWizardPageId GetPreviousPageId() const;
-   virtual MWizardPageId GetNextPageId() const { return MWizard_PageNone; }
+   MWizardPageId GetPreviousPageId() const override;
+   MWizardPageId GetNextPageId() const override { return MWizard_PageNone; }
 
 private:
    DECLARE_NO_COPY_CLASS(MWizard_CreateFolder_FinalPage)
@@ -1058,7 +1058,7 @@ wxWizardPage *CreateFolderWizard::DoCreatePage(MWizardPageId id)
    }
 #undef CREATE_PAGE
 
-   return NULL;
+   return nullptr;
 }
 
 
@@ -1069,7 +1069,7 @@ wxWizardPage *CreateFolderWizard::DoCreatePage(MWizardPageId id)
 MFolder *
 RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
 {
-   MFolder *newfolder = NULL;
+   MFolder *newfolder = nullptr;
 
    // ensure that the pointer is always valid
    bool dummyWantsDialog;

@@ -60,7 +60,7 @@ public:
 
 
    // we redirect OnMEvent() to the methods above
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 private:
    // MEventReceiver cookie for the event manager

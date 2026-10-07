@@ -24,8 +24,6 @@
 #   include "guidef.h"
 #   include "Profile.h"
 #   include "MApplication.h"
-
-#   include <wx/dynarray.h>     // for WX_DEFINE_ARRAY
 #endif // USE_PCH
 
 #include <stdarg.h>             // for va_start
@@ -35,6 +33,8 @@
 #include "HeaderInfo.h"
 
 #include <list>
+
+#include <vector>
 
 // ----------------------------------------------------------------------------
 // private types
@@ -53,7 +53,7 @@ struct MEventReceiverInfo
 };
 
 // array of all registered receivers
-WX_DEFINE_ARRAY(MEventReceiverInfo *, MEventReceiverInfoArray);
+using MEventReceiverInfoArray = std::vector<MEventReceiverInfo *>;
 
 // ----------------------------------------------------------------------------
 // global variables (we don't make them static member vars of MEventManager to
@@ -90,7 +90,7 @@ static int gs_IsSuspended = 0;
 MEventReceiver::~MEventReceiver()
 {
 #ifdef DEBUG
-   size_t count = gs_receivers.GetCount();
+   size_t count = gs_receivers.size();
    for ( size_t n = 0; n < count; n++ )
    {
       MEventReceiverInfo *info = gs_receivers[n];
@@ -180,14 +180,15 @@ bool MEventManager::Dispatch(MEventData *dataptr)
    MEventReceiverInfoArray receivers = gs_receivers;
    mutex.Unlock();
 
-   size_t count = receivers.GetCount();
+   size_t count = receivers.size();
 
    for ( size_t n = 0; n < count; n++ )
    {
       MEventReceiverInfo *info = receivers[n];
 
       // check that the object didn't go away!
-      if ( gs_receivers.Index(info) == wxNOT_FOUND )
+      if ( std::find(gs_receivers.begin(), gs_receivers.end(), info) ==
+               gs_receivers.end() )
          continue;
 
       if ( info->id == id )
@@ -215,7 +216,7 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
 
 #ifdef DEBUG
    // check that we don't register the same object twice
-   size_t count = gs_receivers.GetCount();
+   size_t count = gs_receivers.size();
    for ( size_t n = 0; n < count; n++ )
    {
       MEventReceiverInfo *infoOld = gs_receivers[n];
@@ -229,7 +230,7 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
 
    {
       MEventLocker mutex;
-      gs_receivers.Add(info);
+      gs_receivers.push_back(info);
    }
 
    return info;
@@ -238,14 +239,14 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
 bool MEventManager::Deregister(void *handle)
 {
    MEventLocker mutex;
-   int index = gs_receivers.Index((MEventReceiverInfo *)handle);
+   const auto it = std::find(gs_receivers.begin(), gs_receivers.end(),
+                             (MEventReceiverInfo *)handle);
 
-   CHECK( index != wxNOT_FOUND, false,
+   CHECK( it != gs_receivers.end(), false,
           _T("unregistering event handler which was not registered") );
 
-   size_t n = (size_t)index;
-   delete gs_receivers[n];
-   gs_receivers.RemoveAt(n);
+   delete *it;
+   gs_receivers.erase(it);
 
    return true;
 }

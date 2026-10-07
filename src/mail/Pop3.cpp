@@ -70,12 +70,12 @@ public:
 protected:
    // implement CacheFile pure virtuals
 
-   virtual String GetFileName() const;
-   virtual String GetFileHeader() const;
-   virtual int GetFormatVersion() const;
+   String GetFileName() const override;
+   String GetFileHeader() const override;
+   int GetFormatVersion() const override;
 
-   virtual bool DoLoad(const wxTextFile& file, int version);
-   virtual bool DoSave(wxTempFile& file);
+   bool DoLoad(const wxTextFile& file, int version) override;
+   bool DoSave(wxTempFile& file) override;
 
 private:
    String         m_folderName;
@@ -256,7 +256,7 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
          else
          {
             // real EOT
-            t = NULL;
+            t = nullptr;
          }
       }
       else // normal line

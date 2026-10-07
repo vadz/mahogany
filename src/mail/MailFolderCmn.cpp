@@ -72,6 +72,9 @@
 #include <wx/datetime.h>
 #include <wx/file.h>
 
+#include <memory>
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -190,8 +193,8 @@ private:
    bool m_expires;
 };
 
-// a linked list of MfCloseEntries
-M_LIST_OWN(MfList, MfCloseEntry);
+// a vector of MfCloseEntries
+using MfList = std::vector<std::unique_ptr<MfCloseEntry>>;
 
 // the timer which periodically really closes the previously "closed" folders
 class MfCloser;
@@ -200,7 +203,7 @@ class MfCloseTimer : public wxTimer
 public:
    MfCloseTimer(MfCloser *mfCloser) { m_mfCloser = mfCloser; }
 
-   virtual void Notify(void);
+   void Notify(void) override;
 
 private:
    MfCloser *m_mfCloser;
@@ -228,10 +231,7 @@ public:
    MfCloseEntry *GetCloseEntry(MailFolderCmn *mf) const;
 
    // is this folder in this list?
-   bool HasFolder(MailFolderCmn *mf) const { return GetCloseEntry(mf) != NULL; }
-
-   // remove the given entry from list
-   void Remove(MfCloseEntry *entry);
+   bool HasFolder(MailFolderCmn *mf) const { return GetCloseEntry(mf) != nullptr; }
 
    // restart the timer (useful if timer interval changed)
    void RestartTimer();
@@ -260,7 +260,7 @@ public:
    MfCmnEventReceiver(MailFolderCmn *mf);
    virtual ~MfCmnEventReceiver();
 
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 private:
    MailFolderCmn *m_Mf;
@@ -285,7 +285,7 @@ public:
    }
 
    /// get called on timeout and pings the mailfolder
-   void Notify(void);
+   void Notify(void) override;
 
 protected:
    /// the mailfolder to update
@@ -299,7 +299,7 @@ protected:
 // ----------------------------------------------------------------------------
 
 // the unique MfCloser object
-static MfCloser *gs_MailFolderCloser = NULL;
+static MfCloser *gs_MailFolderCloser = nullptr;
 
 // ============================================================================
 // implementation
@@ -419,7 +419,7 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
    wxLogTrace(TRACE_MF_REF, _T("Adding '%s' to gs_MailFolderCloser"),
               mf->GetName());
 
-   m_MfList.push_back(new MfCloseEntry(mf, delay));
+   m_MfList.push_back(std::make_unique<MfCloseEntry>(mf, delay));
 
    if ( delay < m_interval )
    {
@@ -433,15 +433,20 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
 
 void MfCloser::OnTimer(void)
 {
-   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end();)
+   // destroying the entries may result in closing the folders, which can
+   // reenter our code and access m_MfList, so first remove the expired entries
+   // from it and only destroy them afterwards, when m_MfList is consistent
+   MfList expired;
+   for ( auto i = m_MfList.begin(); i != m_MfList.end();)
    {
-      if ( i->HasExpired() )
+      if ( (*i)->HasExpired() )
       {
 #ifdef DEBUG
          wxLogTrace(TRACE_MF_CLOSE, _T("Going to remove '%s' from m_MfList"),
-                    i->GetName());
+                    (*i)->GetName());
 #endif // DEBUG
 
+         expired.push_back(std::move(*i));
          i = m_MfList.erase(i);
       }
       else
@@ -453,40 +458,22 @@ void MfCloser::OnTimer(void)
 
 void MfCloser::CleanUp(void)
 {
-   m_MfList.clear();
-}
-
-void MfCloser::Remove(MfCloseEntry *entry)
-{
-   CHECK_RET( entry, _T("NULL entry in MfCloser::Remove") );
-
-#ifdef DEBUG
-   wxLogTrace(TRACE_MF_REF, _T("Removing '%s' from gs_MailFolderCloser"),
-              entry->GetName());
-#endif // DEBUG
-
-   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
-   {
-      if ( i.operator->() == entry )
-      {
-         m_MfList.erase(i);
-
-         break;
-      }
-   }
+   // see the comment in OnTimer() for why we don't just call clear() here
+   MfList entries;
+   entries.swap(m_MfList);
 }
 
 MfCloseEntry *MfCloser::GetCloseEntry(MailFolderCmn *mf) const
 {
-   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
+   for ( const auto& entry : m_MfList )
    {
-      if ( i->Matches(mf) )
+      if ( entry->Matches(mf) )
       {
-         return *i;
+         return entry.get();
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 
 void MfCloser::RestartTimer()
@@ -525,7 +512,7 @@ void MailFolderCmn::Close(bool /* mayLinger */)
 
       m_headers->DecRef();
 
-      m_headers = NULL;
+      m_headers = nullptr;
    }
 
    if ( m_keepAliveTimer )
@@ -647,17 +634,17 @@ MailFolderCmn::RealDecRef()
 
 MailFolderCmn::MailFolderCmn()
 {
-   m_keepAliveTimer = NULL;
+   m_keepAliveTimer = nullptr;
 
    m_suspendUpdates = 0;
 
-   m_headers = NULL;
+   m_headers = nullptr;
 
-   m_frame = NULL;
+   m_frame = nullptr;
    m_shouldKeepAlive = false;
 
-   m_statusChangeData = NULL;
-   m_expungeData = NULL;
+   m_statusChangeData = nullptr;
+   m_expungeData = nullptr;
 
    m_msgnoLastNotified = MSGNO_ILLEGAL;
 
@@ -767,16 +754,16 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
 
    // truncate the file
    wxFile file;
-   if ( !file.Create(fileName, TRUE /* overwrite */) )
+   if ( !file.Create(fileName, true /* overwrite */) )
    {
       wxLogError(_("Could not truncate the existing file."));
       return false;
    }
 
    // save the messages
-   int n = selections->Count();
+   int n = selections->size();
 
-   scoped_ptr<MProgressDialog> pd;
+   std::unique_ptr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(GetProfile());
 
    if ( threshold > 0 && n > threshold )
@@ -833,7 +820,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   int n = selections->Count();
+   int n = selections->size();
    CHECK( n, true, _T("SaveMessages(): nothing to save") );
 
    MailFolder_obj mf(MailFolder::OpenFolder(folder, Normal, m_frame));
@@ -852,7 +839,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   scoped_ptr<MProgressDialog> pd;
+   std::unique_ptr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(mf->GetProfile());
 
    if ( threshold > 0 && n > threshold )
@@ -871,7 +858,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    // minimize the number of updates by only doing it once
-   SuspendFolderUpdates suspend(mf);
+   SuspendFolderUpdates suspend(mf.get());
 
    bool rc = true;
    for ( int i = 0; i < n; i++ )
@@ -928,9 +915,9 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
                              const MailFolder::Params& params,
                              wxWindow *parent)
 {
-   Composer *composer = NULL;
+   Composer *composer = nullptr;
 
-   int n = selections->Count();
+   int n = selections->size();
    for( int i = 0; i < n; i++ )
    {
       Message *msg = GetMessage((*selections)[i]);
@@ -951,9 +938,9 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
                                const MailFolder::Params& params,
                                wxWindow *parent)
 {
-   Composer *composer = NULL;
+   Composer *composer = nullptr;
 
-   int n = selections->Count();
+   int n = selections->size();
    for ( int i = 0; i < n; i++ )
    {
       Message *msg = GetMessage((*selections)[i]);
@@ -975,7 +962,7 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
 {
    HeaderInfoList_obj hil(GetHeaders());
-   CHECK( hil, NULL, _T("no listing in SearchMessages") );
+   CHECK( hil, nullptr, _T("no listing in SearchMessages") );
 
    // the search results
    UIdArray *results = new UIdArray;
@@ -983,7 +970,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
    // how many did we find?
    unsigned long countFound = 0;
 
-   MProgressDialog *progDlg = NULL;
+   MProgressDialog *progDlg = nullptr;
 
    MsgnoType nMessages = GetMessageCount();
 
@@ -1055,11 +1042,11 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
          }
       }
 
-      bool found = wxStrstr(what, crit->m_Key) != NULL;
+      bool found = wxStrstr(what, crit->m_Key) != nullptr;
       if ( found != crit->m_Invert )
       {
          // really found, remember its UID or msgno depending on the flags
-         results->Add(flags & SEARCH_UID ? hi->GetUId() : idx + 1);
+         results->push_back(flags & SEARCH_UID ? hi->GetUId() : idx + 1);
       }
 
       // update the progress dialog and check for abort
@@ -1068,7 +1055,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
          String msg;
          msg.Printf(_("Searching in %lu messages..."), nMessages);
 
-         unsigned long cnt = results->Count();
+         unsigned long cnt = results->size();
          if ( cnt != countFound )
          {
             String msg2;
@@ -1323,7 +1310,7 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
    qsort(msgnos, count, sizeof(MsgnoType), SortComparisonFunction);
 
    // don't leave dangling pointers around
-   gs_SortData.hil = NULL;
+   gs_SortData.hil = nullptr;
 
    return true;
 }
@@ -1528,7 +1515,7 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 bool
 MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
 {
-   int n = selections->Count();
+   int n = selections->size();
    int i;
    bool rc = true;
    for(i = 0; i < n; i++)
@@ -1553,7 +1540,7 @@ bool
 MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections,
                                      int flags)
 {
-   CHECK( CanDeleteMessagesInFolder(GetType()), FALSE,
+   CHECK( CanDeleteMessagesInFolder(GetType()), false,
           _T("can't delete messages in this folder") );
 
    // we can either delete the messages by moving them to the trash folder and
@@ -1591,14 +1578,14 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections,
          //       afterwards: see bug 653 at
          //
          //       http://mahogany.sourceforge.net/cgi-bin/show_bug.cgi?id=653
-         rc = DeleteMessages(selections, TRUE /* expunge */);
+         rc = DeleteMessages(selections, true /* expunge */);
       }
 
    }
    else // delete in place
    {
       // delete without expunging
-      rc = DeleteMessages(selections, FALSE /* don't expunge */);
+      rc = DeleteMessages(selections, false /* don't expunge */);
    }
 
    return rc;
@@ -1664,11 +1651,11 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
    CHECK( filterRule, false, _T("FilterNewMail: NULL filter") );
 
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(%zu msgs)"),
-              GetName(), uidsNew.GetCount());
+              GetName(), uidsNew.size());
 
    // we're almost surely going to look at all new messages, so pre-cache them
    // all at once
-   CacheLastMessages(uidsNew.GetCount());
+   CacheLastMessages(uidsNew.size());
 
    // apply the filters finally
    int rc = filterRule->Apply(this, uidsNew);
@@ -1705,7 +1692,7 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
 
    // some messages could have been deleted by filters
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(): %zu msgs left"),
-              GetName(), uidsNew.GetCount());
+              GetName(), uidsNew.size());
 
    return true;
 }
@@ -1796,7 +1783,7 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
          mf->DecRef();
 
          // important for test below
-         mf = NULL;
+         mf = nullptr;
 
          ok = true;
       }
@@ -1813,7 +1800,7 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
       if ( !ok || !mf )
          return ok;
 
-      if ( uidsNew->IsEmpty() )
+      if ( uidsNew->empty() )
       {
          // all new mail was deleted by the filters, nothing more to do
          return true;
@@ -1861,7 +1848,7 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
          return false;
       }
 
-      if ( uidsNew->IsEmpty() )
+      if ( uidsNew->empty() )
       {
          // we moved everything elsewhere, nothing left
          return true;
@@ -1886,7 +1873,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
 {
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ProcessNewMail(%zu msgs) for %s",
               GetName(),
-              uidsNew.GetCount(),
+              uidsNew.size(),
               folderDst ? folderDst->GetFullName() : wxString("ourselves"));
 
    // use the settings for the folder where the new mail is!
@@ -1921,7 +1908,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
    return DoProcessNewMail
           (
             folderWithNewMail,
-            folderDst ? NULL : this,   // folder where new mail is
+            folderDst ? nullptr : this,   // folder where new mail is
             &uidsNew,
             0,                         // count of new messages is unused
             this                       // folder contains UIDs from uidsNew
@@ -1939,7 +1926,7 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
 
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::CollectNewMail(%zu msgs) (%s)"),
               GetName(),
-              uidsNew.GetCount(),
+              uidsNew.size(),
               move ? "moving" : "copying");
 
    if ( !SaveMessages(&uidsNew, newMailFolder) )
@@ -1959,7 +1946,7 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
       DeleteMessages(&uidsNew, true);
 
       // no new mail left here
-      uidsNew.Clear();
+      uidsNew.clear();
    }
 
    return true;
@@ -1992,7 +1979,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
 
    // the count is only given if the array itself is not
    if ( uidsNew )
-      countNew = uidsNew->GetCount();
+      countNew = uidsNew->size();
 
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ReportNewMail(%lu msgs) (folder is %s)"),
               folder->GetFullName(),
@@ -2037,7 +2024,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
          flags |= SND_FILENAME;
       }
 
-      if ( !::PlaySound(sound, NULL, flags) )
+      if ( !::PlaySound(sound, nullptr, flags) )
 #elif defined(OS_UNIX) || defined(__CYGWIN__)
       String soundCmd = READ_CONFIG(profile, MP_NEWMAIL_SOUND_PROGRAM);
 
@@ -2109,7 +2096,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
 
                for ( unsigned long i = 0; i < countNew; i++)
                {
-                  Message_obj msg(mf->GetMessage(uidsNew->Item(i)));
+                  Message_obj msg(mf->GetMessage((*uidsNew)[i]));
                   if ( msg )
                   {
                      infos.push_back(
@@ -2120,7 +2107,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                   {
                      // this may happen if another session deleted it
                      wxLogDebug(_T("New message %lu disappeared from folder '%s'"),
-                                uidsNew->Item(i),
+                                (*uidsNew)[i],
                                 folder->GetFullName());
                   }
                }
@@ -2356,7 +2343,7 @@ MailFolderCmn::SendMsgStatusChangeEvent()
    MEventManager::Send(new MEventMsgStatusData(this, m_statusChangeData));
 
    // MEventMsgStatusData will delete them
-   m_statusChangeData = NULL;
+   m_statusChangeData = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -2369,7 +2356,7 @@ void MailFolderCmn::DiscardExpungeData()
    {
       delete m_expungeData;
 
-      m_expungeData = NULL;
+      m_expungeData = nullptr;
    }
 }
 
@@ -2419,7 +2406,7 @@ void MailFolderCmn::RequestUpdateAfterExpunge()
    }
 
    // MEventFolderExpungeData() will delete the data
-   m_expungeData = NULL;
+   m_expungeData = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -2437,7 +2424,7 @@ wxFrame *MailFolderCmn::SetInteractiveFrame(wxFrame *frame)
    // we still keep the flag set to true as the user may return to this folder
    // in the UI and doesn't expect it to close because of inactivity in the
    // meanwhile
-   if ( m_frame != NULL && !m_shouldKeepAlive )
+   if ( m_frame != nullptr && !m_shouldKeepAlive )
    {
       m_shouldKeepAlive = true;
 
@@ -2455,7 +2442,7 @@ wxFrame *MailFolderCmn::SetInteractiveFrame(wxFrame *frame)
 wxFrame *MailFolderCmn::GetInteractiveFrame() const
 {
    // no interactivity at all in away mode
-   return mApplication->IsInAwayMode() ? NULL : m_frame;
+   return mApplication->IsInAwayMode() ? nullptr : m_frame;
 }
 
 // ----------------------------------------------------------------------------
@@ -2514,7 +2501,7 @@ void MailFolderCmnCleanup()
       // any MailFolderCmn::DecRef() shouldn't add folders to
       // gs_MailFolderCloser from now on, so NULL it immediately
       MfCloser *mfCloser = gs_MailFolderCloser;
-      gs_MailFolderCloser = NULL;
+      gs_MailFolderCloser = nullptr;
 
       delete mfCloser;
    }

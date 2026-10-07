@@ -87,7 +87,7 @@ bool Message::GetHeaderLine(const String& line,
 {
    const char *headers[2];
    headers[0] = line.c_str();
-   headers[1] = NULL;
+   headers[1] = nullptr;
 
    wxArrayString values;
    if ( encoding )

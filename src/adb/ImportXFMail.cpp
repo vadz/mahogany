@@ -44,16 +44,16 @@ public:
    AdbXFMailImporter() { }
 
    // implement base class pure virtuals
-   virtual String GetDefaultFilename() const;
-   virtual bool CanImport(const String& filename);
-   virtual bool StartImport(const String& filename);
-   virtual size_t GetEntryNames(const String& path,
-                                wxArrayString& entries) const;
-   virtual size_t GetGroupNames(const String& path,
-                                wxArrayString& groups) const;
-   virtual bool ImportEntry(const String& path,
-                            size_t index,
-                            AdbEntry *entry);
+   String GetDefaultFilename() const override;
+   bool CanImport(const String& filename) override;
+   bool StartImport(const String& filename) override;
+   size_t GetEntryNames(const String& path,
+                        wxArrayString& entries) const override;
+   size_t GetGroupNames(const String& path,
+                        wxArrayString& groups) const override;
+   bool ImportEntry(const String& path,
+                    size_t index,
+                    AdbEntry *entry) override;
 
    DECLARE_ADB_IMPORTER();
 
@@ -120,13 +120,13 @@ bool AdbXFMailImporter::StartImport(const String& filename)
    if ( filename == m_textfile.GetName() )
    {
       // already loaded
-      return TRUE;
+      return true;
    }
 
    if ( !CanImport(filename) )
    {
       // don't even try
-      return FALSE;
+      return false;
    }
 
    // so that ImportEntry() won't try to use old, invalid data if it's
@@ -148,7 +148,7 @@ AdbXFMailImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
    wxArrayInt& lineNumbers = (wxArrayInt &)m_lineNumbers; // const_cast
    lineNumbers.Empty();
 
-   bool newEntry = FALSE;
+   bool newEntry = false;
    size_t nLines = m_textfile.GetLineCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
@@ -162,7 +162,7 @@ AdbXFMailImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
       if ( line[0u] == '@' )
       {
          // this is the entry separator
-         newEntry = TRUE;
+         newEntry = true;
 
          continue;
       }
@@ -196,7 +196,7 @@ AdbXFMailImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
          entries.Add(nickname);
 
          // if there are any additional lines, we will ignore them
-         newEntry = FALSE;
+         newEntry = false;
       }
       //else: some unknown line, silently ignore it
    }
@@ -218,18 +218,18 @@ bool AdbXFMailImporter::ImportEntry(const String& /* path */,
                                     size_t index,
                                     AdbEntry *entry)
 {
-   CHECK( index < m_lineNumbers.GetCount(), FALSE, _T("invalid entry index") );
+   CHECK( index < m_lineNumbers.GetCount(), false, _T("invalid entry index") );
 
    wxString line = m_textfile.GetLine((size_t)m_lineNumbers[index]);
    if ( !line )
    {
       // hmm... empty address book entry?
-      return FALSE;
+      return false;
    }
 
    // start from the end and take as the email address everything between <>
    // or the whole string (may be there is no address at all)
-   int nStart = line.Find('<', TRUE);
+   int nStart = line.Find('<', true);
    size_t nLen = line.Len();
    if ( nStart == wxNOT_FOUND )
    {
@@ -253,6 +253,6 @@ bool AdbXFMailImporter::ImportEntry(const String& /* path */,
    // XFMail stores only the nickname and the email address
    entry->SetField(AdbField_EMail, email);
 
-   return TRUE;
+   return true;
 }
 

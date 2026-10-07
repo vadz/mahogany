@@ -122,7 +122,7 @@ public:
     */
    static bool IsInList(const wxArrayString& addresses,
                         const String& address,
-                        String *match = NULL);
+                        String *match = nullptr);
 
    /**
        Returns user-friendly address form.
@@ -202,12 +202,8 @@ private:
    GCC_DTOR_WARN_OFF
 };
 
-/// declare AddressList_obj class, smart reference to AddressList
-BEGIN_DECLARE_AUTOPTR(AddressList);
-public:
-   AddressList_obj(const String& address, const String& defhost = wxEmptyString)
-      { m_ptr = AddressList::Create(address, defhost); }
-END_DECLARE_AUTOPTR();
+/// smart reference to AddressList
+using AddressList_obj = DecRefPtr<AddressList>;
 
 /// declare global comparison operator for addresses
 extern bool operator==(const AddressList_obj& addrList1,
@@ -227,7 +223,7 @@ extern bool operator==(const AddressList_obj& addrList1,
  */
 extern bool ContainsOwnAddress(const String& str,
                                Profile *profile,
-                               String *own = NULL);
+                               String *own = nullptr);
 
 #endif // _ADDRESS_H_
 

@@ -49,16 +49,16 @@ public:
    AdbPineImporter() { }
 
    // implement base class pure virtuals
-   virtual bool CanImport(const String& filename);
-   virtual bool StartImport(const String& filename);
-   virtual size_t GetEntryNames(const String& path,
-                                wxArrayString& entries) const;
-   virtual size_t GetGroupNames(const String& path,
-                                wxArrayString& groups) const;
-   virtual bool ImportEntry(const String& path,
-                            size_t index,
-                            AdbEntry *entry);
-   virtual String GetDefaultFilename() const;
+   bool CanImport(const String& filename) override;
+   bool StartImport(const String& filename) override;
+   size_t GetEntryNames(const String& path,
+                        wxArrayString& entries) const override;
+   size_t GetGroupNames(const String& path,
+                        wxArrayString& groups) const override;
+   bool ImportEntry(const String& path,
+                    size_t index,
+                    AdbEntry *entry) override;
+   String GetDefaultFilename() const override;
 
    DECLARE_ADB_IMPORTER();
 
@@ -79,7 +79,7 @@ protected:
    // mailing list.
    size_t SplitMailingListAddresses(const wxString& addresses,
                                     wxArrayString *nicks,
-                                    wxArrayString *emails = NULL) const;
+                                    wxArrayString *emails = nullptr) const;
 
    // parses one addressbook file entry (it may be one or more lines), returns
    // FALSE if the syntax is invalid (although most errors are just silently
@@ -88,10 +88,10 @@ protected:
    // line is continued and corresponds to the index of the last continuation
    // line in the file.
    bool ParsePineADBEntry(size_t *index,
-                          wxString *nickname = NULL,
-                          wxString *addresses = NULL,
-                          wxString *fullname = NULL,
-                          wxString *comment = NULL) const;
+                          wxString *nickname = nullptr,
+                          wxString *addresses = nullptr,
+                          wxString *fullname = nullptr,
+                          wxString *comment = nullptr) const;
 
    // ParsePineADBEntry helper: checks whether the entry in line "*index"
    // continues to the next line: if it does, return TRUE and change index and
@@ -148,7 +148,7 @@ wxString AdbPineImporter::ExtractField(size_t *index,
    wxString field;
    const wxChar *pc = *ppc;
 
-   bool cont = TRUE;
+   bool cont = true;
 
    while ( cont )
    {
@@ -157,7 +157,7 @@ wxString AdbPineImporter::ExtractField(size_t *index,
          field += *pc++;
       }
 
-      cont = FALSE;
+      cont = false;
 
       // the mailing list addresses field may be split on several lines at
       // commas - check for this
@@ -168,7 +168,7 @@ wxString AdbPineImporter::ExtractField(size_t *index,
 
          if ( CheckHasNextField(index, line, &pc) )
          {
-            cont = TRUE;
+            cont = true;
          }
          else
          {
@@ -198,7 +198,7 @@ bool AdbPineImporter::CheckHasNextField(size_t *index,
                    index,
                    m_textfile.GetName());
 
-      return FALSE;
+      return false;
    }
 
    // skip '\t'
@@ -216,12 +216,12 @@ bool AdbPineImporter::CheckHasNextField(size_t *index,
          if ( wxStrncmp(lineNext, _T("   "), 3) == 0 )
          {
             // yes, this entry is continued on the next line
-            continued = TRUE;
+            continued = true;
          }
          else
          {
             // no, next line doesn't start with the continuation prefix
-            continued = FALSE;
+            continued = false;
          }
 
          *index = n;
@@ -231,7 +231,7 @@ bool AdbPineImporter::CheckHasNextField(size_t *index,
       else
       {
          // can't be continued because this was the last line of the file
-         continued = FALSE;
+         continued = false;
       }
 
       if ( !continued )
@@ -242,13 +242,13 @@ bool AdbPineImporter::CheckHasNextField(size_t *index,
                       index,
                       m_textfile.GetName());
 
-         return FALSE;
+         return false;
       }
    }
 
    *ppc = pc;
 
-   return TRUE;
+   return true;
 }
 
 bool AdbPineImporter::ParsePineADBEntry(size_t *index,
@@ -279,7 +279,7 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
       // this is not the start of an entry
       wxLogWarning(_("Unrecognized address book entry '%s'."), pc);
 
-      return FALSE;
+      return false;
    }
 
    wxString tmp ;
@@ -290,7 +290,7 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
       *nickname = tmp;
 
    if ( !CheckHasNextField(index, &line, &pc) )
-      return FALSE;
+      return false;
 
    // extract fullname?
    tmp = ExtractField(index, &line, &pc);
@@ -298,7 +298,7 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
       *fullname = tmp;
 
    if ( !CheckHasNextField(index, &line, &pc) )
-      return FALSE;
+      return false;
 
    // extract addresses
    tmp = ExtractField(index, &line, &pc);
@@ -326,7 +326,7 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 size_t AdbPineImporter::GetEntriesOrGroups(wxArrayString& names,
@@ -398,7 +398,7 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
 
    wxString addresses;
    size_t indexLine = m_groupLineNumbers[(size_t)indexGroup];
-   if ( !ParsePineADBEntry(&indexLine, NULL, &addresses) )
+   if ( !ParsePineADBEntry(&indexLine, nullptr, &addresses) )
    {
       return wxEmptyString;
    }
@@ -495,7 +495,7 @@ bool AdbPineImporter::CanImport(const String& filename)
       if ( !m_textfile.Open(filename) )
       {
          // failed to read, so how will we import it?
-         return FALSE;
+         return false;
       }
 
       // disable the log messages - we're only testing
@@ -517,12 +517,12 @@ bool AdbPineImporter::CanImport(const String& filename)
       if ( nEntriesOk < wxMax(nEntry / 2, 1) )
       {
          // too few good entries
-         return FALSE;
+         return false;
       }
    }
    //else: we already loaded it, hence it's ok
 
-   return TRUE;
+   return true;
 }
 
 bool AdbPineImporter::StartImport(const String& filename)
@@ -530,17 +530,17 @@ bool AdbPineImporter::StartImport(const String& filename)
    if ( m_textfile.GetName() == filename )
    {
       // already have it
-      return TRUE;
+      return true;
    }
 
    if ( !CanImport(filename) )
    {
       // don't even try
-      return FALSE;
+      return false;
    }
 
    // file already loaded by CanImport()
-   return TRUE;
+   return true;
 }
 
 size_t AdbPineImporter::GetEntryNames(const String& path,
@@ -548,7 +548,7 @@ size_t AdbPineImporter::GetEntryNames(const String& path,
 {
    if ( !path )
    {
-      return GetEntriesOrGroups(entries, TRUE /* entries */);
+      return GetEntriesOrGroups(entries, true /* entries */);
    }
    else
    {
@@ -566,7 +566,7 @@ size_t AdbPineImporter::GetGroupNames(const String& path,
 {
    if ( !path )
    {
-      return GetEntriesOrGroups(groups, FALSE /* groups */);
+      return GetEntriesOrGroups(groups, false /* groups */);
    }
    else
    {
@@ -584,7 +584,7 @@ bool AdbPineImporter::ImportEntry(const String& path,
    if ( !path )
    {
       // a top level entry
-      CHECK( index < m_entriesLineNumbers.GetCount(), FALSE,
+      CHECK( index < m_entriesLineNumbers.GetCount(), false,
              _T("invalid entry index") );
 
       size_t nLine = m_entriesLineNumbers[index];
@@ -592,7 +592,7 @@ bool AdbPineImporter::ImportEntry(const String& path,
       wxString email, fullname, comment;
       if ( !ParsePineADBEntry(&nLine, &nickname, &email, &fullname, &comment) )
       {
-         return FALSE;
+         return false;
       }
 
       entry->SetField(AdbField_EMail, email);
@@ -604,13 +604,13 @@ bool AdbPineImporter::ImportEntry(const String& path,
       // this is an entry from the mailing list
       wxString addresses = GetAddressesOfGroup(path);
       if ( !addresses )
-         return FALSE;
+         return false;
 
       // split all addresses
       wxArrayString nicks, emails;
       size_t count = SplitMailingListAddresses(addresses, &nicks, &emails);
 
-      CHECK( index < count, FALSE, _T("invalid entry index") );
+      CHECK( index < count, false, _T("invalid entry index") );
 
 #ifdef DEBUG
       nickname = nicks[index];
@@ -627,7 +627,7 @@ bool AdbPineImporter::ImportEntry(const String& path,
    ASSERT_MSG( nickname == nickReal, _T("wrong index or wrong entry") );
 #endif // DEBUG
 
-   return TRUE;
+   return true;
 }
 
 String AdbPineImporter::GetDefaultFilename() const

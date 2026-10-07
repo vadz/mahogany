@@ -196,8 +196,8 @@ public:
 
    // override base class virtual to implement saving the frame position and
    // to update the MP_SHOWLOG option
-   virtual bool OnFrameClose(wxFrame *frame);
-   virtual void OnFrameDelete(wxFrame *frame);
+   bool OnFrameClose(wxFrame *frame) override;
+   void OnFrameDelete(wxFrame *frame) override;
 
    // are we currently shown?
    bool IsShown() const;
@@ -224,12 +224,12 @@ private:
 class AutoSaveTimer : public wxTimer
 {
 public:
-   AutoSaveTimer() { m_started = FALSE; }
+   AutoSaveTimer() { m_started = false; }
 
-   virtual bool Start( int millisecs = -1, bool oneShot = FALSE )
-      { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
+   bool Start( int millisecs = -1, bool oneShot = false ) override
+      { m_started = true; return wxTimer::Start(millisecs, oneShot); }
 
-   virtual void Notify()
+   void Notify() override
    {
       if ( !mApplication->AllowBgProcessing() )
          return;
@@ -239,7 +239,7 @@ public:
       (void)SaveAll();
    }
 
-   virtual void Stop()
+   void Stop() override
       { if ( m_started ) wxTimer::Stop(); }
 
 public:
@@ -255,7 +255,7 @@ class MailCollectionTimer : public wxTimer
 public:
    MailCollectionTimer() { }
 
-   virtual void Notify();
+   void Notify() override;
 
 private:
    DECLARE_NO_COPY_CLASS(MailCollectionTimer)
@@ -268,7 +268,7 @@ class IdleTimer : public wxTimer
 public:
    IdleTimer() : wxTimer() { Start(100); }
 
-   virtual void Notify() { wxWakeUpIdle(); }
+   void Notify() override { wxWakeUpIdle(); }
 
 private:
    DECLARE_NO_COPY_CLASS(IdleTimer)
@@ -280,11 +280,11 @@ class AwayTimer : public wxTimer
 public:
    AwayTimer() { }
 
-   virtual void Notify()
+   void Notify() override
    {
       wxLogTrace(TRACE_TIMER, _T("Going away on timer"));
 
-      mApplication->SetAwayMode(TRUE);
+      mApplication->SetAwayMode(true);
    }
 
 private:
@@ -297,7 +297,7 @@ static struct WatchDog
 {
    WatchDog()
    {
-      HANDLE hThread = ::CreateThread(NULL, 0, &WatchDog::Run, 0, 0, NULL);
+      HANDLE hThread = ::CreateThread(nullptr, 0, &WatchDog::Run, 0, 0, nullptr);
       if ( hThread )
       {
          ::CloseHandle(hThread);
@@ -306,7 +306,7 @@ static struct WatchDog
 
    static DWORD WINAPI Run(void *)
    {
-      HANDLE hEvent = ::CreateEvent(NULL, FALSE, FALSE, _T("Mahogany_Die"));
+      HANDLE hEvent = ::CreateEvent(nullptr, false, false, _T("Mahogany_Die"));
       if ( !hEvent )
          return (DWORD)-1;
 
@@ -327,13 +327,13 @@ static struct WatchDog
 // ----------------------------------------------------------------------------
 
 // a (unique) autosave timer instance
-static AutoSaveTimer *gs_timerAutoSave = NULL;
+static AutoSaveTimer *gs_timerAutoSave = nullptr;
 
 // a (unique) timer for polling for new mail
-static MailCollectionTimer *gs_timerMailCollection = NULL;
+static MailCollectionTimer *gs_timerMailCollection = nullptr;
 
 // the timer for auto going into away mode: may be NULL
-static AwayTimer *gs_timerAway = NULL;
+static AwayTimer *gs_timerAway = nullptr;
 
 typedef std::list<MModule *> ModulesList;
 
@@ -373,7 +373,7 @@ void MailCollectionTimer::Notify()
 // ----------------------------------------------------------------------------
 
 wxMLogWindow::wxMLogWindow(wxFrame *pParent, const wxChar *szTitle)
-            : wxLogWindow(pParent, szTitle, FALSE)
+            : wxLogWindow(pParent, szTitle, false)
 {
    int x, y, w, h;
    bool i;
@@ -422,7 +422,7 @@ bool wxMLogWindow::OnFrameClose(wxFrame *frame)
                  "Choose \"Yes\" to close the log window just for this session,\n"
                  "\"No\" - to permanently close it or \"Cancel\" to not close\n"
                  "the log window at all."),
-               NULL,
+               nullptr,
                MDIALOG_YESNOTITLE,
                M_DLG_YES_DEFAULT,
                M_MSGBOX_SHOWLOGWINHINT
@@ -488,7 +488,7 @@ class MDebugReport : public wxDebugReportCompress
 public:
    MDebugReport(const wxChar *msg)
    {
-      AddAll(msg == NULL ? Context_Exception : Context_Current);
+      AddAll(msg == nullptr ? Context_Exception : Context_Current);
 
       if ( msg )
       {
@@ -501,12 +501,12 @@ public:
    }
 
 protected:
-   virtual bool DoProcess()
+   bool DoProcess() override
    {
       if ( !wxDebugReportCompress::DoProcess() )
          return false;
 
-      Profile *profile = mApplication ? mApplication->GetProfile() : NULL;
+      Profile *profile = mApplication ? mApplication->GetProfile() : nullptr;
 
       if ( profile )
       {
@@ -542,15 +542,15 @@ protected:
          // notice that more and more mail servers (including the one at
          // sf.net) block attachments with .zip extension, so use another one
          MimeParameterList paramsDisp;
-         paramsDisp.push_back(new MimeParameter
-                                  (
-                                    _T("FILENAME"),
-                                    wxString::Format
-                                    (
-                                       _T("M-%s-debugrpt.mz"),
-                                       M_VERSION
-                                    )
-                                  ));
+         paramsDisp.emplace_back
+                    (
+                      _T("FILENAME"),
+                      wxString::Format
+                      (
+                         _T("M-%s-debugrpt.mz"),
+                         M_VERSION
+                      )
+                    );
          sm->AddPart(MimeType::APPLICATION, buf, len,
                      _T("X-ZIP-COMPRESSED"), _T("ATTACHMENT"),
                      &paramsDisp);
@@ -573,29 +573,29 @@ protected:
 
 wxMApp::wxMApp(void)
 {
-   m_IconManager = NULL;
-   m_HelpController = NULL;
-   m_CanClose = FALSE;
-   m_IdleTimer = NULL;
+   m_IconManager = nullptr;
+   m_HelpController = nullptr;
+   m_CanClose = false;
+   m_IdleTimer = nullptr;
 
 #ifdef USE_DIALUP
-   m_OnlineManager = NULL;
-   m_DialupSupport = FALSE;
+   m_OnlineManager = nullptr;
+   m_DialupSupport = false;
 #endif // USE_DIALUP
 
-   m_PrintData = NULL;
-   m_PageSetupData = NULL;
+   m_PrintData = nullptr;
+   m_PageSetupData = nullptr;
 
-   m_logWindow = NULL;
-   m_logChain = NULL;
+   m_logWindow = nullptr;
+   m_logChain = nullptr;
 
-   m_snglInstChecker = NULL;
-   m_serverIPC = NULL;
+   m_snglInstChecker = nullptr;
+   m_serverIPC = nullptr;
 
-   m_topLevelFrame = NULL;
+   m_topLevelFrame = nullptr;
 
 #ifdef USE_I18N
-   m_Locale = NULL;
+   m_Locale = nullptr;
 #endif // USE_I18N
 
    // this is used for the titles of the message boxess generated by wxWindows
@@ -722,7 +722,7 @@ FatalMsgBox(const String& msg)
    // using a plain message box is safer in this situation, but under Unix we
    // have no such choice
 #ifdef __WXMSW__
-   ::MessageBox(NULL, msg, wxGetTranslation(title), MB_ICONSTOP);
+   ::MessageBox(nullptr, msg, wxGetTranslation(title), MB_ICONSTOP);
 #else // !MSW
    wxMessageBox(msg, wxGetTranslation(title), wxICON_STOP | wxOK);
 #endif // MSW/!MSW
@@ -834,7 +834,7 @@ wxMApp::CanClose() const
    String path = GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT);
    if ( wxPMessageBoxIsDisabled(path) )
    {
-      if ( !MDialog_YesNoDialog(wxEmptyString, NULL, wxEmptyString,
+      if ( !MDialog_YesNoDialog(wxEmptyString, nullptr, wxEmptyString,
                                 M_DLG_NO_DEFAULT, M_MSGBOX_CONFIRM_EXIT) )
       {
          wxLogDebug(_T("Exit confirmation msg box has been disabled on [No], reenabling it."));
@@ -914,7 +914,7 @@ wxMApp::OnClose()
    if ( m_IdleTimer )
    {
       delete m_IdleTimer;
-      m_IdleTimer = NULL;
+      m_IdleTimer = nullptr;
    }
 
    // flush the logs while we can
@@ -940,7 +940,7 @@ wxMApp::OnClose()
          wxMFrame *frame = (wxMFrame *)win;
 
          // force closing the frame
-         frame->Close(TRUE);
+         frame->Close(true);
       }
    }
 #endif // 0
@@ -1080,7 +1080,7 @@ wxMApp::OnInit()
          if ( !m_Locale->IsOk() )
          {
             delete m_Locale;
-            m_Locale = NULL;
+            m_Locale = nullptr;
 
             failedToSetLocale = true;
          }
@@ -1101,7 +1101,7 @@ wxMApp::OnInit()
             // the program directory is not initialized yet so we can't do much
             // more than looking in the current directory...
             wxString strPath;
-            ::GetModuleFileName(NULL, wxStringBuffer(strPath, MAX_PATH), MAX_PATH);
+            ::GetModuleFileName(nullptr, wxStringBuffer(strPath, MAX_PATH), MAX_PATH);
 
             // get just the path
             wxString strDir = wxFileName(strPath).GetPath();
@@ -1131,7 +1131,7 @@ wxMApp::OnInit()
             {
                // better use English messages if msg catalog was not found
                delete m_Locale;
-               m_Locale = NULL;
+               m_Locale = nullptr;
 
                failedToLoadMsgs = true;
             }
@@ -1166,7 +1166,7 @@ wxMApp::OnInit()
    // run for the first time and show a modal dialog before opening the main
    // frame - if we don't do it, when the dialog (which is the last app window
    // at this moment) disappears, the app will close.
-   SetExitOnFrameDelete(FALSE);
+   SetExitOnFrameDelete(false);
 
    // create timers -- are accessed by OnStartup()
    gs_timerAutoSave = new AutoSaveTimer;
@@ -1243,7 +1243,7 @@ wxMApp::OnInit()
    m_IdleTimer = new IdleTimer;
 
    // restore the normal behaviour (see the comments above)
-   SetExitOnFrameDelete(TRUE);
+   SetExitOnFrameDelete(true);
 
 #ifdef USE_DIALUP
    // reflect settings in menu and statusbar:
@@ -1284,14 +1284,14 @@ void wxMApp::DoCleanup()
    if ( m_snglInstChecker )
    {
       delete m_snglInstChecker;
-      m_snglInstChecker = NULL;
+      m_snglInstChecker = nullptr;
    }
 
    // no more IPC for us neither
    if ( m_serverIPC )
    {
       delete m_serverIPC;
-      m_serverIPC = NULL;
+      m_serverIPC = nullptr;
    }
 
    // if one timer was created, then all of them were
@@ -1302,9 +1302,9 @@ void wxMApp::DoCleanup()
       delete gs_timerMailCollection;
       delete gs_timerAway;
 
-      gs_timerAutoSave = NULL;
-      gs_timerMailCollection = NULL;
-      gs_timerAway = NULL;
+      gs_timerAutoSave = nullptr;
+      gs_timerMailCollection = nullptr;
+      gs_timerAway = nullptr;
    }
 
    CleanUpPrintData();
@@ -1329,14 +1329,14 @@ void wxMApp::DoCleanup()
    if ( m_IconManager )
    {
       delete m_IconManager;
-      m_IconManager = NULL;
+      m_IconManager = nullptr;
    }
 
 #ifdef USE_I18N
    if ( m_Locale )
    {
       delete m_Locale;
-      m_Locale = NULL;
+      m_Locale = nullptr;
    }
 #endif // USE_I18N
 
@@ -1344,7 +1344,7 @@ void wxMApp::DoCleanup()
    if ( m_OnlineManager )
    {
       delete m_OnlineManager;
-      m_OnlineManager = NULL;
+      m_OnlineManager = nullptr;
    }
 #endif // USE_DIALUP
 
@@ -1393,7 +1393,7 @@ void wxMApp::CleanUpPrintData()
       m_profile->writeEntry(MP_PRINT_COLOUR, m_PrintData->GetColour());
 
       delete m_PrintData;
-      m_PrintData = NULL;
+      m_PrintData = nullptr;
    }
 
    if ( m_PageSetupData )
@@ -1408,7 +1408,7 @@ void wxMApp::CleanUpPrintData()
                             m_PageSetupData->GetMarginBottomRight().y);
 
       delete m_PageSetupData;
-      m_PageSetupData = NULL;
+      m_PageSetupData = nullptr;
    }
 #endif // wxUSE_PRINTING_ARCHITECTURE
 }
@@ -1569,7 +1569,7 @@ bool wxMApp::InitHelp()
       {
          // failed
          delete m_HelpController;
-         m_HelpController = NULL;
+         m_HelpController = nullptr;
 
          // ask the user if we want to look elsewhere?
          wxString msg;
@@ -1580,7 +1580,7 @@ bool wxMApp::InitHelp()
                       "location (otherwise help will be unavailable)?"),
                     helpdir);
 
-         if ( !MDialog_YesNoDialog(msg, NULL, _("Mahogany Help")) )
+         if ( !MDialog_YesNoDialog(msg, nullptr, _("Mahogany Help")) )
          {
             // can't do anything more
             return false;
@@ -1856,7 +1856,7 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what, bool
 #endif
    )
 {
-   wxMutex *which = NULL;
+   wxMutex *which = nullptr;
    switch(what)
    {
    case GUI:
@@ -1892,7 +1892,7 @@ wxWindow *wxMApp::GetTopWindow() const
 {
    wxWindow *win = wxApp::GetTopWindow();
    if ( win == g_pSplashScreen )
-      win = NULL;
+      win = nullptr;
 
    return win;
 }
@@ -1910,7 +1910,7 @@ wxMApp::GetStdIcon(int UNUSED_IF_WIN(which)) const
    public:
       ConfigPathRestorer()
          {
-            m_profile = mApplication ? mApplication->GetProfile() : NULL;
+            m_profile = mApplication ? mApplication->GetProfile() : nullptr;
             if ( m_profile )
                m_path = m_profile->GetConfig()->GetPath();
          }
@@ -1998,7 +1998,7 @@ wxMApp::OnConnected(wxDialUpEvent&)
 {
    if(! m_DialupSupport)
       return;
-   m_IsOnline = TRUE;
+   m_IsOnline = true;
    UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network connection established."),
                    m_topLevelFrame,
@@ -2011,7 +2011,7 @@ wxMApp::OnDisconnected(wxDialUpEvent&)
 {
    if(! m_DialupSupport)
       return;
-   m_IsOnline = FALSE;
+   m_IsOnline = false;
    UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network shut down."),
                    m_topLevelFrame,
@@ -2062,9 +2062,9 @@ wxMApp::SetupOnlineManager(void)
    else // no dialup support
    {
       delete m_OnlineManager;
-      m_OnlineManager = NULL; // Cleanup will try to delete it.
+      m_OnlineManager = nullptr; // Cleanup will try to delete it.
 
-      m_IsOnline = TRUE;
+      m_IsOnline = true;
    }
 
    UpdateOnlineDisplay();
@@ -2074,7 +2074,7 @@ bool
 wxMApp::IsOnline(void) const
 {
    if(! m_DialupSupport)
-      return TRUE; // no dialup--> always connected
+      return true; // no dialup--> always connected
 
    // make sure we always have the very latest value:
    ((wxMApp*)this)->m_IsOnline = m_OnlineManager->IsOnline();
@@ -2089,7 +2089,7 @@ wxMApp::GoOnline(void) const
 
    if(m_OnlineManager->IsOnline())
    {
-      ((wxMApp *)this)->m_IsOnline = TRUE;
+      ((wxMApp *)this)->m_IsOnline = true;
       ERRORMESSAGE((_("Dial-up network is already online.")));
       return;
    }
@@ -2104,7 +2104,7 @@ wxMApp::GoOffline(void) const
 
    if(! m_OnlineManager->IsOnline())
    {
-      ((wxMApp *)this)->m_IsOnline = FALSE;
+      ((wxMApp *)this)->m_IsOnline = false;
       ERRORMESSAGE((_("Dial-up network is already offline.")));
       return;
    }
@@ -2129,8 +2129,8 @@ wxMApp::UpdateOnlineDisplay(void)
 
    if(! m_DialupSupport)
    {
-      mbar->Enable(WXMENU_FILE_NET_ON, FALSE);
-      mbar->Enable(WXMENU_FILE_NET_OFF, FALSE);
+      mbar->Enable(WXMENU_FILE_NET_ON, false);
+      mbar->Enable(WXMENU_FILE_NET_OFF, false);
    }
    else // we do have dialup support
    {
@@ -2248,7 +2248,7 @@ void wxMApp::SetLogFile(const String& filename)
       {
          // just disable logging to the old file and only pass messages
          // through to the next log target
-         m_logChain->SetLog(NULL);
+         m_logChain->SetLog(nullptr);
       }
    }
    else // log to file
@@ -2606,8 +2606,8 @@ public:
    {
    }
 
-   virtual bool OnExec(const wxString& WXUNUSED(topic),
-                       const wxString& data)
+   bool OnExec(const wxString& WXUNUSED(topic),
+               const wxString& data) override
    {
       return wxGetApp().OnRemoteRequest(data);
    }
@@ -2621,10 +2621,10 @@ private:
 class MAppIPCServer : public wxServer
 {
 public:
-   virtual wxConnectionBase *OnAcceptConnection(const wxString& topic)
+   wxConnectionBase *OnAcceptConnection(const wxString& topic) override
    {
       if ( topic != IPC_TOPIC )
-         return NULL;
+         return nullptr;
 
       return new MAppIPCConnection;
    }
@@ -2674,7 +2674,7 @@ bool wxMApp::SetupRemoteCallServer()
    if ( !m_serverIPC->Create(GetIPCSocket()) )
    {
       delete m_serverIPC;
-      m_serverIPC = NULL;
+      m_serverIPC = nullptr;
 
       return false;
    }

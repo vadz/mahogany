@@ -121,7 +121,7 @@ public:
       m_eventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
    }
 
-   bool OnMEvent(MEventData& event)
+   bool OnMEvent(MEventData& event) override
    {
       if ( event.GetId() == MEventId_OptionsChange )
       {
@@ -133,7 +133,7 @@ public:
       }
 
       // propagate further
-      return TRUE;
+      return true;
    }
 
    virtual ~PythonOptionChangeHandler()
@@ -172,7 +172,7 @@ Profile *wxMFrame::GetFolderProfile(void) const
 {
    Profile *profile = mApplication->GetProfile();
 
-   CHECK( profile, NULL, _T("no global profile??") );
+   CHECK( profile, nullptr, _T("no global profile??") );
 
    profile->IncRef();
 
@@ -286,7 +286,7 @@ wxMFrame::AddFileMenu(void)
    // skip "Close" menu item for the main frame - it is the same as "Exit" for
    // it
    int n = WXMENU_FILE_CLOSE;
-   if ( parent != NULL )
+   if ( parent != nullptr )
    {
       AppendToMenu(fileMenu, n);
    }
@@ -359,7 +359,7 @@ wxMFrame::AddLanguageMenu()
 wxConfigBase *wxMFrame::GetFrameOptionsConfig(const char *name)
 {
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
-   if ( pConf != NULL )
+   if ( pConf != nullptr )
    {
       String path;
       path << Profile::GetFramesPath() << '/' << name;
@@ -374,11 +374,11 @@ bool wxMFrame::RestorePosition(const char *name,
                                bool *i, bool *m)
 {
    // only i and m might be NULL
-   CHECK( x && y && w && h, FALSE,
+   CHECK( x && y && w && h, false,
           _T("NULL pointer in wxMFrame::RestorePosition") );
 
    wxConfigBase * const pConf = GetFrameOptionsConfig(name);
-   if ( pConf != NULL )
+   if ( pConf != nullptr )
    {
       *x = GetOptionValue(pConf, MP_XPOS);
       *y = GetOptionValue(pConf, MP_YPOS);
@@ -406,7 +406,7 @@ bool wxMFrame::RestorePosition(const char *name,
       if ( m )
          *m = GetNumericDefault(MP_MAXIMISED) != 0;
 
-      return FALSE;
+      return false;
    }
 }
 
@@ -415,7 +415,7 @@ void wxMFrame::CreateToolAndStatusBars()
    bool tb, sb;
 
    wxConfigBase * const pConf = GetFrameOptionsConfig();
-   if ( pConf != NULL )
+   if ( pConf != nullptr )
    {
       tb = GetOptionValue(pConf, MP_SHOW_TOOLBAR).GetBoolValue();
       sb = GetOptionValue(pConf, MP_SHOW_STATUSBAR).GetBoolValue();
@@ -512,9 +512,9 @@ wxMFrame::SaveState(const char *name, wxWindow *frame, int flags)
       if ( flags & Save_View )
       {
          UpdateBoolConfigValue(pConf, MP_SHOW_TOOLBAR,
-                               fr->GetToolBar() != NULL);
+                               fr->GetToolBar() != nullptr);
          UpdateBoolConfigValue(pConf, MP_SHOW_STATUSBAR,
-                               fr->GetStatusBar() != NULL);
+                               fr->GetStatusBar() != nullptr);
       }
 
       UpdateBoolConfigValue(pConf, MP_SHOW_FULLSCREEN, fr->IsFullScreen());
@@ -632,7 +632,7 @@ wxMFrame::OnMenuCommand(int id)
                                  path, "",
                                  "py", "*.py",
                                  false,
-                                 NULL /* profile */
+                                 nullptr /* profile */
                                 );
             if ( !filename.empty() )
             {
@@ -726,7 +726,7 @@ wxMFrame::OnMenuCommand(int id)
                configDst(ConfigSourceLocal::CreateFile(path));
             if ( !doExport )
             {
-               configSrc.Swap(configDst);
+               configSrc.swap(configDst);
             }
 
             bool ok = ConfigSource::Copy(*configDst, *configSrc);
@@ -1114,7 +1114,7 @@ wxMFrame::OnMenuCommand(int id)
          else // hide the toolbar
          {
             delete GetToolBar();
-            SetToolBar(NULL);
+            SetToolBar(nullptr);
          }
          break;
 
@@ -1126,7 +1126,7 @@ wxMFrame::OnMenuCommand(int id)
          else // hide the status bar
          {
             delete GetStatusBar();
-            SetStatusBar(NULL);
+            SetStatusBar(nullptr);
          }
          break;
 
@@ -1199,7 +1199,7 @@ void wxMFrame::OnPrintSetupPS()
    wxPrintDialogData printDialogData(* ((wxMApp *)mApplication)->GetPrintData());
    wxPrintDialog printerDialog(this, & printDialogData);
 
-   printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
+   printerDialog.GetPrintDialogData().SetSetupDialog(true);
    if ( printerDialog.ShowModal() == wxID_OK )
    {
       (*((wxMApp *)mApplication)->GetPrintData())
@@ -1215,13 +1215,13 @@ bool
 wxMFrame::ProcessModulesMenu(int id)
 {
 #ifndef USE_MODULES
-   return FALSE;
+   return false;
 #else
    if(id < WXMENU_MODULES_BEGIN || id > WXMENU_MODULES_END)
-      return FALSE;
+      return false;
 
    MModuleListing *listing = MModule::ListLoadedModules();
-   MModule *mptr = NULL;
+   MModule *mptr = nullptr;
    for(size_t i = 0; i < listing->Count(); i++)
    {
       mptr = (*listing)[i].GetModule();
@@ -1229,12 +1229,12 @@ wxMFrame::ProcessModulesMenu(int id)
       {
          listing->DecRef();
          mptr->DecRef();
-         return TRUE;
+         return true;
       }
       mptr->DecRef();
    }
    listing->DecRef();
-   return FALSE;
+   return false;
 #endif
 }
 

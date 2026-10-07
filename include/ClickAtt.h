@@ -31,10 +31,10 @@ public:
    static String GetLabelFor(const MimePart *mimepart);
 
    // implement base class pure virtuals
-   virtual String GetLabel() const;
+   String GetLabel() const override;
 
-   virtual void OnLeftClick() const;
-   virtual void OnRightClick(const wxPoint& pt) const;
+   void OnLeftClick() const override;
+   void OnRightClick(const wxPoint& pt) const override;
 
    // show the popup menu for this window/at this point
    //

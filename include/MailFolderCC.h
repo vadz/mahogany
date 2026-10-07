@@ -79,26 +79,26 @@ public:
    */
    static bool CanExit(String *which);
 
-   virtual void Close(bool mayLinger = true);
+   void Close(bool mayLinger = true) override;
 
-   virtual bool Suspend();
-   virtual bool Resume();
+   bool Suspend() override;
+   bool Resume() override;
 
-   virtual bool IsOpened(void) const { return m_MailStream != NULL; }
+   bool IsOpened(void) const override { return m_MailStream != nullptr; }
 
-   virtual bool IsReadOnly(void) const;
-   virtual bool CanSetFlag(int flags) const;
+   bool IsReadOnly(void) const override;
+   bool CanSetFlag(int flags) const override;
 
    /** return the full folder name
        @return the folder's name
    */
-   virtual String GetName(void) const;
+   String GetName(void) const override;
 
    /// return the folder type
-   virtual MFolderType GetType(void) const;
+   MFolderType GetType(void) const override;
 
    /// return the folder flags
-   virtual int GetFlags(void) const;
+   int GetFlags(void) const override;
 
    /// return full IMAP spec including the login name
    static String GetFullImapSpec(const MFolder *folder, const String& login);
@@ -106,34 +106,34 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual Profile *GetProfile(void) const { return m_Profile; }
+   Profile *GetProfile(void) const override { return m_Profile; }
 
    /// Checks if the folder is in a critical section.
-   virtual bool IsInCriticalSection(void) const { return m_InCritical; }
+   bool IsInCriticalSection(void) const override { return m_InCritical; }
 
-   virtual ServerInfoEntry *CreateServerInfo(const MFolder *folder) const;
+   ServerInfoEntry *CreateServerInfo(const MFolder *folder) const override;
 
    /// @name Folder operations
    //@{
 
    // count various kinds of messages
-   virtual unsigned long CountNewMessages(void) const;
-   virtual unsigned long CountRecentMessages(void) const;
-   virtual unsigned long CountUnseenMessages(void) const;
-   virtual unsigned long CountDeletedMessages(void) const;
+   unsigned long CountNewMessages(void) const override;
+   unsigned long CountRecentMessages(void) const override;
+   unsigned long CountUnseenMessages(void) const override;
+   unsigned long CountDeletedMessages(void) const override;
 
    // uid -> msgno
-   virtual MsgnoType GetMsgnoFromUID(UIdType uid) const;
+   MsgnoType GetMsgnoFromUID(UIdType uid) const override;
 
    /** get message header
        @param uid mesage uid
        @return message header information class
    */
-   virtual Message *GetMessage(unsigned long uid) const;
+   Message *GetMessage(unsigned long uid) const override;
 
-   virtual bool SetMessageFlag(unsigned long uid,
-                               int flag,
-                               bool set = true);
+   bool SetMessageFlag(unsigned long uid,
+                       int flag,
+                       bool set = true) override;
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
@@ -141,41 +141,41 @@ public:
        @param set if true, set the flag, if false, clear it
        @return always true UNSUPPORTED!
    */
-   virtual bool SetSequenceFlag(SequenceKind kind,
-                                const Sequence& sequence,
-                                int flag,
-                                bool set = true);
+   bool SetSequenceFlag(SequenceKind kind,
+                        const Sequence& sequence,
+                        int flag,
+                        bool set = true) override;
 
    /// override base class SaveMessages() to do server side copy if possible
-   virtual bool SaveMessages(const UIdArray *selections, MFolder *folder);
+   bool SaveMessages(const UIdArray *selections, MFolder *folder) override;
 
-   virtual bool AppendMessage(const Message & msg);
+   bool AppendMessage(const Message & msg) override;
 
-   virtual bool AppendMessage(const String& msg);
-   virtual void ExpungeMessages(void);
-
-
-   virtual MsgnoArray *SearchByFlag(MessageStatus flag,
-                                    int flags = SEARCH_SET |
-                                                SEARCH_UNDELETED,
-                                    MsgnoType last = 0) const;
-
-   virtual UIdArray *SearchMessages(const SearchCriterium *crit, int flags);
+   bool AppendMessage(const String& msg) override;
+   void ExpungeMessages(void) override;
 
 
-   virtual bool ThreadMessages(const ThreadParams& thrParams,
-                               ThreadData *thrData);
+   MsgnoArray *SearchByFlag(MessageStatus flag,
+                            int flags = SEARCH_SET |
+                                        SEARCH_UNDELETED,
+                            MsgnoType last = 0) const override;
 
-   virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
+   UIdArray *SearchMessages(const SearchCriterium *crit, int flags) override;
+
+
+   bool ThreadMessages(const ThreadParams& thrParams,
+                       ThreadData *thrData) override;
+
+   bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams) override;
 
 
    /** Check whether mailbox has changed.
        @return FALSE on error
    */
-   virtual bool Ping(void);
+   bool Ping(void) override;
 
    /** Perform a checkpoint on the folder. */
-   virtual void Checkpoint(void);
+   void Checkpoint(void) override;
 
    //@}
 
@@ -192,8 +192,8 @@ public:
                     const String &pattern = _T("*"),
                     bool subscribed_only = false,
                     const String &reference = wxEmptyString,
-                    UserData ud = 0,
-                    Ticket ticket = ILLEGAL_TICKET);
+                    UserData ud = nullptr,
+                    Ticket ticket = ILLEGAL_TICKET) override;
 
    /**@name Access control */
    //@{
@@ -202,22 +202,22 @@ public:
        mode it returns false if we cannot get a lock.
        @return TRUE if we have the lock
    */
-   virtual bool Lock(void) const;
+   bool Lock(void) const override;
    /** Releases the lock on the mailfolder. */
-   virtual void UnLock(void) const;
+   void UnLock(void) const override;
    /// Is folder locked?
-   virtual bool IsLocked(void) const;
+   bool IsLocked(void) const override;
    //@}
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{
-   virtual unsigned long GetMessageCount() const;
+   unsigned long GetMessageCount() const override;
 
-   virtual MsgnoType GetHeaderInfo(ArrayHeaderInfo& headers,
-                                   const Sequence& seq);
+   MsgnoType GetHeaderInfo(ArrayHeaderInfo& headers,
+                           const Sequence& seq) override;
    //@}
 
-   virtual char GetFolderDelimiter() const;
+   char GetFolderDelimiter() const override;
 
    // unused for now
 #if 0
@@ -325,7 +325,7 @@ private:
                         int flags = SEARCH_MSGNO) const;
 
    /// called by CountAllMessages() to perform actual counting
-   virtual bool DoCountMessages(MailFolderStatus *status) const;
+   bool DoCountMessages(MailFolderStatus *status) const override;
    //@}
 
    /// Update the timeout values from a profile
@@ -368,7 +368,7 @@ private:
    */
    static bool CreateIfNeeded(const MFolder *folder,
                               wxFrame *parent,
-                              MAILSTREAM **pStream = NULL);
+                              MAILSTREAM **pStream = nullptr);
 
    /// just do mail_ping() on the opened folder, return TRUE if ok
    bool PingOpenedFolder();
@@ -389,7 +389,7 @@ private:
    /// update the folder after appending messages to it
    void UpdateAfterAppend();
 
-   virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+   void ReadConfig(MailFolderCmn::MFCmnOptions& config) override;
 
    /// fill mailstatus with the results of c-client mail_status() call
    static bool DoCheckStatus(const MFolder *folder,
@@ -431,7 +431,7 @@ private:
    /// set login data (possibly asking the user about it) if needed, return
    /// false if we don't have login/password and so can't continue
    static bool SetLoginDataIfNeeded(const MFolder *mfolder,
-                                    String *login = NULL);
+                                    String *login = nullptr);
 
    //@}
 
@@ -638,7 +638,7 @@ public:
        @param errflg   error level
        @param mf if non-NULL the folder
        */
-   static void mm_log(const String& str, long errflg, MailFolderCC *mf = NULL);
+   static void mm_log(const String& str, long errflg, MailFolderCC *mf = nullptr);
 
    /** log a debugging message
        @param str    message string

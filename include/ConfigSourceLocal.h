@@ -45,7 +45,7 @@ public:
       if ( !config->InitDefault(filename) )
       {
          delete config;
-         config = NULL;
+         config = nullptr;
       }
 
       return config;
@@ -64,7 +64,7 @@ public:
       if ( !config->InitFile(filename) )
       {
          delete config;
-         config = NULL;
+         config = nullptr;
       }
 
       return config;
@@ -82,7 +82,7 @@ public:
       if ( !config->InitRegistry() )
       {
          delete config;
-         config = NULL;
+         config = nullptr;
       }
 
       return config;
@@ -114,28 +114,28 @@ public:
    virtual ~ConfigSourceLocal();
 
    // implement base class pure virtuals
-   virtual String GetSpec() const;
-   virtual bool IsOk() const;
-   virtual bool IsLocal() const;
-   virtual bool Read(const String& name, String *value) const;
-   virtual bool Read(const String& name, long *value) const;
-   virtual bool Write(const String& name, const String& value);
-   virtual bool Write(const String& name, long value);
-   virtual bool Flush();
-   virtual bool GetFirstGroup(const String& key,
-                                 String& group, EnumData& cookie) const;
-   virtual bool GetNextGroup(String& group, EnumData& cookie) const;
-   virtual bool GetFirstEntry(const String& key,
-                                 String& entry, EnumData& cookie) const;
-   virtual bool GetNextEntry(String& entry, EnumData& cookie) const;
-   virtual bool HasGroup(const String& path) const;
-   virtual bool HasEntry(const String& path) const;
-   virtual bool DeleteEntry(const String& name);
-   virtual bool DeleteGroup(const String& name);
-   virtual bool CopyEntry(const String& nameSrc,
-                          const String& nameDst,
-                          ConfigSource *configDst);
-   virtual bool RenameGroup(const String& pathOld, const String& nameNew);
+   String GetSpec() const override;
+   bool IsOk() const override;
+   bool IsLocal() const override;
+   bool Read(const String& name, String *value) const override;
+   bool Read(const String& name, long *value) const override;
+   bool Write(const String& name, const String& value) override;
+   bool Write(const String& name, long value) override;
+   bool Flush() override;
+   bool GetFirstGroup(const String& key,
+                         String& group, EnumData& cookie) const override;
+   bool GetNextGroup(String& group, EnumData& cookie) const override;
+   bool GetFirstEntry(const String& key,
+                         String& entry, EnumData& cookie) const override;
+   bool GetNextEntry(String& entry, EnumData& cookie) const override;
+   bool HasGroup(const String& path) const override;
+   bool HasEntry(const String& path) const override;
+   bool DeleteEntry(const String& name) override;
+   bool DeleteGroup(const String& name) override;
+   bool CopyEntry(const String& nameSrc,
+                  const String& nameDst,
+                  ConfigSource *configDst) override;
+   bool RenameGroup(const String& pathOld, const String& nameNew) override;
 
    // for internal use by ProfileImpl only, don't use elsewhere
    wxConfigBase *GetConfig() const { return m_config; }

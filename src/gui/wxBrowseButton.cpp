@@ -46,11 +46,13 @@
 
 #include "ColourNames.h"
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY(wxBitmap *, BitmapArray);
+using BitmapArray = std::vector<wxBitmap *>;
 
 class wxIconView : public wxListCtrl
 {
@@ -232,7 +234,7 @@ wxColorBrowseButton::wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
                 (
                   wxEVT_COMMAND_TEXT_UPDATED,
                   wxCommandEventHandler(wxColorBrowseButton::OnTextChanged),
-                  NULL,
+                  nullptr,
                   this
                 );
 }
@@ -403,7 +405,7 @@ void wxIconBrowseButton::DoBrowse()
    size_t n, nIcons = m_iconNames.GetCount();
 
    BitmapArray icons;
-   icons.Alloc(nIcons);
+   icons.reserve(nIcons);
 
    for ( n = 0; n < nIcons; n++ )
    {
@@ -419,7 +421,7 @@ void wxIconBrowseButton::DoBrowse()
          bmp = wxBitmap(image);
       }
 
-      icons.Add(new wxBitmap(bmp));
+      icons.push_back(new wxBitmap(bmp));
    }
 
    wxIconSelectionDialog dlg(GetFrame(this), _("Choose icon"), icons, m_nIcon);
@@ -478,9 +480,9 @@ wxIconView::wxIconView(wxDialog *parent,
                        wxLC_AUTOARRANGE |
                        wxLC_ALIGN_LEFT)
 {
-   size_t n, count = icons.GetCount();
+   size_t n, count = icons.size();
    wxImageList *imageList = new wxImageList(ms_iconSize, ms_iconSize,
-                                            TRUE, count);
+                                            true, count);
    for ( n = 0; n < count; n++ )
    {
       imageList->Add(*icons[n]);

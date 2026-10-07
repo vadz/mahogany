@@ -194,11 +194,11 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
                               ? MailFolder::ReplyMessage
                               : MailFolder::ForwardMessage)
                                 (
-                                  msgview ? msgview->GetMessage() : NULL,
+                                  msgview ? msgview->GetMessage() : nullptr,
                                   params,
                                   m_clickableURL->GetProfile(),
-                                  msgview ? msgview->GetWindow() : NULL,
-                                  NULL
+                                  msgview ? msgview->GetWindow() : nullptr,
+                                  nullptr
                                 );
 
             if ( cv )
@@ -215,7 +215,8 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_ADD_TO_WHITELIST:
       case WXMENU_ADD_DOMAIN_TO_WHITELIST:
          {
-            AddressList_obj addrList(m_clickableURL->GetUrl());
+            AddressList_obj
+               addrList(AddressList::Create(m_clickableURL->GetUrl()));
             Address *addr = addrList->GetFirst();
             if ( !addr )
             {
@@ -410,10 +411,10 @@ void ClickableURL::OpenInBrowser(int options) const
                   // this is a bit naive but should work as -1 can't appear
                   // elsewhere in the DDE topic, normally
                   if ( ddeCmd.Replace("-1", "0",
-                                      FALSE /* only first occurrence */) == 1 )
+                                      false /* only first occurrence */) == 1 )
                   {
                      // and also replace the parameters
-                     if ( ddeCmd.Replace("%1", m_url, FALSE) == 1 )
+                     if ( ddeCmd.Replace("%1", m_url, false) == 1 )
                      {
                         // magic incantation understood by wxMSW
                         command << "WX_DDE#"

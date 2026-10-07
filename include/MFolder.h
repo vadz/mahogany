@@ -20,8 +20,6 @@
 
 #include "MObject.h"         // for MObjectRC
 
-#include "lists.h"
-
 class Profile;
 
 /** A class representing a folder used by M. The folders are organized in a tree
@@ -110,7 +108,7 @@ public:
     */
    static MFolder *CreateTemp(const String& fullname,
                               MFolderType type,
-                              Profile *profile = NULL);
+                              Profile *profile = nullptr);
 
    /**
      Create a temp folder representing a file.
@@ -241,7 +239,7 @@ public:
       { return FolderNeedsNetwork(GetType(), GetFlags()); }
 
       /// SSL mode for this folder (this is a NOP for temp folders)
-   virtual SSLSupport GetSSL(SSLCert *acceptUnsigned = NULL) const = 0;
+   virtual SSLSupport GetSSL(SSLCert *acceptUnsigned = nullptr) const = 0;
    virtual void SetSSL(SSLSupport ssl, SSLCert cert) = 0;
 
       /**
@@ -313,8 +311,6 @@ protected:
    MFolder& operator=(const MFolder&);
 };
 
-M_LIST_RC_ABSTRACT(MFolderList, MFolder);
-
 // ----------------------------------------------------------------------------
 // A smart pointer to MFolder: not only it takes care of the ref count itself,
 // but it also allows to create in the same way a folder for arbitrary file
@@ -340,7 +336,7 @@ public:
          {
             wxFAIL_MSG( _T("attempt to create MFolder from non folder profile") );
 
-            m_folder = NULL;
+            m_folder = nullptr;
          }
       }
       // takes ownership of the existing object
@@ -367,16 +363,13 @@ public:
    }
 
    // explicitly test if object is valid
-   bool IsOk() const { return m_folder != NULL; }
+   bool IsOk() const { return m_folder != nullptr; }
+
+   // no copy ctor/assignment operator
+   MFolder_obj(const MFolder_obj&) = delete;
+   MFolder_obj& operator=(const MFolder_obj&) = delete;
 
 private:
-   // workaround for g++ bug: see BEGIN_DECLARE_AUTOPTR() definition in
-   // MObject.h for details
-#ifndef NO_PRIVATE_COPY
-   // no copy ctor/assignment operator
-   MFolder_obj(const MFolder_obj&);
-   MFolder_obj& operator=(const MFolder_obj&);
-#endif // !NO_PRIVATE_COPY
 
    // create folder by name
    void Init(const String& name) { m_folder = MFolder::Get(name); }
@@ -450,7 +443,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                                       MFolderType folderType,
                                       long folderFlags,
                                       const String& path,
-                                      bool notify = TRUE);
+                                      bool notify = true);
 
 /**
    Add all subfolders of the given folder to the tree.

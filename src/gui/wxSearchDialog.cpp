@@ -81,8 +81,8 @@ public:
                          wxWindow *parent);
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
 protected:
    // event handlers
@@ -272,7 +272,7 @@ bool wxMessageSearchDialog::TransferDataToWindow()
 
    m_textWhat->SetFocus();
 
-   return TRUE;
+   return true;
 }
 
 bool wxMessageSearchDialog::TransferDataFromWindow()
@@ -304,7 +304,7 @@ bool wxMessageSearchDialog::TransferDataFromWindow()
       m_CritStruct->m_Folders.Add(s.c_str() + 1); // skip leading slash
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -325,7 +325,7 @@ void wxMessageSearchDialog::OnUpdateUIRemove(wxUpdateUIEvent& event)
 
 void wxMessageSearchDialog::OnButtonAdd(wxCommandEvent& /* event */)
 {
-   MFolder_obj folder(MDialog_FolderChoose(this, NULL, MDlg_Folder_NoFiles));
+   MFolder_obj folder(MDialog_FolderChoose(this, nullptr, MDlg_Folder_NoFiles));
    if ( folder )
    {
       m_lboxFolders->Append(_T('/') + folder->GetFullName());

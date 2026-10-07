@@ -91,8 +91,6 @@
    #include <wx/dcps.h> // for wxThePrintSetupData
 #endif
 
-M_LIST_OWN(VirtualMimePartsList, MimePart);
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -301,7 +299,7 @@ public:
          m_mimepart = part;
       }
 
-   virtual wxString GetParamValue(const wxString& name) const;
+   wxString GetParamValue(const wxString& name) const override;
 
 private:
    const MimePart *m_mimepart;
@@ -311,7 +309,7 @@ private:
 class MIMEFSHandler : public wxMemoryFSHandler
 {
 public:
-   virtual bool CanOpen(const wxString& location)
+   bool CanOpen(const wxString& location) override
    {
       return GetProtocol(location) == "cid";
    }
@@ -326,14 +324,14 @@ public:
 class TransparentFilter : public ViewFilter
 {
 public:
-   TransparentFilter(MessageView *msgView) : ViewFilter(msgView, NULL, true)
+   TransparentFilter(MessageView *msgView) : ViewFilter(msgView, nullptr, true)
    {
       m_isInBody = false;
    }
 
-   virtual void ProcessURL(const String& text,
-                           const String& url,
-                           MessageViewer *viewer)
+   void ProcessURL(const String& text,
+                   const String& url,
+                   MessageViewer *viewer) override
    {
       if ( m_isInBody )
          m_msgView->OnBodyText(text);
@@ -341,20 +339,20 @@ public:
       viewer->InsertURL(text, url);
    }
 
-   virtual void StartText()
+   void StartText() override
    {
       m_isInBody = true;
    }
 
-   virtual void EndText()
+   void EndText() override
    {
       m_isInBody = false;
    }
 
 protected:
-   virtual void DoProcess(String& text,
-                          MessageViewer *viewer,
-                          MTextStyle& style)
+   void DoProcess(String& text,
+                  MessageViewer *viewer,
+                  MTextStyle& style) override
    {
       if ( m_isInBody )
          m_msgView->OnBodyText(text);
@@ -430,7 +428,7 @@ static
 size_t GetAllAvailablePlugins(const char *iface,
                               wxArrayString *names,
                               wxArrayString *descs,
-                              wxArrayInt *states = NULL)
+                              wxArrayInt *states = nullptr)
 {
    CHECK( names && descs, 0, "NULL pointer in GetAllAvailablePlugins()" );
 
@@ -629,29 +627,26 @@ MessageView::Init(wxWindow *parent, Profile *profile)
 void
 MessageView::Init()
 {
-   m_profile = NULL;
-   m_asyncFolder = NULL;
-   m_mailMessage = NULL;
+   m_profile = nullptr;
+   m_asyncFolder = nullptr;
+   m_mailMessage = nullptr;
    m_viewer =
-   m_viewerOld = NULL;
-   m_filters = NULL;
-   m_nullFilter = NULL;
-   m_virtualMimeParts = NULL;
-   m_cidsInMemory = NULL;
+   m_viewerOld = nullptr;
+   m_filters = nullptr;
+   m_nullFilter = nullptr;
+   m_cidsInMemory = nullptr;
 
    m_uid = UID_ILLEGAL;
    m_encodingUser = wxFONTENCODING_DEFAULT;
    m_encodingAuto = wxFONTENCODING_SYSTEM;
 
-   m_evtHandlerProc = NULL;
+   m_evtHandlerProc = nullptr;
 
    RegisterForEvents();
 }
 
 MessageView::~MessageView()
 {
-   delete m_virtualMimeParts;
-
    delete m_cidsInMemory;
 
    UnregisterForEvents();
@@ -728,7 +723,7 @@ void MessageView::RestoreOldViewer()
    if ( m_viewerOld )
    {
       SetViewer(m_viewerOld, m_viewerNameOld);
-      m_viewerOld = NULL;
+      m_viewerOld = nullptr;
       m_viewerNameOld.clear();
    }
 }
@@ -746,9 +741,9 @@ void MessageView::RestoreOldViewer()
                   one couldn't be loaded
    @return the viewer (to be deleted by caller) or NULL
  */
-static MessageViewer *LoadViewer(const String& name, String *nameAlt = NULL)
+static MessageViewer *LoadViewer(const String& name, String *nameAlt = nullptr)
 {
-   MessageViewer *viewer = NULL;
+   MessageViewer *viewer = nullptr;
 
    MModuleListing *
       listing = MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
@@ -850,7 +845,7 @@ MessageView::InitializeViewFilters()
                      ViewFilter::Priority_Lowest,
                      wxEmptyString,
                      wxEmptyString,
-                     NULL
+                     nullptr
                    );
 
    MModuleListing *listing =
@@ -881,7 +876,7 @@ MessageView::InitializeViewFilters()
             }
 
             // find the right place to insert the new filter into
-            for ( ViewFilterNode *node = m_filters, *nodePrev = NULL;
+            for ( ViewFilterNode *node = m_filters, *nodePrev = nullptr;
                   node;
                   nodePrev = node, node = node->GetNext() )
             {
@@ -1036,7 +1031,7 @@ MessageView::Clear()
    if ( m_mailMessage )
    {
       m_mailMessage->DecRef();
-      m_mailMessage = NULL;
+      m_mailMessage = nullptr;
    }
 }
 
@@ -1064,7 +1059,7 @@ void MessageView::UnregisterForEvents()
 {
    MEventManager::DeregisterAll(&m_regCookieASFolderResult,
                                 &m_regCookieOptionsChange,
-                                NULL);
+                                nullptr);
 }
 
 bool
@@ -1625,7 +1620,7 @@ MessageView::ShowSelectedHeaders(const wxArrayString& headersUser_,
       // did their number change from just recounting?
       ASSERT_MSG( nNonEnv == countNonEnvHeaders, "logic error" );
 
-      headerPtrs[countNonEnvHeaders] = NULL;
+      headerPtrs[countNonEnvHeaders] = nullptr;
 
       // get them all at once
       headerNonEnvValues = m_mailMessage->GetHeaderLines(headerPtrs,
@@ -2346,7 +2341,7 @@ MessageView::ShowPart(const MimePart *mimepart)
                wxFontEncoding enc = m_encodingUser == wxFONTENCODING_DEFAULT
                                        ? mimepart->GetTextEncoding()
                                        : m_encodingUser;
-               s = wxCSConv(enc).cMB2WC(data, len, NULL);
+               s = wxCSConv(enc).cMB2WC(data, len, nullptr);
             }
 
             if ( s.empty() )
@@ -2436,7 +2431,7 @@ MessageView::ProcessRelatedMultiPart(const MimePart *mimepart,
 
    const MimePart *partChild = mimepart->GetNested();
 
-   const MimePart *partStart = cidStart.empty() ? partChild : NULL;
+   const MimePart *partStart = cidStart.empty() ? partChild : nullptr;
 
    while ( partChild )
    {
@@ -2618,7 +2613,7 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
    MCryptoEngine::Status status =
          pgpEngine->Decrypt(encryptedData, decryptedData, log);
 
-   ClickablePGPInfo *pgpInfo = 0;
+   ClickablePGPInfo *pgpInfo = nullptr;
    switch ( status )
    {
       case MCryptoEngine::OK:
@@ -2797,10 +2792,7 @@ MessageView::ProcessPart(const MimePart *mimepart, MimePartAction action)
 void
 MessageView::AddVirtualMimePart(MimePart *mimepart)
 {
-   if ( !m_virtualMimeParts )
-      m_virtualMimeParts = new VirtualMimePartsList;
-
-   m_virtualMimeParts->push_back(mimepart);
+   m_virtualMimeParts.emplace_back(mimepart);
 }
 
 bool MessageView::StoreMIMEPartData(const MimePart *part, const String& cidOrig)
@@ -3106,8 +3098,7 @@ MessageView::Update()
 void
 MessageView::DisplayMessageInViewer()
 {
-   if ( m_virtualMimeParts )
-      m_virtualMimeParts->clear();
+   m_virtualMimeParts.clear();
 
    m_textBody.clear();
 
@@ -3178,17 +3169,16 @@ MessageView::MimeInfo(const MimePart *mimepart)
 
    // debug output with all parameters
    const MessageParameterList &plist = mimepart->GetParameters();
-   MessageParameterList::iterator plist_it;
    if ( !plist.empty() )
    {
       message += _("\nParameters:\n");
-      for ( plist_it = plist.begin(); plist_it != plist.end(); plist_it++ )
+      for ( const MessageParameter& param : plist )
       {
-         name = plist_it->name;
+         name = param.name;
          message << NormalizeString(name) << ": ";
 
          // filenames are case-sensitive, don't modify them
-         value = plist_it->value;
+         value = param.value;
          if ( name.CmpNoCase("name") != 0 )
          {
             value.MakeLower();
@@ -3208,12 +3198,12 @@ MessageView::MimeInfo(const MimePart *mimepart)
    if ( !dlist.empty() )
    {
       message += _("\nDisposition parameters:\n");
-      for ( plist_it = dlist.begin(); plist_it != dlist.end(); plist_it++ )
+      for ( const MessageParameter& param : dlist )
       {
-         name = plist_it->name;
+         name = param.name;
          message << NormalizeString(name) << ": ";
 
-         value = plist_it->value;
+         value = param.value;
          if ( name.CmpNoCase("filename") != 0 )
          {
             value.MakeLower();
@@ -3314,7 +3304,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    String mimetype = type.GetFull();
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
-   wxFileType *fileType = NULL;
+   wxFileType *fileType = nullptr;
    if ( wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM") )
    {
       // special handling of "APPLICATION/OCTET-STREAM": this is the default
@@ -3360,7 +3350,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    wxString ext = wxFileName(filenameOrig).GetExt();
 
    // get the standard extension for such files if there is no real one
-   if ( fileType != NULL && ext.empty() )
+   if ( fileType != nullptr && ext.empty() )
    {
       wxArrayString exts;
       if ( fileType->GetExtensions(exts) && exts.GetCount() )
@@ -3473,11 +3463,11 @@ MessageView::MimeHandle(const MimePart *mimepart)
          return;
       }
 
-      saved = TRUE;
+      saved = true;
    }
 
    String command;
-   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) )
+   if ( (fileType == nullptr) || !fileType->GetOpenCommand(&command, params) )
    {
       // unknown MIME type, ask the user for the command to use
       MimeOpenWith(mimepart);
@@ -3501,14 +3491,14 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
    String mimetype = type.GetFull();
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
-   wxFileType *fileType = NULL;
+   wxFileType *fileType = nullptr;
    fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
 
    String filename = wxFileName::CreateTempFileName("Mtemp");
 
    wxString ext = wxFileName(filenameOrig).GetExt();
    // get the standard extension for such files if there is no real one
-   if ( fileType != NULL && !ext )
+   if ( fileType != nullptr && !ext )
    {
       wxArrayString exts;
       if ( fileType->GetExtensions(exts) && exts.GetCount() )
@@ -3600,8 +3590,8 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
                      GetParentFrame(),
                      "MimeSave",
                      _("Save attachment as:"),
-                     NULL /* no default path */, name, ext,
-                     NULL /* default filters */,
+                     nullptr /* no default path */, name, ext,
+                     nullptr /* default filters */,
                      wxFILEDLG_USE_FILENAME
                  );
    }
@@ -3830,7 +3820,7 @@ MessageView::SetFolder(ASMailFolder *asmf)
       if ( m_viewerOld )
       {
          delete m_viewerOld;
-         m_viewerOld = NULL;
+         m_viewerOld = nullptr;
          m_viewerNameOld.clear();
       }
 
@@ -4060,7 +4050,7 @@ MessageView::LaunchProcess(const String& command,
    // file, we have no reason to bother with book-keeping and can just launch
    // the process and forget about it.
    wxProcess *process = filename.empty()
-                           ? NULL
+                           ? nullptr
                            : new wxProcess(GetEventHandlerForProcess());
    int pid = wxExecute(command, wxEXEC_ASYNC, process);
    if ( !pid )
@@ -4077,7 +4067,7 @@ MessageView::LaunchProcess(const String& command,
 
    if ( process )
    {
-      m_processes.Add(new ProcessInfo(process, pid, errormsg, filename));
+      m_processes.push_back(new ProcessInfo(process, pid, errormsg, filename));
    }
 
    return true;
@@ -4088,7 +4078,7 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
 {
    // find the corresponding entry in m_processes
    size_t n,
-          procCount = m_processes.GetCount();
+          procCount = m_processes.size();
    for ( n = 0; n < procCount; n++ )
    {
       if ( m_processes[n]->GetPid() == pid )
@@ -4112,7 +4102,7 @@ MessageView::HandleProcessTermination(int pid, int exitcode)
                   exitcode);
    }
 
-   m_processes.RemoveAt(n);
+   m_processes.erase(m_processes.begin() + n);
    delete info;
 }
 
@@ -4122,7 +4112,7 @@ void MessageView::DetachAllProcesses()
 
    // delete all process info objects, we don't need notifications about
    // process termination any more
-   const size_t procCount = m_processes.GetCount();
+   const size_t procCount = m_processes.size();
    for ( size_t n = 0; n < procCount; n++ )
    {
       ProcessInfo *info = m_processes[n];
@@ -4133,7 +4123,7 @@ void MessageView::DetachAllProcesses()
       delete info;
    }
 
-   m_processes.Empty();
+   m_processes.clear();
 
    if ( !removedAll )
    {

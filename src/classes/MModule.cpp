@@ -112,7 +112,7 @@ struct MModuleListEntry
 typedef std::list<MModuleListEntry> MModuleList;
 
 /// The actual list of all loaded modules.
-static MModuleList *gs_MModuleList = NULL;
+static MModuleList *gs_MModuleList = nullptr;
 
 // ============================================================================
 // implementation
@@ -131,17 +131,17 @@ MModuleList *GetMModuleList(void)
 
 void MAppBase::UnloadDLLs()
 {
-   while ( !m_dllsToUnload.empty() )
+   for ( wxDynamicLibrary *dll : m_dllsToUnload )
    {
       // FIXME: if we do unload the library, M crashes because modules are
       //        unloaded too soon -- they should really remain in memory for as
       //        long as they're used
-      (*m_dllsToUnload.begin())->Detach(); // prevent DLL from being unloaded
+      dll->Detach(); // prevent DLL from being unloaded
 
-      delete *m_dllsToUnload.begin();
-
-      m_dllsToUnload.pop_front();
+      delete dll;
    }
+
+   m_dllsToUnload.clear();
 }
 
 /* When a module gets deleted it must make sure that it is no longer
@@ -209,7 +209,7 @@ void MModule_Cleanup(void)
       }
 
       delete gs_MModuleList;
-      gs_MModuleList = NULL;
+      gs_MModuleList = nullptr;
    }
 }
 
@@ -227,7 +227,7 @@ MModule *FindModule(const String & name)
 #ifdef USE_MODULES_STATIC
          int errorCode = 0; //for now we ignore it
          // on-the-fly initialisation for static modules:
-         if( i->m_Module == NULL )
+         if( i->m_Module == nullptr )
          {
             // initialise the module:
             i->m_Module = (*(i->m_InitFunc))(
@@ -240,7 +240,7 @@ MModule *FindModule(const String & name)
 
          return i->m_Module;
       }
-   return NULL; // not found
+   return nullptr; // not found
 }
 
 
@@ -257,7 +257,7 @@ void MModule_AddStaticModule(const char *Name,
    me.m_Version = Version;
    me.m_Description = Description;
    me.m_Interface = Interface;
-   me.m_Module = NULL;
+   me.m_Module = nullptr;
    me.m_InitFunc = initFunc;
    GetMModuleList()->push_back(me);
 }
@@ -271,7 +271,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       wxLogTrace(M_TRACE_MODULES, _T("Failed to load module '%s' from '%s'."),
                  name, pathname);
 
-      return NULL;
+      return nullptr;
    }
 
    wxLogTrace(M_TRACE_MODULES, _T("Successfully loaded module '%s' from '%s'."),
@@ -282,7 +282,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
 
 
    int errorCode = 255;
-   MModule *module = NULL;
+   MModule *module = nullptr;
    if(initFunc)
    {
       module = (*initFunc)
@@ -341,7 +341,7 @@ MModule::LoadModule(const String & name)
       return module;
    }
 #ifdef USE_MODULES_STATIC
-   return NULL;
+   return nullptr;
 #else // !USE_MODULES_STATIC
 
    wxArrayString dirs = BuildListOfModulesDirs();
@@ -368,7 +368,7 @@ MModule::LoadModule(const String & name)
       pathname << name << moduleExt;
       if(wxFileExists(pathname))
       {
-         if ((module = LoadModuleInternal(name, pathname)) != NULL)
+         if ((module = LoadModuleInternal(name, pathname)) != nullptr)
             break;
       }
    }
@@ -385,7 +385,7 @@ MModule::GetProvider(const wxString &interfaceName)
    {
       wxLogWarning(_("No modules implementing \"%s\" interface found."),
                    interfaceName);
-      return NULL;
+      return nullptr;
    }
 
    if ( listing->Count() > 1 )
@@ -404,19 +404,19 @@ MModule::GetProvider(const wxString &interfaceName)
 class MModuleListingEntryImpl : public MModuleListingEntry
 {
 public:
-   virtual const String &GetName(void) const
+   const String &GetName(void) const override
       { return m_Name; }
-   virtual const String &GetInterface(void) const
+   const String &GetInterface(void) const override
       { return m_Interface; }
-   virtual const String &GetShortDescription(void) const
+   const String &GetShortDescription(void) const override
       { return m_ShortDesc; }
-   virtual const String &GetDescription(void) const
+   const String &GetDescription(void) const override
       { return m_Desc; }
-   virtual const String &GetVersion(void) const
+   const String &GetVersion(void) const override
       { return m_Version; }
-   virtual const String &GetAuthor(void) const
+   const String &GetAuthor(void) const override
       { return m_Author; }
-   virtual MModule *GetModule(void) const
+   MModule *GetModule(void) const override
       {
          if(m_Module) m_Module->IncRef();
          return m_Module;
@@ -427,7 +427,7 @@ public:
                            const String &desc = wxEmptyString,
                            const String &version = wxEmptyString,
                            const String &author = wxEmptyString,
-                           MModule *module = NULL)
+                           MModule *module = nullptr)
       {
          m_Name = name;
          m_Interface = interfaceName;
@@ -481,10 +481,10 @@ class MModuleListingImpl : public MModuleListing
 {
 public:
    /// returns the number of entries
-   virtual size_t Count(void) const
+   size_t Count(void) const override
       { return m_count; }
    /// returns the n-th entry
-   virtual const MModuleListingEntry & operator[] (size_t n) const
+   const MModuleListingEntry & operator[] (size_t n) const override
       { ASSERT(n <= m_count); return m_entries[n]; }
    /// returns the n-th entry
    MModuleListingEntryImpl & operator[] (size_t n)
@@ -499,7 +499,7 @@ protected:
          m_count = n;
 
          // avoid allocating 0 sized array
-         m_entries = m_count > 0 ? new MModuleListingEntryImpl[m_count] : NULL;
+         m_entries = m_count > 0 ? new MModuleListingEntryImpl[m_count] : nullptr;
       }
    ~MModuleListingImpl()
       { delete [] m_entries; }
@@ -673,7 +673,7 @@ MModule::ListAvailableModules(const String& interfaceName)
       MModule_GetModulePropFuncType
          getProps = dll.IsLoaded() ?
             (MModule_GetModulePropFuncType)
-            dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION) : NULL;
+            dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION) : nullptr;
 
       if ( !getProps )
       {

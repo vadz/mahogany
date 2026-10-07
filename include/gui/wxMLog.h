@@ -28,9 +28,9 @@ public:
    static void Activate();
 
 protected:
-   virtual void DoLogRecord(wxLogLevel level,
-                            const wxString& msg,
-                            const wxLogRecordInfo& info);
+   void DoLogRecord(wxLogLevel level,
+                    const wxString& msg,
+                    const wxLogRecordInfo& info) override;
 
 private:
    // Ctor is private, use static Activate() to actually create the object.
@@ -63,7 +63,7 @@ class wxMLogTargetSetter
 {
 public:
    explicit wxMLogTargetSetter(wxInfoBarBase* infobar)
-      : m_infobarOrig(wxMLog::ms_MLog ? wxMLog::ms_MLog->m_activeInfoBar : NULL)
+      : m_infobarOrig(wxMLog::ms_MLog ? wxMLog::ms_MLog->m_activeInfoBar : nullptr)
    {
       if ( wxMLog::ms_MLog )
          wxMLog::ms_MLog->SetInfoBarToUse(infobar);

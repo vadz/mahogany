@@ -46,6 +46,8 @@
 
 #include <wx/regex.h>   // wxRegEx::Flags
 
+#include <vector>
+
 #ifdef USE_PYTHON
 #    include "MPython.h"      // Python fix for PyObject / presult
 #    include "PythonHelp.h"   // Python fix for PythonCallback
@@ -78,7 +80,7 @@ static const char *headersRecipients[] =
    "Resent-To",
    "Resent-Cc",
    "Resent-Bcc",
-   NULL
+   nullptr
 };
 
 // forward declare all of our classes
@@ -204,7 +206,7 @@ public:
    };
 
    // implement the base class pure virtual
-   virtual int Apply(MailFolder *folder, UIdArray& msgs);
+   int Apply(MailFolder *folder, UIdArray& msgs) override;
 
    static FilterRule * Create(const char* filterrule,
                               MInterface *minterface,
@@ -252,7 +254,7 @@ public:
 #endif
    void Error(const String &error);
    void Output(const String &msg)
-      { m_MInterface->MessageDialog(msg,NULL,_("Filters output")); }
+      { m_MInterface->MessageDialog(msg,nullptr,_("Filters output")); }
    void Log(const String &imsg, int level = M_LOG_DEFAULT)
       {
          String msg = _("Filters: ");
@@ -538,7 +540,7 @@ public:
          ASSERT(m_Rule); ASSERT(m_Next);
       }
    ~SequentialEval(void) { delete m_Rule; delete m_Next; }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
 
@@ -567,7 +569,7 @@ public:
    }
 
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = m_Rule->Debug();
@@ -588,7 +590,7 @@ public:
    Statement(const SyntaxNode *r, const SyntaxNode *n)
       : SequentialEval(r, n) {}
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = m_Rule->Debug();
@@ -603,9 +605,9 @@ class Number : public SyntaxNode
 {
 public:
    Number(long v) { m_value = v; }
-   virtual const Value Evaluate() const { MOcheck(); return m_value; }
+   const Value Evaluate() const override { MOcheck(); return m_value; }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       { MOcheck(); String s; s.Printf(_T("%ld"), m_value); return s; }
 #endif
 private:
@@ -617,11 +619,11 @@ class StringConstant : public SyntaxNode
 {
 public:
    StringConstant(String v) : m_String(v) {}
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       { MOcheck(); return m_String; }
 
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s;
@@ -640,7 +642,7 @@ class Negation : public SyntaxNode
 public:
    Negation(const SyntaxNode *sn) { m_Sn = sn; }
    ~Negation() { MOcheck(); delete m_Sn; }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
          Value v = m_Sn->Evaluate();
@@ -648,7 +650,7 @@ public:
             v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s;
@@ -666,7 +668,7 @@ class Negative : public SyntaxNode
 public:
    Negative(const SyntaxNode *sn) { m_Sn = sn; }
    ~Negative() { MOcheck(); delete m_Sn; }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
          Value v = m_Sn->Evaluate();
@@ -674,7 +676,7 @@ public:
             v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s;
@@ -705,7 +707,7 @@ private:
    String          m_Name;
    FunctionPointer m_FunctionPtr;
 };
-M_LIST(FunctionList, FunctionDefinition);
+using FunctionList = std::vector<FunctionDefinition>;
 
 /** These classes represents a function call. */
 
@@ -774,13 +776,13 @@ public:
          MOcheck();
          delete m_args;
       }
-   virtual const Value Evaluate() const
+   const Value Evaluate() const override
       {
          MOcheck();
          return (*m_fd->GetFPtr())(m_args, m_Parser);
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String temp;
@@ -811,7 +813,7 @@ public:
          delete m_Left;
          delete m_Right;
       }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          MOcheck();
          return m_Cond->Evaluate().ToNumber()
@@ -819,7 +821,7 @@ public:
               : m_Right->Evaluate();
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = _T("(");
@@ -855,7 +857,7 @@ public:
       }
 #ifdef DEBUG
    virtual const wxChar *OperName(void) const = 0;
-   String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = _T("(");
@@ -900,9 +902,9 @@ public: \
       : Expression(l, r) {} \
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
       { return new Operator##name(l, r); } \
-   virtual const Value Evaluate(void) const \
+   const Value Evaluate(void) const override \
       { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
-   virtual const wxChar *OperName(void) const { return _T(#oper); } \
+   const wxChar *OperName(void) const override { return _T(#oper); } \
 }
 
 #else        // not DEBUGing
@@ -916,7 +918,7 @@ public: \
       : Expression(l, r) {} \
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
       { return new Operator##name(l, r); } \
-   virtual const Value Evaluate(void) const \
+   const Value Evaluate(void) const override \
       { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
 }
 #endif
@@ -942,7 +944,7 @@ public:
    OperatorAnd(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
       { return new OperatorAnd(l, r); }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          Value lv = m_Left->Evaluate();
          if(lv.ToNumber())
@@ -951,7 +953,7 @@ public:
          return lv;
       }
 #ifdef DEBUG
-   virtual const wxChar *OperName(void) const { return _T("&&"); }
+   const wxChar *OperName(void) const override { return _T("&&"); }
 #endif
 };
 
@@ -963,7 +965,7 @@ public:
    OperatorOr(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
       { return new OperatorOr(l, r); }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          Value lv = m_Left->Evaluate();
          if(! lv.ToNumber())
@@ -972,7 +974,7 @@ public:
          return lv;
       }
 #ifdef DEBUG
-   virtual const wxChar *OperName(void) const { return _T("||"); }
+   const wxChar *OperName(void) const override { return _T("||"); }
 #endif
 };
 
@@ -995,11 +997,11 @@ public:
          delete m_IfBlock;
          delete m_ElseBlock;
       }
-   virtual const Value Evaluate(void) const
+   const Value Evaluate(void) const override
       {
          MOcheck();
-         ASSERT(m_Condition != NULL);
-         ASSERT(m_IfBlock != NULL);
+         ASSERT(m_Condition != nullptr);
+         ASSERT(m_IfBlock != nullptr);
          const Value rc = m_Condition->Evaluate();
          if(rc.ToNumber())
             return m_IfBlock->Evaluate();
@@ -1009,7 +1011,7 @@ public:
          return rc;
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   String Debug(void) const override
       {
          MOcheck();
          String s = _T("if(");
@@ -1037,10 +1039,9 @@ const FunctionDefinition *
 FilterRuleImpl::FindFunction(const String &name)
 {
    // SOMEDAY: when user-defined functions, search that list, too
-   const FunctionList *list = BuiltinFunctions();
-   for (FunctionList::iterator i = list->begin(); i != list->end(); ++i)
+   for ( const FunctionDefinition& fd : *BuiltinFunctions() )
    {
-      if ( name == i->GetName() )
+      if ( name == fd.GetName() )
       {
          // remember if we have some particular functions - we use it to
          // optimize filter execution in Apply()
@@ -1053,11 +1054,11 @@ FilterRuleImpl::FindFunction(const String &name)
          else if ( name == _T("header") )
             m_hasHeaderFunc = true;
 
-         return i.operator->();
+         return &fd;
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 
 void
@@ -1072,7 +1073,7 @@ FilterRuleImpl::Error(const String &error)
    // FIXME: this should be wxLogError() call as otherwise we get several
    //        message boxes for each error instead of only one combining all
    //        messages!
-   m_MInterface->MessageDialog(tmp,NULL,_("Parse error!"));
+   m_MInterface->MessageDialog(tmp,nullptr,_("Parse error!"));
 }
 
 /** Reads the next token from the string and removes it from it.
@@ -1302,10 +1303,10 @@ FilterRuleImpl::ParseProgram(void)
    if(token.IsEOF())
    {
       Error(_("No filter program found"));
-      return NULL;
+      return nullptr;
    }
    const SyntaxNode * pgm = ParseFilters();
-   if(pgm == NULL)
+   if(pgm == nullptr)
       Error(_("Parse error, cannot find valid program."));
    return pgm;
 }
@@ -1314,7 +1315,7 @@ const SyntaxNode *
 FilterRuleImpl::ParseFilters(void)
 {
    MOcheck();
-   const SyntaxNode * filter = NULL;
+   const SyntaxNode * filter = nullptr;
    if(token.IsIdentifier(_T("if")))
    {
       filter = ParseIfElse();
@@ -1323,14 +1324,14 @@ FilterRuleImpl::ParseFilters(void)
    {
       filter = ParseBlock();
    }
-   if (filter == NULL)
-      return NULL;
+   if (filter == nullptr)
+      return nullptr;
    if(token.IsEOF())
       return filter;
    const SyntaxNode * next = ParseFilters();
-   if (next == NULL) {
+   if (next == nullptr) {
       delete filter;
-      return NULL;
+      return nullptr;
    }
    return new Filter(filter, next);
 }
@@ -1345,29 +1346,29 @@ FilterRuleImpl::ParseIfElse(void)
    if(!token.IsChar('('))
    {
       Error(_("expected '(' after 'if'."));
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '('
 
    const SyntaxNode *condition = ParseCondition();
    if(! condition)
-      return NULL;
+      return nullptr;
 
    if(!token.IsChar(')'))
    {
       Error(_("expected ')' after condition in if statement."));
       delete condition;
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow ')'
 
    const SyntaxNode *ifBlock = ParseBlock();
    if(! ifBlock) {
       delete condition;
-      return NULL;
+      return nullptr;
    }
 
-   const SyntaxNode *elseBlock = NULL;
+   const SyntaxNode *elseBlock = nullptr;
    if(token.IsIdentifier(_T("else")))
    {
       // we must parse the else branch, too:
@@ -1380,7 +1381,7 @@ FilterRuleImpl::ParseIfElse(void)
       {
          delete condition;
          delete ifBlock;
-         return NULL;
+         return nullptr;
       }
    }
    // if we reach here, everything was parsed OK:
@@ -1395,7 +1396,7 @@ FilterRuleImpl::ParseBlock(void)
    if(!token.IsChar('{'))
    {
       Error(_("Expected '{' at start of block."));
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '{'
    const SyntaxNode * stmt;
@@ -1403,16 +1404,16 @@ FilterRuleImpl::ParseBlock(void)
       stmt = ParseBlock(); // it can generate {{{ ... }}}
    else
       stmt = ParseStmts();
-   if(stmt == NULL)
+   if(stmt == nullptr)
    {
       Error(_("Expected statements after '{'"));
-      return NULL;
+      return nullptr;
    }
    if(!token.IsChar('}'))
    {
       Error(_("Expected '}' after block."));
       delete stmt;
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '}'
    return stmt;
@@ -1426,34 +1427,34 @@ FilterRuleImpl::ParseStmts(void)
    if(token.IsIdentifier(_T("if")))
    {
       stmt = ParseIfElse();
-      if(stmt == NULL)
-         return NULL;
+      if(stmt == nullptr)
+         return nullptr;
    }
    else if(token.GetType() == Token::TT_Identifier)
    {
       Token id = GetToken();
       stmt = ParseFunctionCall(id);
-      if(stmt == NULL)
-         return NULL;
+      if(stmt == nullptr)
+         return nullptr;
       if(!token.IsChar(';'))
       {
          Error(_("Expected ';' at end of statement."));
          delete stmt;
-         return NULL;
+         return nullptr;
       }
       NextToken();
    }
    else
    {
       Error(_("Expected a statement."));
-      return NULL;
+      return nullptr;
    }
    if(token.IsChar('}'))
       return stmt;
    const SyntaxNode * next = ParseStmts();
-   if(next == NULL) {
+   if(next == nullptr) {
       delete stmt;
-      return NULL;
+      return nullptr;
    }
    return new Statement(stmt, next);
 }
@@ -1470,10 +1471,10 @@ FilterRuleImpl::ParseCondition(void)
 {
    MOcheck();
    const SyntaxNode *sn = ParseQueryOp();
-   if (sn != NULL)
+   if (sn != nullptr)
       return sn;
    Error(_("Invalid conditional expression"));
-   return NULL;
+   return nullptr;
 }
 
 const SyntaxNode *
@@ -1481,29 +1482,29 @@ FilterRuleImpl::ParseQueryOp(void)
 {
    MOcheck();
    const SyntaxNode *sn = ParseOrs();
-   if(sn == NULL)
-      return NULL;
+   if(sn == nullptr)
+      return nullptr;
    if(!token.IsChar('?'))
            return sn;
    NextToken();
    const SyntaxNode *left = ParseExpression();
-   if(left == NULL) {
+   if(left == nullptr) {
       Error(_("Expected expression after '?'"));
       delete sn;
-      return NULL;
+      return nullptr;
    }
    if(!token.IsChar(':'))
    {
       Error(_("Expected ':' after '?' expression."));
       delete left; delete sn;
-      return NULL;
+      return nullptr;
    }
    NextToken();
    const SyntaxNode *right = ParseExpression();
-   if (right == NULL) {
+   if (right == nullptr) {
       Error(_("Expected expression after ':'"));
       delete left; delete sn;
-      return NULL;
+      return nullptr;
    }
    return new QueryOp(sn, left, right);
 }
@@ -1525,19 +1526,19 @@ FilterRuleImpl::Parse##name(void) \
 { \
    MOcheck(); \
    const SyntaxNode *expr = Parse##part(); \
-   if (expr == NULL) \
-      return NULL; \
+   if (expr == nullptr) \
+      return nullptr; \
    for (;;) \
    { \
       OpCreate op = opers(token); \
-      if (op == NULL) \
+      if (op == nullptr) \
          break; \
       NextToken(); \
       const SyntaxNode *exp = Parse##part(); \
-      if (exp == NULL) { \
+      if (exp == nullptr) { \
          delete expr; \
          Error(msg); \
-         return NULL; \
+         return nullptr; \
       } \
       expr = (*op)(expr, exp); \
    } \
@@ -1551,11 +1552,11 @@ OrOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(Or);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier(_T("or")))
       return OperatorOr::Create;
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Ors,OrOp,Iffs,_("Expected expression after OR operator"))
 
@@ -1567,12 +1568,12 @@ IffOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(Iff);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier("iff"))
    return OperatorIff::Create;
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Iffs,IffOp,Ands,_("Expected expression after IFF operator"))
 
@@ -1583,11 +1584,11 @@ AndOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(And);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier(_T("and")))
       return OperatorAnd::Create;
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Ands,AndOp,BOrs,_("Expected expression after AND operator"))
 
@@ -1599,10 +1600,10 @@ BOrOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(BOr);
-         default: return NULL;
+         default: return nullptr;
       }
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(BOrs,BOrOp,Xors,_("Expected expression after bit OR operator"))
 
@@ -1614,12 +1615,12 @@ XorOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(Xor);
-         default: return NULL;
+         default: return nullptr;
       }
    else if (t.IsIdentifier("xor"))
       return OperatorXor::Create;
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Xors,XorOp,BAnds,_("Expected expression after XOR operator"))
 
@@ -1631,10 +1632,10 @@ BAndOp(Token t)
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(BAnd);
-         default: return NULL;
+         default: return nullptr;
       }
 #endif
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(BAnds,BAndOp,Relational,
           _("Expected expression after bit AND operator"))
@@ -1643,7 +1644,7 @@ static inline OpCreate
 RelOp(Token t)
 {
    if (!t.IsOperator())
-      return NULL;
+      return nullptr;
    switch (t.GetOperator())
    {
       OPERATOR_VALUE(Less);
@@ -1657,7 +1658,7 @@ RelOp(Token t)
       default:
          ;
    }
-   return NULL;
+   return nullptr;
 }
 // Relationals are a special case; they don't associate.
 const SyntaxNode *
@@ -1665,17 +1666,17 @@ FilterRuleImpl::ParseRelational(void)
 {
    MOcheck();
    const SyntaxNode *expr = ParseTerm();
-   if (expr == NULL)
-      return NULL;
+   if (expr == nullptr)
+      return nullptr;
    OpCreate op = RelOp(token);
-   if (op == NULL)
+   if (op == nullptr)
       return expr;
    NextToken();
    const SyntaxNode *exp = ParseTerm();
-   if (exp == NULL) {
+   if (exp == nullptr) {
       delete expr;
       Error(_("Expected expression after relational operator"));
-      return NULL;
+      return nullptr;
    }
    return (*op)(expr, exp);
 }
@@ -1684,7 +1685,7 @@ static inline OpCreate
 AddOp(Token t)
 {
    if (!t.IsOperator())
-      return NULL;
+      return nullptr;
    switch (t.GetOperator())
    {
       OPERATOR_VALUE(Plus);
@@ -1695,7 +1696,7 @@ AddOp(Token t)
          ;
    }
 
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Term,AddOp,Factor,_("Expected term after plus/minus operator"))
 
@@ -1703,7 +1704,7 @@ static inline OpCreate
 MulOp(Token t)
 {
    if (!t.IsOperator())
-      return NULL;
+      return nullptr;
    switch (t.GetOperator())
    {
       OPERATOR_VALUE(Times);
@@ -1714,7 +1715,7 @@ MulOp(Token t)
       default:
          ;
    }
-   return NULL;
+   return nullptr;
 }
 LeftAssoc(Factor,MulOp,Unary,
           _("Expected factor after multiply/divide/modulus operator"))
@@ -1723,7 +1724,7 @@ const SyntaxNode *
 FilterRuleImpl::ParseUnary(void)
 {
    MOcheck();
-   const SyntaxNode *sn = NULL;
+   const SyntaxNode *sn = nullptr;
    if(token.GetType() == Token::TT_Char)
    {
       /* expression in parenthesis */
@@ -1735,7 +1736,7 @@ FilterRuleImpl::ParseUnary(void)
          {
             delete sn;
             Error(_("Expected ')' after expression."));
-            return NULL;
+            return nullptr;
          }
          NextToken();
       }
@@ -1743,10 +1744,10 @@ FilterRuleImpl::ParseUnary(void)
       {
          NextToken();
          sn = ParseUnary();
-         if(sn == NULL)
+         if(sn == nullptr)
          {
             Error(_("Expected unary after negation operator."));
-            return NULL;
+            return nullptr;
          }
          sn = new Negation(sn);
       }
@@ -1769,8 +1770,8 @@ FilterRuleImpl::ParseUnary(void)
          else
          {
             sn = ParseUnary();
-            if (sn == NULL)
-               return NULL;
+            if (sn == nullptr)
+               return nullptr;
             sn = new Negative(sn);
          }
       }
@@ -1797,7 +1798,7 @@ FilterRuleImpl::ParseUnary(void)
       NextToken();
    }
    // sn == NULL, illegal unary value
-   if(sn == NULL)
+   if(sn == nullptr)
       Error(_("Expected a number or a function call."));
    return sn;
 }
@@ -1815,7 +1816,7 @@ FilterRuleImpl::ParseFunctionCall(Token id)
       err.Printf(_("Functioncall expected '(' after '%s'."),
                  id.GetIdentifier());
       Error(err);
-      return NULL;
+      return nullptr;
    }
    NextToken(); // swallow '('
 
@@ -1832,13 +1833,13 @@ FilterRuleImpl::ParseFunctionCall(Token id)
          {
             Error(_("Expected an expression in argument list."));
             delete args;
-            return NULL;
+            return nullptr;
          }
          if(token.GetType() != Token::TT_Char)
          {
             Error(_("Expected ',' or ')' after argument."));
             delete args;
-            return NULL;
+            return nullptr;
          }
          else if(token.GetChar() == ')')
             break;
@@ -1849,14 +1850,14 @@ FilterRuleImpl::ParseFunctionCall(Token id)
    NextToken(); // swallow ')'
 
    const FunctionDefinition *fd = FindFunction(id.GetIdentifier());
-   if(fd == NULL)
+   if(fd == nullptr)
    {
       String err;
       err.Printf(_("Attempt to call undefined function '%s'."),
                  id.GetIdentifier());
       Error(err);
       delete args;
-      return NULL;
+      return nullptr;
    }
    return new FunctionCall(fd, args, this);
 }
@@ -1974,7 +1975,7 @@ static Value DoMatchRegEx(ArgList *args, FilterRuleImpl *p, int flags = 0)
    String needle = v2.ToString();
    strutil_RegEx * re = p->GetInterface()->
                            strutil_compileRegEx(needle, flags);
-   if(! re) return FALSE;
+   if(! re) return false;
 
    // yes, 0, don't use flags here
    bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, 0);
@@ -2006,7 +2007,7 @@ static Value func_python(ArgList *args, FilterRuleImpl *p)
    String funcName = args->GetArg(0)->Evaluate().ToString();
 
    int result = 0;
-   if ( !PythonFunction(funcName, msg.Get(), "Message", "i", &result) )
+   if ( !PythonFunction(funcName, msg.get(), "Message", "i", &result) )
       return 0;
 
    return result;
@@ -2034,8 +2035,8 @@ static Value func_print(ArgList *args, FilterRuleImpl *p)
 
    // FIXME: this can't work like this!!
 #if 0
-   wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL);
-   mvf->Show(FALSE);
+   wxMessageViewFrame *mvf = new wxMessageViewFrame(nullptr);
+   mvf->Show(false);
    mvf->ShowMessage(msg);
    msg->DecRef();
    bool rc = mvf->GetMessageView()->Print();
@@ -2313,7 +2314,7 @@ static Value func_now(ArgList *args, FilterRuleImpl *)
 {
    if(args->Count() != 0)
       return Value(-1);
-   time_t today = time(NULL) / 60 / 60 / 24;
+   time_t today = time(nullptr) / 60 / 60 / 24;
    return Value(today);
 }
 
@@ -2597,7 +2598,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
       rc = apply.Run();
 
       m_MailFolder->DecRef();
-      m_MailFolder = NULL;
+      m_MailFolder = nullptr;
    }
 #endif // !TEST
 
@@ -2622,8 +2623,8 @@ FilterRuleImpl::FilterRuleImpl(const char* filterrule,
 
    m_Program = Parse(filterrule);
    m_MessageUId = UID_ILLEGAL;
-   m_MailMessage = NULL;
-   m_MailFolder = NULL;
+   m_MailMessage = nullptr;
+   m_MailFolder = nullptr;
 }
 
 FilterRuleImpl::~FilterRuleImpl()
@@ -2651,7 +2652,7 @@ void FilterRuleImpl::Debug(void)
 FilterRuleApply::FilterRuleApply(FilterRuleImpl *parent, UIdArray& msgs)
                : m_parent(parent), m_msgs(msgs)
 {
-   m_pd = NULL;
+   m_pd = nullptr;
    m_doExpunge = false;
 }
 
@@ -2674,9 +2675,9 @@ FilterRuleApply::Run()
    }
 
    // check if Cancel wasn't pressed (we'd exit the loop above by break then)
-   if ( m_idx == m_msgs.GetCount() &&
+   if ( m_idx == m_msgs.size() &&
         (!m_pd ||
-            m_pd->Update(m_msgs.GetCount(), GetExecuteProgressString(wxEmptyString))) )
+            m_pd->Update(m_msgs.size(), GetExecuteProgressString(wxEmptyString))) )
    {
       if ( !LoopCopy() )
       {
@@ -2684,7 +2685,7 @@ FilterRuleApply::Run()
       }
 
       // again, stop right now if we were cancelled
-      if ( m_idx == m_msgs.GetCount() )
+      if ( m_idx == m_msgs.size() )
       {
          if ( !DeleteAll() )
          {
@@ -2715,7 +2716,7 @@ FilterRuleApply::LoopEvaluate()
    // first decide what should we do with the messages: fill the arrays with
    // the operations to perform and the destination folder if the operation
    // involves copying the message
-   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   for ( m_idx = 0; m_idx < m_msgs.size(); m_idx++ )
    {
       // do it first so that the arrays have the right size even if we hit
       // "continue" below
@@ -2752,7 +2753,7 @@ FilterRuleApply::LoopCopy()
 {
    bool allOk = true;
 
-   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   for ( m_idx = 0; m_idx < m_msgs.size(); m_idx++ )
    {
       if ( m_allOperations[m_idx] & FilterRuleImpl::Copy )
       {
@@ -2777,7 +2778,7 @@ FilterRuleApply::DeleteAll()
 {
    CollectForDelete();
 
-   if ( !m_uidsToDelete.IsEmpty() )
+   if ( !m_uidsToDelete.empty() )
    {
       ProgressDelete();
 
@@ -2804,7 +2805,7 @@ FilterRuleApply::CreateProgressDialog()
                   wxString::Format
                   (
                      _("Filtering %zu messages in folder \"%s\":"),
-                     m_msgs.GetCount(),
+                     m_msgs.size(),
                      m_parent->m_MailFolder->GetName()
                   ),
                   // make the message wide enough to show filtering messages
@@ -2818,7 +2819,7 @@ FilterRuleApply::CreateProgressDialog()
                      _("Subject: "),
                      wxString(120, '.')
                   ),
-                  2*m_msgs.GetCount(),
+                  2*m_msgs.size(),
                   frame
                );
    }
@@ -2910,7 +2911,7 @@ void FilterRuleApply::GetSenderSubject(String& from, String& subject, bool full)
    subject = MIME::DecodeHeader(msg->Subject());
 
    AddressList_obj addrList(msg->GetAddressList(MAT_FROM));
-   Address *addr = addrList ? addrList->GetFirst() : NULL;
+   Address *addr = addrList ? addrList->GetFirst() : nullptr;
    if ( addr )
    {
       if ( full )
@@ -2945,7 +2946,7 @@ String FilterRuleApply::CreditsCommon()
    String common(_("Filtering message"));
 
    // don't append "1/1" as it carries no useful information
-   const size_t count = m_msgs.GetCount();
+   const size_t count = m_msgs.size();
    if ( count != 1 )
       common += String::Format(_T(" %zu/%zu"), m_idx + 1, count);
 
@@ -3101,7 +3102,7 @@ FilterRuleApply::ProgressCopy()
    if ( m_pd )
    {
 
-      if( !m_pd->Update(m_msgs.GetCount() + m_idx,
+      if( !m_pd->Update(m_msgs.size() + m_idx,
                         GetExecuteProgressString(
                           wxString::Format(_("Copying messages to '%s'..."),
                                            m_destinations[m_idx]))) )
@@ -3120,15 +3121,15 @@ FilterRuleApply::CopyToOneFolder()
    UIdArray uidsToCopy;
    wxArrayLong indexesToCopy;
 
-   uidsToCopy.Add(m_msgs[m_idx]);
+   uidsToCopy.push_back(m_msgs[m_idx]);
    indexesToCopy.Add(m_idx);
 
-   for ( size_t n = m_idx + 1; n < m_msgs.GetCount(); n++ )
+   for ( size_t n = m_idx + 1; n < m_msgs.size(); n++ )
    {
       if ( (m_allOperations[n] & FilterRuleImpl::Copy)
          && m_destinations[n] == m_destinations[m_idx] )
       {
-         uidsToCopy.Add(m_msgs[n]);
+         uidsToCopy.push_back(m_msgs[n]);
          indexesToCopy.Add(n);
       }
    }
@@ -3155,15 +3156,15 @@ FilterRuleApply::CopyToOneFolder()
 void
 FilterRuleApply::CollectForDelete()
 {
-   m_uidsToDelete.Empty();
+   m_uidsToDelete.clear();
    m_indicesDeleted.Empty();
 
-   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   for ( m_idx = 0; m_idx < m_msgs.size(); m_idx++ )
    {
       if ( m_allOperations[m_idx] & FilterRuleImpl::Delete )
       {
          m_indicesDeleted.Add(m_idx);
-         m_uidsToDelete.Add(m_msgs[m_idx]);
+         m_uidsToDelete.push_back(m_msgs[m_idx]);
       }
    }
 }
@@ -3173,7 +3174,7 @@ FilterRuleApply::ProgressDelete()
 {
    if ( m_pd )
    {
-      m_pd->Update(2*m_msgs.GetCount(),
+      m_pd->Update(2*m_msgs.size(),
                    GetExecuteProgressString(_("Deleting moved messages...")));
    }
 }
@@ -3187,7 +3188,7 @@ FilterRuleApply::IndicateDeleted()
    size_t count = m_indicesDeleted.GetCount();
    for ( size_t n = count; n > 0; n-- )
    {
-      m_msgs.RemoveAt(m_indicesDeleted[n - 1]);
+      m_msgs.erase(m_msgs.begin() + m_indicesDeleted[n - 1]);
    }
 }
 
@@ -3204,7 +3205,7 @@ class MModule_FiltersImpl : public MModule_Filters
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
    */
-   virtual FilterRule * GetFilter(const char* filterrule) const;
+   FilterRule * GetFilter(const char* filterrule) const override;
    DEFAULT_ENTRY_FUNC
 protected:
    MModule_FiltersImpl()
@@ -3243,7 +3244,7 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
    if(! MMODULE_SAME_VERSION(vmajor, vminor, vrelease))
    {
       if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
-      return NULL;
+      return nullptr;
    }
    return new MModule_FiltersImpl();
 }
@@ -3286,7 +3287,7 @@ TestExprFail(const char *s)
 {
    MyParser p(s, true);
    const SyntaxNode *exp = p.ParseExpression();
-   if (exp == NULL)
+   if (exp == nullptr)
    {
       Rejected(p);
       return 0;
@@ -3302,7 +3303,7 @@ TestExpr(int arg, const char *s)
 {
    MyParser p(s);
    const SyntaxNode *exp = p.ParseExpression();
-   if (exp == NULL)
+   if (exp == nullptr)
    {
       Rejected(p);
       return 1;
@@ -3322,7 +3323,7 @@ TestReject(const char *s)
 {
    MyParser p(s, true);
    const SyntaxNode *pgm = p.ParseProgram();
-   if (pgm == NULL)
+   if (pgm == nullptr)
    {
       Rejected(p);
       return 0;
@@ -3338,7 +3339,7 @@ TestAccept(const char *s)
 {
    MyParser p(s);
    const SyntaxNode *pgm = p.ParseProgram();
-   if (pgm == NULL)
+   if (pgm == nullptr)
    {
       Rejected(p);
       return 1;
@@ -3352,7 +3353,7 @@ TestPgm(int arg, const char *s)
 {
    MyParser p(s);
    const SyntaxNode *pgm = p.ParseProgram();
-   if (pgm == NULL)
+   if (pgm == nullptr)
    {
       Rejected(p);
       return 1;

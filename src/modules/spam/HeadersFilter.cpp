@@ -46,6 +46,8 @@
 #include "SpamFilter.h"
 #include "gui/SpamOptionsPage.h"
 
+#include <vector>
+
 #ifdef OS_MAC
    #undef USE_RBL
 #endif
@@ -207,29 +209,29 @@ public:
    HeadersFilter() { }
 
 protected:
-   virtual bool DoReclassify(const Profile * /* profile */,
-                             const Message& /* msg */,
-                             bool /* isSpam */)
+   bool DoReclassify(const Profile * /* profile */,
+                     const Message& /* msg */,
+                     bool /* isSpam */) override
    {
       // this filter can't be trained but it never really fails, it just
       // doesn't make sense
       return true;
    }
 
-   virtual void DoTrain(const Profile * /* profile */,
-                        const Message& /* msg */,
-                        bool /* isSpam */)
+   void DoTrain(const Profile * /* profile */,
+                const Message& /* msg */,
+                bool /* isSpam */) override
    {
       // this filter can't be trained
    }
 
-   virtual int DoCheckIfSpam(const Profile *profile,
-                             const Message& msg,
-                             const String& param,
-                             String *result);
-   virtual const char *GetOptionPageIconName() const { return "spam"; }
-   virtual SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
-                                             Profile *profile) const;
+   int DoCheckIfSpam(const Profile *profile,
+                     const Message& msg,
+                     const String& param,
+                     String *result) override;
+   const char *GetOptionPageIconName() const override { return "spam"; }
+   SpamOptionsPage *CreateOptionPage(MBookCtrl *notebook,
+                                     Profile *profile) const override;
 
 
    DECLARE_SPAM_FILTER("headers", _("Heuristic headers test"), 30);
@@ -244,7 +246,7 @@ IMPLEMENT_SPAM_FILTER(HeadersFilter,
 // SpamOption and derived classes, used by HeadersOptionsPage
 // ----------------------------------------------------------------------------
 
-typedef scoped_array<wxOptionsPage::FieldInfo> ArrayFieldInfo;
+using ArrayFieldInfo = std::vector<wxOptionsPage::FieldInfo>;
 
 /*
    Represents a single spam option.
@@ -345,12 +347,12 @@ class SpamOptionExeAttach : public SpamOption
 public:
    SpamOptionExeAttach() : SpamOption(Spam_Test_ExeAttachment) { }
 
-   virtual size_t GetEntriesCount() const
+   size_t GetEntriesCount() const override
    {
       return SpamOption::GetEntriesCount() + 1;
    }
 
-   virtual size_t BuildFieldInfo(ArrayFieldInfo& fields, size_t n) const
+   size_t BuildFieldInfo(ArrayFieldInfo& fields, size_t n) const override
    {
       size_t count = SpamOption::BuildFieldInfo(fields, n);
       wxOptionsPage::FieldInfo& info = fields[n + count];
@@ -424,7 +426,7 @@ private:
 
    size_t GetConfigEntryCount();
 
-   scoped_array<ConfigValueDefault> m_configValues;
+   std::vector<ConfigValueDefault> m_configValues;
    ArrayFieldInfo m_fieldInfo;
 
    SpamOptionAssassin m_checkSpamAssassin;
@@ -1024,7 +1026,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
 }
 
 static const wxChar * gs_RblSites[] =
-{ _T("rbl.maps.vix.com"), _T("relays.orbs.org"), _T("rbl.dorkslayers.com"), NULL };
+{ _T("rbl.maps.vix.com"), _T("relays.orbs.org"), _T("rbl.dorkslayers.com"), nullptr };
 
 static bool findIP(String &header,
                    char openChar, char closeChar,
@@ -1332,9 +1334,9 @@ void HeadersOptionsPage::SetFalse()
 
 ConfigValueDefault *HeadersOptionsPage::GetConfigValues()
 {
-   // ConfigValueDefault doesn't have default ctor, so use this hack knowing
-   // that ConfigValueNone has exactly the same binary layout as ValueDefault
-   m_configValues.reset(new ConfigValueNone[GetConfigEntryCount()]);
+   // ConfigValueDefault doesn't have default ctor, so fill the vector with
+   // copies of ConfigValueNone, which are overwritten below
+   m_configValues.assign(GetConfigEntryCount(), ConfigValueNone());
 
    size_t n = 1;
    for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
@@ -1348,12 +1350,12 @@ ConfigValueDefault *HeadersOptionsPage::GetConfigValues()
       n += option->GetEntriesCount();
    }
 
-   return m_configValues.get();
+   return m_configValues.data();
 }
 
 wxOptionsPage::FieldInfo *HeadersOptionsPage::GetFieldInfo()
 {
-   m_fieldInfo.reset(new wxOptionsPage::FieldInfo[GetConfigEntryCount()]);
+   m_fieldInfo.assign(GetConfigEntryCount(), wxOptionsPage::FieldInfo());
 
    m_fieldInfo[0].label
       = gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
@@ -1370,6 +1372,6 @@ wxOptionsPage::FieldInfo *HeadersOptionsPage::GetFieldInfo()
       n += option->BuildFieldInfo(m_fieldInfo, n);
    }
 
-   return m_fieldInfo.get();
+   return m_fieldInfo.data();
 }
 

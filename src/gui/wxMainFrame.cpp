@@ -58,6 +58,9 @@
 
 #include "mail/FolderPool.h"
 
+#include <algorithm>
+#include <memory>
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -135,7 +138,7 @@ static bool WaitForNetwork(int timeoutInSec)
    for ( int n = 0; n < timeoutInSec/2; n++ )
    {
       DWORD flags;
-      if ( (*s_pfnInternetGetConnectedState)(&flags, 0) == TRUE )
+      if ( (*s_pfnInternetGetConnectedState)(&flags, 0) == true )
       {
          wxLogDebug("Network is available.");
          return true;
@@ -251,7 +254,7 @@ public:
       m_frame = frame;
    }
 
-   virtual void OnSelectionChange(MFolder *oldsel, MFolder *newsel)
+   void OnSelectionChange(MFolder *oldsel, MFolder *newsel) override
    {
       if ( newsel )
       {
@@ -268,7 +271,7 @@ public:
       wxFolderTree::OnSelectionChange(oldsel, newsel);
    }
 
-   virtual void OnOpenHere(MFolder *folder)
+   void OnOpenHere(MFolder *folder) override
    {
       if ( !folder )
       {
@@ -279,26 +282,26 @@ public:
          // normally the base class version DecRef()s it but as we're going to
          // pass NULL to it, do it ourselves
          folder->DecRef();
-         folder = NULL;
+         folder = nullptr;
       }
 
       wxFolderTree::OnOpenHere(folder);
    }
 
-   virtual void OnView(MFolder *folder)
+   void OnView(MFolder *folder) override
    {
       CHECK_RET( folder, _T("can't view a NULL folder") );
 
       if ( !m_frame->OpenFolder(folder, true /* RO */) )
       {
          folder->DecRef();
-         folder = NULL;
+         folder = nullptr;
       }
 
       wxFolderTree::OnView(folder);
    }
 
-   virtual bool OnClose(MFolder *folder)
+   bool OnClose(MFolder *folder) override
    {
       m_frame->CloseFolder(folder);
 
@@ -322,7 +325,7 @@ public:
       m_mainFrame = mainFrame;
    }
 
-   virtual bool MoveToNextUnread(bool /* takeNextIfNoUnread */ = true)
+   bool MoveToNextUnread(bool /* takeNextIfNoUnread */ = true) override
    {
       if ( wxFolderView::MoveToNextUnread(false /* don't take next */) )
       {
@@ -349,7 +352,7 @@ public:
       return true;
    }
 
-   virtual void SetFolder(MailFolder *mf)
+   void SetFolder(MailFolder *mf) override
    {
       if ( !mf )
          m_mainFrame->ClearFolderName();
@@ -357,13 +360,13 @@ public:
       wxFolderView::SetFolder(mf);
    }
 
-   virtual void OnAppExit()
+   void OnAppExit() override
    {
       // don't do anything here: the base class version saves this folder name
       // in MP_OPENFOLDERS config entry but the main frame does it for us
    }
 
-   virtual Profile *GetFolderProfile() const
+   Profile *GetFolderProfile() const override
    {
       Profile *profile = GetProfile();
       if ( !profile )
@@ -394,9 +397,9 @@ public:
    // default ctor
    AsyncSearchData()
    {
-      m_mfVirt = NULL;
+      m_mfVirt = nullptr;
 
-      m_folderVirt = NULL;
+      m_folderVirt = nullptr;
 
       m_nMatchingMessages =
       m_nMatchingFolders = 0;
@@ -421,7 +424,7 @@ public:
       CHECK( mf && t != ILLEGAL_TICKET, false,
              _T("invalid params in AsyncSearchData::AddSearchFolder") );
 
-      m_listSingleSearch.push_back(new SingleSearchData(t, mf));
+      m_listSingleSearch.push_back(std::make_unique<SingleSearchData>(t, mf));
 
       return true;
    }
@@ -436,12 +439,19 @@ public:
    bool HandleSearchResult(const ASMailFolder::Result& result)
    {
       const Ticket t = result.GetTicket();
-      for ( SingleSearchDataList::iterator i = m_listSingleSearch.begin();
+      for ( auto i = m_listSingleSearch.begin();
             i != m_listSingleSearch.end();
             ++i )
       {
-         if ( i->GetTicket() == t )
+         if ( (*i)->GetTicket() == t )
          {
+            // we don't care about this one any more after processing it, so
+            // remove it from the list right now: this is also necessary as
+            // the code below may dispatch events and result in modifying the
+            // list, which would invalidate the iterator
+            const std::unique_ptr<SingleSearchData> search = std::move(*i);
+            m_listSingleSearch.erase(i);
+
             if ( ((const ASMailFolder::ResultInt&)result).GetValue() )
             {
                const UIdArray *uidsMatching = result.GetSequence();
@@ -455,7 +465,7 @@ public:
                   // yet
                   if ( GetResultsVFolder() )
                   {
-                     const MailFolder *mf = i->GetMailFolder();
+                     const MailFolder *mf = search->GetMailFolder();
 
                      // and append all matching messages to the results folder
                      HeaderInfoList_obj hil(mf->GetHeaders());
@@ -463,13 +473,13 @@ public:
                      {
                         size_t nMatches = 0;
 
-                        size_t count = uidsMatching->GetCount();
+                        size_t count = uidsMatching->size();
                         for ( size_t n = 0; n < count; n++ )
                         {
                            Message_obj msg(mf->GetMessage((*uidsMatching)[n]));
                            if ( msg )
                            {
-                              m_mfVirt->AppendMessage(*msg.Get());
+                              m_mfVirt->AppendMessage(*msg);
 
                               nMatches++;
                            }
@@ -485,9 +495,6 @@ public:
                }
             }
             //else: nothing found at all in this folder, nothing to do
-
-            // we don't care about this one any more
-            m_listSingleSearch.erase(i);
 
             // it was our result
             return true;
@@ -568,7 +575,7 @@ private:
             if ( !m_mfVirt )
             {
                m_folderVirt->DecRef();
-               m_folderVirt = NULL;
+               m_folderVirt = nullptr;
             }
          }
       }
@@ -612,7 +619,7 @@ private:
 
    // the list containing the individual search records for all folders we're
    // searching in
-   M_LIST_OWN(SingleSearchDataList, SingleSearchData) m_listSingleSearch;
+   std::vector<std::unique_ptr<SingleSearchData>> m_listSingleSearch;
 
    // the virtual folder we show the search results in and the associated
    // MFolder object for it
@@ -643,40 +650,57 @@ public:
    // create a record for a new search operation
    AsyncSearchData *StartNewSearch()
    {
-      AsyncSearchData *ssd = new AsyncSearchData;
-      m_listAsyncSearch.push_back(ssd);
-      return ssd;
+      m_listAsyncSearch.push_back(std::make_unique<AsyncSearchData>());
+      return m_listAsyncSearch.back().get();
    }
 
    // process the result of the async search operation
    void HandleSearchResult(const ASMailFolder::Result& result)
    {
       // leave the real handling to the search this result concerns
-      for ( AsyncSearchDataList::iterator i = m_listAsyncSearch.begin();
-            i != m_listAsyncSearch.end();
-            ++i )
+      //
+      // note that we can't keep the iterators into m_listAsyncSearch while
+      // calling AsyncSearchData methods as they may dispatch events and
+      // result in modifying the vector, so just remember the pointer
+      AsyncSearchData *search = nullptr;
+      for ( const auto& s : m_listAsyncSearch )
       {
-         if ( i->HandleSearchResult(result) )
+         if ( s->HandleSearchResult(result) )
          {
-            // was it the last search result for this search
-            if ( i->IsSearchCompleted() )
-            {
-               // yes, show the results ...
-               i->ShowSearchResults(m_frame);
-
-               // ... and delete the stale stale search record
-               m_listAsyncSearch.erase(i);
-            }
-
-            return;
+            search = s.get();
+            break;
          }
       }
 
-      FAIL_MSG( _T("got search result for a search we hadn't ever started?") );
+      if ( !search )
+      {
+         FAIL_MSG( _T("got search result for a search we hadn't ever started?") );
+         return;
+      }
+
+      // was it the last search result for this search?
+      if ( !search->IsSearchCompleted() )
+         return;
+
+      // yes, remove the stale search record from the list before showing the
+      // results, as this may show a modal dialog ...
+      const auto i = std::find_if(m_listAsyncSearch.begin(),
+                                  m_listAsyncSearch.end(),
+                                  [search](const auto& s)
+                                  {
+                                     return s.get() == search;
+                                  });
+      CHECK_RET( i != m_listAsyncSearch.end(), _T("search record disappeared?") );
+
+      const std::unique_ptr<AsyncSearchData> searchOwner = std::move(*i);
+      m_listAsyncSearch.erase(i);
+
+      // ... and show the results
+      search->ShowSearchResults(m_frame);
    }
 
 private:
-   M_LIST_OWN(AsyncSearchDataList, AsyncSearchData) m_listAsyncSearch;
+   std::vector<std::unique_ptr<AsyncSearchData>> m_listAsyncSearch;
 
    wxFrame *m_frame;
 };
@@ -726,9 +750,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #endif // wx 3.3.0+
 {
    // init members
-   m_searchData = NULL;
-   m_FolderTree = NULL;
-   m_FolderView = NULL;
+   m_searchData = nullptr;
+   m_FolderTree = nullptr;
+   m_FolderView = nullptr;
 
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
@@ -797,11 +821,11 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // disable the operations which don't make sense for viewer
    wxMenuBar *menuBar = GetMenuBar();
-   menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
-   menuBar->Enable(WXMENU_EDIT_PASTE, FALSE);
-   menuBar->Enable(WXMENU_EDIT_PASTE_QUOTED, FALSE);
+   menuBar->Enable(WXMENU_EDIT_CUT, false);
+   menuBar->Enable(WXMENU_EDIT_PASTE, false);
+   menuBar->Enable(WXMENU_EDIT_PASTE_QUOTED, false);
 
-   m_ModulesMenu = NULL;
+   m_ModulesMenu = nullptr;
 
    // update the menu to match the initial selection
    MFolder_obj folder(m_FolderTree->GetSelection());
@@ -847,7 +871,7 @@ wxMainFrame::CloseFolder(MFolder *folder)
 {
    if ( !folder || folder->GetFullName() == m_folderName )
    {
-      m_FolderView->SetFolder(NULL);
+      m_FolderView->SetFolder(nullptr);
 
       //m_folderName.clear(); -- now done in our ClearFolderName()
    }
@@ -933,7 +957,7 @@ wxMainFrame::CanClose() const
    }
 
    // make sure folder is closed before we close the window
-   m_FolderView->SetFolder(NULL);
+   m_FolderView->SetFolder(nullptr);
 
    // tell all the others that we're going away
    mApplication->OnClose();
@@ -964,7 +988,7 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    static bool s_hasPreview = true;
    static bool s_hasFolder = true;
 
-   bool hasFolder = m_FolderView->GetFolder() != NULL;
+   bool hasFolder = m_FolderView->GetFolder() != nullptr;
    if ( hasFolder != s_hasFolder )
    {
       EnableMMenu(MMenu_Message, this, hasFolder);
@@ -1046,7 +1070,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                MFolder_obj folder(MDialog_FolderChoose
                                   (
                                       this, // parent window
-                                      NULL, // parent folder
+                                      nullptr, // parent folder
                                       true  // open
                                   ));
                if ( folder )
@@ -1301,10 +1325,10 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                wxArrayString folderNames;
 
                MFPool::Cookie cookie;
-               MFolder *folder = NULL;
-               for ( MailFolder *mf = MFPool::GetFirst(cookie, NULL, &folder);
+               MFolder *folder = nullptr;
+               for ( MailFolder *mf = MFPool::GetFirst(cookie, nullptr, &folder);
                      mf;
-                     mf = MFPool::GetNext(cookie, NULL, &folder) )
+                     mf = MFPool::GetNext(cookie, nullptr, &folder) )
                {
                   folderNames.push_back(folder->GetFullName());
 
@@ -1364,7 +1388,7 @@ void wxMainFrame::OnPowerSuspended(wxPowerEvent& WXUNUSED(event))
          if ( mf->Suspend() )
          {
             // Pass ownership to the list of folders to resume.
-            m_foldersToResume.push_back(mfObj.Detach());
+            m_foldersToResume.push_back(mfObj.release());
          }
          //else: this (probably local) folder will survive resume.
       }
@@ -1434,7 +1458,7 @@ void wxMainFrame::OnPowerResume(wxPowerEvent& WXUNUSED(event))
          // In case we failed to reopen the folder shown in the main frame,
          // stop showing its old (pre-suspend) state now.
          if ( mf->GetName() == m_folderName )
-            m_FolderView->SetFolder(NULL);
+            m_FolderView->SetFolder(nullptr);
       }
       else
       {
@@ -1459,7 +1483,7 @@ void wxMainFrame::DoFolderSearch()
    MFolder_obj folderSel(m_FolderTree->GetSelection());
    if ( ConfigureSearchMessages(&crit, profile, folderSel, this) )
    {
-      AsyncSearchData *searchData = NULL;
+      AsyncSearchData *searchData = nullptr;
 
       const wxArrayString& folderNames = crit.m_Folders;
       size_t count = folderNames.GetCount();
@@ -1676,7 +1700,7 @@ public:
       m_nCount = 0;
    }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
    {
       MFolder_obj folder(folderName);
       CHECK( folder, false, _T("visiting folder which doesn't exist?") );

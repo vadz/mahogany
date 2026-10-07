@@ -47,9 +47,9 @@
 // private classes
 // ----------------------------------------------------------------------------
 
-DECLARE_AUTOPTR(AdbEntry);
-DECLARE_AUTOPTR(AdbEntryGroup);
-DECLARE_AUTOPTR(AdbBook);
+using AdbEntry_obj = DecRefPtr<AdbEntry>;
+using AdbEntryGroup_obj = DecRefPtr<AdbEntryGroup>;
+using AdbBook_obj = DecRefPtr<AdbBook>;
 
 // ============================================================================
 // implementation of our public API
@@ -147,7 +147,7 @@ void AutoCollectAddress(const String& email,
       String providerName;
 
       AdbBook *autocollectbook = manager->CreateBook(
-         bookName, NULL, &providerName );
+         bookName, nullptr, &providerName );
 
       RefCounter<AdbDataProvider> bookProvider(
          AdbDataProvider::GetProviderByName(providerName));
@@ -184,7 +184,7 @@ void AutoCollectAddress(const String& email,
          group = autocollectbook->CreateGroup(adbGroupName);
       }
       else
-         group = NULL;
+         group = nullptr;
 
       if ( !group )
       {
@@ -282,7 +282,7 @@ void AutoCollectAddress(const String& email,
             }
          }
       }
-      else if ( matches.GetCount() == 1 )
+      else if ( matches.size() == 1 )
       {
          // there is already an entry which has this e-mail, don't create
          // another one (even if the name is different it's more than likely
@@ -312,7 +312,7 @@ void AutoCollectAddress(const String& email,
       }
 
       // release the found items (if any)
-      size_t count = matches.Count();
+      size_t count = matches.size();
       for ( size_t n = 0; n < count; n++ )
       {
          matches[n]->DecRef();
@@ -413,7 +413,8 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
          size_t saved = 0;
          for ( size_t n = 0; n < count; n++ )
          {
-            AddressList_obj addrList(addresses[selections[n]]);
+            AddressList_obj
+               addrList(AddressList::Create(addresses[selections[n]]));
 
             for ( Address *addr = addrList->GetFirst();
                   addr;

@@ -47,7 +47,7 @@
 #define   ADB_HEADER_DESC   "Description"
 #define   ADB_ENTRIES       "ADB_Entries"
 
-IMPLEMENT_ADB_PROVIDER(PalmDataProvider, TRUE, "PalmOS-ADB (ReadOnly)", Name_No);
+IMPLEMENT_ADB_PROVIDER(PalmDataProvider, true, "PalmOS-ADB (ReadOnly)", Name_No);
 
 // ============================================================================
 // implementation
@@ -66,7 +66,7 @@ PalmEntry::PalmEntry(PalmEntryGroup *pGroup, const String& strName, bool bNew)
   if (m_pGroup)
     m_pGroup->IncRef();
 */
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 PalmEntry::~PalmEntry()
@@ -115,13 +115,13 @@ void PalmEntry::Load(struct Address a)
 
   // write "user defined 1-4" to comments!
   
-  m_bDirty = FALSE;
+  m_bDirty = false;
 }
 
 bool PalmEntry::Save()
 {
   // TODO: save changed entries to Palm
-  return FALSE;
+  return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -158,7 +158,7 @@ PalmEntryGroup::~PalmEntryGroup()
       (**i).DecRef();
    
    PalmGroupList::iterator j;
-   PalmEntryGroup *group = NULL;
+   PalmEntryGroup *group = nullptr;
    for(j = m_groups->begin(); j != m_groups->end(); j++)
    {
       group = *j;
@@ -197,13 +197,13 @@ AdbEntry *PalmEntryGroup::GetEntry(const String& name)
       return *i;
     }
   }
-  return NULL;
+  return nullptr;
 } 
 
 bool PalmEntryGroup::Exists(const String& path)
 {
    // TODO
-   return FALSE;
+   return false;
 }
 
 AdbEntryGroup *PalmEntryGroup::GetGroup(const String& name) const
@@ -217,7 +217,7 @@ AdbEntryGroup *PalmEntryGroup::GetGroup(const String& name) const
       return *i;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 void PalmEntryGroup::AddEntry(PalmEntry* p_Entry) 
@@ -229,12 +229,12 @@ void PalmEntryGroup::AddEntry(PalmEntry* p_Entry)
 
 AdbEntry *PalmEntryGroup::CreateEntry(const String& name)
 {
-  CHECK( !!name, NULL, _T("can't create entries with empty names") );
+  CHECK( !!name, nullptr, _T("can't create entries with empty names") );
 
-  PalmEntry *pEntry = new PalmEntry((PalmEntryGroup *)this, name, TRUE /* new */);
+  PalmEntry *pEntry = new PalmEntry((PalmEntryGroup *)this, name, true /* new */);
   if ( !pEntry->IsOk() ) {
     pEntry->DecRef();
-    pEntry = NULL;
+    pEntry = nullptr;
   }
 
   return pEntry;
@@ -242,12 +242,12 @@ AdbEntry *PalmEntryGroup::CreateEntry(const String& name)
 
 AdbEntryGroup *PalmEntryGroup::CreateGroup(const String& name)
 {
-  if (this->m_pParent == NULL) {
+  if (this->m_pParent == nullptr) {
     PalmEntryGroup* p_Group = new PalmEntryGroup(this, name);
     m_groups->push_back(p_Group);
     return p_Group;
   } else
-    return NULL;
+    return nullptr;
 }
 
 void PalmEntryGroup::DeleteEntry(const String& strName)
@@ -264,7 +264,7 @@ void PalmEntryGroup::DeleteGroup(const String& strName)
 AdbEntry *PalmEntryGroup::FindEntry(const wxChar * /* szName */)
 {
   // currently not supported
-  return NULL;
+  return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -276,7 +276,7 @@ PalmBook::PalmBook(const String& strName)
 {
   // create the root group, in our case this is the only group
   // allowed to contain subgroups!
-  m_pRootGroup = new PalmEntryGroup(NULL, strName);
+  m_pRootGroup = new PalmEntryGroup(nullptr, strName);
 
   SetName(_("PalmOS Addressbook"));
   SetDescription(_("PalmOS Addressbook"));
@@ -350,20 +350,20 @@ AdbBook *PalmDataProvider::CreateBook(const String& name)
     return p_Book;
   }
   else
-    return NULL;
+    return nullptr;
 }
 
 bool PalmDataProvider::EnumBooks(wxArrayString& /* aNames */)
 {
-  return FALSE;
+  return false;
 }
 
 bool PalmDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
   MModule *palmModule = MModule::GetProvider("HandheldSynchronise");
-  bool rc = palmModule != NULL;
+  bool rc = palmModule != nullptr;
   if(! rc)
-     return FALSE;
+     return false;
   
   palmModule->DecRef();
   rc = name == PALMOS_ADB_NAME;
@@ -373,13 +373,13 @@ bool PalmDataProvider::TestBookAccess(const String& name, AdbTests test)
   case Test_OpenReadOnly:
        return rc;
   case Test_Create:
-     return FALSE;
+     return false;
   case Test_AutodetectCapable:
   case Test_RecognizesName:
     return true;
   default:
      FAIL_MSG(_T("invalid test in TestBookAccess"));
-     return FALSE;
+     return false;
   }
 }
 
@@ -387,7 +387,7 @@ bool PalmDataProvider::DeleteBook(AdbBook * /* book */)
 {
   // Palm-ADB is currently only available in memory
   // TODO: Delete all entries in memory
-  return FALSE;
+  return false;
 }
 
 // ----------------------------------------------------------------------------

@@ -22,104 +22,106 @@
 
 #include <set>
 
+#include <vector>
+
 class MailFolderVirt : public MailFolderCmn
 {
 public:
    /** @name Suspending and resuming */
    //@{
 
-   virtual bool Suspend();
-   virtual bool Resume();
+   bool Suspend() override;
+   bool Resume() override;
 
    //@}
 
    /** @name Accessors */
    //@{
 
-   virtual bool IsOpened() const;
+   bool IsOpened() const override;
 
-   virtual bool IsReadOnly() const;
+   bool IsReadOnly() const override;
 
-   virtual bool CanSetFlag(int flags) const;
+   bool CanSetFlag(int flags) const override;
 
-   virtual String GetName() const;
+   String GetName() const override;
 
-   virtual MFolderType GetType() const;
+   MFolderType GetType() const override;
 
-   virtual int GetFlags() const;
+   int GetFlags() const override;
 
    // the pointer returned by this function should *NOT* be DecRef()'d
-   virtual Profile *GetProfile() const;
+   Profile *GetProfile() const override;
 
-   virtual bool IsInCriticalSection() const;
+   bool IsInCriticalSection() const override;
 
-   virtual ServerInfoEntry *CreateServerInfo(const MFolder *folder) const;
+   ServerInfoEntry *CreateServerInfo(const MFolder *folder) const override;
 
-   virtual char GetFolderDelimiter() const;
+   char GetFolderDelimiter() const override;
 
    //@}
 
    /** @name Functions working with message headers */
    //@{
-   virtual MsgnoType GetHeaderInfo(ArrayHeaderInfo& headers,
-                                   const Sequence& seq);
+   MsgnoType GetHeaderInfo(ArrayHeaderInfo& headers,
+                           const Sequence& seq) override;
 
-   virtual unsigned long GetMessageCount() const;
+   unsigned long GetMessageCount() const override;
 
-   virtual unsigned long CountNewMessages() const;
+   unsigned long CountNewMessages() const override;
 
-   virtual unsigned long CountRecentMessages() const;
+   unsigned long CountRecentMessages() const override;
 
-   virtual unsigned long CountUnseenMessages() const;
+   unsigned long CountUnseenMessages() const override;
 
-   virtual unsigned long CountDeletedMessages() const;
+   unsigned long CountDeletedMessages() const override;
 
-   virtual MsgnoType GetMsgnoFromUID(UIdType uid) const;
+   MsgnoType GetMsgnoFromUID(UIdType uid) const override;
    //@}
 
    /** @name Operations on the folder */
    //@{
-   virtual bool Ping();
+   bool Ping() override;
 
-   virtual void Checkpoint();
+   void Checkpoint() override;
 
-   virtual Message *GetMessage(unsigned long uid) const;
+   Message *GetMessage(unsigned long uid) const override;
 
-   virtual bool SetMessageFlag(unsigned long uid,
-                               int flag,
-                               bool set = true);
-   virtual bool SetSequenceFlag(SequenceKind kind,
-                                const Sequence& sequence,
-                                int flag,
-                                bool set = true);
+   bool SetMessageFlag(unsigned long uid,
+                       int flag,
+                       bool set = true) override;
+   bool SetSequenceFlag(SequenceKind kind,
+                        const Sequence& sequence,
+                        int flag,
+                        bool set = true) override;
 
-   virtual bool AppendMessage(const Message& msg);
+   bool AppendMessage(const Message& msg) override;
 
-   virtual bool AppendMessage(const String& msg);
+   bool AppendMessage(const String& msg) override;
 
-   virtual void ExpungeMessages();
+   void ExpungeMessages() override;
 
-   virtual MsgnoArray *SearchByFlag(MessageStatus flag,
-                                    int flags = SEARCH_SET |
-                                                SEARCH_UNDELETED,
-                                    MsgnoType last = 0) const;
+   MsgnoArray *SearchByFlag(MessageStatus flag,
+                            int flags = SEARCH_SET |
+                                        SEARCH_UNDELETED,
+                            MsgnoType last = 0) const override;
 
-   virtual void ListFolders(class ASMailFolder *asmf,
-                            const String &pattern = _T("*"),
-                            bool subscribed_only = false,
-                            const String &reference = wxEmptyString,
-                            UserData ud = 0,
-                            Ticket ticket = ILLEGAL_TICKET);
+   void ListFolders(class ASMailFolder *asmf,
+                    const String &pattern = _T("*"),
+                    bool subscribed_only = false,
+                    const String &reference = wxEmptyString,
+                    UserData ud = nullptr,
+                    Ticket ticket = ILLEGAL_TICKET) override;
    //@}
 
    /**@name Access control */
    //@{
 
-   virtual bool Lock() const;
+   bool Lock() const override;
 
-   virtual void UnLock() const;
+   void UnLock() const override;
 
-   virtual bool IsLocked() const;
+   bool IsLocked() const override;
 
    //@}
 
@@ -137,7 +139,7 @@ public:
                                  const String& login,
                                  const String& password,
                                  OpenMode openmode = Normal,
-                                 wxFrame *frame = NULL);
+                                 wxFrame *frame = nullptr);
 
    /// update the status of a virtual folder
    static bool CheckStatus(const MFolder *folder);
@@ -157,7 +159,7 @@ public:
    //@}
 
 protected:
-   virtual bool DoCountMessages(MailFolderStatus *status) const;
+   bool DoCountMessages(MailFolderStatus *status) const override;
 
    /// common part of SetMessageFlag and SetSequenceFlag
    virtual bool DoSetMessageFlag(SequenceKind kind,
@@ -192,7 +194,7 @@ protected:
       ~Msg() { mf->DecRef(); }
    };
 
-   WX_DEFINE_ARRAY(Msg *, MsgArray);
+   using MsgArray = std::vector<Msg *>;
 
    /// the array of messages in the folder
    MsgArray m_messages;
@@ -228,7 +230,7 @@ protected:
    //@{
 
    /// get the number of messages in this folder
-   size_t GetMsgCount() const { return m_messages.GetCount(); }
+   size_t GetMsgCount() const { return m_messages.size(); }
 
    /// get the Msg corresponding to the given msgno or NULL
    Msg *GetMsgFromMsgno(MsgnoType msgno) const;

@@ -116,7 +116,7 @@ ClickablePGPInfo::ClickablePGPInfo(MessageView *msgView,
                   m_bmpName(bmpName),
                   m_colour(colour)
 {
-   m_log = NULL;
+   m_log = nullptr;
 }
 
 ClickablePGPInfo::~ClickablePGPInfo()

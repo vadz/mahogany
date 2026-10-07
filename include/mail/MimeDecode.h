@@ -79,7 +79,7 @@ EncodeHeader(const wxString& in, wxFontEncoding enc = wxFONTENCODING_SYSTEM);
    @param encoding the pointer to the charset of the string (may be NULL)
    @return the fully decoded string
 */
-String DecodeHeader(const String& in, wxFontEncoding *encoding = NULL);
+String DecodeHeader(const String& in, wxFontEncoding *encoding = nullptr);
 
 /**
    Helper for decoding the given data using the specified encoding.

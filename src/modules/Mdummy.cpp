@@ -71,6 +71,6 @@ DummyModule::DummyModule(MInterface *minterface)
       _T("This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable."),
-      NULL,
+      nullptr,
       _T("Welcome from DummyModule!"));
 }

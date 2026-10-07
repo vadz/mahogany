@@ -106,37 +106,37 @@ public:
    virtual ~BareBonesEditor();
 
    // accessors
-   virtual wxWindow *GetWindow() const;
-   virtual bool IsModified() const;
-   virtual bool IsEmpty() const;
-   virtual unsigned long ComputeHash() const;
+   wxWindow *GetWindow() const override;
+   bool IsModified() const override;
+   bool IsEmpty() const override;
+   unsigned long ComputeHash() const override;
 
    // creation
-   virtual void Create(Composer *composer, wxWindow *parent);
-   virtual void UpdateOptions();
-   virtual bool FinishWork();
+   void Create(Composer *composer, wxWindow *parent) override;
+   void UpdateOptions() override;
+   bool FinishWork() override;
 
    // operations
-   virtual void Clear();
-   virtual void Enable(bool enable);
-   virtual void ResetDirty();
-   virtual void SetEncoding(wxFontEncoding encoding);
-   virtual void Copy();
-   virtual void Cut();
-   virtual void Paste();
+   void Clear() override;
+   void Enable(bool enable) override;
+   void ResetDirty() override;
+   void SetEncoding(wxFontEncoding encoding) override;
+   void Copy() override;
+   void Cut() override;
+   void Paste() override;
 
-   virtual bool Print();
-   virtual void PrintPreview();
+   bool Print() override;
+   void PrintPreview() override;
 
-   virtual void MoveCursorTo(unsigned long x, unsigned long y);
-   virtual void MoveCursorBy(long x, long y);
-   virtual void SetFocus();
+   void MoveCursorTo(unsigned long x, unsigned long y) override;
+   void MoveCursorBy(long x, long y) override;
+   void SetFocus() override;
 
    // content
-   virtual void InsertAttachment(const wxBitmap& icon, EditorContentPart *mc);
-   virtual void InsertText(const String& text, InsertMode insMode);
-   virtual EditorContentPart *GetFirstPart();
-   virtual EditorContentPart *GetNextPart();
+   void InsertAttachment(const wxBitmap& icon, EditorContentPart *mc) override;
+   void InsertText(const String& text, InsertMode insMode) override;
+   EditorContentPart *GetFirstPart() override;
+   EditorContentPart *GetNextPart() override;
 
    // for wxBareBonesTextControl only: we have to use
    bool OnFirstTimeFocus() { return MessageEditor::OnFirstTimeFocus(); }
@@ -863,7 +863,7 @@ wxBareBonesTextControl::GetUnicodeText() const
 
 BareBonesEditor::BareBonesEditor()
 {
-   m_textControl = NULL;
+   m_textControl = nullptr;
 
    m_encoding = wxFONTENCODING_SYSTEM;
 
@@ -1238,14 +1238,14 @@ EditorContentPart *BareBonesEditor::GetNextPart()
 {
    const int count = m_attachments->GetItemCount();
 
-   CHECK( m_getNextAttachement >= 0 || m_getNextAttachement < count, NULL,
+   CHECK( m_getNextAttachement >= 0 || m_getNextAttachement < count, nullptr,
             _T("forgot to call BareBonesEditor::GetFirstPart()?") );
 
    if ( m_getNextAttachement == count )
    {
       // no more parts
       m_getNextAttachement = -1;
-      return NULL;
+      return nullptr;
    }
 
    wxListItem item;

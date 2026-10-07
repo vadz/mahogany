@@ -45,8 +45,8 @@
 class AdbVCardExporter : public AdbExporter
 {
 public:
-   virtual bool Export(AdbEntryGroup& group, const String& dest);
-   virtual bool Export(const AdbEntry& entry, const String& dest);
+   bool Export(AdbEntryGroup& group, const String& dest) override;
+   bool Export(const AdbEntry& entry, const String& dest) override;
 
 protected:
    // the real workers
@@ -223,10 +223,10 @@ bool AdbVCardExporter::DoExportEntry(const AdbEntry& entry,
    {
       wxLogError(_("Failed to write vCard to the file '%s'."), filename);
 
-      return FALSE;
+      return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
@@ -240,7 +240,7 @@ bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
          wxLogError(_("Failed to export address book to '%s'."),
                     dirname);
 
-         return FALSE;
+         return false;
       }
    }
 
@@ -256,7 +256,7 @@ bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
 
       if ( !ok )
       {
-         return FALSE;
+         return false;
       }
    }
 
@@ -273,12 +273,12 @@ bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
 
       if ( !ok )
       {
-         return FALSE;
+         return false;
       }
    }
 
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -291,11 +291,11 @@ bool AdbVCardExporter::Export(AdbEntryGroup& group, const String& dest)
    if ( !dirname )
    {
       // choose the initial directory for the vCard files to create
-      wxDirDialog dlg(NULL, _("Choose the directory for vCard files"));
+      wxDirDialog dlg(nullptr, _("Choose the directory for vCard files"));
       if ( dlg.ShowModal() != wxID_OK )
       {
          // cancelled
-         return FALSE;
+         return false;
       }
 
       dirname = dlg.GetPath();
@@ -307,12 +307,12 @@ bool AdbVCardExporter::Export(AdbEntryGroup& group, const String& dest)
       wxLogMessage(_("Successfully exported address book data to "
                      "directory '%s'"), dirname);
 
-      return TRUE;
+      return true;
    }
 
    wxLogError(_("Export failed."));
 
-   return FALSE;
+   return false;
 }
 
 bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
@@ -322,16 +322,16 @@ bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
    {
       filename = wxPSaveFileSelector
                  (
-                     NULL, // no parent
+                     nullptr, // no parent
                      "vcard",
                      _("Choose the name for vCard file"),
-                     NULL, NULL, _T(".vcf"),
+                     nullptr, nullptr, _T(".vcf"),
                      _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*")
                  );
       if ( !filename )
       {
          // cancelled
-         return FALSE;
+         return false;
       }
    }
 

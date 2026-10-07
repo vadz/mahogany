@@ -87,7 +87,7 @@ public:
     */
    MRunFunctionAtExit(void (*fn)()) : m_fn(fn) { }
 
-   virtual void Do() { (*m_fn)(); }
+   void Do() override { (*m_fn)(); }
 
 private:
    void (*m_fn)();

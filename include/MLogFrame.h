@@ -24,7 +24,7 @@ public:
    virtual void Clear() = 0;
 
    /// save the log contents to file (ask user for file name if !filename)
-   virtual bool Save(const wxChar *filename = NULL) = 0;
+   virtual bool Save(const wxChar *filename = nullptr) = 0;
 
    /// make the dtor virtual for all derived classes
    virtual ~MLogFrameBase() { }

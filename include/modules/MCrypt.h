@@ -76,7 +76,7 @@ public:
     */
    virtual Status Decrypt(const String& messageIn,
                           String& messageOut,
-                          MCryptoEngineOutputLog *log = NULL) = 0;
+                          MCryptoEngineOutputLog *log = nullptr) = 0;
 
    /**
       This method encrypts and signs a message.
@@ -101,7 +101,7 @@ public:
                           const String& messageIn,
                           String &messageOut,
                           const String& user = wxEmptyString,
-                          MCryptoEngineOutputLog *log = NULL) = 0;
+                          MCryptoEngineOutputLog *log = nullptr) = 0;
 
    /**
       Just signs the message.
@@ -126,7 +126,7 @@ public:
    virtual Status Sign(const String& user,
                        const String& messageIn,
                        String& messageOut,
-                       MCryptoEngineOutputLog *log = NULL) = 0;
+                       MCryptoEngineOutputLog *log = nullptr) = 0;
 
    /**
       Verifies the message signature.
@@ -138,7 +138,7 @@ public:
     */
    virtual Status VerifySignature(const String& messageIn,
                                   String& messageOut,
-                                  MCryptoEngineOutputLog *log = NULL) = 0;
+                                  MCryptoEngineOutputLog *log = nullptr) = 0;
 
    /**
       Verifies the detached signature.
@@ -148,7 +148,7 @@ public:
    virtual Status
       VerifyDetachedSignature(const String& message,
                               const String& signature,
-                              MCryptoEngineOutputLog *log = NULL) = 0;
+                              MCryptoEngineOutputLog *log = nullptr) = 0;
 
    //@}
 
@@ -283,7 +283,7 @@ public:
    class cname ## Factory : public MCryptoEngineFactory                       \
    {                                                                          \
    public:                                                                    \
-      virtual MCryptoEngine *Get() { return cname::Get(); }                   \
+      MCryptoEngine *Get() override { return cname::Get(); }                  \
                                                                               \
       MMODULE_DEFINE();                                                       \
       DEFAULT_ENTRY_FUNC;                                                     \

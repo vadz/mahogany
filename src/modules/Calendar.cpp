@@ -43,6 +43,8 @@
 #include <wx/calctrl.h>
 #include <wx/spinbutt.h>
 
+#include <vector>
+
 #if wxUSE_DRAG_AND_DROP
    #include "Mdnd.h"
 #endif // wxUSE_DRAG_AND_DROP
@@ -147,7 +149,7 @@ private:
    MOBJECT_NAME(AlarmInfo);
 };
 
-WX_DEFINE_ARRAY(AlarmInfo *, AlarmList);
+using AlarmList = std::vector<AlarmInfo *>;
 
 
 // a timer checking every hour to see if the day has changed:
@@ -155,10 +157,10 @@ class DayCheckTimer : public wxTimer
 {
 public:
    DayCheckTimer(class CalendarModule *module)
-      { m_Module = module; m_started = FALSE; }
+      { m_Module = module; m_started = false; }
 
    virtual bool Start(void)
-      { m_started = TRUE; return wxTimer::Start(60*60*1000, TRUE); }
+      { m_started = true; return wxTimer::Start(60*60*1000, true); }
 
    virtual void Notify(void);
 
@@ -205,7 +207,7 @@ private:
 
    bool ProcessMenuEvent(int id);
    inline void ErrorMessage(const String &msg)
-      { m_MInterface->MessageDialog(msg,NULL,"Calendar module error!");wxYield(); }
+      { m_MInterface->MessageDialog(msg,nullptr,"Calendar module error!");wxYield(); }
 
    bool OnMEvent(MEventData &event);
    class CalEventReceiver *m_EventReceiver;
@@ -214,7 +216,7 @@ private:
    void CreateFrame(void);
    void TellDeleteFrame(void)
       {
-         m_Frame = NULL;
+         m_Frame = nullptr;
       }
    friend class CalendarFrame;
    class CalendarFrame *m_Frame;
@@ -262,7 +264,7 @@ public:
             else
                m_Date.SetEndDate(m_Date); // no end date
          }
-         return TRUE;
+         return true;
       }
    virtual bool TransferDataToWindow()
       {
@@ -271,7 +273,7 @@ public:
             || m_Date.GetMonthRepeat()
             || m_Date.GetYearRepeat())
          {
-            m_CheckBox->Enable(TRUE);
+            m_CheckBox->Enable(true);
             long num = 1;
             if(m_Date.GetDayRepeat())
             {
@@ -293,11 +295,11 @@ public:
 
             if(m_Date.HasEndDate())
             {
-               m_EndsOn->Enable(TRUE);
+               m_EndsOn->Enable(true);
                m_CalCtrlEnd->SetDate(m_Date.GetEndDate());
             }
          }
-         return TRUE;
+         return true;
       }
    void OnCheckBox(wxCommandEvent & WXUNUSED(event) )
       {
@@ -358,7 +360,7 @@ END_EVENT_TABLE()
 wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
    : wxManuallyLaidOutDialog(parent,_("Pick a Date"),"CalendarModuleDateDlg")
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Date"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Date"), false,
                                              MH_MODULES_CALENDAR_DATEDLG);
    wxLayoutConstraints *c;
 
@@ -441,7 +443,7 @@ wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
    c->width.AsIs();
    c->height.AsIs();
    m_EndsOn->SetConstraints(c);
-   m_EndsOn->SetValue(TRUE);
+   m_EndsOn->SetValue(true);
 
    m_CalCtrlEnd = new wxCalendarCtrl(this,-1, dt,
                                      wxDefaultPosition,
@@ -455,8 +457,8 @@ wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
 
    m_CalCtrlEnd->SetConstraints(c);
 
-   SetAutoLayout(TRUE);
-   SetDefaultSize(420, 320, TRUE /* minimal */);
+   SetAutoLayout(true);
+   SetDefaultSize(420, 320, true /* minimal */);
    m_Date = dt;
    TransferDataToWindow();
 
@@ -465,7 +467,7 @@ wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
 
 extern
 bool PickDateDialog(wxDateTimeWithRepeat &dt,
-                    wxWindow *parent = NULL)
+                    wxWindow *parent = nullptr)
 {
    wxDateDialog dlg(dt, parent);
    bool rc = dlg.ShowModal() == wxID_OK;
@@ -494,7 +496,7 @@ public:
    /** checks if anything needs to be done:
        @param mf if non-NULL, react to change in this folder if is ours
    */
-   void CheckUpdate(MailFolder *mf = NULL);
+   void CheckUpdate(MailFolder *mf = nullptr);
    /// re-reads config
    void GetConfig(void);
 
@@ -561,7 +563,7 @@ public:
             if(msg)
             {
                if(m_Frame->ScheduleMessage(msg))
-                  msgsToDelete.Add(data->GetMessageUId(i));
+                  msgsToDelete.push_back(data->GetMessageUId(i));
                msg->DecRef();
             }
          }
@@ -623,7 +625,7 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    m_Module = module;
    m_MInterface = module->GetMInterface();
    m_Profile = m_MInterface->CreateModuleProfile(MODULE_NAME);
-   m_Folder = NULL;
+   m_Folder = nullptr;
 
    AddFileMenu();
    AddHelpMenu();
@@ -661,8 +663,8 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    c->height.PercentOf(panel, wxHeight, 40);
    m_ListCtrl->SetConstraints(c);
 
-   panel->SetAutoLayout(TRUE);
-   SetAutoLayout(TRUE);
+   panel->SetAutoLayout(true);
+   SetAutoLayout(true);
 
 #if wxUSE_DRAG_AND_DROP
    new MMessagesCalDropTarget(this);
@@ -689,7 +691,7 @@ CalendarFrame::Show(bool show)
    // do it should be done in OnClose() (TODO)
    if ( m_MInterface->GetMApplication()->IsRunning() )
    {
-      if(m_Show == FALSE)
+      if(m_Show == false)
          CheckUpdate();
       m_Show = show;
       m_Module->m_CalendarMenu->Check(WXMENU_MODULES_CALENDAR_SHOW, m_Show);
@@ -702,9 +704,9 @@ void
 CalendarFrame::Toggle(void)
 {
    if(m_Show)
-      m_Show = FALSE;
+      m_Show = false;
    else
-      m_Show = TRUE;
+      m_Show = true;
    Show(m_Show);
 }
 
@@ -826,11 +828,11 @@ CalendarFrame::ScheduleMessage(SendMessage *msg)
       wxString str;
       msg->WriteToString(str);
       AddReminder(str,CAL_ACTION_SEND, dt);
-      Show(TRUE); // make ourselves visible
-      return TRUE;
+      Show(true); // make ourselves visible
+      return true;
    }
    else
-      return FALSE;
+      return false;
 }
 
 bool
@@ -842,11 +844,11 @@ CalendarFrame::ScheduleMessage(Message *msg)
       wxString str;
       msg->WriteToString(str);
       AddReminder(str,CAL_ACTION_REMIND, dt);
-      Show(TRUE); // make ourselves visible
-      return TRUE;
+      Show(true); // make ourselves visible
+      return true;
    }
    else
-      return FALSE;
+      return false;
 }
 
 void
@@ -857,7 +859,7 @@ CalendarFrame::AddReminder(void)
                         _("Mahogany : Create Reminder"),
                         ""/* default */,
                         this,
-                        -1,-1, TRUE);
+                        -1,-1, true);
    AddReminder(text);
 }
 
@@ -865,11 +867,11 @@ CalendarFrame::AddReminder(void)
 void
 CalendarFrame::ClearAlarms(void)
 {
-   for(size_t count = 0; count < m_Alarms.Count(); count++)
+   for(size_t count = 0; count < m_Alarms.size(); count++)
    {
       delete m_Alarms[count];
    }
-   m_Alarms.Clear();
+   m_Alarms.clear();
 }
 
 void
@@ -909,7 +911,7 @@ CalendarFrame::ParseFolder(void)
                                               (*hil)[count]->GetSubject(),
                                               (*hil)[count]->GetUId(),
                                               action);
-               m_Alarms.Add(ai);
+               m_Alarms.push_back(ai);
             }
          }
          msg->DecRef();
@@ -917,7 +919,7 @@ CalendarFrame::ParseFolder(void)
       hil->DecRef();
    }
    // update the listctrl:
-   for(size_t count = 0; count < m_Alarms.Count(); count++)
+   for(size_t count = 0; count < m_Alarms.size(); count++)
    {
       m_ListCtrl->InsertItem(count, m_Alarms[count]->GetDate().Format(m_DateFormat));
       m_ListCtrl->SetItem(count,1, m_Alarms[count]->GetSubject());
@@ -956,7 +958,7 @@ CalendarFrame::DeleteOrRewrite(MailFolder *mf,
       newdt.SetYear(ndt.GetYear());
 
       wxString text;
-      msg->WriteToString(text, FALSE);
+      msg->WriteToString(text, false);
       AddReminder(text,action, newdt);
    }
    mf->DeleteMessage(msg->GetUId());
@@ -975,13 +977,13 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
    }
 
    // we react to an event which isn't ours, abort
-   if(eventFolder != NULL && eventFolder != mf)
+   if(eventFolder != nullptr && eventFolder != mf)
    {
       mf->DecRef();
       return;
    }
-   bool deleted = FALSE;
-   for(size_t count = 0; count < m_Alarms.Count(); count++)
+   bool deleted = false;
+   for(size_t count = 0; count < m_Alarms.size(); count++)
    {
       if(m_Alarms[count]->GetDate() <= wxDateTime::Now())
       {
@@ -1002,7 +1004,7 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
 
                   DeleteOrRewrite(mf, msg,
                                   m_Alarms[count]->GetDate(), action);
-                  deleted = TRUE;
+                  deleted = true;
                }
                if(nmmf) nmmf->DecRef();
             }
@@ -1022,7 +1024,7 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
                   GetStatusBar()->SetStatusText(txt);
                   DeleteOrRewrite(mf, msg,
                                   m_Alarms[count]->GetDate(), action);
-                  deleted = TRUE;
+                  deleted = true;
                }
             }
             msg->DecRef();
@@ -1108,7 +1110,7 @@ CalendarModule::Init(int version_major, int version_minor,
    {
       if(errorCode)
          *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
-      return NULL;
+      return nullptr;
    }
 
    return new CalendarModule(minterface);
@@ -1117,10 +1119,10 @@ CalendarModule::Init(int version_major, int version_minor,
 CalendarModule::CalendarModule(MInterface *minterface)
 {
    SetMInterface(minterface);
-   m_Frame = NULL;
-   m_Timer = NULL;
-   m_EventReceiver = NULL;
-   m_CalendarMenu = NULL;
+   m_Frame = nullptr;
+   m_Timer = nullptr;
+   m_EventReceiver = nullptr;
+   m_CalendarMenu = nullptr;
 }
 
 CalendarModule::~CalendarModule()
@@ -1135,7 +1137,7 @@ bool
 CalendarModule::RegisterWithMainFrame()
 {
    m_CalendarMenu = new wxMenu("", wxMENU_TEAROFF);
-   m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_SHOW, _("&Show"), "", TRUE);
+   m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_SHOW, _("&Show"), "", true);
    m_CalendarMenu->AppendSeparator();
    m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_CONFIG, _("&Configure"));
 
@@ -1171,17 +1173,17 @@ CalendarModule::ProcessMenuEvent(int id)
          Configure();
          CreateFrame();
          m_Frame->GetConfig();
-         return TRUE;
+         return true;
       case WXMENU_MODULES_CALENDAR_SHOW:
          CreateFrame();
          m_Frame->Toggle();
-         return TRUE;
+         return true;
       case WXMENU_MODULES_CALENDAR_ADD_REMINDER:
          CreateFrame();
          m_Frame->AddReminder();
-         return TRUE;
+         return true;
       default:
-         return FALSE;
+         return false;
    }
 }
 
@@ -1252,7 +1254,7 @@ CalendarModule::CreateFrame(void)
 bool
 CalendarModule::OnASFolderResultEvent(MEventASFolderResultData &)
 {
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1260,7 +1262,7 @@ CalendarModule::OnFolderUpdateEvent(MEventFolderUpdateData &ev )
 {
    if(m_Frame)
       m_Frame->CheckUpdate(ev.GetFolder());
-   return TRUE;
+   return true;
 }
 
 void
@@ -1308,6 +1310,6 @@ void
 CalendarModule::Configure(void)
 {
    Profile *p = m_MInterface->CreateModuleProfile(MODULE_NAME);
-   ShowCustomOptionsDialog(gs_OptionsPageDesc, p, NULL);
+   ShowCustomOptionsDialog(gs_OptionsPageDesc, p, nullptr);
    p->DecRef();
 }

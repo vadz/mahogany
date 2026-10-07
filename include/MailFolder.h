@@ -18,12 +18,16 @@
 #endif // USE_PCH
 
 #include "MObject.h"
+#include "pointers.h"
 
 #include "FolderType.h"         // for MFolderType
+#include "UIdArray.h"
+
 #include <wx/fontenc.h>         // for wxFontEncoding
 
+#include <vector>
+
 // forward declarations
-class ArrayHeaderInfo;
 class Composer;
 class FolderView;
 class HeaderInfo;
@@ -31,12 +35,15 @@ class HeaderInfoList;
 class Message;
 class MessageView;
 class MFolder;
-class MFolderList;
 class MLogCircle;
 class Profile;
 class Sequence;
 class ServerInfoEntry;
-class UIdArray;
+
+#ifndef SWIG
+using MFolderList = std::vector<RefCounter<MFolder>>;
+using ArrayHeaderInfo = std::vector<HeaderInfo *>;
+#endif // SWIG
 
 struct MailFolderStatus;
 struct SearchCriterium;
@@ -46,10 +53,6 @@ struct ThreadParams;
 
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 class WXDLLIMPEXP_FWD_CORE wxWindow;
-
-#ifndef MsgnoArray
-   #define MsgnoArray UIdArray
-#endif
 
 // ----------------------------------------------------------------------------
 // MailFolder
@@ -190,7 +193,7 @@ public:
       Params(ReplyKind rk = REPLY) { Init(rk); }
       Params(const String& t, ReplyKind rk = REPLY) : templ(t) { Init(rk); }
 
-      void Init(ReplyKind rk) { replyKind = rk; msgview = NULL; }
+      void Init(ReplyKind rk) { replyKind = rk; msgview = nullptr; }
 
       /// see ReplyKind enum above
       ReplyKind replyKind;
@@ -229,14 +232,14 @@ public:
     */
    static MailFolder * OpenFolder(const MFolder *mfolder,
                                   OpenMode openmode = Normal,
-                                  wxFrame *frame = NULL);
+                                  wxFrame *frame = nullptr);
 
    /**
      Half open the folder using paremeters from MFolder object. This is a
      simple wrapper around OpenFolder()
     */
    static MailFolder * HalfOpenFolder(const MFolder *mfolder,
-                                      wxFrame *frame = NULL)
+                                      wxFrame *frame = nullptr)
       { return OpenFolder(mfolder, HalfOpen, frame); }
 
    /**
@@ -265,7 +268,7 @@ public:
      @param frame if not NULL, some feedback is given
      @return true if ok, false if an error occured
     */
-   static bool CheckFolder(const MFolder *mfolder, wxFrame *frame = NULL);
+   static bool CheckFolder(const MFolder *mfolder, wxFrame *frame = nullptr);
 
    /**
        Suspend the folder by temporarily closing it.
@@ -307,7 +310,7 @@ public:
                     the folders which were closed
       @return the number of folders closed, -1 on error
     */
-   static int CloseAll(MFolderList *opened = NULL);
+   static int CloseAll(MFolderList *opened = nullptr);
 
    /**
      Call Ping() on all opened mailboxes.
@@ -315,7 +318,7 @@ public:
      @param frame if not NULL, some feedback is given
      @return true if ok, false if an error occured
     */
-   static bool PingAllOpened(wxFrame *frame = NULL);
+   static bool PingAllOpened(wxFrame *frame = nullptr);
 
    //@}
 
@@ -393,9 +396,9 @@ public:
    */
    static Composer *ForwardMessage(Message *msg,
                                    const Params& params,
-                                   Profile *profile = NULL,
-                                   wxWindow *parent = NULL,
-                                   Composer *composer = NULL);
+                                   Profile *profile = nullptr,
+                                   wxWindow *parent = nullptr,
+                                   Composer *composer = nullptr);
 
    /** Reply to one message.
        @param message message to reply to
@@ -407,9 +410,9 @@ public:
    */
    static Composer *ReplyMessage(Message *msg,
                                  const Params& params,
-                                 Profile *profile = NULL,
-                                 wxWindow *parent = NULL,
-                                 Composer *composer = NULL);
+                                 Profile *profile = nullptr,
+                                 wxWindow *parent = nullptr,
+                                 Composer *composer = nullptr);
 
    //@}
 
@@ -446,7 +449,7 @@ public:
                             const String &pattern = _T("*"),
                             bool subscribed_only = false,
                             const String &reference = wxEmptyString,
-                            UserData ud = 0,
+                            UserData ud = nullptr,
                             Ticket ticket = ILLEGAL_TICKET) = 0;
 
    //@}
@@ -776,7 +779,7 @@ public:
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
                                    const String& filename,
-                                   wxWindow *parent = NULL) = 0;
+                                   wxWindow *parent = nullptr) = 0;
 
    /** Mark messages as deleted or move them to trash.
 
@@ -808,7 +811,7 @@ public:
    */
    virtual void ReplyMessages(const UIdArray *messages,
                               const Params& params,
-                              wxWindow *parent = NULL) = 0;
+                              wxWindow *parent = nullptr) = 0;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
@@ -817,7 +820,7 @@ public:
    */
    virtual void ForwardMessages(const UIdArray *messages,
                                 const Params& params,
-                                wxWindow *parent = NULL) = 0;
+                                wxWindow *parent = nullptr) = 0;
 
    /** Sort messages: returns the array containing the msgnos of the messages
        in sorted order.
@@ -872,7 +875,7 @@ public:
      @return true if ok, false on error
    */
    virtual bool ProcessNewMail(UIdArray& uidsNew,
-                               const MFolder *folderDst = NULL) = 0;
+                               const MFolder *folderDst = nullptr) = 0;
 
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.
@@ -1033,7 +1036,7 @@ protected:
                                     String& login,
                                     String& password,
                                     wxFrame *parent,
-                                    bool *userEnteredPwd = NULL);
+                                    bool *userEnteredPwd = nullptr);
 
    /**
      Propose to the user to save the login and password temporarily (i.e. in
@@ -1075,8 +1078,10 @@ private:
    MailFolder *m_mf;
 };
 
+#ifndef SWIG
 // MailFolder_obj is a smart reference to MailFolder
-DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
+using MailFolder_obj = DecRefPtr<MailFolder>;
+#endif // SWIG
 
 #endif // _MAILFOLDER_H
 

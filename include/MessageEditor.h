@@ -201,7 +201,7 @@ protected:
    //@}
 
    /// protected ctor as the objects of this class are never created directly
-   MessageEditor() { m_composer = NULL; }
+   MessageEditor() { m_composer = nullptr; }
 
    /// back pointer to the composer (we need its profile), must be set manually
    Composer *m_composer;
@@ -244,7 +244,7 @@ public:
    //@{
 
    /// give us the data to attach, we will free() it (must be !NULL)
-   void SetData(void *data, size_t length, const wxChar* name = NULL, const wxChar *filename = NULL);
+   void SetData(void *data, size_t length, const wxChar* name = nullptr, const wxChar *filename = nullptr);
 
    /// give us a file to attach - will be done only when we'll be sent
    void SetFile(const String& filename);
@@ -379,7 +379,7 @@ public:
    class cname##Factory : public MessageEditorFactory                      \
    {                                                                       \
    public:                                                                 \
-      virtual MessageEditor *Create() { return new cname; }                \
+      MessageEditor *Create() override { return new cname; }               \
                                                                            \
       MMODULE_DEFINE();                                                    \
       DEFAULT_ENTRY_FUNC;                                                  \

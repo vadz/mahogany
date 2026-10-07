@@ -93,7 +93,7 @@ wxString wxIconManager::ms_IconPath = wxEmptyString;
 /// valid filename extensions for icon files
 static const wxChar *wxIconManagerFileExtensions[] =
 {
-   _T(".xpm"), _T(".png"), _T(".bmp"), _T(".jpg"), _T(".gif"), _T(".pcx"), _T(".pnm"), NULL
+   _T(".xpm"), _T(".png"), _T(".bmp"), _T(".jpg"), _T(".gif"), _T(".pcx"), _T(".pnm"), nullptr
 };
 
 /// how many image handlers do we have
@@ -262,7 +262,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 char **
 wxIconManager::LoadImageXpm(String filename)
 {
-   char **cpptr = NULL;
+   char **cpptr = nullptr;
 
    wxLogTrace(wxTraceIconLoading, _T("wxIconManager::LoadImage(%s) called..."),
               filename);
@@ -328,7 +328,7 @@ wxIconManager::LoadXpm(String filename)
          if(line > 0 && ! found_xpm)
          {
             free(cpptr);
-            return NULL;
+            return nullptr;
          }
          // We only load the actual data, that is, lines starting with
          // a double quote and ending in a comma:  "data",  --> data
@@ -339,7 +339,7 @@ wxIconManager::LoadXpm(String filename)
             cpptr[line++] = strutil_strdup(str.ToAscii());
          }
       }while(! in.fail());
-      cpptr[line++] = NULL;
+      cpptr[line++] = nullptr;
       if(found_xpm)
       {
          cpptr = (char **)realloc(cpptr,line*sizeof(char *));
@@ -348,13 +348,13 @@ wxIconManager::LoadXpm(String filename)
       else
       {
          free(cpptr);
-         cpptr = NULL;
+         cpptr = nullptr;
       }
    }
    else
    {
       free(cpptr);
-      cpptr = NULL;
+      cpptr = nullptr;
    }
    return cpptr;
 }

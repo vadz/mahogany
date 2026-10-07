@@ -114,7 +114,7 @@ static bool
 StringStartsWith(const String& str,
                  const wxChar *prefix,
                  CaseSensitivity cs = Case_Exact,
-                 String *rest = NULL)
+                 String *rest = nullptr)
 {
    const wxChar *p = str.c_str();
    while ( *prefix )
@@ -162,10 +162,10 @@ public:
    void OnTreeExpanding(wxTreeEvent& event);
 
    // list event processing functions
-   virtual void OnListFolder(const String& path, wxChar delim, long flags);
+   void OnListFolder(const String& path, wxChar delim, long flags) override;
 
    // called when the last folder is received
-   virtual void OnNoMoreFolders();
+   void OnNoMoreFolders() override;
 
 private:
    // called when a new folder must be added
@@ -237,7 +237,7 @@ public:
    virtual ~wxSubscriptionDialog();
 
    // called when [Ok] is pressed, may veto it
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
    // callbacks
    // ---------
@@ -324,15 +324,15 @@ class ListFolderEventReceiver : public ListEventReceiver
 public:
    ListFolderEventReceiver()
    {
-      m_progressInfo = NULL;
+      m_progressInfo = nullptr;
    }
 
    // do retrieve all folders and create them
    size_t AddAllFolders(MFolder *folder, ASMailFolder *mailFolder);
 
    // list folder events processing function
-   virtual void OnListFolder(const String& path, wxChar delim, long flags);
-   virtual void OnNoMoreFolders();
+   void OnListFolder(const String& path, wxChar delim, long flags) override;
+   void OnNoMoreFolders() override;
 
 private:
    // the progress meter
@@ -399,7 +399,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    m_mailFolder = mailFolder;
    m_mailFolder->IncRef();
 
-   m_progressInfo = (MProgressInfo *)NULL;
+   m_progressInfo = (MProgressInfo *)nullptr;
    m_chDelimiter = '\0';
    m_idParent = wxTreeItemId();
 
@@ -600,7 +600,7 @@ wxSubfoldersTree::OnListFolder(const String& path, wxChar delim, long attr)
    //
    // note that if the parent folder is not in the tree, its children
    // don't risk to be there neither
-   MFolder_obj folder(m_folderCur ? m_folderCur->GetSubfolder(name) : NULL);
+   MFolder_obj folder(m_folderCur ? m_folderCur->GetSubfolder(name) : nullptr);
    if ( !folder )
    {
       SetItemBold(id);
@@ -639,7 +639,7 @@ void wxSubfoldersTree::OnNoMoreFolders()
    if ( m_progressInfo )
    {
       delete m_progressInfo;
-      m_progressInfo = NULL;
+      m_progressInfo = nullptr;
    }
 
    Show();
@@ -651,7 +651,7 @@ void wxSubfoldersTree::OnNoMoreFolders()
    if ( !m_nFoldersRetrieved && m_idParent.IsOk() )
    {
       // this item doesn't have any subfolders
-      SetItemHasChildren(m_idParent, FALSE);
+      SetItemHasChildren(m_idParent, false);
    }
 
    m_idParent.Unset();
@@ -1028,7 +1028,7 @@ void wxSubscriptionDialog::OnAddAll(wxCommandEvent& WXUNUSED(event))
 bool wxSubscriptionDialog::TransferDataFromWindow()
 {
    // will be set to TRUE if we need to refresh the tree
-   bool createdSomething = FALSE;
+   bool createdSomething = false;
 
    wxTreeItemId idRoot = m_treectrl->GetRootItem();
 
@@ -1129,7 +1129,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             folderNew->SetFlags(flags);
 
             // we created a new folder, set the flag to refresh the tree
-            createdSomething = TRUE;
+            createdSomething = true;
          }
 
          fullpath += name;
@@ -1155,7 +1155,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
    // show all errors which could have been accumulated
    wxLog::FlushActive();
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1172,14 +1172,14 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    m_nFoldersRetrieved = 0u;
    m_finished = false;
 
-   m_progressInfo = new MProgressInfo(NULL,
+   m_progressInfo = new MProgressInfo(nullptr,
                                       _("Retrieving the folder list: "));
    wxYieldIfNeeded(); // to show the frame
 
    (void)mailFolder->ListFolders
                      (
                         _T("*"),     // everything
-                        FALSE,       // subscribed only?
+                        false,       // subscribed only?
                         wxEmptyString,      // path relative to the folder
                         this         // data to pass to the callback
                      );
@@ -1331,7 +1331,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       // how did we get here at all?
       wxLogMessage(_("The folder '%s' has no subfolders."), folder->GetPath());
 
-      return FALSE;
+      return false;
    }
 
    // The folder must be half opened because we don't really want to read any
@@ -1356,7 +1356,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       //else: the user didn't want to open the folder (for example because it
       //      requires going online and he didn't want it)
 
-      return FALSE;
+      return false;
    }
 
    if ( MDialog_YesNoDialog
@@ -1384,7 +1384,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       dlg.ShowModal();
    }
 
-   return TRUE;
+   return true;
 }
 
 // add all subfolders to the tree

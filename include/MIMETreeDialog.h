@@ -30,7 +30,7 @@ class WXDLLIMPEXP_FWD_CORE wxFrame;
 extern void
 ShowMIMETreeDialog(const MimePart *part,
                    wxFrame *parent,
-                   MessageView *msgView = NULL);
+                   MessageView *msgView = nullptr);
 
 #endif // _M_MIMETREEDIALOG_H_
 

@@ -54,57 +54,57 @@ public:
    // standard headers
    // ----------------
 
-   virtual void SetSubject(const String &subject);
+   void SetSubject(const String &subject) override;
 
-   virtual void SetAddresses(const String &To,
-                             const String &CC = wxEmptyString,
-                             const String &BCC = wxEmptyString);
+   void SetAddresses(const String &To,
+                     const String &CC = wxEmptyString,
+                     const String &BCC = wxEmptyString) override;
 
-   virtual void SetFrom(const String &from,
-                        const String &replyaddress = wxEmptyString,
-                        const String &sender = wxEmptyString);
+   void SetFrom(const String &from,
+                const String &replyaddress = wxEmptyString,
+                const String &sender = wxEmptyString) override;
 
-   virtual void SetNewsgroups(const String &groups);
+   void SetNewsgroups(const String &groups) override;
 
-   virtual bool SetFcc(const String& fcc);
+   bool SetFcc(const String& fcc) override;
 
-   virtual void SetHeaderEncoding(wxFontEncoding enc);
+   void SetHeaderEncoding(wxFontEncoding enc) override;
 
    // custom headers
    // --------------
 
-   virtual void AddHeaderEntry(const String &entry, const String &value);
+   void AddHeaderEntry(const String &entry, const String &value) override;
 
-   virtual void RemoveHeaderEntry(const String& name);
+   void RemoveHeaderEntry(const String& name) override;
 
-   virtual bool HasHeaderEntry(const String& name) const;
+   bool HasHeaderEntry(const String& name) const override;
 
-   virtual String GetHeaderEntry(const String &key) const;
+   String GetHeaderEntry(const String &key) const override;
 
    // message body
    // ------------
 
-   virtual void AddPart(MimeType::Primary type,
-                        const void *buf, size_t len,
-                        const String &subtype = M_EMPTYSTRING,
-                        const String &disposition = "INLINE",
-                        MessageParameterList const *dlist = NULL,
-                        MessageParameterList const *plist = NULL,
-                        wxFontEncoding enc = wxFONTENCODING_SYSTEM);
+   void AddPart(MimeType::Primary type,
+                const void *buf, size_t len,
+                const String &subtype = M_EMPTYSTRING,
+                const String &disposition = "INLINE",
+                MessageParameterList const *dlist = nullptr,
+                MessageParameterList const *plist = nullptr,
+                wxFontEncoding enc = wxFONTENCODING_SYSTEM) override;
 
-   virtual void EnableSigning(const String& user = "");
+   void EnableSigning(const String& user = "") override;
 
-   virtual bool WriteToString(String  &output);
+   bool WriteToString(String  &output) override;
 
-   virtual bool WriteToFile(const String &filename, bool append = true);
+   bool WriteToFile(const String &filename, bool append = true) override;
 
-   virtual bool WriteToFolder(const String &foldername);
+   bool WriteToFolder(const String &foldername) override;
 
-   virtual Result PrepareForSending(int flags = 0, String *outbox = NULL);
-   virtual bool SendNow(String *errGeneral, String *errDetailed);
-   virtual void AfterSending();
+   Result PrepareForSending(int flags = 0, String *outbox = nullptr) override;
+   bool SendNow(String *errGeneral, String *errDetailed) override;
+   void AfterSending() override;
 
-   virtual void Preview(String *text = NULL);
+   void Preview(String *text = nullptr) override;
 
    /// destructor
    virtual ~SendMessageCC();
@@ -121,7 +121,7 @@ protected:
    SendMessageCC(const Profile *profile,
                  Protocol protocol,
                  wxFrame *frame,
-                 const Message *message = NULL);
+                 const Message *message = nullptr);
 
    /// init the fields for a new message
    void InitNew();
@@ -310,7 +310,7 @@ private:
    bool m_cloneOfExisting;
 
    /// a list of folders to save copies of the message in after sending
-   M_LIST_OWN(StringList, String) m_FccList;
+   std::vector<String> m_FccList;
 
    //@}
 

@@ -209,7 +209,7 @@ class MFilterDesc
 {
 public:
    /// ctor creates an uninitialized object, one of Set() below must be used
-   MFilterDesc() { m_settings = NULL; }
+   MFilterDesc() { m_settings = nullptr; }
 
    /// assignment operator
    MFilterDesc& operator=(const MFilterDesc& o)
@@ -234,7 +234,7 @@ public:
       if ( m_settings )
       {
          m_settings->DecRef();
-         m_settings = NULL;
+         m_settings = nullptr;
       }
 
       m_program = program;
@@ -244,7 +244,7 @@ public:
    void SetName(const String& name) { m_name = name; }
 
    /// returns TRUE if we can be represented as MFDialogSettings
-   bool IsSimple() const { return m_settings != NULL; }
+   bool IsSimple() const { return m_settings != nullptr; }
 
    /// returns TRUE if we're uninitialized
    bool IsEmpty() const { return !IsSimple() && !m_program; }
@@ -337,13 +337,7 @@ public:
 };
 
 /// smart reference to MFilter
-BEGIN_DECLARE_AUTOPTR(MFilter)
-   public:
-      MFilter_obj(const String& name)
-      {
-         m_ptr = MFilter::CreateFromProfile(name);
-      }
-END_DECLARE_AUTOPTR();
+using MFilter_obj = DecRefPtr<MFilter>;
 
 /**
   Returns the filter program for the given folder. If no filters are specified

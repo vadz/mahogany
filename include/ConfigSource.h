@@ -303,7 +303,7 @@ public:
     */
    virtual bool CopyEntry(const String& nameSrc,
                           const String& nameDst,
-                          ConfigSource *configDst = NULL) = 0;
+                          ConfigSource *configDst = nullptr) = 0;
 
    /**
       Rename a group.
@@ -340,7 +340,7 @@ private:
    const String m_type;
 };
 
-DECLARE_AUTOPTR(ConfigSource);
+using ConfigSource_obj = DecRefPtr<ConfigSource>;
 
 
 /**
@@ -474,7 +474,7 @@ public:
                      const String& spec) = 0;
 };
 
-DECLARE_AUTOPTR(ConfigSourceFactory);
+using ConfigSourceFactory_obj = DecRefPtr<ConfigSourceFactory>;
 
 
 /**
@@ -532,10 +532,10 @@ public:
             m_module->DecRef();                                            \
       }                                                                    \
                                                                            \
-      virtual const char *GetType() const { return type; }                 \
+      const char *GetType() const override { return type; }                \
                                                                            \
-      virtual ConfigSource *Create(const ConfigSource& config,             \
-                                   const String& name)                     \
+      ConfigSource *Create(const ConfigSource& config,                     \
+                           const String& name) override                    \
       {                                                                    \
          return new cname(config, name);                                   \
       }                                                                    \
@@ -547,7 +547,7 @@ public:
    class cname##FactoryModule : public ConfigSourceFactoryModule           \
    {                                                                       \
    public:                                                                 \
-      virtual ConfigSourceFactory *CreateFactory()                         \
+      ConfigSourceFactory *CreateFactory() override                        \
       {                                                                    \
          return new cname##Factory(this);                                  \
       }                                                                    \

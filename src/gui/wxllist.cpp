@@ -204,7 +204,7 @@ wxLayoutObject::Read(wxString &istr)
       return wxLayoutObjectIcon::Read(istr);
    }
 
-   return NULL;
+   return nullptr;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -400,7 +400,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap const &icon)
    {
       wxFAIL_MSG(_T("invalid icon"));
 
-      m_Icon = NULL;
+      m_Icon = nullptr;
 
       return;
    }
@@ -434,13 +434,13 @@ wxLayoutObjectIcon::Read(wxString &istr)
    ReadString(file, istr);
 
    if(! wxFileExists(file))
-      return NULL;
+      return nullptr;
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon;
 
    if(!obj->m_Icon->LoadFile(file, WXLO_BITMAP_FORMAT))
    {
       delete obj;
-      return NULL;
+      return nullptr;
    }
 
    return obj;
@@ -468,7 +468,7 @@ wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &coords,
    if ( m_Icon )
    {
       dc.DrawBitmap(*m_Icon, coords.x, coords.y-m_Icon->GetHeight(),
-                    (m_Icon->GetMask() == NULL) ? FALSE : TRUE);
+                    (m_Icon->GetMask() == nullptr) ? false : true);
    }
 }
 
@@ -532,8 +532,8 @@ wxLayoutStyleInfo::wxLayoutStyleInfo(const wxFont& ifont,
 
 void wxLayoutStyleInfo::InitColours(wxColour *fg, wxColour *bg)
 {
-   m_fg_valid = fg != NULL;
-   m_bg_valid = bg != NULL;
+   m_fg_valid = fg != nullptr;
+   m_bg_valid = bg != nullptr;
    m_fg = m_fg_valid ? *fg : *wxBLACK;
    m_bg = m_bg_valid ? *bg : *wxWHITE;
 }
@@ -600,8 +600,8 @@ wxLayoutObjectCmd::Copy(void)
       m_StyleInfo->style,
       m_StyleInfo->weight,
       m_StyleInfo->underline,
-      m_StyleInfo->m_fg_valid ? &m_StyleInfo->m_fg : NULL,
-      m_StyleInfo->m_bg_valid ? &m_StyleInfo->m_bg : NULL);
+      m_StyleInfo->m_fg_valid ? &m_StyleInfo->m_fg : nullptr,
+      m_StyleInfo->m_bg_valid ? &m_StyleInfo->m_bg : nullptr);
    obj->SetUserData(m_UserData);
    return obj;
 }
@@ -724,7 +724,7 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
 
    m_updateLeft = -1;
    m_Previous = prev;
-   m_Next = NULL;
+   m_Next = nullptr;
    MarkDirty(0);
 
    m_LineNumber = 0;
@@ -751,7 +751,7 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
 
 wxLayoutLine::~wxLayoutLine()
 {
-   // kbList cleans itself
+   // m_ObjectList deletes the objects it contains itself
 }
 
 wxPoint
@@ -785,7 +785,7 @@ wxLayoutLine::RecalculatePosition(wxLayoutList *llist)
 
 
 wxLayoutObjectList::iterator
-wxLayoutLine::FindObject(CoordType xpos, CoordType *offset) const
+wxLayoutLine::FindObject(CoordType xpos, CoordType *offset)
 {
    wxASSERT(xpos >= 0);
    wxASSERT(offset);
@@ -817,7 +817,7 @@ wxLayoutLine::FindObject(CoordType xpos, CoordType *offset) const
 wxLayoutObjectList::iterator
 wxLayoutLine::FindObjectScreen(wxDC &dc, wxLayoutList *llist,
                                CoordType xpos, CoordType *cxpos,
-                               bool *found) const
+                               bool *found)
 {
    wxASSERT(cxpos);
 
@@ -828,7 +828,7 @@ wxLayoutLine::FindObjectScreen(wxDC &dc, wxLayoutList *llist,
 
    for(i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
    {
-      wxLayoutObject *obj = *i;
+      wxLayoutObject *obj = i->get();
       if ( obj->GetType() == WXLO_TYPE_CMD )
       {
          // this will set the correct font for the objects which follow
@@ -856,7 +856,7 @@ wxLayoutLine::FindObjectScreen(wxDC &dc, wxLayoutList *llist,
 
    if (found)
        *found = false;
-   return m_ObjectList.tail();
+   return GetLastObject();
 }
 
 /** Finds text in this line.
@@ -870,7 +870,7 @@ wxLayoutLine::FindText(const wxString &needle, CoordType xpos) const
    int cpos = 0;
    wxString text;
 
-   for(wxLOiterator i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
+   for(auto i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
    {
       int len = (*i)->GetLength();
 
@@ -880,7 +880,7 @@ wxLayoutLine::FindText(const wxString &needle, CoordType xpos) const
       {
          if((**i).GetType() == WXLO_TYPE_TEXT)
          {
-            wxLayoutObjectText *objText = (wxLayoutObjectText *)*i;
+            wxLayoutObjectText *objText = (wxLayoutObjectText *)i->get();
 
             // search from xpos, not the beginning of the text, if xpos lies
             // inside this text object
@@ -914,7 +914,7 @@ bool
 wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj, CoordType *pLenOrig)
 {
    wxASSERT(xpos >= 0);
-   wxASSERT(obj != NULL);
+   wxASSERT(obj != nullptr);
 
    MarkDirty(xpos);
 
@@ -931,7 +931,7 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj, CoordType *pLenOrig)
    {
       if(xpos == 0 ) // aha, empty line!
       {
-         m_ObjectList.push_back(obj);
+         m_ObjectList.emplace_back(obj);
          m_Length += *pLen;
          return true;
       }
@@ -942,23 +942,23 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj, CoordType *pLenOrig)
    CoordType len = (**i).GetLength();
    if(offset == 0 /*&& i != m_ObjectList.begin()*/) // why?
    {  // insert before this object
-      m_ObjectList.insert(i,obj);
+      m_ObjectList.emplace(i,obj);
       m_Length += *pLen;
       return true;
    }
    if(offset == len )
    {
-      if( i == m_ObjectList.tail()) // last object?
+      if( std::next(i) == m_ObjectList.end()) // last object?
       {
          // TODO: possible optimization is to combine this object with the
          //       previous one if they are both of type WXLO_TYPE_CMD as it
          //       would save on calls to ApplyStyle() during Layout()
-         m_ObjectList.push_back(obj);
+         m_ObjectList.emplace_back(obj);
       }
       else
       {  // insert after current object
          ++i;
-         m_ObjectList.insert(i,obj);
+         m_ObjectList.emplace(i,obj);
       }
       m_Length += *pLen;
       return true;
@@ -967,16 +967,16 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj, CoordType *pLenOrig)
       Fortunately this can only be a text object. */
    wxASSERT((**i).GetType() == WXLO_TYPE_TEXT);
    wxString left, right;
-   wxLayoutObjectText *tobj = (wxLayoutObjectText *) *i;
+   wxLayoutObjectText *tobj = (wxLayoutObjectText *)i->get();
    left = tobj->GetText().substr(0,offset);
    right = tobj->GetText().substr(offset,len-offset);
    // current text object gets set to right half
    tobj->GetText() = right; // set new text
    // before it we insert the new object
-   m_ObjectList.insert(i,obj);
+   i = m_ObjectList.emplace(i,obj);
    m_Length += *pLen;
    // and before that we insert the left half
-   m_ObjectList.insert(i,new wxLayoutObjectText(left));
+   m_ObjectList.emplace(i,new wxLayoutObjectText(left));
    return true;
 }
 
@@ -991,7 +991,7 @@ wxLayoutLine::Insert(CoordType xpos, const wxString& text)
    wxLOiterator i = FindObject(xpos, &offset);
    if(i != m_ObjectList.end() && (**i).GetType() == WXLO_TYPE_TEXT)
    {
-      wxLayoutObjectText *tobj = (wxLayoutObjectText *) *i;
+      wxLayoutObjectText *tobj = (wxLayoutObjectText *)i->get();
       tobj->GetText().insert(offset, text);
       m_Length += text.Length();
    }
@@ -1054,7 +1054,7 @@ wxLayoutLine::Delete(CoordType xpos, CoordType npos)
          if(offset == 0 && max == (**i).GetLength())
             i = m_ObjectList.erase(i);  // remove the whole object
          else
-            ((wxLayoutObjectText *)(*i))->GetText().Remove(offset,max);
+            ((wxLayoutObjectText *)i->get())->GetText().Remove(offset,max);
       }
    }
 
@@ -1089,7 +1089,7 @@ wxLayoutLine::DeleteWord(CoordType xpos)
             ++i; offset = 0;
             continue;
          }
-         wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
+         wxLayoutObjectText *tobj = (wxLayoutObjectText *)i->get();
          size_t count = 0;
          wxString str = tobj->GetText();
          str = str.substr(offset,str.Length()-offset);
@@ -1100,7 +1100,7 @@ wxLayoutLine::DeleteWord(CoordType xpos)
          while(wxIsalnum(str.c_str()[count])) count++;
          // now delete it:
          wxASSERT(count+offset <= (size_t) (**i).GetLength());
-         ((wxLayoutObjectText *)*i)->GetText().erase(offset,count);
+         ((wxLayoutObjectText *)i->get())->GetText().erase(offset,count);
          m_Length -= count;
          return true;
       }
@@ -1137,7 +1137,7 @@ wxLayoutLine::Draw(wxDC &dc,
                    wxLayoutList *llist,
                    const wxPoint & offset) const
 {
-   wxLayoutObjectList::iterator i;
+   wxLayoutObjectList::const_iterator i;
    wxPoint pos = offset;
    pos = pos + GetPosition();
 
@@ -1219,7 +1219,7 @@ wxLayoutLine::Layout(wxDC &dc,
    m_StyleInfo = llist->GetStyleInfo(); // save current style
    for(i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
    {
-      wxLayoutObject *obj = *i;
+      wxLayoutObject *obj = i->get();
       obj->Layout(dc, llist);
       wxPoint sizeObj = obj->GetSize(&objTopHeight, &objBottomHeight);
 
@@ -1233,13 +1233,13 @@ wxLayoutLine::Layout(wxDC &dc,
             {
                len = cx - count; // pos in object
                wxCoord width, height, descent;
-               dc.GetTextExtent((*(wxLayoutObjectText*)*i).GetText().substr(0,len),
+               dc.GetTextExtent(((wxLayoutObjectText *)i->get())->GetText().substr(0,len),
                                 &width, &height, &descent);
                cursorPos->x += width;
                cursorPos->y = m_Position.y;
                wxString str;
                if(len < obj->GetLength())
-                  str = (*(wxLayoutObjectText*)*i).GetText().substr(len,1);
+                  str = ((wxLayoutObjectText *)i->get())->GetText().substr(len,1);
                else
                   str = WXLO_CURSORCHAR;
                dc.GetTextExtent(str, &width, &height, &descent);
@@ -1365,7 +1365,7 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
       && offset != (**i).GetLength() )
    {
       wxString left, right;
-      wxLayoutObjectText *tobj = (wxLayoutObjectText *) *i;
+      wxLayoutObjectText *tobj = (wxLayoutObjectText *)i->get();
       left = tobj->GetText().substr(0,offset);
       right = tobj->GetText().substr(offset,tobj->GetLength()-offset);
       // current text object gets set to left half
@@ -1380,14 +1380,15 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
          ++i; // move objects from here to new list
    }
 
-   while(i != m_ObjectList.end())
+   // move all the remaining objects to the new line
+   for(auto j = i; j != m_ObjectList.end(); ++j)
    {
-      wxLayoutObject *obj = *i;
-      newLine->Append(obj);
-      m_Length -= obj->GetLength();
-
-      m_ObjectList.remove(i); // remove without deleting it
+      const CoordType len = (*j)->GetLength();
+      m_Length -= len;
+      newLine->m_Length += len;
    }
+   newLine->m_ObjectList.splice(newLine->m_ObjectList.end(),
+                                m_ObjectList, i, m_ObjectList.end());
    if(m_Next)
       m_Next->MarkDirty();
    return newLine;
@@ -1397,12 +1398,12 @@ bool
 wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
 {
    if(GetLength() < wrapmargin)
-      return FALSE; // nothing to do
+      return false; // nothing to do
 
    // find the object which covers the wrapmargin:
    CoordType offset;
    wxLOiterator i = FindObject(wrapmargin, &offset);
-   wxCHECK_MSG( i != m_ObjectList.end(), FALSE,
+   wxCHECK_MSG( i != m_ObjectList.end(), false,
       _T("Cannot find object covering wrapmargin."));
 
    // from this object on, the rest of the line must be copied to the
@@ -1427,13 +1428,13 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    }
    else
    {
-      bool foundSpace = FALSE;
+      bool foundSpace = false;
       do
       {
 //         while(i != m_ObjectList.begin() && (**i).GetType() != WXLO_TYPE_TEXT)
 //            --i;
          // try to find a suitable place to split the object:
-         wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
+         wxLayoutObjectText *tobj = (wxLayoutObjectText *)i->get();
          if((**i).GetType() == WXLO_TYPE_TEXT
             && tobj->GetText().Length() > breakpos)
          {
@@ -1453,7 +1454,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
          if(! foundSpace) // breakpos == 0!
          {
             if(i == m_ObjectList.begin())
-               return FALSE; // could not break line
+               return false; // could not break line
             else
             {
                --i;
@@ -1475,7 +1476,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
             objectCursorPos += (**j).GetLength();
       }
       // now we know where to break it:
-      wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
+      wxLayoutObjectText *tobj = (wxLayoutObjectText *)i->get();
       shorter = tobj->GetLength() - breakpos;
       // remember text to copy from this object
       prependText = tobj->GetText().Mid(breakpos+1);
@@ -1488,19 +1489,18 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    (void) new wxLayoutLine(this, llist);
    wxASSERT(m_Next);
 
-   // We need to move this and all following objects to the next
-   // line. Starting from the end of line, to keep the order right.
+   // We need to move this and all following objects to the start of the next
+   // line.
    if(copyObject != m_ObjectList.end())
    {
-      for(wxLOiterator j = m_ObjectList.tail(); j != copyObject; j--)
-         m_Next->Prepend(*j);
-      m_Next->Prepend(*copyObject);
-      // and now remove them from this list:
-      while( copyObject != m_ObjectList.end() )
-      {
-         shorter += (**copyObject).GetLength();
-         m_ObjectList.remove(copyObject); // remove without deleting it
-      }
+      CoordType lenMoved = 0;
+      for(auto j = copyObject; j != m_ObjectList.end(); ++j)
+         lenMoved += (*j)->GetLength();
+
+      m_Next->m_ObjectList.splice(m_Next->m_ObjectList.begin(),
+                                  m_ObjectList, copyObject, m_ObjectList.end());
+      m_Next->m_Length += lenMoved;
+      shorter += lenMoved;
    }
    m_Length -= shorter;
 
@@ -1510,17 +1510,14 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
 
    // we also need to copy all the style information from the previous line
    // occuring before the wrap point, otherwise formatting would be broken
-   for ( wxLOiterator j = m_ObjectList.tail(); ; j-- )
+   for ( auto j = m_ObjectList.rbegin(); j != m_ObjectList.rend(); ++j )
    {
-      if ( j->GetType() == WXLO_TYPE_CMD )
+      if ( (*j)->GetType() == WXLO_TYPE_CMD )
       {
          // we have to make a new object to avoid referencing the same pointer
          // from 2 lines (would result in a crash when deleting them)
-         m_Next->Prepend(j->Copy());
+         m_Next->Prepend((*j)->Copy());
       }
-
-      if ( j == m_ObjectList.begin() )
-         break;
    }
 
    // do we need to adjust the cursor position?
@@ -1530,7 +1527,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
                                 ((xpos > breakpos) ? 1 : 0 ));
       llist->MoveCursorTo( wxPoint( xpos, m_Next->GetLineNumber()) );
    }
-   return TRUE; // we wrapped the line
+   return true; // we wrapped the line
 }
 
 void
@@ -1549,35 +1546,14 @@ wxLayoutLine::MergeNextLine(wxLayoutList *llist)
 {
    wxCHECK_RET(GetNextLine(),_T("wxLayout internal error: no next line to merge"));
    wxLayoutObjectList &list = GetNextLine()->m_ObjectList;
-   wxLOiterator i;
 
    MarkDirty(GetWidth());
 
-   wxLayoutObject *last = NULL;
-   for(i = list.begin(); i != list.end();)
-   {
-      wxLayoutObject *current = *i;
+   // move all objects from the next line to this one
+   for(const auto& obj : list)
+      m_Length += obj->GetLength();
 
-      // merge text objects together for efficiency
-      if ( last && last->GetType() == WXLO_TYPE_TEXT &&
-                   current->GetType() == WXLO_TYPE_TEXT )
-      {
-         wxLayoutObjectText *textObj = (wxLayoutObjectText *)last;
-         wxString text(textObj->GetText());
-         text += ((wxLayoutObjectText *)current)->GetText();
-         textObj->SetText(text);
-
-         i = list.erase(i); // remove and delete it
-      }
-      else
-      {
-         // just append the object "as was"
-         Append(current);
-
-         list.remove(i); // remove without deleting it
-      }
-   }
-   wxASSERT(list.empty());
+   m_ObjectList.splice(m_ObjectList.end(), list);
 
    wxLayoutLine *oldnext = GetNextLine();
    wxLayoutLine *nextLine = oldnext->GetNextLine();
@@ -1612,13 +1588,13 @@ wxLayoutLine::GetWrapPosition(CoordType column)
    if(i == m_ObjectList.end()) return -1; // cannot wrap
 
    // go backwards through the list and look for space in text objects
-   do
+   for(;;)
    {
       if((**i).GetType() == WXLO_TYPE_TEXT)
       {
          do
          {
-            if(wxIsspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
+            if(wxIsspace(((wxLayoutObjectText*)i->get())->GetText().c_str()[(size_t)offset]))
                return column;
             else
             {
@@ -1626,16 +1602,18 @@ wxLayoutLine::GetWrapPosition(CoordType column)
                column--;
             }
          }while(offset != -1);
-         --i;  // move on to previous object
       }
       else
       {
          column -= (**i).GetLength();
-         --i;
       }
-      if( i != m_ObjectList.end())
-         offset = (**i).GetLength();
-   }while(i != m_ObjectList.end());
+
+      if( i == m_ObjectList.begin() )
+         break;
+
+      --i;  // move on to previous object
+      offset = (**i).GetLength();
+   }
    /* If we reached the begin of the list and have more than one
       object, that one is longer than the margin, so break behind
       it. */
@@ -1651,7 +1629,7 @@ wxLayoutLine::GetWrapPosition(CoordType column)
    // now we are behind the one long text object and need to find the
    // first space in it
    for(offset = 0; offset < (**i).GetLength(); offset++)
-      if( wxIsspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
+      if( wxIsspace(((wxLayoutObjectText *)i->get())->GetText().c_str()[(size_t)offset]))
       {
          return pos+offset;
       }
@@ -1694,13 +1672,12 @@ wxLayoutLine::Copy(wxLayoutList *llist,
 
    // Common special case: only one object
    if( first != m_ObjectList.end() && last != m_ObjectList.end()
-      && *first == *last )
+      && first == last )
    {
       if( (**first).GetType() == WXLO_TYPE_TEXT )
       {
          llist->Insert(new wxLayoutObjectText(
-            ((wxLayoutObjectText
-              *)*first)->GetText().substr(firstOffset,
+            ((wxLayoutObjectText *)first->get())->GetText().substr(firstOffset,
                                           lastOffset-firstOffset))
             );
          return;
@@ -1718,7 +1695,7 @@ wxLayoutLine::Copy(wxLayoutList *llist,
    if((**first).GetType() == WXLO_TYPE_TEXT && firstOffset != 0)
    {
       llist->Insert(new wxLayoutObjectText(
-         ((wxLayoutObjectText *)*first)->GetText().substr(firstOffset))
+         ((wxLayoutObjectText *)first->get())->GetText().substr(firstOffset))
          );
    }
    else if(firstOffset == 0)
@@ -1736,7 +1713,7 @@ wxLayoutLine::Copy(wxLayoutList *llist,
       if( (**last).GetType() == WXLO_TYPE_TEXT )
       {
          llist->Insert(new wxLayoutObjectText(
-            ((wxLayoutObjectText *)*last)->GetText().substr(0,lastOffset))
+            ((wxLayoutObjectText *)last->get())->GetText().substr(0,lastOffset))
             );
       }
       else
@@ -1754,20 +1731,20 @@ wxLayoutLine::Copy(wxLayoutList *llist,
 wxLayoutList::wxLayoutList()
 {
 #ifdef WXLAYOUT_USE_CARET
-   m_caret = NULL;
+   m_caret = nullptr;
 #endif // WXLAYOUT_USE_CARET
 
    m_numLines = 0;
-   m_FirstLine = NULL;
-   SetAutoFormatting(TRUE);
-   ForceTotalLayout(TRUE);  // for the first time, do all
+   m_FirstLine = nullptr;
+   SetAutoFormatting(true);
+   ForceTotalLayout(true);  // for the first time, do all
    InvalidateUpdateRect();
    Clear();
 }
 
 wxLayoutList::~wxLayoutList()
 {
-   SetAutoFormatting(FALSE);
+   SetAutoFormatting(false);
    InternalClear();
    Empty();
    m_FirstLine->DeleteLine(false, this);
@@ -1785,7 +1762,7 @@ wxLayoutList::Empty(void)
    m_CursorScreenPos = wxPoint(0,0);
    m_CursorSize = wxPoint(0,0);
    m_movedCursor = true;
-   m_FirstLine = new wxLayoutLine(NULL, this); // empty first line
+   m_FirstLine = new wxLayoutLine(nullptr, this); // empty first line
    m_CursorLine = m_FirstLine;
    InvalidateUpdateRect();
 }
@@ -1802,9 +1779,9 @@ wxLayoutList::InternalClear(void)
    m_DefaultStyleInfo.style = wxNORMAL;
    m_DefaultStyleInfo.weight = wxNORMAL;
    m_DefaultStyleInfo.underline = 0;
-   m_DefaultStyleInfo.m_fg_valid = TRUE;
+   m_DefaultStyleInfo.m_fg_valid = true;
    m_DefaultStyleInfo.m_fg = *wxBLACK;
-   m_DefaultStyleInfo.m_bg_valid = TRUE;
+   m_DefaultStyleInfo.m_bg_valid = true;
    m_DefaultStyleInfo.m_bg = *wxWHITE;
 
    m_CurrentStyleInfo = m_DefaultStyleInfo;
@@ -1891,7 +1868,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
       cbg = wxTheColourDatabase->Find(bg);
 
    SetFont(family, size, style, weight, underline,
-           fg ? &cfg : NULL, bg ? &cbg : NULL, encoding);
+           fg ? &cfg : nullptr, bg ? &cbg : nullptr, encoding);
 }
 
 void
@@ -1977,7 +1954,7 @@ wxLayoutList::MoveCursorTo(wxPoint const &p)
 bool
 wxLayoutList::MoveCursorVertically(int n)
 {
-   if(m_CursorLine == NULL)
+   if(m_CursorLine == nullptr)
       return m_movedCursor = false;
 
    AddCursorPosToUpdateRect();
@@ -1990,7 +1967,7 @@ wxLayoutList::MoveCursorVertically(int n)
       while(n < 0)
       {
          wxLayoutLine *next = m_CursorLine->GetPreviousLine();
-         if (next == NULL)
+         if (next == nullptr)
          {
             m_CursorPos.x = 0;
             m_CursorPos.y = 0;
@@ -2006,7 +1983,7 @@ wxLayoutList::MoveCursorVertically(int n)
       while(n > 0)
       {
          wxLayoutLine *next = m_CursorLine->GetNextLine();
-         if (next == NULL)
+         if (next == nullptr)
          {
             m_CursorPos.x = m_CursorLine->GetLength();
             wxASSERT(m_CursorPos.x >= 0);
@@ -2081,9 +2058,16 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
    CoordType moveDistance = 0;
    CoordType offset;
    wxLayoutLine *lineCur = m_CursorLine;
+
+   // return the previous object in the current line or NULLIT() if none
+   const auto prev = [&lineCur](wxLOiterator i)
+   {
+      return i == lineCur->GetFirstObject() ? lineCur->NULLIT() : std::prev(i);
+   };
+
    for ( wxLOiterator i = lineCur->FindObject(m_CursorPos.x, &offset);
          n != 0;
-         n > 0 ? ++i : --i )
+         i = n > 0 ? std::next(i) : prev(i) )
    {
       if ( i == lineCur->NULLIT() )
       {
@@ -2113,7 +2097,7 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
          offset = -1;
       }
 
-      wxLayoutObject *obj = *i;
+      wxLayoutObject *obj = i->get();
 
       if ( offset == -1 )
       {
@@ -2285,7 +2269,7 @@ bool
 wxLayoutList::Insert(wxLayoutList *llist)
 {
    wxASSERT(llist);
-   bool rc = TRUE;
+   bool rc = true;
 
    for(wxLayoutLine *line = llist->GetFirstLine();
        line;
@@ -2295,7 +2279,7 @@ wxLayoutList::Insert(wxLayoutList *llist)
       for(wxLOiterator i = line->GetFirstObject();
           i != line->NULLIT();
           ++i)
-         rc |= Insert(*i);
+         rc |= Insert((*i)->Copy());
       LineBreak();
    }
    return rc;
@@ -2315,7 +2299,7 @@ wxLayoutList::LineBreak(void)
       height = m_CursorLine->GetHeight();
 
    m_CursorLine = m_CursorLine->Break(m_CursorPos.x, this);
-   if(m_CursorLine->GetPreviousLine() == NULL)
+   if(m_CursorLine->GetPreviousLine() == nullptr)
       m_FirstLine = m_CursorLine;
    m_CursorPos.y++;
    m_CursorPos.x = 0;
@@ -2349,8 +2333,8 @@ wxLayoutList::WrapAll(CoordType column)
 {
    wxLayoutLine *line = m_FirstLine;
    if(! line)
-      return FALSE;
-   bool rc = FALSE;
+      return false;
+   bool rc = false;
    while(line)
    {
       rc |= line->Wrap(column, this);
@@ -2511,10 +2495,10 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
 
    if(m_ReLayoutAll)
    {
-      forceAll = TRUE;
+      forceAll = true;
       bottom = -1;
    }
-   ForceTotalLayout(FALSE);
+   ForceTotalLayout(false);
 
 
    // If one line was dirty, we need to re-calculate all
@@ -2565,7 +2549,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
                if ( csize )
                   *csize = m_CursorSize;
             }
-            cursorReached = TRUE;
+            cursorReached = true;
          }
          else
          {
@@ -2573,8 +2557,8 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
             {
                line->Layout(dc, this,
                             cpos,
-                            csize, NULL, cpos->x);
-               cursorReached = TRUE;
+                            csize, nullptr, cpos->x);
+               cursorReached = true;
             }
             else
                line->Layout(dc, this);
@@ -2586,7 +2570,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
 #ifndef WXLAYOUT_USE_CARET
    // can only be 0 if we are on the first line and have no next line
    wxASSERT(m_CursorSize.x != 0 || (m_CursorLine &&
-                                    m_CursorLine->GetNextLine() == NULL &&
+                                    m_CursorLine->GetNextLine() == nullptr &&
                                     m_CursorLine == m_FirstLine));
 #endif // WXLAYOUT_USE_CARET
    AddCursorPosToUpdateRect();
@@ -2681,7 +2665,7 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
       line = line->GetNextLine();
    }
 
-   bool didFind = line != NULL;
+   bool didFind = line != nullptr;
 
    if ( !line )
    {
@@ -2710,12 +2694,12 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
    else
      i = line->FindObjectScreen(dc, this,
                                     pos.x,
-                                    NULL,
+                                    nullptr,
                                     &foundinline);
    if ( found )
       *found = didFind && foundinline;
 
-   return (i == line->NULLIT()) ? NULL : *i;
+   return (i == line->NULLIT()) ? nullptr : i->get();
 }
 
 wxPoint
@@ -3086,22 +3070,22 @@ wxLayoutList::Copy(const wxPoint &from,
                    const wxPoint &to)
 {
    wxLayoutLine
-      * firstLine = NULL,
-      * lastLine = NULL;
+      * firstLine = nullptr,
+      * lastLine = nullptr;
 
    for(firstLine = m_FirstLine;
        firstLine && firstLine->GetLineNumber() < from.y;
        firstLine=firstLine->GetNextLine())
       ;
    if(!firstLine || firstLine->GetLineNumber() != from.y)
-      return NULL;
+      return nullptr;
 
    for(lastLine = m_FirstLine;
        lastLine && lastLine->GetLineNumber() < to.y;
        lastLine=lastLine->GetNextLine())
       ;
    if(!lastLine || lastLine->GetLineNumber() != to.y)
-      return NULL;
+      return nullptr;
 
    if(to <= from)
    {
@@ -3143,7 +3127,7 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
       if(m_Selection.m_selecting)
          EndSelection();
       else
-         return NULL;
+         return nullptr;
    }
 
    if(invalidate) m_Selection.m_valid = false;
@@ -3157,7 +3141,7 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
 
       wxLayoutExportObject *exp;
       wxLayoutExportStatus status(llist);
-      while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_OBJECTS)) != NULL)
+      while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_OBJECTS)) != nullptr)
       {
          if(exp->type == WXLO_EXPORT_EMPTYLINE)
             string << (int) WXLO_TYPE_LINEBREAK << '\n';
@@ -3184,10 +3168,10 @@ wxLayoutList::ApplyStyle(wxLayoutStyleInfo const &si, wxDC &dc)
       if(si.what != -1) \
       { \
          m_CurrentStyleInfo.what = si.what; \
-         fontChanged = TRUE; \
+         fontChanged = true; \
       }
 
-      bool fontChanged = FALSE;
+      bool fontChanged = false;
       COPY_SI(family);
       COPY_SI(size);
       COPY_SI(style);
@@ -3298,18 +3282,18 @@ bool wxLayoutPrintout::Print(wxWindow *window, wxLayoutList *llist)
    wxPrinter printer(& pdd);
    wxLayoutPrintout printout(llist);
 
-   if ( !printer.Print(window, &printout, TRUE)
+   if ( !printer.Print(window, &printout, true)
         && printer.GetLastError() != wxPRINTER_CANCELLED )
    {
       wxMessageBox(_("There was a problem with printing the message:\n"
                      "perhaps your current printer is not set up correctly?"),
                    _("Printing"), wxOK);
-      return FALSE;
+      return false;
    }
 
    mApplication->SetPrintData(printer.GetPrintDialogData().GetPrintData());
 
-   return TRUE;
+   return true;
 }
 
 /* static */
@@ -3338,14 +3322,14 @@ bool wxLayoutPrintout::PrintPreview(wxLayoutList *llist)
    wxPreviewFrame *frame = new wxPreviewFrame
                                (
                                  preview,
-                                 NULL, //GetFrame(m_Parent),
+                                 nullptr, //GetFrame(m_Parent),
                                  _("Print Preview"),
                                  wxPoint(100, 100),
                                  wxSize(600, 650)
                                );
    frame->Centre(wxBOTH);
    frame->Initialize();
-   frame->Show(TRUE);
+   frame->Show(true);
 
    return true;
 #else // !wxUSE_PRINTING_ARCHITECTURE
@@ -3430,11 +3414,11 @@ bool
 wxLayoutPrintout::OnBeginDocument(int startPage, int endPage)
 {
    if (!wxPrintout::OnBeginDocument(startPage, endPage))
-      return FALSE;
+      return false;
 
    ScaleDC(GetDC());
 
-   return TRUE;
+   return true;
 }
 
 bool wxLayoutPrintout::OnPrintPage(int page)
@@ -3457,8 +3441,8 @@ bool wxLayoutPrintout::OnPrintPage(int page)
    // SetDeviceOrigin() doesn't work here, so we need to manually
    // translate all coordinates.
    wxPoint translate(marginX, - top + marginY);  // HACK ALERT
-   m_llist->ForceTotalLayout(TRUE);  // for the first time, do all
-   m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly */);
+   m_llist->ForceTotalLayout(true);  // for the first time, do all
+   m_llist->Draw(*dc, translate, top, bottom, true /* clip strictly */);
 
    return true;
 }
@@ -3516,18 +3500,15 @@ wxFont
 wxFontCache::GetFont(int family, int size, int style, int weight,
                      bool underline, wxFontEncoding encoding)
 {
-   for(wxFCEList::iterator i = m_FontList.begin();
-       i != m_FontList.end(); ++i)
+   for ( const wxFontCacheEntry& fce : m_FontList )
    {
-      if( (**i).Matches(family, size, style, weight, underline, encoding) )
-         return (**i).GetFont();
+      if( fce.Matches(family, size, style, weight, underline, encoding) )
+         return fce.GetFont();
    }
 
    // not found:
-   wxFontCacheEntry *fce = new wxFontCacheEntry(family, size, style,
-                                                weight, underline, encoding);
-   m_FontList.push_back(fce);
-   return fce->GetFont();
+   m_FontList.emplace_back(family, size, style, weight, underline, encoding);
+   return m_FontList.back().GetFont();
 }
 
 /*

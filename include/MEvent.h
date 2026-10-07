@@ -100,7 +100,7 @@ class MEventWithFolderData : public MEventData
 public:
    /// ctor takes the (string) id for the event
    MEventWithFolderData(MEventId id = MEventId_Null,
-                        MailFolder *mf = NULL);
+                        MailFolder *mf = nullptr);
 
    /// virtual dtor as in any base class
    virtual ~MEventWithFolderData();
@@ -500,7 +500,7 @@ public:
    static bool DeregisterAll(void **pHandle, ...);
 
    /// Temporarily suspend (enable/disable) event dispatching:
-   static void Suspend(bool suspended = TRUE);
+   static void Suspend(bool suspended = true);
 };
 
 // ----------------------------------------------------------------------------

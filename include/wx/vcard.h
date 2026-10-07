@@ -18,8 +18,9 @@
 
 #ifndef USE_PCH
 #  include "wx/string.h"
-#  include "wx/dynarray.h"
 #endif // USE_PCH
+
+#include <vector>
 
 // we can be compiled inside wxWin or not
 #ifdef WXMAKINGDLL
@@ -38,7 +39,7 @@ class WXDLLMAYEXP wxVCard;
    #define VOBJECT_DEFINED
 #endif // VOBJECT_DEFINED
 
-WX_DEFINE_ARRAY(wxVCard *, wxArrayCards);
+using wxArrayCards = std::vector<wxVCard *>;
 
 // ----------------------------------------------------------------------------
 // wxVCardObject has a name, a value and a list of associated properties which
@@ -62,7 +63,7 @@ public:
     };
 
     // is this object valid?
-    bool IsOk() { return m_vObj != NULL; }
+    bool IsOk() { return m_vObj != nullptr; }
 
     // return the object name
     wxString GetName() const;
@@ -117,7 +118,7 @@ protected:
     friend class wxVCard; // uses GetNamedPropValue()
 
     // ctors
-    wxVCardObject(VObject *vObj = NULL);
+    wxVCardObject(VObject *vObj = nullptr);
     wxVCardObject(wxVCardObject *parent, const wxString& name);
 
     // get out string value (protected, shouldn't be called by user)
@@ -311,10 +312,10 @@ public:
 
     bool GetFullName(wxString *fullName) const;
     bool GetName(wxString *familyName,
-                 wxString *givenName = NULL,
-                 wxString *additionalNames = NULL,
-                 wxString *namePrefix = NULL,
-                 wxString *nameSuffix = NULL) const;
+                 wxString *givenName = nullptr,
+                 wxString *additionalNames = nullptr,
+                 wxString *namePrefix = nullptr,
+                 wxString *nameSuffix = nullptr) const;
     bool GetPhoto(wxVCardImage *image) const;
     bool GetBirthDay(wxDateTime *birthday) const;
     bool GetBirthDayString(wxString *birthday) const;

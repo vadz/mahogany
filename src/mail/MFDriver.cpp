@@ -26,7 +26,7 @@
 // implementation
 // ============================================================================
 
-MFDriver *MFDriver::ms_drivers = NULL;
+MFDriver *MFDriver::ms_drivers = nullptr;
 
 /* static */
 MFDriver *MFDriver::Get(const char *name)
@@ -41,6 +41,6 @@ MFDriver *MFDriver::Get(const char *name)
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 

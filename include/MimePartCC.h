@@ -26,8 +26,8 @@ class MimePartCC : public MimePartCCBase
 {
 public:
    // data access
-   virtual const void *GetRawContent(unsigned long *len = NULL) const;
-   virtual String GetHeaders() const;
+   const void *GetRawContent(unsigned long *len = nullptr) const override;
+   String GetHeaders() const override;
 
 protected:
    /// get the message we belong to

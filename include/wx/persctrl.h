@@ -115,7 +115,7 @@ public:
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& size = wxDefaultSize,
                  long style = 0,
-                 wxConfigBase *config = NULL);
+                 wxConfigBase *config = nullptr);
 
         // to be used if object was created with default ctor
     bool Create(const wxString& configPath,
@@ -125,7 +125,7 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = 0,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
         // dtor saves the strings
     ~wxPTextEntry();
@@ -171,10 +171,10 @@ public:
               const wxPoint &pos = wxDefaultPosition,
               const wxSize &size = wxDefaultSize,
               int n = 0,
-              const wxString *items = NULL,
+              const wxString *items = nullptr,
               long style = 0,
               const wxValidator& validator = wxDefaultValidator,
-              wxConfigBase *config = NULL);
+              wxConfigBase *config = nullptr);
         // pseudo ctor
     bool Create(const wxString& configPath,
                 wxWindow *parent,
@@ -182,10 +182,10 @@ public:
                 const wxPoint &pos = wxDefaultPosition,
                 const wxSize &size = wxDefaultSize,
                 int n = 0,
-                const wxString *items = NULL,
+                const wxString *items = nullptr,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
     // dtor saves the settings
     virtual ~wxPChoice();
@@ -234,7 +234,7 @@ public:
                       const wxPoint& pos = wxDefaultPosition,
                       const wxSize& size = wxDefaultSize,
                       long style = wxSP_3D | wxCLIP_CHILDREN,
-                      wxConfigBase *config = NULL);
+                      wxConfigBase *config = nullptr);
 
         // to be used if object was created with default ctor
     bool Create(const wxString& configPath,
@@ -243,20 +243,20 @@ public:
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxSP_3D | wxCLIP_CHILDREN,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
         // dtor saves the strings
     ~wxPSplitterWindow();
 
     // when the window is split for the first time we restore the previously
     // saved position of the splitter
-    virtual bool SplitVertically(wxWindow *window1, wxWindow *window2,
-                                 int sashPosition = 0);
-    virtual bool SplitHorizontally(wxWindow *window1, wxWindow *window2,
-                                   int sashPosition = 0);
+    bool SplitVertically(wxWindow *window1, wxWindow *window2,
+                         int sashPosition = 0) override;
+    bool SplitHorizontally(wxWindow *window1, wxWindow *window2,
+                           int sashPosition = 0) override;
 
     // we need to update our m_wasSplit here
-    virtual void OnUnsplit(wxWindow *removed);
+    void OnUnsplit(wxWindow *removed) override;
 
     // accessors
         // set the config object to use (must be !NULL)
@@ -300,7 +300,7 @@ public:
                 const wxSize &size = wxDefaultSize,
                 long style = wxLC_ICON,
                 const wxValidator& validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
         // pseudo ctor
     bool Create(const wxString& configPath,
                 wxWindow *parent,
@@ -309,7 +309,7 @@ public:
                 const wxSize &size = wxDefaultSize,
                 long style = wxLC_ICON,
                 const wxValidator& validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
     // dtor saves the settings
     virtual ~wxPListCtrl();
@@ -362,7 +362,7 @@ public:
                 const wxSize &size = wxDefaultSize,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
         // pseudo ctor
     bool Create(const wxString& configPath,
                 wxWindow *parent,
@@ -372,7 +372,7 @@ public:
                 const wxSize &size = wxDefaultSize,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
     // dtor saves the settings
     virtual ~wxPCheckBox();
@@ -413,10 +413,10 @@ public:
                const wxPoint &pos = wxDefaultPosition,
                const wxSize &size = wxDefaultSize,
                int n = 0,
-               const wxString *items = NULL,
+               const wxString *items = nullptr,
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
-               wxConfigBase *config = NULL);
+               wxConfigBase *config = nullptr);
         // pseudo ctor
     bool Create(const wxString& configPath,
                 wxWindow *parent,
@@ -424,10 +424,10 @@ public:
                 const wxPoint &pos = wxDefaultPosition,
                 const wxSize &size = wxDefaultSize,
                 int n = 0,
-                const wxString *items = NULL,
+                const wxString *items = nullptr,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
     // dtor saves the settings
     virtual ~wxPListBox();
@@ -478,11 +478,11 @@ public:
                const wxPoint &pos = wxDefaultPosition,
                const wxSize &size = wxDefaultSize,
                int n = 0,
-               const wxString *items = NULL,
+               const wxString *items = nullptr,
                int majorDim = 0,
                long style = wxRA_HORIZONTAL,
                const wxValidator& validator = wxDefaultValidator,
-               wxConfigBase *config = NULL);
+               wxConfigBase *config = nullptr);
         // pseudo ctor
     bool Create(const wxString& configPath,
                 wxWindow *parent,
@@ -491,11 +491,11 @@ public:
                 const wxPoint &pos = wxDefaultPosition,
                 const wxSize &size = wxDefaultSize,
                 int n = 0,
-                const wxString *items = NULL,
+                const wxString *items = nullptr,
                 int majorDim = 0,
                 long style = wxRA_HORIZONTAL,
                 const wxValidator& validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
     // dtor saves the settings
     virtual ~wxPRadioBox();
@@ -545,7 +545,7 @@ public:
                 const wxSize& size = wxDefaultSize,
                 long style = wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT,
                 const wxValidator &validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
         // pseudo ctor
     bool Create(const wxString& configPath,
                 wxWindow *parent,
@@ -554,7 +554,7 @@ public:
                 const wxSize& size = wxDefaultSize,
                 long style = wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT,
                 const wxValidator &validator = wxDefaultValidator,
-                wxConfigBase *config = NULL);
+                wxConfigBase *config = nullptr);
 
     // dtor saves the settings
     virtual ~wxPTreeCtrl();
@@ -618,24 +618,24 @@ enum
 extern WXDLLMAYEXP wxString
 wxPFileSelector(const wxString& configPath,
                 const wxString& title,
-                const wxChar *defpath = NULL,
-                const wxChar *defname = NULL,
-                const wxChar *extension = NULL,
-                const wxChar *filter = NULL,
+                const wxChar *defpath = nullptr,
+                const wxChar *defname = nullptr,
+                const wxChar *extension = nullptr,
+                const wxChar *filter = nullptr,
                 int flags = 0,
-                wxWindow *parent = NULL,
-                wxConfigBase *config = NULL);
+                wxWindow *parent = nullptr,
+                wxConfigBase *config = nullptr);
 
 // convenient wrappers for wxPFileSelector to use when loading/saving files
 inline wxString
 wxPLoadExistingFileSelector(wxWindow *parent,
                             const wxString& configPath,
                             const wxString& title,
-                            const wxChar *defpath = NULL,
-                            const wxChar *defname = NULL,
-                            const wxChar *extension = NULL,
-                            const wxChar *filter = NULL,
-                            wxConfigBase *config = NULL)
+                            const wxChar *defpath = nullptr,
+                            const wxChar *defname = nullptr,
+                            const wxChar *extension = nullptr,
+                            const wxChar *filter = nullptr,
+                            wxConfigBase *config = nullptr)
 {
     return wxPFileSelector(configPath, title, defpath, defname, extension,
                            filter, wxFD_OPEN | wxFD_FILE_MUST_EXIST,
@@ -646,12 +646,12 @@ inline wxString
 wxPSaveFileSelector(wxWindow *parent,
                     const wxString& configPath,
                     const wxString& title,
-                    const wxChar *defpath = NULL,
-                    const wxChar *defname = NULL,
-                    const wxChar *extension = NULL,
-                    const wxChar *filter = NULL,
+                    const wxChar *defpath = nullptr,
+                    const wxChar *defname = nullptr,
+                    const wxChar *extension = nullptr,
+                    const wxChar *filter = nullptr,
                     int flags = 0,
-                    wxConfigBase *config = NULL)
+                    wxConfigBase *config = nullptr)
 {
     return wxPFileSelector(configPath, title, defpath, defname, extension,
                            filter, wxFD_SAVE | wxFD_OVERWRITE_PROMPT | flags,
@@ -663,13 +663,13 @@ wxPSaveFileSelector(wxWindow *parent,
 extern WXDLLMAYEXP size_t wxPFilesSelector(wxArrayString& filenames,
                                            const wxString& configPath,
                                            const wxString& title,
-                                           const wxChar *defpath = NULL,
-                                           const wxChar *defname = NULL,
-                                           const wxChar *extension = NULL,
-                                           const wxChar *filter = NULL,
+                                           const wxChar *defpath = nullptr,
+                                           const wxChar *defname = nullptr,
+                                           const wxChar *extension = nullptr,
+                                           const wxChar *filter = nullptr,
                                            int flags = 0,
-                                           wxWindow *parent = NULL,
-                                           wxConfigBase *config = NULL);
+                                           wxWindow *parent = nullptr,
+                                           wxConfigBase *config = nullptr);
 
 // ----------------------------------------------------------------------------
 // Persistent directory selector: remember the last directory entered
@@ -680,8 +680,8 @@ extern WXDLLMAYEXP size_t wxPFilesSelector(wxArrayString& filenames,
 extern WXDLLMAYEXP wxString wxPDirSelector(const wxString& configPath,
                                            const wxString& message,
                                            const wxString& pathDefault = wxEmptyString,
-                                           wxWindow *parent = NULL,
-                                           wxConfigBase *config = NULL);
+                                           wxWindow *parent = nullptr,
+                                           wxConfigBase *config = nullptr);
 
 // ----------------------------------------------------------------------------
 // Persistent (a.k.a. "don't remind me again") message boxes functions.
@@ -720,27 +720,27 @@ wxPMessageBox(const wxString& configPath,
               const wxString& message,
               const wxString& caption,
               long style = wxYES_NO | wxICON_QUESTION,
-              wxWindow *parent = NULL,
-              wxConfigBase *config = NULL,
-              wxPMessageBoxParams *params = NULL);
+              wxWindow *parent = nullptr,
+              wxConfigBase *config = nullptr,
+              wxPMessageBoxParams *params = nullptr);
 
 // Return a non null value if the message box was previously disabled.
 //
 // The function can return wxYES, wxNO or wxOK if the message was disabled and
 // 0 otherwise.
 extern WXDLLMAYEXP int wxPMessageBoxIsDisabled(const wxString& configPath,
-                                               wxConfigBase *config = NULL);
+                                               wxConfigBase *config = nullptr);
 
 // make sure that the next call to wxPMessageBox(configPath) will show the
 // message box (by erasing the stored answer in it)
 extern WXDLLMAYEXP void wxPMessageBoxEnable(const wxString& configPath,
-                                            wxConfigBase *config = NULL);
+                                            wxConfigBase *config = nullptr);
 
 // disable the given message box by storing the given value for it (i.e. it
 // will be returned by wxPMessageBox() call, must be wxYES/NO/OK)
 extern WXDLLMAYEXP void wxPMessageBoxDisable(const wxString& configPath,
                                              int value,
-                                             wxConfigBase *config = NULL);
+                                             wxConfigBase *config = nullptr);
 
 #endif // _WX_PWINDOW_H_
 

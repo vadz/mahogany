@@ -22,11 +22,11 @@
 class ASMailFolder;
 class MessageView;
 class MFolder;
-class UIdArray;
 
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 #include "MEvent.h"
+#include "UIdArray.h"
 
 // ----------------------------------------------------------------------------
 // MsgCmdProc
@@ -43,7 +43,7 @@ public:
       @return MsgCmdProc pointer which must be deleted by the caller
     */
    static MsgCmdProc *Create(MessageView *msgView,
-                             wxWindow *winForDnd = NULL);
+                             wxWindow *winForDnd = nullptr);
 
    /**
      Set the folder to use (if the folder is NULL no messages will be
@@ -71,7 +71,7 @@ public:
     */
    virtual bool ProcessCommand(int id,
                                const UIdArray& messages,
-                               MFolder *folder = NULL) = 0;
+                               MFolder *folder = nullptr) = 0;
 
    /// get the name of our folder (only used by MMessagesDropTarget)
    virtual String GetFolderName() const = 0;

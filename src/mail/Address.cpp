@@ -28,13 +28,13 @@
    #include "MApplication.h"
 #endif // USE_PCH
 
-#include <wx/hashmap.h>
+#include <unordered_map>
 
 #include "Address.h"
 
 // hash type associates the list of the address equivalent to the given one
 // (used as the key)
-WX_DECLARE_STRING_HASH_MAP(wxArrayString, AddressHash);
+using AddressHash = std::unordered_map<wxString, wxArrayString>;
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -95,7 +95,7 @@ bool Address::operator==(const String& address) const
 {
    CHECK( IsValid(), false, _T("can't compare invalid addresses") );
 
-   AddressList_obj addrList(address);
+   AddressList_obj addrList(AddressList::Create(address));
    Address *addr = addrList->GetFirst();
 
    return addr && !addrList->HasNext(addr) && IsSameAs(*addr);
@@ -104,8 +104,8 @@ bool Address::operator==(const String& address) const
 /* static */
 bool Address::Compare(const String& address1, const String& address2)
 {
-   AddressList_obj addrList1(address1),
-                   addrList2(address2);
+   AddressList_obj addrList1(AddressList::Create(address1)),
+                   addrList2(AddressList::Create(address2));
    const Address * const addr1 = addrList1->GetFirst(),
                  * const addr2 = addrList2->GetFirst();
 
@@ -297,7 +297,7 @@ String Address::BuildFullForm(const String& name, const String& email)
 
    // we need to quote the personal part if it's not an atext as defined by RFC
    // 2822 (TODO: reuse IsATextChar() from matchurl.cpp!)
-   bool doQuote = wxStrpbrk(name, ",;\"") != NULL;
+   bool doQuote = wxStrpbrk(name, ",;\"") != nullptr;
    if ( doQuote )
    {
       address = _T('"');
@@ -333,7 +333,7 @@ Address::IsInList(const wxArrayString& addresses,
    String mailbox,
           domain;
 
-   AddressList_obj addrList(address);
+   AddressList_obj addrList(AddressList::Create(address));
    for ( Address *addr = addrList->GetFirst();
          addr;
          addr = addrList->GetNext(addr) )
@@ -349,7 +349,7 @@ Address::IsInList(const wxArrayString& addresses,
          //     can't use AddressList here as this might be just a domain name
          //     and not a valid address
          const wxChar *startAddr = wxStrchr(start, _T('<')),
-                      *endAddr = NULL;
+                      *endAddr = nullptr;
          if ( startAddr )
             endAddr = wxStrchr(++startAddr, _T('>'));
          else
@@ -433,7 +433,7 @@ Address::GetDisplayAddress(const String& address)
 
 bool AddressList::HasNext(const Address *addr) const
 {
-   return GetNext(addr) != NULL;
+   return GetNext(addr) != nullptr;
 }
 
 bool

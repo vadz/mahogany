@@ -12,10 +12,6 @@
 
 #include "gui/wxllist.h"
 
-#ifndef   NULL
-#   define   NULL 0
-#endif
-
 enum wxLayoutExportType
 {
    WXLO_EXPORT_TEXT,

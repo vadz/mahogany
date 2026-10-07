@@ -40,9 +40,9 @@
 #include "gui/wxMenuDefs.h"
 
 #ifndef wxHAS_RADIO_MENU_ITEMS
-   #define wxITEM_NORMAL FALSE
-   #define wxITEM_CHECK TRUE
-   #define wxITEM_RADIO TRUE
+   #define wxITEM_NORMAL false
+   #define wxITEM_CHECK true
+   #define wxITEM_RADIO true
 #endif
 
 class MOption;
@@ -669,7 +669,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
       const wxString label(wxGetTranslation(GetMenuItem(n).label));
       if ( !label.empty() ) {
          const wxChar *p = wxStrchr(label, _T('&'));
-         if ( p == NULL ) {
+         if ( p == nullptr ) {
             wxLogWarning(_T("Menu label '%s' doesn't have keyboard accelerator."),
                          label);
          }
@@ -836,15 +836,15 @@ extern wxMenu *
 FindSubmenu(wxWindow *win, int id)
 {
    wxFrame *frame = GetFrame(win);
-   CHECK( frame, NULL, _T("no parent frame in FindSubmenu") );
+   CHECK( frame, nullptr, _T("no parent frame in FindSubmenu") );
 
    wxMenuBar *mb = frame->GetMenuBar();
-   CHECK( mb, NULL, _T("no menu bar in FindSubmenu") );
+   CHECK( mb, nullptr, _T("no menu bar in FindSubmenu") );
 
    // we use the index in the array/enum as id for the submenus, see
    // AppendToMenu()
    wxMenuItem *menuitem = mb->FindItem(SubmenuId(id));
-   CHECK( menuitem, NULL, _T("no such menuitem in FindSubmenu") );
+   CHECK( menuitem, nullptr, _T("no such menuitem in FindSubmenu") );
 
    ASSERT_MSG( menuitem->IsSubMenu(),
                _T("this menuitem is not a submenu in FindSubmenu") );
@@ -946,7 +946,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
    }
 
 #ifdef wxHAS_RADIO_MENU_ITEMS
-   mb->Check(id, TRUE);
+   mb->Check(id, true);
 #else // !wxHAS_RADIO_MENU_ITEMS
    // emulate the "radio menu items" as wxWin doesn't yet have this
    static const int menuIds[] =

@@ -12,22 +12,24 @@
 #ifndef _M_CONFIGSOURCESALL_H_
 #define _M_CONFIGSOURCESALL_H_
 
-#include "lists.h"
 #include "Profile.h"
 #include "ConfigSource.h"
+#include "pointers.h"
+
+#include <vector>
 
 class LookupData;
 
 /**
    AllConfigSources is a list of all config source the profiles use.
 
-   It is just an ordered, read-only linked list with a smart ctor.
+   It is just an ordered, read-only vector with a smart ctor.
  */
 class AllConfigSources
 {
 public:
-   /// Linked list of the config sources
-   M_LIST_RC_ABSTRACT(List, ConfigSource);
+   /// Vector of the config sources
+   using List = std::vector<RefCounter<ConfigSource>>;
 
 
    /**
@@ -203,7 +205,7 @@ public:
                    const wxArrayString& specs);
 
    /// Delete the global AllConfigSources object returned by Get()
-   static void Cleanup() { delete ms_theInstance; ms_theInstance = NULL; }
+   static void Cleanup() { delete ms_theInstance; ms_theInstance = nullptr; }
 
    //@}
 
@@ -216,10 +218,10 @@ public:
    //@{
 
    /// Find the config source containing this entry
-   List::iterator FindEntry(const String& path) const;
+   List::const_iterator FindEntry(const String& path) const;
 
    /// Find the config source containing this group
-   List::iterator FindGroup(const String& path) const;
+   List::const_iterator FindGroup(const String& path) const;
 
    /**
       Get wxConfig object associated with the local config source.

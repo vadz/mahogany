@@ -31,7 +31,7 @@ extern void AutoCollectAddresses(const Message *message,
                                  bool collectNamed,
                                  const String& bookName,
                                  const String& groupName,
-                                 class wxFrame *frame = NULL);
+                                 class wxFrame *frame = nullptr);
 
 /** Automatic collection of one email address/name pair into the given subgroup
     of the given addressbook.
@@ -49,7 +49,7 @@ extern void AutoCollectAddress(const String& email,
                                bool collectNamed,
                                const String& bookName,
                                const String& groupName,
-                               class wxFrame *frame = NULL);
+                               class wxFrame *frame = nullptr);
 
 /**
    Interactive collection of email addresses: present the user with a dialog
@@ -65,5 +65,5 @@ extern void AutoCollectAddress(const String& email,
 extern int InteractivelyCollectAddresses(const wxArrayString& addresses,
                                          const String& bookName,
                                          const String& groupName,
-                                         wxFrame *parent = NULL);
+                                         wxFrame *parent = nullptr);
 

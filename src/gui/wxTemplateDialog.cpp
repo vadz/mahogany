@@ -40,6 +40,8 @@
 
 #include <wx/confbase.h>
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
@@ -75,7 +77,7 @@ public:
                    wxTE_MULTILINE),
         m_menuInfo(menu)
    {
-      m_menu = NULL;
+      m_menu = nullptr;
    }
 
    virtual ~TemplateEditor() { if ( m_menu ) delete m_menu; }
@@ -93,7 +95,7 @@ private:
 
    // the popup menu description
    const TemplatePopupMenuItem& m_menuInfo;
-   WX_DEFINE_ARRAY(const TemplatePopupMenuItem *, ArrayPopupMenuItems);
+   using ArrayPopupMenuItems = std::vector<const TemplatePopupMenuItem *>;
    ArrayPopupMenuItems m_items;
 
    // the popup menu itself
@@ -117,7 +119,7 @@ public:
    bool WasChanged() const { return m_wasChanged; }
 
    // called by wxWindows when [Ok] button was pressed
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
    // callbacks
    void OnListboxSelection(wxCommandEvent& event);
@@ -152,8 +154,8 @@ public:
    // get the last template kind the user chose
    MessageTemplateKind GetTemplateKind() const { return m_kind; }
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // callbacks
    void OnListboxSelection(wxCommandEvent& event);
@@ -214,7 +216,7 @@ protected:
       FindWindow(wxID_OK)->Enable(m_listbox->GetSelection() != -1);
    }
 
-   virtual wxString GetTemplateTitle(MessageTemplateKind kind) const;
+   wxString GetTemplateTitle(MessageTemplateKind kind) const override;
 
 private:
    DECLARE_EVENT_TABLE()
@@ -227,7 +229,7 @@ class wxAllTemplatesDialog : public wxTemplatesDialogBase
 public:
    wxAllTemplatesDialog(const TemplatePopupMenuItem& menu, wxWindow *parent);
 
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 protected:
    // event handlers
@@ -245,7 +247,7 @@ protected:
 
    static MessageTemplateKind GetKindLastEdited();
 
-   virtual wxString GetTemplateTitle(MessageTemplateKind kind) const;
+   wxString GetTemplateTitle(MessageTemplateKind kind) const override;
 
 private:
    DECLARE_EVENT_TABLE()
@@ -320,7 +322,7 @@ void TemplateEditor::OnRClick(wxMouseEvent& event)
 void TemplateEditor::OnMenu(wxCommandEvent& event)
 {
    size_t id = (size_t)event.GetId();
-   CHECK_RET( id < m_items.GetCount(), _T("unexpected menu event") );
+   CHECK_RET( id < m_items.size(), _T("unexpected menu event") );
 
    const TemplatePopupMenuItem *menuitem = m_items[id];
    CHECK_RET( menuitem, _T("no menu item") );
@@ -421,7 +423,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
          {
             // first create the entry for the submenu
             wxMenu *submenu = new wxMenu;
-            menu->Append(m_items.GetCount(), wxGetTranslation(menuitem.label), submenu);
+            menu->Append(m_items.size(), wxGetTranslation(menuitem.label), submenu);
 
             // next subitems
             for ( size_t n = 0; n < menuitem.nSubItems; n++ )
@@ -440,7 +442,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
       case TemplatePopupMenuItem::Normal:
       case TemplatePopupMenuItem::File:
       case TemplatePopupMenuItem::Text:
-         menu->Append(m_items.GetCount(), wxGetTranslation(menuitem.label));
+         menu->Append(m_items.size(), wxGetTranslation(menuitem.label));
          break;
 
       default:
@@ -448,7 +450,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
          return;
    }
 
-   m_items.Add(&menuitem);
+   m_items.push_back(&menuitem);
 }
 
 void TemplateEditor::CreatePopupMenu()
@@ -488,7 +490,7 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
 
    m_kind = MessageTemplate_Max;
    m_profile = profile;
-   m_textctrl = NULL;
+   m_textctrl = nullptr;
 
    // layout the controls
    // -------------------
@@ -665,7 +667,7 @@ void wxTemplatesDialogBase::SaveChanges()
 {
    wxASSERT_MSG( !m_name.empty(), _T("shouldn't try to save") );
 
-   SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, NULL);
+   SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, nullptr);
 }
 
 void wxTemplatesDialogBase::UpdateText()

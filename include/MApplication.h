@@ -14,14 +14,14 @@
 #endif // USE_PCH
 
 #include "MEvent.h"
-#include "lists.h"
+
+#include <vector>
 
 class CmdLineOptions;
 class FolderMonitor;
 class MAppBase;
 class MailFolder;
 class MModuleCommon;
-class ArrayFrames;
 class wxMFrame;
 
 class WXDLLIMPEXP_FWD_BASE wxDynamicLibrary;
@@ -30,8 +30,6 @@ class WXDLLIMPEXP_FWD_BASE wxPageSetupDialogData;
 class WXDLLIMPEXP_FWD_BASE wxPrintData;
 class WXDLLIMPEXP_FWD_BASE wxConfigBase;
 class WXDLLIMPEXP_FWD_CORE wxWindow;
-
-M_LIST_PTR(ListLibraries, wxDynamicLibrary);
 
 /// the global application object pointer
 extern MAppBase *mApplication;
@@ -84,7 +82,7 @@ public:
                   application detected that some unrecoverable error occured
                   or NULL if caused because we have crashed
    */
-   virtual void OnAbnormalTermination(const char *msg = NULL);
+   virtual void OnAbnormalTermination(const wxChar *msg = nullptr);
 
    /**
      @name Exiting the application
@@ -126,7 +124,7 @@ public:
      Terminates the application (unless ask == TRUE and the user cancels
      shutdown)
     */
-   void Exit(bool ask = TRUE);
+   void Exit(bool ask = true);
 
    /**
      Called just before the application terminates, it is impossible to prevent
@@ -140,7 +138,7 @@ public:
        @param id help id from MHelp.h
        @param parent parent window pointer
    */
-   virtual void Help(int id, wxWindow *parent = NULL) = 0;
+   virtual void Help(int id, wxWindow *parent = nullptr) = 0;
 
    /// Returns the main frame.
    virtual class MainFrameBase *GetMainFrame(void)
@@ -199,7 +197,7 @@ public:
    virtual class wxIconManager *GetIconManager(void) const = 0;
 
    /// called by the main frame when it's closed
-   void OnMainFrameClose() { m_topLevelFrame = NULL; m_cycle = ShuttingDown; }
+   void OnMainFrameClose() { m_topLevelFrame = nullptr; m_cycle = ShuttingDown; }
 
    /// @name What are we doing?
    //@{
@@ -338,14 +336,14 @@ public:
    virtual void SendOutbox(void) const;
 
    /// Check if we have messages to send.
-   virtual bool CheckOutbox(UIdType *nSMTP = NULL,
-                            UIdType *nNNTP = NULL,
-                            class MailFolder *mf = NULL) const;
+   virtual bool CheckOutbox(UIdType *nSMTP = nullptr,
+                            UIdType *nNNTP = nullptr,
+                            class MailFolder *mf = nullptr) const;
 
    //@}
 
    /// called when the events we're interested in are generated
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    /// CreateInternalMessage option changed
    void OnChangeCreateInternalMessage(MEventData& event);
@@ -382,7 +380,7 @@ public:
    bool IsMailDebuggingEnabled() const;
 
    /// show or hide the log window
-   virtual void ShowLog(bool doShow = TRUE) = 0;
+   virtual void ShowLog(bool doShow = true) = 0;
 
    /// set the name of the file to use for logging (disable if empty)
    virtual void SetLogFile(const String& filename) = 0;
@@ -454,7 +452,7 @@ public:
    //@}
 
    /// updates display of outbox status
-   virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const = 0;
+   virtual void UpdateOutboxStatus(class MailFolder *mf = nullptr) const = 0;
 
    /// Report a fatal error:
    virtual void FatalError(const wxChar *message) = 0;
@@ -551,7 +549,7 @@ protected:
    bool m_UseOutbox;
 
    /// list of frames to not ask again in CanClose()
-   ArrayFrames *m_framesOkToClose;
+   std::vector<const wxMFrame *> m_framesOkToClose;
 
    /// where are we in the application life cycle?
    enum LifeCycle
@@ -570,8 +568,8 @@ protected:
    /// the struct containing the command line options
    CmdLineOptions *m_cmdLineOptions;
 
-   /// the list of DLLs to unload a.s.a.p.
-   ListLibraries m_dllsToUnload;
+   /// the DLLs to unload a.s.a.p.
+   std::vector<wxDynamicLibrary *> m_dllsToUnload;
 
 private:
    /**
@@ -659,6 +657,6 @@ CopyEntries(wxConfigBase *src,
             const wxString &from,
             const wxString &to,
             bool recursive = true,
-            wxConfigBase *dest = NULL);
+            wxConfigBase *dest = nullptr);
 
 #endif   // MAPPLICATION_H

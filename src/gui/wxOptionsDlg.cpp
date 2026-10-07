@@ -83,8 +83,6 @@
    #include <wx/stopwatch.h>
 #endif
 
-wxALLOW_COMBINING_ENUMS(wxOptionsPage::FieldType, wxOptionsPage::FieldFlags)
-
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
@@ -701,16 +699,16 @@ public:
    virtual ~wxGlobalOptionsDialog();
 
    // override base class functions
-   virtual void CreateNotebook(wxPanel *panel);
-   virtual bool TransferDataToWindow();
+   void CreateNotebook(wxPanel *panel) override;
+   bool TransferDataToWindow() override;
 
    // return TRUE if this dialog edits global options for the program, FALSE
    // if this is another kind of dialog
-   virtual bool IsGlobalOptionsDialog() const { return TRUE; }
+   virtual bool IsGlobalOptionsDialog() const { return true; }
 
 protected:
    // implement base class pure virtual
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       return ((wxOptionsNotebook *)m_notebook)->GetProfile();
    }
@@ -732,8 +730,8 @@ public:
       : wxGlobalOptionsDialog(parent, configForDialog),
         m_configForNotebook(configForNotebook)
    {
-      SetProfile(NULL);
-      SetPagesDesc(0, NULL);
+      SetProfile(nullptr);
+      SetPagesDesc(0, nullptr);
    }
 
    // full ctor specifying everything we need
@@ -776,7 +774,7 @@ public:
    }
 
    // overloaded base class virtual
-   virtual void CreateNotebook(wxPanel *panel)
+   void CreateNotebook(wxPanel *panel) override
    {
       m_notebook = new wxCustomOptionsNotebook(panel,
                                                m_nPages,
@@ -786,7 +784,7 @@ public:
    }
 
 protected:
-   Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       SafeIncRef(m_profile);
       return m_profile;
@@ -838,11 +836,11 @@ public:
    // editing identities shouldn't give warning about "important programs
    // settings were changed" as the only really important ones are the global
    // ones
-   virtual void SetDoTest() { SetDirty(); } // TODO: might do something here
-   virtual void SetGiveRestartWarning() { }
+   void SetDoTest() override { SetDirty(); } // TODO: might do something here
+   void SetGiveRestartWarning() override { }
 
    // we're not the global options dialog
-   virtual bool IsGlobalOptionsDialog() const { return FALSE; }
+   bool IsGlobalOptionsDialog() const override { return false; }
 
 protected:
    enum
@@ -880,7 +878,7 @@ public:
    bool HasChanges() const { return m_hasChanges; }
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 private:
    wxCheckListBox *m_checklistBox;
@@ -896,8 +894,8 @@ class wxConfigSourcesDialog : public wxManuallyLaidOutDialog
 public:
    wxConfigSourcesDialog(wxFrame *parent);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    // column indices
@@ -2450,7 +2448,7 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
                            int image)
 {
    // no listbox by default
-   m_lboxData = NULL;
+   m_lboxData = nullptr;
 
    m_aFields = aFields;
    m_aDefaults = aDefaults;
@@ -2468,7 +2466,7 @@ bool wxOptionsPage::Create(FieldInfoArray aFields,
    m_nFirst = nFirst;
    m_nLast = nLast;
 
-   notebook->AddPage(this, title, FALSE /* don't select */, image);
+   notebook->AddPage(this, title, false /* don't select */, image);
 
    // don't create controls yet, this will be done in Show() when we become the
    // notebook current page
@@ -2612,7 +2610,7 @@ void wxOptionsPage::CreateControls()
 
    // now create the controls
    int styleText = wxTE_LEFT;
-   wxControl *last = NULL; // last control created
+   wxControl *last = nullptr; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       int flags = GetFieldFlags(n);
       if ( (!isAdvanced && (flags & Field_Advanced)) ||
@@ -2621,7 +2619,7 @@ void wxOptionsPage::CreateControls()
            (!isFolderDialog && (flags & Field_NotApp)) )
       {
          // skip this one
-         m_aControls.push_back(NULL);
+         m_aControls.push_back(nullptr);
          m_aDirtyFlags.push_back(false);
 
          continue;
@@ -2634,7 +2632,7 @@ void wxOptionsPage::CreateControls()
 
          case Field_File:
             last = CreateFileEntry(wxGetTranslation(m_aFields[n].label), widthMax, last,
-                                   NULL, !(flags & Field_FileSave));
+                                   nullptr, !(flags & Field_FileSave));
             break;
 
          case Field_Folder:
@@ -2718,17 +2716,17 @@ void wxOptionsPage::CreateControls()
 
 bool wxOptionsPage::OnChangeCommon(wxControl *control)
 {
-   int index = m_aControls.Index(control);
+   const auto it = std::ranges::find(m_aControls, control);
 
-   if ( index == wxNOT_FOUND )
+   if ( it == m_aControls.end() )
    {
       // we can get events from the text controls from "file open" dialog here
       // too - just skip them silently
-      return FALSE;
+      return false;
    }
 
    // mark this control as being dirty
-   m_aDirtyFlags[(size_t)index] = true;
+   m_aDirtyFlags[it - m_aControls.begin()] = true;
 
    // update this page controls state
    UpdateUI();
@@ -2738,15 +2736,17 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    if ( !dialog )
       return false;
 
-   if ( m_aVitalControls.Index(control) != -1 )
+   if ( std::ranges::find(m_aVitalControls, control) !=
+            m_aVitalControls.end() )
       dialog->SetDoTest();
    else
       dialog->SetDirty();
 
-   if ( m_aRestartControls.Index(control) != -1 )
+   if ( std::ranges::find(m_aRestartControls, control) !=
+            m_aRestartControls.end() )
       dialog->SetGiveRestartWarning();
 
-   return TRUE;
+   return true;
 }
 
 void wxOptionsPage::OnTextChange(wxCommandEvent& event)
@@ -2975,7 +2975,7 @@ bool wxOptionsPage::DoTransferOptionsToWindow()
       if ( !control )
          continue;
 
-      wxControl *label = NULL;
+      wxControl *label = nullptr;
       switch ( GetFieldType(n) )
       {
          case Field_Text:
@@ -3249,7 +3249,7 @@ bool wxOptionsPage::DoTransferOptionsFromWindow()
    }
 
    // TODO life is easy as we don't check for errors...
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -3339,7 +3339,7 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
                    lboxData.m_lboxDlgPrompt,
                    GET_PARENT_OF_CLASS(this, wxDialog),
                    lboxData.m_lboxDlgPers) ) {
-      return FALSE;
+      return false;
    }
 
    // check that it's not already there
@@ -3348,7 +3348,7 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
       wxLogError(_("String '%s' is already present in the list, not added."),
                  str);
 
-      return FALSE;
+      return false;
    }
 
    // ok, do add it
@@ -3356,14 +3356,14 @@ bool wxOptionsPage::OnListBoxAdd(wxListBox *lbox, const LboxData& lboxData)
 
    wxOptionsPage::OnChangeCommon(lbox);
 
-   return TRUE;
+   return true;
 }
 
 bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
 {
    int nSel = lbox->GetSelection();
 
-   wxCHECK_MSG( nSel != -1, FALSE, _T("should be disabled") );
+   wxCHECK_MSG( nSel != -1, false, _T("should be disabled") );
 
    wxString val = wxGetTextFromUser
                   (
@@ -3376,14 +3376,14 @@ bool wxOptionsPage::OnListBoxModify(wxListBox *lbox, const LboxData& lboxData)
    if ( !val || val == lbox->GetString(nSel) )
    {
       // cancelled or unchanged
-      return FALSE;
+      return false;
    }
 
    lbox->SetString(nSel, val);
 
    wxOptionsPage::OnChangeCommon(lbox);
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -3391,13 +3391,13 @@ wxOptionsPage::OnListBoxDelete(wxListBox *lbox, const LboxData& /* lboxData */)
 {
    int nSel = lbox->GetSelection();
 
-   wxCHECK_MSG( nSel != -1, FALSE, _T("should be disabled") );
+   wxCHECK_MSG( nSel != -1, false, _T("should be disabled") );
 
    lbox->Delete(nSel);
 
    wxOptionsPage::OnChangeCommon(lbox);
 
-   return TRUE;
+   return true;
 }
 
 void wxOptionsPage::OnUpdateUIListboxBtns(wxUpdateUIEvent& event)
@@ -3924,7 +3924,7 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(MBookCtrl *parent,
 void wxOptionsPageNetwork::FillDialupConnections()
 {
    wxControl *control = GetControl(ConfigField_NetConnection);
-   wxChoice *choice = control ? wxStaticCast(control, wxChoice) : NULL;
+   wxChoice *choice = control ? wxStaticCast(control, wxChoice) : nullptr;
 
    // may be NULL if we don't use dial up manager at all
    if ( !choice )
@@ -4050,7 +4050,7 @@ wxOptionsPageNewMail::wxOptionsPageNewMail(MBookCtrl *parent,
 {
    m_nIncomingDelayOld = -1;
 
-   m_folder = NULL;
+   m_folder = nullptr;
 }
 
 wxOptionsPageNewMail::~wxOptionsPageNewMail()
@@ -4065,7 +4065,7 @@ bool wxOptionsPageNewMail::GetFolderFromProfile()
 
    m_folder = MFolder::Get(GetFolderName());
 
-   return m_folder != NULL;
+   return m_folder != nullptr;
 }
 
 bool wxOptionsPageNewMail::DoTransferOptionsToWindow()
@@ -4423,10 +4423,10 @@ bool wxOptionsPageSync::DoTransferOptionsFromWindow()
             if ( !usingConfigFile )
             {
                // importing to registry, not exporting from it
-               configSrc.Swap(configDst);
+               configSrc.swap(configDst);
             }
 
-            if ( !ConfigSource::Copy(*configDst.Get(), *configSrc.Get()) )
+            if ( !ConfigSource::Copy(*configDst, *configSrc) )
             {
                if ( usingConfigFile )
                   wxLogError(_("Failed to export settings to the file \"%s\"."),
@@ -4781,14 +4781,14 @@ bool
 wxGlobalOptionsDialog::TransferDataToWindow()
 {
    if ( !wxOptionsEditDialog::TransferDataToWindow() )
-      return FALSE;
+      return false;
 
    int nPageCount = m_notebook->GetPageCount();
    for ( int nPage = 0; nPage < nPageCount; nPage++ ) {
       ((wxOptionsPage *)m_notebook->GetPage(nPage))->UpdateUI();
    }
 
-   return TRUE;
+   return true;
 }
 
 void wxGlobalOptionsDialog::CreateNotebook(wxPanel *panel)
@@ -4850,7 +4850,7 @@ wxCustomOptionsNotebook::GetImagesArray(size_t nPages,
       m_aImages[n] = pageDesc[n].GetImage();
    }
 
-   m_aImages[nPages] = NULL;
+   m_aImages[nPages] = nullptr;
 
    return m_aImages;
 }
@@ -4881,7 +4881,7 @@ const char *wxOptionsNotebook::ms_aszImages[] =
    "unknown",
 #endif // USE_TEST_PAGE
    "miscopt",
-   NULL
+   nullptr
 };
 
 // don't forget to update both the array above and the enum when modifying
@@ -5050,7 +5050,7 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(Profile *profile,
    }
 
    // set the initial and minimal size
-   SetDefaultSize(4*wBtn, 10*hBtn, FALSE /* not minimal size */);
+   SetDefaultSize(4*wBtn, 10*hBtn, false /* not minimal size */);
 }
 
 bool wxRestoreDefaultsDialog::TransferDataFromWindow()
@@ -5069,7 +5069,7 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -5166,15 +5166,12 @@ bool wxConfigSourcesDialog::TransferDataToWindow()
    int n = 0;
 
    const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
-   for ( AllConfigSources::List::iterator i = sources.begin(),
-                                        end = sources.end();
-         i != end;
-         ++i, ++n )
+   for ( const auto& config : sources )
    {
       m_sources->AppendRows(1);
 
-      wxString type = i->GetType(),
-               spec = i->GetSpec();
+      wxString type = config->GetType(),
+               spec = config->GetSpec();
 
 #ifdef OS_WIN
       // special case: the unnamed/local config may use registry and not a file
@@ -5183,9 +5180,11 @@ bool wxConfigSourcesDialog::TransferDataToWindow()
          type = gettext_noop("registry");
 #endif // OS_WIN
 
-      m_sources->SetCellValue(n, Col_Name, i->GetName());
+      m_sources->SetCellValue(n, Col_Name, config->GetName());
       m_sources->SetCellValue(n, Col_Type, wxGetTranslation(type));
       m_sources->SetCellValue(n, Col_Spec, spec);
+
+      n++;
    }
 
    // allow to choose only supported types for the type column
@@ -5282,7 +5281,7 @@ bool wxConfigSourcesDialog::TransferDataFromWindow()
 
    MDialog_Message(_("Please notice that changes to configuration sources "
                      "will only take effect during next program run."),
-                   NULL,
+                   nullptr,
                    _("Configuration Sources Updated"),
                    GetPersMsgBoxName(M_MSGBOX_WARN_RESTART_OPT));
 

@@ -58,37 +58,37 @@ public:
    virtual ~LayoutEditor();
 
    // accessors
-   virtual wxWindow *GetWindow() const;
-   virtual bool IsModified() const;
-   virtual bool IsEmpty() const;
-   virtual unsigned long ComputeHash() const;
+   wxWindow *GetWindow() const override;
+   bool IsModified() const override;
+   bool IsEmpty() const override;
+   unsigned long ComputeHash() const override;
 
    // creation
-   virtual void Create(Composer *composer, wxWindow *parent);
-   virtual void UpdateOptions();
-   virtual bool FinishWork();
+   void Create(Composer *composer, wxWindow *parent) override;
+   void UpdateOptions() override;
+   bool FinishWork() override;
 
    // operations
-   virtual void Clear();
-   virtual void Enable(bool enable);
-   virtual void ResetDirty();
-   virtual void SetEncoding(wxFontEncoding encoding);
-   virtual void Copy();
-   virtual void Cut();
-   virtual void Paste();
+   void Clear() override;
+   void Enable(bool enable) override;
+   void ResetDirty() override;
+   void SetEncoding(wxFontEncoding encoding) override;
+   void Copy() override;
+   void Cut() override;
+   void Paste() override;
 
-   virtual bool Print();
-   virtual void PrintPreview();
+   bool Print() override;
+   void PrintPreview() override;
 
-   virtual void MoveCursorTo(unsigned long x, unsigned long y);
-   virtual void MoveCursorBy(long x, long y);
-   virtual void SetFocus();
+   void MoveCursorTo(unsigned long x, unsigned long y) override;
+   void MoveCursorBy(long x, long y) override;
+   void SetFocus() override;
 
    // content
-   virtual void InsertAttachment(const wxBitmap& icon, EditorContentPart *mc);
-   virtual void InsertText(const String& text, InsertMode insMode);
-   virtual EditorContentPart *GetFirstPart();
-   virtual EditorContentPart *GetNextPart();
+   void InsertAttachment(const wxBitmap& icon, EditorContentPart *mc) override;
+   void InsertText(const String& text, InsertMode insMode) override;
+   EditorContentPart *GetFirstPart() override;
+   EditorContentPart *GetNextPart() override;
 
    // for wxComposerLayoutWindow only: we have to use
    bool OnFirstTimeFocus() { return MessageEditor::OnFirstTimeFocus(); }
@@ -194,14 +194,14 @@ wxComposerLayoutWindow::wxComposerLayoutWindow(LayoutEditor *editor,
    SetMouseTracking();
 
    m_firstTimeModify =
-   m_firstTimeFocus = TRUE;
+   m_firstTimeFocus = true;
 }
 
 void wxComposerLayoutWindow::OnKeyDown(wxKeyEvent& event)
 {
    if ( m_firstTimeModify )
    {
-      m_firstTimeModify = FALSE;
+      m_firstTimeModify = false;
 
       m_editor->OnFirstTimeModify();
    }
@@ -213,13 +213,13 @@ void wxComposerLayoutWindow::OnFocus(wxFocusEvent& event)
 {
    if ( m_firstTimeFocus )
    {
-      m_firstTimeFocus = FALSE;
+      m_firstTimeFocus = false;
 
       if ( m_editor->OnFirstTimeFocus() )
       {
          // composer doesn't need first modification notification any more
          // because it modified the text itself
-         m_firstTimeModify = FALSE;
+         m_firstTimeModify = false;
       }
    }
 
@@ -269,9 +269,9 @@ void wxComposerLayoutWindow::OnMouseRClick(wxCommandEvent& event)
 
 LayoutEditor::LayoutEditor()
 {
-   m_LayoutWindow = NULL;
+   m_LayoutWindow = nullptr;
 
-   m_exportStatus = NULL;
+   m_exportStatus = nullptr;
 }
 
 LayoutEditor::~LayoutEditor()
@@ -353,7 +353,7 @@ unsigned long LayoutEditor::ComputeHash() const
    wxLayoutExportObject *exp;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
-   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != NULL )
+   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != nullptr )
    {
       // non text objects get ignored
       if (exp->type == WXLO_EXPORT_TEXT )
@@ -436,19 +436,19 @@ void LayoutEditor::SetFocus()
 
 void LayoutEditor::Copy()
 {
-   m_LayoutWindow->Copy( WXLO_COPY_FORMAT, FALSE );
+   m_LayoutWindow->Copy( WXLO_COPY_FORMAT, false );
    m_LayoutWindow->Refresh();
 }
 
 void LayoutEditor::Cut()
 {
-   m_LayoutWindow->Cut( WXLO_COPY_FORMAT, FALSE );
+   m_LayoutWindow->Cut( WXLO_COPY_FORMAT, false );
    m_LayoutWindow->Refresh();
 }
 
 void LayoutEditor::Paste()
 {
-   m_LayoutWindow->Paste( WXLO_COPY_FORMAT, FALSE );
+   m_LayoutWindow->Paste( WXLO_COPY_FORMAT, false );
    m_LayoutWindow->Refresh();
 }
 
@@ -498,7 +498,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
 {
    // insert the text in the beginning of the message replacing the old
    // text if asked for this, otherwise just append it at the end
-   wxLayoutList *listNonTextObjects = NULL;
+   wxLayoutList *listNonTextObjects = nullptr;
    if ( insMode == Insert_Replace )
    {
       // VZ: I don't know why exactly does this happen but exporting text and
@@ -531,7 +531,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
       wxLayoutObject *obj;
       wxLayoutExportStatus status(layoutList);
       wxLayoutExportObject *exp;
-      while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_OBJECTS)) != NULL )
+      while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_OBJECTS)) != nullptr )
       {
          if ( exp->type == WXLO_EXPORT_OBJECT )
          {
@@ -562,7 +562,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
       wxLayoutExportObject *exp;
       wxLayoutExportStatus status2(listNonTextObjects);
       while((exp = wxLayoutExport( &status2,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
+                                      WXLO_EXPORT_AS_OBJECTS)) != nullptr)
          if(exp->type == WXLO_EXPORT_EMPTYLINE)
             layoutList->LineBreak();
          else
@@ -581,7 +581,7 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
 
 EditorContentPart *LayoutEditor::GetFirstPart()
 {
-   CHECK( !m_exportStatus, NULL,
+   CHECK( !m_exportStatus, nullptr,
           _T("GetNextPart() should be called, not GetFirstPart()") );
 
    m_exportStatus = new wxLayoutExportStatus(m_LayoutWindow->GetLayoutList());
@@ -591,7 +591,7 @@ EditorContentPart *LayoutEditor::GetFirstPart()
 
 EditorContentPart *LayoutEditor::GetNextPart()
 {
-   CHECK( m_exportStatus, NULL, _T("must call GetFirstPart() first!") );
+   CHECK( m_exportStatus, nullptr, _T("must call GetFirstPart() first!") );
 
    for ( ;; )
    {
@@ -647,8 +647,8 @@ EditorContentPart *LayoutEditor::GetNextPart()
    }
 
    delete m_exportStatus;
-   m_exportStatus = NULL;
+   m_exportStatus = nullptr;
 
-   return NULL;
+   return nullptr;
 }
 

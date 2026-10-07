@@ -73,10 +73,10 @@ public:
    const wxString& GetFileName() const { return m_filename; }
 
    // fill the listbox with importer names
-   virtual bool TransferDataToWindow();
+   bool TransferDataToWindow() override;
 
    // save the controls values
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
    // set the controls state
    void DoUpdateUI();
@@ -128,7 +128,7 @@ public:
    // get the index of the selected item in the listbox
    int GetSelection() const { return m_listbox->GetSelection(); }
 
-   virtual bool TransferDataToWindow();
+   bool TransferDataToWindow() override;
 
    // control ids
    enum
@@ -212,7 +212,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    //    buttons
 
    // buttons
-   (void)CreateStdButtonsAndBox(wxEmptyString, TRUE /* no box please */);
+   (void)CreateStdButtonsAndBox(wxEmptyString, true /* no box please */);
    m_btnOk = (wxButton *)FindWindow(wxID_OK);
 
    // panel for all other items
@@ -224,7 +224,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    c->bottom.Above(m_btnOk, -2*LAYOUT_Y_MARGIN);
    m_panel->SetConstraints(c);
 
-   m_panel->SetAutoLayout(TRUE);
+   m_panel->SetAutoLayout(true);
 
    // all items must be created on the canvas, not the panel itself
    wxWindow *canvas = m_panel->GetCanvas();
@@ -250,7 +250,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
                      &lines
                     );
 
-   wxStaticText *msg = NULL;
+   wxStaticText *msg = nullptr;
    size_t nLines = lines.GetCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
@@ -287,7 +287,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    // text and browse button
    int widthMax;
    wxString label(_("&File:"));
-   GetTextExtent(label, &widthMax, NULL);
+   GetTextExtent(label, &widthMax, nullptr);
    m_text = m_panel->CreateFileEntry(label, (long)widthMax, msg, &m_browseBtn);
 
    // checkboxes
@@ -362,7 +362,7 @@ bool wxAdbImportDialog::TransferDataToWindow()
       wxLogError(_("Sorry, no import filters found - importing address "
                    "books is not available in this version of the program."));
 
-      return FALSE;
+      return false;
    }
 
    for ( size_t n = 0; n < nCount; n++ )
@@ -370,7 +370,7 @@ bool wxAdbImportDialog::TransferDataToWindow()
       m_listbox->Append(m_importerDescs[n]);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxAdbImportDialog::TransferDataFromWindow()
@@ -389,7 +389,7 @@ bool wxAdbImportDialog::TransferDataFromWindow()
       m_desc = m_importerDescs[index];
    }
 
-   return TRUE;
+   return true;
 }
 
 wxAdbImportDialog::~wxAdbImportDialog()
@@ -429,8 +429,8 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
    m_listbox = new wxListBox(this, -1);
 
    // don't show the "More" button if there are no more matches
-   m_btnMore = aMoreEntries.IsEmpty()
-                  ? NULL
+   m_btnMore = aMoreEntries.empty()
+                  ? nullptr
                   : new wxButton(this, Btn_More, _("&More matches"));
 
    m_btnDelete = new wxButton(this, Btn_Delete, _("&Delete"));
@@ -440,7 +440,7 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
 #endif // wxUSE_TOOLTIPS
 
    // we have to fill the listbox here or it won't have the correct size
-   size_t nEntryCount = aEverything.GetCount();
+   size_t nEntryCount = aEverything.size();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
       m_listbox->Append(aEverything[nEntry]->GetDescription());
@@ -497,7 +497,7 @@ bool wxAdbExpandDialog::TransferDataToWindow()
 
 void wxAdbExpandDialog::OnBtnMore(wxCommandEvent&)
 {
-   size_t nEntryCount = m_aMoreEntries.GetCount();
+   size_t nEntryCount = m_aMoreEntries.size();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
       m_listbox->Append(m_aMoreEntries[nEntry]->GetDescription());
@@ -525,18 +525,18 @@ void wxAdbExpandDialog::OnBtnDelete(wxCommandEvent& WXUNUSED(event))
    // now remove it from the internal data as well
    AdbEntry *entry;
 
-   size_t countMain = m_aEverything.GetCount();
+   size_t countMain = m_aEverything.size();
    if ( n < countMain )
    {
       entry = (AdbEntry *)m_aEverything[n];
-      m_aEverything.RemoveAt(n);
+      m_aEverything.erase(m_aEverything.begin() + n);
    }
    else // an additional entry
    {
       n -= countMain;
 
       entry = m_aMoreEntries[n];
-      m_aMoreEntries.RemoveAt(n);
+      m_aMoreEntries.erase(m_aMoreEntries.begin() + n);
    }
 
    // remember to not use it for the expansion again
@@ -556,14 +556,14 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    if ( dlg.ShowModal() != wxID_OK )
    {
       // cancelled
-      return FALSE;
+      return false;
    }
 
    wxString importerName = dlg.GetImporterName(),
             importerDesc = dlg.GetImporterDesc(),
             filename = dlg.GetFileName();
 
-   AdbImporter *importer = NULL;
+   AdbImporter *importer = nullptr;
    if ( !!importerName )
    {
       importer = AdbImporter::GetImporterByName(importerName);
@@ -572,7 +572,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    if ( !filename )
    {
       // we can't guess everything!
-      CHECK( importer, FALSE, _T("should have either importer or filename") );
+      CHECK( importer, false, _T("should have either importer or filename") );
 
       filename = importer->GetDefaultFilename();
       if ( !filename )
@@ -604,13 +604,13 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
          // cancelled by user
          SafeDecRef(importer);
 
-         return FALSE;
+         return false;
       }
    }
 
    // ask for the name of the ADB to import data in
    wxString adbname, ext;
-   wxFileName::SplitPath(filename, NULL, &adbname, &ext);
+   wxFileName::SplitPath(filename, nullptr, &adbname, &ext);
    if ( !adbname )
    {
       // this means that the file starts with '.' in which case just take the
@@ -631,7 +631,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
       // cancelled by user
       SafeDecRef(importer);
 
-      return FALSE;
+      return false;
    }
 
    if ( nameOfNativeAdb )
@@ -664,15 +664,15 @@ bool AdbShowExportDialog(AdbEntryGroup& group)
             wxString(_T("Mahogany : "))+_("ADB export options"),
             n,
             &descs[0],
-            NULL,
+            nullptr,
             -1, -1, // x,y
-            TRUE,   //centre
+            true,   //centre
             w, h
             );
       if(idx >= 0)
          name = names[idx];
       else
-         return FALSE; // cancelled
+         return false; // cancelled
 
    }
    else
@@ -688,7 +688,7 @@ bool AdbShowExportDialog(AdbEntryGroup& group)
       wxLogError(_("Cannot export address book - the functionality "
                    "is missing in this version of the program."));
 
-      return FALSE;
+      return false;
    }
 
    bool ok = AdbExport(group, *exporter);
@@ -705,7 +705,7 @@ AdbShowExpandDialog(ArrayAdbElements& aEverything,
 {
    int choice;
 
-   size_t count = aEverything.GetCount();
+   size_t count = aEverything.size();
    switch ( count )
    {
       case 0:

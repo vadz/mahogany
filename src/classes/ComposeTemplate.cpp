@@ -57,6 +57,8 @@
 
 #include "wx/persctrl.h"
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -107,7 +109,7 @@ struct AttachmentInfo
            filename;
 };
 
-WX_DECLARE_OBJARRAY(AttachmentInfo, ArrayAttachmentInfo);
+using ArrayAttachmentInfo = std::vector<AttachmentInfo>;
 
 // ----------------------------------------------------------------------------
 // implementation of template sink which stores the data internally and then
@@ -118,21 +120,21 @@ class ExpansionSink : public MessageTemplateSink
 {
 public:
    // ctor
-   ExpansionSink() { m_hasCursorPosition = FALSE; m_x = m_y = 0; }
+   ExpansionSink() { m_hasCursorPosition = false; m_x = m_y = 0; }
 
    // called after successful parsing of the template to insert the resulting
    // text into the compose view
    void InsertTextInto(Composer& cv) const;
 
    // implement base class pure virtual function
-   virtual bool Output(const String& text);
+   bool Output(const String& text) override;
 
    // TODO the functions below should be in the base class (as pure virtuals)
    //      somehow, not here
 
    // called by VarExpander to remember the current position as the initial
    // cursor position
-   void RememberCursorPosition() { m_hasCursorPosition = TRUE; }
+   void RememberCursorPosition() { m_hasCursorPosition = true; }
 
    // called by VarExpander to insert an attachment
    void InsertAttachment(void *data, size_t len,
@@ -296,10 +298,10 @@ public:
    }
 
    // implement base class pure virtual function
-   virtual bool Expand(const String& category,
-                       const String& name,
-                       const wxArrayString& arguments,
-                       String *value) const;
+   bool Expand(const String& category,
+               const String& name,
+               const wxArrayString& arguments,
+               String *value) const override;
 
 protected:
    // read the file into the string, return TRUE on success
@@ -407,10 +409,10 @@ static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
 // Available accels: BCDEFGHJKLMNOPRSUVWXYZ
 static TemplatePopupMenuItem gs_popupSubmenuFile[] =
 {
-   TemplatePopupMenuItem(gettext_noop("&Insert file..."), _T("${file:%s}"), TRUE),
-   TemplatePopupMenuItem(gettext_noop("Insert &any file..."), _T("${file:%s?ask"), TRUE),
-   TemplatePopupMenuItem(gettext_noop("Insert &quoted file..."), _T("${file:%s?quote}"), TRUE),
-   TemplatePopupMenuItem(gettext_noop("A&ttach file..."), _T("${attach:%s}"), TRUE),
+   TemplatePopupMenuItem(gettext_noop("&Insert file..."), _T("${file:%s}"), true),
+   TemplatePopupMenuItem(gettext_noop("Insert &any file..."), _T("${file:%s?ask"), true),
+   TemplatePopupMenuItem(gettext_noop("Insert &quoted file..."), _T("${file:%s?quote}"), true),
+   TemplatePopupMenuItem(gettext_noop("A&ttach file..."), _T("${attach:%s}"), true),
 };
 
 // the message submenu
@@ -466,9 +468,9 @@ static TemplatePopupMenuItem gs_popupMenu[] =
                          WXSIZEOF(gs_popupSubmenuFile)),
    TemplatePopupMenuItem(),
 #ifdef USE_PYTHON
-   TemplatePopupMenuItem(gettext_noop("Run &Python function..."), _T("${python:%s}"), FALSE),
+   TemplatePopupMenuItem(gettext_noop("Run &Python function..."), _T("${python:%s}"), false),
 #endif // USE_PYTHON
-   TemplatePopupMenuItem(gettext_noop("E&xecute command..."), _T("${cmd:%s}"), FALSE),
+   TemplatePopupMenuItem(gettext_noop("E&xecute command..."), _T("${cmd:%s}"), false),
 };
 
 const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
@@ -508,7 +510,7 @@ static String ExtractFirstOrLastName(const String& fullname, bool first)
 {
    String value;
 
-   AddressList_obj addrList(fullname);
+   AddressList_obj addrList(AddressList::Create(fullname));
    for ( Address *addr = addrList->GetFirst();
          addr;
          addr = addrList->GetNext(addr) )
@@ -583,8 +585,8 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
       // part of the address, remove them if so
 
       // remove spaces
-      name.Trim(TRUE);
-      name.Trim(FALSE);
+      name.Trim(true);
+      name.Trim(false);
       if ( !name.empty() )
       {
          if ( name[0u] == '"' && name.Last() == '"' )
@@ -770,9 +772,6 @@ ExpandOriginalText(const String& text,
 // ExpansionSink - the sink used with wxComposeView
 // ----------------------------------------------------------------------------
 
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(ArrayAttachmentInfo);
-
 bool
 ExpansionSink::Output(const String& text)
 {
@@ -806,7 +805,7 @@ ExpansionSink::Output(const String& text)
    // after the last attachment)
    m_text += text;
 
-   return TRUE;
+   return true;
 }
 
 void
@@ -821,9 +820,8 @@ ExpansionSink::InsertAttachment(void *data,
       m_x++;
    }
 
-   // create a new attachment info object (NB: it will be deleted by the array
-   // automatically because we pass it by pointer and not by reference)
-   m_attachments.Add(new AttachmentInfo(data, len, mimetype, filename));
+   // remember the attachment info
+   m_attachments.emplace_back(data, len, mimetype, filename);
 
    // the last component of text becomes the text before this attachment
    m_texts.Add(m_text);
@@ -836,14 +834,14 @@ void
 ExpansionSink::InsertTextInto(Composer& cv) const
 {
    size_t nCount = m_texts.GetCount();
-   ASSERT_MSG( m_attachments.GetCount() == nCount,
+   ASSERT_MSG( m_attachments.size() == nCount,
                _T("something is very wrong in template expansion sink") );
 
    for ( size_t n = 0; n < nCount; n++ )
    {
       cv.InsertText(m_texts[n]);
 
-      AttachmentInfo& attInfo = m_attachments[n];
+      const AttachmentInfo& attInfo = m_attachments[n];
       cv.InsertData(attInfo.data, attInfo.len,
                     attInfo.mimetype,
                     attInfo.filename);
@@ -1025,7 +1023,7 @@ VarExpander::Expand(const String& category,
 
       default:
          // unknown category
-         return FALSE;
+         return false;
    }
 }
 
@@ -1074,10 +1072,10 @@ VarExpander::ExpandMisc(const String& name,
 
       default:
          // unknown name
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1087,7 +1085,7 @@ VarExpander::ExpandFile(const String& name,
 {
    // first check if we don't want to ask user
    String filename = GetAbsFilename(name);
-   if ( arguments.Index(_T("ask"), FALSE /* no case */) != wxNOT_FOUND )
+   if ( arguments.Index(_T("ask"), false /* no case */) != wxNOT_FOUND )
    {
       filename = MDialog_FileRequester(_("Select the file to insert"),
                                        m_cv.GetFrame(),
@@ -1102,11 +1100,11 @@ VarExpander::ExpandFile(const String& name,
          wxLogError(_("Failed to insert file '%s' into the message."),
                     name);
 
-         return FALSE;
+         return false;
       }
 
       // do we want to quote the files contents before inserting?
-      if ( arguments.Index(_T("quote"), FALSE /* no case */) != wxNOT_FOUND )
+      if ( arguments.Index(_T("quote"), false /* no case */) != wxNOT_FOUND )
       {
          String prefix = READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
          String quotedValue;
@@ -1134,7 +1132,7 @@ VarExpander::ExpandFile(const String& name,
    }
    //else: no file, nothing to insert
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1143,7 +1141,7 @@ VarExpander::ExpandAttach(const String& name,
                           String *value) const
 {
    String filename = GetAbsFilename(name);
-   if ( arguments.Index(_T("ask"), FALSE /* no case */) != wxNOT_FOUND )
+   if ( arguments.Index(_T("ask"), false /* no case */) != wxNOT_FOUND )
    {
       filename = MDialog_FileRequester(_("Select the file to attach"),
                                        m_cv.GetFrame(),
@@ -1157,7 +1155,7 @@ VarExpander::ExpandAttach(const String& name,
          wxLogError(_("Failed to attach file '%s' to the message."),
                     name);
 
-         return FALSE;
+         return false;
       }
 
       // guess MIME type from extension
@@ -1171,7 +1169,7 @@ VarExpander::ExpandAttach(const String& name,
    }
    //else: no file, nothing to attach
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1219,10 +1217,10 @@ VarExpander::ExpandCommand(const String& name,
       // variable from the parser
       *value = _T('?');
 
-      return FALSE;
+      return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1237,7 +1235,7 @@ VarExpander::SetHeaderValue(const String& name,
 
       *value = _T('?');
 
-      return FALSE;
+      return false;
    }
 
    String headerValue = arguments[0];
@@ -1259,7 +1257,7 @@ VarExpander::SetHeaderValue(const String& name,
    else // some other header
       m_cv.AddHeaderEntry(headerName, headerValue);
 
-   return TRUE;
+   return true;
 }
 
 #ifdef USE_PYTHON
@@ -1272,10 +1270,10 @@ VarExpander::ExpandPython(const String& name,
    // call Python function with the given name
    if ( !PythonStringFunction(name, arguments, value) )
    {
-      return FALSE;
+      return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 #endif // USE_PYTHON
@@ -1287,7 +1285,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
    if ( header == MessageHeader_Invalid )
    {
       // unknown variable
-      return FALSE;
+      return false;
    }
 
    switch ( header )
@@ -1306,7 +1304,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
          break;
 
       default:
-         CHECK( header <= MessageHeader_LastControl, FALSE,
+         CHECK( header <= MessageHeader_LastControl, false,
                 _T("unexpected macro in message category") );
 
          // the MessageHeader enum values are the same as RecipientType ones,
@@ -1314,7 +1312,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
          *value = m_cv.GetRecipients((RecipientType)header);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1379,7 +1377,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
          case OriginalHeader_Domain:
             {
-               AddressList_obj addrList(m_msg->From());
+               AddressList_obj addrList(AddressList::Create(m_msg->From()));
                Address *addr = addrList->GetFirst();
                if ( addr )
                {
@@ -1412,7 +1410,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             }
             else
             {
-               return FALSE;
+               return false;
             }
       }
 
@@ -1427,7 +1425,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1520,7 +1518,7 @@ String VarExpander::GetSignature() const
                                  m_cv.GetFrame(),
                                  "sig",
                                  _("Choose signature file"),
-                                 NULL, _T(".signature"), NULL
+                                 nullptr, _T(".signature"), nullptr
                              );
             }
             else

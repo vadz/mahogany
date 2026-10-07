@@ -44,14 +44,14 @@ void MimePartCCBase::Init()
 {
    m_parent =
    m_nested =
-   m_next = NULL;
+   m_next = nullptr;
 
-   m_body = NULL;
+   m_body = nullptr;
 
    m_parameterList =
-   m_dispositionParameterList = NULL;
+   m_dispositionParameterList = nullptr;
 
-   m_content = NULL;
+   m_content = nullptr;
    m_lenContent = 0;
    m_ownsContent = false;
 
@@ -196,14 +196,13 @@ MimePartCCBase::FindParam(const MimeParameterList& list, const String& name)
 {
    String value;
 
-   MimeParameterList::iterator i;
-   for ( i = list.begin(); i != list.end(); i++ )
+   for ( const MimeParameter& param : list )
    {
       // parameter names are not case-sensitive, i.e. "charset" == "CHARSET"
-      if ( name.CmpNoCase(i->name) == 0 )
+      if ( name.CmpNoCase(param.name) == 0 )
       {
          // found
-         value = i->value;
+         value = param.value;
          break;
       }
    }
@@ -230,7 +229,7 @@ void MimePartCCBase::InitParamList(MimeParameterList *list, PARAMETER *par)
 {
    while ( par )
    {
-      list->push_back(new MimeParameter(par->attribute, par->value));
+      list->emplace_back(par->attribute, par->value);
 
       par = par->next;
    }
@@ -314,7 +313,7 @@ const void *MimePartCCBase::GetContent(unsigned long *lenptr) const
 
    const void *cptr = GetRawContent(lenptr);
    if ( !cptr || !*lenptr )
-      return NULL;
+      return nullptr;
 
    return self->DecodeRawContent(cptr, lenptr);
 }
@@ -363,7 +362,7 @@ MimePartCCBase::DecodeRawContent(const void *cptr, unsigned long *lenptr)
       case ENCBASE64:      // base-64 encoded data
          // the size of possible extra non Base64 encoded text following a
          // Base64 encoded part
-         const unsigned char *startSlack = NULL;
+         const unsigned char *startSlack = nullptr;
          size_t sizeSlack = 0;
 
          // there is a frequent problem with mail list software appending the

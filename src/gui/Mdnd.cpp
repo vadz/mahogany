@@ -53,11 +53,11 @@ MMessagesDataObject::MMessagesDataObject(MsgCmdProc *msgProc,
    // we store the MsgCmdProc pointer first followed by the number of
    // messages - and then all messages after it
    size_t len = sizeof(MMessagesDataObject::Data) +
-                  messages.GetCount()*sizeof(UIdType);
+                  messages.size()*sizeof(UIdType);
    void *buf = new char[len];
    Data *data = (Data *)buf;
    data->msgProc = msgProc;
-   data->number = messages.GetCount();
+   data->number = messages.size();
    data->folder = folder;
    
    UIdType *p = GetUIDs(data);
@@ -73,11 +73,11 @@ UIdArray MMessagesDataObject::GetMessages() const
 {
    UIdArray messages;
    size_t count = GetMessageCount();
-   messages.Alloc(count);
+   messages.reserve(count);
 
    for ( size_t n = 0; n < count; n++ )
    {
-      messages.Add(GetMessageUId(n));
+      messages.push_back(GetMessageUId(n));
    }
 
    return messages;
@@ -178,7 +178,7 @@ wxDragResult MMessagesDropTarget::OnMsgDrop(wxCoord x, wxCoord y,
    msgCmdProc->ProcessCommand(WXMENU_MSG_DROP_TO_FOLDER, messages, folder);
 
    // it's ok even if m_frame is NULL
-   wxLogStatus(GetFrame(), _("%zu message(s) dropped."), messages.GetCount());
+   wxLogStatus(GetFrame(), _("%zu message(s) dropped."), messages.size());
    m_where->Refresh();
 
    return def;

@@ -136,7 +136,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
    // init members
    // ------------
 
-   m_dlgFind = NULL;
+   m_dlgFind = nullptr;
 
    m_posFind = 0;
 
@@ -228,7 +228,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
 
    SetSize(x, y, w, h);
 
-   Show(TRUE);
+   Show(true);
 }
 
 MTextDialog::~MTextDialog()
@@ -279,7 +279,7 @@ void MTextDialog::OnFind(wxCommandEvent&)
                                           &m_dataFind,
                                           _("Mahogany: Find regular expression"),
                                           wxFR_NOUPDOWN);
-      m_dlgFind->Show(TRUE);
+      m_dlgFind->Show(true);
    }
    else // dialog already exists
    {
@@ -346,7 +346,7 @@ void MTextDialog::OnFindDialogNext(wxFindDialogEvent& event)
 void MTextDialog::OnFindDialogClose(wxFindDialogEvent&)
 {
    m_dlgFind->Destroy();
-   m_dlgFind = NULL;
+   m_dlgFind = nullptr;
 }
 
 // ----------------------------------------------------------------------------

@@ -53,21 +53,21 @@ public:
    AdbTextImporter();
 
    // implement base class pure virtuals
-   virtual String GetDefaultFilename() const { return wxEmptyString; }
-   virtual bool CanImport(const String& filename);
-   virtual bool StartImport(const String& filename);
-   virtual size_t GetEntryNames(const String& path,
-                                wxArrayString& entries) const;
-   virtual size_t GetGroupNames(const String& path,
-                                wxArrayString& groups) const;
-   virtual bool ImportEntry(const String& path,
-                            size_t index,
-                            AdbEntry *entry);
+   String GetDefaultFilename() const override { return wxEmptyString; }
+   bool CanImport(const String& filename) override;
+   bool StartImport(const String& filename) override;
+   size_t GetEntryNames(const String& path,
+                        wxArrayString& entries) const override;
+   size_t GetGroupNames(const String& path,
+                        wxArrayString& groups) const override;
+   bool ImportEntry(const String& path,
+                    size_t index,
+                    AdbEntry *entry) override;
 
 protected:
    // split one field from the line, modify the pointer to point at the start
    // of the next field if !NULL
-   wxString SplitField(const wxChar *start, const wxChar **next = NULL) const;
+   wxString SplitField(const wxChar *start, const wxChar **next = nullptr) const;
 
    // split the line of the input file into fields using our delimiter, return
    // the number of fields
@@ -210,20 +210,20 @@ bool AdbTextImporter::TestDelimiter(wxChar chDelimiter)
          if ( abs((int)(nDelimiters[nLine] - nDelimitersAverage)) > (int)maxDiff )
          {
             // this line looks strange...
-            return FALSE;
+            return false;
          }
       }
    }
    else
    {
       // the file is empty or has too few delimiters
-      return FALSE;
+      return false;
    }
 
    // looks ok
    m_chDelimiter = chDelimiter;
 
-   return TRUE;
+   return true;
 }
 
 bool AdbTextImporter::CanImport(const String& filename)
@@ -236,7 +236,7 @@ bool AdbTextImporter::CanImport(const String& filename)
 
    if ( !m_textfile.Open(filename) )
    {
-      m_lastTestResult = FALSE;
+      m_lastTestResult = false;
    }
    else
    {
@@ -252,7 +252,7 @@ bool AdbTextImporter::StartImport(const String& filename)
    if ( filename == m_textfile.GetName() )
    {
       // we already loaded it
-      return TRUE;
+      return true;
    }
 
    return m_textfile.Open(filename);
@@ -325,7 +325,7 @@ bool AdbTextImporter::ImportEntry(const String& /* path */,
    if ( nFields == 0 )
    {
       // should have at least something!
-      return FALSE;
+      return false;
    }
 
    #define COPY_FIELD(our, foreign)                      \
@@ -371,6 +371,6 @@ bool AdbTextImporter::ImportEntry(const String& /* path */,
    entry->SetField(AdbField_NickName, nick);
 #endif
 
-   return TRUE;
+   return true;
 }
 

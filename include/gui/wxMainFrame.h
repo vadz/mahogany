@@ -40,12 +40,12 @@ class wxMainFrame : public wxMFrame, public MEventReceiver
 public:
    /// constructor & dtor
    wxMainFrame(const String &iname = String(_T("wxMainFrame")),
-               wxFrame *parent = NULL);
+               wxFrame *parent = nullptr);
 
    virtual ~wxMainFrame();
 
    // ask user whether he really wants to exit
-   virtual bool CanClose() const;
+   bool CanClose() const override;
 
    // open the given folder in the integrated folder view (may be called
    // multiple times) in read write (default) or read only mode
@@ -53,7 +53,7 @@ public:
 
    // close the given folder if it is opened or the currently opened one if
    // folder is NULL
-   void CloseFolder(MFolder *folder = NULL);
+   void CloseFolder(MFolder *folder = nullptr);
 
    // add the folder menu to the menu bar
    void AddFolderMenu(void);
@@ -76,7 +76,7 @@ public:
 
 
    /// Mahogany event processing
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    /// Appends the menu for a module to the menubar
    virtual void AddModulesMenu(const wxChar *name,
@@ -93,7 +93,7 @@ public:
    wxString GetFolderName(void) const { return m_folderName; }
 
    /// Return the profile to use for the composer started from this frame
-   virtual Profile *GetFolderProfile(void) const;
+   Profile *GetFolderProfile(void) const override;
 
    /// "private" method - for wxMainFolderView use only
    void ClearFolderName() { m_folderName.clear(); }
@@ -139,8 +139,8 @@ protected:
 
 private:
    // implement base class pure virtual methods
-   virtual void DoCreateToolBar();
-   virtual void DoCreateStatusBar();
+   void DoCreateToolBar() override;
+   void DoCreateStatusBar() override;
 
    /// create and initialize the modules menu
    void MakeModulesMenu(void);

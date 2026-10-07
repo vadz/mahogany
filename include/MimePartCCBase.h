@@ -32,30 +32,30 @@ public:
    virtual ~MimePartCCBase();
 
    // MIME tree navigation
-   virtual MimePart *GetParent() const { return m_parent; }
-   virtual MimePart *GetNext() const { return m_next; }
-   virtual MimePart *GetNested() const { return m_nested; }
+   MimePart *GetParent() const override { return m_parent; }
+   MimePart *GetNext() const override { return m_next; }
+   MimePart *GetNested() const override { return m_nested; }
 
    // headers access
-   virtual MimeType GetType() const;
-   virtual String GetDescription() const;
-   virtual String GetFilename() const;
-   virtual String GetDisposition() const;
-   virtual String GetPartSpec() const;
-   virtual String GetParam(const String& name) const;
-   virtual String GetDispositionParam(const String& name) const;
-   virtual const MimeParameterList& GetParameters() const;
-   virtual const MimeParameterList& GetDispositionParameters() const;
-   virtual MimeXferEncoding GetTransferEncoding() const;
-   virtual size_t GetSize() const;
+   MimeType GetType() const override;
+   String GetDescription() const override;
+   String GetFilename() const override;
+   String GetDisposition() const override;
+   String GetPartSpec() const override;
+   String GetParam(const String& name) const override;
+   String GetDispositionParam(const String& name) const override;
+   const MimeParameterList& GetParameters() const override;
+   const MimeParameterList& GetDispositionParameters() const override;
+   MimeXferEncoding GetTransferEncoding() const override;
+   size_t GetSize() const override;
 
    // text part additional info
-   virtual wxFontEncoding GetTextEncoding() const;
-   virtual size_t GetNumberOfLines() const;
+   wxFontEncoding GetTextEncoding() const override;
+   size_t GetNumberOfLines() const override;
 
    // data access
-   virtual const void *GetContent(unsigned long *len = NULL) const;
-   virtual String GetTextContent() const;
+   const void *GetContent(unsigned long *len = nullptr) const override;
+   String GetTextContent() const override;
 
 
    // return the total number (recursively) of all our subparts
@@ -77,7 +77,7 @@ protected:
       @param nPart the order among our siblings
     */
    void Create(struct mail_bodystruct *body,
-               MimePartCCBase *parent = NULL,
+               MimePartCCBase *parent = nullptr,
                size_t nPart = 1u);
 
    /// common part of all ctors
@@ -88,7 +88,7 @@ protected:
 
    /// full ctor, same argument as for Create()
    MimePartCCBase(struct mail_bodystruct *body,
-                  MimePartCCBase *parent = NULL,
+                  MimePartCCBase *parent = nullptr,
                   size_t nPart = 1u)
    {
       Init();

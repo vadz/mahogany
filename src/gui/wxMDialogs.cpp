@@ -72,6 +72,8 @@
 
 #include <errno.h>
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -120,33 +122,33 @@ wxMDialog::ShowModal()
    CloseSplash();
 
 #ifdef USE_SEMIMODAL
-   m_modalShowing = TRUE;
+   m_modalShowing = true;
 
 #if wxUSE_HELP && wxUSE_HTML
    /* Disable all other windows apart from the help frame and this
       one. */
 
-   wxFrame *hf = NULL;
+   wxFrame *hf = nullptr;
    wxHelpController *hc = ((wxMApp *)mApplication)->GetHelpController();
    if(hc && hc->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
       hf = ((wxHelpControllerHtml *)hc)->GetFrameParameters();
 #else
-   wxWindow *hf = NULL;
+   wxWindow *hf = nullptr;
 #endif
 
    wxWindowList::Node *node;
    for ( node = wxTopLevelWindows.GetFirst(); node; node = node->GetNext() )
    {
       if(node->GetData() != hf && node->GetData() != this)
-         node->GetData()->Enable(FALSE);
+         node->GetData()->Enable(false);
    }
 
-   Show( TRUE );
+   Show( true );
 
    while(IsModal())
       wxTheApp->Dispatch();
 
-   wxEnableTopLevelWindows(TRUE);
+   wxEnableTopLevelWindows(true);
    return GetReturnCode();
 #else // !USE_SEMIMODAL
    return wxDialog::ShowModal();
@@ -163,8 +165,8 @@ void wxMDialog::EndModal( int retCode )
         wxFAIL_MSG( _T("wxMDialog:EndModal called twice") );
         return;
     }
-    m_modalShowing = FALSE;
-    Show( FALSE );
+    m_modalShowing = false;
+    Show( false );
 #else // !USE_SEMIMODAL
     wxDialog::EndModal(retCode);
 #endif // USE_SEMIMODAL/!USE_SEMIMODAL
@@ -186,8 +188,8 @@ public:
    const wxString& GetText() const { return m_strText; }
 
    // base class virtuals implemented
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // if using a textctrl and not a combobox, this will process the
    // ENTER key
@@ -222,8 +224,8 @@ public:
    bool HasUserChosenFolder() const { return m_userChoseFolder; }
 
    // base class virtuals implemented
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    void OnButton(wxCommandEvent &ev);
 
@@ -257,7 +259,7 @@ class MFolderDialogTree : public wxFolderTree
 public:
    MFolderDialogTree(MFolderDialog *dlg) : wxFolderTree(dlg) { m_dlg = dlg; }
 
-   virtual bool OnDoubleClick()
+   bool OnDoubleClick() override
    {
       // pretend the dialog was closed via ok button
       wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
@@ -437,7 +439,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                                wxSize(widthText, heightText));
      m_text->SetFocus();
-     m_passwd = NULL; // signal that it's not used
+     m_passwd = nullptr; // signal that it's not used
   }
 
   // buttons
@@ -459,7 +461,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
 
 bool MTextInputDialog::TransferDataToWindow()
 {
-   if ( m_passwd == NULL )
+   if ( m_passwd == nullptr )
    {
       if ( m_strText.empty() )
       {
@@ -491,11 +493,11 @@ bool MTextInputDialog::TransferDataFromWindow()
   {
     // imitate [Cancel] button
     EndModal(wxID_CANCEL);
-    return FALSE;
+    return false;
   }
 
   m_strText = strText;
-  return TRUE;
+  return true;
 }
 
 // a wxConfig-aware function which asks user for a string
@@ -618,7 +620,7 @@ MDialog_Message(const wxString& message,
             String(M_TITLE_PREFIX) + title,
             style,
             GetDialogParent(parent),
-            NULL,
+            nullptr,
             &params
           ) != wxCANCEL;
 }
@@ -635,7 +637,7 @@ bool MDialog_Message(const wxString& message,
 
    return MDialog_Message(message, parent, title,
                           persMsg ? (const char *)configPath.c_str()
-                                  : (const char *)NULL,
+                                  : (const char *)nullptr,
                           flags);
 }
 
@@ -754,7 +756,7 @@ MDialog_YesNoDialog(const wxString& message,
                String(M_TITLE_PREFIX) + title,
                GetYesNoMsgBoxStyle(flags),
                GetDialogParent(parent),
-               NULL,
+               nullptr,
                &params
             );
 
@@ -813,7 +815,7 @@ MDialog_FileRequester(String const & message,
    CloseSplash();
 
 
-   if(parent == NULL)
+   if(parent == nullptr)
       parent = mApplication->TopLevelFrame();
 
    // TODO we save only one file name for all "open file" dialogs and one for
@@ -897,8 +899,8 @@ MDialog_FolderProfile(const wxWindow *parent, const String& folderName)
 void
 MDialog_FolderOpen(const wxWindow *parent)
 {
-   MFolder *folder = MDialog_FolderChoose(parent, NULL, true /* open */);
-   if ( folder != NULL )
+   MFolder *folder = MDialog_FolderChoose(parent, nullptr, true /* open */);
+   if ( folder != nullptr )
    {
       // open a view on this folder
       OpenFolderViewFrame(folder, (wxWindow *)parent);
@@ -987,7 +989,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
                       (
                         "FolderDialogFile",
                         _("Mahogany: Please choose a folder file"),
-                        NULL, NULL, NULL, NULL,
+                        nullptr, nullptr, nullptr, nullptr,
                         m_flags & MDlg_Folder_Open
                            ? wxFD_OPEN | wxFD_FILE_MUST_EXIST
                            : wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
@@ -1053,7 +1055,7 @@ bool MFolderDialog::TransferDataFromWindow()
    {
       SafeDecRef(m_folder);
       m_folder = m_tree->GetSelection();
-      if ( m_folder != NULL )
+      if ( m_folder != nullptr )
       {
          // save the folder name to config
          wxConfigBase *config = wxConfigBase::Get();
@@ -1084,7 +1086,7 @@ MDialog_FolderChoose(const wxWindow *parent, MFolder *folder, int flags)
    // TODO store the last folder in config
    MFolderDialog dlg((wxWindow *)parent, folder, flags);
 
-   return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : NULL;
+   return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : nullptr;
 }
 
 
@@ -1176,8 +1178,8 @@ public:
    virtual ~wxDateFmtDialog() { m_timer->Stop(); delete m_timer; }
 
    // transfer data to/from dialog
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    // returns TRUE if the format string was changed
    bool WasChanged(void) { return m_DateFmt != m_OldDateFmt;}
@@ -1198,7 +1200,7 @@ protected:
          m_dialog = dialog;
       }
 
-      virtual void Notify() { m_dialog->UpdateExample(); }
+      void Notify() override { m_dialog->UpdateExample(); }
 
    private:
       wxDateFmtDialog *m_dialog;
@@ -1245,7 +1247,7 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
    else
       labelBox.Printf(_("&Default date format"));
 
-   wxStaticBox *box = CreateStdButtonsAndBox(labelBox, FALSE, MH_DIALOG_DATEFMT);
+   wxStaticBox *box = CreateStdButtonsAndBox(labelBox, false, MH_DIALOG_DATEFMT);
 
    wxLayoutConstraints *c;
 
@@ -1295,7 +1297,7 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
    c->height.AsIs();
    m_UseGMT->SetConstraints(c);
 
-   SetDefaultSize(5*wBtn, 8*hBtn, TRUE /* minimal */);
+   SetDefaultSize(5*wBtn, 8*hBtn, true /* minimal */);
    TransferDataToWindow();
    m_OldDateFmt = m_DateFmt;
 
@@ -1327,7 +1329,7 @@ wxDateFmtDialog::TransferDataFromWindow()
    GetProfile()->writeEntry(MP_DATE_FMT, m_DateFmt);
    GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue());
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1343,7 +1345,7 @@ wxDateFmtDialog::TransferDataToWindow()
    m_UseGMT->SetValue( READ_CONFIG_BOOL(GetProfile(), MP_DATE_GMT));
    m_textctrl->SetValue(m_DateFmt);
 
-   return TRUE;
+   return true;
 }
 
 
@@ -1371,7 +1373,7 @@ wxXFaceButton::SetFile(const wxString &filename)
    wxBitmap bmp;
    if(filename.Length() != 0)
    {
-      bool success = FALSE;
+      bool success = false;
       if(wxFileExists(filename))
          bmp = wxBitmap(XFace::GetXFaceImg(filename, &success, m_Parent));
       if(! success)
@@ -1396,8 +1398,8 @@ public:
    wxXFaceDialog(Profile *profile, wxWindow *parent);
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
    bool WasChanged(void)
       {
          return
@@ -1430,7 +1432,7 @@ wxXFaceDialog::wxXFaceDialog(Profile *profile,
                             _("Choose a XFace"),
                             _T("XFaceChooser"))
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("XFace"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("XFace"), false,
                                              MH_DIALOG_XFACE);
    wxLayoutConstraints *c;
 
@@ -1466,9 +1468,9 @@ wxXFaceDialog::wxXFaceDialog(Profile *profile,
    c->height.AsIs();
    m_Checkbox->SetConstraints(c);
 
-   m_Changed = FALSE;
+   m_Changed = false;
 
-   SetDefaultSize(325, 348, TRUE /* minimal */);
+   SetDefaultSize(325, 348, true /* minimal */);
    TransferDataToWindow();
    m_OldXFace = m_Button->GetFile();
    m_OldUseXFace = m_Checkbox->GetValue();
@@ -1497,7 +1499,7 @@ wxXFaceDialog::OnButton(wxCommandEvent & event )
                   this,
                   GetProfile()->GetName() + _T("/xfacefilerequester"),
                   _("Please pick an image file"),
-                  path, file, NULL
+                  path, file, nullptr
                 );
       m_Button->SetFile(newface);
    }
@@ -1510,7 +1512,7 @@ wxXFaceDialog::TransferDataToWindow()
    m_Button->SetFile(READ_CONFIG(GetProfile(), MP_COMPOSE_XFACE_FILE));
    m_Checkbox->SetValue(READ_CONFIG_BOOL(GetProfile(), MP_COMPOSE_USE_XFACE));
    m_Button->Enable(m_Checkbox->GetValue() != 0);
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1518,7 +1520,7 @@ wxXFaceDialog::TransferDataFromWindow()
 {
    GetProfile()->writeEntry(MP_COMPOSE_XFACE_FILE, m_Button->GetFile());
    GetProfile()->writeEntry(MP_COMPOSE_USE_XFACE, m_Checkbox->GetValue());
-   return TRUE;
+   return true;
 }
 
 extern
@@ -1546,14 +1548,14 @@ public:
          m_NewUC = newUseCrypt;
       }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          static const char * keys[] =
          {
             MP_FOLDER_PASSWORD,
             MP_SMTPHOST_PASSWORD,
             MP_NNTPHOST_LOGIN,
-            NULL
+            nullptr
          };
          for(int idx = 0; keys[idx]; idx++)
          {
@@ -1573,7 +1575,7 @@ public:
                }
             }
          }
-         return TRUE;
+         return true;
       }
    ~ChangePasswdTraversal()
       {
@@ -1592,12 +1594,12 @@ public:
    wxGlobalPasswdDialog(Profile *profile, wxWindow *parent);
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
    bool WasChanged(void) const
       {
          // difficult to say, be cautious:
-         return TRUE;
+         return true;
       };
 
    void OnButton(wxCommandEvent & event );
@@ -1643,7 +1645,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
                             _("Choose a global password"),
                             _T("GlobalPasswdChooser"))
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Global Password Settings"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Global Password Settings"), false,
                                              MH_DIALOG_GLOBALPASSWD);
    wxLayoutConstraints *c;
    wxStaticText *stattext = new wxStaticText
@@ -1714,7 +1716,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    }
    else
    {
-      m_oPassword = NULL;
+      m_oPassword = nullptr;
    }
 
    m_text1 = new wxStaticText(this, -1, _("New password:"));
@@ -1753,7 +1755,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    m_nPassword2->SetConstraints(c);
 
-   SetDefaultSize(360, 400, TRUE /* minimal */);
+   SetDefaultSize(360, 400, true /* minimal */);
    TransferDataToWindow();
 }
 
@@ -1763,7 +1765,7 @@ wxGlobalPasswdDialog::TransferDataToWindow()
    m_UseGlobalPassword->SetValue(READ_APPCONFIG_BOOL(MP_CRYPTALGO));
    DoUpdateUI();
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1780,7 +1782,7 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
       if ( !strutil_checkpasswd(m_oPassword->GetValue()) )
       {
          wxLogError(_("Incorrect old password value!"));
-         return FALSE;
+         return false;
       }
    }
 
@@ -1793,13 +1795,13 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
       if ( newPw.empty() )
       {
          wxLogError(_("Password can't be empty."));
-         return FALSE;
+         return false;
       }
 
       if ( newPw != m_nPassword2->GetValue() )
       {
          wxLogError(_("The two values for the password do not match!"));
-         return FALSE;
+         return false;
       }
    }
 
@@ -1820,7 +1822,7 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
       traverse.Traverse();
    }
 
-   return TRUE;
+   return true;
 }
 
 extern
@@ -1890,7 +1892,7 @@ public:
    bool ShouldShow() const { return m_listctrl->GetItemCount() != 0; }
 
    // transfer data (selections) from control
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 private:
    wxArrayInt  m_selections;
@@ -2048,7 +2050,7 @@ bool ReenableDialog::TransferDataFromWindow()
       m_selections.Add(index);
    }
 
-   return TRUE;
+   return true;
 }
 
 // TODO: all this should be implemented in wx/persctrl.cpp, not here!
@@ -2065,19 +2067,16 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
    wxArrayString entries;
 
    const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
-   for ( AllConfigSources::List::iterator config = sources.begin(),
-                                             end = sources.end();
-         config != end;
-         ++config )
+   for ( const auto& config : sources )
    {
-      dlg.AddAllEntries(config.operator->(), wxEmptyString, entries);
+      dlg.AddAllEntries(config.get(), wxEmptyString, entries);
 
       ConfigSource::EnumData dummy;
       String name;
       bool cont = config->GetFirstGroup(MESSAGE_BOXES_ROOT, name, dummy);
       while ( cont )
       {
-         dlg.AddAllEntries(config.operator->(), name, entries);
+         dlg.AddAllEntries(config.get(), name, entries);
 
          cont = config->GetNextGroup(name, dummy);
       }
@@ -2101,10 +2100,7 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
                // we don't know in which config source this message box was
                // disabled but it doesn't matter: if we want to reenable it, we
                // must do it in all of them anyhow
-               for ( AllConfigSources::List::iterator config = sources.begin(),
-                                                         end = sources.end();
-                     config != end;
-                     ++config )
+               for ( const auto& config : sources )
                {
                   config->DeleteEntry(key);
                }
@@ -2147,7 +2143,7 @@ extern "C"
            << '\n'
            << _("Do you accept this certificate?");
       return (int) MDialog_YesNoDialog(info,
-                                       NULL, _("SSL certificate verification"),
+                                       nullptr, _("SSL certificate verification"),
                                        M_DLG_YES_DEFAULT);
    }
 }
@@ -2170,7 +2166,7 @@ wxLicenseDialog::wxLicenseDialog(wxWindow *parent)
                : wxManuallyLaidOutDialog(parent,
                                          _("Mahogany Licensing Conditions"))
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Licensing Conditions"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Licensing Conditions"), false,
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
@@ -2202,7 +2198,7 @@ wxLicenseDialog::wxLicenseDialog(wxWindow *parent)
    button = (wxButton *) FindWindow(wxID_CANCEL);
    button->SetLabel(_("&Reject"));
 
-   SetAutoLayout(TRUE);
+   SetAutoLayout(true);
    SetDefaultSize(w + 12*LAYOUT_X_MARGIN, (3*w)/2);
 }
 
@@ -2251,8 +2247,8 @@ public:
                           const wxArrayString& choices,
                           wxArrayInt *selections);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    wxArrayInt *m_selections;
@@ -2307,7 +2303,7 @@ wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
     topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0,
                   wxCENTRE | wxALL, 2*LAYOUT_X_MARGIN);
 
-    SetAutoLayout(TRUE);
+    SetAutoLayout(true);
     SetSizer(topsizer);
 
     topsizer->SetSizeHints(this);
@@ -2327,7 +2323,7 @@ bool wxMultipleChoiceDialog::TransferDataToWindow()
    m_checklstbox->Select(0);
    m_checklstbox->SetFocus();
 
-   return TRUE;
+   return true;
 }
 
 bool wxMultipleChoiceDialog::TransferDataFromWindow()
@@ -2341,7 +2337,7 @@ bool wxMultipleChoiceDialog::TransferDataFromWindow()
          m_selections->Add(n);
    }
 
-   return TRUE;
+   return true;
 }
 
 size_t MDialog_GetSelections(const wxString& message,
@@ -2438,7 +2434,7 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
                        : wxManuallyLaidOutDialog(parent, caption, profileKey)
 {
    m_hasChanges = false;
-   m_textAdd = NULL;
+   m_textAdd = nullptr;
 
    // layout the controls
    // -------------------
@@ -2468,7 +2464,7 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    m_btnUp->SetConstraints(c);
 
    // optional controls for string editing below the list box
-   wxControl *ctrlBelow = NULL;
+   wxControl *ctrlBelow = nullptr;
    if ( extraFeatures & Allow_Add )
    {
       wxStaticText *labelAdd = new wxStaticText(this, -1, _("&Add another:"));
@@ -2631,7 +2627,7 @@ bool wxSelectionsOrderDialogSimple::TransferDataToWindow()
          m_checklstBox->Check(n);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxSelectionsOrderDialogSimple::TransferDataFromWindow()
@@ -2655,7 +2651,7 @@ bool wxSelectionsOrderDialogSimple::TransferDataFromWindow()
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 bool MDialog_GetSelectionsInOrder(const wxString& message,
@@ -2677,7 +2673,7 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
 // ----------------------------------------------------------------------------
 
 class wxIdentCombo;
-WX_DEFINE_ARRAY(wxIdentCombo *, wxIdentComboArray);
+using wxIdentComboArray = std::vector<wxIdentCombo *>;
 
 class wxIdentCombo : public wxChoice
 {
@@ -2687,18 +2683,18 @@ public:
                  wxDefaultPosition, wxDefaultSize,
                  count, choices)
    {
-      ms_allIdentCombos.Add(this);
+      ms_allIdentCombos.push_back(this);
    }
 
    virtual ~wxIdentCombo()
    {
-      ms_allIdentCombos.Remove(this);
+      std::erase(ms_allIdentCombos, this);
    }
 
-   virtual void DoDeleteOneItem(unsigned int index)
+   void DoDeleteOneItem(unsigned int index) override
    {
       // sync all other combos with this one
-      size_t count = ms_allIdentCombos.GetCount();
+      size_t count = ms_allIdentCombos.size();
       for ( size_t n = 0; n < count; n++ )
       {
          if ( ms_allIdentCombos[n] != this )
@@ -2710,21 +2706,25 @@ public:
       wxChoice::DoDeleteOneItem(index);
    }
 
-   virtual int DoAppendItems(const wxArrayStringsAdapter& items,
-                             void **clientData,
-                             wxClientDataType type)
+   int DoAppendItems(const wxArrayStringsAdapter& items,
+                     void **clientData,
+                     wxClientDataType type) override
    {
       // sync all other comboboxes with the one on which Append() had been
       // called: be careful to avoid reentrancy which would result in the
       // infinite recursion
       if ( ms_indexOfAppend == wxNOT_FOUND )
       {
-         ms_indexOfAppend = ms_allIdentCombos.Index(this);
+         const auto it = std::find(ms_allIdentCombos.begin(),
+                                   ms_allIdentCombos.end(),
+                                   this);
 
-         CHECK( ms_indexOfAppend != wxNOT_FOUND, -1,
+         CHECK( it != ms_allIdentCombos.end(), -1,
                 _T("all wxIdentCombos should be in the array!") );
 
-         size_t count = ms_allIdentCombos.GetCount();
+         ms_indexOfAppend = it - ms_allIdentCombos.begin();
+
+         size_t count = ms_allIdentCombos.size();
          for ( size_t n = 0; n < count; n++ )
          {
             if ( ms_allIdentCombos[n] != this )
@@ -2758,7 +2758,7 @@ extern wxChoice *CreateIdentCombo(wxWindow *parent)
    wxArrayString identities = Profile::GetAllIdentities();
    size_t count = identities.GetCount();
    if ( !count )
-      return (wxChoice *)NULL;
+      return (wxChoice *)nullptr;
 
    // first one is always the default identity, i.e. no identity at all
    wxString *choices = new wxString[count + 1];
@@ -2822,7 +2822,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    m_frame->SetBackgroundColour(wxSystemSettings::
                                 GetColour(wxSYS_COLOUR_BTNFACE));
 
-   m_frame->EnableCloseButton(FALSE);
+   m_frame->EnableCloseButton(false);
 #endif // __WXMSW__
 
    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -2833,7 +2833,7 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    m_labelValue = new wxStaticText(m_frame, -1, _("XXXXXX done"));
    sizer->Add(m_labelValue, 0, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 10);
 
-   m_frame->SetAutoLayout(TRUE);
+   m_frame->SetAutoLayout(true);
    m_frame->SetSizer(sizer);
    sizer->Fit(m_frame);
    sizer->SetSizeHints(m_frame);
@@ -2884,8 +2884,8 @@ public:
                 String *value2,
                 long textStyle = 0);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    wxTextCtrl *m_text1,
@@ -2977,7 +2977,7 @@ bool MText2Dialog::TransferDataToWindow()
    m_text1->SetValue(*m_value1);
    m_text2->SetValue(*m_value2);
 
-   return TRUE;
+   return true;
 }
 
 bool MText2Dialog::TransferDataFromWindow()
@@ -2985,7 +2985,7 @@ bool MText2Dialog::TransferDataFromWindow()
    *m_value1 = m_text1->GetValue();
    *m_value2 = m_text2->GetValue();
 
-   return TRUE;
+   return true;
 }
 
 bool MDialog_GetText2FromUser(const wxString& message,
@@ -3026,7 +3026,7 @@ public:
    {
    }
 
-   virtual bool TransferDataToWindow();
+   bool TransferDataToWindow() override;
 
 protected:
    void OnUpdateOk(wxUpdateUIEvent& event);
@@ -3043,11 +3043,11 @@ END_EVENT_TABLE()
 bool MPasswordDialog::TransferDataToWindow()
 {
    if ( !MText2Dialog::TransferDataToWindow() )
-      return FALSE;
+      return false;
 
    m_text2->SetFocus();
 
-   return TRUE;
+   return true;
 }
 
 void MPasswordDialog::OnUpdateOk(wxUpdateUIEvent& event)
@@ -3133,7 +3133,7 @@ bool MDialog_GetPassword(Protocol protocol,
 
 extern wxWindow *GetDialogParent(const wxWindow *parent)
 {
-  return parent == NULL ? mApplication->TopLevelFrame()
+  return parent == nullptr ? mApplication->TopLevelFrame()
                         : GetFrame(parent);
 }
 

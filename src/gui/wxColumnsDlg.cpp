@@ -63,12 +63,12 @@ public:
 
    virtual ~wxFolderViewColumnsDialog();
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    // update m_idxTrans table here
-   virtual void OnItemSwap(size_t item1, size_t item2);
+   void OnItemSwap(size_t item1, size_t item2) override;
 
    // event handlers
    void OnCheckListbox(wxCommandEvent& event);

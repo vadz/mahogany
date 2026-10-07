@@ -50,8 +50,8 @@ public:
 
    // transfer data to/from window - must be overridden to populate the check
    // list box and retrieve the results from it
-   virtual bool TransferDataToWindow() = 0;
-   virtual bool TransferDataFromWindow() = 0;
+   bool TransferDataToWindow() override = 0;
+   bool TransferDataFromWindow() override = 0;
 
 protected:
    // can be overridden if the derived class wants to know when the 2 items in
@@ -72,14 +72,14 @@ protected:
    // event handlers
 
    // check list box event handler
-   void OnCheckLstBoxToggle(wxCommandEvent&) { m_hasChanges = TRUE; }
+   void OnCheckLstBoxToggle(wxCommandEvent&) { m_hasChanges = true; }
 
    // update UI here: disable the buttons when they don't do anything
    void OnCheckLstBoxSelChanged(wxCommandEvent& event);
 
    // up/down buttons notifications
-   void OnButtonUp(wxCommandEvent&) { OnButtonMove(TRUE); }
-   void OnButtonDown(wxCommandEvent&) { OnButtonMove(FALSE); }
+   void OnButtonUp(wxCommandEvent&) { OnButtonMove(true); }
+   void OnButtonDown(wxCommandEvent&) { OnButtonMove(false); }
    void OnButtonMove(bool up);
 
    // handlers for the controls used for adding items: notice that it's ok to
@@ -139,8 +139,8 @@ public:
       m_status = status;
    }
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    wxArrayString *m_choices;

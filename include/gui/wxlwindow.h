@@ -18,7 +18,7 @@
 
 /** shall we copy formatting to the clipboard? For now: NO (either
     true or false) */
-#define WXLO_COPY_FORMAT FALSE
+#define WXLO_COPY_FORMAT false
 
 
 enum
@@ -63,24 +63,24 @@ public:
               int style = wxNORMAL,
               int weight = wxNORMAL,
               int underline = 0,
-              wxColour *fg = NULL,
-              wxColour *bg = NULL,
+              wxColour *fg = nullptr,
+              wxColour *bg = nullptr,
               bool noUpdate = false);
 
    /// Clear taking an explicit font
    void Clear(const wxFont& font,
-              wxColour *fg = NULL,
-              wxColour *bg = NULL,
+              wxColour *fg = nullptr,
+              wxColour *bg = nullptr,
               bool noUpdate = false);
 
    /// override base class virtual to also refresh the scrollbar position
-   virtual void Refresh(bool eraseBackground = TRUE,
-                        const wxRect *rect = (const wxRect *)NULL);
+   void Refresh(bool eraseBackground = true,
+                const wxRect *rect = (const wxRect *)nullptr) override;
 
    /** Sets a background image, only used on screen, not on printouts.
        @param bitmap a pointer to a wxBitmap or NULL to remove it
    */
-   void SetBackgroundBitmap(wxBitmap *bitmap = NULL)
+   void SetBackgroundBitmap(wxBitmap *bitmap = nullptr)
       {
          if(m_BGbitmap) delete m_BGbitmap;
          m_BGbitmap = bitmap;
@@ -100,18 +100,18 @@ public:
       m_CursorVisibility = visibility; return v;}
 
    /// Pastes text from clipboard.
-   void Paste(bool privateFormat = FALSE, bool usePrimarySelection = FALSE);
+   void Paste(bool privateFormat = false, bool usePrimarySelection = false);
    /** Copies selection to clipboard.
        @param invalidate used internally, see wxllist.h for details
    */
-   bool Copy(bool invalidate = true, bool privateFormat = FALSE, bool primary = FALSE);
+   bool Copy(bool invalidate = true, bool privateFormat = false, bool primary = false);
    /// Copies selection to clipboard and deletes it.
-   bool Cut(bool privateFormat = FALSE, bool usePrimary = FALSE);
+   bool Cut(bool privateFormat = false, bool usePrimary = false);
    //@}
 
    /// find string in buffer
    bool Find(const wxString &needle,
-             wxPoint * fromWhere = NULL,
+             wxPoint * fromWhere = nullptr,
              const wxString &configPath = _T("MsgViewFindString"));
    /// find the same string again
    bool FindAgain(void);
@@ -183,7 +183,7 @@ public:
       }
 #if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    /// Enable or disable focus follow mode under non-MSW
-   void SetFocusFollowMode(bool enable = TRUE)
+   void SetFocusFollowMode(bool enable = true)
       { m_FocusFollowMode = enable; }
 #endif
 
@@ -191,7 +191,7 @@ public:
       in Clear() */
    //@{
    /// Set dirty flag.
-   void SetModified(bool modified = TRUE) { m_Modified = modified; }
+   void SetModified(bool modified = true) { m_Modified = modified; }
    /// Query whether window needs redrawing.
    bool IsModified(void) const { return m_Modified; }
    //@}
@@ -257,7 +257,7 @@ protected:
    */
    int m_CursorVisibility;
 
-   bool SetAutoDeleteSelection(bool enable = TRUE)
+   bool SetAutoDeleteSelection(bool enable = true)
    {
       bool old = m_AutoDeleteSelection;
       m_AutoDeleteSelection = enable;

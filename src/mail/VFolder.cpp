@@ -114,7 +114,7 @@ MailFolderVirt::OpenFolder(const MFolder *folder,
                            OpenMode openmode,
                            wxFrame * /* frame */)
 {
-   CHECK( folder, NULL, _T("NULL folder in MailFolderVirt::OpenFolder") );
+   CHECK( folder, nullptr, _T("NULL folder in MailFolderVirt::OpenFolder") );
 
    MailFolderVirt *vf = new MailFolderVirt(folder, openmode);
 
@@ -287,7 +287,7 @@ Profile *MailFolderVirt::GetProfile() const
 
 MailFolderVirt::Msg *MailFolderVirt::GetMsgFromMsgno(MsgnoType msgno) const
 {
-   CHECK( 1 <= msgno && msgno <= GetMsgCount(), NULL,
+   CHECK( 1 <= msgno && msgno <= GetMsgCount(), nullptr,
           _T("invalid msgno in MailFolderVirt") );
 
    return m_messages[msgno - 1];
@@ -306,7 +306,7 @@ MailFolderVirt::Msg *MailFolderVirt::GetMsgFromUID(UIdType uid) const
 
    FAIL_MSG( _T("no message with such UID in the virtual folder") );
 
-   return NULL;
+   return nullptr;
 }
 
 void MailFolderVirt::AddMsg(MailFolderVirt::Msg *msg)
@@ -315,7 +315,7 @@ void MailFolderVirt::AddMsg(MailFolderVirt::Msg *msg)
 
    m_underlyingMFs.insert(msg->mf);
 
-   m_messages.Add(msg);
+   m_messages.push_back(msg);
 }
 
 MailFolderVirt::Msg *MailFolderVirt::GetFirstMsg(MsgCookie& cookie) const
@@ -337,7 +337,7 @@ MailFolderVirt::Msg *MailFolderVirt::GetNextMsg(MsgCookie& cookie) const
       // shouldn't be > than it!
       ASSERT_MSG( cookie == count, _T("invalid msg index in MailFolderVirt") );
 
-      return NULL;
+      return nullptr;
    }
 }
 
@@ -366,7 +366,7 @@ void MailFolderVirt::DeleteMsg(MsgCookie& cookie)
    // finally, really delete the message
    delete m_messages[cookie];
 
-   m_messages.RemoveAt(cookie);
+   m_messages.erase(m_messages.begin() + cookie);
 }
 
 void MailFolderVirt::ClearMsgs()
@@ -567,11 +567,11 @@ Message *MailFolderVirt::GetMessage(unsigned long uid) const
 {
    Msg *msg = GetMsgFromUID(uid);
    if ( !msg )
-      return NULL;
+      return nullptr;
 
    Message *message = msg->mf->GetMessage(msg->uidPhys);
    if ( !message )
-      return NULL;
+      return nullptr;
 
    return MessageVirt::Create((MailFolderVirt *)this, uid, &msg->flags, message);
 }
@@ -724,7 +724,7 @@ MailFolderVirt::SearchByFlag(MessageStatus flag,
          // don't care whether it is or not
          if ( !(msg->flags & MSG_STAT_DELETED) || !(flags & SEARCH_UNDELETED) )
          {
-            results->Add(flags & SEARCH_UID ? msg->uidVirt : n);
+            results->push_back(flags & SEARCH_UID ? msg->uidVirt : n);
          }
       }
    }

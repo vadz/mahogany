@@ -40,10 +40,10 @@ public:
 
 
    // implement the base class pure virtuals
-   virtual String GetLabel() const;
+   String GetLabel() const override;
 
-   virtual void OnLeftClick() const;
-   virtual void OnRightClick(const wxPoint& pt) const;
+   void OnLeftClick() const override;
+   void OnRightClick(const wxPoint& pt) const override;
 
    // show the details about this PGP info object to the user (menu command)
    void ShowDetails() const;
@@ -188,7 +188,7 @@ public:
    }
 
    // override this to get the missing key from server
-   virtual void OnLeftClick() const;
+   void OnLeftClick() const override;
 
 private:
    MCryptoEngine * const m_engine;

@@ -15,7 +15,6 @@
 #define _M_MESSAGEVIEW_H_
 
 #ifndef USE_PCH
-   #include <wx/dynarray.h>     // for WX_DEFINE_ARRAY
    #include "Mdefaults.h"       // for MAction enum
 #endif // USE_PCH
 
@@ -23,6 +22,9 @@
 #include <wx/colour.h>
 
 #include "MEvent.h"
+
+#include <memory>
+#include <vector>
 
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 class WXDLLIMPEXP_FWD_CORE wxPoint;
@@ -47,7 +49,7 @@ class FolderView;
 // extracted from the headers by ShowXXXHeaders() functions
 struct ViewableInfoFromHeaders;
 
-WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
+using ArrayProcessInfo = std::vector<ProcessInfo *>;
 
 // ----------------------------------------------------------------------------
 // MessageView: this class does MIME handling and uses ViewFilters (which, in
@@ -67,7 +69,7 @@ protected:
    MessageView();
 
    /// same arguments as in ctor(s)
-   void Init(wxWindow *parent, Profile *profile = NULL);
+   void Init(wxWindow *parent, Profile *profile = nullptr);
 
 public:
    /**
@@ -121,7 +123,7 @@ public:
    Message *GetMessage() const { return m_mailMessage; }
 
    /// return true if we're showing a message
-   bool HasMessage() const { return m_mailMessage != NULL; }
+   bool HasMessage() const { return m_mailMessage != nullptr; }
 
    //@}
 
@@ -209,7 +211,7 @@ public:
    void MimeOpenWith(const MimePart *part);
 
    /// saves the currently selected MIME content
-   bool MimeSave(const MimePart *part, const wxChar *filename = NULL);
+   bool MimeSave(const MimePart *part, const wxChar *filename = nullptr);
 
    /// view attachment as text
    void MimeViewText(const MimePart *part);
@@ -716,7 +718,7 @@ private:
    void UnregisterForEvents();
 
    /// internal M events processing function
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    /// process the result of an async operation (e.g. message retrieval)
    void OnASFolderResultEvent(MEventASFolderResultData& event);
@@ -818,7 +820,7 @@ private:
     */
    void SetViewer(MessageViewer *viewer,
                   const String& viewerName,
-                  wxWindow *parent = NULL);
+                  wxWindow *parent = nullptr);
 
    /**
       Initializes and sets the given non-NULL viewer.
@@ -832,16 +834,16 @@ private:
     */
    void DoSetViewer(MessageViewer *viewer,
                     const String& viewerName,
-                    wxWindow *parent = NULL);
+                    wxWindow *parent = nullptr);
 
    /**
       Reset the viewer to the default one.
 
       @param parent the parent window, may be NULL
     */
-   void ResetViewer(wxWindow *parent = NULL)
+   void ResetViewer(wxWindow *parent = nullptr)
    {
-      SetViewer(NULL, String(), parent);
+      SetViewer(nullptr, String(), parent);
    }
 
    /**
@@ -932,8 +934,8 @@ private:
    //@}
 
 
-   /// list of all virtual MIME parts, created on demand
-   class VirtualMimePartsList *m_virtualMimeParts;
+   /// all virtual MIME parts
+   std::vector<std::unique_ptr<MimePart>> m_virtualMimeParts;
 
    /// all Content-IDs which we keep in memory during multipart/related parsing
    wxArrayString *m_cidsInMemory;

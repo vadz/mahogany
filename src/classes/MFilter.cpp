@@ -25,8 +25,6 @@
 #   include "Mcommon.h"
 #   include "Profile.h"
 #   include "strutil.h"
-
-#   include <wx/dynarray.h>        // for WX_DECLARE_OBJARRAY
 #endif // USE_PCH
 
 #include <wx/recguard.h>
@@ -34,6 +32,9 @@
 #include "MFilter.h"
 #include "MFolder.h"
 #include "modules/Filters.h"
+
+#include <unordered_map>
+#include <vector>
 
 // ----------------------------------------------------------------------------
 // constants
@@ -64,8 +65,7 @@ static void InvalidateFilter(const MFilter *filter);
 
 // filter rules are relatively expensive to construct, so we cache them once we
 // created them in this hash map (its keys are the folder names)
-#include "wx/hashmap.h"
-WX_DECLARE_STRING_HASH_MAP(FilterRule *, FolderFiltersMap);
+using FolderFiltersMap = std::unordered_map<wxString, FilterRule *>;
 
 static FolderFiltersMap gs_folderFilters;
 
@@ -85,12 +85,12 @@ struct MFDialogComponent
    /// reads settings from a string
    bool ReadSettings(String *str);
    /// writes settings to a string
-   String WriteSettings();
+   String WriteSettings() const;
    /// attempt to parse filter rule string
    bool ReadSettingsFromRule(String & str);
 
    /// Writes a rule
-   String WriteTest();
+   String WriteTest() const;
 
    bool operator==(const MFDialogComponent& other) const
    {
@@ -115,40 +115,40 @@ MFDialogComponent::ReadSettings(String *str)
    bool success;
    long number = strutil_readNumber(*str, &success);
    if(!success)
-      return FALSE;
+      return false;
    m_Logical = (MFDialogLogical) number;
 
    number = strutil_readNumber(*str, &success);
    if(!success)
-      return FALSE;
+      return false;
    m_Inverted = number != 0;
 
    number = strutil_readNumber(*str, &success);
    if(! success)
-      return FALSE;
+      return false;
    m_Test = (MFDialogTest)number;
 
    m_Argument = strutil_readString(*str, &success);
    if(! success)
-      return FALSE;
+      return false;
 
    number = strutil_readNumber(*str);
    if(!success)
-      return FALSE;
+      return false;
    m_Target = (MFDialogTarget) number;
 
    if ( m_Target == ORC_W_Header )
    {
       m_TargetArgument = strutil_readString(*str, &success);
       if(!success)
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 String
-MFDialogComponent::WriteSettings(void)
+MFDialogComponent::WriteSettings(void) const
 {
    String s = wxString::Format(_T("%d %d %d \"%s\" %d"),
                                (int) m_Logical,
@@ -184,7 +184,7 @@ const wxChar * ORC_T_Names[] =
    _T("istome()"),          // ORC_T_IsToMe
    _T("hasflag("),          // ORC_T_HasFlag
    _T("isfromme()"),        // ORC_T_IsFromMe
-   NULL
+   nullptr
 };
 
 /// this array tells us if the tests need arguments
@@ -259,7 +259,7 @@ const wxChar * ORC_W_Names[] =
    _T("headerline(\"Sender\")"),// ORC_W_Sender
    _T("recipients()"),          // ORC_W_Recipients
    _T("headerline"),            // ORC_W_Header: parentheses treated specially
-   NULL
+   nullptr
 };
 
 static const wxChar * OAC_T_Names[] =
@@ -279,7 +279,7 @@ static const wxChar * OAC_T_Names[] =
    _T("clearflag("),    // OAC_T_ClearFlag
    _T("setscore("),     // OAC_T_SetScore
    _T("nop("),          // OAC_T_NOP
-   NULL
+   nullptr
 };
 
 #define OAC_F_NeedsArg      0x01
@@ -372,7 +372,7 @@ bool FilterActionImplemented(MFDialogAction action)
 }
 
 String
-MFDialogComponent::WriteTest(void)
+MFDialogComponent::WriteTest(void) const
 {
    String program;
 
@@ -455,15 +455,15 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       m_Logical = ORC_L_None;
 
    if(*cptr++ != '(')
-      return FALSE;
+      return false;
 
    if(*cptr == '!')
    {
-      m_Inverted = TRUE;
+      m_Inverted = true;
       cptr++;
    }
    else
-      m_Inverted = FALSE;
+      m_Inverted = false;
    // now we need to find the test to be applied:
    m_Test = ORC_T_Illegal;
    for(size_t i = 0; ORC_T_Names[i]; i++)
@@ -477,7 +477,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       }
    }
    if(m_Test == ORC_T_Illegal)
-      return FALSE;
+      return false;
 
    bool needsTarget = FilterTestNeedsTarget(m_Test);
    bool needsArgument = FilterTestNeedsArgument(m_Test);
@@ -496,49 +496,47 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       }
 
       if(m_Target == ORC_W_Illegal)
-         return FALSE;
+         return false;
       if(m_Target == ORC_W_Header)
       {
          // special case: this one has an extra argument which we must extract
          if (*cptr++ != '(')
-            return FALSE;
+            return false;
          bool success;
          String tmp(cptr);
          const size_t lenOrig = tmp.length();
          m_TargetArgument = strutil_readString(tmp, &success);
          if ( !success )
-            return FALSE;
+            return false;
          cptr += lenOrig - tmp.length();
          if (*cptr++ != ')')
-            return FALSE;
+            return false;
       }
    }
    // comma between target and argument:
    if(needsTarget && needsArgument
       && *cptr++ != ',')
-      return FALSE;
+      return false;
 
    m_Argument = wxEmptyString;
    if(needsArgument)
    {
-      if(*cptr != '"') return FALSE;
+      if(*cptr != '"') return false;
       String tmp(cptr);
       const size_t lenOrig = tmp.length();
       bool success;
       m_Argument = strutil_readString(tmp, &success);
-      if(! success) return FALSE;
+      if(! success) return false;
       cptr += lenOrig - tmp.length();
    }
    if(*cptr++ != ')')
-      return FALSE;
+      return false;
    // assign remaining bit
    rule = cptr;
-   return TRUE;
+   return true;
 }
 
-WX_DECLARE_OBJARRAY(MFDialogComponent, MFDComponentArray);
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(MFDComponentArray);
+using MFDComponentArray = std::vector<MFDialogComponent>;
 
 
 /** This is a set of dialog settings representing a filter rule. A
@@ -548,43 +546,43 @@ class MFDialogSettingsImpl : public MFDialogSettings
 {
 public:
    /// The number of tests in the rule:
-   virtual size_t CountTests() const
-      { return m_Tests.Count(); }
+   size_t CountTests() const override
+      { return m_Tests.size(); }
 
    /// Return the n-th test:
-   virtual MFDialogTest GetTest(size_t n) const
+   MFDialogTest GetTest(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Test;
       }
    /// Is the n-th test inverted?
-   virtual bool IsInverted(size_t n) const
+   bool IsInverted(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Inverted;
       }
 
    /// Return the n-th logical operator, i.e. the one after the n-th test:
-   virtual MFDialogLogical GetLogical(size_t n) const
+   MFDialogLogical GetLogical(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Logical;
       }
 
    /// Return the n-th test's argument if any:
-   virtual String GetTestArgument(size_t n) const
+   String GetTestArgument(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Argument;
       }
 
-   virtual MFDialogTarget GetTestTarget(size_t n) const
+   MFDialogTarget GetTestTarget(size_t n) const override
       {
          MOcheck();
          return m_Tests[n].m_Target;
       }
 
-   virtual String GetTestTargetArgument(size_t n) const
+   String GetTestTargetArgument(size_t n) const override
       {
          MOcheck();
          ASSERT_MSG( GetTestTarget(n) == ORC_W_Header,
@@ -594,46 +592,46 @@ public:
       }
 
    /// Return the action component
-   virtual MFDialogAction GetAction() const
+   MFDialogAction GetAction() const override
       {
          MOcheck();
          return m_Action;
       }
    /// Return the action argument if any
-   virtual String GetActionArgument() const
+   String GetActionArgument() const override
       {
          MOcheck();
          return m_ActionArgument;
       }
    /// Add a new test component:
-   virtual void AddTest(MFDialogLogical l,
-                        bool isInverted,
-                        MFDialogTest test,
-                        MFDialogTarget target,
-                        String argument = wxEmptyString,
-                        String targetArg = wxEmptyString
-      )
+   void AddTest(MFDialogLogical l,
+                bool isInverted,
+                MFDialogTest test,
+                MFDialogTarget target,
+                String argument = wxEmptyString,
+                String targetArg = wxEmptyString
+      ) override
       {
          MOcheck();
          MFDialogComponent c;
          c.m_Inverted = isInverted;
-         c.m_Logical = (m_Tests.Count() == 0) ? ORC_L_None : l;
+         c.m_Logical = (m_Tests.size() == 0) ? ORC_L_None : l;
          c.m_Test = test;
          c.m_Target = target;
          c.m_TargetArgument = targetArg;
          c.m_Argument = argument;
-         m_Tests.Add(c);
+         m_Tests.push_back(c);
       }
 
-   virtual void SetAction(MFDialogAction action, const String& arg)
+   void SetAction(MFDialogAction action, const String& arg) override
    {
       m_Action = action;
       m_ActionArgument = arg;
    }
 
-   virtual String WriteRule(void) const;
+   String WriteRule(void) const override;
 
-   virtual bool operator==(const MFDialogSettings& other) const;
+   bool operator==(const MFDialogSettings& other) const override;
 
    /// attempt to parse filter rule string
    bool ReadSettingsFromRule(const String & str);
@@ -658,8 +656,8 @@ MFDialogSettingsImpl::operator==(const MFDialogSettings& o) const
    // FIXME urgh
    const MFDialogSettingsImpl& other = (const MFDialogSettingsImpl &)o;
 
-   size_t count = m_Tests.GetCount();
-   if ( count != other.m_Tests.GetCount() )
+   size_t count = m_Tests.size();
+   if ( count != other.m_Tests.size() )
       return false;
 
    for ( size_t n = 0; n < count; n++ )
@@ -676,7 +674,7 @@ MFDialogSettingsImpl::operator==(const MFDialogSettings& o) const
    if( wxStrncmp(cptr, what, wxStrlen(what)) == 0) \
      cptr += wxStrlen(what); \
    else \
-     return FALSE \
+     return false \
 
 String
 MFDialogSettingsImpl::WriteAction(void) const
@@ -709,10 +707,10 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
       MFDialogComponent c;
       rc = c.ReadSettingsFromRule(tmp);
       if(rc)
-         m_Tests.Add(c);
+         m_Tests.push_back(c);
    }while(rc);
-   if(m_Tests.Count() == 0)
-      return FALSE; // could not find any test
+   if(m_Tests.size() == 0)
+      return false; // could not find any test
    cptr = tmp.c_str();
 
    MATCH_FAIL(_T("){"));
@@ -727,15 +725,15 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
    bool needsArgument = FilterActionNeedsArg(m_Action);
    if(needsArgument)
    {
-      if(*cptr != '"') return FALSE;
+      if(*cptr != '"') return false;
       tmp = cptr;
       m_ActionArgument = strutil_readString(tmp, &rc);
       if(! rc)
-         return FALSE;
+         return false;
    }
    else
       m_ActionArgument = wxEmptyString;
-   return TRUE; // we    made it
+   return true; // we    made it
 }
 
 bool
@@ -750,14 +748,14 @@ MFDialogSettingsImpl::ReadSettings(const String & istr)
       MFDialogComponent c;
       rc = c.ReadSettings(&str);
       if(rc)
-         m_Tests.Add(c);
+         m_Tests.push_back(c);
    }
-   if(m_Tests.Count() == 0)
-      return FALSE;
+   if(m_Tests.size() == 0)
+      return false;
 
    // now read the action settings:
    long a = strutil_readNumber(str, &rc);
-   if(! rc) return FALSE;
+   if(! rc) return false;
    m_Action = (MFDialogAction) a;
    m_ActionArgument = strutil_readString(str, &rc);
    return rc;
@@ -767,8 +765,8 @@ String
 MFDialogSettingsImpl::WriteSettings(void) const
 {
    String str;
-   str << m_Tests.Count() << ' ';
-   for(size_t i = 0; i < m_Tests.Count(); i++)
+   str << m_Tests.size() << ' ';
+   for(size_t i = 0; i < m_Tests.size(); i++)
       str << m_Tests[i].WriteSettings() << ' ';
    str << WriteActionSettings();
    return str;
@@ -785,10 +783,10 @@ MFDialogSettingsImpl::WriteActionSettings(void) const
 String
 MFDialogSettingsImpl::WriteRule(void) const
 {
-   ASSERT(m_Tests.Count() > 0);
+   ASSERT(m_Tests.size() > 0);
    String program = _T("if(");
 
-   for(size_t i = 0; i < m_Tests.Count(); i++)
+   for(size_t i = 0; i < m_Tests.size(); i++)
       program << m_Tests[i].WriteTest();
 
    program << ')'
@@ -811,7 +809,7 @@ MFDialogSettings *MFDialogSettings::Create()
 class MFilterFromProfile : public MFilter
 {
 public:
-   virtual MFilterDesc GetDesc(void) const
+   MFilterDesc GetDesc(void) const override
    {
       MFilterDesc fd;
       fd.SetName(m_Name);
@@ -829,7 +827,7 @@ public:
       return fd;
    }
 
-   virtual void Set(const MFilterDesc& fd)
+   void Set(const MFilterDesc& fd) override
    {
       m_Name = fd.GetName();
       SafeDecRef(m_Settings);
@@ -840,14 +838,14 @@ public:
       }
       else
       {
-         m_Settings = NULL;
+         m_Settings = nullptr;
          m_Rule = fd.GetProgram();
       }
 
       DoWrite();
    }
 
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       m_Profile->IncRef();
       return m_Profile;
@@ -863,7 +861,7 @@ protected:
       {
          m_Profile = p;
          m_Name = p->readEntry(MP_FILTER_NAME, "");
-         m_Settings = NULL;
+         m_Settings = nullptr;
 
          // use the filter program if we have it
          m_Rule = p->readEntry(MP_FILTER_RULE, "");
@@ -930,7 +928,7 @@ private:
             {
                // oops, failed...
                m_Settings->DecRef();
-               m_Settings = NULL;
+               m_Settings = nullptr;
             }
             else
                m_Rule = m_Settings->WriteRule();
@@ -942,7 +940,7 @@ private:
             if(!rc)
             {
                m_Settings->DecRef();
-               m_Settings = NULL;
+               m_Settings = nullptr;
             }
          }
       }
@@ -1111,7 +1109,7 @@ InvalidateFilter(const MFilter * /* filter */)
 extern FilterRule *
 GetFilterForFolder(const MFolder *folder)
 {
-   CHECK( folder, NULL, _T("GetFilterForFolder: NULL parameter") );
+   CHECK( folder, nullptr, _T("GetFilterForFolder: NULL parameter") );
 
    // check if we already have it in the cache
    const String folderName = folder->GetFullName();
@@ -1131,7 +1129,7 @@ GetFilterForFolder(const MFolder *folder)
    size_t countFilters = filters.GetCount();
    for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
    {
-      MFilter_obj filter(filters[nFilter]);
+      MFilter_obj filter(MFilter::CreateFromProfile(filters[nFilter]));
       MFilterDesc fd = filter->GetDesc();
       filterString += fd.GetRule();
    }
@@ -1140,9 +1138,9 @@ GetFilterForFolder(const MFolder *folder)
    if ( filterString.empty() )
    {
       // no, nothing to do
-      gs_folderFilters[folderName] = NULL;
+      gs_folderFilters[folderName] = nullptr;
 
-      return NULL;
+      return nullptr;
    }
 
    MModule_Filters *filterModule = MModule_Filters::GetModule();
@@ -1152,7 +1150,7 @@ GetFilterForFolder(const MFolder *folder)
 
       // don't cache this failure: maybe we'll be able to load the module the
       // next time
-      return NULL;
+      return nullptr;
    }
 
    // compile the filter rule into the real filter

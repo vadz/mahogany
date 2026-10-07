@@ -182,7 +182,7 @@ class MigrateModule : public MModule
 public:
    MigrateModule(MInterface *minterface);
 
-   virtual int Entry(int arg, ...);
+   int Entry(int arg, ...) override;
 
 private:
    // add a menu entry for us to the main frame menu, return true if ok
@@ -208,8 +208,8 @@ public:
    IMAPServerPanel(wxWindow *parent, MigrateImapServer *imapData);
    virtual ~IMAPServerPanel();
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // has anything changed?
    bool IsDirty() const { return m_isDirty; }
@@ -253,8 +253,8 @@ class LocalPanel : public wxEnhancedPanel
 public:
    LocalPanel(wxWindow *panel, MigrateLocal *localData);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // returns the name of the mailbox format
    static const wxChar *GetFormatName(FileMailboxFormat format);
@@ -316,12 +316,12 @@ public:
    // determine ourselves whether there is a prev/next page as we don't want to
    // create the pages just for this (this can usually be postponed until
    // later or even not done at all in some cases)
-   virtual bool HasNextPage(wxWizardPage *page);
-   virtual bool HasPrevPage(wxWizardPage *page);
+   bool HasNextPage(wxWizardPage *page) override;
+   bool HasPrevPage(wxWizardPage *page) override;
 
    // implement ListEventReceiver methods
-   virtual void OnListFolder(const String& path, wxChar delim, long flags);
-   virtual void OnNoMoreFolders();
+   void OnListFolder(const String& path, wxChar delim, long flags) override;
+   void OnNoMoreFolders() override;
 
 private:
    // return, creating if necessary, the given page
@@ -363,9 +363,9 @@ public:
       { m_wizard->EnableButtons(buttons, enable); }
 
    // let the wizard decide the order in which the pages are shown
-   virtual wxWizardPage *GetPrev() const
+   wxWizardPage *GetPrev() const override
       { return GetWizard()->GetPrevPage(GetId()); }
-   virtual wxWizardPage *GetNext() const
+   wxWizardPage *GetNext() const override
       { return GetWizard()->GetNextPage(GetId()); }
 
 private:
@@ -403,8 +403,8 @@ class MigrateWizardSourcePage : public MigrateWizardPage
 public:
    MigrateWizardSourcePage(MigrateWizard *parent);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    IMAPServerPanel *m_panel;
@@ -477,8 +477,8 @@ class MigrateWizardDstPage : public MigrateWizardPage
 public:
    MigrateWizardDstPage(MigrateWizard *parent);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    void OnRadioButton(wxCommandEvent& event);
@@ -635,7 +635,7 @@ MigrateModule::Init(int verMajor, int verMinor, int verRelease,
    {
       if( errorCode )
          *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
-      return NULL;
+      return nullptr;
    }
 
    return new MigrateModule(minterface);
@@ -697,7 +697,7 @@ bool
 MigrateModule::DoMigrate()
 {
    MAppBase *mapp = m_MInterface->GetMApplication();
-   wxMFrame *mframe = mapp ? mapp->TopLevelFrame() : NULL;
+   wxMFrame *mframe = mapp ? mapp->TopLevelFrame() : nullptr;
 
    MigrateWizard *wizard = new MigrateWizard(mframe);
 
@@ -724,7 +724,7 @@ IMAPServerPanel::IMAPServerPanel(wxWindow *parent, MigrateImapServer *imapData)
                : wxEnhancedPanel(parent)
 {
    m_imapData = imapData;
-   m_folder = NULL;
+   m_folder = nullptr;
    m_isDirty = false;
 
    // the controls data
@@ -755,7 +755,7 @@ IMAPServerPanel::IMAPServerPanel(wxWindow *parent, MigrateImapServer *imapData)
    const long widthMax = GetMaxLabelWidth(labels, this);
 
    // create the controls: server and the root folder to use on it
-   m_textServer = CreateFolderEntry(labels[Label_Server], widthMax, NULL,
+   m_textServer = CreateFolderEntry(labels[Label_Server], widthMax, nullptr,
                                     &m_btnFolder);
    m_textRoot = CreateTextWithLabel(labels[Label_Root], widthMax, m_textServer);
 
@@ -890,7 +890,7 @@ void IMAPServerPanel::OnText(wxCommandEvent& event)
             // it was already changed by the browse button
             m_textServer->SetValue(wxEmptyString);
 
-            m_folder = NULL;
+            m_folder = nullptr;
 
             return;
          }
@@ -953,7 +953,7 @@ LocalPanel::LocalPanel(wxWindow *panel, MigrateLocal *localData)
 
    const long widthMax = GetMaxLabelWidth(labels, this);
 
-   m_textDir = CreateDirEntry(labels[Label_Dir], widthMax, NULL);
+   m_textDir = CreateDirEntry(labels[Label_Dir], widthMax, nullptr);
 
    String formats = labels[Label_Format];
    for ( int fmt = 0; fmt < FileMbox_Max + 1 /* for MH */; fmt++ )
@@ -1372,7 +1372,7 @@ MigrateWizardProgressPage::OpenSource(const MigrateImapServer& imapData,
                                       const String& name)
 {
    MFolder_obj folderSrc(MFolder::CreateTemp(wxEmptyString, MF_IMAP));
-   CHECK( folderSrc, NULL, _T("MFolder::CreateTemp() failed?") );
+   CHECK( folderSrc, nullptr, _T("MFolder::CreateTemp() failed?") );
 
    folderSrc->SetServer(imapData.server);
 
@@ -1470,7 +1470,7 @@ MigrateWizardProgressPage::GetDstFolder(const String& name, int flags)
    // which kind of folder are we going to create?
    MFolderType folderType = GetDstType();
    MFolder *folderDst = MFolder::CreateTemp(wxEmptyString, folderType);
-   CHECK( folderDst, NULL, _T("MFolder::CreateTemp() failed?") );
+   CHECK( folderDst, nullptr, _T("MFolder::CreateTemp() failed?") );
 
    if ( folderType == MF_FILE )
    {
@@ -1538,7 +1538,7 @@ bool
 MigrateWizardProgressPage::CopyMessages(MailFolder *mfSrc, MFolder *folderDst)
 {
    UIdArray uids;
-   uids.Add(UID_ILLEGAL);
+   uids.push_back(UID_ILLEGAL);
 
    HeaderInfoList_obj headers(mfSrc->GetHeaders());
 
@@ -1624,7 +1624,7 @@ bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
    }
 
    // now copy all the messages from src to dst
-   return CopyMessages(mf, folderDst);
+   return CopyMessages(mf.get(), folderDst);
 }
 
 bool MigrateWizardProgressPage::ProcessAllFolders()
@@ -1775,7 +1775,7 @@ MigrateWizard::MigrateWizard(wxWindow *parent)
 {
    for ( size_t n = 0; n < WXSIZEOF(m_pages); n++ )
    {
-      m_pages[n] = NULL;
+      m_pages[n] = nullptr;
    }
 }
 
@@ -1841,7 +1841,7 @@ wxWizardPage *MigrateWizard::GetPage(Page page)
 
       default:
          FAIL_MSG( _T("unknown page in MigrateWizard") );
-         return NULL;
+         return nullptr;
    }
 
    m_pages[page] = p;
@@ -1931,7 +1931,7 @@ wxWizardPage *MigrateWizard::GetNextPage(Page page)
       pageNext = nextPages[page];
    }
 
-   return pageNext == Page_Max ? NULL : GetPage(pageNext);
+   return pageNext == Page_Max ? nullptr : GetPage(pageNext);
 }
 
 wxWizardPage *MigrateWizard::GetPrevPage(Page page)
@@ -1947,7 +1947,7 @@ wxWizardPage *MigrateWizard::GetPrevPage(Page page)
    };
 
    Page pagePrev = prevPages[page];
-   return pagePrev == Page_Max ? NULL : GetPage(pagePrev);
+   return pagePrev == Page_Max ? nullptr : GetPage(pagePrev);
 }
 
 bool MigrateWizard::HasNextPage(wxWizardPage *page)

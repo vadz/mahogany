@@ -123,8 +123,8 @@ public:
    wxComposeHeadersDialog(Profile *profile, wxWindow *parent);
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // did we do anything?
    bool HasChanges() const { return m_hasChanges; }
@@ -170,12 +170,12 @@ public:
    virtual ~wxMsgViewHeadersDialog();
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    // validate the header names
-   virtual bool OnItemAdd(const wxString& item);
+   bool OnItemAdd(const wxString& item) override;
 
 private:
    Profile *m_profile;
@@ -203,8 +203,8 @@ public:
    }
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // accessors
    const wxString& GetHeaderName() const { return m_headerName; }
@@ -244,8 +244,8 @@ public:
    virtual ~wxCustomHeadersDialog();
 
    // transfer data to/from window
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // event handlers
    void OnUpdateUI(wxUpdateUIEvent& event);
@@ -262,11 +262,11 @@ private:
                                       wxLIST_STATE_SELECTED);
 
       if ( s == -1 )
-         return FALSE;
+         return false;
 
       *sel = (size_t)s;
 
-      return TRUE;
+      return true;
    }
 
    // finds header by name in the listctrl, returns wxNOT_FOUND if not found
@@ -408,7 +408,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    msg2->SetConstraints(c);
 
    // create a checkbox and a text field for each header
-   wxControl *last = NULL;
+   wxControl *last = nullptr;
    for ( size_t header = 0; header < Header_Max; header++ )
    {
       wxStaticText *label = new wxStaticText(this, -1, wxGetTranslation(ms_headerNames[header]));
@@ -470,7 +470,7 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
       m_textvalues[header]->DiscardEdits();
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxComposeHeadersDialog::TransferDataFromWindow()
@@ -483,13 +483,13 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
       {
          def = m_textvalues[header]->GetValue();
 
-         m_hasChanges = TRUE;
+         m_hasChanges = true;
 
          m_profile->writeEntry(ms_profileNamesDefault[header], def);
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -577,7 +577,7 @@ bool wxMsgViewHeadersDialog::TransferDataToWindow()
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxMsgViewHeadersDialog::TransferDataFromWindow()
@@ -602,7 +602,7 @@ bool wxMsgViewHeadersDialog::TransferDataFromWindow()
    m_hasChanges = shownHeaders != READ_CONFIG(m_profile, MP_MSGVIEW_HEADERS);
    if ( m_hasChanges )
    {
-      m_hasChanges = TRUE;
+      m_hasChanges = true;
 
       m_profile->writeEntry(MP_MSGVIEW_HEADERS, shownHeaders);
    }
@@ -614,7 +614,7 @@ bool wxMsgViewHeadersDialog::TransferDataFromWindow()
       m_profile->writeEntry(MP_MSGVIEW_ALL_HEADERS, allHeaders);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -651,8 +651,8 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
             labelValue = _("&Value: ");
 
    int widthName, widthValue;
-   GetTextExtent(labelName, &widthName, NULL);
-   GetTextExtent(labelValue, &widthValue, NULL);
+   GetTextExtent(labelName, &widthName, nullptr);
+   GetTextExtent(labelValue, &widthValue, nullptr);
 
    int widthLabel = wxMax(widthName, widthValue);
 
@@ -730,7 +730,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
 
       m_headerType = CustomHeader_Both;
 
-      m_checkboxRemember = (wxCheckBox *)NULL;
+      m_checkboxRemember = (wxCheckBox *)nullptr;
 
       extraHeight = 3;
    }
@@ -750,7 +750,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
 
       m_checkboxRemember->SetConstraints(c);
 
-      m_radioboxType = (wxRadioBox *)NULL;
+      m_radioboxType = (wxRadioBox *)nullptr;
 
       extraHeight = 0;
    }
@@ -777,7 +777,7 @@ bool wxCustomHeaderDialog::TransferDataToWindow()
       m_radioboxType->SetSelection(m_headerType);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxCustomHeaderDialog::TransferDataFromWindow()
@@ -810,7 +810,7 @@ bool wxCustomHeaderDialog::TransferDataFromWindow()
    if ( m_radioboxType )
       m_headerType = (CustomHeaderType)m_radioboxType->GetSelection();
 
-   return TRUE;
+   return true;
 }
 
 void wxCustomHeaderDialog::OnUpdateUI(wxUpdateUIEvent& event)
@@ -895,7 +895,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    };
 
    wxIconManager *iconmanager = mApplication->GetIconManager();
-   wxImageList *imagelist = new wxImageList(16, 16, FALSE, CustomHeader_Max);
+   wxImageList *imagelist = new wxImageList(16, 16, false, CustomHeader_Max);
    for ( size_t nImage = 0; nImage < CustomHeader_Max; nImage++ )
    {
       imagelist->Add(iconmanager->GetBitmap(iconNames[nImage]));
@@ -1014,7 +1014,7 @@ bool wxCustomHeadersDialog::TransferDataToWindow()
                 (CustomHeaderType)headerTypes[nHeader]);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxCustomHeadersDialog::TransferDataFromWindow()
@@ -1104,7 +1104,7 @@ bool wxCustomHeadersDialog::TransferDataFromWindow()
       m_profile->DeleteEntry(MP_ORGANIZATION);
    }
 
-   return TRUE;
+   return true;
 }
 
 void wxCustomHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
@@ -1117,7 +1117,7 @@ void wxCustomHeadersDialog::OnEdit(wxCommandEvent& WXUNUSED(event))
    size_t sel = 0; // inititialize it to fix compiler warnings
    CHECK_RET( GetSelection(&sel), _T("button should be disabled") );
 
-   wxCustomHeaderDialog dlg(m_profile, GetParent(), TRUE);
+   wxCustomHeaderDialog dlg(m_profile, GetParent(), true);
 
    String headerName, headerValue;
    GetHeader(sel, &headerName, &headerValue);
@@ -1135,7 +1135,7 @@ void wxCustomHeadersDialog::OnEdit(wxCommandEvent& WXUNUSED(event))
 
 void wxCustomHeadersDialog::OnAdd(wxCommandEvent& WXUNUSED(event))
 {
-   wxCustomHeaderDialog dlg(m_profile, GetParent(), TRUE);
+   wxCustomHeaderDialog dlg(m_profile, GetParent(), true);
 
    if ( dlg.ShowModal() == wxID_OK )
    {
@@ -1206,7 +1206,7 @@ bool ConfigureCustomHeader(Profile *profile,
       type = dlg.GetHeaderType();
    }
 
-   bool remember = letUserChooseType ? TRUE : dlg.RememberHeader();
+   bool remember = letUserChooseType ? true : dlg.RememberHeader();
 
    if ( storedInProfile )
       *storedInProfile = remember;

@@ -33,7 +33,7 @@ static void* register_alloc (size_t size) {
     
     for (;;) {
         for (int i = first_free_spot; i < leaks_count; i++)
-            if (leaks[i].addr == NULL) {
+            if (leaks[i].addr == nullptr) {
                 leaks[i].addr = p;
                 leaks[i].size = size;
                 leaks[i].ret = __builtin_return_address(1);
@@ -56,13 +56,13 @@ static void* register_alloc (size_t size) {
 }
 
 static void register_free (void *p) {
-    if (p == NULL)
+    if (p == nullptr)
         return;
     
     new_count--;
     for (int i = 0; i < leaks_count; i++)
         if (leaks[i].addr == p) {
-            leaks[i].addr = NULL;
+            leaks[i].addr = nullptr;
             new_size -= leaks[i].size;
             if (i < first_free_spot)
                 first_free_spot = i;
@@ -101,7 +101,7 @@ void write_leaks() {
         fprintf(stderr, "LeakTracer: Could not open %s: %m\n", filename);
     else {
         for (int i = 0; i <  leaks_count; i++)
-            if (leaks[i].addr != NULL) {
+            if (leaks[i].addr != nullptr) {
                 // This ought to be 64-bit safe?
                 fprintf(fp, "%8p %8p %9ld\n", leaks[i].addr, leaks[i].ret, (long) leaks[i].size);
             }

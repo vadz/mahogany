@@ -29,8 +29,9 @@
    #include "MApplication.h"
 
    #include <wx/textdlg.h>
-   #include <wx/hashmap.h>
 #endif //USE_PCH
+
+#include <unordered_map>
 
 #include "modules/MCrypt.h"
 #include "gui/wxMDialogs.h"
@@ -83,7 +84,7 @@ String ReadNumber(const wxChar *& pc)
 //                    again (and again...)
 // ----------------------------------------------------------------------------
 
-WX_DECLARE_STRING_HASH_MAP(String, UserPassMap);
+using UserPassMap = std::unordered_map<wxString, String>;
 
 class PassphraseManager
 {
@@ -125,32 +126,32 @@ class PGPEngine : public MCryptoEngine
 {
 public:
    // implement the base class pure virtuals
-   virtual Status Decrypt(const String& messageIn,
+   Status Decrypt(const String& messageIn,
+                  String& messageOut,
+                  MCryptoEngineOutputLog *log) override;
+
+   Status Encrypt(const String& recipient,
+                  const String& messageIn,
+                  String &messageOut,
+                  const String& user,
+                  MCryptoEngineOutputLog *log) override;
+
+   Status Sign(const String& user,
+               const String& messageIn,
+               String& messageOut,
+               MCryptoEngineOutputLog *log) override;
+
+   Status VerifySignature(const String& messageIn,
                           String& messageOut,
-                          MCryptoEngineOutputLog *log);
+                          MCryptoEngineOutputLog *log) override;
 
-   virtual Status Encrypt(const String& recipient,
-                          const String& messageIn,
-                          String &messageOut,
-                          const String& user,
-                          MCryptoEngineOutputLog *log);
+   Status VerifyDetachedSignature(const String& message,
+                                  const String& signature,
+                                  MCryptoEngineOutputLog *log) override;
 
-   virtual Status Sign(const String& user,
-                       const String& messageIn,
-                       String& messageOut,
-                       MCryptoEngineOutputLog *log);
-
-   virtual Status VerifySignature(const String& messageIn,
-                                  String& messageOut,
-                                  MCryptoEngineOutputLog *log);
-
-   virtual Status VerifyDetachedSignature(const String& message,
-                                          const String& signature,
-                                          MCryptoEngineOutputLog *log);
-
-   virtual Status GetPublicKey(const String& pk,
-                               const String& server,
-                               MCryptoEngineOutputLog *log) const;
+   Status GetPublicKey(const String& pk,
+                       const String& server,
+                       MCryptoEngineOutputLog *log) const override;
 
 protected:
    /**
@@ -199,7 +200,7 @@ class PGPProcess : public wxProcess
 public:
    PGPProcess() { m_done = false; Redirect(); }
 
-   virtual void OnTerminate(int /* pid */, int /* status */)
+   void OnTerminate(int /* pid */, int /* status */) override
    {
       m_done = true;
    }
@@ -270,7 +271,7 @@ PGPEngine::ExecCommand(const String& options,
                "\n"
                "If you don't, the current operation will be cancelled.");
 
-      wxWindow * const parent = log ? log->GetParent() : NULL;
+      wxWindow * const parent = log ? log->GetParent() : nullptr;
       if ( !MDialog_YesNoDialog
             (
                msg,
@@ -376,7 +377,7 @@ PGPEngine::ExecCommand(const String& options,
          {
             // we don't have anything more to write, so close the stream
             process.CloseOutput();
-            in = NULL;
+            in = nullptr;
          }
          else
          {
@@ -992,7 +993,7 @@ PassphraseManager::Get(const String& user, String& passphrase)
    //
    // note that we can't directly use wxGetPasswordFromUser() because it
    // doesn't distinguish between cancelling and enteting an empty string
-   wxTextEntryDialog dialog(NULL,
+   wxTextEntryDialog dialog(nullptr,
                             wxString::Format
                             (
                               _("Passphrase is required to unlock the "
@@ -1032,7 +1033,7 @@ PassphraseManager::Unget(const String& user, String& passphrase)
                _("Would you like to keep the passphrase for the "
                  "user \"%s\" in memory?"), user
             ),
-            NULL,
+            nullptr,
             _("Mahogany: Remember the passphrase?"),
             M_DLG_NO_DEFAULT,
             M_MSGBOX_REMEMBER_PGP_PASSPHRASE

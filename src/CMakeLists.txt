@@ -30,7 +30,6 @@ target_sources(mahogany PRIVATE
   classes/QuotedText.cpp
   classes/Sequence.cpp
   classes/XFace.cpp
-  classes/kbList.cpp
 
   # GUI components
   gui/AddressExpander.cpp

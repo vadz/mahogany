@@ -65,7 +65,7 @@ static AdbImporter *FindImporter(const String& filename,
 static bool DoAdbImport(const String& filename,
                         AdbEntryGroup *group,
                         AdbImporter *importer,
-                        String *errMsg = NULL);
+                        String *errMsg = nullptr);
 
 // ============================================================================
 // implementation
@@ -101,7 +101,7 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
          wxLogError(_("Import error: cannot create entry '%s/%s'."),
                     path, entryName);
 
-         return FALSE;
+         return false;
       }
 
       if ( !importer->ImportEntry(path, nEntry, entry) )
@@ -109,7 +109,7 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
          // importer logged the error already
          entry->DecRef();
 
-         return FALSE;
+         return false;
       }
 
       entry->DecRef();
@@ -127,20 +127,20 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
          wxLogError(_("Import error: cannot create group '%s/%s'."),
                     path, groupName);
 
-         return FALSE;
+         return false;
       }
 
       String pathSubgroup;
       pathSubgroup << path << '/' << groupName;
       if ( !AdbImportGroup(importer, subgroup, pathSubgroup) )
       {
-         return FALSE;
+         return false;
       }
 
       subgroup->DecRef();
    }
 
-   return TRUE;
+   return true;
 }
 
 AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
@@ -161,7 +161,7 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
          }
 
          importer->DecRef();
-         importer = NULL;
+         importer = nullptr;
 
          info = info->next;
       }
@@ -180,14 +180,14 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
                       "do you still want to try to import it?"),
                     filename, importer->GetFormatDesc());
 
-         if ( !MDialog_YesNoDialog(msg, NULL, _("Address book import"),
+         if ( !MDialog_YesNoDialog(msg, nullptr, _("Address book import"),
                                    M_DLG_NO_DEFAULT,
                                    M_MSGBOX_CONFIRM_ADB_IMPORTER) )
          {
             // cancelled by user
             mApplication->SetLastError(M_ERROR_CANCEL);
 
-            return NULL;
+            return nullptr;
          }
       }
 
@@ -236,9 +236,9 @@ bool AdbImport(const String& filename,
 
    importer = FindImporter(filename, importer);
 
-   AdbBook *adbBook = NULL;
+   AdbBook *adbBook = nullptr;
 
-   bool ok = TRUE;
+   bool ok = true;
    wxString errMsg, provname;
 
    // can't conntinue without an importer
@@ -285,7 +285,7 @@ exit:
    if ( !!errMsg )
    {
       // if we have an error message, something went wrong
-      ok = FALSE;
+      ok = false;
    }
 
    if ( ok )

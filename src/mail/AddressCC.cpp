@@ -59,7 +59,7 @@ static inline String AdrField2String(const char *s)
 // return string containing all addresses or just the first one from this list
 static String Adr2String(ADDRESS *adr,
                          Adr2StringWhich which = Adr2String_All,
-                         bool *error = NULL);
+                         bool *error = nullptr);
 
 // return the string containing just the email part of the address (this always
 // works with one address only, not the entire list)
@@ -78,7 +78,7 @@ AddressCC::AddressCC(ADDRESS *adr)
    ASSERT_MSG( adr && !adr->error, _T("invalid ADDRESS in AddressCC ctor") );
 
    m_adr = adr;
-   m_addrNext = NULL;
+   m_addrNext = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -168,7 +168,7 @@ bool AddressCC::IsSameAs(const Address& addr) const
 
 AddressListCC::AddressListCC(mail_address *adr)
 {
-   m_addrCC = NULL;
+   m_addrCC = nullptr;
    AddressCC *addrCur = m_addrCC;
 
    while ( adr )
@@ -234,7 +234,7 @@ AddressList *AddressListCC::Create(const mail_address *adr)
    {
       // it's not an error, this may happen if there are no valid addresses in
       // the message
-      adrCopy = NULL;
+      adrCopy = nullptr;
    }
 
    return new AddressListCC(adrCopy);
@@ -246,7 +246,7 @@ AddressList::Create(const String& address,
                     const String& defhost,
                     wxFontEncoding enc)
 {
-   ADDRESS *adr = NULL;
+   ADDRESS *adr = nullptr;
 
    if ( !address.empty() )
    {
@@ -275,7 +275,7 @@ Address *AddressListCC::GetFirst() const
 
 Address *AddressListCC::GetNext(const Address *addr) const
 {
-   CHECK( addr, NULL, _T("NULL address in AddressList::GetNext") );
+   CHECK( addr, nullptr, _T("NULL address in AddressList::GetNext") );
 
    return ((AddressCC *)addr)->m_addrNext;
 }
@@ -565,7 +565,7 @@ ParseAddressList(const String& address,
    else
       defhostBuf = defhost.ToAscii();
 
-   ADDRESS *adr = NULL;
+   ADDRESS *adr = nullptr;
    rfc822_parse_adrlist(&adr, addressBuf.data(), defhostBuf.data());
 
    // encode the personal part of the header as it can contain non-ASCII

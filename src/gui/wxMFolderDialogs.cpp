@@ -162,8 +162,8 @@ public:
    MFolder *GetFolder() const { SafeIncRef(m_newFolder); return m_newFolder; }
 
    // override control creation functions
-   virtual wxControl *CreateControlsAbove(wxPanel *panel);
-   virtual void CreateNotebook(wxPanel *panel);
+   wxControl *CreateControlsAbove(wxPanel *panel) override;
+   void CreateNotebook(wxPanel *panel) override;
 
    // control ids
    enum
@@ -179,7 +179,7 @@ public:
 
    // don't let the base class to enable the buttons if we can't allow it
    // because some entries are missing/incorrect
-   virtual void EnableButtons(bool enable)
+   void EnableButtons(bool enable) override
    {
       if ( !enable || ShouldEnableOk() )
          wxOptionsEditDialog::EnableButtons(enable);
@@ -187,7 +187,7 @@ public:
    }
 
    // base class pure virtual: return the profile we're working with (IncRef'd)
-   virtual Profile *GetProfile() const
+   Profile *GetProfile() const override
    {
       if ( m_newFolder && !m_profile )
       {
@@ -237,8 +237,8 @@ public:
    wxFolderPropertiesDialog(wxWindow *parent,
                             MFolder *folder);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 private:
    DECLARE_ABSTRACT_CLASS(wxFolderPropertiesDialog)
@@ -252,8 +252,8 @@ public:
    wxFolderCreateDialog(wxWindow *parent,
                         MFolder *parentFolder);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // called by the page to create the new folder
    MFolder *DoCreateFolder(MFolderType folderType);
@@ -287,7 +287,7 @@ class wxFolderPropertiesPage : public MBookCtrlPageBase
 public:
    wxFolderPropertiesPage(MBookCtrl *notebook,
                           Profile *profile,
-                          wxFolderCreateDialog *dlg = NULL);
+                          wxFolderCreateDialog *dlg = nullptr);
 
    ~wxFolderPropertiesPage() { m_profile->DecRef(); }
 
@@ -298,8 +298,8 @@ public:
    void SetFolderPath(const String& profilePath)
       { m_folderPath = profilePath; }
 
-   virtual bool TransferDataToWindow(void);
-   virtual bool TransferDataFromWindow(void);
+   bool TransferDataToWindow(void) override;
+   bool TransferDataFromWindow(void) override;
 
    /// update controls after the current folder type changed
    void DoUpdateUI();
@@ -334,7 +334,7 @@ protected:
    // or just showing the properties for it. Ultimately, it shouldn't be
    // necessary, but for now we use it to adjust our behaviour depending on
    // what we're doing
-   bool IsCreating() const { return m_dlgCreate != NULL; }
+   bool IsCreating() const { return m_dlgCreate != nullptr; }
 
    // the radiobox indices
    enum RadioIndex
@@ -422,13 +422,13 @@ protected:
    // inverse function of the above one: get the radiobox and choice indices
    // (if any) from the folder type
    RadioIndex GetRadioIndexFromFolderType(MFolderType type,
-                                          int *choiceIndex = NULL) const;
+                                          int *choiceIndex = nullptr) const;
 
    // enable the controls which make sense for a NNTP/News folder
-   void EnableControlsForNewsGroup(bool isNNTP = TRUE);
+   void EnableControlsForNewsGroup(bool isNNTP = true);
 
    // enable the controls which make sense for an POP or IMAP folder
-   void EnableControlsForImapOrPop(bool isIMAP = TRUE);
+   void EnableControlsForImapOrPop(bool isIMAP = true);
 
    // enable the controls which make sense for MBOX or MH folder
    void EnableControlsForFileFolder(MFolderType folderType);
@@ -540,7 +540,7 @@ public:
    static const char *s_aszImages[];
    static const char *s_aszImagesAdvanced[];
 
-   wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = NULL);
+   wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = nullptr);
 
 private:
    DECLARE_NO_COPY_CLASS(wxFolderCreateNotebook)
@@ -560,7 +560,7 @@ public:
       : wxFolderIconBrowseButton(parent, tooltip) { m_dlg = dlg; }
 
 private:
-   virtual void OnIconChange() { m_dlg->SetDirty(); }
+   void OnIconChange() override { m_dlg->SetDirty(); }
 
    wxFolderBaseDialog *m_dlg;
 
@@ -604,11 +604,11 @@ wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
                                      title,
                                      _T("FolderProperties"))
 {
-   m_notebook = NULL;
-   m_parentFolder = NULL;
-   m_newFolder = NULL;
+   m_notebook = nullptr;
+   m_parentFolder = nullptr;
+   m_newFolder = nullptr;
    m_mayEnableOk = false;
-   m_profile = NULL;
+   m_profile = nullptr;
 }
 
 wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
@@ -786,7 +786,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolderType folderType)
       // tell the other pages that we now have a folder (and hence a profile)
       String folderName = m_newFolder->GetFullName();
       m_profile = Profile::CreateProfile(folderName);
-      CHECK( m_profile, NULL, "failed to create profile for new folder" );
+      CHECK( m_profile, nullptr, "failed to create profile for new folder" );
 
       ApplyConfigSourceSelectedByUser(*m_profile);
       SetPagesProfile(m_profile);
@@ -858,21 +858,21 @@ bool wxFolderCreateDialog::TransferDataToWindow()
    }
 
    if ( !wxOptionsEditDialog::TransferDataToWindow() )
-      return FALSE;
+      return false;
 
    // enable changing the parent folder -- this can't be done for an
    // already existing folder so the base class ctor disables it, but we are
    // creating a new folder and so can choose its parent to be whatever we want
-   m_btnParentFolder->Enable(TRUE);
+   m_btnParentFolder->Enable(true);
 
    m_folderName->SetFocus();
 
-   return TRUE;
+   return true;
 }
 
 bool wxFolderCreateDialog::TransferDataFromWindow()
 {
-   bool ok = TRUE;
+   bool ok = true;
 
    wxString folderName = m_folderName->GetValue();
 
@@ -900,7 +900,7 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
                    "not supported in the mailbox folder names, please "
                    "don't use them."), ch);
 
-      ok = FALSE;
+      ok = false;
    }
 
    SafeDecRef(m_parentFolder);
@@ -910,7 +910,7 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
       wxLogError(_("Folder '%s' specified as the parent for the new folder "
                    "doesn't exist. Please choose an existing folder as "
                    "parent or leave it blank."), folderName);
-      ok = FALSE;
+      ok = false;
    }
 
    if ( ok )
@@ -944,7 +944,7 @@ wxFolderPropertiesDialog::wxFolderPropertiesDialog(wxWindow *frame,
 
 bool wxFolderPropertiesDialog::TransferDataToWindow()
 {
-   CHECK( m_newFolder, FALSE, _T("no folder in folder properties dialog") );
+   CHECK( m_newFolder, false, _T("no folder in folder properties dialog") );
 
    wxString folderName = m_newFolder->GetFullName();
    Profile_obj profile(GetProfile());
@@ -960,7 +960,7 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
 
 bool wxFolderPropertiesDialog::TransferDataFromWindow()
 {
-   CHECK( m_newFolder, FALSE, _T("no folder in folder properties dialog") );
+   CHECK( m_newFolder, false, _T("no folder in folder properties dialog") );
 
    return wxFolderBaseDialog::TransferDataFromWindow();
 }
@@ -976,7 +976,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(MBookCtrl *notebook,
 {
    // add us to the notebook
    int image = FolderCreatePage_Folder;
-   notebook->AddPage(this, _("Access"), FALSE /* don't select */, image);
+   notebook->AddPage(this, _("Access"), false /* don't select */, image);
 
    // are we in "view properties" or "create" mode?
    m_dlgCreate = dlg;
@@ -1087,8 +1087,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(MBookCtrl *notebook,
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
    m_path = CreateFileOrDirEntry(labels[Label_Path], widthMax,
                                  m_comment, &m_browsePath,
-                                 TRUE,    // open
-                                 FALSE);  // allow non existing files
+                                 true,    // open
+                                 false);  // allow non existing files
 
    wxControl *lastCtrl = m_path;
 
@@ -1298,7 +1298,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
       wxString folderName;
 
       // the control whose value we will automatically set
-      wxTextCtrl *textToSet = NULL;
+      wxTextCtrl *textToSet = nullptr;
 
       MFolderType folderType = GetCurrentFolderType();
       switch ( folderType )
@@ -1408,23 +1408,23 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
 void
 wxFolderPropertiesPage::EnableControlsForNewsGroup(bool isNNTP)
 {
-   EnableTextWithLabel(m_mailboxname, FALSE);
-   EnableTextWithLabel(m_server, TRUE);
-   EnableTextWithLabel(m_newsgroup, TRUE);
-   EnableTextWithButton(m_path, FALSE);
+   EnableTextWithLabel(m_mailboxname, false);
+   EnableTextWithLabel(m_server, true);
+   EnableTextWithLabel(m_newsgroup, true);
+   EnableTextWithButton(m_path, false);
 
 #ifdef USE_LOCAL_CHECKBOX
    m_isLocal->Enable(isNNTP);
 #endif // USE_LOCAL_CHECKBOX
 
    // "group" here means a news hierarchy
-   m_isGroup->Enable(TRUE);
+   m_isGroup->Enable(true);
 
    // the news hierarchies can't be opened, but sometimes a newsgroup is a
    // hierarchy too (news.groups is a group, but there is also
    // news.groups.questions, so it is a hierarchy as well), so we need to
    // allow the user to set this flag as well
-   m_canBeOpened->Enable(TRUE);
+   m_canBeOpened->Enable(true);
 }
 
 // enable the controls which make sense for a POP or IMAP folder
@@ -1432,12 +1432,12 @@ void
 wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
 {
    EnableTextWithLabel(m_mailboxname, isIMAP);
-   EnableTextWithLabel(m_server, TRUE);
-   EnableTextWithLabel(m_newsgroup, FALSE);
-   EnableTextWithButton(m_path, FALSE);
+   EnableTextWithLabel(m_server, true);
+   EnableTextWithLabel(m_newsgroup, false);
+   EnableTextWithButton(m_path, false);
 
 #ifdef USE_LOCAL_CHECKBOX
-   m_isLocal->Enable(TRUE);
+   m_isLocal->Enable(true);
 #endif // USE_LOCAL_CHECKBOX
 
    // this makes no sense for POP
@@ -1446,7 +1446,7 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
       if ( IsCreating() )
       {
          // we can't change this setting when creating an IMAP folder
-         m_isGroup->Enable(FALSE);
+         m_isGroup->Enable(false);
       }
       else
       {
@@ -1455,38 +1455,38 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
          m_isGroup->SetValue(m_originalIsGroup);
 
          // but allow the user to override it if we're mistaken
-         m_isGroup->Enable(TRUE);
+         m_isGroup->Enable(true);
       }
    }
    else // POP
    {
       // no folder hierarchies under POP
-      m_isGroup->SetValue(FALSE);
-      m_isGroup->Enable(FALSE);
+      m_isGroup->SetValue(false);
+      m_isGroup->Enable(false);
 
       // can't keep a POP3 folder always opened
-      m_keepOpen->Enable(TRUE);
+      m_keepOpen->Enable(true);
    }
 }
 
 void
 wxFolderPropertiesPage::EnableControlsForFileFolder(MFolderType /* type */)
 {
-   EnableTextWithLabel(m_mailboxname, FALSE);
-   EnableTextWithLabel(m_server, FALSE);
-   EnableTextWithLabel(m_newsgroup, FALSE);
+   EnableTextWithLabel(m_mailboxname, false);
+   EnableTextWithLabel(m_server, false);
+   EnableTextWithLabel(m_newsgroup, false);
 
    // the path can't be changed for an already existing folder
    EnableTextWithButton(m_path, IsCreating());
 
    // file folders are always local
 #ifdef USE_LOCAL_CHECKBOX
-   m_isLocal->SetValue(FALSE);
+   m_isLocal->SetValue(false);
    m_isLocal->Disable();
 #endif // USE_LOCAL_CHECKBOX
 
    // all file folders can be opened
-   m_canBeOpened->SetValue(TRUE);
+   m_canBeOpened->SetValue(true);
    m_canBeOpened->Disable();
 
    // the value is fixed (whatever it is) by the folder type
@@ -1599,7 +1599,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
       m_acceptUnsignedSSL->Disable();
 #endif // USE_SSL
 
-   m_keepOpen->Enable(TRUE);
+   m_keepOpen->Enable(true);
 
    m_isAnonymous->Enable(enableAnonymous);
    m_login->Enable(enableLogin);
@@ -1654,14 +1654,14 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
          // for a simple grouping folder, all fields make sense because
          // they will be inherited by the children and the children
          // folders may have any type
-         EnableTextWithLabel(m_mailboxname, TRUE);
-         EnableTextWithLabel(m_server, TRUE);
-         EnableTextWithLabel(m_newsgroup, TRUE);
-         EnableTextWithButton(m_path, TRUE);
-         m_isGroup->Enable(TRUE);
+         EnableTextWithLabel(m_mailboxname, true);
+         EnableTextWithLabel(m_server, true);
+         EnableTextWithLabel(m_newsgroup, true);
+         EnableTextWithButton(m_path, true);
+         m_isGroup->Enable(true);
 
          // a group can never be opened
-         m_canBeOpened->Enable(FALSE);
+         m_canBeOpened->Enable(false);
          break;
 
       default:
@@ -1673,7 +1673,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
    EnableControlWithLabel(m_folderSubtype,
                           IsCreating() && !m_folderSubtype->IsEmpty());
 
-   dlg->SetMayEnableOk(TRUE);
+   dlg->SetMayEnableOk(true);
 }
 
 void
@@ -2075,7 +2075,7 @@ wxFolderPropertiesPage::SetDefaultValues()
                m_browsePath->BrowseForFiles();
 
             // don't need to set anything
-            textToSet = NULL;
+            textToSet = nullptr;
             break;
          }
 
@@ -2107,7 +2107,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 
       default:
          // nothing special to do
-         textToSet = NULL;
+         textToSet = nullptr;
    }
 
    if ( textToSet )
@@ -2217,7 +2217,7 @@ wxFolderPropertiesPage::IsOk() const
 
       default:
          // nothing to check for the other types
-         return TRUE;
+         return true;
    }
 }
 
@@ -2291,7 +2291,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 
    SetDefaultValues();
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -2326,7 +2326,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
          wxLog::FlushActive();
 
-         return FALSE;
+         return false;
       }
    }
 
@@ -2375,7 +2375,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
             wxString what;    // what did the user forget to specify
 
             // the key to use for MDialog_YesNoDialog
-            const MPersMsgBox *msgbox = NULL; // suppress compiler warning
+            const MPersMsgBox *msgbox = nullptr; // suppress compiler warning
 
             if ( !loginName )
             {
@@ -2675,7 +2675,7 @@ const char *wxFolderCreateNotebook::s_aszImages[] =
 #ifdef USE_PYTHON
    "python",
 #endif // USE_PYTHON
-   NULL
+   nullptr
 };
 
 // create the control and add pages too
@@ -2732,7 +2732,7 @@ static MFolder *DoShowFolderDialog(wxFolderBaseDialog& dlg,
    }
    else
    {
-      return (MFolder *)NULL;
+      return (MFolder *)nullptr;
    }
 }
 
@@ -2809,7 +2809,7 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
    wxFolderPropertiesDialog dlg(parent, folder);
 
    MFolder *folderNew = DoShowFolderDialog(dlg, FolderCreatePage_Default);
-   if ( folderNew != NULL )
+   if ( folderNew != nullptr )
    {
       // what else can it return?
       ASSERT_MSG( folderNew == folder, _T("unexpected folder change") );
@@ -2818,10 +2818,10 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
       // folder, compensate for it here
       folderNew->DecRef();
 
-      return TRUE;
+      return true;
    }
 
    // dialog was cancelled
-   return FALSE;
+   return false;
 }
 

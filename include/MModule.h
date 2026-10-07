@@ -175,12 +175,12 @@ class MModuleCommon
 {
 public:
    /// ctor sets the ref count to 1 to make the object alive
-   MModuleCommon(MInterface *minterface = NULL)
+   MModuleCommon(MInterface *minterface = nullptr)
    {
       m_nRef = 1;
       m_MInterface = minterface;
 #ifndef USE_MODULES_STATIC
-      m_dll = NULL;
+      m_dll = nullptr;
 #endif // !USE_MODULES_STATIC
    }
 
@@ -198,7 +198,7 @@ public:
    virtual MInterface *GetMInterface() { return m_MInterface; }
 
    virtual void IncRef() { m_nRef++; }
-   virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+   virtual bool DecRef() { if ( --m_nRef ) return true; delete this; return false; }
 
 protected:
    /// Removes the module from the global list
@@ -217,8 +217,8 @@ private:
 };
 
 // for "compatibility" with MObjectRC
-inline void SafeIncRef(MModuleCommon *p) { if ( p != NULL ) p->IncRef(); }
-inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
+inline void SafeIncRef(MModuleCommon *p) { if ( p != nullptr ) p->IncRef(); }
+inline void SafeDecRef(MModuleCommon *p) { if ( p != nullptr ) p->DecRef(); }
 
 /**
    This is the interface for Mahogany extension modules.
@@ -229,7 +229,7 @@ inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
 class MModule : public MModuleCommon
 {
 public:
-   MModule(MInterface *minterface = NULL) : MModuleCommon(minterface) { }
+   MModule(MInterface *minterface = nullptr) : MModuleCommon(minterface) { }
 
    /** MModule interface, this needs to be implemented by the actual modules. */
    //@{
@@ -370,18 +370,18 @@ void MModule_AddStaticModule(const char *Name,
 /// this macro must be used inside the class declaration for any module class
 #define MMODULE_DEFINE() \
 public: \
-   virtual const char * GetName(void) const; \
-   virtual const char * GetInterface(void) const; \
-   virtual const char * GetDescription(void) const; \
-   virtual const char * GetVersion(void) const; \
-   virtual void GetMVersion(int *version_major, \
-                            int *version_minor, \
-                            int *version_release) const; \
+   const char * GetName(void) const override; \
+   const char * GetInterface(void) const override; \
+   const char * GetDescription(void) const override; \
+   const char * GetVersion(void) const override; \
+   void GetMVersion(int *version_major, \
+                    int *version_minor, \
+                    int *version_release) const override; \
    static  MModule *Init(int, int, int, MInterface *, int *); \
    static const ModuleProperty ms_properties[]
 
 /// this macro may be used for modules which don't do anything in their Entry()
-#define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
+#define DEFAULT_ENTRY_FUNC   int Entry(int /* arg */, ...) override { return 0; }
 
 /// these macros must be used in the .cpp file implementing the module class
 #define MMODULE_BEGIN_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
@@ -407,7 +407,7 @@ extern "C" \
             (version_minor < M_VERSION_MINOR)) ) \
       {\
          *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS; \
-         return NULL; \
+         return nullptr; \
       } \
       \
       MModule *module = ClassName::Init(version_major,  version_minor, \
@@ -430,7 +430,7 @@ const ModuleProperty ClassName::ms_properties[] = \
 #define MMODULE_PROP(name, value) { name, value },
 
 #define MMODULE_END_IMPLEMENT(ClassName) \
-   { NULL, NULL }, \
+   { nullptr, nullptr }, \
    }; \
 \
 MMODULE_DEFINE_GET_PROPERTIES(ClassName) \

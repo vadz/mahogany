@@ -13,16 +13,14 @@
 #ifndef  _MFCACHE_H_
 #define  _MFCACHE_H_
 
-#ifndef   USE_PCH
-#  include <wx/dynarray.h>        // for WX_DEFINE_ARRAY
-#endif // USE_PCH
-
 #include "CacheFile.h"           // base class
 
 #include "MEvent.h"
 #include "MFStatus.h"
 
-WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
+#include <vector>
+
+using MfStatusArray = std::vector<MailFolderStatus *>;
 
 // trace mask for logging MfStatusCache methods and other mailfolder
 // status-related activity
@@ -55,7 +53,7 @@ public:
 
    // query the status info: return true and fill the provided pointer with
    // info if we have it (and the pointer is not NULL), return false otherwise
-   bool GetStatus(const String& folderName, MailFolderStatus *status = NULL);
+   bool GetStatus(const String& folderName, MailFolderStatus *status = nullptr);
 
    // update the status info 
    void UpdateStatus(const String& folderName, const MailFolderStatus& status);
@@ -71,7 +69,7 @@ protected:
    virtual ~MfStatusCache();
 
    // implement MEventReceiver pure virtual to process folder rename events
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    // do we need to be saved at all?
    bool IsDirty() const { return m_isDirty; }
@@ -81,16 +79,16 @@ protected:
 
    // override some CacheFile methods
 
-   virtual bool Save();
+   bool Save() override;
 
    // implement CacheFile pure virtuals
 
-   virtual String GetFileName() const;
-   virtual String GetFileHeader() const;
-   virtual int GetFormatVersion() const;
+   String GetFileName() const override;
+   String GetFileHeader() const override;
+   int GetFormatVersion() const override;
 
-   virtual bool DoLoad(const wxTextFile& file, int version);
-   virtual bool DoSave(wxTempFile& file);
+   bool DoLoad(const wxTextFile& file, int version) override;
+   bool DoSave(wxTempFile& file) override;
 
 private:
    // the names of the folders we have cached status for

@@ -26,7 +26,9 @@
 #   include "MObject.h"
 #endif
 
-#include   "kbList.h"
+#include <list>
+#include <memory>
+#include <vector>
 
 // use the wxWindows caret class instead of home grown cursor whenever possible
 #ifdef __WXMSW__
@@ -52,9 +54,9 @@
 #include <unistd.h>
 
 #   define WXLO_TIMER_DEFINE(x)    static struct timeval  x
-#   define WXLO_TIMER_START(x)     gettimeofday(&x,NULL)
+#   define WXLO_TIMER_START(x)     gettimeofday(&x,nullptr)
 #   define WXLO_TIMER_STOP(x)      { struct timeval y; \
-                                gettimeofday(&y,NULL); \
+                                gettimeofday(&y,nullptr); \
                                 x.tv_sec -= y.tv_sec; x.tv_usec -= y.tv_usec; }
 #   define   WXLO_TIMER_PRINT(x)   wxLogDebug("Timer " #x " elapsed: %ld", \
                                          (long)(x.tv_sec * -1000 - x.tv_usec));
@@ -187,7 +189,7 @@ public:
       { return 0; }
 
    /// constructor
-   wxLayoutObject() { m_UserData = NULL; }
+   wxLayoutObject() { m_UserData = nullptr; }
    /// delete the user data
    virtual ~wxLayoutObject() { if(m_UserData) m_UserData->DecRef(); }
 
@@ -241,11 +243,11 @@ protected:
 #endif
 };
 
-/// Define a list type of wxLayoutObject pointers.
-KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObject);
+/// Define a list type owning wxLayoutObjects.
+using wxLayoutObjectList = std::list<std::unique_ptr<wxLayoutObject>>;
 
 /// The iterator type.
-typedef wxLayoutObjectList::iterator wxLOiterator;
+using wxLOiterator = wxLayoutObjectList::iterator;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -259,43 +261,43 @@ class wxLayoutObjectText : public wxLayoutObject
 public:
    wxLayoutObjectText(const wxString &txt = wxEmptyString);
 
-   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
-   virtual void Layout(wxDC &dc, wxLayoutList *llist);
-   virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     wxLayoutList *wxllist,
-                     CoordType begin = -1,
-                     CoordType end = -1);
+   wxLayoutObjectType GetType(void) const override { return WXLO_TYPE_TEXT; }
+   void Layout(wxDC &dc, wxLayoutList *llist) override;
+   void Draw(wxDC &dc, wxPoint const &coords,
+             wxLayoutList *wxllist,
+             CoordType begin = -1,
+             CoordType end = -1) override;
    /** Calculates and returns the size of the object.
        @param top where to store height above baseline
        @param bottom where to store height below baseline
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetSize(CoordType * top, CoordType *bottom) const;
+   wxPoint GetSize(CoordType * top, CoordType *bottom) const override;
    /// Return just the width of the object on the screen.
-   virtual CoordType GetWidth(void) const { return m_Width; }
+   CoordType GetWidth(void) const override { return m_Width; }
    /** Returns the cursor offset relating to the screen x position
        relative to begin of object.
        @param dc the wxDC to use for calculations
        @param xpos relative x position from head of object
        @return cursor coordinate offset
    */
-   virtual CoordType GetOffsetScreen(wxDC &dc, CoordType xpos) const;
+   CoordType GetOffsetScreen(wxDC &dc, CoordType xpos) const override;
 
-   virtual void Write(wxString &ostr);
+   void Write(wxString &ostr) override;
    static wxLayoutObjectText *Read(wxString &istr);
 
 #ifdef WXLAYOUT_DEBUG
    virtual wxString DebugDump(void) const;
 #endif
 
-   virtual CoordType GetLength(void) const { return m_Text.length(); }
+   CoordType GetLength(void) const override { return m_Text.length(); }
 
    // for editing:
    wxString & GetText(void) { return m_Text; }
    void SetText(wxString const &text);
    /** Makes a copy of this object.
     */
-   virtual wxLayoutObject *Copy(void);
+   wxLayoutObject *Copy(void) override;
 private:
    wxString m_Text;
    /// size of the box containing text
@@ -316,32 +318,32 @@ private:
 class wxLayoutObjectIcon : public wxLayoutObject
 {
 public:
-   wxLayoutObjectIcon(wxBitmap *icon = NULL);
+   wxLayoutObjectIcon(wxBitmap *icon = nullptr);
    wxLayoutObjectIcon(wxBitmap const &icon);
 
    ~wxLayoutObjectIcon() { if(m_Icon) delete m_Icon; }
 
-   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
-   virtual void Layout(wxDC &dc, wxLayoutList *llist);
-   virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     wxLayoutList *wxllist,
-                     CoordType begin = -1,
-                     CoordType end = -1);
+   wxLayoutObjectType GetType(void) const override { return WXLO_TYPE_ICON; }
+   void Layout(wxDC &dc, wxLayoutList *llist) override;
+   void Draw(wxDC &dc, wxPoint const &coords,
+             wxLayoutList *wxllist,
+             CoordType begin = -1,
+             CoordType end = -1) override;
 
    /** Calculates and returns the size of the object.
        @param top where to store height above baseline
        @param bottom where to store height below baseline
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetSize(CoordType * top, CoordType *bottom) const;
+   wxPoint GetSize(CoordType * top, CoordType *bottom) const override;
    /// Return just the width of the object on the screen.
-   virtual CoordType GetWidth(void) const { return m_Icon->GetWidth(); }
+   CoordType GetWidth(void) const override { return m_Icon->GetWidth(); }
    // return a pointer to the icon
    wxBitmap *GetIcon(void) const { return m_Icon; }
    /** Makes a copy of this object.
     */
-   virtual wxLayoutObject *Copy(void);
-   virtual void Write(wxString &ostr);
+   wxLayoutObject *Copy(void) override;
+   void Write(wxString &ostr) override;
    static wxLayoutObjectIcon *Read(wxString &istr);
 private:
    wxBitmap *m_Icon;
@@ -352,16 +354,16 @@ private:
 struct wxLayoutStyleInfo
 {
    wxLayoutStyleInfo(const wxFont& font,
-                     wxColour *fg = NULL,
-                     wxColour *bg = NULL);
+                     wxColour *fg = nullptr,
+                     wxColour *bg = nullptr);
 
    wxLayoutStyleInfo(int ifamily = -1,
                      int isize = -1,
                      int istyle = -1,
                      int iweight = -1,
                      int iul = -1,
-                     wxColour *fg = NULL,
-                     wxColour *bg = NULL,
+                     wxColour *fg = nullptr,
+                     wxColour *bg = nullptr,
                      wxFontEncoding enc = wxFONTENCODING_DEFAULT);
 
    wxLayoutStyleInfo(const wxLayoutStyleInfo&) = default;
@@ -428,8 +430,6 @@ private:
    wxFontEncoding m_Encoding;
 };
 
-KBLIST_DEFINE(wxFCEList, wxFontCacheEntry);
-
 class wxFontCache
 {
 public:
@@ -442,7 +442,7 @@ public:
       }
 
 private:
-   wxFCEList m_FontList;
+   std::vector<wxFontCacheEntry> m_FontList;
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -455,20 +455,20 @@ private:
 class wxLayoutObjectCmd : public wxLayoutObject
 {
 public:
-   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_CMD; }
-   virtual void Layout(wxDC &dc, wxLayoutList *llist);
-   virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     wxLayoutList *wxllist,
-                     CoordType begin = -1,
-                     CoordType end = -1);
+   wxLayoutObjectType GetType(void) const override { return WXLO_TYPE_CMD; }
+   void Layout(wxDC &dc, wxLayoutList *llist) override;
+   void Draw(wxDC &dc, wxPoint const &coords,
+             wxLayoutList *wxllist,
+             CoordType begin = -1,
+             CoordType end = -1) override;
    wxLayoutObjectCmd(const wxFont& font);
    wxLayoutObjectCmd(int family = -1,
                      int size = -1,
                      int style = -1,
                      int weight = -1,
                      int underline = -1,
-                     wxColour *fg = NULL,
-                     wxColour *bg = NULL,
+                     wxColour *fg = nullptr,
+                     wxColour *bg = nullptr,
                      wxFontEncoding enc = wxFONTENCODING_DEFAULT);
    wxLayoutObjectCmd(const wxLayoutStyleInfo &si);
    ~wxLayoutObjectCmd();
@@ -476,8 +476,8 @@ public:
    wxLayoutStyleInfo * GetStyle(void) const;
    /** Makes a copy of this object.
     */
-   virtual wxLayoutObject *Copy(void);
-   virtual void Write(wxString &ostr);
+   wxLayoutObject *Copy(void) override;
+   void Write(wxString &ostr) override;
    static wxLayoutObjectCmd *Read(wxString &istr);
 private:
    wxLayoutStyleInfo *m_StyleInfo;
@@ -510,7 +510,7 @@ public:
        @param len  effective length of the new object is stored here if not NULL
        @return true if that xpos existed and the object was inserted
    */
-   bool Insert(CoordType xpos, wxLayoutObject *obj, CoordType *len = NULL);
+   bool Insert(CoordType xpos, wxLayoutObject *obj, CoordType *len = nullptr);
 
    /** This function inserts text at cursor position xpos.
        @param xpos where to insert
@@ -525,7 +525,7 @@ public:
    void Append(wxLayoutObject * obj)
       {
          wxASSERT(obj);
-         m_ObjectList.push_back(obj);
+         m_ObjectList.emplace_back(obj);
          m_Length += obj->GetLength();
       }
 
@@ -533,7 +533,7 @@ public:
    void Prepend(wxLayoutObject * obj)
       {
          wxASSERT(obj);
-         m_ObjectList.push_front(obj);
+         m_ObjectList.emplace_front(obj);
          m_Length += obj->GetLength();
       }
        
@@ -582,7 +582,7 @@ public:
 
    /** A cursor used to indicate boundry conditions
    */
-   inline wxLayoutObjectList::iterator NULLIT(void) const
+   inline wxLayoutObjectList::iterator NULLIT(void)
       { return m_ObjectList.end(); }
 
    /** Finds the object which covers the cursor position xpos in this
@@ -593,7 +593,7 @@ public:
        @return iterator to the object or NULLIT
    */
    wxLayoutObjectList::iterator FindObject(CoordType xpos, CoordType
-                                           *offset) const ;
+                                           *offset);
 
    /** Finds the object which covers the screen position xpos in this
        line.
@@ -608,7 +608,7 @@ public:
                                                  wxLayoutList *llist,
                                                  CoordType xpos,
                                                  CoordType *offset,
-                                                 bool *found = NULL) const ;
+                                                 bool *found = nullptr);
 
    /** Finds text in this line.
        @param needle the text to find
@@ -621,16 +621,18 @@ public:
        functions to export the list.
        @return iterator to the first object
    */
-   wxLayoutObjectList::iterator GetFirstObject(void) const
+   wxLayoutObjectList::iterator GetFirstObject(void)
       {
          return m_ObjectList.begin();
       }
 
    /** Get the last object in the list.
+       @return iterator to the last object or NULLIT if the line is empty
     */
-   wxLayoutObjectList::iterator GetLastObject(void) const
+   wxLayoutObjectList::iterator GetLastObject(void)
       {
-         return m_ObjectList.tail();
+         return m_ObjectList.empty() ? m_ObjectList.end()
+                                     : std::prev(m_ObjectList.end());
       }
 
    /** Deletes this line, returns pointer to next line.
@@ -673,11 +675,11 @@ public:
    */
    void Layout(wxDC &dc,
                wxLayoutList *llist,
-               wxPoint *cursorPos = NULL,
-               wxPoint *cursorSize = NULL,
-               wxLayoutStyleInfo *cursorStyle = NULL,
+               wxPoint *cursorPos = nullptr,
+               wxPoint *cursorSize = nullptr,
+               wxLayoutStyleInfo *cursorStyle = nullptr,
                int cx = 0,
-               bool suppressStyleUpdate = FALSE);
+               bool suppressStyleUpdate = false);
    /** This function finds an object belonging to a given cursor
        position. It assumes that Layout() has been called before.
        @param dc the wxDC to use for calculations
@@ -689,7 +691,7 @@ public:
    */
    wxLayoutObject * FindObjectScreen(wxDC &dc,
                                      CoordType xpos,
-                                     bool *found = NULL);
+                                     bool *found = nullptr);
    /** This sets the style info for the beginning of this line.
        @param si styleinfo structure
     */
@@ -830,14 +832,14 @@ public:
               int style=wxNORMAL,
               int weight=wxNORMAL,
               int underline=0,
-              wxColour *fg=NULL,
-              wxColour *bg=NULL,
+              wxColour *fg=nullptr,
+              wxColour *bg=nullptr,
               wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
    /// Clear with epxlicit font
    void Clear(const wxFont& font,
-              wxColour *fg = NULL,
-              wxColour *bg = NULL);
+              wxColour *fg = nullptr,
+              wxColour *bg = nullptr);
 
    /// Empty: clear the list but leave font settings.
    void Empty(void);
@@ -848,7 +850,7 @@ public:
        disable this.
        @param enable TRUE to enable, FALSE to disable
    */
-   void SetAutoFormatting(bool enable = TRUE)
+   void SetAutoFormatting(bool enable = true)
       { m_AutoFormat = enable; }
    /**@name Cursor Management */
    //@{
@@ -988,8 +990,8 @@ public:
    /// sets font parameters, colours by name
    void SetFont(int family=-1, int size = -1, int style=-1,
                 int weight=-1, int underline = -1,
-                wxChar const *fg = NULL,
-                wxChar const *bg = NULL,
+                wxChar const *fg = nullptr,
+                wxChar const *bg = nullptr,
                 wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
    /// changes to the next larger font size
@@ -1011,12 +1013,12 @@ public:
    inline void SetFontUnderline(bool ul) { SetFont(-1,-1,-1,-1,(int)ul); }
    /// sets the font encoding
    void SetFontEncoding(wxFontEncoding enc)
-      { SetFont(-1,-1,-1,-1,-1,(wxColour *)NULL,(wxColour *)NULL,enc); }
+      { SetFont(-1,-1,-1,-1,-1,(wxColour *)nullptr,(wxColour *)nullptr,enc); }
    /// set font colours by name
-   inline void SetFontColour(wxChar const *fg, wxChar const *bg = NULL)
+   inline void SetFontColour(wxChar const *fg, wxChar const *bg = nullptr)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }
    /// set font colours by colour
-   inline void SetFontColour(wxColour *fg, wxColour *bg = NULL)
+   inline void SetFontColour(wxColour *fg, wxColour *bg = nullptr)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }
 
    /// set font explicitly
@@ -1079,14 +1081,14 @@ public:
        @param csize Will hold the cursor size relating to cpos.
    */
    void Layout(wxDC &dc, CoordType bottom = -1, bool forceAll = false,
-               wxPoint *cpos = NULL,
-               wxPoint *csize = NULL);
+               wxPoint *cpos = nullptr,
+               wxPoint *csize = nullptr);
 
    /** Ensure that the whole list will be recalculate on the next call 
        to Layout() or Draw().
        @param redrawAll TRUE or FALSE to reset it
    */
-   void ForceTotalLayout(bool redrawAll = TRUE)
+   void ForceTotalLayout(bool redrawAll = true)
       { m_ReLayoutAll = redrawAll; }
    
    /** Returns the screen coordinates relating to a given cursor
@@ -1096,7 +1098,7 @@ public:
        @param csize If non-NULL, will be set to the cursor size.
        @return The cursor position on the DC.
    */
-   wxPoint GetScreenPos(wxDC &dc, const wxPoint &cpos, wxPoint *csize = NULL);
+   wxPoint GetScreenPos(wxDC &dc, const wxPoint &cpos, wxPoint *csize = nullptr);
 
    /** Calculates new sizes for everything in the list, like Layout()
        but this is needed after the list got changed.
@@ -1136,8 +1138,8 @@ public:
    */
    wxLayoutObject * FindObjectScreen(wxDC &dc,
                                      wxPoint const pos,
-                                     wxPoint *cursorPos = NULL,
-                                     bool *found = NULL);
+                                     wxPoint *cursorPos = nullptr,
+                                     bool *found = nullptr);
 
    /** Called by the objects to update the update rectangle.
        @param x horizontal coordinate to include in rectangle
@@ -1200,7 +1202,7 @@ public:
        @param invalidate if true, the selection will be invalidated after this and can no longer be used.
        @return Another layout list object holding the selection, must be freed by caller
    */
-   wxLayoutList *GetSelection(class wxLayoutDataObject *wxldo = NULL, bool invalidate = TRUE);
+   wxLayoutList *GetSelection(class wxLayoutDataObject *wxldo = nullptr, bool invalidate = true);
    /// Delete selected bit
    void DeleteSelection(void);
 
@@ -1373,18 +1375,18 @@ public:
    virtual ~wxLayoutPrintout();
 
    /** Called to set things up */
-   bool OnBeginDocument(int startPage, int endPage);
+   bool OnBeginDocument(int startPage, int endPage) override;
 
    /** Function which prints the n-th page.
        @param page the page number to print
        @return bool true if we are not at end of document yet
    */
-   bool OnPrintPage(int page);
+   bool OnPrintPage(int page) override;
    /** Checks whether page exists in document.
        @param page number of page
        @return true if page exists
    */
-   bool HasPage(int page);
+   bool HasPage(int page) override;
 
    /** Gets called from wxWindows to find out which pages are existing.
        I'm not totally sure about the parameters though.
@@ -1394,7 +1396,7 @@ public:
        @param selPageTo the last page to be printed
    */
    void GetPageInfo(int *minPage, int *maxPage,
-                    int *selPageFrom, int *selPageTo);
+                    int *selPageFrom, int *selPageTo) override;
 protected:
    /** This little function scales the DC so that the printout has
        roughly the same size as the output on screen.

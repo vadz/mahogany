@@ -66,37 +66,37 @@ public:
    wxMApp();
 
    /// implement base class virtuals
-   virtual wxMFrame *CreateTopLevelFrame();
-   virtual void OnFatalException() { OnAbnormalTermination(); }
-   virtual void OnAbnormalTermination(const wxChar *msg = NULL);
+   wxMFrame *CreateTopLevelFrame() override;
+   void OnFatalException() override { OnAbnormalTermination(); }
+   void OnAbnormalTermination(const wxChar *msg = nullptr) override;
 
-   virtual bool StartTimer(Timer timer);
-   virtual bool StopTimer(Timer timer);
+   bool StartTimer(Timer timer) override;
+   bool StopTimer(Timer timer) override;
 
-   virtual bool IsLogShown() const;
-   virtual void ShowLog(bool doShow = TRUE);
-   virtual void SetLogFile(const String& filename);
+   bool IsLogShown() const override;
+   void ShowLog(bool doShow = true) override;
+   void SetLogFile(const String& filename) override;
 
    // program termination helpers
-   virtual bool CanClose() const;
-   virtual void OnClose();
+   bool CanClose() const override;
+   void OnClose() override;
 
    // wxWin calls these functions to start/run/stop the application
-   virtual bool OnInit();
-   virtual int  OnRun();
-   virtual int  OnExit();
+   bool OnInit() override;
+   int  OnRun() override;
+   int  OnExit() override;
 
    // methods used for the command line parsing
-   virtual void OnInitCmdLine(wxCmdLineParser& parser);
-   virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
+   void OnInitCmdLine(wxCmdLineParser& parser) override;
+   bool OnCmdLineParsed(wxCmdLineParser& parser) override;
 
    // stop event processing while c-client is locked to prevent reentrancies
-   virtual int FilterEvent(wxEvent& event);
+   int FilterEvent(wxEvent& event) override;
 
    // override top level window detection: never return splash frame from here
    // as it is transient and so is not suitable for use as a parent for the
    // dialogs (it can disappear before the dialog is closed)
-   virtual wxWindow *GetTopWindow() const;
+   wxWindow *GetTopWindow() const override;
 
    // override wxWindows default icons
    virtual wxIcon GetStdIcon(int which) const;
@@ -116,30 +116,30 @@ public:
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
    */
-   virtual void Help(int id, wxWindow *parent = NULL);
+   void Help(int id, wxWindow *parent = nullptr) override;
 
    /// return a pointer to the IconManager:
-   wxIconManager *GetIconManager(void) const;
+   wxIconManager *GetIconManager(void) const override;
 
    /// Destructor
    ~wxMApp();
 
    /// get a pointer to the print data
-   virtual const wxPrintData *GetPrintData();
+   const wxPrintData *GetPrintData() override;
 
    /// store the print data (after the user modified it)
-   virtual void SetPrintData(const wxPrintData& printData);
+   void SetPrintData(const wxPrintData& printData) override;
 
    /// get the page setup data
-   virtual wxPageSetupDialogData *GetPageSetupData();
+   wxPageSetupDialogData *GetPageSetupData() override;
 
    /// change it
-   virtual void SetPageSetupData(const wxPageSetupDialogData& data);
+   void SetPageSetupData(const wxPageSetupDialogData& data) override;
 
    /** @name Thread control */
    //@{
-   virtual void ThrEnter(SectionId what) { ThrEnterLeave(TRUE, what, FALSE); }
-   virtual void ThrLeave(SectionId what, bool testing) { ThrEnterLeave(FALSE, what, testing); }
+   void ThrEnter(SectionId what) override { ThrEnterLeave(true, what, false); }
+   void ThrLeave(SectionId what, bool testing) override { ThrEnterLeave(false, what, testing); }
    //@}
 
    wxHelpControllerBase *GetHelpController(void) const
@@ -154,34 +154,34 @@ public:
    void OnDisconnected(wxDialUpEvent &event);
 #endif // USE_DIALUP
 
-   virtual bool AllowBgProcessing() const;
-   virtual void EnterCritical();
-   virtual void LeaveCritical();
+   bool AllowBgProcessing() const override;
+   void EnterCritical() override;
+   void LeaveCritical() override;
 
    /// updates display of outbox status
-   virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const;
+   void UpdateOutboxStatus(class MailFolder *mf = nullptr) const override;
 
-   virtual void SetAwayMode(bool isAway = true);
+   void SetAwayMode(bool isAway = true) override;
 
    // multiple program instances handling
-   virtual bool IsAnotherRunning() const;
-   virtual bool CallAnother();
-   virtual bool SetupRemoteCallServer();
+   bool IsAnotherRunning() const override;
+   bool CallAnother() override;
+   bool SetupRemoteCallServer() override;
 
    bool OnRemoteRequest(const wxChar *request);
 
    /// Report a fatal error:
-   virtual void FatalError(const wxChar *message);
+   void FatalError(const wxChar *message) override;
 
 #ifdef __WXDEBUG__
-   virtual void OnAssert(const wxChar *file, int line,
-                         const wxChar *cond, const wxChar *msg);
+   void OnAssert(const wxChar *file, int line,
+                 const wxChar *cond, const wxChar *msg) override;
 #endif // __WXDEBUG__
 
-   virtual bool Yield(bool onlyIfNeeded = FALSE);
+   virtual bool Yield(bool onlyIfNeeded = false);
 
 protected:
-   virtual void RecreateStatusBar();
+   void RecreateStatusBar() override;
 
 #ifdef USE_DIALUP
    /// sets up the class handling dial up networking
@@ -196,11 +196,11 @@ protected:
    */
    void ThrEnterLeave(bool enter, SectionId what, bool testing);
    /// Load modules at startup
-   virtual void LoadModules(void);
+   void LoadModules(void) override;
    /// Init modules - called as soon as the program is fully initialized
-   virtual void InitModules(void);
+   void InitModules(void) override;
    /// Unload modules loaded at startup
-   virtual void UnloadModules(void);
+   void UnloadModules(void) override;
 
 private:
    /// common part of OnExit() and dtor, i.e. cleanup which is always done

@@ -125,7 +125,7 @@ public:
 
    // implement interface methods
    // AdbEntry
-   virtual AdbEntryGroup *GetGroup() const;
+   AdbEntryGroup *GetGroup() const override;
 
    // an easier to use GetName()
    const wxChar *GetName() const
@@ -134,8 +134,8 @@ public:
    /**@name the parser */
    //@{
    enum FieldTypes { Field_String, Field_Integer};
-   static const String ReadString(String *string, bool *success = NULL);
-   static StringList ReadListOfStrings(String *string, bool *success = NULL);
+   static const String ReadString(String *string, bool *success = nullptr);
+   static StringList ReadListOfStrings(String *string, bool *success = nullptr);
    static StringListList ReadVector(String *string);
    static StringListListList ReadListOfVectors(String *string);
 
@@ -171,24 +171,24 @@ public:
 
    // implement interface methods
    // AdbEntryGroup
-   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
-   virtual String GetName() const { return m_strName; }
+   AdbEntryGroup *GetGroup() const override { return m_pParent; }
+   String GetName() const override { return m_strName; }
 
-   virtual size_t GetEntryNames(wxArrayString& aNames) const;
-   virtual size_t GetGroupNames(wxArrayString& aNames) const;
+   size_t GetEntryNames(wxArrayString& aNames) const override;
+   size_t GetGroupNames(wxArrayString& aNames) const override;
 
-   virtual AdbEntry *GetEntry(const String& name);
-   virtual AdbEntryGroup *GetGroup(const String& name) const;
+   AdbEntry *GetEntry(const String& name) override;
+   AdbEntryGroup *GetGroup(const String& name) const override;
 
-   virtual bool Exists(const String& path);
+   bool Exists(const String& path) override;
 
-   virtual AdbEntry *CreateEntry(const String& strName);
-   virtual AdbEntryGroup *CreateGroup(const String& strName);
+   AdbEntry *CreateEntry(const String& strName) override;
+   AdbEntryGroup *CreateGroup(const String& strName) override;
 
-   virtual void DeleteEntry(const String& strName);
-   virtual void DeleteGroup(const String& strName);
+   void DeleteEntry(const String& strName) override;
+   void DeleteGroup(const String& strName) override;
 
-   virtual AdbEntry *FindEntry(const wxChar *szName);
+   AdbEntry *FindEntry(const wxChar *szName) override;
 
 private:
    virtual ~BbdbEntryGroup();
@@ -207,55 +207,55 @@ public:
 
    // implement interface methods
    // AdbElement
-   virtual AdbEntryGroup *GetGroup() const { return NULL; }
+   AdbEntryGroup *GetGroup() const override { return nullptr; }
 
    // AdbEntryGroup
-   virtual AdbEntry *GetEntry(const String& name)
+   AdbEntry *GetEntry(const String& name) override
       { return m_pRootGroup->GetEntry(name); }
 
-   virtual bool Exists(const String& path)
+   bool Exists(const String& path) override
       { return m_pRootGroup->Exists(path); }
 
-   virtual size_t GetEntryNames(wxArrayString& aNames) const
+   size_t GetEntryNames(wxArrayString& aNames) const override
       { return m_pRootGroup->GetEntryNames(aNames); }
-   virtual size_t GetGroupNames(wxArrayString& aNames) const
+   size_t GetGroupNames(wxArrayString& aNames) const override
       { return m_pRootGroup->GetGroupNames(aNames); }
 
-   virtual AdbEntryGroup *GetGroup(const String& name) const
+   AdbEntryGroup *GetGroup(const String& name) const override
       { return m_pRootGroup->GetGroup(name); }
 
-   virtual AdbEntry *CreateEntry(const String& strName)
+   AdbEntry *CreateEntry(const String& strName) override
       { return m_pRootGroup->CreateEntry(strName); }
-   virtual AdbEntryGroup *CreateGroup(const String& strName)
+   AdbEntryGroup *CreateGroup(const String& strName) override
       { return m_pRootGroup->CreateGroup(strName); }
 
-   virtual void DeleteEntry(const String& strName)
+   void DeleteEntry(const String& strName) override
       { m_pRootGroup->DeleteEntry(strName); }
-   virtual void DeleteGroup(const String& strName)
+   void DeleteGroup(const String& strName) override
       { m_pRootGroup->DeleteGroup(strName); }
 
-   virtual AdbEntry *FindEntry(const wxChar *szName)
+   AdbEntry *FindEntry(const wxChar *szName) override
       { return m_pRootGroup->FindEntry(szName); }
 
       // AdbBook
-   virtual bool IsSameAs(const String& name) const;
-   virtual String GetFileName() const;
+   bool IsSameAs(const String& name) const override;
+   String GetFileName() const override;
 
-   virtual void SetName(const String& name);
-   virtual String GetName() const;
+   void SetName(const String& name) override;
+   String GetName() const override;
 
-   virtual void SetDescription(const String& desc);
-   virtual String GetDescription() const;
+   void SetDescription(const String& desc) override;
+   String GetDescription() const override;
 
-   virtual size_t GetNumberOfEntries() const;
+   size_t GetNumberOfEntries() const override;
 
-   virtual bool IsLocal() const { return TRUE; }
-   virtual bool IsReadOnly() const;
+   bool IsLocal() const override { return true; }
+   bool IsReadOnly() const override;
 
    /** Return the icon name if set. The numeric return value must be -1
      for the default, or an index into the image list in AdbFrame.cpp.
     */
-   virtual int GetIconId() const { return 6; }
+   int GetIconId() const override { return 6; }
 
 private:
    virtual ~BbdbBook();
@@ -274,19 +274,19 @@ class BbdbDataProvider : public AdbDataProvider
 {
 public:
    // implement interface methods
-   virtual AdbBook *CreateBook(const String& name);
-   virtual bool EnumBooks(wxArrayString& aNames);
-   virtual bool DeleteBook(AdbBook *book);
-   virtual bool TestBookAccess(const String& name, AdbTests test);
+   AdbBook *CreateBook(const String& name) override;
+   bool EnumBooks(wxArrayString& aNames) override;
+   bool DeleteBook(AdbBook *book) override;
+   bool TestBookAccess(const String& name, AdbTests test) override;
    
    // Our entry is derived from AdbEntryStoredInMemory
-   virtual bool HasField(AdbField field) const { return true; }
-   virtual bool HasMultipleEMails() const { return true; }
+   bool HasField(AdbField field) const override { return true; }
+   bool HasMultipleEMails() const override { return true; }
 
    DECLARE_ADB_PROVIDER(BbdbDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, "BBDB version 2", Name_File);
+IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, true, "BBDB version 2", Name_File);
 
 // ============================================================================
 // implementation
@@ -299,13 +299,13 @@ IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, "BBDB version 2", Name_File);
 BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup, const String& strName)
 {
    m_pGroup = pGroup;
-   m_bDirty = FALSE;
+   m_bDirty = false;
 }
 
 BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup)
 {
    m_pGroup = pGroup;
-   m_bDirty = FALSE;
+   m_bDirty = false;
 }
 
 bool
@@ -410,23 +410,15 @@ BbdbEntry::ReadString(String * line, bool *success)
 void
 BbdbEntry::WriteString(std::ostream &out, String const &string)
 {
-   const wxChar *cptr;
-
    if(string.empty())
    {
       out << "nil";
       return;
    }
-   out << '"';
-   cptr = string.c_str();
-   while(*cptr)
-   {
-      if(*cptr == '"')
-         out << '\\';
-      out << *cptr;
-      cptr++;
-   }
-   out << "\" ";
+
+   String escaped(string);
+   escaped.Replace("\"", "\\\"");
+   out << '"' << escaped.mb_str() << "\" ";
 }
 
 StringList
@@ -523,7 +515,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
 
    // line must start with '['
    if(! ReadToken('[', line))
-      return NULL;
+      return nullptr;
 
    static int count = 0;
    String tmp;
@@ -535,7 +527,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
    if(first_name.empty() && last_name.empty())
    {
       if(m_IgnoreAnonymous)
-         return NULL;
+         return nullptr;
       else
          alias = m_AnonymousName;
    }
@@ -545,7 +537,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
    if(m_EnforceUnique)
    {
       temp = alias;
-      while((e_exists = pGroup->GetEntry(alias)) != NULL) // duplicate entry
+      while((e_exists = pGroup->GetEntry(alias)) != nullptr) // duplicate entry
       {
          e_exists->DecRef(); // GetEntry() does an IncRef()
          tmp.Printf(_T("%d"), count);
@@ -667,7 +659,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    m_entries = new BbdbEntryList(false);
 
    m_strName = strName; // there is only one group so far
-   m_pParent = NULL;
+   m_pParent = nullptr;
 
    BbdbEntry *e;
    wxString line, version;
@@ -698,7 +690,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
                      _T("BBDB import"),
                      _T("Importing..."),
                      length,
-                     NULL,
+                     nullptr,
                      wxPD_APP_MODAL
                    );
    do
@@ -752,7 +744,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          str.Printf(_("Save BBDB address book '%s'?\n"
                       "This might lead to loss of some of the original data."),
                     m_strName);
-         save = MDialog_YesNoDialog(str,NULL,_("BBDB"),
+         save = MDialog_YesNoDialog(str,nullptr,_("BBDB"),
                                     M_DLG_YES_DEFAULT,
                                     M_MSGBOX_BBDB_SAVE_DIALOG);
          break;
@@ -770,7 +762,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          for(i = m_entries->begin(); i != m_entries->end(); i++)
             length++;
          MProgressDialog status_frame(_T("BBDB"), _T("Saving..."),
-                                      length, NULL, wxPD_APP_MODAL);
+                                      length, nullptr, wxPD_APP_MODAL);
 
          String str;
          std::ofstream out(m_strName.mb_str());
@@ -898,21 +890,21 @@ BbdbEntryGroup::GetEntry(const String& name)
          return *i;
       }
    }
-   return NULL;
+   return nullptr;
 }
 
 bool
 BbdbEntryGroup::Exists(const String& path)
 {
    MOcheck();
-   return GetEntry(path) != NULL;
+   return GetEntry(path) != nullptr;
 }
 
 AdbEntryGroup *BbdbEntryGroup::GetGroup(const String& name) const
 {
    MOcheck();
 //   wxLogDebug(_T("BbdbEntryGroup::GetGroup() called with: %s"), name);
-   return NULL;
+   return nullptr;
 }
 
 AdbEntry *
@@ -926,7 +918,7 @@ BbdbEntryGroup::CreateEntry(const String& strName)
 AdbEntryGroup *BbdbEntryGroup::CreateGroup(const String& strName)
 {
    MOcheck();
-   return NULL;
+   return nullptr;
 }
 
 void
@@ -957,7 +949,7 @@ BbdbEntryGroup::FindEntry(const wxChar *szName)
 {
    MOcheck();
 //   wxLogDebug(_T("BbdbEntryGroup::FindEntry() called with: %s"), szName);
-   return NULL;
+   return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -970,12 +962,12 @@ BbdbBook::BbdbBook(const String& name)
 
    m_strFileName = name;
 
-   wxFileName::SplitPath(m_strFileName, NULL, &m_strName, NULL);
+   wxFileName::SplitPath(m_strFileName, nullptr, &m_strName, nullptr);
 
    m_strDesc << m_strName << _(" (Emacs BBDB addressbook)");
 
    // create the root group
-   m_pRootGroup = new BbdbEntryGroup(NULL, name); // there is only one group
+   m_pRootGroup = new BbdbEntryGroup(nullptr, name); // there is only one group
 }
 
 BbdbBook::~BbdbBook()
@@ -1051,7 +1043,7 @@ BbdbDataProvider::CreateBook(const String& name)
 bool
 BbdbDataProvider::EnumBooks(wxArrayString& aNames)
 {
-   return FALSE;
+   return false;
 }
 
 bool
@@ -1069,7 +1061,7 @@ BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
             std::ifstream file(name.mb_str());
             String line;
             strutil_getstrline(file, line);
-            return BbdbEntry::ReadHeader(NULL, &line);
+            return BbdbEntry::ReadHeader(nullptr, &line);
          }
          return false;
       case Test_AutodetectCapable:
@@ -1083,5 +1075,5 @@ BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
 bool
 BbdbDataProvider::DeleteBook(AdbBook *book)
 {
-   return FALSE;
+   return false;
 }

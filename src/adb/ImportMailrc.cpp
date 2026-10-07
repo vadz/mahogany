@@ -49,16 +49,16 @@ public:
    AdbMailrcImporter() { }
 
    // implement base class pure virtuals
-   virtual String GetDefaultFilename() const;
-   virtual bool CanImport(const String& filename);
-   virtual bool StartImport(const String& filename);
-   virtual size_t GetEntryNames(const String& path,
-                                wxArrayString& entries) const;
-   virtual size_t GetGroupNames(const String& path,
-                                wxArrayString& groups) const;
-   virtual bool ImportEntry(const String& path,
-                            size_t index,
-                            AdbEntry *entry);
+   String GetDefaultFilename() const override;
+   bool CanImport(const String& filename) override;
+   bool StartImport(const String& filename) override;
+   size_t GetEntryNames(const String& path,
+                        wxArrayString& entries) const override;
+   size_t GetGroupNames(const String& path,
+                        wxArrayString& groups) const override;
+   bool ImportEntry(const String& path,
+                    size_t index,
+                    AdbEntry *entry) override;
 
    DECLARE_ADB_IMPORTER();
 
@@ -69,7 +69,7 @@ protected:
    // parsed.
    bool ParseMailrcAliasLine(const wxString& line,
                              wxString *nickname,
-                             wxArrayString *addresses = NULL) const;
+                             wxArrayString *addresses = nullptr) const;
 
    // the indices of the alias line in m_textfile
    wxArrayInt m_lineNumbers;
@@ -117,7 +117,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
    }
 
    // first extract the nickname
-   for ( bool cont = TRUE; cont; pc++ )
+   for ( bool cont = true; cont; pc++ )
    {
       switch ( *pc )
       {
@@ -125,7 +125,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
             if ( quoted )
             {
                // end of string
-               cont = FALSE;
+               cont = false;
 
                break;
             }
@@ -138,7 +138,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
             wxLogWarning(_("Invalid mailrc alias entry '%s' discarded."),
                          line.c_str());
 
-            return FALSE;
+            return false;
 
          case '\\':
             // it quotes the next character
@@ -149,7 +149,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
             if ( !quoted )
             {
                // field delimiter
-               cont = FALSE;
+               cont = false;
 
                break;
             }
@@ -196,11 +196,11 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
          wxLogWarning(_("Mailrc entry '%s' doesn't have any addresses and "
                         "will be ignored."), line);
 
-         return FALSE;
+         return false;
       }
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -236,7 +236,7 @@ bool AdbMailrcImporter::CanImport(const String& filename)
 {
    // load the file into memory
    if ( !m_textfile.Open(filename) )
-       return FALSE;
+       return false;
 
    // according to the mailrc docs I could find, the only allowed keywords in
    // mailrc file are alias, ignore, set and unset, so find the first non
@@ -252,7 +252,7 @@ bool AdbMailrcImporter::CanImport(const String& filename)
          continue;
       }
 
-      line.Trim(FALSE /* from left */);
+      line.Trim(false /* from left */);
 
       if ( line.StartsWith(_T("alias ")) ||
            line.StartsWith(_T("ignore ")) ||
@@ -264,12 +264,12 @@ bool AdbMailrcImporter::CanImport(const String& filename)
       }
 
       // unexpected line
-      return FALSE;
+      return false;
    }
 
    // do return TRUE even if we broke out of the loop because we exhausted all
    // lines - this allows us to import successfully even a default ~/.mailrc
-   return TRUE;
+   return true;
 }
 
 bool AdbMailrcImporter::StartImport(const String& filename)
@@ -277,7 +277,7 @@ bool AdbMailrcImporter::StartImport(const String& filename)
    if ( m_textfile.GetName() == filename )
    {
       // already have it
-      return TRUE;
+      return true;
    }
 
    return CanImport(filename);
@@ -305,7 +305,7 @@ AdbMailrcImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
          continue;
       }
 
-      line.Trim(FALSE /* from left */);
+      line.Trim(false /* from left */);
 
       if ( wxStrncmp(line, _T("alias"), lenAlias) != 0 )
       {
@@ -340,20 +340,20 @@ bool AdbMailrcImporter::ImportEntry(const String& /* path */,
                                     size_t index,
                                     AdbEntry *entry)
 {
-   CHECK( index < m_lineNumbers.GetCount(), FALSE, _T("invalid entry index") );
+   CHECK( index < m_lineNumbers.GetCount(), false, _T("invalid entry index") );
 
    wxString line = m_textfile.GetLine((size_t)m_lineNumbers[index]);
    if ( !line )
    {
       // hmm... empty address book entry?
-      return FALSE;
+      return false;
    }
 
    wxString nickname;
    wxArrayString addresses;
    if ( !ParseMailrcAliasLine(line, &nickname, &addresses) )
    {
-      return FALSE;
+      return false;
    }
 
 #ifdef DEBUG
@@ -372,6 +372,6 @@ bool AdbMailrcImporter::ImportEntry(const String& /* path */,
       entry->AddEMail(addresses[nAddress]);
    }
 
-   return TRUE;
+   return true;
 }
 

@@ -43,16 +43,16 @@ public:
    virtual ~AdbVCardImporter() { DeleteCards(); }
 
    // implement base class pure virtuals
-   virtual String GetDefaultFilename() const { return wxEmptyString; }
-   virtual bool CanImport(const String& filename);
-   virtual bool StartImport(const String& filename);
-   virtual size_t GetEntryNames(const String& path,
-                                wxArrayString& entries) const;
-   virtual size_t GetGroupNames(const String& path,
-                                wxArrayString& groups) const;
-   virtual bool ImportEntry(const String& path,
-                            size_t index,
-                            AdbEntry *entry);
+   String GetDefaultFilename() const override { return wxEmptyString; }
+   bool CanImport(const String& filename) override;
+   bool StartImport(const String& filename) override;
+   size_t GetEntryNames(const String& path,
+                        wxArrayString& entries) const override;
+   size_t GetGroupNames(const String& path,
+                        wxArrayString& groups) const override;
+   bool ImportEntry(const String& path,
+                    size_t index,
+                    AdbEntry *entry) override;
 
 protected:
    // delete all cards we have
@@ -90,13 +90,13 @@ IMPLEMENT_ADB_IMPORTER(AdbVCardImporter,
 
 void AdbVCardImporter::DeleteCards()
 {
-   size_t count = m_cards.GetCount();
+   size_t count = m_cards.size();
    for ( size_t n = 0; n < count; n++ )
    {
       delete m_cards[n];
    }
 
-   m_cards.Empty();
+   m_cards.clear();
 }
 
 bool AdbVCardImporter::CanImport(const String& filename)
@@ -114,7 +114,7 @@ bool AdbVCardImporter::CanImport(const String& filename)
    }
    // else: we already tried loading cards from this file
 
-   return !m_cards.IsEmpty();
+   return !m_cards.empty();
 }
 
 bool AdbVCardImporter::StartImport(const String& filename)
@@ -133,7 +133,7 @@ size_t AdbVCardImporter::GetEntryNames(const String& path,
    // natural choice for this, so just take the family name instead
    wxString familyname, givenname;
    size_t countImported = 0,
-          countAll = m_cards.GetCount();
+          countAll = m_cards.size();
    for ( size_t n = 0; n < countAll; n++ )
    {
       if ( m_cards[n]->GetName(&familyname, &givenname) )
@@ -184,7 +184,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
                                    size_t index,
                                    AdbEntry *entry)
 {
-   wxCHECK_MSG( !path && (index < m_cards.GetCount()), false,
+   wxCHECK_MSG( !path && (index < m_cards.size()), false,
                 _T("unexpected params in AdbVCardImporter") );
 
    // set all simple fields
@@ -204,7 +204,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
 
    // now transfer name properties
    wxString familyName, givenName, namePrefix;
-   if ( vcard->GetName(&familyName, &givenName, NULL, &namePrefix) )
+   if ( vcard->GetName(&familyName, &givenName, nullptr, &namePrefix) )
    {
       if ( !!familyName )
          entry->SetField(AdbField_FamilyName, familyName);
@@ -250,8 +250,8 @@ bool AdbVCardImporter::ImportEntry(const String& path,
    // and with addresses: the problem here is that vCard has an arbitrary number
    // of addresses each of them being a home one, work one or may be both at
    // once, and we want exactly one of each
-   wxVCardAddress *addrHome = NULL,
-                  *addrWork = NULL;
+   wxVCardAddress *addrHome = nullptr,
+                  *addrWork = nullptr;
    wxVCardAddress *addr = vcard->GetFirstAddress(&cookie);
    while ( addr && (!addrHome || !addrWork) )
    {
@@ -328,10 +328,10 @@ bool AdbVCardImporter::ImportEntry(const String& path,
    // FIXME well, so I decided to do it simply instead of thinking about how to
    //       do it really well... if someone ever complains about it, this should
    //       be fixed
-   wxVCardPhoneNumber *phoneWork = NULL,
-                      *phoneHome = NULL,
-                      *faxWork = NULL,
-                      *faxHome = NULL;
+   wxVCardPhoneNumber *phoneWork = nullptr,
+                      *phoneHome = nullptr,
+                      *faxWork = nullptr,
+                      *faxHome = nullptr;
    wxVCardPhoneNumber *phone = vcard->GetFirstPhoneNumber(&cookie);
    while ( phone )
    {
@@ -384,7 +384,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
       phone = vcard->GetNextPhoneNumber(&cookie);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

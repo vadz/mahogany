@@ -35,7 +35,7 @@
 #include "UIdArray.h"
 #include "Address.h"
 
-#include "pointers.h"
+#include <memory>
 
 #include "gui/wxMDialogs.h"         // for MProgressInfo
 
@@ -137,7 +137,7 @@ public:
 
 protected:
    // just for derived classes, they must call Init() themselves
-   StatusIndicator() { m_frame = NULL; }
+   StatusIndicator() { m_frame = nullptr; }
 
    // ctor version which can be also called by derived classes
    void Init(wxFrame *frame, const wxChar *fmt, va_list argptr);
@@ -169,11 +169,6 @@ private:
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
-
-int CMPFUNC_CONV MsgnoCmpFunc(UIdType *msgno1, UIdType *msgno2)
-{
-   return *msgno1 - *msgno2;
-}
 
 static UIdType MapIndexToMsgno(UIdType uid)
 {
@@ -344,7 +339,7 @@ BusyIndicator::BusyIndicator(bool nonInteractive,
 {
    va_list argptr;
    va_start(argptr, fmt);
-   Init(nonInteractive ? NULL : mf->GetInteractiveFrame(), fmt, argptr);
+   Init(nonInteractive ? nullptr : mf->GetInteractiveFrame(), fmt, argptr);
    va_end(argptr);
 
    // only show the busy dialog when we're opening the folder manually,
@@ -356,7 +351,7 @@ BusyIndicator::BusyIndicator(bool nonInteractive,
    }
    else // busy indicator disabled
    {
-      m_progInfo = NULL;
+      m_progInfo = nullptr;
    }
 }
 
@@ -452,12 +447,12 @@ inline bool HeaderInfoListImpl::IsThreading() const
 
 inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
 {
-   return (n < m_headers.GetCount()) && (m_headers[n] != NULL);
+   return (n < m_headers.size()) && (m_headers[n] != nullptr);
 }
 
 inline bool HeaderInfoListImpl::HasTransTable() const
 {
-   return m_tableMsgno != NULL;
+   return m_tableMsgno != nullptr;
 }
 
 inline bool HeaderInfoListImpl::ShouldHaveTables() const
@@ -511,7 +506,7 @@ inline void HeaderInfoListImpl::ScheduleTableRebuild()
 /* static */
 HeaderInfoList *HeaderInfoList::Create(MailFolder *mf)
 {
-   CHECK( mf, NULL, _T("NULL mailfolder in HeaderInfoList::Create") );
+   CHECK( mf, nullptr, _T("NULL mailfolder in HeaderInfoList::Create") );
 
    return new HeaderInfoListImpl(mf);
 }
@@ -529,15 +524,15 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
 
    // preallocate the memory for headers
    m_count = mf->GetMessageCount();
-   m_headers.Alloc(m_count);
+   m_headers.reserve(m_count);
 
    // no sorting/threading yet
    m_sizeTables = 0;
    m_tableSort =
    m_tableMsgno =
-   m_tablePos = NULL;
+   m_tablePos = nullptr;
 
-   m_thrData = NULL;
+   m_thrData = nullptr;
 
    m_dontFreeMsgnos = false;
    m_firstSort = true;
@@ -583,7 +578,7 @@ MsgnoType HeaderInfoListImpl::Count(void) const
 
 HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
 {
-   CHECK( n < m_count, NULL, _T("invalid index in HeaderInfoList::GetItemByIndex") );
+   CHECK( n < m_count, nullptr, _T("invalid index in HeaderInfoList::GetItemByIndex") );
 
    if ( !IsHeaderValid(n) )
    {
@@ -744,10 +739,10 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
    ASSERT_MSG( m_count, _T("removing a message from empty folder?") );
 
-   if ( n < m_headers.GetCount() )
+   if ( n < m_headers.size() )
    {
       delete m_headers[n];
-      m_headers.RemoveAt(n);
+      m_headers.erase(m_headers.begin() + n);
 
       // the indices are shifted (and one is even removed completely), so
       // invalidate the pointers into m_headers
@@ -981,7 +976,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
             if ( m_tablePos )
             {
                delete [] m_tablePos;
-               m_tablePos = NULL;
+               m_tablePos = nullptr;
             }
 
             // we must have the correct (i.e. updated) value of m_sizeTables
@@ -1135,7 +1130,7 @@ HeaderInfoListImpl::FindFirstInRange(const MsgnoArray& array,
 
    // test for m_count in the loop to detect if the folder is unexpectedly
    // closed
-   const size_t count = array.GetCount();
+   const size_t count = array.size();
    for ( size_t n = 0; m_count && n < count; n++ )
    {
       MsgnoType pos = GetPosFromIdx(array[n] - 1);
@@ -1224,7 +1219,7 @@ MsgnoType HeaderInfoListImpl::GetNthSortedMsgno(MsgnoType n) const
 }
 
 
-size_t* globalInvSortTable = 0;
+size_t* globalInvSortTable = nullptr;
 
 extern "C"
 {
@@ -1237,7 +1232,7 @@ extern "C"
       size_t count = 0;
       while (msgno == 0) {
          p = p->next;
-         if (p == 0) {
+         if (p == nullptr) {
             break;
          }
          msgno = FindMsgno(p);
@@ -1265,7 +1260,7 @@ extern "C"
 
 
 static void ApplyOrdering(THREADNODE* th) {
-   if (th->next == 0) {
+   if (th->next == nullptr) {
       // No children to sort
       return;
    }
@@ -1299,7 +1294,7 @@ static void ApplyOrdering(THREADNODE* th) {
    for (size_t i = 0; i < nbKids-1; i++) {
       kids[i]->branch = kids[i+1];
    }
-   kids[nbKids-1]->branch = 0;
+   kids[nbKids-1]->branch = nullptr;
 
    // We're done. Clean up.
    delete [] kids;
@@ -1326,13 +1321,13 @@ THREADNODE* ReOrderTree(THREADNODE* thrNode, MsgnoType *sortTable,
    // root node, not a list, at first level. So we build
    // a fake one here.
    THREADNODE fakeRoot;
-   fakeRoot.branch = 0;
+   fakeRoot.branch = nullptr;
    fakeRoot.next = thrNode;
    ApplyOrdering(&fakeRoot);
 
    // Clean up
    delete [] globalInvSortTable;
-   globalInvSortTable = 0;
+   globalInvSortTable = nullptr;
 
    return fakeRoot.next;
 }
@@ -1383,7 +1378,7 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
       }
 
       size_t nbChildren = 0;
-      if (node->next != 0)
+      if (node->next != nullptr)
       {
          // Node has at least one child
          size_t indentForKid = indent;
@@ -1487,7 +1482,7 @@ void HeaderInfoListImpl::BuildTables()
    // this also makes sense because the server side sorting/threading seems to
    // be much faster the subsequent times (the server probably keeps some data
    // alive) but the first time it's really slow
-   scoped_ptr<BusyIndicator> busy;
+   std::unique_ptr<BusyIndicator> busy;
 
    // no tables, check if we need them
 
@@ -1622,13 +1617,13 @@ void HeaderInfoListImpl::FreeTables()
          m_dontFreeMsgnos = false;
       else
          delete [] m_tableMsgno;
-      m_tableMsgno = NULL;
+      m_tableMsgno = nullptr;
    }
 
    if ( m_tablePos )
    {
       delete [] m_tablePos;
-      m_tablePos = NULL;
+      m_tablePos = nullptr;
    }
 }
 
@@ -1641,7 +1636,7 @@ void HeaderInfoListImpl::FreeSortData()
    if ( m_tableSort )
    {
       delete [] m_tableSort;
-      m_tableSort = NULL;
+      m_tableSort = nullptr;
    }
 }
 
@@ -1816,7 +1811,7 @@ void HeaderInfoListImpl::FreeThreadData()
    if ( m_thrData )
    {
       delete m_thrData;
-      m_thrData = NULL;
+      m_thrData = nullptr;
    }
 }
 
@@ -1892,7 +1887,7 @@ void HeaderInfoListImpl::ExpandToMakeIndexValid(MsgnoType n)
    // it up to n with NULLs
    //
    // TODO: add SetCount() to wxArray instead
-   size_t count = m_headers.GetCount();
+   size_t count = m_headers.size();
    if ( count <= n )
    {
       // adding elements to array may need realloc()ing and invalidate the
@@ -1901,7 +1896,7 @@ void HeaderInfoListImpl::ExpandToMakeIndexValid(MsgnoType n)
 
       while ( count++ <= n )
       {
-         m_headers.Add(NULL);
+         m_headers.push_back(nullptr);
       }
    }
 }
@@ -1909,7 +1904,7 @@ void HeaderInfoListImpl::ExpandToMakeIndexValid(MsgnoType n)
 void HeaderInfoListImpl::Cache(const Sequence& seq)
 {
    UIdType idxMax;
-   seq.GetBounds(NULL, &idxMax);
+   seq.GetBounds(nullptr, &idxMax);
 
    // make it an index from msgno
    idxMax--;
@@ -1976,10 +1971,10 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
             return;
          }
 
-         msgnos.Add(msgno);
+         msgnos.push_back(msgno);
       }
 
-      msgnos.Sort(MsgnoCmpFunc);
+      std::sort(msgnos.begin(), msgnos.end());
 
       seqMsgnos.AddArray(msgnos);
    }
@@ -2015,7 +2010,7 @@ bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
    CHECK( idx < m_count, false,
           _T("HeaderInfoListImpl::IsInCache(): invalid position") );
 
-   return (idx < m_headers.GetCount()) && (m_headers[idx] != NULL);
+   return (idx < m_headers.size()) && (m_headers[idx] != nullptr);
 }
 
 bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)

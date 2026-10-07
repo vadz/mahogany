@@ -333,11 +333,11 @@ static bool FilterExists(const String& name);
 
 // create a new filter, return its name (or an empty string if the filter
 // creation was cancelled)
-static String CreateNewFilter(wxWindow *parent, ConfigSource *config = NULL);
+static String CreateNewFilter(wxWindow *parent, ConfigSource *config = nullptr);
 
 // edit the filter with given name, return TRUE if anything changed
 static bool
-EditFilter(const String& name, wxWindow *parent, ConfigSource *config = NULL);
+EditFilter(const String& name, wxWindow *parent, ConfigSource *config = nullptr);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -358,8 +358,8 @@ public:
    virtual ~wxOneFilterDialog();
 
    // transfer data to/from dialog
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    // returns TRUE if the format string was changed
    bool HasChanges() const { return !(*m_FilterData == m_OriginalFilterData);}
@@ -591,7 +591,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    m_Parent = parent;
 
    // don't create it yet as it might be not needed at all, so postpone it
-   m_btnSpam = NULL;
+   m_btnSpam = nullptr;
 
    // only create the logical condition (And/Or) control if we have
    // something to combine this one with
@@ -615,7 +615,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
                               : ORC_L_Or);
    }
    else
-      m_Logical = NULL;
+      m_Logical = nullptr;
 
    m_Not = new wxCheckBox(parent, -1, _("Not"));
 
@@ -1232,7 +1232,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_initializing = true;
    m_nControls = 0;
    m_FilterData = fd;
-   SetAutoLayout( TRUE );
+   SetAutoLayout( true );
    wxLayoutConstraints *c;
 
    // Remove unimplemented labels for tests and actions
@@ -1241,7 +1241,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    SKIP_UNIMPLEMENTED_LABELS( OAC_Types, OAC_T_Swap, OAC_TypesCountS,
                               FilterActionImplemented );
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), false,
                                              MH_DIALOG_FILTERS_DETAILS);
 
    /// The name of the filter rule:
@@ -1286,14 +1286,14 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_textProgram->SetConstraints(c);
 
-   m_Panel = new wxEnhancedPanel(this, TRUE);
+   m_Panel = new wxEnhancedPanel(this, true);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.Below(m_NameCtrl,  2*LAYOUT_Y_MARGIN);
    c->bottom.Above(m_textProgram, -2*LAYOUT_Y_MARGIN);
    m_Panel->SetConstraints(c);
-   m_Panel->SetAutoLayout(TRUE);
+   m_Panel->SetAutoLayout(true);
 
    m_OriginalFilterData = *m_FilterData;
 
@@ -1332,7 +1332,7 @@ wxOneFilterDialog::LayoutControls()
 
    if ( m_isSimple )
    {
-      wxWindow *last = NULL;
+      wxWindow *last = nullptr;
 
       c = new wxLayoutConstraints;
       c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -1382,7 +1382,7 @@ wxOneFilterDialog::AddOneControl()
 {
    ASSERT_MSG( m_nControls < MAX_CONTROLS, _T("too many filter controls") );
 
-   OneCritControl *prev = m_nControls == 0 ? NULL
+   OneCritControl *prev = m_nControls == 0 ? nullptr
                                            : m_CritControl[m_nControls - 1];
    m_CritControl[m_nControls] = new OneCritControl(m_Panel->GetCanvas(), prev);
    m_nControls++;
@@ -1566,7 +1566,7 @@ wxOneFilterDialog::TransferDataToWindow()
    // now any updates come from user, not from program
    m_initializing = false;
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1607,7 +1607,7 @@ wxOneFilterDialog::DoTransferDataFromWindow(MFilterDesc *filterData)
       filterData->Set(settings);
    }
 
-   return TRUE;
+   return true;
 }
 
 bool
@@ -1631,8 +1631,8 @@ public:
    wxAllFiltersDialog(wxWindow *parent);
 
    // transfer data to/from dialog
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // returns TRUE if the format string was changed
    bool HasChanges(void) const { return m_hasChanges; }
@@ -1693,7 +1693,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("All &filters:"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("All &filters:"), false,
                                              MH_DIALOG_FILTERS);
 
    /* This dialog is supposed to look like this:
@@ -1763,7 +1763,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
    m_lboxFilters = new wxPListBox(_T("FiltersList"),
                                   this, -1,
                                   wxDefaultPosition, wxDefaultSize,
-                                  0, NULL,
+                                  0, nullptr,
                                   wxLB_SORT);
    m_lboxFilters->SetConstraints(c);
 
@@ -1795,7 +1795,7 @@ wxAllFiltersDialog::OnAddFiter(wxCommandEvent& /* event */)
    // ensure that we save changes to the selected config source, if any
    ConfigSource * const config = m_chcSources
                                     ? m_chcSources->GetSelectedSource()
-                                    : NULL;
+                                    : nullptr;
 
    const String name = CreateNewFilter(this, config);
    if ( name.empty() )
@@ -1882,7 +1882,7 @@ wxAllFiltersDialog::OnEditFiter(wxCommandEvent& /* event */)
    CHECK_RET( !!name, _T("must have selection in the listbox") );
 
    if ( EditFilter(name, this, m_chcSources ? m_chcSources->GetSelectedSource()
-                                            : NULL) )
+                                            : nullptr) )
    {
       // filter changed
       m_hasChanges = true;
@@ -1903,7 +1903,7 @@ public:
       , m_nameNew(nameNew)
    {  }
 
-   virtual bool OnVisitFolder(const wxString& folderName)
+   bool OnVisitFolder(const wxString& folderName) override
       {
          MFolder* folder = MFolder::Get(folderName);
          CHECK( folder, false, _T("RenameAFilterTraversal: NULL folder") );
@@ -2103,7 +2103,7 @@ public:
                                  folderName));
       }
 
-   virtual bool TransferDataToWindow()
+   bool TransferDataToWindow() override
    {
       return DoFillWithFilters(m_filterNames);
    }
@@ -2122,8 +2122,8 @@ public:
    wxFolderFiltersDialog(MFolder *folder, wxWindow *parent);
    virtual ~wxFolderFiltersDialog();
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    // event handlers
@@ -2272,7 +2272,7 @@ bool wxFolderFiltersDialog::TransferDataToWindow()
       //else: we already have it
    }
 
-   return TRUE;
+   return true;
 }
 
 bool wxFolderFiltersDialog::TransferDataFromWindow()
@@ -2300,7 +2300,7 @@ bool wxFolderFiltersDialog::TransferDataFromWindow()
       m_folder->SetFilters(m_filters);
    }
 
-   return TRUE;
+   return true;
 }
 
 void wxFolderFiltersDialog::OnAddButton(wxCommandEvent& event)
@@ -2393,13 +2393,13 @@ public:
 
    virtual ~wxQuickFilterDialog();
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
 protected:
    // implement base class pure virtual
-   virtual Profile *GetProfile() const;
-   virtual wxWindow *CreateMainWindow(wxPanel *panel);
+   Profile *GetProfile() const override;
+   wxWindow *CreateMainWindow(wxPanel *panel) override;
 
    void DoUpdateUI() { m_action->UpdateUI(); }
 
@@ -2481,7 +2481,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    // this is used in OnText() to check if we had finished with initializing
    // the dialog
-   m_action = NULL;
+   m_action = nullptr;
 
    CreateAllControls(ProfileEdit_WithoutApply | ProfileEdit_NoDefSize);
 
@@ -2705,7 +2705,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
       return false;
 
    // construct the object we use to initialize the filter
-   MFDialogSettings *settings = NULL;
+   MFDialogSettings *settings = nullptr;
    String name = _("quick filter ");
 
    for ( size_t n = 0; n < Filter_Max; n++ )
@@ -2720,7 +2720,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
    const wxString arg = m_action->GetArgument();
    settings->SetAction(action, arg);
 
-   MFilter_obj filter(name);
+   MFilter_obj filter(MFilter::CreateFromProfile(name));
    MFilterDesc fd;
    fd.SetName(name);
    fd.Set(settings);
@@ -2761,7 +2761,7 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
             profileTargetFolder->writeEntry(MP_COMPOSE_TO, recipient);
          if ( !sender.empty() )
          {
-            AddressList_obj addrList(sender);
+            AddressList_obj addrList(AddressList::Create(sender));
             Address* const addr = addrList->GetFirst();
             if ( !addr )
             {
@@ -2924,7 +2924,7 @@ static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
       }
 
       // create the new filter
-      MFilter_obj filter(name);
+      MFilter_obj filter(MFilter::CreateFromProfile(name));
 
       // ensure that it is saved to the specified config source
       Profile_obj profileFilter(filter->GetProfile());
@@ -2936,7 +2936,7 @@ static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
       // before MFilter one which is where the filter is really saved to config
       {
          MFilter_obj filterNull;
-         filter.Swap(filterNull);
+         filter.swap(filterNull);
       }
    }
    //else: cancelled
@@ -2947,7 +2947,7 @@ static String CreateNewFilter(wxWindow *parent, ConfigSource *config)
 static bool
 EditFilter(const String& name, wxWindow *parent, ConfigSource *config)
 {
-   MFilter_obj filter(name);
+   MFilter_obj filter(MFilter::CreateFromProfile(name));
    CHECK( filter, false, _T("filter unexpectedly missing") );
 
    MFilterDesc fd = filter->GetDesc();
@@ -3017,7 +3017,7 @@ extern bool FindFiltersForFolder(MFolder *folder, wxWindow *parent)
    {
       // examine this filter: we can only really parse simple filters
       const String& filterName = allFilters[n];
-      MFilter_obj filter(filterName);
+      MFilter_obj filter(MFilter::CreateFromProfile(filterName));
       MFilterDesc fdesc(filter->GetDesc());
       if ( fdesc.IsSimple() )
       {

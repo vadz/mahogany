@@ -85,7 +85,7 @@ struct MailFolderStatus
 extern String FormatFolderStatusString(const String& format,
                                        const String& folderName,
                                        MailFolderStatus *status,
-                                       const MailFolder *mf = NULL);
+                                       const MailFolder *mf = nullptr);
 
 
 #endif // _MFSTATUS_H_

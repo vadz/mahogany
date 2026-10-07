@@ -31,7 +31,7 @@
 // ----------------------------------------------------------------------------
 // AdbProviderInfo
 // ----------------------------------------------------------------------------
-AdbDataProvider::AdbProviderInfo *AdbDataProvider::ms_listProviders = NULL;
+AdbDataProvider::AdbProviderInfo *AdbDataProvider::ms_listProviders = nullptr;
 
 AdbDataProvider::AdbProviderInfo::AdbProviderInfo(const char *name,
                                                   Constructor ctor,
@@ -77,7 +77,7 @@ AdbDataProvider *AdbDataProvider::GetProviderByName(const String& name)
 
   if ( !info ) {
     // no provider with such name
-    return NULL;
+    return nullptr;
   }
 
   return info->CreateProvider();

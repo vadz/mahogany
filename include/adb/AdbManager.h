@@ -19,6 +19,8 @@
 
 #include "RecipientType.h"
 
+#include <vector>
+
 #ifndef USE_PCH
 #  include "Profile.h"      // for Profile
 #  include <wx/dynarray.h>
@@ -31,10 +33,10 @@ class AdbDataProvider;
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 // arrays
-WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
-WX_DEFINE_ARRAY(AdbEntryGroup *, ArrayAdbGroups);
-WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
-WX_DEFINE_ARRAY(AdbElement *, ArrayAdbElements);
+using ArrayAdbBooks = std::vector<AdbBook *>;
+using ArrayAdbGroups = std::vector<AdbEntryGroup *>;
+using ArrayAdbEntries = std::vector<AdbEntry *>;
+using ArrayAdbElements = std::vector<AdbElement *>;
 
 /**
   A book corresponds to a physical medium (disk file, database...), the
@@ -86,8 +88,8 @@ public:
     //  if providerName != NULL it's filled with the name of provider used
     //  to create the book
   AdbBook *CreateBook(const String& name,
-                      AdbDataProvider *provider = NULL,
-                      String *providerName = NULL);
+                      AdbDataProvider *provider = nullptr,
+                      String *providerName = nullptr);
     /// delete the given book
   void DeleteBook(size_t n);
 
@@ -148,7 +150,7 @@ public:
    AdbManager *operator->() const { return m_manager; }
 
    // testing for validity
-   operator bool() const { return m_manager != NULL; }
+   operator bool() const { return m_manager != nullptr; }
 
 private:
    AdbManager *m_manager;
@@ -175,7 +177,7 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
                                   AdbLookup_FullName |
                                   AdbLookup_EMail,
                       int how = AdbLookup_Substring,
-                      AdbEntryGroup *group = NULL);
+                      AdbEntryGroup *group = nullptr);
 
 /**
   Expand the abbreviated address: i.e. looks for an address entry which starts

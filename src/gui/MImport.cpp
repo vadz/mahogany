@@ -41,6 +41,8 @@
 
 #include "MImport.h"
 
+#include <vector>
+
 class MPersMsgBox;
 
 // ----------------------------------------------------------------------------
@@ -53,7 +55,7 @@ extern const MPersMsgBox *M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT;
 // array classes
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY(MImporter *, wxArrayImporters);
+using wxArrayImporters = std::vector<MImporter *>;
 
 // ----------------------------------------------------------------------------
 // private function prototypes
@@ -141,9 +143,9 @@ public:
 
    virtual ~wxImportDialogLog() { delete wxLog::SetActiveTarget(m_logOld); }
 
-   virtual void DoLogRecord(wxLogLevel WXUNUSED(level),
-                            const wxString& szString,
-                            const wxLogRecordInfo& info)
+   void DoLogRecord(wxLogLevel WXUNUSED(level),
+                    const wxString& szString,
+                    const wxLogRecordInfo& info) override
    {
       const wxLongLong t = info.timestampMS;
       m_dialog->GetLogListBox()->Append(
@@ -211,7 +213,7 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
 
    #define INIT_IMPORT(what)                    \
       if ( flags & MImporter::Import_##what )   \
-         m_check##what->SetValue(TRUE);         \
+         m_check##what->SetValue(true);         \
       else                                      \
          m_check##what->Disable()
 
@@ -236,7 +238,7 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
    topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxCENTRE | wxALL, 10 );
    SetOkBtnLabel(_("&Start"));
 
-   SetAutoLayout( TRUE );
+   SetAutoLayout( true );
    SetSizer( topsizer );
 
    topsizer->SetSizeHints( this );
@@ -280,7 +282,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
 
       if ( m_checkFolders->GetValue() )
       {
-         MFolder *folderParent = NULL;
+         MFolder *folderParent = nullptr;
          int flags = 0;
 
          String msg;
@@ -312,12 +314,12 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
             {
                folderParent = CreateFolderTreeEntry
                               (
-                               NULL,
+                               nullptr,
                                folderName,
                                MF_GROUP,
                                0,
                                wxEmptyString,
-                               FALSE
+                               false
                               );
             }
          }
@@ -399,7 +401,7 @@ static bool FindAllImporters(wxArrayImporters& importers,
       {
          if ( importer->Applies() )
          {
-            importers.Add(importer);
+            importers.push_back(importer);
             prognames.Add(importer->GetProgName());
          }
          else
@@ -415,13 +417,13 @@ static bool FindAllImporters(wxArrayImporters& importers,
 
    listing->DecRef();
 
-   return importers.GetCount() > 0;
+   return importers.size() > 0;
 }
 
 // frees all importers in the array
 static void FreeImporters(const wxArrayImporters& importers)
 {
-   size_t count = importers.GetCount();
+   size_t count = importers.size();
    for ( size_t n = 0; n < count; n++ )
    {
       importers[n]->DecRef();

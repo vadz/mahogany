@@ -30,55 +30,55 @@ class MessageCC : public Message
 {
 public:
    // get specfied header lines
-   virtual wxArrayString GetHeaderLines(const char **headers,
-                                        wxArrayInt *encodings = NULL) const;
+   wxArrayString GetHeaderLines(const char **headers,
+                                wxArrayInt *encodings = nullptr) const override;
 
-   virtual String GetHeader(void) const;
+   String GetHeader(void) const override;
 
    /** @name Envelop headers */
    //@{
    /** get Subject line
        @return Subject entry
    */
-   virtual String Subject(void) const;
+   String Subject(void) const override;
 
    /** return the date of the message */
-   virtual time_t GetDate() const;
+   time_t GetDate() const override;
 
    /** Return message id. */
-   virtual String GetId(void) const ;
+   String GetId(void) const override ;
 
    /** Return message references. */
-   virtual String GetReferences(void) const;
+   String GetReferences(void) const override;
 
-   virtual String GetInReplyTo(void) const;
+   String GetInReplyTo(void) const override;
 
-   virtual String GetNewsgroups() const;
+   String GetNewsgroups() const override;
    //@}
 
-   virtual size_t GetAddresses(MessageAddressType type,
-                               wxArrayString& addresses) const;
+   size_t GetAddresses(MessageAddressType type,
+                       wxArrayString& addresses) const override;
 
-   virtual AddressList *GetAddressList(MessageAddressType type) const;
+   AddressList *GetAddressList(MessageAddressType type) const override;
 
    /** get From line
        @return From entry
    */
-   virtual String From(void) const;
+   String From(void) const override;
 
    /** get Date line
        @return Date when message was sent
    */
-   virtual String Date(void) const;
+   String Date(void) const override;
 
    /** get message text
        @return the uninterpreted message body
    */
-   virtual String FetchText(void) const;
+   String FetchText(void) const override;
 
    /** get the raw part text
     */
-   const char *GetRawPartData(const MimePart& mimepart, unsigned long *len = NULL);
+   const char *GetRawPartData(const MimePart& mimepart, unsigned long *len = nullptr);
 
    /**
       Get all headers of this message part.
@@ -87,45 +87,45 @@ public:
      */
    String GetPartHeaders(const MimePart& mimepart);
 
-   virtual const MimePart *GetTopMimePart() const;
+   const MimePart *GetTopMimePart() const override;
 
    /** return the number of body parts in message
        @return the number of body parts
    */
-   virtual int CountParts(void) const;
+   int CountParts(void) const override;
 
-   virtual const MimePart *GetMimePart(int n) const;
+   const MimePart *GetMimePart(int n) const override;
 
    /** Returns a pointer to the folder. If the caller needs that
        folder to stay around, it should IncRef() it. It's existence is
        guaranteed for as long as the message exists.
        @return folder pointer (not incref'ed)
    */
-   virtual MailFolder * GetFolder(void) const;
+   MailFolder * GetFolder(void) const override;
 
-   virtual Profile *GetProfile() const { return m_Profile; }
+   Profile *GetProfile() const override { return m_Profile; }
 
    /** Return the numeric status of message.
        @return flags of message
    */
-   virtual int GetStatus() const;
+   int GetStatus() const override;
 
    // get the size in bytes
-   virtual unsigned long GetSize() const;
+   unsigned long GetSize() const override;
 
    /** Write the message to a String.
        @param str the string to write message text to
        @param headerFlag if true, include header
        @return FALSE on error
    */
-   virtual bool WriteToString(String &str, bool headerFlag = true) const;
+   bool WriteToString(String &str, bool headerFlag = true) const override;
 
    /// Return the numeric uid
-   virtual UIdType GetUId(void) const { return m_uid; }
+   UIdType GetUId(void) const override { return m_uid; }
 
    static MessageCC *Create(const char *text,
                             UIdType uid = UID_ILLEGAL,
-                            Profile *profile = NULL)
+                            Profile *profile = nullptr)
    {
       return new MessageCC(text, uid, profile);
    }
@@ -146,7 +146,7 @@ protected:
    MessageCC(MailFolderCC *folder, const HeaderInfo& hi);
    MessageCC(const char *text,
              UIdType uid = UID_ILLEGAL,
-             Profile *profile = NULL);
+             Profile *profile = nullptr);
 
    /** destructor */
    ~MessageCC();
@@ -186,7 +186,7 @@ private:
          return true;
 
       const_cast<MessageCC*>(this)->GetEnvelope();
-      return m_Envelope != NULL;
+      return m_Envelope != nullptr;
    }
 
    /// get the cache element for this message

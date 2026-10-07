@@ -79,8 +79,8 @@ class wxMessageSortingDialog : public wxOptionsPageSubdialog
 public:
    wxMessageSortingDialog(Profile *profile, wxWindow *parent);
 
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    bool WasChanged(void) const { return m_wasChanged; }
 
@@ -114,7 +114,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                                                _("Message sorting"),
                                                _T("MessageSortingDialog"))
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("&Sort criteria"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&Sort criteria"), false,
                                              MH_DIALOG_SORTING);
 
    const wxCoord
@@ -250,7 +250,7 @@ bool wxMessageSortingDialog::TransferDataToWindow()
       if ( IsSortCritReversed(sortOrder) )
       {
          // it is MSO_XXX_REV
-         m_Checkboxes[n]->SetValue(TRUE);
+         m_Checkboxes[n]->SetValue(true);
       }
 
       m_Choices[n]->SetSelection(crit / 2);
@@ -260,7 +260,7 @@ bool wxMessageSortingDialog::TransferDataToWindow()
 
    m_checkUseServerSort->SetValue(m_UseServerSort);
 
-   return TRUE;
+   return true;
 }
 
 bool wxMessageSortingDialog::TransferDataFromWindow()
@@ -298,7 +298,7 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
       GetProfile()->writeEntry(MP_MSGS_SERVER_SORT, m_UseServerSort);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

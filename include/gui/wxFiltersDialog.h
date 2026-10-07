@@ -30,27 +30,27 @@
 // ----------------------------------------------------------------------------
 
 /// configure all existing filters
-extern bool ConfigureAllFilters(wxWindow *parent = NULL);
+extern bool ConfigureAllFilters(wxWindow *parent = nullptr);
 
 /// configure the filters to use for the folder
-extern bool ConfigureFiltersForFolder(MFolder *folder, wxWindow *parent = NULL);
+extern bool ConfigureFiltersForFolder(MFolder *folder, wxWindow *parent = nullptr);
 
 /// a function to edit/create a filter: will modify provided filterDesc
 extern bool ConfigureFilter(MFilterDesc *filterDesc,
-                            wxWindow *parent = NULL);
+                            wxWindow *parent = nullptr);
 
 /**
    Find all filters moving mail to the given folder and show them to user.
 
    @return true if any filters were found, false otherwise
  */
-extern bool FindFiltersForFolder(MFolder *folder, wxWindow *parent = NULL);
+extern bool FindFiltersForFolder(MFolder *folder, wxWindow *parent = nullptr);
 
 /// allows to create a filter from the subject/from values
 extern bool CreateQuickFilter(MFolder *folder,
                               const String& from,
                               const String& subject,
                               const String& to,
-                              wxWindow *parent = NULL);
+                              wxWindow *parent = nullptr);
 
 #endif // _WXFILTERSDIALOG_H_

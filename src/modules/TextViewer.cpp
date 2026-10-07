@@ -38,6 +38,8 @@
 
 #include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
 
+#include <vector>
+
 // only Win32 supports URLs in the text control natively so far, define this to
 // use this possibility
 //
@@ -56,7 +58,7 @@ class TextViewerWindow;
 class wxTextEasyPrinting : public wxHtmlEasyPrinting
 {
 public:
-   wxTextEasyPrinting(const wxString& name, wxWindow *parent = NULL)
+   wxTextEasyPrinting(const wxString& name, wxWindow *parent = nullptr)
       : wxHtmlEasyPrinting(name, GetFrame(parent)) { }
 
    bool Print(wxTextCtrl *text) { return PrintText(ControlToHtml(text)); }
@@ -79,56 +81,56 @@ public:
    TextViewer();
 
    // creation &c
-   virtual void Create(MessageView *msgView, wxWindow *parent);
-   virtual void Clear();
-   virtual void Update();
-   virtual void UpdateOptions();
-   virtual wxWindow *GetWindow() const;
+   void Create(MessageView *msgView, wxWindow *parent) override;
+   void Clear() override;
+   void Update() override;
+   void UpdateOptions() override;
+   wxWindow *GetWindow() const override;
 
    // operations
-   virtual bool Find(const String& text);
-   virtual bool FindAgain();
-   virtual void SelectAll();
-   virtual String GetSelection() const;
-   virtual void Copy();
-   virtual bool Print();
-   virtual void PrintPreview();
+   bool Find(const String& text) override;
+   bool FindAgain() override;
+   void SelectAll() override;
+   String GetSelection() const override;
+   void Copy() override;
+   bool Print() override;
+   void PrintPreview() override;
 
    // header showing
-   virtual void StartHeaders();
-   virtual void ShowRawHeaders(const String& header);
-   virtual void ShowHeaderName(const String& name);
-   virtual void ShowHeaderValue(const String& value,
-                                wxFontEncoding encoding);
-   virtual void ShowHeaderURL(const String& text,
-                              const String& url);
-   virtual void EndHeader();
-   virtual void ShowXFace(const wxBitmap& bitmap);
-   virtual void EndHeaders();
+   void StartHeaders() override;
+   void ShowRawHeaders(const String& header) override;
+   void ShowHeaderName(const String& name) override;
+   void ShowHeaderValue(const String& value,
+                        wxFontEncoding encoding) override;
+   void ShowHeaderURL(const String& text,
+                      const String& url) override;
+   void EndHeader() override;
+   void ShowXFace(const wxBitmap& bitmap) override;
+   void EndHeaders() override;
 
    // body showing
-   virtual void StartBody();
-   virtual void StartPart();
-   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
-   virtual void InsertClickable(const wxBitmap& icon,
-                                ClickableInfo *ci,
-                                const wxColour& col);
-   virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
-   virtual void InsertRawContents(const String& data);
-   virtual void InsertText(const String& text, const MTextStyle& style);
-   virtual void InsertURL(const String& text, const String& url);
-   virtual void EndPart();
-   virtual void EndBody();
+   void StartBody() override;
+   void StartPart() override;
+   void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) override;
+   void InsertClickable(const wxBitmap& icon,
+                        ClickableInfo *ci,
+                        const wxColour& col) override;
+   void InsertImage(const wxImage& image, ClickableInfo *ci) override;
+   void InsertRawContents(const String& data) override;
+   void InsertText(const String& text, const MTextStyle& style) override;
+   void InsertURL(const String& text, const String& url) override;
+   void EndPart() override;
+   void EndBody() override;
 
    // scrolling
-   virtual bool LineDown();
-   virtual bool LineUp();
-   virtual bool PageDown();
-   virtual bool PageUp();
+   bool LineDown() override;
+   bool LineUp() override;
+   bool PageDown() override;
+   bool PageUp() override;
 
    // capabilities querying
-   virtual bool CanInlineImages() const;
-   virtual bool CanProcess(const String& mimetype) const;
+   bool CanInlineImages() const override;
+   bool CanProcess(const String& mimetype) const override;
 
 private:
    // create m_printText if necessary
@@ -172,10 +174,10 @@ public:
    {
    }
 
-   virtual String GetLabel() const { return "Face picture"; }
+   String GetLabel() const override { return "Face picture"; }
 
-   virtual void OnLeftClick() const { DoShow(); }
-   virtual void OnRightClick(const wxPoint& /* pt */) const { }
+   void OnLeftClick() const override { DoShow(); }
+   void OnRightClick(const wxPoint& /* pt */) const override { }
 
 private:
    class FaceWindow : public wxDialog
@@ -242,7 +244,7 @@ private:
    ClickableInfo *m_ci;
 };
 
-WX_DEFINE_ARRAY(TextViewerClickable *, ArrayClickables);
+using ArrayClickables = std::vector<TextViewerClickable *>;
 
 // ----------------------------------------------------------------------------
 // TextViewerWindow: the viewer window used by TextViewer
@@ -259,8 +261,8 @@ public:
                         const wxColour& col = wxNullColour);
 
    // override some base class virtuals
-   virtual void Clear();
-   virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
+   void Clear() override;
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 
 private:
 #ifdef USE_AUTO_URL_DETECTION
@@ -432,7 +434,7 @@ void TextViewerWindow::InsertClickable(const wxString& text,
 
    TextViewerClickable *clickable =
       new TextViewerClickable(ci, GetLastPosition(), text.length());
-   m_clickables.Add(clickable);
+   m_clickables.push_back(clickable);
 
    AppendText(text);
 
@@ -492,7 +494,7 @@ void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 
 bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 {
-   size_t count = m_clickables.GetCount();
+   size_t count = m_clickables.size();
    for ( size_t n = 0; n < count; n++ )
    {
       TextViewerClickable *clickable = m_clickables[n];
@@ -564,11 +566,11 @@ IMPLEMENT_MESSAGE_VIEWER
 
 TextViewer::TextViewer()
 {
-   m_window = NULL;
+   m_window = nullptr;
    m_posFind = -1;
 
 #if wxUSE_PRINTING_ARCHITECTURE
-   m_printText = NULL;
+   m_printText = nullptr;
 #endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
@@ -645,7 +647,7 @@ bool TextViewer::FindAgain()
       p += m_posFind + 1;
    }
 
-   p = *p != '\0' ? wxStrstr(p, m_textFind) : NULL;
+   p = *p != '\0' ? wxStrstr(p, m_textFind) : nullptr;
 
    if ( p )
    {
@@ -658,7 +660,7 @@ bool TextViewer::FindAgain()
       m_window->SetSelection(0, 0);
    }
 
-   return p != NULL;
+   return p != nullptr;
 }
 
 void TextViewer::Copy()

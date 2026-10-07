@@ -44,9 +44,11 @@
 #include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
 #include <wx/html/m_templ.h>    // for TAG_HANDLER_BEGIN
 
+#include <vector>
+
 class HtmlViewerWindow;
 
-WX_DEFINE_ARRAY(ClickableInfo *, ArrayClickInfo);
+using ArrayClickInfo = std::vector<ClickableInfo *>;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -78,56 +80,56 @@ public:
    virtual ~HtmlViewer();
 
    // creation &c
-   virtual void Create(MessageView *msgView, wxWindow *parent);
-   virtual void Clear();
-   virtual void Update();
-   virtual void UpdateOptions();
-   virtual wxWindow *GetWindow() const;
+   void Create(MessageView *msgView, wxWindow *parent) override;
+   void Clear() override;
+   void Update() override;
+   void UpdateOptions() override;
+   wxWindow *GetWindow() const override;
 
    // operations
-   virtual bool Find(const String& text);
-   virtual bool FindAgain();
-   virtual void SelectAll();
-   virtual String GetSelection() const;
-   virtual void Copy();
-   virtual bool Print();
-   virtual void PrintPreview();
+   bool Find(const String& text) override;
+   bool FindAgain() override;
+   void SelectAll() override;
+   String GetSelection() const override;
+   void Copy() override;
+   bool Print() override;
+   void PrintPreview() override;
 
    // header showing
-   virtual void StartHeaders();
-   virtual void ShowRawHeaders(const String& header);
-   virtual void ShowHeaderName(const String& name);
-   virtual void ShowHeaderValue(const String& value,
-                                wxFontEncoding encoding);
-   virtual void ShowHeaderURL(const String& text,
-                              const String& url);
-   virtual void EndHeader();
-   virtual void ShowXFace(const wxBitmap& bitmap);
-   virtual void EndHeaders();
+   void StartHeaders() override;
+   void ShowRawHeaders(const String& header) override;
+   void ShowHeaderName(const String& name) override;
+   void ShowHeaderValue(const String& value,
+                        wxFontEncoding encoding) override;
+   void ShowHeaderURL(const String& text,
+                      const String& url) override;
+   void EndHeader() override;
+   void ShowXFace(const wxBitmap& bitmap) override;
+   void EndHeaders() override;
 
    // body showing
-   virtual void StartBody();
-   virtual void StartPart();
-   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
-   virtual void InsertClickable(const wxBitmap& icon,
-                                ClickableInfo *ci,
-                                const wxColour& col);
-   virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
-   virtual void InsertRawContents(const String& data);
-   virtual void InsertText(const String& text, const MTextStyle& style);
-   virtual void InsertURL(const String& text, const String& url);
-   virtual void EndPart();
-   virtual void EndBody();
+   void StartBody() override;
+   void StartPart() override;
+   void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) override;
+   void InsertClickable(const wxBitmap& icon,
+                        ClickableInfo *ci,
+                        const wxColour& col) override;
+   void InsertImage(const wxImage& image, ClickableInfo *ci) override;
+   void InsertRawContents(const String& data) override;
+   void InsertText(const String& text, const MTextStyle& style) override;
+   void InsertURL(const String& text, const String& url) override;
+   void EndPart() override;
+   void EndBody() override;
 
    // scrolling
-   virtual bool LineDown();
-   virtual bool LineUp();
-   virtual bool PageDown();
-   virtual bool PageUp();
+   bool LineDown() override;
+   bool LineUp() override;
+   bool PageDown() override;
+   bool PageUp() override;
 
    // capabilities querying
-   virtual bool CanInlineImages() const;
-   virtual bool CanProcess(const String& mimetype) const;
+   bool CanInlineImages() const override;
+   bool CanProcess(const String& mimetype) const override;
 
    // methods used by HtmlViewerWindow only
    MessageView *GetMessageView() const { return m_msgView; }
@@ -414,13 +416,13 @@ public:
    void ClearClickables();
 
    // override some base class virtuals
-   virtual void OnSetTitle(const wxString& title);
-   virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
-   virtual void OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y);
+   void OnSetTitle(const wxString& title) override;
+   void OnLinkClicked(const wxHtmlLinkInfo& link) override;
+   void OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y) override;
 
-   virtual wxHtmlOpeningStatus OnOpeningURL(wxHtmlURLType type,
-                                            const wxString& url,
-                                            wxString *redirect) const;
+   wxHtmlOpeningStatus OnOpeningURL(wxHtmlURLType type,
+                                    const wxString& url,
+                                    wxString *redirect) const override;
 
 
    // provide access to some wxHtmlWindow protected methods
@@ -451,13 +453,13 @@ public:
    {
       m_window = window;
 
-      m_window->GetViewStart(NULL, &m_y);
+      m_window->GetViewStart(nullptr, &m_y);
    }
 
    bool HasChanged() const
    {
       wxCoord y;
-      m_window->GetViewStart(NULL, &y);
+      m_window->GetViewStart(nullptr, &y);
 
       return m_y != y;
    }
@@ -491,7 +493,10 @@ HtmlViewerWindow::~HtmlViewerWindow()
 
 void HtmlViewerWindow::StoreClickable(ClickableInfo *ci, const String& url)
 {
-   m_clickables.Insert(ci, m_urls.Add(url));
+   // m_urls is sorted, so we need to insert into m_clickables at the same
+   // position to keep them in sync
+   const size_t index = m_urls.Add(url);
+   m_clickables.insert(m_clickables.begin() + index, ci);
 }
 
 void HtmlViewerWindow::ClearClickables()
@@ -505,7 +510,7 @@ ClickableInfo *HtmlViewerWindow::GetClickable(const String& url) const
 {
    int index = m_urls.Index(url);
 
-   return index == wxNOT_FOUND ? NULL : m_clickables[(size_t)index];
+   return index == wxNOT_FOUND ? nullptr : m_clickables[(size_t)index];
 }
 
 void HtmlViewerWindow::OnSetTitle(const wxString& /* title */)
@@ -590,13 +595,13 @@ HtmlViewer::HtmlViewer()
 
    wxFileSystem::AddHandler(new wxInternetFSHandler);
 
-   m_window = NULL;
+   m_window = nullptr;
 
    m_nPart =
    m_nImage = 0;
 
 #if wxUSE_PRINTING_ARCHITECTURE
-   m_printHtml = NULL;
+   m_printHtml = nullptr;
 #endif // wxUSE_PRINTING_ARCHITECTURE
 
    m_hasHtmlContents = false;
@@ -1106,8 +1111,8 @@ void HtmlViewer::InsertRawContents(const String& data)
          m_end = text.end();
       }
 
-      virtual wxString GetSupportedTags() { return "BODY"; }
-      virtual bool HandleTag(const wxHtmlTag& tag)
+      wxString GetSupportedTags() override { return "BODY"; }
+      bool HandleTag(const wxHtmlTag& tag) override
       {
          // "end 1" is the position just before the closing tag while "end 2"
          // is after the tag, as we don't need the tag itself, use the former
@@ -1133,8 +1138,8 @@ void HtmlViewer::InsertRawContents(const String& data)
       BodyParser() { }
 
       // provide stubs for base class pure virtual methods which we don't use
-      virtual wxObject* GetProduct() { return NULL; }
-      virtual void AddText(const wxString& WXUNUSED(txt)) { }
+      wxObject* GetProduct() override { return nullptr; }
+      void AddText(const wxString& WXUNUSED(txt)) override { }
    };
 
    BodyTagHandler *handler = new BodyTagHandler(data);

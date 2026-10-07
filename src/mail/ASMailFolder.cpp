@@ -74,8 +74,8 @@ static
 UIdArray *Copy(const UIdArray *old)
 {
    UIdArray *newarray = new UIdArray;
-   for(size_t i = 0; i < old->Count(); i++)
-      newarray->Add( (*old)[i] );
+   for(size_t i = 0; i < old->size(); i++)
+      newarray->push_back( (*old)[i] );
    return newarray;
 }
 
@@ -91,7 +91,7 @@ public:
       {
          m_ASMailFolder = mf;
          SafeIncRef(mf);
-         m_MailFolder = mf ? mf->GetMailFolder() : NULL;
+         m_MailFolder = mf ? mf->GetMailFolder() : nullptr;
          m_UserData = ud;
       }
 
@@ -155,7 +155,7 @@ MailThread::Entry()
    //LockFolder();
    WorkFunction();
    //UnLockFolder();
-   return NULL; // no return value
+   return nullptr; // no return value
 }
 
 
@@ -191,7 +191,7 @@ public:
          // We don't delete the m_Seq array, this will be deleted by
          // the Result object when no longer needed.
          // After passing it to the Result, we set it to NULL to check.
-         ASSERT(m_Seq == NULL);
+         ASSERT(m_Seq == nullptr);
       }
 protected:
    UIdArray *m_Seq;
@@ -203,7 +203,7 @@ public:
    MT_Ping(ASMailFolder *mf,
            UserData ud)
       : MailThread(mf, ud) {}
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {  // Ping() does its own locking
          //m_MailFolder->UnLock();
          m_MailFolder->Ping();
@@ -225,7 +225,7 @@ public:
          m_Flag = flag;
          m_Set = set;
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          m_MailFolder->SetSequenceFlag(m_Kind, m_Sequence, m_Flag, m_Set);
       }
@@ -250,7 +250,7 @@ public:
          m_Flag = flag;
          m_Set = set;
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          m_MailFolder->SetFlagForAll(m_Flag, m_Set);
       }
@@ -271,12 +271,12 @@ public:
          m_Flag = flag;
          m_Set = set;
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          m_MailFolder->SetFlag(m_Seq, m_Flag, m_Set);
          delete m_Seq;
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 protected:
@@ -295,7 +295,7 @@ public:
          m_Flags = flags;
       }
 
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          bool rc = m_MailFolder->DeleteOrTrashMessages(m_Seq, m_Flags);
          SendEvent(ASMailFolder::ResultInt::Create
@@ -309,7 +309,7 @@ public:
                     )
                    );
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 
@@ -327,7 +327,7 @@ public:
       {
          m_Flags = flags;
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          bool rc = m_MailFolder->DeleteMessages(m_Seq, m_Flags);
          SendEvent(ASMailFolder::ResultInt::Create
@@ -341,7 +341,7 @@ public:
                     )
                    );
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 
@@ -360,14 +360,14 @@ public:
       {
          m_UId = uid;
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          Message *msg = m_MailFolder->GetMessage(m_UId);
          SendEvent(ASMailFolder::ResultMessage::Create
                    (
                      m_ASMailFolder,
                      m_Ticket,
-                     NULL,
+                     nullptr,
                      msg,
                      m_UId,
                      m_UserData
@@ -397,20 +397,20 @@ public:
 
       : MailThread(mf, ud)
       {
-         m_Message = NULL;
+         m_Message = nullptr;
          m_MsgString = msgstr;
       }
    ~MT_AppendMessage()
       {
          m_Message->DecRef();
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          int rc = m_Message ? m_MailFolder->AppendMessage(*m_Message)
                             : m_MailFolder->AppendMessage(m_MsgString);
          SendEvent(ASMailFolder::ResultInt::
                    Create(m_ASMailFolder, m_Ticket,
-                          ASMailFolder::Op_AppendMessage,  NULL,
+                          ASMailFolder::Op_AppendMessage,  nullptr,
                           rc,
                           m_UserData));
       }
@@ -423,8 +423,8 @@ class MT_Expunge : public MailThread
 {
 public:
    MT_Expunge(ASMailFolder *mf)
-      : MailThread(mf, NULL) {}
-   virtual void WorkFunction(void)
+      : MailThread(mf, nullptr) {}
+   void WorkFunction(void) override
       { m_MailFolder->ExpungeMessages(); }
 };
 
@@ -440,7 +440,7 @@ public:
       : MailThreadSeq(mf, ud, selections) 
       , m_read(read)
    {}
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
    { 
       bool rc = m_MailFolder->SetFlag(m_Seq, MailFolder::MSG_STAT_SEEN, m_read);
       //bool rc = m_MailFolder->MarkRead(m_Seq, (bool)m_UserData); 
@@ -455,7 +455,7 @@ public:
                  )
                );
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
    }
 };
@@ -465,14 +465,14 @@ class MT_SearchMessages : public MailThread
 public:
    MT_SearchMessages(ASMailFolder *mf, UserData ud, const SearchCriterium *crit)
       : MailThread(mf, ud) { m_Criterium = *crit;}
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          UIdArray *msgs = m_MailFolder->SearchMessages(&m_Criterium);
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket,
                                                    ASMailFolder::Op_SearchMessages,
                                                    msgs,
-                                                   msgs->Count(), m_UserData));
+                                                   msgs->size(), m_UserData));
       }
 private:
    SearchCriterium m_Criterium;
@@ -489,7 +489,7 @@ public:
       {
          m_MfName = folderName;
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          int rc = m_MailFolder->SaveMessages(m_Seq, m_MfName);
          SendEvent(ASMailFolder::ResultInt
@@ -499,7 +499,7 @@ public:
                             m_Seq,
                             rc, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -516,7 +516,7 @@ public:
       {
          m_Name = fileName;
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          int rc = m_MailFolder->SaveMessagesToFile(m_Seq, m_Name);
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
@@ -525,7 +525,7 @@ public:
                                                    m_Seq,
                                                    rc, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -540,7 +540,7 @@ public:
                                  ASMailFolder::OperationId op,
                                  const UIdArray *selections,
                                  wxWindow *parent,
-                                 MFolder *folder = NULL)
+                                 MFolder *folder = nullptr)
       : MailThreadSeq(mf, ud, selections)
       {
          m_Parent = parent;
@@ -549,7 +549,7 @@ public:
          ASSERT(m_Op == ASMailFolder::Op_SaveMessagesToFile ||
                 m_Op == ASMailFolder::Op_SaveMessagesToFolder);
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          int rc = m_Op == ASMailFolder::Op_SaveMessagesToFile
                   ? m_MailFolder->SaveMessagesToFile(m_Seq, wxEmptyString, m_Parent)
@@ -559,7 +559,7 @@ public:
                                                    m_Seq,
                                                    rc, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -583,7 +583,7 @@ public:
          ASSERT(m_Op == ASMailFolder::Op_ReplyMessages ||
                 m_Op == ASMailFolder::Op_ForwardMessages);
       }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          if(m_Op == ASMailFolder::Op_ReplyMessages)
             m_MailFolder->ReplyMessages(m_Seq, m_Params, m_Parent);
@@ -591,7 +591,7 @@ public:
             m_MailFolder->ForwardMessages(m_Seq, m_Params, m_Parent);
          delete m_Seq;
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -607,14 +607,14 @@ public:
                        const UIdArray *selections)
       : MailThreadSeq(mf, ud, selections)
       { }
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          int result = m_MailFolder->ApplyFilterRules(*m_Seq);
          SendEvent(ASMailFolder::ResultInt::Create(
             m_ASMailFolder, m_Ticket, ASMailFolder::Op_ApplyFilterRules, m_Seq,
             result, m_UserData));
 #ifdef DEBUG
-         m_Seq = NULL;
+         m_Seq = nullptr;
 #endif
       }
 private:
@@ -646,7 +646,7 @@ public:
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket,
                                                    ASMailFolder::Op_Subscribe,
-                                                   NULL, rc, m_UserData));
+                                                   nullptr, rc, m_UserData));
       }
 private:
    String  m_Host;
@@ -672,7 +672,7 @@ public:
          m_SubOnly = sub_only;
       }
 
-   virtual void WorkFunction(void)
+   void WorkFunction(void) override
       {
          m_MailFolder->ListFolders(m_ASMailFolder,
                                    m_Pattern,
@@ -711,8 +711,8 @@ public:
    /**@name Function for access control and event handling. */
    //@{
    /// Returns true if we have obtained the lock.
-   bool LockFolder(void);
-   void UnLockFolder(void);
+   bool LockFolder(void) override;
+   void UnLockFolder(void) override;
    //@}
 
    /**@name Asynchronous Access Functions, returning results in events.*/
@@ -720,22 +720,22 @@ public:
    /** Check whether mailbox has changed.
        @return void, but causes update events to be sent if necessary.
    */
-   virtual void Ping(void)
-      { (void) (new MT_Ping(this, NULL))->Start(); }
+   void Ping(void) override
+      { (void) (new MT_Ping(this, nullptr))->Start(); }
 
 
    /** get the message with unique id uid
        @param uid message uid
        @return ResultMessage with boolean success value
    */
-   virtual Ticket GetMessage(unsigned long uid, UserData ud)
+   Ticket GetMessage(unsigned long uid, UserData ud) override
       {
          return (new MT_GetMessage(this, ud, uid))->Start();
       }
 
-   virtual Ticket SetFlagForAll(int flag, bool set = true)
+   Ticket SetFlagForAll(int flag, bool set = true) override
       {
-         return (new MT_SetFlagForAll(this, NULL, flag, set))->Start();
+         return (new MT_SetFlagForAll(this, nullptr, flag, set))->Start();
       }
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
@@ -743,12 +743,12 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetSequenceFlag(MailFolder::SequenceKind kind,
-                                  const Sequence& sequence,
-                                  int flag,
-                                  bool set)
+   Ticket SetSequenceFlag(MailFolder::SequenceKind kind,
+                          const Sequence& sequence,
+                          int flag,
+                          bool set) override
       {
-         return (new MT_SetSequenceFlag(this, NULL,
+         return (new MT_SetSequenceFlag(this, nullptr,
                                         kind,sequence,flag,set))->Start();
       }
 
@@ -759,7 +759,7 @@ public:
    */
    virtual Ticket SetFlag(const UIdArray *sequence, int flag, bool set)
       {
-         return (new MT_SetFlag(this, NULL, sequence, flag, set))->Start();
+         return (new MT_SetFlag(this, nullptr, sequence, flag, set))->Start();
       }
 
 
@@ -767,7 +767,7 @@ public:
        @param msg the message to append
        @return true on success
    */
-   virtual Ticket AppendMessage(const Message *msg, UserData ud )
+   Ticket AppendMessage(const Message *msg, UserData ud ) override
       {
          CHECK(msg, ILLEGAL_TICKET, "NULL message");
 
@@ -778,14 +778,14 @@ public:
        @param msg text of the  message to append
        @return true on success
    */
-   virtual Ticket AppendMessage(const String &msg, UserData ud)
+   Ticket AppendMessage(const String &msg, UserData ud) override
       {
          return (new MT_AppendMessage(this, ud, msg))->Start();
       }
 
    /** Expunge messages.
     */
-   virtual Ticket ExpungeMessages(void)
+   Ticket ExpungeMessages(void) override
       {
          return (new MT_Expunge(this))->Start();
       }
@@ -794,9 +794,9 @@ public:
        @param selections the message indices which will be converted using the current listing
        @param read true if messages must be marked read
      */
-   virtual Ticket MarkRead(const UIdArray *selections,
-                           UserData ud,
-                           bool read)
+   Ticket MarkRead(const UIdArray *selections,
+                   UserData ud,
+                   bool read) override
       {
          return (new MT_MarkRead(this, ud, selections, read))->Start();
       }
@@ -804,7 +804,7 @@ public:
    /** Search Messages.
        @return a Result with a sequence of matching uids.
     */
-   virtual Ticket SearchMessages(const SearchCriterium *crit, UserData ud)
+   Ticket SearchMessages(const SearchCriterium *crit, UserData ud) override
       {
          return (new MT_SearchMessages(this, ud, crit))->Start();
       }
@@ -814,22 +814,22 @@ public:
    /** Delete a message.
        @param uid the message uid
    */
-   virtual Ticket DeleteMessage(unsigned long uid)
+   Ticket DeleteMessage(unsigned long uid) override
       {
          UIdArray uids;
-         uids.Add(uid);
-         return DeleteMessages(&uids, false, NULL);
+         uids.push_back(uid);
+         return DeleteMessages(&uids, false, nullptr);
       }
 
    /** UnDelete a message.
        @param uid the message uid
        @return ResultInt with boolean success value
    */
-   virtual Ticket UnDeleteMessage(unsigned long uid)
+   Ticket UnDeleteMessage(unsigned long uid) override
       {
          UIdArray uids;
-         uids.Add(uid);
-         return UnDeleteMessages(&uids, NULL);
+         uids.push_back(uid);
+         return UnDeleteMessages(&uids, nullptr);
       }
 
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
@@ -837,11 +837,11 @@ public:
        @pa   ram flag flag to be set, e.g. "\\Deleted"
        @param se   t if true, set the flag, if false, clear it
    */
-   virtual void SetMessageFlag(unsigned long uid,
-                               int flag, bool set)
+   void SetMessageFlag(unsigned long uid,
+                       int flag, bool set) override
       {
          UIdArray ua;
-         ua.Add(uid);
+         ua.push_back(uid);
 
          SetFlag(&ua, flag, set);
       }
@@ -861,9 +861,9 @@ public:
        a symbolic folder name, otherwise as a filename
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessages(const UIdArray *selections,
-                               String const & folderName,
-                               UserData ud)
+   Ticket SaveMessages(const UIdArray *selections,
+                       String const & folderName,
+                       UserData ud) override
       {
          return (new MT_SaveMessages(this, ud, selections, folderName))->Start();
       }
@@ -873,9 +873,9 @@ public:
        @param flags combination of MailFolder::DELETE_XXX bit flags
        @return ResultInt boolean
    */
-   virtual Ticket DeleteOrTrashMessages(const UIdArray *messages,
-                                        int flags,
-                                        UserData ud)
+   Ticket DeleteOrTrashMessages(const UIdArray *messages,
+                                int flags,
+                                UserData ud) override
       {
          return (new MT_DeleteOrTrashMessages(this, ud, messages, flags))->Start();
       }
@@ -884,9 +884,9 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket DeleteMessages(const UIdArray *messages,
-                                 int flags,
-                                 UserData ud)
+   Ticket DeleteMessages(const UIdArray *messages,
+                         int flags,
+                         UserData ud) override
       {
          return (new MT_DeleteMessages(this, ud, messages, flags))->Start();
       }
@@ -895,7 +895,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket UnDeleteMessages(const UIdArray *messages, UserData /* ud */)
+   Ticket UnDeleteMessages(const UIdArray *messages, UserData /* ud */) override
       {
          return SetFlag(messages, MailFolder::MSG_STAT_DELETED, false);
       }
@@ -905,8 +905,8 @@ public:
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessagesToFile(const UIdArray *messages,
-                                     const String &fileName, UserData ud)
+   Ticket SaveMessagesToFile(const UIdArray *messages,
+                             const String &fileName, UserData ud) override
       {
          return (new MT_SaveMessagesToFile(this, ud,
                                            messages, fileName))->Start();
@@ -917,8 +917,8 @@ public:
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessagesToFile(const UIdArray *messages,
-                                     wxWindow *parent, UserData ud)
+   Ticket SaveMessagesToFile(const UIdArray *messages,
+                             wxWindow *parent, UserData ud) override
       {
          return (new MT_SaveMessagesToFileOrFolder(this, ud,
                                                    Op_SaveMessagesToFile,
@@ -931,10 +931,10 @@ public:
        @param folder is the folder to save to, ask the user if NULL
        @return true if messages got saved
    */
-   virtual Ticket SaveMessagesToFolder(const UIdArray *messages,
-                                       wxWindow *parent,
-                                       MFolder *folder,
-                                       UserData ud)
+   Ticket SaveMessagesToFolder(const UIdArray *messages,
+                               wxWindow *parent,
+                               MFolder *folder,
+                               UserData ud) override
       {
          return (new MT_SaveMessagesToFileOrFolder(this, ud,
                                                    Op_SaveMessagesToFolder,
@@ -947,10 +947,10 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
-   virtual Ticket ReplyMessages(const UIdArray *messages,
-                                const MailFolder::Params& params,
-                                wxWindow *parent,
-                                UserData ud)
+   Ticket ReplyMessages(const UIdArray *messages,
+                        const MailFolder::Params& params,
+                        wxWindow *parent,
+                        UserData ud) override
    {
       return (new MT_ReplyForwardMessages(this, ud,
                                           Op_ReplyMessages,
@@ -963,10 +963,10 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
-   virtual Ticket ForwardMessages(const UIdArray *messages,
-                                  const MailFolder::Params& params,
-                                  wxWindow *parent,
-                                  UserData ud)
+   Ticket ForwardMessages(const UIdArray *messages,
+                          const MailFolder::Params& params,
+                          wxWindow *parent,
+                          UserData ud) override
    {
       return (new MT_ReplyForwardMessages(this, ud,
                                           Op_ForwardMessages,
@@ -977,7 +977,7 @@ public:
        Applies the rule to all messages listed in msgs.
        @return -1 if no filter module exists, return code otherwise
    */
-   virtual Ticket ApplyFilterRules(const UIdArray * msgs, UserData ud)
+   Ticket ApplyFilterRules(const UIdArray * msgs, UserData ud) override
    {
       return (new MT_ApplyFilterRules(this, ud, msgs))->Start();
    }
@@ -998,7 +998,7 @@ public:
                            bool subscribe,
                            UserData ud)
       {
-         return (new MT_Subscribe(NULL, ud, host, protocol,
+         return (new MT_Subscribe(nullptr, ud, host, protocol,
                                   mailboxname, subscribe))->Start();
       }
 #endif // USE_SUBSCRIBE
@@ -1027,25 +1027,25 @@ public:
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
-   virtual String GetName(void) const
+   String GetName(void) const override
       { AScheck(); return m_MailFolder->GetName(); }
    /** Get the profile.
        @return Pointer to the profile.
    */
-   Profile *GetProfile(void) const
+   Profile *GetProfile(void) const override
       { AScheck(); return m_MailFolder->GetProfile(); }
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
-   virtual HeaderInfoList *GetHeaders(void) const
+   HeaderInfoList *GetHeaders(void) const override
       { AScheck(); return m_MailFolder->GetHeaders(); }
    //@}
    /// Return the folder's type.
-   virtual MFolderType GetType(void) const
+   MFolderType GetType(void) const override
       { AScheck(); return m_MailFolder->GetType(); }
    /// Returns the underlying MailFolder object.
-   virtual MailFolder *GetMailFolder(void) const
+   MailFolder *GetMailFolder(void) const override
       { AScheck(); m_MailFolder->IncRef(); return m_MailFolder;}
    //@}
 private:
@@ -1107,19 +1107,19 @@ ASMailFolder::Create(MailFolder *mf)
 class ASTicketListImpl : public ASTicketList
 {
 public:
-   virtual bool Contains(Ticket t) const
+   bool Contains(Ticket t) const override
       {
          for(size_t i = 0; i < m_Tickets.Count(); i++)
             if( m_Tickets[i] == t)
                return true;
          return false;
       }
-   virtual void Add(Ticket t)
+   void Add(Ticket t) override
       {
          ASSERT(!Contains(t));
          m_Tickets.Add(t);
       }
-   virtual void Remove(Ticket t)
+   void Remove(Ticket t) override
       {
          ASSERT(Contains(t));
 
@@ -1127,13 +1127,13 @@ public:
          // not RemoveAt()
          m_Tickets.Remove( (int) t);
       }
-   virtual void Clear(void)
+   void Clear(void) override
       {
          m_Tickets.Clear();
       }
 
-   virtual bool IsEmpty(void) const { return m_Tickets.IsEmpty(); }
-   virtual Ticket Pop(void)
+   bool IsEmpty(void) const override { return m_Tickets.IsEmpty(); }
+   Ticket Pop(void) override
    {
       size_t n = m_Tickets.GetCount();
       CHECK( n > 0, ILLEGAL_TICKET, _T("ticket list is empty in Pop()") );

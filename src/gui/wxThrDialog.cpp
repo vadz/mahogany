@@ -85,8 +85,8 @@ class wxMessageThreadingDialog : public wxOptionsPageSubdialog
 public:
    wxMessageThreadingDialog(Profile *profile, wxWindow *parent);
 
-   virtual bool TransferDataFromWindow();
-   virtual bool TransferDataToWindow();
+   bool TransferDataFromWindow() override;
+   bool TransferDataToWindow() override;
 
    bool WasChanged() const { return m_wasChanged; }
 
@@ -209,7 +209,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    }
    long widthMax = GetMaxLabelWidth(aLabels, this);
 
-   wxControl *last = NULL;
+   wxControl *last = nullptr;
 
    last = m_panel->CreateMessage
           (
@@ -375,7 +375,7 @@ bool wxMessageThreadingDialog::TransferDataToWindow()
 
    DoUpdateUI();
 
-   return TRUE;
+   return true;
 }
 
 bool wxMessageThreadingDialog::TransferDataFromWindow()
@@ -412,7 +412,7 @@ bool wxMessageThreadingDialog::TransferDataFromWindow()
 
 #undef WRITE_IF_CHANGE
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

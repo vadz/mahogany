@@ -13,10 +13,11 @@
 #ifndef _MAIL_SERVERINFO_H
 #define _MAIL_SERVERINFO_H
 
-#include "lists.h"
-
 #include "MFolder.h"
 #include "MailFolder.h"
+
+#include <memory>
+#include <vector>
 
 // put this in the trace mask to get messages about connection caching
 #define TRACE_SERVER_CACHE  _T("servercache")
@@ -66,18 +67,16 @@ public:
    static ServerInfoEntry *Get(const MFolder *folder)
    {
       // look among the existing ones
-      for ( ServerInfoList::iterator i = ms_servers.begin();
-            i != ms_servers.end();
-            ++i )
+      for ( const auto& server : ms_servers )
       {
-         if ( i->CanBeUsedFor(folder) )
+         if ( server->CanBeUsedFor(folder) )
          {
             wxLogTrace(TRACE_SERVER_CACHE,
                        _T("Reusing existing server entry for %s(%s)."),
-                       folder->GetFullName(), i->m_login);
+                       folder->GetFullName(), server->m_login);
 
             // found
-            return *i;
+            return server.get();
          }
       }
 
@@ -86,7 +85,7 @@ public:
                  _T("No server entry for %s found."),
                  folder->GetFullName());
 
-      return NULL;
+      return nullptr;
    }
 
    /**
@@ -110,9 +109,9 @@ public:
 
          serverInfo = mf->CreateServerInfo(folder);
 
-         CHECK( serverInfo, NULL, _T("CreateServerInfo() failed?") );
+         CHECK( serverInfo, nullptr, _T("CreateServerInfo() failed?") );
 
-         ms_servers.push_back(serverInfo);
+         ms_servers.emplace_back(serverInfo);
       }
 
       return serverInfo;
@@ -189,8 +188,8 @@ public:
    //@}
 
 
-   // dtor must be public in order to use M_LIST_OWN() but nobody should delete
-   // us directly!
+   // dtor must be public in order to allow ms_servers to delete us, but
+   // nobody else should do it!
    virtual ~ServerInfoEntry()
    {
    }
@@ -222,8 +221,7 @@ protected:
    bool m_hasAuthInfo;
 
    // the list of all servers
-   M_LIST_OWN(ServerInfoList, ServerInfoEntry);
-   static ServerInfoList ms_servers;
+   static std::vector<std::unique_ptr<ServerInfoEntry>> ms_servers;
 
    GCC_DTOR_WARN_OFF
 };

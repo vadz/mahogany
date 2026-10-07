@@ -43,6 +43,8 @@
 
 #include "wx/vcard.h"
 
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -116,11 +118,7 @@ struct wxVCardAddressData
     int flags;
 };
 
-WX_DECLARE_OBJARRAY(wxVCardAddressData, wxVCardAddresses);
-
-#include "wx/arrimpl.cpp"
-
-WX_DEFINE_OBJARRAY(wxVCardAddresses);
+using wxVCardAddresses = std::vector<wxVCardAddressData>;
 
 // ----------------------------------------------------------------------------
 // vCard editing dialog
@@ -131,8 +129,8 @@ class wxVCardDialog : public wxDialog
 public:
     wxVCardDialog(wxVCard *vcard);
 
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
 
 protected:
     // event handlers
@@ -193,8 +191,8 @@ class wxVCardAddressDialog : public wxDialog
 public:
     wxVCardAddressDialog(wxWindow *parent, const wxVCardAddressData& data);
 
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
 
     const wxVCardAddressData& GetData() const { return m_data; }
 
@@ -246,7 +244,7 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 wxVCardDialog::wxVCardDialog(wxVCard *vcard)
-             : wxDialog(NULL, -1, _("Edit vCard"),
+             : wxDialog(nullptr, -1, _("Edit vCard"),
                         wxDefaultPosition, wxDefaultSize,
                         wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER )
 {
@@ -319,7 +317,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
     sizerPanel->Add(sizerBirthDay, 0, wxGROW | wxALL, 5);
     sizerPanel->Add(sizerOrg, 0, wxGROW | wxALL, 5);
 
-    panel->SetAutoLayout(TRUE);
+    panel->SetAutoLayout(true);
     panel->SetSizer(sizerPanel);
 
     notebook->AddPage(panel, _("Identity"));
@@ -344,7 +342,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
 
     sizerPanel->Add(sizerEmail, 1, wxGROW | wxALL, 5);
 
-    panel->SetAutoLayout(TRUE);
+    panel->SetAutoLayout(true);
     panel->SetSizer(sizerPanel);
 
     notebook->AddPage(panel, _("Network"));
@@ -368,7 +366,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
 
     sizerPanel->Add(sizerAddr, 1, wxGROW | wxALL, 5);
 
-    panel->SetAutoLayout(TRUE);
+    panel->SetAutoLayout(true);
     panel->SetSizer(sizerPanel);
 
     notebook->AddPage(panel, _("Address"));
@@ -376,7 +374,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
     // do use the sizer
     // ----------------
 
-    SetAutoLayout( TRUE );
+    SetAutoLayout( true );
     SetSizer( sizerTop );
     sizerTop->Fit( this );
     sizerTop->SetSizeHints( this );
@@ -489,7 +487,7 @@ bool wxVCardDialog::TransferDataToWindow()
 
     #undef PROP_TO_CTRL
 
-    return TRUE;
+    return true;
 }
 
 // transfer data to vCard from the window
@@ -503,7 +501,7 @@ bool wxVCardDialog::TransferDataFromWindow()
         wxLogError(_("Invalid birthday date: '%s'"),
                    m_birthday->GetValue());
 
-        return FALSE;
+        return false;
     }
 
     wxString value;
@@ -540,7 +538,7 @@ bool wxVCardDialog::TransferDataFromWindow()
 
     // address page
     {
-        size_t count = m_addrData.GetCount();
+        size_t count = m_addrData.size();
         for ( size_t n = 0; n < count; n++ )
         {
             const wxVCardAddressData& d = m_addrData[n];
@@ -557,7 +555,7 @@ bool wxVCardDialog::TransferDataFromWindow()
 
     #undef CTRL_TO_PROP
 
-    return TRUE;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -610,7 +608,7 @@ void wxVCardDialog::OnEmailDelete(wxCommandEvent& WXUNUSED(event))
 
 void wxVCardDialog::OnAddrAdd(wxCommandEvent& WXUNUSED(event))
 {
-    wxVCardAddressDialog dlg(this, wxVCardAddressData(NULL));
+    wxVCardAddressDialog dlg(this, wxVCardAddressData(nullptr));
     if ( dlg.ShowModal() == wxID_OK )
     {
         AddAddress(dlg.GetData());
@@ -635,7 +633,7 @@ void wxVCardDialog::OnAddrDelete(wxCommandEvent& WXUNUSED(event))
     int sel = m_addresses->GetSelection();
     wxCHECK_RET( sel != -1, _T("button should be disabled") );
 
-    m_addrData.RemoveAt(sel);
+    m_addrData.erase(m_addrData.begin() + sel);
     m_addresses->Delete(sel);
 }
 
@@ -663,7 +661,7 @@ wxString wxVCardDialog::GetAddressLabel(const wxVCardAddressData& data) const
 
 void wxVCardDialog::AddAddress(const wxVCardAddressData& data)
 {
-    m_addrData.Add(data);
+    m_addrData.push_back(data);
     m_addresses->Append(GetAddressLabel(data));
 }
 
@@ -673,7 +671,7 @@ void wxVCardDialog::AddAddress(const wxVCardAddressData& data)
 
 wxVCardAddressDialog::wxVCardAddressDialog(wxWindow *parent,
                                            const wxVCardAddressData& data)
-                    : wxDialog(NULL, -1, _("Edit Address"),
+                    : wxDialog(nullptr, -1, _("Edit Address"),
                                wxDefaultPosition, wxDefaultSize,
                                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER ),
                       m_data(data)
@@ -724,7 +722,7 @@ wxVCardAddressDialog::wxVCardAddressDialog(wxWindow *parent,
     sizerTop->Add(CreateButtonSizer(wxOK | wxCANCEL), 0,
                   wxALIGN_RIGHT | (wxALL & ~wxRIGHT), 10);
 
-    SetAutoLayout(TRUE);
+    SetAutoLayout(true);
     SetSizer(sizerTop);
     sizerTop->Fit(this);
     sizerTop->SetSizeHints(this);
@@ -745,7 +743,7 @@ bool wxVCardAddressDialog::TransferDataToWindow()
     ADDR_TO_DLG(country);
 
     #define SET_ADDR_FLAG(flag, ctrl) \
-        if ( m_data.flags & wxVCardAddress::flag ) ctrl->SetValue(TRUE)
+        if ( m_data.flags & wxVCardAddress::flag ) ctrl->SetValue(true)
 
     SET_ADDR_FLAG(Domestic, m_domesticAddr);
     SET_ADDR_FLAG(Intl, m_internationalAddr);
@@ -757,7 +755,7 @@ bool wxVCardAddressDialog::TransferDataToWindow()
     #undef SET_ADDR_FLAG
     #undef ADDR_TO_DLG
 
-    return TRUE;
+    return true;
 }
 
 bool wxVCardAddressDialog::TransferDataFromWindow()
@@ -787,7 +785,7 @@ bool wxVCardAddressDialog::TransferDataFromWindow()
     #undef GET_ADDR_FLAG
     #undef DLG_TO_ADDR
 
-    return TRUE;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -796,7 +794,7 @@ bool wxVCardAddressDialog::TransferDataFromWindow()
 
 extern bool wxEditVCard(wxVCard *vcard)
 {
-    wxCHECK_MSG( vcard, FALSE, _T("NULL vCard not allowed in wxEditVCard") );
+    wxCHECK_MSG( vcard, false, _T("NULL vCard not allowed in wxEditVCard") );
 
     wxVCardDialog dlg(vcard);
     return dlg.ShowModal() == wxID_OK;
@@ -813,6 +811,6 @@ extern wxVCard *wxCreateVCard()
     {
         delete vcard;
 
-        return NULL;
+        return nullptr;
     }
 }

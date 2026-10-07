@@ -13,20 +13,20 @@
 #ifndef _ADB_DIALOGS_H
 #define _ADB_DIALOGS_H
 
+#include "adb/AdbManager.h"     // for ArrayAdbElements and ArrayAdbEntries
+
 class WXDLLIMPEXP_FWD_CORE wxWindow;
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 class AdbEntryGroup;
-class ArrayAdbElements;
-class ArrayAdbEntries;
 
 /**
   Show the dialog allowing the user to import any address book, return the name
   of the native book used for import in the out parameter and return TRUE if
   the import succeeded - FALSE and log the error message(s) if it failed.
  */
-extern bool AdbShowImportDialog(wxWindow *parent = NULL,
-                                String *nameOfNativeAdb = NULL);
+extern bool AdbShowImportDialog(wxWindow *parent = nullptr,
+                                String *nameOfNativeAdb = nullptr);
 
 /**
   Show the dialog allowing the user to export the given address book

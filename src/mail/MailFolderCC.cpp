@@ -73,6 +73,8 @@
 // wxFile::Exists() too
 #include <wx/file.h>
 
+#include <vector>
+
 class MPersMsgBox;
 
 // windows.h included from fontutil.h defines ERROR
@@ -208,18 +210,18 @@ static wxTLS_TYPE(MailFolderCC *) tls_ccCallbackDefaultObj;
 #define gs_ccCallbackDefaultObj wxTLS_VALUE(tls_ccCallbackDefaultObj)
 
 /// object used to reflect some events back to MailFolderCC
-static class CCEventReflector *gs_CCEventReflector = NULL;
+static class CCEventReflector *gs_CCEventReflector = nullptr;
 
 #ifdef USE_DIALUP
 /// object used to close the streams if it can't be done when closing folder
-static class CCStreamCleaner *gs_CCStreamCleaner = NULL;
+static class CCStreamCleaner *gs_CCStreamCleaner = nullptr;
 #endif // USE_DIALUP
 
 /// handler for temporarily redirected mm_list calls
-static mm_list_handler gs_mmListRedirect = NULL;
+static mm_list_handler gs_mmListRedirect = nullptr;
 
 /// handler for temporarily redirected mm_status calls
-static mm_status_handler gs_mmStatusRedirect = NULL;
+static mm_status_handler gs_mmStatusRedirect = nullptr;
 
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
@@ -308,9 +310,6 @@ long MailCreate(MAILSTREAM *stream, const String& mailbox)
 // private classes
 // ============================================================================
 
-/// a list of MAILSTREAM pointers
-M_LIST_PTR(StreamList, MAILSTREAM);
-
 // we extend ServerInfoEntry with connection caching
 class ServerInfoEntryCC : public ServerInfoEntry
 {
@@ -332,14 +331,14 @@ public:
       if ( !serverInfo )
       {
          serverInfo = new ServerInfoEntryCC(folder);
-         ms_servers.push_back(serverInfo);
+         ms_servers.emplace_back(serverInfo);
       }
 
       return serverInfo;
    }
 
    /// return true if this server can be used with the given folder
-   bool CanBeUsedFor(const MFolder *folder) const;
+   bool CanBeUsedFor(const MFolder *folder) const override;
 
    /// check for the timed out connections for all servers
    static void CheckTimeoutAll();
@@ -359,12 +358,12 @@ public:
    void KeepStream(MAILSTREAM *stream, const MFolder *folder);
 
    /// close those of our connections which have timed out
-   virtual bool CheckTimeout();
+   bool CheckTimeout() override;
 
    //@}
 
-   // dtor must be public in order to use M_LIST_OWN() but nobody should delete
-   // us directly!
+   // dtor must be public in order to allow ms_servers to delete us, but
+   // nobody else should do it!
    virtual ~ServerInfoEntryCC();
 
 private:
@@ -386,15 +385,20 @@ private:
    // folder
    NETMBX m_netmbx;
 
+   // a connection which may be reused
+   struct CachedConnection
+   {
+      MAILSTREAM *stream;
+
+      // the moment when we should close this connection
+      time_t timeout;
+   };
+
    // the pool of connections to this server which may be reused (may be empty,
    // of course)
    //
-   // this list is used as a FIFO queue, in fact
-   StreamList m_connections;
-
-   // the timeouts for each of the connections, i.e. the moment when we should
-   // close them
-   M_LIST(TimeList, time_t) m_timeouts;
+   // this vector is used as a FIFO queue, in fact
+   std::vector<CachedConnection> m_connections;
 
    /**
      A small class to close the cached connections periodically.
@@ -404,7 +408,7 @@ private:
    public:
       ConnCloseTimer() { }
 
-      virtual void Notify() { ServerInfoEntryCC::CheckTimeoutAll(); }
+      void Notify() override { ServerInfoEntryCC::CheckTimeoutAll(); }
 
    private:
       DECLARE_NO_COPY_CLASS(ConnCloseTimer)
@@ -526,7 +530,7 @@ public:
       );
    }
 
-   virtual bool OnMEvent(MEventData& ev)
+   bool OnMEvent(MEventData& ev) override
    {
       MEventWithFolderData& event = (MEventWithFolderData &)ev;
       MailFolderCC *mfCC = (MailFolderCC *)event.GetFolder();
@@ -557,7 +561,7 @@ public:
          &m_cookieNewMail,
          &m_cookieMsgStatus,
          &m_cookieFlagsChange,
-         NULL
+         nullptr
       );
    }
 
@@ -589,7 +593,7 @@ public:
    ~CCStreamCleaner();
 
 private:
-   StreamList m_List;
+   std::vector<MAILSTREAM *> m_List;
 };
 
 #endif // USE_DIALUP
@@ -611,7 +615,7 @@ public:
    {
       m_nTotal = nTotal;
       m_nRetrieved = 0;
-      m_progdlg = NULL;
+      m_progdlg = nullptr;
 
       m_current = m_seq.GetFirst(m_seqCookie);
    }
@@ -965,7 +969,7 @@ public:
 
    ~MMListRedirector()
    {
-      gs_mmListRedirect = NULL;
+      gs_mmListRedirect = nullptr;
    }
 };
 
@@ -990,9 +994,9 @@ public:
 
    ~MMStatusRedirector()
    {
-      gs_mmStatusRedirect = NULL;
+      gs_mmStatusRedirect = nullptr;
 
-      ms_mailstatus = NULL;
+      ms_mailstatus = nullptr;
    }
 
 private:
@@ -1085,7 +1089,7 @@ private:
 
 String MMStatusRedirector::ms_filename;
 NETMBX MMStatusRedirector::ms_mbx;
-MAILSTATUS *MMStatusRedirector::ms_mailstatus = NULL;
+MAILSTATUS *MMStatusRedirector::ms_mailstatus = nullptr;
 
 // ----------------------------------------------------------------------------
 // ReadProgressInfo: create an instance of this object to start showing progress
@@ -1108,9 +1112,9 @@ public:
       if ( secondsToWait )
       {
          // don't show the dialog immediately, wait a little
-         m_dlgProgress = NULL;
+         m_dlgProgress = nullptr;
 
-         m_timeStart = time(NULL) + secondsToWait;
+         m_timeStart = time(nullptr) + secondsToWait;
       }
       else // show the dialog from the beginning
       {
@@ -1139,7 +1143,7 @@ public:
 
       if ( !m_dlgProgress )
       {
-         if ( time(NULL) > m_timeStart )
+         if ( time(nullptr) > m_timeStart )
          {
             CreateDialog();
          }
@@ -1182,7 +1186,7 @@ private:
                            _("Retrieving data from server"),
                            msg,
                            100,
-                           NULL,
+                           nullptr,
                            0        // no flags
                           );
    }
@@ -1194,12 +1198,12 @@ private:
 
    // the moment when we started reading
    time_t m_timeStart;
-} *gs_readProgressInfo = NULL;
+} *gs_readProgressInfo = nullptr;
 
 #endif // USE_READ_PROGRESS
 
 // ----------------------------------------------------------------------------
-// LastNewUIDList: stores the UID of the last seen new message permanently,
+// gs_lastNewUIDList: stores the UID of the last seen new message permanently,
 //                 i.e. keeps it even after the folder was closed
 // ----------------------------------------------------------------------------
 
@@ -1225,9 +1229,7 @@ struct LastNewUIDEntry
    UIdType m_uidValidity;
 };
 
-M_LIST_OWN(LastNewUIDList, LastNewUIDEntry);
-
-static LastNewUIDList gs_lastNewUIDList;
+static std::vector<LastNewUIDEntry> gs_lastNewUIDList;
 
 // ============================================================================
 // implementation
@@ -1485,7 +1487,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
                                   MFolderType folderType,
                                   String *pName)
 {
-   CHECK( pName, FALSE, _T("NULL name in MailFolderCC::SpecToFolderName") );
+   CHECK( pName, false, _T("NULL name in MailFolderCC::SpecToFolderName") );
 
    String& name = *pName;
    switch ( folderType )
@@ -1497,7 +1499,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
       {
          FAIL_MSG(_T("invalid MH folder specification - no #mh/ prefix"));
 
-         return FALSE;
+         return false;
       }
 
       // make sure that the folder name does not start with s;ash
@@ -1544,7 +1546,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
       {
          FAIL_MSG(_T("invalid folder specification - no {nntp/...}"));
 
-         return FALSE;
+         return false;
       }
 
       name = specification.c_str() + (size_t)startIndex + 1;
@@ -1552,13 +1554,13 @@ bool MailFolder::SpecToFolderName(const String& specification,
    break;
    case MF_IMAP:
       name = specification.AfterFirst('}');
-      return TRUE;
+      return true;
    default:
       FAIL_MSG(_T("not done yet"));
-      return FALSE;
+      return false;
    }
 
-   return TRUE;
+   return true;
 }
 
 // This does not return driver prefixes such as #mh/ which are
@@ -1677,9 +1679,9 @@ MailFolderCC::Create(MFolderType /* type */, int /* flags */)
 
    Init();
 
-   m_listData = NULL;
+   m_listData = nullptr;
 
-   m_SearchMessagesFound = NULL;
+   m_SearchMessagesFound = nullptr;
 }
 
 void MailFolderCC::Init()
@@ -1689,14 +1691,12 @@ void MailFolderCC::Init()
    m_uidValidity = UID_ILLEGAL;
 
    // maybe we had stored the UID of the last new message for this folder?
-   for ( LastNewUIDList::iterator i = gs_lastNewUIDList.begin();
-         i != gs_lastNewUIDList.end();
-         ++i )
+   for ( const LastNewUIDEntry& entry : gs_lastNewUIDList )
    {
-      if ( i->m_folderName == GetName() )
+      if ( entry.m_folderName == GetName() )
       {
-         m_uidLastNew = i->m_uidLastNew;
-         m_uidValidity = i->m_uidValidity;
+         m_uidLastNew = entry.m_uidLastNew;
+         m_uidValidity = entry.m_uidValidity;
 
          break;
       }
@@ -1739,7 +1739,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
                              MAILSTREAM **pStream)
 {
    if ( pStream )
-      *pStream = NULL;
+      *pStream = nullptr;
 
    if ( !folder->ShouldTryToCreate() )
    {
@@ -1763,7 +1763,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
 
    // disable callbacks if we don't have the folder to redirect them to: assume
    // that we do have the folder if we want to get the stream back
-   CCAllDisabler *noCallbacks = pStream ? NULL : new CCAllDisabler;
+   CCAllDisabler *noCallbacks = pStream ? nullptr : new CCAllDisabler;
 
    MAILSTREAM *stream;
 
@@ -1776,7 +1776,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
                  imapspec);
 
       CCErrorDisabler noErrs;
-      stream = MailOpen(NULL, imapspec);
+      stream = MailOpen(nullptr, imapspec);
    }
 
    // login data was reset by mm_login() called from mail_open(), set it once
@@ -1817,7 +1817,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
       {
          // still failed
          mail_close(stream);
-         stream = NULL;
+         stream = nullptr;
       }
       else // successfully opened
       {
@@ -1836,7 +1836,7 @@ MailFolderCC::CreateIfNeeded(const MFolder *folder,
    // restore callbacks
    delete noCallbacks;
 
-   return stream != NULL;
+   return stream != nullptr;
 }
 
 /* static */
@@ -1877,7 +1877,7 @@ MailFolderCC::OpenFolder(const MFolder *folder,
 
    mf->DecRef();
 
-   return NULL;
+   return nullptr;
 }
 
 void MailFolderCC::CreateFileFolder()
@@ -1990,7 +1990,7 @@ MailFolderCC::CheckForFileLock()
    else if ( folderType == MF_INBOX )
    {
       // get INBOX path name
-      file = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+      file = (char *) mail_parameters (NIL,GET_SYSINBOX,nullptr);
       if(file.empty()) // another c-client stupidity
          file = (char *) sysinbox();
    }
@@ -2019,7 +2019,7 @@ MailFolderCC::CheckForFileLock()
                                    "Shall I forcefully override the lock?"),
                                  lockfile, file
                               ),
-                              NULL,
+                              nullptr,
                               MDIALOG_YESNOTITLE,
                               M_DLG_YES_DEFAULT
                              );
@@ -2038,7 +2038,7 @@ MailFolderCC::CheckForFileLock()
                                     _("The file '%s' is not empty, still remove it?"),
                                     lockfile
                                  ),
-                                 NULL,
+                                 nullptr,
                                  MDIALOG_YESNOTITLE,
                                  M_DLG_NO_DEFAULT
                                 );
@@ -2366,7 +2366,7 @@ MailFolderCC::Close(bool mayLinger)
          else // no need
          {
             // this will just call mail_close() in CloseOrKeepStream()
-            server = NULL;
+            server = nullptr;
          }
 
          CloseOrKeepStream(m_MailStream, m_mfolder, server);
@@ -2384,7 +2384,7 @@ MailFolderCC::Close(bool mayLinger)
    {
       delete m_statusChangeData;
 
-      m_statusChangeData = NULL;
+      m_statusChangeData = nullptr;
    }
 
    // normally the folder won't be reused any more but reset them just in case
@@ -2394,8 +2394,8 @@ MailFolderCC::Close(bool mayLinger)
    // save our last new UID in case this folder is going to be reopened later
    String folderName = GetName();
 
-   LastNewUIDList::iterator i;
-   for ( i = gs_lastNewUIDList.begin(); i != gs_lastNewUIDList.end(); ++i )
+   auto i = gs_lastNewUIDList.begin();
+   for ( ; i != gs_lastNewUIDList.end(); ++i )
    {
       if ( i->m_folderName == folderName )
       {
@@ -2408,13 +2408,7 @@ MailFolderCC::Close(bool mayLinger)
 
    if ( i == gs_lastNewUIDList.end() )
    {
-      // note that the lists take ownership of the entry
-      gs_lastNewUIDList.push_front(new LastNewUIDEntry
-                                       (
-                                          folderName,
-                                          m_uidLastNew,
-                                          m_uidValidity
-                                       ));
+      gs_lastNewUIDList.emplace_back(folderName, m_uidLastNew, m_uidValidity);
    }
 }
 
@@ -2555,7 +2549,7 @@ MailFolderCC::LookupObject(const MAILSTREAM *stream)
                _T("No mailfolder for c-client callback?") );
 #endif
 
-   return NULL;
+   return nullptr;
 }
 
 /* static */
@@ -2589,7 +2583,7 @@ void MailFolderCC::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 void
 MailFolderCC::Checkpoint(void)
 {
-   if ( m_MailStream == NULL )
+   if ( m_MailStream == nullptr )
      return; // nothing we can do anymore
 
    // nothing to do for halfopened folders (and doing CHECK on a half opened
@@ -2667,7 +2661,7 @@ MailFolderCC::Ping(void)
                     "Do you want to try to check folder '%s' anyway?"),
                   GetName()
                ),
-               NULL,
+               nullptr,
                MDIALOG_YESNOTITLE,
                M_DLG_NO_DEFAULT,
                M_MSGBOX_NO_NET_PING_ANYWAY,
@@ -2737,7 +2731,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
    }
    else
    {
-      server = NULL;
+      server = nullptr;
    }
 
    MAILSTREAM *stream;
@@ -2747,7 +2741,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
    }
    else // no connection to reuse
    {
-      stream = NULL;
+      stream = nullptr;
    }
 
    // find out the login and password we need: first see if we don't already
@@ -2779,7 +2773,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
       // we're not interested in mm_exists() and what not
       CCCallbackDisabler noCallbacks;
 
-      stream = MailOpen(NULL, spec, OP_HALFOPEN | OP_READONLY);
+      stream = MailOpen(nullptr, spec, OP_HALFOPEN | OP_READONLY);
       if ( !stream )
       {
          // if we failed to open it, checking its status won't work neither
@@ -2978,7 +2972,7 @@ MailFolderCC::AppendMessage(const Message& msg)
    String date;
    msg.GetHeaderLine(_T("Date"), date);
 
-   char *dateptr = NULL;
+   char *dateptr = nullptr;
    char datebuf[128];
    MESSAGECACHE mc;
    if ( mail_parse_date(&mc, UCHAR_CAST(date.char_str())) )
@@ -3034,7 +3028,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 {
    CHECK( folder, false, _T("SaveMessages() needs a valid folder pointer") );
 
-   size_t count = selections->Count();
+   size_t count = selections->size();
    CHECK( count, true, _T("SaveMessages(): nothing to save") );
 
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SaveMessages(%s)"),
@@ -3151,7 +3145,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    HeaderInfoList_obj headers(GetHeaders());
    for ( size_t n = 0; n < count; n++ )
    {
-      MsgnoType msgno = GetMsgnoFromUID(selections->Item(n));
+      MsgnoType msgno = GetMsgnoFromUID((*selections)[n]);
       if ( msgno == MSGNO_ILLEGAL )
       {
          FAIL_MSG(_T("inexistent message was copied??"));
@@ -3183,7 +3177,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
          {
             if ( isRecent )
             {
-               uidsNew.Add(selections->Item(n));
+               uidsNew.push_back((*selections)[n]);
 
                status.newmsgs++;
             }
@@ -3217,7 +3211,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    {
       // if we have copied any new messages to the dst folder, we must process
       // them (i.e. filter, report, ...)
-      if ( !uidsNew.IsEmpty() )
+      if ( !uidsNew.empty() )
       {
          ProcessNewMail(uidsNew, folder);
       }
@@ -3274,7 +3268,7 @@ unsigned long MailFolderCC::CountNewMessages() const
    if ( !messages )
       return 0;
 
-   unsigned long newmsgs = messages->GetCount();
+   unsigned long newmsgs = messages->size();
    delete messages;
 
    return newmsgs;
@@ -3361,14 +3355,14 @@ MailFolderCC::GetMsgnoFromUID(UIdType uid) const
 Message *
 MailFolderCC::GetMessage(unsigned long uid) const
 {
-   Message* msg = NULL;
+   Message* msg = nullptr;
    if ( CheckConnection() )
    {
       HeaderInfoList_obj headers(GetHeaders());
-      CHECK( headers, NULL, _T("GetMessage: failed to get headers") );
+      CHECK( headers, nullptr, _T("GetMessage: failed to get headers") );
 
       UIdType idx = headers->GetIdxFromUId(uid);
-      CHECK( idx != UID_ILLEGAL, NULL, _T("GetMessage: no UID with this message") );
+      CHECK( idx != UID_ILLEGAL, nullptr, _T("GetMessage: no UID with this message") );
 
       HeaderInfo *hi = headers->GetItemByIndex((size_t)idx);
       if ( hi )
@@ -3394,7 +3388,7 @@ MailFolderCC::DoSearch(struct search_program *pgm, int flags) const
    ASSERT_MSG( flags == SEARCH_UID || flags == SEARCH_MSGNO,
                "DoSearch(): invalid flags value" );
 
-   CHECK( m_MailStream, NULL, "DoSearch(): folder is closed" );
+   CHECK( m_MailStream, nullptr, "DoSearch(): folder is closed" );
 
    // at best we're going to have a memory leak, at worse c-client is locked
    // and we will just crash
@@ -3423,18 +3417,18 @@ MailFolderCC::DoSearch(struct search_program *pgm, int flags) const
          mail_free_searchpgm(&pgm);
 
          delete m_SearchMessagesFound;
-         self->m_SearchMessagesFound = NULL;
+         self->m_SearchMessagesFound = nullptr;
 
-         return NULL;
+         return nullptr;
       }
    }
 
    mail_free_searchpgm(&pgm);
 
-   CHECK( m_SearchMessagesFound, NULL, "who deleted m_SearchMessagesFound?" );
+   CHECK( m_SearchMessagesFound, nullptr, "who deleted m_SearchMessagesFound?" );
 
    MsgnoArray *searchMessagesFound = m_SearchMessagesFound;
-   self->m_SearchMessagesFound = NULL;
+   self->m_SearchMessagesFound = nullptr;
 
    return searchMessagesFound;
 }
@@ -3447,7 +3441,7 @@ MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
    unsigned long count;
    if ( searchResults )
    {
-      count = searchResults->Count();
+      count = searchResults->size();
 
       delete searchResults;
    }
@@ -3531,7 +3525,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
 
          mail_free_searchpgm(&pgm);
 
-         return NULL;
+         return nullptr;
    }
 
    if ( flags & SEARCH_UNDELETED )
@@ -3545,7 +3539,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
       SEARCHSET *sset = mail_newsearchset();
       sset->first = last + 1;
 
-      CHECK( m_MailStream, 0, _T("SearchByFlag: folder is closed") );
+      CHECK( m_MailStream, nullptr, _T("SearchByFlag: folder is closed") );
 
 
       if ( flags & SEARCH_UID )
@@ -3566,7 +3560,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
 UIdArray *
 MailFolderCC::SearchMessages(const SearchCriterium *crit, int flags)
 {
-   CHECK( crit, NULL, _T("no criterium in SearchMessages") );
+   CHECK( crit, nullptr, _T("no criterium in SearchMessages") );
 
    // server side searching doesn't support all possible search criteria,
    // check if it can do this search first
@@ -3600,7 +3594,7 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit, int flags)
          break;
 
       default:
-         slistMatch = NULL;
+         slistMatch = nullptr;
          mail_free_searchpgm(&pgm);
    }
 
@@ -3648,7 +3642,7 @@ String MailFolderCC::BuildSequence(const UIdArray& messages)
 {
    Sequence seq;
 
-   size_t count = messages.GetCount();
+   size_t count = messages.size();
    for ( size_t n = 0; n < count; n++ )
    {
       seq.Add(messages[n]);
@@ -3738,7 +3732,7 @@ void MailFolderCC::OnMsgStatusChanged()
       if ( msgno != MSGNO_ILLEGAL )
       {
          MESSAGECACHE *elt = m_MailStream ? mail_elt(m_MailStream, msgno)
-                                          : NULL;
+                                          : nullptr;
          if ( elt )
          {
             status = GetMsgStatus(elt);
@@ -3955,7 +3949,7 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
    {
       // construct the sort program checking that all sort criteria are
       // supported by the server side sort
-      SORTPGM *pgmSort = NULL;
+      SORTPGM *pgmSort = nullptr;
       SORTPGM **ppgmStep = &pgmSort;
 
       // iterate over all individual sort criteriums
@@ -4145,7 +4139,7 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
          thr = thr->next )
       ;
 
-   return thr != NULL;
+   return thr != nullptr;
 }
 
 
@@ -4155,7 +4149,7 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 static THREADNODE *CopyTree(THREADNODE* th)
 {
    if ( !th )
-      return NULL;
+      return nullptr;
 
    THREADNODE* thrNode = new THREADNODE;
    thrNode->num = th->num;
@@ -4174,7 +4168,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
    if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
         READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD) )
    {
-      const char *threadingAlgo = NULL;
+      const char *threadingAlgo = nullptr;
 
       // it does, but maybe we want only threading by references (best) and it
       // only provides dumb threading by subject?
@@ -4221,7 +4215,7 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
                            (
                             m_MailStream,
                             CONST_CCAST(threadingAlgo),
-                            NULL,                // default charset
+                            nullptr,                // default charset
                             mail_newsearchpgm(), // thread all messages
                             SE_FREE
                            );
@@ -4684,17 +4678,17 @@ void MailFolderCC::OnNewMail()
 
       if ( uidsNew )
       {
-         size_t count = uidsNew->GetCount();
+         size_t count = uidsNew->size();
          if ( count )
          {
             // use "%ld" to print UID_ILLEGAL as -1 although it's really
             // unsigned
             wxLogTrace(TRACE_MF_NEWMAIL, _T("Folder %s: last new UID %ld -> %ld"),
-                       GetName(), m_uidLastNew, uidsNew->Last());
+                       GetName(), m_uidLastNew, uidsNew->back());
 
             // update m_uidLastNew to avoid finding the same messages again the
             // next time
-            m_uidLastNew = uidsNew->Last();
+            m_uidLastNew = uidsNew->back();
 
             HeaderInfoList_obj hil(GetHeaders());
             if ( hil )
@@ -4703,7 +4697,7 @@ void MailFolderCC::OnNewMail()
 
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
-               if ( ProcessNewMail(*uidsNew) && uidsNew->IsEmpty() )
+               if ( ProcessNewMail(*uidsNew) && uidsNew->empty() )
                {
                   // All new messages were already handled, so no need to
                   // notify the GUI
@@ -4770,24 +4764,24 @@ MailFolderCC::CClientInit(void)
    // 1 try is enough, the default (3) is too slow: notice that this only sets
    // the number of trials for SMTP and not for the mailbox drivers for which
    // we have to set this separately!
-   mail_parameters(NULL, SET_MAXLOGINTRIALS, (void *)1);
+   mail_parameters(nullptr, SET_MAXLOGINTRIALS, (void *)1);
 
    (*imapdriver.parameters)(SET_MAXLOGINTRIALS, (void *)1);
    (*pop3driver.parameters)(SET_MAXLOGINTRIALS, (void *)1);
 
 #ifdef USE_BLOCK_NOTIFY
-   mail_parameters(NULL, SET_BLOCKNOTIFY, (void *)mahogany_block_notify);
+   mail_parameters(nullptr, SET_BLOCKNOTIFY, (void *)mahogany_block_notify);
 #endif // USE_BLOCK_NOTIFY
 
 #ifdef USE_READ_PROGRESS
-   mail_parameters(NULL, SET_READPROGRESS, (void *)mahogany_read_progress);
+   mail_parameters(nullptr, SET_READPROGRESS, (void *)mahogany_read_progress);
 #endif // USE_READ_PROGRESS
 
    // disable time zone text in the "Date" field, it's unnecessary and some
    // (arguably broken, as this text is RFC 2822 conformant) mail servers
    // reject messages with it erroneously considering that they are used to
    // attack Exchange server (!)
-   mail_parameters(NULL, SET_DISABLE822TZTEXT, (void *)1);
+   mail_parameters(nullptr, SET_DISABLE822TZTEXT, (void *)1);
 
 #if defined(OS_UNIX) && !defined(__CYGWIN__) && !defined(__WINE__)
    // install our own sigpipe handler to ignore (and not die) if a SIGPIPE
@@ -4798,14 +4792,14 @@ MailFolderCC::CClientInit(void)
    sa.sa_handler = sigpipe_handler;
    sa.sa_mask = sst;
    sa.sa_flags = SA_RESTART;
-   if( sigaction(SIGPIPE,  &sa, NULL) != 0)
+   if( sigaction(SIGPIPE,  &sa, nullptr) != 0)
    {
       wxLogError(_("Cannot set signal handler for SIGPIPE."));
    }
 #endif // OS_UNIX
 
 #ifdef USE_DIALUP
-   ASSERT(gs_CCStreamCleaner == NULL);
+   ASSERT(gs_CCStreamCleaner == nullptr);
    gs_CCStreamCleaner = new CCStreamCleaner();
 #endif // USE_DIALUP
 
@@ -4824,10 +4818,8 @@ CCStreamCleaner::~CCStreamCleaner()
 
    bool isOnline = mApplication->IsOnline();
 
-   for ( StreamList::iterator i = m_List.begin(); i != m_List.end(); ++i )
+   for ( MAILSTREAM *stream : m_List )
    {
-      MAILSTREAM *stream = *i;
-
       if ( isOnline )
       {
          // we are online, so we can close it properly:
@@ -4864,18 +4856,18 @@ void MailFolderCCCleanup(void)
 
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
-   free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+   free(mail_parameters((MAILSTREAM *)nullptr, GET_NEWSRC, nullptr));
 
 #ifdef USE_DIALUP
    if ( gs_CCStreamCleaner )
    {
       delete gs_CCStreamCleaner;
-      gs_CCStreamCleaner = NULL;
+      gs_CCStreamCleaner = nullptr;
    }
 #endif // USE_DIALUP
 }
 
-static MFSubSystem gs_subsysCC(NULL, MailFolderCCCleanup);
+static MFSubSystem gs_subsysCC(nullptr, MailFolderCCCleanup);
 
 // ----------------------------------------------------------------------------
 // Some news spool support (TODO: move out from here)
@@ -4889,7 +4881,7 @@ String
 MailFolderCC::GetNewsSpool(void)
 {
    CClientInit();
-   return (const char *)mail_parameters (NIL,GET_NEWSSPOOL,NULL);
+   return (const char *)mail_parameters (NIL,GET_NEWSSPOOL,nullptr);
 }
 
 const String& MailFolder::InitializeNewsSpool()
@@ -4899,11 +4891,11 @@ const String& MailFolder::InitializeNewsSpool()
       // first, init cclient
       MailFolderCCInit();
 
-      gs_NewsSpoolDir = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
+      gs_NewsSpoolDir = (char *)mail_parameters(nullptr, GET_NEWSSPOOL, nullptr);
       if ( !gs_NewsSpoolDir )
       {
          gs_NewsSpoolDir = READ_APPCONFIG_TEXT(MP_NEWS_SPOOL_DIR);
-         mail_parameters(NULL, SET_NEWSSPOOL, gs_NewsSpoolDir.char_str());
+         mail_parameters(nullptr, SET_NEWSSPOOL, gs_NewsSpoolDir.char_str());
       }
    }
 
@@ -4951,7 +4943,7 @@ MailFolderCC::mm_searched(MAILSTREAM * stream,
    // this must have been allocated before starting the search
    CHECK_RET( mf->m_SearchMessagesFound, _T("logic error in search code") );
 
-   mf->m_SearchMessagesFound->Add(msgno);
+   mf->m_SearchMessagesFound->push_back(msgno);
 }
 
 /** this mailbox name matches a listing request
@@ -5389,7 +5381,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    (subscribedOnly ? mail_lsub : mail_list)
    (
       m_MailStream,
-      NULL,
+      nullptr,
       (spec + reference + (pattern.empty() ? String(_T("*"))
                                            : pattern)).char_str()
    );
@@ -5407,7 +5399,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    );
 
    delete m_listData;
-   m_listData = NULL;
+   m_listData = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -5447,7 +5439,7 @@ char MailFolderCC::GetFolderDelimiter() const
             spec += '}';
 
          gs_delimiter = '\0';
-         mail_list(m_MailStream, NULL, spec.char_str());
+         mail_list(m_MailStream, nullptr, spec.char_str());
 
          // well, except that in practice some IMAP servers do *not* return
          // anything in reply to this command! try working around this bug
@@ -5456,7 +5448,7 @@ char MailFolderCC::GetFolderDelimiter() const
             CHECK( m_MailStream, _T('\0'), _T("folder closed in GetFolderDelimiter") );
 
             spec += '%';
-            mail_list(m_MailStream, NULL, spec.char_str());
+            mail_list(m_MailStream, nullptr, spec.char_str());
          }
 
          // we must have got something!
@@ -5510,7 +5502,7 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
    }
 
    // do rename
-   if ( !mail_rename(NULL, spec.char_str(), specNew.char_str()) )
+   if ( !mail_rename(nullptr, spec.char_str(), specNew.char_str()) )
    {
       wxLogError(_("Failed to rename the mailbox for folder '%s' "
                    "from '%s' to '%s'."),
@@ -5553,8 +5545,8 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       nmsgs = mf->GetMessageCount();
 
-      noCCC = NULL;
-      server = NULL;
+      noCCC = nullptr;
+      server = nullptr;
    }
    else // this folder is not opened
    {
@@ -5711,7 +5703,7 @@ MailFolderCC::HasInferiors(const String& imapSpec,
    if ( stream != NIL )
    {
       MMListRedirector redirect(HasInferiorsMMList);
-      mail_list (stream, NULL, imapSpec.char_str());
+      mail_list (stream, nullptr, imapSpec.char_str());
 
       /* This does happen for for folders where the server does not know
          if they have inferiors, i.e. if they don't exist yet.
@@ -5767,7 +5759,7 @@ void MailFolderCC::EndReading()
       MAppCriticalSection cs;
 
       delete gs_readProgressInfo;
-      gs_readProgressInfo = NULL;
+      gs_readProgressInfo = nullptr;
    }
    //else: we didn't create it in StartReading()
 #endif // USE_READ_PROGRESS
@@ -6033,7 +6025,7 @@ void *mahogany_block_notify(int reason, void *data)
    LOG_BLOCK_REASON(FILELOCK)
    printf("mm_blocknotify(UNKNOWN, %p)\n", data);
 
-   return NULL;
+   return nullptr;
 }
 
 #endif // USE_BLOCK_NOTIFY
@@ -6057,7 +6049,7 @@ void mahogany_read_progress(GETS_DATA * /* md */, unsigned long count)
 // ServerInfoEntryCC implementation
 // ============================================================================
 
-ServerInfoEntryCC::ConnCloseTimer *ServerInfoEntryCC::ms_connCloseTimer = NULL;
+ServerInfoEntryCC::ConnCloseTimer *ServerInfoEntryCC::ms_connCloseTimer = nullptr;
 
 ServerInfoEntryCC::LastParsedFolder ServerInfoEntryCC::ms_lastParsed;
 
@@ -6092,11 +6084,9 @@ ServerInfoEntryCC::~ServerInfoEntryCC()
               m_netmbx.host, m_netmbx.user);
 
    // close all connections we may still have
-   for ( StreamList::iterator i = m_connections.begin();
-         i != m_connections.end();
-         ++i )
+   for ( const CachedConnection& conn : m_connections )
    {
-      mail_close(*i);
+      mail_close(conn.stream);
    }
 }
 
@@ -6108,7 +6098,7 @@ void ServerInfoEntryCC::DeleteAll()
    if ( ms_connCloseTimer )
    {
       delete ms_connCloseTimer;
-      ms_connCloseTimer = NULL;
+      ms_connCloseTimer = nullptr;
    }
 }
 
@@ -6156,28 +6146,25 @@ bool ServerInfoEntryCC::CanBeUsedFor(const MFolder *folder) const
 MAILSTREAM *ServerInfoEntryCC::GetStream()
 {
    if ( m_connections.empty() )
-      return NULL;
+      return nullptr;
 
-   MAILSTREAM *stream = *m_connections.begin();
-   m_connections.pop_front();
-   m_timeouts.pop_front();
+   MAILSTREAM *stream = m_connections.front().stream;
+   m_connections.erase(m_connections.begin());
 
    return stream;
 }
 
 void ServerInfoEntryCC::KeepStream(MAILSTREAM *stream, const MFolder *folder)
 {
-   m_connections.push_back(stream);
-
    Profile_obj profile(folder->GetProfile());
-   time_t t = time(NULL);
+   time_t t = time(nullptr);
    time_t delay = READ_CONFIG(profile, MP_CONN_CLOSE_DELAY);
 
    wxLogTrace(TRACE_SERVER_CACHE,
               _T("Keeping connection to %s alive for %d seconds."),
               stream->mailbox, (int)delay);
 
-   m_timeouts.push_back(t + delay);
+   m_connections.push_back({stream, t + delay});
 
    if ( !ms_connCloseTimer )
    {
@@ -6203,20 +6190,17 @@ bool ServerInfoEntryCC::CheckTimeout()
 
    // close the connection even if the timeout hasn't expired yet but expires
    // in less than 1 second: this helps when we have a really big timeout (i.e.
-   // 30 minutes) and if the timer comes up slightly before the moment *j
+   // 30 minutes) and if the timer comes up slightly before the timeout
    // (which does happen in practice): we don't want to wait for another 30
    // minutes before closing the connection
-   time_t t = time(NULL) + 1;
+   time_t t = time(nullptr) + 1;
 
-   // iterate in parallel over both lists
-   StreamList::iterator i = m_connections.begin();
-   TimeList::iterator j = m_timeouts.begin();
-   while ( i != m_connections.end() )
+   for ( auto i = m_connections.begin(); i != m_connections.end(); )
    {
-      if ( *j <= t )
+      if ( i->timeout <= t )
       {
          // timed out
-         MAILSTREAM *stream = *i;
+         MAILSTREAM *stream = i->stream;
 
          wxLogTrace(TRACE_SERVER_CACHE,
                     _T("Connection to %s timed out, closing."), stream->mailbox);
@@ -6227,12 +6211,10 @@ bool ServerInfoEntryCC::CheckTimeout()
          mail_close(stream);
 
          i = m_connections.erase(i);
-         j = m_timeouts.erase(j);
       }
       else
       {
          ++i;
-         ++j;
       }
    }
 
@@ -6245,11 +6227,9 @@ void ServerInfoEntryCC::CheckTimeoutAll()
 {
    bool hasAnyConns = false;
 
-   for ( ServerInfoList::iterator i = ms_servers.begin();
-         i != ms_servers.end();
-         ++i )
+   for ( const auto& server : ms_servers )
    {
-      if ( i->CheckTimeout() )
+      if ( server->CheckTimeout() )
       {
          hasAnyConns = true;
       }

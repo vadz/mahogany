@@ -37,7 +37,7 @@ PythonCallback(const char *name,
                int def,
                void *obj,
                const char *classname,
-               Profile *profile = NULL);
+               Profile *profile = nullptr);
 
 
 /**

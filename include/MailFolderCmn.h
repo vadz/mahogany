@@ -44,10 +44,10 @@ class MailFolderCmn : public MailFolder
 {
 public:
    /// remove the folder from our "closer" list
-   virtual void Close(bool mayLinger = true);
+   void Close(bool mayLinger = true) override;
 
    /// do status caching and call DoCountMessages() to do the real work
-   virtual bool CountAllMessages(MailFolderStatus *status) const;
+   bool CountAllMessages(MailFolderStatus *status) const override;
 
    /**@name Some higher level functionality implemented by the
       MailFolderCmn class on top of the other functions.
@@ -59,87 +59,87 @@ public:
        @param folder is the folder to save to, can't be NULL
        @return true if messages got saved
    */
-   virtual bool SaveMessages(const UIdArray *selections, MFolder *folder);
+   bool SaveMessages(const UIdArray *selections, MFolder *folder) override;
 
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
        @return true on success
    */
-   virtual bool SaveMessages(const UIdArray *selections,
-                             const String& folderName);
+   bool SaveMessages(const UIdArray *selections,
+                     const String& folderName) override;
 
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param fileName the name of the folder to save to
        @return true on success
    */
-   virtual bool SaveMessagesToFile(const UIdArray *selections,
-                                   const String& fileName,
-                                   wxWindow *parent = NULL);
+   bool SaveMessagesToFile(const UIdArray *selections,
+                           const String& fileName,
+                           wxWindow *parent = nullptr) override;
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool DeleteOrTrashMessages(const UIdArray *messages,
-                                      int flags = DELETE_ALLOW_TRASH);
+   bool DeleteOrTrashMessages(const UIdArray *messages,
+                              int flags = DELETE_ALLOW_TRASH) override;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool DeleteMessages(const UIdArray *messages,
-                               int flags = DELETE_NO_EXPUNGE);
+   bool DeleteMessages(const UIdArray *messages,
+                       int flags = DELETE_NO_EXPUNGE) override;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool UnDeleteMessages(const UIdArray *messages);
+   bool UnDeleteMessages(const UIdArray *messages) override;
 
    /** Mark message as deleted.
        @param uid mesage uid
        @return true if ok
    */
-   virtual bool DeleteMessage(unsigned long uid);
+   bool DeleteMessage(unsigned long uid) override;
 
    /** Mark message as not deleted.
        @param uid mesage uid
        @return true if ok
    */
-   virtual bool UnDeleteMessage(unsigned long uid);
+   bool UnDeleteMessage(unsigned long uid) override;
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
        @param params reply parameters
        @param parent window for dialog
    */
-   virtual void ReplyMessages(const UIdArray *messages,
-                              const Params& params,
-                              wxWindow *parent = NULL);
+   void ReplyMessages(const UIdArray *messages,
+                      const Params& params,
+                      wxWindow *parent = nullptr) override;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @param profile pointer for environment
    */
-   virtual void ForwardMessages(const UIdArray *messages,
-                                const Params& params,
-                                wxWindow *parent = NULL);
+   void ForwardMessages(const UIdArray *messages,
+                        const Params& params,
+                        wxWindow *parent = nullptr) override;
 
-   virtual UIdArray *SearchMessages(const SearchCriterium *crit, int flags);
-   virtual bool ThreadMessages(const ThreadParams& thrParams,
-                               ThreadData *thrData);
+   UIdArray *SearchMessages(const SearchCriterium *crit, int flags) override;
+   bool ThreadMessages(const ThreadParams& thrParams,
+                       ThreadData *thrData) override;
 
-   virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
+   bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams) override;
    //@}
 
 
-   virtual HeaderInfoList *GetHeaders(void) const;
+   HeaderInfoList *GetHeaders(void) const override;
 
-   virtual bool ProcessNewMail(UIdArray& uidsNew,
-                               const MFolder *folderDst = NULL);
+   bool ProcessNewMail(UIdArray& uidsNew,
+                       const MFolder *folderDst = nullptr) override;
 
    /**
      Process new mail in some other folder when it appeared there independently
@@ -151,10 +151,10 @@ public:
     */
    static bool ProcessNewMail(const MFolder *folder, MsgnoType countNew)
    {
-      return DoProcessNewMail(folder, NULL, NULL, countNew, NULL);
+      return DoProcessNewMail(folder, nullptr, nullptr, countNew, nullptr);
    }
 
-   virtual int ApplyFilterRules(const UIdArray& msgs);
+   int ApplyFilterRules(const UIdArray& msgs) override;
 
    /** Update the folder to correspond to the new parameters: called from
        Options_Change MEvent handler.
@@ -164,16 +164,16 @@ public:
    virtual void OnOptionsChange(MEventOptionsChangeData::ChangeKind kind);
 
    /// VZ: adding this decl as it doesn't compile otherwise
-   virtual void Checkpoint(void) = 0;
+   void Checkpoint(void) override = 0;
 
-   virtual wxFrame *SetInteractiveFrame(wxFrame *frame);
-   virtual wxFrame *GetInteractiveFrame() const;
+   wxFrame *SetInteractiveFrame(wxFrame *frame) override;
+   wxFrame *GetInteractiveFrame() const override;
 
-   virtual void SuspendUpdates() { m_suspendUpdates++; }
-   virtual void ResumeUpdates();
-   virtual void RequestUpdate();
+   void SuspendUpdates() override { m_suspendUpdates++; }
+   void ResumeUpdates() override;
+   void RequestUpdate() override;
 
-   virtual bool Resume();
+   bool Resume() override;
 
    /** @name Delayed folder closing
 
@@ -183,8 +183,8 @@ public:
     */
    //@{
    /// decrement and delete if reached 0, return TRUE if item wasn't deleted
-   virtual void IncRef();
-   virtual bool DecRef();
+   void IncRef() override;
+   bool DecRef() override;
 private:
    virtual bool RealDecRef();
    //@}

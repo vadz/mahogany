@@ -40,8 +40,8 @@ class MWizard : public wxWizard
 public:
    MWizard(int numPages,
            const wxString &title,
-           const wxBitmap * bitmap = NULL,
-           wxWindow *parent = NULL)
+           const wxBitmap * bitmap = nullptr,
+           wxWindow *parent = nullptr)
       : wxWizard( parent, -1, title,
                   // using bitmap before '?' results in a compile error with
                   // Borland C++ - go figure
@@ -73,9 +73,9 @@ public:
    wxWizardPage *GetPageById(MWizardPageId id)
    {
       if ( id == GetLastPageId()+1 || id == MWizard_PageNone)
-         return NULL;
+         return nullptr;
 
-      CHECK( id >= 0 && id < m_numPages, NULL, "page index out of range" );
+      CHECK( id >= 0 && id < m_numPages, nullptr, "page index out of range" );
 
       const int ofs = id - GetFirstPageId();
       if ( !m_WizardPages[ofs] )
@@ -117,8 +117,8 @@ public:
 
     /* These are two wxWindows wxWizard functions that we must override
     */
-   virtual wxWizardPage *GetPrev() const { return GetPageById(GetPreviousPageId()); }
-   virtual wxWizardPage *GetNext() const { return GetPageById(GetNextPageId()); }
+   wxWizardPage *GetPrev() const override { return GetPageById(GetPreviousPageId()); }
+   wxWizardPage *GetNext() const override { return GetPageById(GetNextPageId()); }
 
    /// Override these two in derived classes if needed:
    virtual MWizardPageId GetNextPageId() const

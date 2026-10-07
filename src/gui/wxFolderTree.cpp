@@ -52,6 +52,8 @@
 #include "MFCache.h"
 #include "MFStatus.h"
 
+#include <vector>
+
 #if wxUSE_DRAG_AND_DROP
    #include "Mdnd.h"
 #endif // wxUSE_DRAG_AND_DROP
@@ -139,7 +141,7 @@ int CompareFoldersByTreePos(MFolder **pf1, MFolder **pf2)
 // pseudo template classes
 // ----------------------------------------------------------------------------
 
-WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
+using wxArrayFolder = std::vector<MFolder *>;
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -160,9 +162,7 @@ struct ItemWithChangedIcon
 };
 
 // and the array of such things
-WX_DECLARE_OBJARRAY(ItemWithChangedIcon, ArrayOfItemsWithChangedIcon);
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(ArrayOfItemsWithChangedIcon);
+using ArrayOfItemsWithChangedIcon = std::vector<ItemWithChangedIcon>;
 
 // tree element
 class wxFolderTreeNode : public wxTreeItemData
@@ -182,7 +182,7 @@ public:
    // the ctor creates the element and inserts it in the tree
    wxFolderTreeNode(wxTreeCtrl *tree,
                     MFolder *folder,
-                    wxFolderTreeNode *parent = NULL,
+                    wxFolderTreeNode *parent = nullptr,
                     int index = -1);
 
    // dtor
@@ -354,7 +354,7 @@ public:
    void OnIdle(wxIdleEvent& event);
 
    // event processing function
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
 #if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    void OnMouseMove(wxMouseEvent &event)
@@ -382,7 +382,7 @@ public:
    MFolder *GetFolderFromTreeItem(const wxTreeItemId& item) const
    {
       wxFolderTreeNode *node = GetFolderTreeNode(item);
-      CHECK( node, NULL, _T("tree item without associated data?") );
+      CHECK( node, nullptr, _T("tree item without associated data?") );
 
       MFolder *folder = node->GetFolder();
       ASSERT_MSG( folder, _T("tree node without associated folder?") );
@@ -630,13 +630,13 @@ class TreeMessagesDropWhere : public MMessagesDropWhere
 public:
    TreeMessagesDropWhere(wxFolderTreeImpl *tree) { m_tree = tree; }
 
-   virtual MFolder *GetFolder(wxCoord x, wxCoord y) const
+   MFolder *GetFolder(wxCoord x, wxCoord y) const override
    {
       wxTreeItemId item = m_tree->HitTest(wxPoint(x, y));
       if ( !item.IsOk() )
       {
          // no item, no folder
-         return NULL;
+         return nullptr;
       }
 
       // get the folder for this item
@@ -660,9 +660,9 @@ class TreeDropTarget : MMessagesDropTarget
 {
 public:
    TreeDropTarget(MMessagesDropWhere *where, wxWindow *win)
-      : MMessagesDropTarget(where, win) { m_folderLast = NULL; }
+      : MMessagesDropTarget(where, win) { m_folderLast = nullptr; }
 
-   virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def)
+   wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def) override
    {
       TreeMessagesDropWhere *
          dropWhere = ((TreeMessagesDropWhere *)GetDropWhere());
@@ -699,18 +699,18 @@ public:
       return def;
    }
 
-   virtual void OnLeave()
+   void OnLeave() override
    {
       SafeDecRef(m_folderLast);
-      m_folderLast = NULL;
+      m_folderLast = nullptr;
 
       MMessagesDropTarget::OnLeave();
    }
 
-   virtual bool OnDrop(wxCoord x, wxCoord y)
+   bool OnDrop(wxCoord x, wxCoord y) override
    {
       SafeDecRef(m_folderLast);
-      m_folderLast = NULL;
+      m_folderLast = nullptr;
 
       return MMessagesDropTarget::OnDrop(x, y);
    }
@@ -809,15 +809,15 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
 
 MFolder *wxFolderTree::FindNextUnreadFolder(bool next)
 {
-   CHECK( m_tree, NULL, _T("you didn't call Init()") );
+   CHECK( m_tree, nullptr, _T("you didn't call Init()") );
 
    wxFolderTreeNode *node = m_tree->GetSelectedNode();
    if ( !node )
-      return NULL;
+      return nullptr;
 
    wxTreeItemId id = m_tree->FindNextUnreadFolder(node->GetId(), next);
    if ( !id.IsOk() )
-      return NULL;
+      return nullptr;
 
    MFolder *folder = m_tree->GetFolderTreeNode(id)->GetFolder();
    folder->IncRef();
@@ -898,12 +898,12 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 
 MFolder *wxFolderTree::GetSelection() const
 {
-   CHECK( m_tree, NULL, _T("you didn't call Init()") );
+   CHECK( m_tree, nullptr, _T("you didn't call Init()") );
 
    // get it from the tree
    wxFolderTreeNode *node = m_tree->GetSelectedNode();
-   if ( node == NULL )
-      return NULL;
+   if ( node == nullptr )
+      return nullptr;
 
    MFolder *folder = node->GetFolder();
    folder->IncRef();
@@ -936,7 +936,7 @@ void wxFolderTree::OnSelectionChange(MFolder * /* oldsel */, MFolder *newsel)
       else
       {
          // remove the folder view
-         OnOpenHere(NULL);
+         OnOpenHere(nullptr);
       }
    }
 }
@@ -1040,7 +1040,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
 
    // by default, don't allow to suppress this question as deleting a whole
    // subtree of folders is something which should require confirmation
-   const MPersMsgBox *msgbox = NULL;
+   const MPersMsgBox *msgbox = nullptr;
    wxString msg;
    if ( folder->GetSubfolderCount() > 0 )
    {
@@ -1712,12 +1712,12 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
                               wxTR_EDIT_LABELS)
 {
    // init member vars
-   m_current = NULL;
+   m_current = nullptr;
    m_sink = sink;
    m_menu =
-   m_menuRoot = NULL;
+   m_menuRoot = nullptr;
    m_suppressSelectionChange = false;
-   m_previousFolder = NULL;
+   m_previousFolder = nullptr;
 
    m_showHidden = ShowHiddenFolders();
    m_curIsHidden = false;
@@ -1729,7 +1729,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    // create an image list and associate it with this control
    size_t nIcons = GetNumberOfFolderIcons();
 
-   wxImageList *imageList = NULL;
+   wxImageList *imageList = nullptr;
 
    wxIconManager *iconManager = mApplication->GetIconManager();
    for ( size_t n = 0; n < nIcons; n++ )
@@ -1834,7 +1834,7 @@ void wxFolderTreeImpl::SetOpenFolderName(const String& name)
 void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
 {
    wxFolderTreeNode *cur = GetSelectedNode();
-   if ( cur != NULL )
+   if ( cur != nullptr )
    {
       MFolder *folder = cur->GetFolder();
 
@@ -1955,7 +1955,7 @@ void wxFolderTreeImpl::DoFolderView()
 void wxFolderTreeImpl::DoFolderCreate()
 {
    MFolder *folderNew = m_sink->OnCreate(m_sink->GetSelection());
-   if ( folderNew != NULL )
+   if ( folderNew != nullptr )
    {
       // now done in OnMEvent()
 #if 0
@@ -2133,7 +2133,7 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
       if ( folder == m_current->GetFolder() )
       {
          // don't leave invalid selection
-         m_current = NULL;
+         m_current = nullptr;
       }
 
       wxLogStatus(GetFrame(this), _("Folder '%s' %s"),
@@ -2449,7 +2449,7 @@ void wxFolderTreeImpl::OnIdle(wxIdleEvent& event)
 
          SetItemText(m_idEditedInPlace, label);
 
-         m_idEditedInPlace = 0l;
+         m_idEditedInPlace = nullptr;
       }
    }
 
@@ -2796,17 +2796,21 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
          }
 
          // remember this one
-         subfolders.Add(subfolder);
+         subfolders.push_back(subfolder);
       }
 
       if ( shouldSort )
       {
          // sort the array by tree item position
-         subfolders.Sort(CompareFoldersByTreePos);
+         std::sort(subfolders.begin(), subfolders.end(),
+                   [](MFolder *f1, MFolder *f2)
+                   {
+                     return CompareFoldersByTreePos(&f1, &f2) < 0;
+                   });
       }
 
       // now do fill the tree
-      nSubfolders = subfolders.GetCount();
+      nSubfolders = subfolders.size();
       for ( n = 0; n < nSubfolders; n++ )
       {
          MFolder *subfolder = subfolders[n];
@@ -2824,9 +2828,9 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 
    wxTreeItemId itemId = event.GetItem();
    wxFolderTreeNode *newCurrent = itemId.IsOk() ? GetFolderTreeNode(itemId)
-                                                : NULL;
+                                                : nullptr;
 
-   MFolder *oldsel = m_current ? m_current->GetFolder() : NULL;
+   MFolder *oldsel = m_current ? m_current->GetFolder() : nullptr;
 
    // do it now because due to use of wxYield() elsewhere, the other handlers
    // might be called _before_ this function returns and the tree selection is
@@ -2837,7 +2841,7 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 
    if ( !m_suppressSelectionChange )
    {
-      MFolder *newsel = newCurrent ? newCurrent->GetFolder() : NULL;
+      MFolder *newsel = newCurrent ? newCurrent->GetFolder() : nullptr;
 
       // send the event right now
       m_sink->OnSelectionChange(oldsel, newsel);
@@ -2912,11 +2916,11 @@ void wxFolderTreeImpl::OnContextMenu(wxContextMenuEvent& event)
    DoPopupMenu(pt);
 
    // now send the selection change event
-   MFolder *newsel = m_current ? m_current->GetFolder() : NULL;
+   MFolder *newsel = m_current ? m_current->GetFolder() : nullptr;
    m_sink->OnSelectionChange(m_previousFolder, newsel);
 
    SafeDecRef(m_previousFolder); // matches IncRef() in OnTreeSelect()
-   m_previousFolder = NULL;
+   m_previousFolder = nullptr;
 }
 
 #ifdef USE_MIDDLE_CLICK_HACK
@@ -3098,7 +3102,7 @@ void wxFolderTreeImpl::ReopenBranch(wxTreeItemId parent)
       {
          // this may happen if the previously selected folder became hidden and
          // is not shown in the tree any more
-         m_current = NULL;
+         m_current = nullptr;
       }
    }
 }
@@ -3507,7 +3511,7 @@ void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
    if ( tmp )
    {
       int imageOld = GetItemImage(item);
-      m_itemsWithChangedIcons.Add(new ItemWithChangedIcon(item, imageOld));
+      m_itemsWithChangedIcons.emplace_back(item, imageOld);
    }
    else
    {
@@ -3516,7 +3520,7 @@ void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
       size_t n;
       if ( FindItemWithChangedIcon(item, &n) )
       {
-         m_itemsWithChangedIcons.RemoveAt(n);
+         m_itemsWithChangedIcons.erase(m_itemsWithChangedIcons.begin() + n);
       }
    }
 
@@ -3536,7 +3540,7 @@ void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
       SetItemImage(item, m_itemsWithChangedIcons[n].image);
 
       // and delete the record - can't cancel the same action more than once
-      m_itemsWithChangedIcons.RemoveAt(n);
+      m_itemsWithChangedIcons.erase(m_itemsWithChangedIcons.begin() + n);
    }
    //else: the icon wasn't changed, so nothing to do
 }
@@ -3546,7 +3550,7 @@ void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
 bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
                                                size_t *index)
 {
-   size_t nCount = m_itemsWithChangedIcons.GetCount();
+   size_t nCount = m_itemsWithChangedIcons.size();
    for ( size_t n = 0; n < nCount; n++ )
    {
       if ( m_itemsWithChangedIcons[n].item == item )
@@ -3603,7 +3607,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
                                 &m_eventOptionsChange,
                                 &m_eventFolderStatus,
                                 &m_eventFolderClose,
-                                NULL);
+                                nullptr);
 
    delete GetImageList();
 

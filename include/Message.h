@@ -157,7 +157,7 @@ public:
     */
    static Message *Create(const char * itext,
                           UIdType uid = UID_ILLEGAL,
-                          Profile *profile = NULL);
+                          Profile *profile = nullptr);
 
    /** @name Headers access
     */
@@ -185,7 +185,7 @@ public:
    */
    bool GetHeaderLine(const String &line,
                       String &value,
-                      wxFontEncoding *encoding = NULL) const;
+                      wxFontEncoding *encoding = nullptr) const;
 
    /**
       Get the header line after decoding any MIME-encoded words in it.
@@ -203,7 +203,7 @@ public:
        @return the array containing the header values
    */
    virtual wxArrayString GetHeaderLines(const char **headers,
-                                        wxArrayInt *encodings = NULL) const = 0;
+                                        wxArrayInt *encodings = nullptr) const = 0;
 
    /**
      Return the object which may be used for iterating over the headers.
@@ -378,7 +378,7 @@ public:
        @param  len a pointer to a variable where to store length of data returned
        @return pointer to the content
    */
-   const void *GetPartContent(int n, unsigned long *len = NULL) const
+   const void *GetPartContent(int n, unsigned long *len = nullptr) const
       { return GetMimePart(n)->GetContent(len); }
 
    /** Query the type of the content.
@@ -451,7 +451,7 @@ public:
        @return list of parameters, must be freed by caller.
    */
    const MimeParameterList& GetDisposition(int n,
-                                           String *disptype = NULL) const
+                                           String *disptype = nullptr) const
    {
       const MimePart *part = GetMimePart(n);
       if ( disptype )
@@ -514,6 +514,8 @@ protected:
    MOBJECT_NAME(Message)
 };
 
-DECLARE_AUTOPTR(Message);
+#ifndef SWIG
+using Message_obj = DecRefPtr<Message>;
+#endif // SWIG
 
 #endif // MESSAGE_H

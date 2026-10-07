@@ -60,9 +60,11 @@
 
 #include "modules/Filters.h"    // for FilterRule::Error
 
+#include <vector>
+
 class AsyncStatusHandler;
 
-WX_DEFINE_ARRAY(AsyncStatusHandler *, ArrayAsyncStatus);
+using ArrayAsyncStatus = std::vector<AsyncStatusHandler *>;
 
 // the trace mask for dnd messages
 #define M_TRACE_DND _T("msgdnd")
@@ -98,25 +100,25 @@ public:
    /**
      Set the folder to use - this should be called before ProcessCommand()
     */
-   virtual void SetFolder(ASMailFolder *asmf);
+   void SetFolder(ASMailFolder *asmf) override;
 
    /**
      Set the frame to use for status messages and (as parent for) dialogs
     */
-   virtual void SetFrame(wxFrame *frame) { m_frame = frame; }
+   void SetFrame(wxFrame *frame) override { m_frame = frame; }
 
-   virtual void SetWindowForDnD(wxWindow *win) { m_winForDnd = win; }
+   void SetWindowForDnD(wxWindow *win) override { m_winForDnd = win; }
 
    /**
      Process the given WXMENU_MSG_XXX command for all message
 
      @return true if the command was processed
     */
-   virtual bool ProcessCommand(int id,
-                               const UIdArray& messages,
-                               MFolder *folder);
+   bool ProcessCommand(int id,
+                       const UIdArray& messages,
+                       MFolder *folder) override;
 
-   virtual String GetFolderName() const
+   String GetFolderName() const override
    {
       String name;
       if ( m_asmf )
@@ -133,7 +135,7 @@ public:
    //@{
 
    /// needed for async event processing
-   virtual bool OnMEvent(MEventData& event);
+   bool OnMEvent(MEventData& event) override;
 
    /// add an async status object to m_arrayAsyncStatus
    void AddAsyncStatus(AsyncStatusHandler *asyncStatus);
@@ -152,7 +154,7 @@ public:
    wxFrame *GetFrame() const { return m_frame; }
 
    MailFolder *GetMailFolder() const
-      { return m_asmf ? m_asmf->GetMailFolder() : NULL; }
+      { return m_asmf ? m_asmf->GetMailFolder() : nullptr; }
 
 protected:
    /** @name Menu command handlers
@@ -175,8 +177,8 @@ protected:
    void ToggleMessagesFlag(const UIdArray& messages, MailFolder::MessageStatus f);
    void MarkRead(const UIdArray& messages, bool read);
 
-   Ticket SaveMessagesToFolder(const UIdArray& selections, MFolder *folder = NULL);
-   Ticket MoveMessagesToFolder(const UIdArray& messages, MFolder *folder = NULL);
+   Ticket SaveMessagesToFolder(const UIdArray& selections, MFolder *folder = nullptr);
+   Ticket MoveMessagesToFolder(const UIdArray& messages, MFolder *folder = nullptr);
    Ticket SaveMessagesToFile(const UIdArray& selections);
 
    void ExtractAddresses(const UIdArray& selections);
@@ -184,7 +186,7 @@ protected:
    void ApplyFilters(const UIdArray& selections);
 
    bool DragAndDropMessages(const UIdArray& selections);
-   void DropMessagesToFolder(const UIdArray& selections, MFolder *folder = NULL);
+   void DropMessagesToFolder(const UIdArray& selections, MFolder *folder = nullptr);
 
    /// Show the raw text of the specified message
    void ShowRawText(UIdType uid);
@@ -216,7 +218,7 @@ protected:
    {
       // do it synchronously (FIXME should we?)
       MailFolder_obj mf(GetMailFolder());
-      CHECK( mf, NULL, _T("no folder in MsgCmdProcImpl::GetMessage()") );
+      CHECK( mf, nullptr, _T("no folder in MsgCmdProcImpl::GetMessage()") );
 
       return mf->GetMessage(uid);
    }
@@ -357,12 +359,12 @@ bool AsyncStatusHandler::Monitor(Ticket ticket, const wxString& msgError)
 
       delete this;
 
-      return FALSE;
+      return false;
    }
 
    m_msgCmdProc->AddASyncOperation(ticket);
 
-   return TRUE;
+   return true;
 }
 
 void AsyncStatusHandler::SetSuccessMsg(const wxString& msgOk)
@@ -399,7 +401,7 @@ AsyncStatusHandler::~AsyncStatusHandler()
 /* static */
 MsgCmdProc *MsgCmdProc::Create(MessageView *msgView, wxWindow *winForDnd)
 {
-   CHECK( msgView, NULL, _T("must have an associated message view") );
+   CHECK( msgView, nullptr, _T("must have an associated message view") );
 
    return new MsgCmdProcImpl(msgView, winForDnd);
 }
@@ -410,15 +412,15 @@ MsgCmdProcImpl::MsgCmdProcImpl(MessageView *msgView, wxWindow *winForDnd)
 
    m_msgView = msgView;
    m_winForDnd = winForDnd;
-   m_asmf = NULL;
+   m_asmf = nullptr;
    m_regASyncResult = MEventManager::Register(*this, MEventId_ASFolderResult);
 
    m_TicketList = ASTicketList::Create();
 
    // these are created on demand
-   m_TicketsToDeleteList = NULL;
-   m_TicketsDroppedList = NULL;
-   m_TicketsToEditList = NULL;
+   m_TicketsToDeleteList = nullptr;
+   m_TicketsDroppedList = nullptr;
+   m_TicketsToEditList = nullptr;
 }
 
 MsgCmdProcImpl::~MsgCmdProcImpl()
@@ -475,7 +477,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
    if ( !m_asmf )
       return false;
 
-   CHECK( !messages.IsEmpty(), false, _T("no messages to operate on") );
+   CHECK( !messages.empty(), false, _T("no messages to operate on") );
 
    bool rc = true;
 
@@ -804,7 +806,7 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
    CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ShowMIMEDialog") );
 
    Message_obj msg(mf->GetMessage(uid));
-   const MimePart *part = msg ? msg->GetTopMimePart() : NULL;
+   const MimePart *part = msg ? msg->GetTopMimePart() : nullptr;
 
    if ( !part )
    {
@@ -816,7 +818,7 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
    // only pass message view to the dialog to allow showing the context menu
    // for the MIME parts - but for this we must be previewing this message!
    ShowMIMETreeDialog(part, GetFrame(),
-                           m_msgView->GetUId() == uid ? m_msgView : NULL);
+                           m_msgView->GetUId() == uid ? m_msgView : nullptr);
 }
 
 void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
@@ -905,7 +907,7 @@ void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
    SendMessage_obj msgCopy(SendMessage::CreateFromMsg
                            (
                                GetProfile(),
-                               msg.Get(),
+                               msg.get(),
                                Prot_SMTP,
                                GetFrame(),
                                &partsRemove
@@ -923,7 +925,7 @@ void MsgCmdProcImpl::RemoveAttachments(UIdType uid)
       bool flagsOk = false;
 
       HeaderInfoList_obj headers(HeaderInfoList::Create(mf));
-      const HeaderInfo * const hi = headers ? headers->GetEntryUId(uid) : NULL;
+      const HeaderInfo * const hi = headers ? headers->GetEntryUId(uid) : nullptr;
       if ( hi )
       {
          const int flags = hi->GetStatus();
@@ -957,7 +959,7 @@ void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
    wxLogStatus(GetFrame(), msg);
 
    // first mark the messages as spam/ham
-   const size_t count = uids.Count();
+   const size_t count = uids.size();
    UIdArray uidsReclassified;
    uidsReclassified.reserve(count);
    for ( size_t i = 0; i < count; i++ )
@@ -1003,7 +1005,7 @@ void MsgCmdProcImpl::CheckIfSpam(const UIdArray& uids)
    wxString status(_("Checking message using spam filters..."));
    wxLogStatus(GetFrame(), status);
 
-   const size_t n = uids.Count();
+   const size_t n = uids.size();
    for ( size_t i = 0; i < n; i++ )
    {
       Message_obj msg(GetMessage(uids[i]));
@@ -1037,7 +1039,7 @@ void MsgCmdProcImpl::CheckIfSpam(const UIdArray& uids)
 void
 MsgCmdProcImpl::OpenMessages(const UIdArray& selections)
 {
-   size_t n = selections.Count();
+   size_t n = selections.size();
    for ( size_t i = 0; i < n; i++ )
    {
       ShowMessageViewFrame(GetFrame(), m_asmf, selections[i]);
@@ -1050,7 +1052,7 @@ MsgCmdProcImpl::EditMessages(const UIdArray& selections)
    if ( !m_TicketsToEditList )
       m_TicketsToEditList = ASTicketList::Create();
 
-   size_t n = selections.Count();
+   size_t n = selections.size();
    for ( size_t i = 0; i < n; i++ )
    {
       Ticket t = m_asmf->GetMessage(selections[i], this);
@@ -1080,7 +1082,7 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
    }
 
    size_t countOk = 0,
-          count = messages.GetCount();
+          count = messages.size();
    for ( size_t n = 0; n < count; n++ )
    {
       Message *msg = GetMessage(messages[n]);
@@ -1105,7 +1107,7 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
 void
 MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
 {
-   size_t count = messages.GetCount();
+   size_t count = messages.size();
    if ( !count )
       return;
 
@@ -1138,7 +1140,7 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
       SendMessage_obj sendMsg(SendMessage::CreateResent
                               (
                                   GetProfile(),
-                                  msg.Get(),
+                                  msg.get(),
                                   GetFrame()
                               ));
 
@@ -1255,7 +1257,7 @@ MsgCmdProcImpl::DeleteAndExpungeMessages(const UIdArray& selections)
                  "the %zu selected messages?\n"
                  "\n"
                  "Note that it will be impossible to restore them!"),
-               selections.Count()
+               selections.size()
             ),
             GetFrame(),
             MDIALOG_YESNOTITLE,
@@ -1296,7 +1298,7 @@ MsgCmdProcImpl::ToggleMessagesFlag(const UIdArray& messages,
    HeaderInfoList_obj hil(mf->GetHeaders());
    CHECK_RET( hil, _T("can't toggle messages flag without folder listing") );
 
-   size_t count = messages.GetCount();
+   size_t count = messages.size();
    for ( size_t n = 0; n < count; n++ )
    {
       // find the corresponding entry in the listing
@@ -1328,7 +1330,7 @@ MsgCmdProcImpl::ToggleMessagesFlag(const UIdArray& messages,
 void
 MsgCmdProcImpl::MarkRead(const UIdArray& selections, bool read)
 {
-   const unsigned long count = selections.GetCount();
+   const unsigned long count = selections.size();
 
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
@@ -1364,7 +1366,7 @@ MsgCmdProcImpl::SaveMessagesToFolder(const UIdArray& selections,
       folder->IncRef(); // to match DecRef() below
    }
 
-   const unsigned long count = selections.GetCount();
+   const unsigned long count = selections.size();
 
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
@@ -1403,7 +1405,7 @@ MsgCmdProcImpl::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
 Ticket
 MsgCmdProcImpl::SaveMessagesToFile(const UIdArray& selections)
 {
-   const unsigned long count = selections.GetCount();
+   const unsigned long count = selections.size();
 
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
@@ -1432,7 +1434,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
 
    // extract all addresses from the selected messages to this array
    wxArrayString addressesSorted;
-   size_t count = selections.GetCount();
+   size_t count = selections.size();
 
    MProgressDialog *dlg;
    if ( count > 10 )  // FIXME: hardcoded
@@ -1448,7 +1450,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
    }
    else
    {
-      dlg = NULL;
+      dlg = nullptr;
    }
 
    for ( size_t n = 0; n < count; n++ )
@@ -1498,7 +1500,7 @@ MsgCmdProcImpl::DropMessagesToFolder(const UIdArray& selections,
                                      MFolder *folder)
 {
    wxLogTrace(M_TRACE_DND, _T("Saving %zu message(s) to folder '%s'"),
-              selections.GetCount(),
+              selections.size(),
               folder->GetFullName());
 
    Ticket t = SaveMessagesToFolder(selections, folder);
@@ -1527,7 +1529,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    MailFolder_obj mf(GetMailFolder());
    CHECK( mf, false, _T("no mail folder to drag messages from?") );
 
-   MMessagesDataObject dropData(this, mf, selections);
+   MMessagesDataObject dropData(this, mf.get(), selections);
 
    // setting up the dnd icons can't be done in portable way :-(
 #if defined(__WXMSW__) || defined(__WXMAC__)
@@ -1536,7 +1538,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
                            wxCursor(_T("msg_move")));
 #else // Unix
    wxIconManager *iconManager = mApplication->GetIconManager();
-   wxIcon icon = iconManager->GetIcon(selections.Count() > 1 ? _T("dnd_msgs")
+   wxIcon icon = iconManager->GetIcon(selections.size() > 1 ? _T("dnd_msgs")
                                                              : _T("dnd_msg"));
    wxDropSource dropSource(dropData, m_winForDnd, icon);
 #endif // OS
@@ -1572,14 +1574,14 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
             }
 
             // also delete the messages which have been already saved
-            if ( !m_UIdsCopiedOk.IsEmpty() )
+            if ( !m_UIdsCopiedOk.empty() )
             {
                m_TicketList->Add
                (
                   // true => expunge as well
                   m_asmf->DeleteMessages(&m_UIdsCopiedOk, true, this)
                );
-               m_UIdsCopiedOk.Empty();
+               m_UIdsCopiedOk.clear();
 
                wxLogTrace(M_TRACE_DND, _T("Deleted previously dropped msgs."));
             }
@@ -1602,7 +1604,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
       didDrop = true;
 
       m_TicketsDroppedList->DecRef();
-      m_TicketsDroppedList = NULL;
+      m_TicketsDroppedList = nullptr;
 
       wxLogTrace(M_TRACE_DND, _T("DragAndDropMessages() done ok"));
    }
@@ -1611,9 +1613,9 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
       wxLogTrace(M_TRACE_DND, _T("Nothing dropped"));
    }
 
-   if ( !m_UIdsCopiedOk.IsEmpty() )
+   if ( !m_UIdsCopiedOk.empty() )
    {
-      m_UIdsCopiedOk.Empty();
+      m_UIdsCopiedOk.clear();
    }
 #endif // wxUSE_DRAG_AND_DROP
 
@@ -1624,7 +1626,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
 void
 MsgCmdProcImpl::ApplyFilters(const UIdArray& selections)
 {
-   const auto count = selections.GetCount();
+   const auto count = selections.size();
 
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, wxString::Format
@@ -1680,7 +1682,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
       // find the corresponding AsyncStatusHandler object, if any
       bool hadStatusObject = false;
-      size_t progressCount = m_arrayAsyncStatus.GetCount();
+      size_t progressCount = m_arrayAsyncStatus.size();
       for ( size_t n = 0; n < progressCount; n++ )
       {
          AsyncStatusHandler *asyncStatus = m_arrayAsyncStatus[n];
@@ -1693,7 +1695,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
             }
 
             delete asyncStatus;
-            m_arrayAsyncStatus.RemoveAt(n);
+            m_arrayAsyncStatus.erase(m_arrayAsyncStatus.begin() + n);
 
             hadStatusObject = true;
 
@@ -1752,7 +1754,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   UIdArray *seq = result->GetSequence();
                   CHECK( seq, false, _T("invalid async event data") );
 
-                  const auto count = seq->Count();
+                  const auto count = seq->size();
 
                   if ( wasDropped )
                   {
@@ -1856,12 +1858,12 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
 void MsgCmdProcImpl::RemoveAsyncStatus(AsyncStatusHandler *asyncStatus)
 {
-   size_t progressCount = m_arrayAsyncStatus.GetCount();
+   size_t progressCount = m_arrayAsyncStatus.size();
    for ( size_t n = 0; n < progressCount; n++ )
    {
       if ( asyncStatus == m_arrayAsyncStatus[n] )
       {
-         m_arrayAsyncStatus.RemoveAt(n);
+         m_arrayAsyncStatus.erase(m_arrayAsyncStatus.begin() + n);
 
          return;
       }
@@ -1872,6 +1874,6 @@ void MsgCmdProcImpl::RemoveAsyncStatus(AsyncStatusHandler *asyncStatus)
 
 void MsgCmdProcImpl::AddAsyncStatus(AsyncStatusHandler *asyncStatus)
 {
-   m_arrayAsyncStatus.Add(asyncStatus);
+   m_arrayAsyncStatus.push_back(asyncStatus);
 }
 

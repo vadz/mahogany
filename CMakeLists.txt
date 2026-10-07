@@ -46,9 +46,12 @@ project(Mahogany
 )
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# We don't use C++20 modules, so don't waste time scanning for them.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # Build options
 option(USE_PYTHON "Enable Python scripting support" ON)

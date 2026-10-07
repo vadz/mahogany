@@ -82,7 +82,7 @@ public:
 private:
    Params m_params;
 
-   virtual wxWizardPage *DoCreatePage(MWizardPageId id);
+   wxWizardPage *DoCreatePage(MWizardPageId id) override;
 
    DECLARE_NO_COPY_CLASS(ImportFoldersWizard)
 };
@@ -96,8 +96,8 @@ class MWizard_ImportFolders_ChoicePage : public MWizardPage
 public:
    MWizard_ImportFolders_ChoicePage(MWizard *wizard);
 
-   virtual MWizardPageId GetPreviousPageId() const { return MWizard_PageNone; }
-   virtual MWizardPageId GetNextPageId() const;
+   MWizardPageId GetPreviousPageId() const override { return MWizard_PageNone; }
+   MWizardPageId GetNextPageId() const override;
 
    void OnCheckBox(wxCommandEvent& event);
 
@@ -116,7 +116,7 @@ MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wiza
                              : MWizardPage(wizard,
                                            MWizard_ImportFolders_Choice)
 {
-   m_checkMH = NULL;
+   m_checkMH = nullptr;
 
    bool hasMH = false,
         hasSomethingToImport = false;
@@ -152,7 +152,7 @@ MWizard_ImportFolders_ChoicePage::MWizard_ImportFolders_ChoicePage(MWizard *wiza
 
    if ( hasMH )
    {
-      m_checkMH = panel->CreateCheckBox(labels[0], maxwidth, NULL);
+      m_checkMH = panel->CreateCheckBox(labels[0], maxwidth, nullptr);
 
       // by default, import them all
       m_checkMH->SetValue(true);
@@ -185,12 +185,12 @@ class MWizard_ImportFolders_MHPage : public MWizardPage
 public:
    MWizard_ImportFolders_MHPage(MWizard *wizard);
 
-   virtual MWizardPageId GetPreviousPageId() const
+   MWizardPageId GetPreviousPageId() const override
       { return MWizard_ImportFolders_Choice; }
-   virtual MWizardPageId GetNextPageId() const
+   MWizardPageId GetNextPageId() const override
       { return MWizard_PageNone; }
 
-   virtual bool TransferDataFromWindow();
+   bool TransferDataFromWindow() override;
 
 private:
    wxTextCtrl *m_textTop;
@@ -221,7 +221,7 @@ MWizard_ImportFolders_MHPage::MWizard_ImportFolders_MHPage(MWizard *wizard)
 
    maxwidth += 5;
 
-   m_textTop = panel->CreateDirEntry(labels[0], maxwidth, NULL);
+   m_textTop = panel->CreateDirEntry(labels[0], maxwidth, nullptr);
    m_checkAll = panel->CreateCheckBox(labels[1], maxwidth, m_textTop);
 
    // init controls
@@ -257,7 +257,7 @@ ImportFoldersWizard::DoCreatePage(MWizardPageId id)
    }
 #undef CREATE_PAGE
 
-   return NULL;
+   return nullptr;
 }
 
 void RunImportFoldersWizard()

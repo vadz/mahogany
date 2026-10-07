@@ -63,8 +63,8 @@ class XFace
    bool CreateFromFile(const String& filename);
 
    static class wxImage GetXFaceImg(const String &filename,
-                                    bool *hasimg = NULL,
-                                    class wxWindow *parent = NULL);
+                                    bool *hasimg = nullptr,
+                                    class wxWindow *parent = nullptr);
    static String ConvertImgToXFaceData(wxImage &img);
 #endif
    /**

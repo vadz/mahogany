@@ -38,10 +38,10 @@ public:
    ClickableURL(MessageView *msgView, const String& url);
 
    // implement base class pure virtuals
-   virtual String GetLabel() const;
+   String GetLabel() const override;
 
-   virtual void OnLeftClick() const;
-   virtual void OnRightClick(const wxPoint& pt) const;
+   void OnLeftClick() const override;
+   void OnRightClick(const wxPoint& pt) const override;
 
    /// @name Accessors
    //@{

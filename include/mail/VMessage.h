@@ -46,52 +46,52 @@ public:
    /** @name Headers access */
    //@{
 
-   virtual wxArrayString GetHeaderLines(const char **headers,
-                                        wxArrayInt *encodings = NULL) const
+   wxArrayString GetHeaderLines(const char **headers,
+                                wxArrayInt *encodings = nullptr) const override
       { return m_message->GetHeaderLines(headers, encodings); }
 
-   virtual String GetHeader() const
+   String GetHeader() const override
       { return m_message->GetHeader(); }
 
-   virtual size_t GetAddresses(MessageAddressType type,
-                               wxArrayString& addresses) const
+   size_t GetAddresses(MessageAddressType type,
+                       wxArrayString& addresses) const override
       { return m_message->GetAddresses(type, addresses); }
 
-   virtual AddressList *GetAddressList(MessageAddressType type) const
+   AddressList *GetAddressList(MessageAddressType type) const override
       { return m_message->GetAddressList(type); }
 
-   virtual String Subject() const { return m_message->Subject(); }
-   virtual String From() const { return m_message->From(); }
-   virtual String Date() const { return m_message->Date(); }
-   virtual String GetId() const { return m_message->GetId(); }
-   virtual String GetReferences() const { return m_message->GetReferences(); }
-   virtual String GetInReplyTo() const { return m_message->GetInReplyTo(); }
-   virtual String GetNewsgroups() const { return m_message->GetNewsgroups(); }
-   virtual int GetStatus() const { return *m_flags; }
-   virtual unsigned long GetSize() const { return m_message->GetSize(); }
-   virtual time_t GetDate() const { return m_message->GetDate(); }
+   String Subject() const override { return m_message->Subject(); }
+   String From() const override { return m_message->From(); }
+   String Date() const override { return m_message->Date(); }
+   String GetId() const override { return m_message->GetId(); }
+   String GetReferences() const override { return m_message->GetReferences(); }
+   String GetInReplyTo() const override { return m_message->GetInReplyTo(); }
+   String GetNewsgroups() const override { return m_message->GetNewsgroups(); }
+   int GetStatus() const override { return *m_flags; }
+   unsigned long GetSize() const override { return m_message->GetSize(); }
+   time_t GetDate() const override { return m_message->GetDate(); }
 
    //@}
 
    /** @name Simple accessors */
    //@{
 
-   virtual MailFolder *GetFolder() const { return m_mf; }
-   virtual UIdType GetUId() const { return m_uid; }
-   virtual Profile *GetProfile() const { return m_message->GetProfile(); }
+   MailFolder *GetFolder() const override { return m_mf; }
+   UIdType GetUId() const override { return m_uid; }
+   Profile *GetProfile() const override { return m_message->GetProfile(); }
 
    //@}
 
    /** @name Body access */
    //@{
 
-   virtual const MimePart *GetTopMimePart() const
+   const MimePart *GetTopMimePart() const override
       { return m_message->GetTopMimePart(); }
 
-   virtual int CountParts() const
+   int CountParts() const override
       { return m_message->CountParts(); }
 
-   virtual const MimePart *GetMimePart(int n) const
+   const MimePart *GetMimePart(int n) const override
       { return m_message->GetMimePart(n); }
 
    //@}
@@ -99,10 +99,10 @@ public:
    /** @name Operations */
    //@{
 
-   virtual String FetchText() const
+   String FetchText() const override
       { return m_message->FetchText(); }
 
-   virtual bool WriteToString(String& str, bool headerFlag = true) const
+   bool WriteToString(String& str, bool headerFlag = true) const override
       { return m_message->WriteToString(str, headerFlag); }
 
    //@}

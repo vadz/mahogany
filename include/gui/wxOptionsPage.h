@@ -22,7 +22,9 @@
 
 #include "gui/wxDialogLayout.h"         // for MBookCtrlPageBase
 
-WX_DEFINE_ARRAY(wxControl *, ArrayControls);
+#include <vector>
+
+using ArrayControls = std::vector<wxControl *>;
 
 // We can't use WX_DEFINE_ARRAY_INT(bool) as this doesn't compile when using
 // STL containers because of the differences between std::vector<bool>
@@ -53,10 +55,10 @@ enum
 struct ConfigValueDefault
 {
    ConfigValueDefault(const char *name_, long value)
-      { bNumeric = TRUE; name = name_; lValue = value; }
+      { bNumeric = true; name = name_; lValue = value; }
 
    ConfigValueDefault(const char *name_, const char *value)
-      { bNumeric = FALSE; name = name_; szValue = value; }
+      { bNumeric = false; name = name_; szValue = value; }
 
    long GetLong() const { wxASSERT( bNumeric ); return lValue; }
    const char *GetString() const { wxASSERT( !bNumeric ); return szValue; }
@@ -90,7 +92,7 @@ class wxOptionsPage : public MBookCtrlPageBase
 public:
    // FieldType and FieldFlags are stored in one 'int', so the bits should be
    // shared...
-   enum FieldType
+   enum FieldType : unsigned
    {
       Field_Text   = 0x0001, // one line text field
       Field_Number = 0x0002, // the same as text but accepts only digits
@@ -110,7 +112,7 @@ public:
       Field_Type   = 0xffff  // bit mask selecting the type
    };
 
-   enum FieldFlags
+   enum FieldFlags : unsigned
    {
       Field_Vital    = 0x10000000, // vital setting, test after change
       Field_Restart  = 0x20000000, // will only take effect during next run
@@ -126,18 +128,7 @@ public:
    struct FieldInfo
    {
       const char   *label;   // which is shown in the dialog
-      // We have a problem with the type of FieldFlags enum elements: MSVC (up
-      // to version 10) treats Field_Global as negative int and warns when
-      // initializing flags with it if it's declared as unsigned. OTOH g++ 4.7
-      // treats all FieldFlags constants as unsigned (why?) and warns when
-      // initializing flags with them if it's defined as int. So there doesn't
-      // seem to be any way to avoid warnings without conditional compilation.
-#ifdef _MSC_VER
-      int
-#else
-      unsigned      
-#endif
-                    flags;   // contains the type and the flags (see above)
+      unsigned      flags;   // contains the type and the flags (see above)
       int           enable;  // enable this field depending on the value of
                              // the "enable" one if != -1 (using negative ids
                              // != -1 negates the condition, i.e. this field is
@@ -185,11 +176,11 @@ public:
 
    // transfer data to/from the controls: derived classes should implement
    // DoTransferOptionsTo/FromWindow() instead of overriding those
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    // create controls when the page is shown in the notebook for the first time
-   virtual bool Show(bool show = true);
+   bool Show(bool show = true) override;
 
    // to change the profile associated with the page:
    void SetProfile(Profile *profile);
@@ -280,7 +271,7 @@ protected:
    // for all this mess to work at all
    struct LboxData
    {
-      LboxData() { m_next = NULL; }
+      LboxData() { m_next = nullptr; }
 
       int m_idListbox;           // id
       wxString m_lboxDlgTitle,   // the title for Add/Modifydialogs
@@ -310,7 +301,7 @@ protected:
    // the pointers being returned are valid
    bool GetListboxFromButtonEvent(const wxEvent& event,
                                   wxListBox **pLbox,
-                                  LboxData **pData = NULL) const;
+                                  LboxData **pData = nullptr) const;
 
    // array of LboxData or NULL if we have no listboxes
    LboxData *m_lboxData;
@@ -336,6 +327,21 @@ private:
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxOptionsPage)
 };
+
+// Combining elements of different enums is deprecated in C++20, so define the
+// operators for doing it explicitly. They must be constexpr to allow using
+// them in the initializers of FieldInfo::flags without narrowing.
+constexpr unsigned
+operator|(wxOptionsPage::FieldType type, wxOptionsPage::FieldFlags flags)
+{
+   return static_cast<unsigned>(type) | static_cast<unsigned>(flags);
+}
+
+constexpr unsigned
+operator|(wxOptionsPage::FieldFlags flags, wxOptionsPage::FieldType type)
+{
+   return type | flags;
+}
 
 // ----------------------------------------------------------------------------
 // a page which gets the information about its controls from the static array
@@ -561,8 +567,8 @@ public:
    }
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    // ctor for New()
@@ -608,8 +614,8 @@ public:
    void OnButton(wxCommandEvent&);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    // create m_folder for our m_Profile
@@ -693,8 +699,8 @@ public:
    void OnButton(wxCommandEvent&);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    // the names of all available viewers
@@ -714,8 +720,8 @@ public:
    wxOptionsPageFolderView(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnButton(wxCommandEvent&);
 
@@ -731,8 +737,8 @@ public:
    wxOptionsPageFolderTree(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    bool m_isHomeOrig;
@@ -748,8 +754,8 @@ public:
    wxOptionsPageFolders(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnUpdateUIBtns(wxUpdateUIEvent&);
 
@@ -768,7 +774,7 @@ class wxOptionsPagePython : public wxOptionsPageStandard
 public:
    wxOptionsPagePython(MBookCtrl *parent, Profile *profile);
 
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPagePython)
@@ -783,8 +789,8 @@ public:
    wxOptionsPageAdb(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageAdb)
@@ -808,8 +814,8 @@ public:
    wxOptionsPageSync(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnButton(wxCommandEvent& event);
 
@@ -835,8 +841,8 @@ public:
    wxOptionsPageOthers(MBookCtrl *parent, Profile *profile);
 
 protected:
-   virtual bool DoTransferOptionsToWindow();
-   virtual bool DoTransferOptionsFromWindow();
+   bool DoTransferOptionsToWindow() override;
+   bool DoTransferOptionsFromWindow() override;
 
    void OnButton(wxCommandEvent&);
 

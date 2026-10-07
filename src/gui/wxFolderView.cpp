@@ -113,8 +113,8 @@ enum ListCtrlImages
 };
 
 #ifndef wxHAS_RADIO_MENU_ITEMS
-   #define wxITEM_NORMAL FALSE
-   #define wxITEM_RADIO TRUE
+   #define wxITEM_NORMAL false
+   #define wxITEM_RADIO true
 #endif
 
 // ----------------------------------------------------------------------------
@@ -284,10 +284,10 @@ public:
       m_dateGMT = dateGMT;
    }
 
-   virtual bool Expand(const String& category,
-                       const String& Name,
-                       const wxArrayString& /* arguments */,
-                       String *value) const
+   bool Expand(const String& category,
+               const String& Name,
+               const wxArrayString& /* arguments */,
+               String *value) const override
    {
       if ( !m_hi )
          return false;
@@ -352,7 +352,7 @@ public:
    void UpdateOptions();
 
    // don't get the focus from keyboard, we don't normally need it
-   virtual bool AcceptsFocusFromKeyboard() const { return false; }
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 
 protected:
    // the event handlers
@@ -457,7 +457,7 @@ public:
    void UpdateListing(HeaderInfoList *headers);
 
    /// do we have headers at all?
-   bool HasHeaders() const { return m_headers != NULL; }
+   bool HasHeaders() const { return m_headers != nullptr; }
 
    /// get the number of items we show
    size_t GetHeadersCount() const { return m_headers ? m_headers->Count() : 0; }
@@ -526,7 +526,7 @@ public:
    bool SelectNextUnreadAfter(long indexStart = -1,
                               MailFolder::MessageStatus status =
                                  MailFolder::MSG_STAT_SEEN,
-                              bool isSet = FALSE);
+                              bool isSet = false);
 
    /// return true if we preview this item
    bool IsPreviewed(long item) const
@@ -555,7 +555,7 @@ public:
    }
 
    /// get the UID and, optionally, the index of the focused item
-   UIdType GetFocusedUId(long *idx = NULL) const;
+   UIdType GetFocusedUId(long *idx = nullptr) const;
 
    /// get the only selected item, return -1 if 0 or >= 2 items are selected
    long GetUniqueSelection() const;
@@ -656,9 +656,9 @@ protected:
    wxColour GetEntryColour(const HeaderInfo *hi) const;
 
    /// return information about the list ctrl items on demand
-   virtual wxString OnGetItemText(long item, long column) const;
-   virtual int OnGetItemImage(long item) const;
-   virtual wxListItemAttr *OnGetItemAttr(long item) const;
+   wxString OnGetItemText(long item, long column) const override;
+   int OnGetItemImage(long item) const override;
+   wxListItemAttr *OnGetItemAttr(long item) const override;
 
    /// read the column width string from profile or default one
    wxString GetColWidths() const;
@@ -681,7 +681,7 @@ protected:
    void UpdateItemCount() { SetItemCount(GetHeadersCount()); }
 
    /// do we have a folder opened?
-   bool HasFolder() const { return m_FolderView->GetFolder() != NULL; }
+   bool HasFolder() const { return m_FolderView->GetFolder() != nullptr; }
 
    /// get the folder view settings we use
    const wxFolderView::AllProfileSettings& GetSettings() const
@@ -828,13 +828,13 @@ public:
       m_folderView = view;
    }
 
-   virtual MFolder *GetFolder(wxCoord /* x */, wxCoord /* y */) const
+   MFolder *GetFolder(wxCoord /* x */, wxCoord /* y */) const override
    {
       // we don't even use the position of the drop
       return MFolder::Get(m_folderView->GetFullName());
    }
 
-   virtual void Refresh()
+   void Refresh() override
    {
       m_folderView->Update();
    }
@@ -1138,14 +1138,14 @@ wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent,
                             wxDefaultPosition, wxDefaultSize,
                             folderView ? wxBORDER_NONE : wxBORDER_DEFAULT)
 {
-   m_winViewer = NULL;
+   m_winViewer = nullptr;
 #ifdef USE_VIEWER_BAR
-   m_winBar = NULL;
+   m_winBar = nullptr;
 #endif // USE_VIEWER_BAR
    m_folderView = folderView;
    m_listCtrl = listCtrl;
-   m_winViewerContainer = NULL;
-   m_evtHandlerMsgView = NULL;
+   m_winViewerContainer = nullptr;
+   m_evtHandlerMsgView = nullptr;
 }
 
 void wxFolderMsgWindow::SetViewerContainerWindow(wxWindow *winViewerContainer)
@@ -1285,7 +1285,7 @@ void wxFolderMsgWindow::CreateViewerBar()
 
    // put the layout together
    m_winBar->SetSizer(sizer);
-   m_winBar->SetAutoLayout(TRUE);
+   m_winBar->SetAutoLayout(true);
    sizer->Fit(m_winBar);
 }
 
@@ -1295,7 +1295,7 @@ void wxFolderMsgWindow::DeleteViewerBar()
    ASSERT_MSG( m_winBar, _T("deleting non existent viewer bar?") );
 
    delete m_winBar;
-   m_winBar = NULL;
+   m_winBar = nullptr;
 }
 
 void wxFolderMsgWindow::UpdateViewerBar()
@@ -1337,7 +1337,7 @@ void wxFolderMsgWindow::UpdateOptions()
       return;
    }
 
-   bool hasBar = m_winBar != NULL;
+   bool hasBar = m_winBar != nullptr;
    bool toggleBar;
    if ( m_folderView->GetFolder() )
    {
@@ -1500,10 +1500,10 @@ END_EVENT_TABLE()
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
                 : m_timerPreview(this)
 {
-   m_headers = NULL;
+   m_headers = nullptr;
    m_indexHI = (size_t)-1;
-   m_hiCached = NULL;
-   m_attr = NULL;
+   m_hiCached = nullptr;
+   m_attr = nullptr;
 
    m_PreviewOnSingleClick = false;
    m_PreviewDelay = 0;
@@ -1511,8 +1511,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_FolderView = fv;
    m_enableOnSelect = true;
    m_countSelected = 0;
-   m_menu = NULL;
-   m_menuFolders = NULL;
+   m_menu = nullptr;
+   m_menuFolders = nullptr;
 
    m_colSort = WXFLC_NONE;
    for (size_t i = 0; i < WXFLC_NUMENTRIES; ++i)
@@ -1573,7 +1573,7 @@ void wxFolderListCtrl::OnFolderChange()
    if ( m_headers )
    {
       m_headers->DecRef();
-      m_headers = NULL;
+      m_headers = nullptr;
 
       InvalidateCache();
    }
@@ -1686,7 +1686,7 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
       if ( event.Dragging() )
       {
          const UIdArray& selections = m_FolderView->GetSelections();
-         if ( !selections.IsEmpty() &&
+         if ( !selections.empty() &&
                   m_FolderView->m_msgCmdProc->
                      ProcessCommand(WXMENU_MSG_DRAG, selections) )
          {
@@ -1718,13 +1718,13 @@ void wxFolderListCtrl::OnContextMenu(wxContextMenuEvent& event)
    if ( m_menu )
    {
       delete m_menu;
-      m_menu = NULL;
+      m_menu = nullptr;
    }
 
    if ( m_menuFolders )
    {
       delete m_menuFolders;
-      m_menuFolders = NULL;
+      m_menuFolders = nullptr;
    }
 #endif // __WXGTK__
 
@@ -1948,7 +1948,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
    // threading
    menu.AppendSeparator();
-   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), wxEmptyString, TRUE);
+   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), wxEmptyString, true);
    menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
 
    // add column-specific entries
@@ -1961,17 +1961,17 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
       case WXFLC_FROM:
          menu.AppendSeparator();
-         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), wxEmptyString, TRUE);
-         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), wxEmptyString, TRUE);
+         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), wxEmptyString, true);
+         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), wxEmptyString, true);
 
          if ( READ_CONFIG(profile, MP_FVIEW_NAMES_ONLY) )
          {
-            menu.Check(WXMENU_FVIEW_FROM_NAMES_ONLY, TRUE);
+            menu.Check(WXMENU_FVIEW_FROM_NAMES_ONLY, true);
          }
 
          if ( READ_CONFIG(profile, MP_FVIEW_FROM_REPLACE) )
          {
-            menu.Check(WXMENU_FVIEW_TO_IN_FROM, TRUE);
+            menu.Check(WXMENU_FVIEW_TO_IN_FROM, true);
          }
          break;
 
@@ -1996,7 +1996,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
                sizeFmt = WXMENU_FVIEW_SIZE_AUTO;
             }
 
-            menu.Check(sizeFmt, TRUE);
+            menu.Check(sizeFmt, true);
          }
          break;
 
@@ -2020,12 +2020,12 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    if ( !READ_CONFIG(profile, MP_MSGS_SORTBY) )
    {
       // we're already unsorted, this command doesn't make sense
-      menu.Enable(WXMENU_FVIEW_RESET_SORT, FALSE);
+      menu.Enable(WXMENU_FVIEW_RESET_SORT, false);
    }
 
    if ( READ_CONFIG(profile, MP_MSGS_USE_THREADING) )
    {
-      menu.Check(WXMENU_FVIEW_TOGGLE_THREAD, TRUE);
+      menu.Check(WXMENU_FVIEW_TOGGLE_THREAD, true);
    }
 
    // and show the menu
@@ -2226,7 +2226,7 @@ void wxFolderListCtrl::PreviewItemDelayed(long idx, UIdType uid)
       m_uidDelayed = uid;
 
       // start (or restart) the timer
-      m_timerPreview.Start(m_PreviewDelay, TRUE /* one shot */);
+      m_timerPreview.Start(m_PreviewDelay, true /* one shot */);
    }
    else // no, preview the item immediately
    {
@@ -2375,7 +2375,7 @@ void wxFolderListCtrl::InvalidateCache()
 {
    m_indexHI = (size_t)-1;
 
-   m_hiCached = NULL;
+   m_hiCached = nullptr;
 
    m_headersToGet.Empty();
 }
@@ -2407,7 +2407,7 @@ void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
 
 HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 {
-   CHECK( m_headers, NULL, _T("no listing hence no header info") );
+   CHECK( m_headers, nullptr, _T("no listing hence no header info") );
 
    wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
 
@@ -2420,7 +2420,7 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
       if ( !m_headers->Count() )
       {
          // this probably means that we lost the connection unexpectedly
-         return NULL;
+         return nullptr;
       }
    }
 
@@ -2444,7 +2444,7 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
             self->m_headersToGet.Add(index);
          }
 
-         return NULL;
+         return nullptr;
       }
 
       // if the header is already cached, check if it's not the focused one
@@ -2575,7 +2575,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
             // here we can call it with the last parameter being true which
             // allows it to use interactive message boxes
             wxFontEncoding encoding = hi->GetEncoding();
-            if ( !EnsureAvailableTextEncoding(&encoding, NULL, true) )
+            if ( !EnsureAvailableTextEncoding(&encoding, nullptr, true) )
             {
                // no such encoding, don't try to show it
                hi->SetEncoding(wxFONTENCODING_SYSTEM);
@@ -2926,13 +2926,13 @@ wxFolderListCtrl::GetSelectionsOrFocus() const
          {
             const UIdType uidFocus = GetFocusedUId();
             if ( uidFocus != UID_ILLEGAL )
-               uids.Add(uidFocus);
+               uids.push_back(uidFocus);
          }
          break;
 
       case 1:
          // no need to cache anything
-         uids.Add(GetUIdFromIndex(seq.GetFirst(cookie)));
+         uids.push_back(GetUIdFromIndex(seq.GetFirst(cookie)));
          break;
 
       default:
@@ -2943,7 +2943,7 @@ wxFolderListCtrl::GetSelectionsOrFocus() const
                idx != UID_ILLEGAL;
                idx = seq.GetNext(idx, cookie) )
          {
-            uids.Add(GetUIdFromIndex(idx));
+            uids.push_back(GetUIdFromIndex(idx));
          }
    }
 
@@ -3048,7 +3048,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
             {
                String names;
 
-               AddressList_obj addrList(text);
+               AddressList_obj addrList(AddressList::Create(text));
                for ( Address *addr = addrList->GetFirst();
                      addr;
                      addr = addrList->GetNext(addr) )
@@ -3185,20 +3185,20 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    // see comment in the beginning of OnGetItemText()
    if ( (size_t)item >= GetHeadersCount() )
    {
-      return NULL;
+      return nullptr;
    }
 
    HeaderInfo *hi = GetHeaderInfo((size_t)item);
    if ( !hi )
    {
       // will get it later
-      return NULL;
+      return nullptr;
    }
 
    if ( !hi->IsValid() )
    {
       // no attributes for the headers we didn't retrieve
-      return NULL;
+      return nullptr;
    }
 
    if ( !m_attr )
@@ -3348,19 +3348,19 @@ wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
 wxFolderView *
 wxFolderView::Create(wxWindow *parent)
 {
-   wxCHECK_MSG(parent, NULL, _T("NULL parent frame in wxFolderView ctor"));
+   wxCHECK_MSG(parent, nullptr, _T("NULL parent frame in wxFolderView ctor"));
    wxFolderView *fv = new wxFolderView(parent);
    return fv;
 }
 
 wxFolderView::wxFolderView(wxWindow *parent)
 {
-   m_Profile = NULL;
+   m_Profile = nullptr;
    m_Parent = parent;
 
    m_Frame = GetFrame(m_Parent);
 
-   m_ASMailFolder = NULL;
+   m_ASMailFolder = nullptr;
    m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
 
    m_TicketList = ASTicketList::Create();
@@ -3404,7 +3404,7 @@ wxFolderView::~wxFolderView()
 
    // set it to NULL so that Clear() knows we are being destroyed - see the
    // code there
-   m_MessagePreview = NULL;
+   m_MessagePreview = nullptr;
 
    Clear();
 
@@ -3471,7 +3471,7 @@ bool wxFolderView::MoveToNextUnread(bool takeNextIfNoUnread)
 
 void wxFolderView::MoveToNextSearchMatch(bool forward)
 {
-   const size_t count = m_searchData.uids.GetCount();
+   const size_t count = m_searchData.uids.size();
 
    if ( !count )
    {
@@ -3876,7 +3876,7 @@ wxFolderView::Update()
 
    m_nDeleted = UID_ILLEGAL;
 
-   UpdateTitleAndStatusBars(m_Frame, mf);
+   UpdateTitleAndStatusBars(m_Frame, mf.get());
 }
 
 void
@@ -3958,16 +3958,16 @@ wxFolderView::DoClear(bool keepTheViewer)
 
       // this folder is not associated with our frame any more
       MailFolder_obj mf(m_ASMailFolder->GetMailFolder());
-      mf->SetInteractiveFrame(NULL);
+      mf->SetInteractiveFrame(nullptr);
 
       m_ASMailFolder->DecRef();
-      m_ASMailFolder = NULL;
+      m_ASMailFolder = nullptr;
 
-      m_msgCmdProc->SetFolder(NULL);
+      m_msgCmdProc->SetFolder(nullptr);
 
       if ( !keepTheViewer && m_MessagePreview )
       {
-         m_MessagePreview->SetFolder(NULL);
+         m_MessagePreview->SetFolder(nullptr);
          m_MessageWindow->UpdateOptions();
       }
    }
@@ -3981,7 +3981,7 @@ wxFolderView::DoClear(bool keepTheViewer)
    {
       m_Profile->DecRef();
 
-      m_Profile = NULL;
+      m_Profile = nullptr;
    }
 
    if ( !keepTheViewer && m_MessagePreview )
@@ -4075,7 +4075,7 @@ wxFolderView::SetFolder(MailFolder *mf)
    // keep the viewer (by passing true to Clear()) only if we're going to open
    // a new folder soon: this avoids flicker but still ensures that we close
    // the current viewer if we are not going to open any folder
-   DoClear(mf != NULL);
+   DoClear(mf != nullptr);
 
    if ( mf )
    {
@@ -4283,7 +4283,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
       folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
    }
 
-   return mf != NULL;
+   return mf != nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -4324,10 +4324,10 @@ void wxFolderView::SelectAllByStatus(MailFolder::MessageStatus status,
    if ( !indices )
       return;
 
-   size_t count = indices->GetCount();
+   size_t count = indices->size();
    for ( size_t n = 0; n < count; n++ )
    {
-      m_FolderCtrl->Select(hil->GetIdxFromMsgno(indices->Item(n)), true);
+      m_FolderCtrl->Select(hil->GetIdxFromMsgno((*indices)[n]), true);
    }
 
    delete indices;
@@ -4589,7 +4589,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
       case '/':   // start search forward
       case '?':   // start search backwards
          {
-            m_searchData.uids.Clear();
+            m_searchData.uids.clear();
 
             if ( !MInputBox
                   (
@@ -4710,7 +4710,7 @@ void
 wxFolderView::DoCommandEvent(int cmd)
 {
    const UIdArray& selections = GetSelections();
-   if ( selections.IsEmpty() )
+   if ( selections.empty() )
    {
       // nothing to do
       return;
@@ -4778,11 +4778,11 @@ wxFolderView::DoCommandEvent(int cmd)
          break;
 
       case WXMENU_MSG_NEXT_UNREAD:
-         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
+         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_SEEN, false);
          break;
 
       case WXMENU_MSG_NEXT_FLAGGED:
-         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
+         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, true);
          break;
 
       case WXMENU_MSG_SELECTALL:
@@ -4790,11 +4790,11 @@ wxFolderView::DoCommandEvent(int cmd)
          break;
 
       case WXMENU_MSG_SELECTUNREAD:
-         SelectAllByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
+         SelectAllByStatus(MailFolder::MSG_STAT_SEEN, false);
          break;
 
       case WXMENU_MSG_SELECTFLAGGED:
-         SelectAllByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
+         SelectAllByStatus(MailFolder::MSG_STAT_FLAGGED, true);
          break;
 
       case WXMENU_MSG_DESELECTALL:
@@ -4984,7 +4984,7 @@ wxFolderView::OnFocusChange(long idx, UIdType uid)
       HeaderInfoList_obj hil(GetFolder()->GetHeaders());
       CHECK_RET( hil, _T("failed to get headers") );
 
-      HeaderVarExpander expander(hil[idx],
+      HeaderVarExpander expander((*hil)[idx],
                                  m_settings.dateFormat,
                                  m_settings.dateGMT);
 
@@ -5034,7 +5034,7 @@ void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() == mf )
+   if ( event.GetFolder() == mf.get() )
    {
       wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Clear()"));
 
@@ -5062,7 +5062,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() != mf )
+   if ( event.GetFolder() != mf.get() )
       return;
 
    // deal with the special case when we get the expunge notification before
@@ -5138,7 +5138,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    // we don't have any deleted messages any more
    m_nDeleted = 0;
 
-   UpdateTitleAndStatusBars(m_Frame, mf);
+   UpdateTitleAndStatusBars(m_Frame, mf.get());
 }
 
 // this function gets called when new mail appears in the folder
@@ -5147,7 +5147,7 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() == mf )
+   if ( event.GetFolder() == mf.get() )
    {
       Update();
    }
@@ -5159,7 +5159,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
 {
    MailFolder_obj mf(GetMailFolder());
 
-   if ( event.GetFolder() == mf )
+   if ( event.GetFolder() == mf.get() )
    {
       HeaderInfoList_obj hil(GetFolder()->GetHeaders());
 
@@ -5219,7 +5219,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
       }
 
       // update the number of unread messages showin in the title/status bars
-      UpdateTitleAndStatusBars(m_Frame, mf);
+      UpdateTitleAndStatusBars(m_Frame, mf.get());
    }
 }
 
@@ -5272,7 +5272,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                           ) )
                      {
                         UIdArray selections;
-                        selections.Add(message->GetUId());
+                        selections.push_back(message->GetUId());
                         m_TicketList->Add(
                               m_ASMailFolder->ApplyFilterRules(&selections, this)
                            );
@@ -5413,7 +5413,7 @@ wxFolderViewFrame::Create(MFolder *folder,
    if ( !fv->OpenFolder(folder, openmode == MailFolder::ReadOnly) )
    {
       delete frame;
-      return NULL;
+      return nullptr;
    }
 
    // can only do it now, after the folder had been opened
@@ -5425,7 +5425,7 @@ wxFolderViewFrame::Create(MFolder *folder,
 wxFolderViewFrame::wxFolderViewFrame(const String& name, wxMFrame *parent)
                  : wxMFrame(name, parent)
 {
-   m_FolderView = NULL;
+   m_FolderView = nullptr;
 }
 
 void wxFolderViewFrame::DoCreateToolBar()
@@ -5506,7 +5506,7 @@ bool OpenFolderViewFrame(MFolder *folder,
 {
    return wxFolderViewFrame::Create(folder,
                                     (wxMFrame *)GetFrame(parent),
-                                    openmode) != NULL;
+                                    openmode) != nullptr;
 }
 
 extern

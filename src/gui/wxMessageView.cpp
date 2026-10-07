@@ -73,10 +73,10 @@ public:
    MsgVarExpander(Message *msg) { m_msg = msg; SafeIncRef(m_msg); }
    virtual ~MsgVarExpander() { SafeDecRef(m_msg); }
 
-   virtual bool Expand(const String& category,
-                       const String& Name,
-                       const wxArrayString& /* arguments */,
-                       String *value) const
+   bool Expand(const String& category,
+               const String& Name,
+               const wxArrayString& /* arguments */,
+               String *value) const override
    {
       if ( !m_msg )
          return false;
@@ -118,7 +118,7 @@ public:
    // creation
    DummyViewer() { }
 
-   virtual void Create(MessageView * /* msgView */, wxWindow *parent)
+   void Create(MessageView * /* msgView */, wxWindow *parent) override
    {
       m_window = new wxStaticText(parent, -1, _("\n\nNo message"),
                                   wxDefaultPosition, wxDefaultSize,
@@ -126,59 +126,59 @@ public:
    }
 
    // operations
-   virtual void Clear() { }
-   virtual void Update() { }
-   virtual void UpdateOptions() { }
-   virtual wxWindow *GetWindow() const { return m_window; }
+   void Clear() override { }
+   void Update() override { }
+   void UpdateOptions() override { }
+   wxWindow *GetWindow() const override { return m_window; }
 
-   virtual bool Find(const String& /* text */) { return false; }
-   virtual bool FindAgain() { return false; }
-   virtual void SelectAll() { }
-   virtual String GetSelection() const { return wxEmptyString; }
-   virtual void Copy() { }
-   virtual bool Print() { return false; }
-   virtual void PrintPreview() { }
+   bool Find(const String& /* text */) override { return false; }
+   bool FindAgain() override { return false; }
+   void SelectAll() override { }
+   String GetSelection() const override { return wxEmptyString; }
+   void Copy() override { }
+   bool Print() override { return false; }
+   void PrintPreview() override { }
 
    // header showing
-   virtual void StartHeaders() { }
-   virtual void ShowRawHeaders(const String& /* header */) { }
-   virtual void ShowHeaderName(const String& /* name */) { }
-   virtual void ShowHeaderValue(const String& /* value */,
-                                wxFontEncoding /* encoding */) { }
-   virtual void ShowHeaderURL(const String& /* text */,
-                              const String& /* url */) { }
-   virtual void EndHeader() { }
-   virtual void ShowXFace(const wxBitmap& /* bitmap */) { }
-   virtual void EndHeaders() { }
+   void StartHeaders() override { }
+   void ShowRawHeaders(const String& /* header */) override { }
+   void ShowHeaderName(const String& /* name */) override { }
+   void ShowHeaderValue(const String& /* value */,
+                        wxFontEncoding /* encoding */) override { }
+   void ShowHeaderURL(const String& /* text */,
+                      const String& /* url */) override { }
+   void EndHeader() override { }
+   void ShowXFace(const wxBitmap& /* bitmap */) override { }
+   void EndHeaders() override { }
 
    // body showing
-   virtual void StartBody() { }
-   virtual void StartPart() { }
-   virtual void InsertAttachment(const wxBitmap& /* icon */,
-                                 ClickableInfo * /* ci */) { }
-   virtual void InsertClickable(const wxBitmap& /* icon */,
-                                ClickableInfo * /* ci */,
-                                const wxColour& /* col */) { }
-   virtual void InsertImage(const wxImage& /* image */,
-                            ClickableInfo * /* ci */) { }
-   virtual void InsertRawContents(const String& /* data */) { }
-   virtual void InsertText(const String& /* text */,
-                           const MTextStyle& /* style */) { }
-   virtual void InsertURL(const String& /* text */,
-                          const String& /* url */) { }
+   void StartBody() override { }
+   void StartPart() override { }
+   void InsertAttachment(const wxBitmap& /* icon */,
+                         ClickableInfo * /* ci */) override { }
+   void InsertClickable(const wxBitmap& /* icon */,
+                        ClickableInfo * /* ci */,
+                        const wxColour& /* col */) override { }
+   void InsertImage(const wxImage& /* image */,
+                    ClickableInfo * /* ci */) override { }
+   void InsertRawContents(const String& /* data */) override { }
+   void InsertText(const String& /* text */,
+                   const MTextStyle& /* style */) override { }
+   void InsertURL(const String& /* text */,
+                  const String& /* url */) override { }
    virtual void EndText() { }
-   virtual void EndPart() { }
-   virtual void EndBody() { }
+   void EndPart() override { }
+   void EndBody() override { }
 
    // scrolling
-   virtual bool LineDown() { return false; }
-   virtual bool LineUp() { return false; }
-   virtual bool PageDown() { return false; }
-   virtual bool PageUp() { return false; }
+   bool LineDown() override { return false; }
+   bool LineUp() override { return false; }
+   bool PageDown() override { return false; }
+   bool PageUp() override { return false; }
 
    // capabilities querying
-   virtual bool CanInlineImages() const { return false; }
-   virtual bool CanProcess(const String& /* mimetype */) const { return false; }
+   bool CanInlineImages() const override { return false; }
+   bool CanProcess(const String& /* mimetype */) const override { return false; }
 
 private:
    wxWindow *m_window;
@@ -198,7 +198,7 @@ wxMessageView::wxMessageView(wxWindow *parent,
 {
    // set it to NULL initially to avoid sending notification in
    // OnViewerChange() for the initial dummy viewer
-   m_FolderView = NULL;
+   m_FolderView = nullptr;
 
    m_viewerParent = new wxPanel(parent);
    m_infobar = new wxInfoBar(m_viewerParent);
@@ -230,7 +230,7 @@ MessageView *MessageView::Create(wxWindow *parent, FolderView *folderView)
 MessageView *
 MessageView::CreateStandalone(wxWindow *parent, Profile *profile)
 {
-   return new wxMessageView(parent, NULL, profile);
+   return new wxMessageView(parent, nullptr, profile);
 }
 
 // ----------------------------------------------------------------------------
@@ -271,7 +271,7 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
    if ( m_FolderView )
    {
       m_FolderView->OnMsgViewerChange(viewerNew ? viewerNew->GetWindow()
-                                                : NULL);
+                                                : nullptr);
    }
 
    if ( viewerOld )
@@ -562,7 +562,7 @@ void
 wxMessageViewFrame::OnMenuCommand(int id)
 {
    UIdArray messages;
-   messages.Add(m_MessageView->GetUId());
+   messages.push_back(m_MessageView->GetUId());
 
    if ( !m_msgCmdProc->ProcessCommand(id, messages) )
    {
@@ -596,7 +596,7 @@ bool wxMessageViewFrame::OnMEvent(MEventData& event)
 
             const UIdType uid = m_MessageView->GetMessage()->GetUId();
 
-            const size_t count = uids.Count();
+            const size_t count = uids.size();
             for ( size_t n = 0; n < count; n++ )
             {
                if ( uids[n] == uid )
@@ -635,7 +635,7 @@ extern MessageView *ShowMessageViewFrame(wxWindow *parent,
                                          ASMailFolder *asmf,
                                          UIdType uid)
 {
-   CHECK( asmf, NULL, _T("NULL folder in ShowMessageViewFrame()?") );
+   CHECK( asmf, nullptr, _T("NULL folder in ShowMessageViewFrame()?") );
 
    wxMessageViewFrame *frame = new wxMessageViewFrame(parent, asmf, uid);
 

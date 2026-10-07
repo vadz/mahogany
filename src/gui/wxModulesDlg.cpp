@@ -58,8 +58,8 @@ public:
    wxModulesDialog(wxWindow *parent);
 
    // check the modules which are been currently loaded
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   bool TransferDataToWindow() override;
+   bool TransferDataFromWindow() override;
 
    void OnListBox(wxCommandEvent & ev);
    bool InternalUpdate(size_t n);
@@ -91,7 +91,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    m_Listing = MModule::ListAvailableModules();
 
    // create controls
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"), false,
                                              MH_DIALOG_MODULES);
    wxLayoutConstraints *c;
 
@@ -163,13 +163,13 @@ wxModulesDialog::InternalUpdate(size_t n)
       << (*m_Listing)[n].GetDescription() << '\n';
    m_textCtrl->ShowPosition(0); // no effect for wxGTK :-(
    m_textCtrl->SetInsertionPoint(0);
-   return TRUE;
+   return true;
 }
 
 bool wxModulesDialog::TransferDataToWindow()
 {
    if ( !m_Listing )
-      return FALSE;
+      return false;
 
    // get list of modules which shouldn't be loaded
    wxString modulesStr = READ_APPCONFIG(MP_MODULES_DONT_LOAD);
@@ -191,7 +191,7 @@ bool wxModulesDialog::TransferDataToWindow()
 
    InternalUpdate(0);
 
-   return TRUE;
+   return true;
 }
 
 bool wxModulesDialog::TransferDataFromWindow()
@@ -209,7 +209,7 @@ bool wxModulesDialog::TransferDataFromWindow()
    mApplication->GetProfile()->
       writeEntry(MP_MODULES_DONT_LOAD, strutil_flatten_array(modules));
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

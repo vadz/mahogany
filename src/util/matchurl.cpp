@@ -33,7 +33,7 @@ class KeywordDetectorCell
 {
 public:
    KeywordDetectorCell(char c) :
-      _c(c), _son(NULL), _brother(NULL), _isKey(0), _back(NULL) {}
+      _c(c), _son(nullptr), _brother(nullptr), _isKey(0), _back(nullptr) {}
 
    ~KeywordDetectorCell()
    {
@@ -67,7 +67,7 @@ private:
 class KeywordDetector
 {
 public:
-   KeywordDetector() : _root(NULL) { }
+   KeywordDetector() : _root(nullptr) { }
    ~KeywordDetector() { delete _root; }
 
 public:
@@ -100,7 +100,7 @@ public:
      to scan.
     */
    void computeBackArcs() {
-      _root->computeBackArcs(_root, 0);
+      _root->computeBackArcs(_root, nullptr);
    }
 
 private:
@@ -323,7 +323,7 @@ KeywordDetectorCell::computeBackArc(KeywordDetectorCell* root,
    ASSERT_MSG(parentBack == 0 || parentBack->_c == '\000',
               _T("logic error in KeywordDetectorCell?"));
 
-   KeywordDetectorCell* current = 0;
+   KeywordDetectorCell* current = nullptr;
    int backLevel = 0;
    if (! parentBack)
    {
@@ -358,7 +358,7 @@ KeywordDetectorCell::computeBackArc(KeywordDetectorCell* root,
 
       // There must be a son, otherwise the current node would be a keyword
       // and there is no need for a back node
-      CHECK(lastSon, 0, _T("node with a back link must have a son"));
+      CHECK(lastSon, nullptr, _T("node with a back link must have a son"));
 
       while (lastSon->_brother)
       {
@@ -373,7 +373,7 @@ KeywordDetectorCell::computeBackArc(KeywordDetectorCell* root,
       return newCell;
    }
 
-   return 0;
+   return nullptr;
 }
 
 void
@@ -387,7 +387,7 @@ KeywordDetectorCell::computeBackArcs(KeywordDetectorCell* root,
       if (parent->_c == '\000')
          break;
 
-      KeywordDetectorCell* back = 0;
+      KeywordDetectorCell* back = nullptr;
       if (! (onRootLevel || parent->_isKey))
       {
          back = parent->computeBackArc(root, parentBack);
@@ -787,8 +787,8 @@ match:
             // and has either two dots or at least a slash the other URLs,
             // otherwise it probably isn't an address/URL neither (stuff like
             // "... using ftp.If you ... " shouldn't be recognized as an URL)
-            good = wxTmemchr(pDot + 1, '.', p - pDot - 1) != NULL ||
-                     wxTmemchr(pDot + 1, '/', p - pDot - 1) != NULL;
+            good = wxTmemchr(pDot + 1, '.', p - pDot - 1) != nullptr ||
+                     wxTmemchr(pDot + 1, '/', p - pDot - 1) != nullptr;
          }
       }
 

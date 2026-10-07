@@ -113,7 +113,7 @@ public:
     */
    static bool CheckIfSpam(const Message& msg,
                            const String& param = wxEmptyString,
-                           String *result = NULL);
+                           String *result = nullptr);
 
    /**
       Show a GUI dialog allowing the user to configure all spam filters.
@@ -156,7 +156,7 @@ protected:
    /**
       Default ctor.
     */
-   SpamFilter() { m_next = NULL; }
+   SpamFilter() { m_next = nullptr; }
 
    /**
       Virtual dtor for the base class.
@@ -246,7 +246,7 @@ protected:
 
       @return the name of the icon to use or NULL
     */
-   virtual const char *GetOptionPageIconName() const { return NULL; }
+   virtual const char *GetOptionPageIconName() const { return nullptr; }
 
    /**
       Return a pointer to the option page used for editing this spam filter
@@ -336,9 +336,9 @@ public:
  */
 #define DECLARE_SPAM_FILTER(name, lname, cost)                                \
    public:                                                                    \
-      virtual unsigned int GetCost() const { return cost; }                   \
-      virtual const char *GetName() const { return name; }                    \
-      virtual String GetLongName() const { return lname; }
+      unsigned int GetCost() const override { return cost; }                  \
+      const char *GetName() const override { return name; }                   \
+      String GetLongName() const override { return lname; }
 
 /**
   This macro must be used in the .cpp file containing the implementation of a
@@ -352,7 +352,7 @@ public:
    class cname##Factory : public SpamFilterFactory                            \
    {                                                                          \
    public:                                                                    \
-      virtual SpamFilter *Create() const { return new cname; }                \
+      SpamFilter *Create() const override { return new cname; }               \
                                                                               \
       MMODULE_DEFINE();                                                       \
       DEFAULT_ENTRY_FUNC                                                      \

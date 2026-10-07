@@ -46,6 +46,10 @@
 #include "MFolder.h"
 #include "MEvent.h"
 
+#include "pointers.h"
+
+#include <vector>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -205,66 +209,66 @@ struct PrefMap {
 
 // IDENTITY Preferences
 static  PrefMap g_IdentityPrefMap[] = {
-  {_T("mail.identity.username") , MP_PERSONALNAME , _T("user's full name"), NM_IS_STRING, FALSE },
-  {_T("mail.identity.defaultdomain") , MP_HOSTNAME , _T("default domain"), NM_IS_STRING, FALSE },
-  {_T("mail.identity.useremail") , MP_FROM_ADDRESS , _T("e-mail address"), NM_IS_STRING, FALSE },
-  {_T("mail.identity.organization") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
-  {_T("mail.identity.reply_to") , MP_REPLY_ADDRESS , _T("reply address"), NM_IS_STRING, FALSE },
-  {_T("mail.attach_vcard") , MP_USEVCARD , _T("attach vCard to outgoing messages"), NM_IS_BOOL, FALSE },
+  {_T("mail.identity.username") , MP_PERSONALNAME , _T("user's full name"), NM_IS_STRING, false },
+  {_T("mail.identity.defaultdomain") , MP_HOSTNAME , _T("default domain"), NM_IS_STRING, false },
+  {_T("mail.identity.useremail") , MP_FROM_ADDRESS , _T("e-mail address"), NM_IS_STRING, false },
+  {_T("mail.identity.organization") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+  {_T("mail.identity.reply_to") , MP_REPLY_ADDRESS , _T("reply address"), NM_IS_STRING, false },
+  {_T("mail.attach_vcard") , MP_USEVCARD , _T("attach vCard to outgoing messages"), NM_IS_BOOL, false },
   {_T("END"), _T("Ignored"), _T("No descrEond of list record"), NM_NONE }   // DO NOT REMOVE, hack to find the end
 };
 
 // IDENTITY Preferences
 static  PrefMap g_NetworkPrefMap[] = {
 
- {_T("mail.smtp_name") , MP_SMTPHOST_LOGIN, _T("SMTP login name"), NM_IS_STRING, FALSE },
+ {_T("mail.smtp_name") , MP_SMTPHOST_LOGIN, _T("SMTP login name"), NM_IS_STRING, false },
  // my guess that netscape uses the same name
- {_T("mail.smtp_name") , MP_NNTPHOST_LOGIN, _T("NNTP login name"), NM_IS_STRING, FALSE },
- {_T("mail.pop_name") , MP_USERNAME, _T("POP username"), NM_IS_STRING, FALSE },
- {_T("mail.pop_password") , _T("Ignored"), _T("Password for the POP server"), NM_IS_STRING, FALSE },
- {_T("network.hosts.smtp_server") , MP_SMTPHOST, _T("SMTP Server Name"), NM_IS_STRING, FALSE },
- {_T("network.hosts.nntp_server") , MP_NNTPHOST, _T("NNTP Server Name"), NM_IS_STRING, FALSE },
- {_T("network.hosts.pop_server") , MP_POPHOST, _T("POP Server Name"), NM_IS_STRING, FALSE },
+ {_T("mail.smtp_name") , MP_NNTPHOST_LOGIN, _T("NNTP login name"), NM_IS_STRING, false },
+ {_T("mail.pop_name") , MP_USERNAME, _T("POP username"), NM_IS_STRING, false },
+ {_T("mail.pop_password") , _T("Ignored"), _T("Password for the POP server"), NM_IS_STRING, false },
+ {_T("network.hosts.smtp_server") , MP_SMTPHOST, _T("SMTP Server Name"), NM_IS_STRING, false },
+ {_T("network.hosts.nntp_server") , MP_NNTPHOST, _T("NNTP Server Name"), NM_IS_STRING, false },
+ {_T("network.hosts.pop_server") , MP_POPHOST, _T("POP Server Name"), NM_IS_STRING, false },
    // imap stuff is not there yet. It is a bit more complex: a bunch of keys
    // like mail.imap.<servername>.<property>. I don't know enough to make sense
    // out of it at the moment. I may set the imap to nil.
- {_T("mail.imap.server_sub_directory") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.imap.root_dir") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.imap.local_copies") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.imap.server_ssl") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.imap.delete_is_move_to_trash") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.imap.server_sub_directory") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.imap.root_dir") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.imap.local_copies") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.imap.server_ssl") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.imap.delete_is_move_to_trash") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
  // something to use instead of send/fetchmail here?
 #ifdef OS_UNIX
- {_T("mail.use_movemail") , MP_USE_SENDMAIL, _T("use mail moving program"), NM_IS_BOOL, FALSE },
- {_T("mail.use_builtin_movemail") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.movemail_program") , MP_SENDMAILCMD, _T("mail moving command"), NM_IS_STRING, FALSE },
+ {_T("mail.use_movemail") , MP_USE_SENDMAIL, _T("use mail moving program"), NM_IS_BOOL, false },
+ {_T("mail.use_builtin_movemail") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("mail.movemail_program") , MP_SENDMAILCMD, _T("mail moving command"), NM_IS_STRING, false },
 #else
- {_T("mail.use_movemail") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.use_builtin_movemail") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.movemail_program") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.use_movemail") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.use_builtin_movemail") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.movemail_program") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 #endif
- {_T("mail.movemail_warn") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.movemail_warn") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
  {_T("END"), _T("Ignored"), _T("End of list record"), NM_NONE }   // DO NOT REMOVE, hack to find the end
 };
 
 
 // COMPOSE Preferences
 static  PrefMap g_ComposePrefMap[] = {
- {_T("mail.wrap_long_lines") , MP_AUTOMATIC_WORDWRAP, _T("automatic line wrap"), NM_IS_BOOL, FALSE },
- {_T("mailnews.wraplength") , MP_WRAPMARGIN, _T("wrap lenght"), NM_IS_INT, FALSE },
+ {_T("mail.wrap_long_lines") , MP_AUTOMATIC_WORDWRAP, _T("automatic line wrap"), NM_IS_BOOL, false },
+ {_T("mailnews.wraplength") , MP_WRAPMARGIN, _T("wrap lenght"), NM_IS_INT, false },
    // additional bcc addresses: add to MP_COMPOSE_BCC if this true
- {_T("mail.default_cc") , _T("Special"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.use_default_cc") , _T("Special"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.default_cc") , _T("Special"), _T("No descr"), NM_NONE, false },
+ {_T("mail.use_default_cc") , _T("Special"), _T("No descr"), NM_NONE, false },
    // directory where sent mail goes
- {_T("mail.default_fcc") , MP_OUTGOINGFOLDER, _T("sent mail folder"), NM_IS_STRNIL, FALSE }, //where copied
+ {_T("mail.default_fcc") , MP_OUTGOINGFOLDER, _T("sent mail folder"), NM_IS_STRNIL, false }, //where copied
    // if true copy mail to def fcc
- {_T("mail.use_fcc") , MP_USEOUTGOINGFOLDER, _T("keep copies of sent mail"), NM_IS_BOOL, FALSE },
+ {_T("mail.use_fcc") , MP_USEOUTGOINGFOLDER, _T("keep copies of sent mail"), NM_IS_BOOL, false },
    // if set, put email addresse in BCC: MP_COMPOSE_BCC
- {_T("mail.cc_self") , _T("Special"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.auto_quote") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.html_compose") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.cc_self") , _T("Special"), _T("No descr"), NM_NONE, false },
+ {_T("mail.auto_quote") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.html_compose") , _T("Ignored"), _T("No descr"), NM_NONE, false },
    // set MP_COMPOSE_USE_SIGNATURE if not empty
- {_T("mail.signature_file") , MP_COMPOSE_SIGNATURE , _T("filename of signature file"), NM_IS_STRNIL, FALSE },
+ {_T("mail.signature_file") , MP_COMPOSE_SIGNATURE , _T("filename of signature file"), NM_IS_STRNIL, false },
  {_T("END"), _T("Ignored"), _T("End of list record"), NM_NONE }   // DO NOT REMOVE, hack to find the end
 };
 
@@ -273,27 +277,27 @@ static  PrefMap g_ComposePrefMap[] = {
 // FOLDER Preferences
 static  PrefMap g_FolderPrefMap[] = {
   // no pref for the name of the outbox
-  {_T("mail.deliver_immediately") , MP_USE_OUTBOX, _T("send messages later"), NM_IS_NEGATE_BOOL, FALSE },
+  {_T("mail.deliver_immediately") , MP_USE_OUTBOX, _T("send messages later"), NM_IS_NEGATE_BOOL, false },
    // map this to a very large number if "mail.check_new_mail" false
-  {_T("mail.check_time") , MP_POLLINCOMINGDELAY, _T("interval between checks for incoming mail"), NM_IS_INT, FALSE },
+  {_T("mail.check_time") , MP_POLLINCOMINGDELAY, _T("interval between checks for incoming mail"), NM_IS_INT, false },
   // AFAIK cannot switch off polling in M. Could set the interval to a veeery large number
-  {_T("mail.check_new_mail") , _T("Special"), _T("check mail at intervals"), NM_IS_BOOL, FALSE },
+  {_T("mail.check_new_mail") , _T("Special"), _T("check mail at intervals"), NM_IS_BOOL, false },
    // not sure about this one. I mean ... even less sure than for the others
-  {_T("mail.max_size") , MP_MAX_MESSAGE_SIZE, _T("max size for downloaded message"), NM_IS_INT, FALSE },
+  {_T("mail.max_size") , MP_MAX_MESSAGE_SIZE, _T("max size for downloaded message"), NM_IS_INT, false },
   {_T("END"), _T("Ignored"), _T("End of list record"), NM_NONE }   // DO NOT REMOVE, hack to find the end
 };
 
 // VIEWER Preferences
 static  PrefMap g_ViewerPrefMap[] = {
- {_T("mail.quoted_style") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.quoted_size") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.quoted_style") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.quoted_size") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
    // color for quoted mails: MP_MVIEW_QUOTED_COLOUR1
    // if not "" set MP_MVIEW_QUOTED_COLOURIZE to true
- {_T("mail.citation_color") , MP_MVIEW_QUOTED_COLOUR1, _T("color for quoted mails"), NM_IS_STRING, FALSE },
+ {_T("mail.citation_color") , MP_MVIEW_QUOTED_COLOUR1, _T("color for quoted mails"), NM_IS_STRING, false },
 
- {_T("mail.wrap_long_lines") , MP_VIEW_AUTOMATIC_WORDWRAP, _T("automatic line wrap"), NM_IS_BOOL, FALSE },
- {_T("mailnews.wraplength") , MP_VIEW_WRAPMARGIN, _T("wrap lenght"), NM_IS_INT, FALSE },
- {_T("mail.thread_mail") , MP_MSGS_USE_THREADING, _T("display mail threads"), NM_IS_BOOL, FALSE },
+ {_T("mail.wrap_long_lines") , MP_VIEW_AUTOMATIC_WORDWRAP, _T("automatic line wrap"), NM_IS_BOOL, false },
+ {_T("mailnews.wraplength") , MP_VIEW_WRAPMARGIN, _T("wrap lenght"), NM_IS_INT, false },
+ {_T("mail.thread_mail") , MP_MSGS_USE_THREADING, _T("display mail threads"), NM_IS_BOOL, false },
 
   {_T("END"), _T("Ignored"), _T("End of list record"), NM_NONE }   // DO NOT REMOVE, hack to find the end
 };
@@ -301,155 +305,155 @@ static  PrefMap g_ViewerPrefMap[] = {
 
 static  PrefMap g_RestPrefMap[] = {
   // very specially treated
- {_T("mail.directory") , _T("Special"), _T("mail directory"), NM_IS_STRING, FALSE },
+ {_T("mail.directory") , _T("Special"), _T("mail directory"), NM_IS_STRING, false },
 
- {_T("helpers.global_mime_types_file") , MP_MIMETYPES, _T("global mime types file"), NM_IS_STRING, FALSE },
- {_T("helpers.private_mime_types_file") , MP_MIMETYPES, _T("private mime types file"), NM_IS_STRING, FALSE },
+ {_T("helpers.global_mime_types_file") , MP_MIMETYPES, _T("global mime types file"), NM_IS_STRING, false },
+ {_T("helpers.private_mime_types_file") , MP_MIMETYPES, _T("private mime types file"), NM_IS_STRING, false },
 
- {_T("helpers.global_mailcap_file") , MP_MAILCAP, _T("global mailcap file"), NM_IS_STRING, FALSE },
- {_T("helpers.private_mailcap_file") , MP_MAILCAP, _T("private mailcap file"), NM_IS_STRING, FALSE },
+ {_T("helpers.global_mailcap_file") , MP_MAILCAP, _T("global mailcap file"), NM_IS_STRING, false },
+ {_T("helpers.private_mailcap_file") , MP_MAILCAP, _T("private mailcap file"), NM_IS_STRING, false },
 
- {_T("print.print_command") , MP_PRINT_COMMAND, _T("print command"), NM_IS_STRING, FALSE },
- {_T("print.print_reversed") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("print.print_color") , MP_PRINT_COLOUR, _T("print color"), NM_IS_BOOL, FALSE },
- {_T("print.print_landscape") , MP_PRINT_ORIENTATION, _T("print orientation"), NM_IS_NEGATE_BOOL, FALSE },
+ {_T("print.print_command") , MP_PRINT_COMMAND, _T("print command"), NM_IS_STRING, false },
+ {_T("print.print_reversed") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("print.print_color") , MP_PRINT_COLOUR, _T("print color"), NM_IS_BOOL, false },
+ {_T("print.print_landscape") , MP_PRINT_ORIENTATION, _T("print orientation"), NM_IS_NEGATE_BOOL, false },
  // see what is used in Netscape
- {_T("print.print_paper_size") , MP_PRINT_PAPER, _T("paper size"), NM_IS_STRING, FALSE },
+ {_T("print.print_paper_size") , MP_PRINT_PAPER, _T("paper size"), NM_IS_STRING, false },
 
- {_T("intl.character_set") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("intl.font_charset") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("intl.font_spec_list") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("intl.accept_languages") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
+ {_T("intl.character_set") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("intl.font_charset") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("intl.font_spec_list") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("intl.accept_languages") , _T("Ignored"), _T("No descr"), NM_NONE, false },
 
- {_T("mail.play_sound") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.strictly_mime") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.file_attach_binary") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.addr_book.lastnamefirst") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.play_sound") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.strictly_mime") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.file_attach_binary") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.addr_book.lastnamefirst") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 
- {_T("mail.signature_date") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.leave_on_server") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.limit_message_size") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.prompt_purge_threshhold") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.purge_threshhold") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.use_mapi_server") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.server_type") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.fixed_width_messages") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.empty_trash") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.remember_password") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.support_skey") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.pane_config") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.sort_by") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mail.default_html_action") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mail.signature_date") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.leave_on_server") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.limit_message_size") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.prompt_purge_threshhold") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.purge_threshhold") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.use_mapi_server") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.server_type") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.fixed_width_messages") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.empty_trash") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.remember_password") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.support_skey") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.pane_config") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.sort_by") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mail.default_html_action") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 
- {_T("mailnews.reuse_message_window") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mailnews.reuse_thread_window") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mailnews.message_in_thread_window") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mailnews.nicknames_only") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mailnews.reply_on_top") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("mailnews.reply_with_extra_lines") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("mailnews.reuse_message_window") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mailnews.reuse_thread_window") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mailnews.message_in_thread_window") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mailnews.nicknames_only") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mailnews.reply_on_top") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("mailnews.reply_with_extra_lines") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 
- {_T("network.ftp.passive") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.max_connections") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.tcpbufsize") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.hosts.socks_server") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.hosts.socks_serverport") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.ftp") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.ftp_port") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.http") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.http_port") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.gopher") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.gopher_port") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.wais") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.wais_port") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.ssl") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.ssl_port") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.no_proxies_on") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.type") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("network.proxy.autoconfig_url") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("network.ftp.passive") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.max_connections") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.tcpbufsize") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.hosts.socks_server") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.hosts.socks_serverport") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.ftp") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.ftp_port") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.http") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.http_port") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.gopher") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.gopher_port") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.wais") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.wais_port") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.ssl") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.ssl_port") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.no_proxies_on") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.type") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("network.proxy.autoconfig_url") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 
- {_T("news.default_cc") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.default_fcc") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.cc_self") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.use_fcc") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("news.default_cc") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.default_fcc") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.cc_self") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.use_fcc") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 
- {_T("news.directory") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.notify.on") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.max_articles") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.cache_xover") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.show_first_unread") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.sash_geometry") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.thread_news") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.pane_config") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.sort_by") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.keep.method") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.keep.days") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.keep.count") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.keep.only_unread") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.remove_bodies.by_age") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.remove_bodies.days") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.server_port") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("news.server_is_secure") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("news.directory") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.notify.on") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.max_articles") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.cache_xover") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.show_first_unread") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.sash_geometry") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.thread_news") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.pane_config") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.sort_by") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.keep.method") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.keep.days") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.keep.count") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.keep.only_unread") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.remove_bodies.by_age") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.remove_bodies.days") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.server_port") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("news.server_is_secure") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 
- {_T("offline.startup_mode") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("offline.news.download.unread_only") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("offline.news.download.by_date") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("offline.news.download.use_days") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("offline.news.download.days") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
- {_T("offline.news.download.increments") , _T("Not mapped"), _T("No descr"), NM_NONE, FALSE },
+ {_T("offline.startup_mode") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("offline.news.download.unread_only") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("offline.news.download.by_date") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("offline.news.download.use_days") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("offline.news.download.days") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
+ {_T("offline.news.download.increments") , _T("Not mapped"), _T("No descr"), NM_NONE, false },
 
- {_T("security.email_as_ftp_password") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.submit_email_forms") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.warn_entering_secure") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.warn_leaving_secure") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.warn_viewing_mixed") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.warn_submit_insecure") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.enable_java") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("javascript.enabled") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.enable_ssl2") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.enable_ssl3") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.ciphers") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.default_personal_cert") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.use_password") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.ask_for_password") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("security.password_lifetime") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("custtoolbar.has_toolbar_folder") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("custtoolbar.personal_toolbar_folder") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.author") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.html_editor") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.image_editor") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.template_location") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.auto_save_delay") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.use_custom_colors") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.background_color") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.text_color") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.link_color") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.active_link_color") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.followed_link_color") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.background_image") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.publish_keep_links") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.publish_keep_images") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.publish_location") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.publish_username") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.publish_password") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.publish_save_password") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.publish_browse_location") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("editor.show_copyright") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
+ {_T("security.email_as_ftp_password") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.submit_email_forms") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.warn_entering_secure") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.warn_leaving_secure") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.warn_viewing_mixed") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.warn_submit_insecure") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.enable_java") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("javascript.enabled") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.enable_ssl2") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.enable_ssl3") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.ciphers") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.default_personal_cert") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.use_password") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.ask_for_password") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("security.password_lifetime") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("custtoolbar.has_toolbar_folder") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("custtoolbar.personal_toolbar_folder") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.author") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.html_editor") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.image_editor") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.template_location") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.auto_save_delay") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.use_custom_colors") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.background_color") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.text_color") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.link_color") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.active_link_color") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.followed_link_color") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.background_image") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.publish_keep_links") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.publish_keep_images") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.publish_location") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.publish_username") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.publish_password") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.publish_save_password") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.publish_browse_location") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("editor.show_copyright") , _T("Ignored"), _T("No descr"), NM_NONE, false },
 
- {_T("fortezza.toggle") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("fortezza.timeout") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
+ {_T("fortezza.toggle") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("fortezza.timeout") , _T("Ignored"), _T("No descr"), NM_NONE, false },
 
- {_T("general.startup.browser") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.startup.mail") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.startup.news") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.startup.editor") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.startup.conference") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.startup.netcaster") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.startup.calendar") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.always_load_images") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.help_source.site") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("general.help_source.url") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("images.dither") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
- {_T("images.incremental_display") , _T("Ignored"), _T("No descr"), NM_NONE, FALSE },
+ {_T("general.startup.browser") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.startup.mail") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.startup.news") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.startup.editor") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.startup.conference") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.startup.netcaster") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.startup.calendar") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.always_load_images") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.help_source.site") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("general.help_source.url") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("images.dither") , _T("Ignored"), _T("No descr"), NM_NONE, false },
+ {_T("images.incremental_display") , _T("Ignored"), _T("No descr"), NM_NONE, false },
 
  {_T("END"), _T("Ignored"), _T("No descr"), NM_NONE }   // DO NOT REMOVE, hack to find the end
  };
@@ -474,25 +478,6 @@ static const wxChar   g_CommentChar   = '/';
 //   nicely one class per file.
 // - makefile infrastructure to create .so and .a
 
-
-// ----------------------------------------------------------------------------
-// class MyFolderArray
-//   simply a wxArray of MFolder pointers that calls DecRef for the items
-//   in the array when destroyed. Simplifies cleanup
-// ----------------------------------------------------------------------------
-
-WX_DEFINE_ARRAY(MFolder *, FolderArray);
-
-class MyFolderArray: public FolderArray
-{
-public:
-
-  ~MyFolderArray()
-   {
-     for (unsigned k = 0; k < GetCount(); k++ )
-      Item(k)->DecRef();
-   }
-};
 
 
 // ----------------------------------------------------------------------------
@@ -531,8 +516,8 @@ MyHashTable::~MyHashTable()
 {
   // should delete the strings hier;
   m_tbl.BeginFind();
-  wxHashTable::Node* node = NULL;
-  while ( (node = m_tbl.Next()) != NULL )
+  wxHashTable::Node* node = nullptr;
+  while ( (node = m_tbl.Next()) != nullptr )
    delete (wxString*)node->GetData();
 
   //  m_tbl.DeleteContents(FALSE);  // just ot make sure, they are deleted
@@ -554,20 +539,20 @@ void MyHashTable::Delete(const wxString& key)
 bool MyHashTable::Exist(const wxString& key) const
 {
   wxString* tmp = (wxString *)m_tbl.Get(key);
-  return ( tmp != NULL );
+  return ( tmp != nullptr );
 }
 
 bool MyHashTable::GetValue(const wxString& key, bool& value) const
 {
-  value = FALSE;
+  value = false;
   wxString* tmp = (wxString *)m_tbl.Get(key);
   if ( tmp )
    {
      value = (( *tmp == _T("true") ) || ( *tmp == _T("TRUE") ) || ( *tmp == _T("1")));
-     return TRUE;
+     return true;
    }
   else
-   return FALSE;
+   return false;
 }
 
 bool MyHashTable::GetValue(const wxString& key, wxString& value ) const
@@ -577,10 +562,10 @@ bool MyHashTable::GetValue(const wxString& key, wxString& value ) const
   if ( tmp )
    {
      value = *tmp;
-     return TRUE;
+     return true;
    }
   else
-   return FALSE;
+   return false;
 }
 
 bool MyHashTable::GetValue(const wxString& key, unsigned long& value ) const
@@ -588,11 +573,11 @@ bool MyHashTable::GetValue(const wxString& key, unsigned long& value ) const
   wxString* tmp = (wxString *)m_tbl.Get(key);
 
   if ( tmp && tmp->ToULong(&value) )
-   return TRUE;
+   return true;
 
   value = (unsigned long)-1; // FIXME: is this really needed?
 
-  return FALSE;
+  return false;
 }
 
 
@@ -606,13 +591,13 @@ public:
 
   MNetscapeImporter();
 
-  virtual bool Applies() const;
-  virtual int  GetFeatures() const;
+  bool Applies() const override;
+  int  GetFeatures() const override;
 
-  virtual bool ImportADB();
-  virtual bool ImportFolders(MFolder *folderParent, int flags);
-  virtual bool ImportSettings();
-  virtual bool ImportFilters();
+  bool ImportADB() override;
+  bool ImportFolders(MFolder *folderParent, int flags) override;
+  bool ImportSettings() override;
+  bool ImportFilters() override;
 
   DECLARE_M_IMPORTER();
 
@@ -696,7 +681,7 @@ bool MNetscapeImporter::ImportADB()
    {
       wxLogError(_("%s address book import module not found."), "Netscape");
 
-      return FALSE;
+      return false;
    }
 
    wxString filename = importer->GetDefaultFilename();
@@ -714,7 +699,7 @@ bool MNetscapeImporter::ImportADB()
    return ok;
 #endif // 0
 
-  return FALSE;
+  return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -735,12 +720,12 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
      //   On the other hand it should ahve been read in prefs
      wxLogMessage(_("Cannot import folders, directory '%s' doesn't exist"),
                   m_MailDir);
-     return FALSE;
+     return false;
    }
 
   wxDir dir(m_MailDir);
   if ( ! dir.IsOpened() )    // if it can't be opened bail out
-   return FALSE;          // looks like the isOpened already logs a message
+   return false;          // looks like the isOpened already logs a message
 
   // the parent for all folders: use the given one, don't create an extra level
   // of indirection if the user doesn't want it
@@ -759,9 +744,9 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
   else
    // TODO
    // - remove the created folders, something went wrong
-   return FALSE;
+   return false;
 
-  return TRUE;
+  return true;
 }
 
 
@@ -784,7 +769,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
   wxDir currDir(dir);
 
   if ( ! currDir.IsOpened() )    // if it can't be opened bail out
-   return FALSE;          // looks like the isOpened already logs a message
+   return false;          // looks like the isOpened already logs a message
 
   // find the folders
   wxString filename;
@@ -814,7 +799,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
     wxLogMessage(_("No folders found in '%s'."), dir);
 
     // we can consider the operation successful
-    return TRUE;
+    return true;
    }
 
   // as far as I know there isn't a flag in Netscape to mark
@@ -833,12 +818,13 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
       }
   }    
 
-  MFolder *folder = NULL;
-  MFolder *subFolder = NULL;
-  MyFolderArray folderList;
+  MFolder *folder = nullptr;
+  MFolder *subFolder = nullptr;
+  // the folders are DecRef()'d when this vector is destroyed
+  std::vector<RefCounter<MFolder>> folderList;
   wxString dirFldName;
 
-  folderList.Alloc(25);
+  folderList.reserve(25);
 
   // loop through the found directories
   // for each one,
@@ -854,7 +840,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
   // - [DONE] find out the type (MF_?) of FoFs [DONE]
 
   // in the next for loop no system folders will be treated anyway
-  MFolder *tmpParent = NULL;
+  MFolder *tmpParent = nullptr;
   if (level == 0) {
     if ( (flags & ImportFolder_AllUseParent)
          == ImportFolder_AllUseParent )
@@ -885,16 +871,16 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
                                      MF_GROUP,     //            type
                                      0,            //            flags
                                      path,         //            path
-                                     FALSE         // don't notify
+                                     false         // don't notify
                                      );
 
      if ( folder )
       {
-        folderList.Add(folder);
+        folderList.emplace_back(folder);
         wxLogMessage(_("Imported group folder: %s."),dirFldName);
       }
      else
-      return FALSE;
+      return false;
 
      // check if there is a file matching (without .sbd)
      int i = fileList.Index( dirFldName );
@@ -910,20 +896,20 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
                                    MF_FILE,   //            type
                                    0,         //            flags
                                    tmpPath,      //            path
-                                   FALSE      // don't notify
+                                   false      // don't notify
                                    );
 
 
         if ( subFolder )
          {
            subFolder->SetTreeIndex(10);   // popsition folder after system folders
-           folderList.Add(subFolder);
+           folderList.emplace_back(subFolder);
            fileList.RemoveAt(i);      // this one has been created, remove from filelist
            wxLogMessage(_("NOTE: >>>>>> Created 'AAA Misc' folder to contain the msgs currently in group folder %s."),
                         dirFldName);
          }
         else
-         return FALSE;
+         return false;
       }
 
      // crude way to know if we are at the root mail dir level
@@ -931,7 +917,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
      level++; 
      // recursive call
      if ( ! CreateFolders( folder, path, flags ) )
-      return FALSE;
+      return false;
      level--;
    }
 
@@ -946,14 +932,14 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
 
      // find out the folder type (system or not) by walking the list
      // to know how to set the parent folder (accordig to flags)
-    tmpParent = NULL;
+    tmpParent = nullptr;
      
     if (level == 0) {
       // look mum, I'm making fire with two stones!
-      bool found = FALSE;
+      bool found = false;
       for (int i=0; i<NR_SYS_FLD; i++)
         if (name == sysFolderList[i]) {
-          found = TRUE;
+          found = true;
           break;
         }
       
@@ -975,18 +961,18 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
                                      MF_FILE,   //            type
                                      0,         //            flags
                                      path,      //            path
-                                     FALSE      // don't notify
+                                     false      // don't notify
                                      );
     if ( folder )
       {
-        folderList.Add(folder);
+        folderList.emplace_back(folder);
         wxLogMessage(_("Imported mail folder: %s "), name);
       }
     else
-      return FALSE;
+      return false;
   }
   
-  return TRUE;
+  return true;
   }
 
 
@@ -1027,7 +1013,7 @@ bool MNetscapeImporter::ImportSettings()
    {
      // TODO
      // - ask user if he knows where the prefs file is
-     return FALSE;
+     return false;
    }
 
   bool status = ImportSettingsFromFileIfExists(filename);
@@ -1046,7 +1032,7 @@ MNetscapeImporter::ImportSettingsFromFileIfExists(const wxString& filename)
    if ( !wxFile::Exists(filename) )
    {
       // pretend everything is ok
-      return TRUE;
+      return true;
    }
 
    return ImportSettingsFromFile(filename);
@@ -1057,7 +1043,7 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
 {
   wxTextFile file(filename);
   if ( !file.Open() )
-      return FALSE;
+      return false;
 
   wxString token;
   wxStringTokenizer tkz;
@@ -1105,8 +1091,8 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
      value = tkz.GetNextToken();
 
      // get rid of white space
-     value.Trim(); value.Trim(FALSE);
-     varName.Trim(); varName.Trim(FALSE);
+     value.Trim(); value.Trim(false);
+     varName.Trim(); varName.Trim(false);
 
      // clean away eventual quotes
      if (varName[0u] == '"' && varName[varName.Len()-1] == '"')
@@ -1116,8 +1102,8 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
       value = value(1,value.Len()-2);
 
      // and now the white space again, e.g. " \" the value \""
-     value.Trim(); value.Trim(FALSE);
-     varName.Trim(); varName.Trim(FALSE);
+     value.Trim(); value.Trim(false);
+     varName.Trim(); varName.Trim(false);
 
      // key-value found (hopefully), add to hashtable
      keyval.Put(varName,value);
@@ -1135,7 +1121,7 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
   ImportRestSettings ( keyval );
 
 
-  return TRUE;
+  return true;
 }
 
 bool MNetscapeImporter::ImportIdentitySettings ( MyHashTable& tbl )
@@ -1145,7 +1131,7 @@ bool MNetscapeImporter::ImportIdentitySettings ( MyHashTable& tbl )
   PrefMap* map = g_IdentityPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-   return FALSE;
+   return false;
 
 
   // do the special stuff (derived settings etc)
@@ -1157,7 +1143,7 @@ bool MNetscapeImporter::ImportIdentitySettings ( MyHashTable& tbl )
       WriteProfileEntry(MP_ADD_DEFAULT_HOSTNAME, map[i].procd, _T("use default domain"));
    }
 
-  return TRUE;
+  return true;
 }
 
 
@@ -1168,7 +1154,7 @@ bool MNetscapeImporter::ImportNetworkSettings ( MyHashTable& tbl )
   PrefMap* map = g_NetworkPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-   return FALSE;
+   return false;
 
 
   // do the special stuff (derived settings etc)
@@ -1183,7 +1169,7 @@ bool MNetscapeImporter::ImportNetworkSettings ( MyHashTable& tbl )
   //    {
   //    }
 
-  return TRUE;
+  return true;
 }
 
 bool MNetscapeImporter::ImportComposeSettings ( MyHashTable& tbl )
@@ -1205,11 +1191,11 @@ bool MNetscapeImporter::ImportComposeSettings ( MyHashTable& tbl )
   PrefMap* map = g_ComposePrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-   return FALSE;
+   return false;
 
   // add additional bcc addresses
 
-  bool tmpBool = FALSE;
+  bool tmpBool = false;
 
   if ( tbl.GetValue(_T("mail.use_default_cc"), tmpBool) && tmpBool) // BCC to others
    tbl.GetValue(_T("mail.default_cc"), lstr);
@@ -1226,9 +1212,9 @@ bool MNetscapeImporter::ImportComposeSettings ( MyHashTable& tbl )
   // use the fact that these variables are set to infer that they are also
   // used is weak, but it is all I have at the moment
   if ( tbl.GetValue(_T("mail.signature_file"), lstr) && !lstr.empty())
-   WriteProfileEntry(MP_COMPOSE_USE_SIGNATURE, TRUE, _T("use signature file"));
+   WriteProfileEntry(MP_COMPOSE_USE_SIGNATURE, true, _T("use signature file"));
 
-  return TRUE;
+  return true;
 }
 
 
@@ -1239,9 +1225,9 @@ bool MNetscapeImporter::ImportFolderSettings ( MyHashTable& tbl )
   PrefMap* map = g_FolderPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-   return FALSE;
+   return false;
 
-  bool tmpBool = FALSE;
+  bool tmpBool = false;
 
   // pref says not to check for new mail, then set to a very large number
   // otherwise leave it as set.
@@ -1252,7 +1238,7 @@ bool MNetscapeImporter::ImportFolderSettings ( MyHashTable& tbl )
   if ( tbl.GetValue(_T("mail.deliver_immediately"), tmpBool) && ! tmpBool )
 	WriteProfileEntry(MP_OUTBOX_NAME, String(_T("Outbox")), _T("Outgoing mail folder"));
 
-  return TRUE;
+  return true;
 }
 
 bool MNetscapeImporter::ImportViewerSettings ( MyHashTable& tbl )
@@ -1263,15 +1249,15 @@ bool MNetscapeImporter::ImportViewerSettings ( MyHashTable& tbl )
   PrefMap* map = g_ViewerPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-   return FALSE;
+   return false;
 
   wxString lstr;
   // use the fact that these variables are set to infer that they are also
   // used is weak, but it is all I have at the moment
   if ( tbl.GetValue(_T("mail.citation_color"), lstr) && !lstr.empty())
-   WriteProfileEntry(MP_MVIEW_QUOTED_COLOURIZE, TRUE, _T("use color for quoted messages"));
+   WriteProfileEntry(MP_MVIEW_QUOTED_COLOURIZE, true, _T("use color for quoted messages"));
 
-  return TRUE;
+  return true;
 }
 
 bool MNetscapeImporter::ImportRestSettings ( MyHashTable& tbl )
@@ -1283,15 +1269,15 @@ bool MNetscapeImporter::ImportRestSettings ( MyHashTable& tbl )
   PrefMap* map = g_RestPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-   return FALSE;
+   return false;
 
-  return TRUE;
+  return true;
 }
 
 bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
 {
   wxString value;
-  bool tmp = FALSE;
+  bool tmp = false;
   unsigned long lval = (unsigned long)-1;
 
   for (int i=0; map[i].npKey != _T("END"); i++)
@@ -1304,13 +1290,13 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
      else if (map[i].mpKey == _T("Not mapped"))
       {
         wxLogMessage(_("Key '%s' hasn't been mapped yet"), map[i].npKey);
-        map[i].procd = TRUE; // mark to find out which ones in the file are also in the maps
+        map[i].procd = true; // mark to find out which ones in the file are also in the maps
         continue;
       }
 
      else if (( map[i].mpKey == _T("Ignored")) || ( map[i].mpKey == _T("Special") ))
       {
-        map[i].procd = TRUE;
+        map[i].procd = true;
         continue;
       }
 
@@ -1363,9 +1349,9 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
         wxLogMessage(_("Bad type key '%s'"), map[i].npKey);
       }
      if ( ! map[i].procd )
-      return FALSE;
+      return false;
    }
-  return TRUE;
+  return true;
 }
 
 
@@ -1373,7 +1359,7 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
 
 bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const wxString& val, const wxString& desc )
 {
-  bool status = FALSE;
+  bool status = false;
 
   // let's make sure that if there are environment variable
   // they are expanded
@@ -1392,7 +1378,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const wxString& v
 
 bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const int val, const wxString& desc )
 {
-  bool status = FALSE;
+  bool status = false;
 
   Profile* l_Profile = mApplication->GetProfile();
 
@@ -1407,7 +1393,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const int val, co
 
 bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const bool val, const wxString& desc )
 {
-  bool status = FALSE;
+  bool status = false;
 
   Profile* l_Profile = mApplication->GetProfile();
 
@@ -1433,7 +1419,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const bool val, c
 
 bool MNetscapeImporter::ImportFilters()
 {
-   return FALSE;
+   return false;
 }
 
 

@@ -62,6 +62,9 @@
 #include <wx/textbuf.h>
 #include <wx/fontmap.h>
 #include <wx/scopeguard.h>
+
+#include <vector>
+
 #ifdef __WINE__
 // it includes wrapwin.h which includes windows.h which defines SendMessage under Windows
 #undef SendMessage
@@ -195,9 +198,7 @@ enum
 // globals
 // ----------------------------------------------------------------------------
 
-M_LIST(ComposerList, wxComposeView *);
-
-static ComposerList gs_listOfAllComposers;
+static std::vector<wxComposeView *> gs_listOfAllComposers;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -215,7 +216,7 @@ wxString GetMimeTypeFromFilename(const wxString& filename)
    wxString strMimeType;
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
    wxFileType *fileType = strExt.empty()
-                           ? NULL
+                           ? nullptr
                            : mimeManager.GetFileTypeFromExtension(strExt);
    if ( !fileType || !fileType->GetMimeType(&strMimeType) )
    {
@@ -410,7 +411,7 @@ public:
 
 protected:
    /// The thread entry function.
-   virtual void *Entry()
+   void *Entry() override
    {
       SendThreadResult res;
       if ( !m_msg.SendNow(&res.errGeneral, &res.errDetailed) )
@@ -422,7 +423,7 @@ protected:
 
       wxQueueEvent(&m_composer, evt.Clone());
 
-      return NULL;
+      return nullptr;
    }
 
 private:
@@ -468,9 +469,9 @@ public:
    {
       m_composeView = cv;
 
-      m_choice = NULL;
-      m_text = NULL;
-      m_btnExpand = NULL;
+      m_choice = nullptr;
+      m_text = nullptr;
+      m_btnExpand = nullptr;
    }
 
    virtual ~wxRcptControl();
@@ -539,13 +540,13 @@ class wxRcptMainControl : public wxRcptControl
 public:
    wxRcptMainControl(wxComposeView *cv) : wxRcptControl(cv)
    {
-      m_btnAdd = NULL;
+      m_btnAdd = nullptr;
    }
 
-   virtual wxSizer *CreateControls(wxWindow *parent);
+   wxSizer *CreateControls(wxWindow *parent) override;
 
    // notify the composer that the default recipient type changed
-   virtual void OnTypeChange(RecipientType rcptType);
+   void OnTypeChange(RecipientType rcptType) override;
 
    // callback for "add new recipient" button
    void OnAdd();
@@ -553,7 +554,7 @@ public:
    virtual ~wxRcptMainControl();
 
 protected:
-   virtual wxAddressTextCtrl *CreateText(wxWindow *parent);
+   wxAddressTextCtrl *CreateText(wxWindow *parent) override;
 
 private:
    wxRcptAddButton *m_btnAdd;
@@ -570,7 +571,7 @@ public:
    {
       // we're always inserted in the beginning, see AddRecipientControls()
       m_index = 0;
-      m_btnRemove = NULL;
+      m_btnRemove = nullptr;
    }
 
    // remove this one - called by button
@@ -591,12 +592,12 @@ public:
       m_index--;
    }
 
-   virtual wxSizer *CreateControls(wxWindow *parent);
+   wxSizer *CreateControls(wxWindow *parent) override;
 
    virtual ~wxRcptExtraControl();
 
 protected:
-   virtual wxAddressTextCtrl *CreateText(wxWindow *parent);
+   wxAddressTextCtrl *CreateText(wxWindow *parent) override;
 
 private:
    wxRcptRemoveButton *m_btnRemove;
@@ -712,7 +713,7 @@ public:
    }
 
    // we don't want to get in the way when tabbing through header fields
-   virtual bool AcceptsFocusFromKeyboard() const { return false; }
+   bool AcceptsFocusFromKeyboard() const override { return false; }
 };
 
 // ----------------------------------------------------------------------------
@@ -740,7 +741,7 @@ public:
                wxCommandEventHandler(ToggleIconButton::OnClick));
    }
 
-   void Update()
+   void Update() override
    {
       UpdateWithoutRefresh();
       Refresh();
@@ -805,8 +806,8 @@ public:
    }
 
 private:
-   virtual void DoHandleClick() { m_composer->ConfigureInReplyTo(); }
-   virtual bool DoGetValue() const { return m_composer->IsInReplyTo(); }
+   void DoHandleClick() override { m_composer->ConfigureInReplyTo(); }
+   bool DoGetValue() const override { return m_composer->IsInReplyTo(); }
 
    DECLARE_NO_COPY_CLASS(IsReplyButton)
 };
@@ -831,8 +832,8 @@ public:
    }
 
 private:
-   virtual void DoHandleClick() { m_composer->TogglePGPSigning(); }
-   virtual bool DoGetValue() const { return m_composer->IsPGPSigningEnabled(); }
+   void DoHandleClick() override { m_composer->TogglePGPSigning(); }
+   bool DoGetValue() const override { return m_composer->IsPGPSigningEnabled(); }
 
    DECLARE_NO_COPY_CLASS(PGPSignButton)
 };
@@ -1231,7 +1232,7 @@ wxFont ComposerOptions::GetFont() const
 
 void EditorContentPart::Init()
 {
-   m_Data = NULL;
+   m_Data = nullptr;
 }
 
 void EditorContentPart::SetMimeType(const String& mimeType)
@@ -1244,7 +1245,7 @@ void EditorContentPart::SetData(void *data,
                                 const wxChar *name,
                                 const wxChar *filename)
 {
-   ASSERT_MSG( data != NULL, _T("NULL data is invalid in EditorContentPart::SetData!") );
+   ASSERT_MSG( data != nullptr, _T("NULL data is invalid in EditorContentPart::SetData!") );
 
    m_Data = data;
    m_Length = length;
@@ -1426,7 +1427,7 @@ void wxRcptControl::OnExpand()
             MFolder_obj folder(MDialog_FolderChoose
                                (
                                  m_composeView->GetFrame(),
-                                 NULL,
+                                 nullptr,
                                  MDlg_Folder_NoFiles
                                ));
             if ( !folder )
@@ -1624,8 +1625,8 @@ void wxTextCtrlProcessingEnter::OnEnter(wxCommandEvent& /* event */)
 {
    // pass to the next control when <Enter> is pressed
    wxNavigationKeyEvent event;
-   event.SetDirection(TRUE);       // forward
-   event.SetWindowChange(FALSE);   // control change
+   event.SetDirection(true);       // forward
+   event.SetWindowChange(false);   // control change
    event.SetEventObject(this);
 
    GetParent()->GetEventHandler()->ProcessEvent(event);
@@ -1791,7 +1792,7 @@ Composer::CreateNewArticle(const MailFolder::Params& params,
                                          wxComposeView::Mode_News,
                                          wxComposeView::Message_New);
 
-   CHECK( cv, NULL, _T("failed to create composer for a new article") );
+   CHECK( cv, nullptr, _T("failed to create composer for a new article") );
 
    cv->Launch();
 
@@ -1811,7 +1812,7 @@ Composer::CreateFollowUpArticle(const MailFolder::Params& params,
                         wxComposeView::Message_Reply
                        );
 
-   CHECK( cv, NULL, _T("failed to create composer for a followup article") );
+   CHECK( cv, nullptr, _T("failed to create composer for a followup article") );
 
    cv->SetOriginal(original);
 
@@ -1825,7 +1826,7 @@ Composer::CreateNewMessage(const MailFolder::Params& params, Profile *profile)
                                          wxComposeView::Mode_Mail,
                                          wxComposeView::Message_New);
 
-   CHECK( cv, NULL, _T("failed to create composer for a new message") );
+   CHECK( cv, nullptr, _T("failed to create composer for a new message") );
 
    cv->Launch();
 
@@ -1845,7 +1846,7 @@ Composer::CreateReplyMessage(const MailFolder::Params& params,
                         wxComposeView::Message_Reply
                        );
 
-   CHECK( cv, NULL, _T("failed to create composer for a reply message") );
+   CHECK( cv, nullptr, _T("failed to create composer for a reply message") );
 
    cv->SetOriginal(original);
 
@@ -1865,7 +1866,7 @@ Composer::CreateFwdMessage(const MailFolder::Params& params,
                         wxComposeView::Message_Forward
                        );
 
-   CHECK( cv, NULL, _T("failed to create composer for a forward message") );
+   CHECK( cv, nullptr, _T("failed to create composer for a forward message") );
 
    cv->SetOriginal(original);
 
@@ -1875,7 +1876,7 @@ Composer::CreateFwdMessage(const MailFolder::Params& params,
 Composer *
 Composer::EditMessage(Profile *profile, Message *msg)
 {
-   CHECK( msg, NULL, _T("no message to edit?") );
+   CHECK( msg, nullptr, _T("no message to edit?") );
 
    // first, create the composer
 
@@ -1989,12 +1990,10 @@ Composer::EditMessage(Profile *profile, Message *msg)
 /* static */
 Composer *Composer::CheckForExistingReply(Message *original)
 {
-   CHECK( original, NULL, _T("original message is NULL") );
+   CHECK( original, nullptr, _T("original message is NULL") );
 
-   for ( ComposerList::iterator i = gs_listOfAllComposers.begin(),
-                              end = gs_listOfAllComposers.end(); i!= end ; ++i )
+   for ( wxComposeView *cv : gs_listOfAllComposers )
    {
-      wxComposeView *cv = *i;
       if ( cv->IsReplyTo(*original) )
       {
          if ( !MDialog_YesNoDialog
@@ -2019,7 +2018,7 @@ Composer *Composer::CheckForExistingReply(Message *original)
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -2039,15 +2038,15 @@ wxComposeView::wxComposeView(const String &name,
    m_mode = mode;
    m_kind = kind;
    m_pidEditor = 0;
-   m_procExtEdit = NULL;
+   m_procExtEdit = nullptr;
    m_alreadyExtEdited =
    m_closeAfterSending =
    m_closing = false;
    m_customTemplate = false;
-   m_OriginalMessage = NULL;
-   m_DraftMessage = NULL;
+   m_OriginalMessage = nullptr;
+   m_DraftMessage = nullptr;
 
-   m_msgBeingSent = NULL;
+   m_msgBeingSent = nullptr;
 
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
@@ -2057,13 +2056,13 @@ wxComposeView::wxComposeView(const String &name,
 
    m_okToConvertOnSend = false;
 
-   m_editor = NULL;
+   m_editor = nullptr;
    m_encoding = wxFONTENCODING_SYSTEM;
 
-   m_txtSubject = NULL;
+   m_txtSubject = nullptr;
 
-   m_btnIsReply = NULL;
-   m_btnPGPSign = NULL;
+   m_btnIsReply = nullptr;
+   m_btnPGPSign = nullptr;
 }
 
 bool wxComposeView::IsReplyTo(const Message& original) const
@@ -2122,7 +2121,7 @@ wxComposeView::~wxComposeView()
 
       // at least avoid the memory leaks
       delete m_msgBeingSent;
-      m_msgBeingSent = NULL;
+      m_msgBeingSent = nullptr;
    }
 
    delete m_rcptMain;
@@ -2135,21 +2134,9 @@ wxComposeView::~wxComposeView()
    SafeDecRef(m_OriginalMessage);
    SafeDecRef(m_DraftMessage);
 
-   for ( ComposerList::iterator i = gs_listOfAllComposers.begin(); ; ++i )
+   if ( !std::erase(gs_listOfAllComposers, this) )
    {
-      if ( i == gs_listOfAllComposers.end() )
-      {
-         FAIL_MSG( _T("composer not in the list of all composers?") );
-
-         break;
-      }
-
-      if ( *i == this )
-      {
-         gs_listOfAllComposers.erase(i);
-
-         break;
-      }
+      FAIL_MSG( _T("composer not in the list of all composers?") );
    }
 
    // clean up the autosave file: if m_filenameAutoSave is set we must have it,
@@ -2178,14 +2165,14 @@ wxComposeView::CreateMenu()
    AddViewMenu();
    AddHelpMenu();
 
-   GetMenuBar()->Enable(WXMENU_EDIT_PASTE_QUOTED, m_OriginalMessage != NULL);
+   GetMenuBar()->Enable(WXMENU_EDIT_PASTE_QUOTED, m_OriginalMessage != nullptr);
 
    // check if we can schedule messages:
    MModule *module = MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
-   if ( module == NULL )
+   if ( module == nullptr )
    {
       // if menu is !NULL, it will be filled with wxMenu this item belongs to
-      wxMenu *menu = NULL;
+      wxMenu *menu = nullptr;
       GetMenuBar()->FindItem(WXMENU_COMPOSE_SEND_LATER, &menu);
       if ( menu )
       {
@@ -2220,7 +2207,7 @@ void wxComposeView::DoCreateStatusBar()
 
 void wxComposeView::CreatePlaceHolder()
 {
-   CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
+   CHECK_RET( m_sizerRcpts && m_rcptExtra.empty(),
               _T("can't or shouldn't create the place holder now!") );
 
    m_sizerRcpts->Add(0, 0, 1);
@@ -2236,7 +2223,7 @@ void wxComposeView::CreatePlaceHolder()
 
 void wxComposeView::DeletePlaceHolder()
 {
-   CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
+   CHECK_RET( m_sizerRcpts && m_rcptExtra.empty(),
               _T("can't or shouldn't delete the place holder now!") );
 
    // remove the spacers and the static text we had added to it
@@ -2298,7 +2285,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
    }
    else // no from line
    {
-      sizerFrom = NULL;
+      sizerFrom = nullptr;
    }
 
    // main recipient line
@@ -2366,13 +2353,13 @@ private:
 public:
   wxDataObjectCompositeEx()
   {
-    m_dataObjectLast = NULL;
+    m_dataObjectLast = nullptr;
   }
 
-  bool SetData(const wxDataFormat& format, size_t len, const void *buf)
+  bool SetData(const wxDataFormat& format, size_t len, const void *buf) override
   {
     m_dataObjectLast = GetObject(format);
-    wxCHECK_MSG( m_dataObjectLast, FALSE, wxT("unsupported format in wxDataObjectCompositeEx"));
+    wxCHECK_MSG( m_dataObjectLast, false, wxT("unsupported format in wxDataObjectCompositeEx"));
     return m_dataObjectLast->SetData(len, buf);
   }
 
@@ -2404,7 +2391,7 @@ public:
     SetDataObject(dataObjectComposite);
   }
 
-  virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) {
+  wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) override {
     if ( !GetData() )
     {
       wxLogDebug(_T("Failed to get drag and drop data"));
@@ -2441,11 +2428,11 @@ public:
   }
 
   bool OnDropMessages(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), MailFolder* folder, const UIdArray& messages) {
-    if ( messages.Count() <= 0 )
+    if ( messages.size() <= 0 )
     {
       return false;
     }
-    for ( size_t i = 0; i < messages.Count(); i++ )
+    for ( size_t i = 0; i < messages.size(); i++ )
     {
       Message_obj msg(folder->GetMessage(messages[i]));
       wxString str;
@@ -2555,9 +2542,9 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
 void
 wxComposeView::CreateEditor()
 {
-   wxASSERT_MSG( m_editor == NULL, _T("creating the editor twice?") );
+   wxASSERT_MSG( m_editor == nullptr, _T("creating the editor twice?") );
 
-   MessageEditor *editor = NULL;
+   MessageEditor *editor = nullptr;
 
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_EDITOR_INTERFACE);
@@ -2678,7 +2665,7 @@ void
 wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
 {
    // remove the place holder we had there before
-   if ( m_rcptExtra.IsEmpty() )
+   if ( m_rcptExtra.empty() )
    {
       DeletePlaceHolder();
    }
@@ -2702,7 +2689,7 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    // insert the control in the beginning, like this the controls inserted
    // later stay visible even if the controls added earlier might be scrolled
    // off
-   m_rcptExtra.Insert(rcpt, 0);
+   m_rcptExtra.insert(m_rcptExtra.begin(), rcpt);
 
    m_sizerRcpts->Prepend(sizerRcpt, wxSizerFlags().Expand());
 
@@ -2712,7 +2699,7 @@ wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
    m_numNewRcpts++;
 
    // adjust the indexes of all the existing controls after adding a new one
-   const size_t count = m_rcptExtra.GetCount();
+   const size_t count = m_rcptExtra.size();
    for ( size_t n = 1; n < count; n++ )
    {
       m_rcptExtra[n]->IncIndex();
@@ -2731,10 +2718,10 @@ wxComposeView::OnRemoveRcpt(size_t index)
    delete m_rcptExtra[index];
 
    // remove them from the arrays too
-   m_rcptExtra.RemoveAt(index);
+   m_rcptExtra.erase(m_rcptExtra.begin() + index);
 
    // and don't forget to adjust the indices of all the others
-   size_t count = m_rcptExtra.GetCount();
+   size_t count = m_rcptExtra.size();
    while ( index < count )
    {
       m_rcptExtra[index++]->DecIndex();
@@ -2811,7 +2798,7 @@ wxComposeView::AddRecipients(const String& addressOrig,
 
          if ( address == _T("none") )
          {
-            size_t count = m_rcptExtra.GetCount();
+            size_t count = m_rcptExtra.size();
             for ( size_t n = 0; n < count; n++ )
             {
                wxRcptControl * const rcpt = m_rcptExtra[n];
@@ -2843,7 +2830,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
               _T("invalid parameter in AddRecipient()") );
 
    // look if we don't already have it
-   size_t count = m_rcptExtra.GetCount();
+   size_t count = m_rcptExtra.size();
 
    for ( size_t n = 0; n < count; n++ )
    {
@@ -2958,7 +2945,7 @@ void wxComposeView::GetRecipients(RecipientType type, wxArrayString& list) const
 
    GetRecipientFromControl(type, m_rcptMain, list);
 
-   size_t count = m_rcptExtra.GetCount();
+   size_t count = m_rcptExtra.size();
    for ( size_t n = 0; n < count; n++ )
    {
       GetRecipientFromControl(type, m_rcptExtra[n], list);
@@ -3164,7 +3151,7 @@ wxComposeView::DoInitText(Message *msgOrig)
          // this is surely not ideal, but I don't see how to do what we want
          // otherwise with the existing code
 
-         const wxChar *pcEnd = NULL;
+         const wxChar *pcEnd = nullptr;
          const wxChar *pcStart = templateValue.c_str();
          for ( const wxChar *pc = pcStart; ; )
          {
@@ -3206,7 +3193,7 @@ wxComposeView::DoInitText(Message *msgOrig)
 
       // we will only run this loop once unless there are erros in the template
       // and the user changed it
-      templateChanged = FALSE;
+      templateChanged = false;
 
       // do parse the template
       if ( !ExpandTemplate
@@ -3240,7 +3227,7 @@ wxComposeView::DoInitText(Message *msgOrig)
                if ( ConfigureTemplates(m_Profile, this) )
                {
                   // ...restart the loop
-                  templateChanged = TRUE;
+                  templateChanged = true;
                }
             }
             else
@@ -3249,7 +3236,7 @@ wxComposeView::DoInitText(Message *msgOrig)
                String templNew = ChooseTemplateFor(kind, this);
                if ( m_template != templNew )
                {
-                  templateChanged = TRUE;
+                  templateChanged = true;
 
                   m_template = templNew;
                }
@@ -3307,7 +3294,7 @@ wxComposeView::DoInitText(Message *msgOrig)
                               this,
                               "vcard",
                               _("Choose vCard file"),
-                              NULL, _T("vcard.vcf"), NULL,
+                              nullptr, _T("vcard.vcf"), nullptr,
                               pattern
                           );
             }
@@ -3535,7 +3522,7 @@ wxComposeView::CanClose() const
 
    // if the msg is not empty, we're going to show a msg box to the user
    String msg;
-   const MPersMsgBox *persMsgBox = NULL;
+   const MPersMsgBox *persMsgBox = nullptr;
 
    if ( m_msgBeingSent )
    {
@@ -3728,7 +3715,7 @@ wxComposeView::OnMenuCommand(int id)
                                this,
                                _T("MsgInsertText"),
                                _("Please choose a file to insert."),
-                               NULL, _T("dead.letter"), NULL
+                               nullptr, _T("dead.letter"), nullptr
                               );
 
             if ( filename.empty() )
@@ -3754,7 +3741,7 @@ wxComposeView::OnMenuCommand(int id)
                                this,
                                _T("MsgSaveText"),
                                _("Choose file to append message to"),
-                               NULL, _T("dead.letter"), NULL
+                               nullptr, _T("dead.letter"), nullptr
                               );
 
             if ( filename.empty() )
@@ -3986,7 +3973,7 @@ bool wxComposeView::StartExternalEditor()
 
          // do start the external process
          m_procExtEdit = new wxProcess(this, HelperProcess_Editor);
-         m_pidEditor = wxExecute(command, FALSE, m_procExtEdit);
+         m_pidEditor = wxExecute(command, false, m_procExtEdit);
 
          if ( !m_pidEditor  )
          {
@@ -4016,7 +4003,7 @@ bool wxComposeView::StartExternalEditor()
          if ( m_procExtEdit )
          {
             delete m_procExtEdit;
-            m_procExtEdit = NULL;
+            m_procExtEdit = nullptr;
          }
 
          // either it wasn't configured at all, or the configured editor
@@ -4032,7 +4019,7 @@ bool wxComposeView::StartExternalEditor()
                            _("Enter the command name (%s will be "
                              "replaced with the name of the file):"),
                            this,
-                           NULL,
+                           nullptr,
                            extEdit) )
             {
                // the ext editor setting is global, don't write it in
@@ -4115,7 +4102,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
    m_tmpFileName.Empty();
 
    delete m_procExtEdit;
-   m_procExtEdit = NULL;
+   m_procExtEdit = nullptr;
 
 
    UpdateTitle();
@@ -4325,7 +4312,7 @@ wxComposeView::InsertText(const String &text)
    String textCopy;
    if ( wxLocale::GetSystemEncoding() == wxFONTENCODING_UTF8 )
    {
-      if ( wxConvUTF8.MB2WC(NULL, text, 0) == (size_t)-1 )
+      if ( wxConvUTF8.MB2WC(nullptr, text, 0) == (size_t)-1 )
       {
          // not a valid UTF-8 string, must suppose it's in some other encoding
          // and as we have no idea about what it is, choose latin1 as the most
@@ -4431,21 +4418,21 @@ public:
    {
       ms_attachName = this;
 
-      m_text = NULL;
+      m_text = nullptr;
 
       dialog.SetExtraControlCreator(Create);
    }
 
    static wxWindow* Create(wxWindow* parent)
    {
-      wxCHECK( ms_attachName, NULL );
+      wxCHECK( ms_attachName, nullptr );
 
       return ms_attachName->DoCreate(parent);
    }
 
    virtual ~AttachNamesInFileDialog()
    {
-      ms_attachName = NULL;
+      ms_attachName = nullptr;
    }
 
    wxArrayString GetNames() const
@@ -4488,7 +4475,7 @@ private:
       // We need to bind to this event to update m_names immediately as m_text
       // can't be used any more once the dialog is closed.
       m_text->Bind(wxEVT_TEXT,
-                   [=](wxCommandEvent&) { m_names = m_text->GetValue(); });
+                   [this](wxCommandEvent&) { m_names = m_text->GetValue(); });
 
       return panel;
    }
@@ -4501,7 +4488,7 @@ private:
    static AttachNamesInFileDialog* ms_attachName;
 };
 
-AttachNamesInFileDialog* AttachNamesInFileDialog::ms_attachName = NULL;
+AttachNamesInFileDialog* AttachNamesInFileDialog::ms_attachName = nullptr;
 
 } // anonymous namespace
 
@@ -4570,7 +4557,7 @@ void wxComposeView::LetUserAddAttachment()
    const size_t nFiles = filenames.size();
    for ( size_t n = 0; n < nFiles; n++ )
    {
-      InsertFile(filenames[n], NULL, n < names.size() ? names[n] : wxString());
+      InsertFile(filenames[n], nullptr, n < names.size() ? names[n] : wxString());
    }
 }
 
@@ -4722,7 +4709,7 @@ wxComposeView::IsReadyToSend() const
          {
             wxLogError(_("Cannot send message - network is not configured."));
 
-            return FALSE;
+            return false;
          }
       }
       else
@@ -4907,7 +4894,7 @@ wxComposeView::BuildMessage(int flags) const
    if ( !msg )
    {
       // can't do anything more
-      return NULL;
+      return nullptr;
    }
 
    // compose the body
@@ -4935,7 +4922,7 @@ wxComposeView::BuildMessage(int flags) const
                {
                   // send aborted
                   part->DecRef();
-                  return NULL;
+                  return nullptr;
                }
 
                msg->AddPart(
@@ -4944,8 +4931,8 @@ wxComposeView::BuildMessage(int flags) const
                               textBuf.length(),
                               _T("PLAIN"),
                               _T("INLINE"),  // disposition
-                              NULL,          // disposition parameters
-                              NULL,          // other parameters
+                              nullptr,          // disposition parameters
+                              nullptr,          // other parameters
                               encodingPart
                            );
             }
@@ -4979,18 +4966,15 @@ wxComposeView::BuildMessage(int flags) const
                      }
 
                      MessageParameterList plist, dlist;
-                     MessageParameter *p;
 
                      // newer mailers look for "FILENAME" in disposition
                      // parameters according to RFC 2183
-                     p = new MessageParameter(_T("FILENAME"), name);
-                     dlist.push_back(p);
+                     dlist.emplace_back(_T("FILENAME"), name);
 
                      // but some old mailers still use "NAME" in content-type
                      // parameters (per obsolete RFC 1521), so put it there as
                      // well
-                     p = new MessageParameter(_T("NAME"), name);
-                     plist.push_back(p);
+                     plist.emplace_back(_T("NAME"), name);
 
                      const MimeType& mt = part->GetMimeType();
                      msg->AddPart
@@ -5033,18 +5017,12 @@ wxComposeView::BuildMessage(int flags) const
 
                if ( !name.empty() )
                {
-                  MessageParameter *p;
-
-                  p = new MessageParameter(_T("FILENAME"), wxFileNameFromPath(name));
-                  dlist.push_back(p);
+                  dlist.emplace_back(_T("FILENAME"), wxFileNameFromPath(name));
                }
 
                if ( !filename.empty() )
                {
-                  MessageParameter *p;
-
-                  p = new MessageParameter(_T("NAME"), filename);
-                  plist.push_back(p);
+                  plist.emplace_back(_T("NAME"), filename);
                }
 
                const MimeType& mt = part->GetMimeType();
@@ -5071,7 +5049,7 @@ wxComposeView::BuildMessage(int flags) const
    if ( !allPartsOk )
    {
       // we shouldn't send the message without some attachments, abort
-      return NULL;
+      return nullptr;
    }
 
 
@@ -5252,7 +5230,7 @@ void wxComposeView::OnSendResult(const SendThreadResult& res)
    if ( res.success )
       m_msgBeingSent->AfterSending();
    delete m_msgBeingSent;
-   m_msgBeingSent = NULL;
+   m_msgBeingSent = nullptr;
 
    if ( res.success )
    {
@@ -5273,7 +5251,7 @@ void wxComposeView::OnSendResult(const SendThreadResult& res)
          );
       }
 
-      if ( m_OriginalMessage != NULL )
+      if ( m_OriginalMessage != nullptr )
       {
          // we mark the original message as "answered"
          MailFolder *mf = m_OriginalMessage->GetFolder();
@@ -5715,7 +5693,7 @@ bool wxComposeView::DeleteDraft()
    }
 
    m_DraftMessage->DecRef();
-   m_DraftMessage = NULL;
+   m_DraftMessage = nullptr;
 
    return true;
 }
@@ -5732,7 +5710,7 @@ SendMessage *wxComposeView::BuildDraftMessage(int flags) const
          wxLogError(_("Failed to create the message to save."));
       }
 
-      return NULL;
+      return nullptr;
    }
 
    // mark this message as our draft (the value doesn't matter)
@@ -5969,11 +5947,9 @@ wxComposeView::AutoSave()
 int Composer::SaveAll()
 {
    int rc = 0;
-   for ( ComposerList::iterator i = gs_listOfAllComposers.begin();
-         i != gs_listOfAllComposers.end();
-         ++i )
+   for ( wxComposeView *cv : gs_listOfAllComposers )
    {
-      if ( (*i)->AutoSave() )
+      if ( cv->AutoSave() )
          rc++;
       else
          rc = -1;

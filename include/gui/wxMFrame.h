@@ -41,7 +41,7 @@ public:
       // if there is no config object to read settings from
    static bool RestorePosition(const char *name,
                                int *x, int *y, int *w, int *h,
-                               bool *iconised = NULL, bool *maximised = NULL);
+                               bool *iconised = nullptr, bool *maximised = nullptr);
 
       //  save the given frame's position and size in config file
    static void SavePosition(const char *name, wxFrame *frame);
@@ -50,9 +50,9 @@ public:
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
    wxMFrame() : MFrameBase(M_EMPTYSTRING) { FAIL_MSG(_T("unreachable")); }
    /// Constructor
-   wxMFrame(const String &iname, wxWindow *parent = NULL);
+   wxMFrame(const String &iname, wxWindow *parent = nullptr);
    /// Creates an object
-   void Create(const String &iname, wxWindow *parent = NULL);
+   void Create(const String &iname, wxWindow *parent = nullptr);
    /// Destructor
    ~wxMFrame();
 
@@ -62,10 +62,10 @@ public:
    bool  IsInitialised(void) const { return m_initialised; }
 
    /// make it visible or invisible
-   bool Show(bool visible = true) { return wxFrame::Show(visible); }
+   bool Show(bool visible = true) override { return wxFrame::Show(visible); }
 
    /// used to set the title of the window class
-   void  SetTitle(String const & name);
+   void  SetTitle(String const & name) override;
 
    /**
       This virtual method returns a pointer to the profile of the mailfolder
@@ -78,7 +78,7 @@ public:
    virtual Profile *GetFolderProfile(void) const;
 
    /// Passes a menu id to modules for reacting to it.
-   virtual bool ProcessModulesMenu(int id);
+   bool ProcessModulesMenu(int id) override;
 
    /**
       Methods for adding standard menus to the frame menu bar.
@@ -87,8 +87,8 @@ public:
       AddMessageMenu() if they show a message or AddViewMenu() otherwise.
     */
    //@{
-   virtual void AddFileMenu();
-   virtual void AddHelpMenu();
+   void AddFileMenu() override;
+   void AddHelpMenu() override;
    void AddEditMenu();
    void AddViewMenu();
    void AddMessageMenu();
