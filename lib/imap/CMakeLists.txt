@@ -71,9 +71,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   if(USE_SSL)
     string(APPEND OSDEP_C_CONTENTS "#include \"ssl_unix.c\"\n")
 
-    # Linking with OpenSSL::SSL is not enough because c-client code includes
-    # OpenSSL headers without "openssl/" prefix, so we need to explicitly add
-    # this directory to the include path to make it compile.
+    # Linking with OpenSSL::SSL (see below) is not enough because c-client
+    # code includes OpenSSL headers without "openssl/" prefix, so we need to
+    # explicitly add this directory to the include path to make it compile.
     set_property(
       SOURCE
         ${CMAKE_CURRENT_BINARY_DIR}/osdep.c
@@ -279,5 +279,6 @@ target_compile_definitions(mahogany_imap PRIVATE
 if(WIN32)
   target_link_libraries(mahogany_imap INTERFACE ws2_32)
 elseif(USE_SSL)
-  target_link_libraries(mahogany_imap INTERFACE OpenSSL::SSL OpenSSL::Crypto crypt)
+  target_link_libraries(mahogany_imap PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+  target_link_libraries(mahogany_imap INTERFACE crypt)
 endif()
