@@ -17,7 +17,7 @@
 #ifndef _SEQUENCE_H_
 #define _SEQUENCE_H_
 
-class UIdArray;
+#include "UIdArray.h"
 
 // ----------------------------------------------------------------------------
 // Sequence: an "optimized" sequence of numbers

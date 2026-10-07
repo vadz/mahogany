@@ -2428,11 +2428,11 @@ public:
   }
 
   bool OnDropMessages(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y), MailFolder* folder, const UIdArray& messages) {
-    if ( messages.Count() <= 0 )
+    if ( messages.size() <= 0 )
     {
       return false;
     }
-    for ( size_t i = 0; i < messages.Count(); i++ )
+    for ( size_t i = 0; i < messages.size(); i++ )
     {
       Message_obj msg(folder->GetMessage(messages[i]));
       wxString str;

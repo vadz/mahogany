@@ -357,12 +357,12 @@ void wxMIMETreeDialog::SaveMessages(size_t count, const MimePart **parts)
          {
             const size_t hcount = hil->Count();
             UIdArray all;
-            all.Alloc(hcount);
+            all.reserve(hcount);
             for ( size_t n = 0; n < hcount; n++ )
             {
                HeaderInfo *hi = hil->GetItemByIndex(n);
                if ( hi )
-                  all.Add(hi->GetUId());
+                  all.push_back(hi->GetUId());
             }
 
             if ( mf->SaveMessages(&all, folderDst) )

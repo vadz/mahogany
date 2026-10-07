@@ -21,6 +21,8 @@
 #include "pointers.h"
 
 #include "FolderType.h"         // for MFolderType
+#include "UIdArray.h"
+
 #include <wx/fontenc.h>         // for wxFontEncoding
 
 #include <vector>
@@ -37,7 +39,6 @@ class MLogCircle;
 class Profile;
 class Sequence;
 class ServerInfoEntry;
-class UIdArray;
 
 #ifndef SWIG
 using MFolderList = std::vector<RefCounter<MFolder>>;
@@ -52,10 +53,6 @@ struct ThreadParams;
 
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 class WXDLLIMPEXP_FWD_CORE wxWindow;
-
-#ifndef MsgnoArray
-   #define MsgnoArray UIdArray
-#endif
 
 // ----------------------------------------------------------------------------
 // MailFolder

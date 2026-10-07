@@ -10,10 +10,10 @@
 #define FILTERSMODULE_H
 
 #include "MModule.h"
+#include "UIdArray.h"
 
 class FilterRule;
 class MailFolder;
-class UIdArray;
 
 /// The name of the interface provided.
 #define MMODULE_INTERFACE_FILTERS   "Filters"

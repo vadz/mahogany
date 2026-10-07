@@ -2675,9 +2675,9 @@ FilterRuleApply::Run()
    }
 
    // check if Cancel wasn't pressed (we'd exit the loop above by break then)
-   if ( m_idx == m_msgs.GetCount() &&
+   if ( m_idx == m_msgs.size() &&
         (!m_pd ||
-            m_pd->Update(m_msgs.GetCount(), GetExecuteProgressString(wxEmptyString))) )
+            m_pd->Update(m_msgs.size(), GetExecuteProgressString(wxEmptyString))) )
    {
       if ( !LoopCopy() )
       {
@@ -2685,7 +2685,7 @@ FilterRuleApply::Run()
       }
 
       // again, stop right now if we were cancelled
-      if ( m_idx == m_msgs.GetCount() )
+      if ( m_idx == m_msgs.size() )
       {
          if ( !DeleteAll() )
          {
@@ -2716,7 +2716,7 @@ FilterRuleApply::LoopEvaluate()
    // first decide what should we do with the messages: fill the arrays with
    // the operations to perform and the destination folder if the operation
    // involves copying the message
-   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   for ( m_idx = 0; m_idx < m_msgs.size(); m_idx++ )
    {
       // do it first so that the arrays have the right size even if we hit
       // "continue" below
@@ -2753,7 +2753,7 @@ FilterRuleApply::LoopCopy()
 {
    bool allOk = true;
 
-   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   for ( m_idx = 0; m_idx < m_msgs.size(); m_idx++ )
    {
       if ( m_allOperations[m_idx] & FilterRuleImpl::Copy )
       {
@@ -2778,7 +2778,7 @@ FilterRuleApply::DeleteAll()
 {
    CollectForDelete();
 
-   if ( !m_uidsToDelete.IsEmpty() )
+   if ( !m_uidsToDelete.empty() )
    {
       ProgressDelete();
 
@@ -2805,7 +2805,7 @@ FilterRuleApply::CreateProgressDialog()
                   wxString::Format
                   (
                      _("Filtering %zu messages in folder \"%s\":"),
-                     m_msgs.GetCount(),
+                     m_msgs.size(),
                      m_parent->m_MailFolder->GetName()
                   ),
                   // make the message wide enough to show filtering messages
@@ -2819,7 +2819,7 @@ FilterRuleApply::CreateProgressDialog()
                      _("Subject: "),
                      wxString(120, '.')
                   ),
-                  2*m_msgs.GetCount(),
+                  2*m_msgs.size(),
                   frame
                );
    }
@@ -2946,7 +2946,7 @@ String FilterRuleApply::CreditsCommon()
    String common(_("Filtering message"));
 
    // don't append "1/1" as it carries no useful information
-   const size_t count = m_msgs.GetCount();
+   const size_t count = m_msgs.size();
    if ( count != 1 )
       common += String::Format(_T(" %zu/%zu"), m_idx + 1, count);
 
@@ -3102,7 +3102,7 @@ FilterRuleApply::ProgressCopy()
    if ( m_pd )
    {
 
-      if( !m_pd->Update(m_msgs.GetCount() + m_idx,
+      if( !m_pd->Update(m_msgs.size() + m_idx,
                         GetExecuteProgressString(
                           wxString::Format(_("Copying messages to '%s'..."),
                                            m_destinations[m_idx]))) )
@@ -3121,15 +3121,15 @@ FilterRuleApply::CopyToOneFolder()
    UIdArray uidsToCopy;
    wxArrayLong indexesToCopy;
 
-   uidsToCopy.Add(m_msgs[m_idx]);
+   uidsToCopy.push_back(m_msgs[m_idx]);
    indexesToCopy.Add(m_idx);
 
-   for ( size_t n = m_idx + 1; n < m_msgs.GetCount(); n++ )
+   for ( size_t n = m_idx + 1; n < m_msgs.size(); n++ )
    {
       if ( (m_allOperations[n] & FilterRuleImpl::Copy)
          && m_destinations[n] == m_destinations[m_idx] )
       {
-         uidsToCopy.Add(m_msgs[n]);
+         uidsToCopy.push_back(m_msgs[n]);
          indexesToCopy.Add(n);
       }
    }
@@ -3156,15 +3156,15 @@ FilterRuleApply::CopyToOneFolder()
 void
 FilterRuleApply::CollectForDelete()
 {
-   m_uidsToDelete.Empty();
+   m_uidsToDelete.clear();
    m_indicesDeleted.Empty();
 
-   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   for ( m_idx = 0; m_idx < m_msgs.size(); m_idx++ )
    {
       if ( m_allOperations[m_idx] & FilterRuleImpl::Delete )
       {
          m_indicesDeleted.Add(m_idx);
-         m_uidsToDelete.Add(m_msgs[m_idx]);
+         m_uidsToDelete.push_back(m_msgs[m_idx]);
       }
    }
 }
@@ -3174,7 +3174,7 @@ FilterRuleApply::ProgressDelete()
 {
    if ( m_pd )
    {
-      m_pd->Update(2*m_msgs.GetCount(),
+      m_pd->Update(2*m_msgs.size(),
                    GetExecuteProgressString(_("Deleting moved messages...")));
    }
 }
@@ -3188,7 +3188,7 @@ FilterRuleApply::IndicateDeleted()
    size_t count = m_indicesDeleted.GetCount();
    for ( size_t n = count; n > 0; n-- )
    {
-      m_msgs.RemoveAt(m_indicesDeleted[n - 1]);
+      m_msgs.erase(m_msgs.begin() + m_indicesDeleted[n - 1]);
    }
 }
 

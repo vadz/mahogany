@@ -145,7 +145,7 @@ void Sequence::AddRange(UIdType from, UIdType to)
 void Sequence::AddArray(const UIdArray& array)
 {
    // TODO: this surely can be optimized
-   size_t count = array.GetCount();
+   size_t count = array.size();
    for ( size_t n = 0; n < count; n++ )
    {
       Add(array[n]);
@@ -274,7 +274,7 @@ String GetSequenceString(const UIdArray *messages)
 
    Sequence seq;
 
-   size_t count = messages ? messages->GetCount() : 0;
+   size_t count = messages ? messages->size() : 0;
    for ( size_t n = 0; n < count; n++ )
    {
       seq.Add((*messages)[n]);

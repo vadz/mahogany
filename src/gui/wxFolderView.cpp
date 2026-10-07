@@ -1686,7 +1686,7 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
       if ( event.Dragging() )
       {
          const UIdArray& selections = m_FolderView->GetSelections();
-         if ( !selections.IsEmpty() &&
+         if ( !selections.empty() &&
                   m_FolderView->m_msgCmdProc->
                      ProcessCommand(WXMENU_MSG_DRAG, selections) )
          {
@@ -2926,13 +2926,13 @@ wxFolderListCtrl::GetSelectionsOrFocus() const
          {
             const UIdType uidFocus = GetFocusedUId();
             if ( uidFocus != UID_ILLEGAL )
-               uids.Add(uidFocus);
+               uids.push_back(uidFocus);
          }
          break;
 
       case 1:
          // no need to cache anything
-         uids.Add(GetUIdFromIndex(seq.GetFirst(cookie)));
+         uids.push_back(GetUIdFromIndex(seq.GetFirst(cookie)));
          break;
 
       default:
@@ -2943,7 +2943,7 @@ wxFolderListCtrl::GetSelectionsOrFocus() const
                idx != UID_ILLEGAL;
                idx = seq.GetNext(idx, cookie) )
          {
-            uids.Add(GetUIdFromIndex(idx));
+            uids.push_back(GetUIdFromIndex(idx));
          }
    }
 
@@ -3471,7 +3471,7 @@ bool wxFolderView::MoveToNextUnread(bool takeNextIfNoUnread)
 
 void wxFolderView::MoveToNextSearchMatch(bool forward)
 {
-   const size_t count = m_searchData.uids.GetCount();
+   const size_t count = m_searchData.uids.size();
 
    if ( !count )
    {
@@ -4324,10 +4324,10 @@ void wxFolderView::SelectAllByStatus(MailFolder::MessageStatus status,
    if ( !indices )
       return;
 
-   size_t count = indices->GetCount();
+   size_t count = indices->size();
    for ( size_t n = 0; n < count; n++ )
    {
-      m_FolderCtrl->Select(hil->GetIdxFromMsgno(indices->Item(n)), true);
+      m_FolderCtrl->Select(hil->GetIdxFromMsgno((*indices)[n]), true);
    }
 
    delete indices;
@@ -4589,7 +4589,7 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
       case '/':   // start search forward
       case '?':   // start search backwards
          {
-            m_searchData.uids.Clear();
+            m_searchData.uids.clear();
 
             if ( !MInputBox
                   (
@@ -4710,7 +4710,7 @@ void
 wxFolderView::DoCommandEvent(int cmd)
 {
    const UIdArray& selections = GetSelections();
-   if ( selections.IsEmpty() )
+   if ( selections.empty() )
    {
       // nothing to do
       return;
@@ -5272,7 +5272,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                           ) )
                      {
                         UIdArray selections;
-                        selections.Add(message->GetUId());
+                        selections.push_back(message->GetUId());
                         m_TicketList->Add(
                               m_ASMailFolder->ApplyFilterRules(&selections, this)
                            );

@@ -1538,7 +1538,7 @@ bool
 MigrateWizardProgressPage::CopyMessages(MailFolder *mfSrc, MFolder *folderDst)
 {
    UIdArray uids;
-   uids.Add(UID_ILLEGAL);
+   uids.push_back(UID_ILLEGAL);
 
    HeaderInfoList_obj headers(mfSrc->GetHeaders());
 

@@ -3028,7 +3028,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 {
    CHECK( folder, false, _T("SaveMessages() needs a valid folder pointer") );
 
-   size_t count = selections->Count();
+   size_t count = selections->size();
    CHECK( count, true, _T("SaveMessages(): nothing to save") );
 
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::SaveMessages(%s)"),
@@ -3145,7 +3145,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    HeaderInfoList_obj headers(GetHeaders());
    for ( size_t n = 0; n < count; n++ )
    {
-      MsgnoType msgno = GetMsgnoFromUID(selections->Item(n));
+      MsgnoType msgno = GetMsgnoFromUID((*selections)[n]);
       if ( msgno == MSGNO_ILLEGAL )
       {
          FAIL_MSG(_T("inexistent message was copied??"));
@@ -3177,7 +3177,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
          {
             if ( isRecent )
             {
-               uidsNew.Add(selections->Item(n));
+               uidsNew.push_back((*selections)[n]);
 
                status.newmsgs++;
             }
@@ -3211,7 +3211,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    {
       // if we have copied any new messages to the dst folder, we must process
       // them (i.e. filter, report, ...)
-      if ( !uidsNew.IsEmpty() )
+      if ( !uidsNew.empty() )
       {
          ProcessNewMail(uidsNew, folder);
       }
@@ -3268,7 +3268,7 @@ unsigned long MailFolderCC::CountNewMessages() const
    if ( !messages )
       return 0;
 
-   unsigned long newmsgs = messages->GetCount();
+   unsigned long newmsgs = messages->size();
    delete messages;
 
    return newmsgs;
@@ -3441,7 +3441,7 @@ MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
    unsigned long count;
    if ( searchResults )
    {
-      count = searchResults->Count();
+      count = searchResults->size();
 
       delete searchResults;
    }
@@ -3642,7 +3642,7 @@ String MailFolderCC::BuildSequence(const UIdArray& messages)
 {
    Sequence seq;
 
-   size_t count = messages.GetCount();
+   size_t count = messages.size();
    for ( size_t n = 0; n < count; n++ )
    {
       seq.Add(messages[n]);
@@ -4678,17 +4678,17 @@ void MailFolderCC::OnNewMail()
 
       if ( uidsNew )
       {
-         size_t count = uidsNew->GetCount();
+         size_t count = uidsNew->size();
          if ( count )
          {
             // use "%ld" to print UID_ILLEGAL as -1 although it's really
             // unsigned
             wxLogTrace(TRACE_MF_NEWMAIL, _T("Folder %s: last new UID %ld -> %ld"),
-                       GetName(), m_uidLastNew, uidsNew->Last());
+                       GetName(), m_uidLastNew, uidsNew->back());
 
             // update m_uidLastNew to avoid finding the same messages again the
             // next time
-            m_uidLastNew = uidsNew->Last();
+            m_uidLastNew = uidsNew->back();
 
             HeaderInfoList_obj hil(GetHeaders());
             if ( hil )
@@ -4697,7 +4697,7 @@ void MailFolderCC::OnNewMail()
 
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
-               if ( ProcessNewMail(*uidsNew) && uidsNew->IsEmpty() )
+               if ( ProcessNewMail(*uidsNew) && uidsNew->empty() )
                {
                   // All new messages were already handled, so no need to
                   // notify the GUI
@@ -4943,7 +4943,7 @@ MailFolderCC::mm_searched(MAILSTREAM * stream,
    // this must have been allocated before starting the search
    CHECK_RET( mf->m_SearchMessagesFound, _T("logic error in search code") );
 
-   mf->m_SearchMessagesFound->Add(msgno);
+   mf->m_SearchMessagesFound->push_back(msgno);
 }
 
 /** this mailbox name matches a listing request

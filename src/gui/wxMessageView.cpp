@@ -562,7 +562,7 @@ void
 wxMessageViewFrame::OnMenuCommand(int id)
 {
    UIdArray messages;
-   messages.Add(m_MessageView->GetUId());
+   messages.push_back(m_MessageView->GetUId());
 
    if ( !m_msgCmdProc->ProcessCommand(id, messages) )
    {
@@ -596,7 +596,7 @@ bool wxMessageViewFrame::OnMEvent(MEventData& event)
 
             const UIdType uid = m_MessageView->GetMessage()->GetUId();
 
-            const size_t count = uids.Count();
+            const size_t count = uids.size();
             for ( size_t n = 0; n < count; n++ )
             {
                if ( uids[n] == uid )

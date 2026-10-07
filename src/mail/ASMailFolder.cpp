@@ -74,8 +74,8 @@ static
 UIdArray *Copy(const UIdArray *old)
 {
    UIdArray *newarray = new UIdArray;
-   for(size_t i = 0; i < old->Count(); i++)
-      newarray->Add( (*old)[i] );
+   for(size_t i = 0; i < old->size(); i++)
+      newarray->push_back( (*old)[i] );
    return newarray;
 }
 
@@ -472,7 +472,7 @@ public:
                                                    m_Ticket,
                                                    ASMailFolder::Op_SearchMessages,
                                                    msgs,
-                                                   msgs->Count(), m_UserData));
+                                                   msgs->size(), m_UserData));
       }
 private:
    SearchCriterium m_Criterium;
@@ -817,7 +817,7 @@ public:
    Ticket DeleteMessage(unsigned long uid) override
       {
          UIdArray uids;
-         uids.Add(uid);
+         uids.push_back(uid);
          return DeleteMessages(&uids, false, nullptr);
       }
 
@@ -828,7 +828,7 @@ public:
    Ticket UnDeleteMessage(unsigned long uid) override
       {
          UIdArray uids;
-         uids.Add(uid);
+         uids.push_back(uid);
          return UnDeleteMessages(&uids, nullptr);
       }
 
@@ -841,7 +841,7 @@ public:
                        int flag, bool set) override
       {
          UIdArray ua;
-         ua.Add(uid);
+         ua.push_back(uid);
 
          SetFlag(&ua, flag, set);
       }

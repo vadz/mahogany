@@ -563,7 +563,7 @@ public:
             if(msg)
             {
                if(m_Frame->ScheduleMessage(msg))
-                  msgsToDelete.Add(data->GetMessageUId(i));
+                  msgsToDelete.push_back(data->GetMessageUId(i));
                msg->DecRef();
             }
          }

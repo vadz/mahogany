@@ -761,7 +761,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    }
 
    // save the messages
-   int n = selections->Count();
+   int n = selections->size();
 
    std::unique_ptr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(GetProfile());
@@ -820,7 +820,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   int n = selections->Count();
+   int n = selections->size();
    CHECK( n, true, _T("SaveMessages(): nothing to save") );
 
    MailFolder_obj mf(MailFolder::OpenFolder(folder, Normal, m_frame));
@@ -917,7 +917,7 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
 {
    Composer *composer = nullptr;
 
-   int n = selections->Count();
+   int n = selections->size();
    for( int i = 0; i < n; i++ )
    {
       Message *msg = GetMessage((*selections)[i]);
@@ -940,7 +940,7 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 {
    Composer *composer = nullptr;
 
-   int n = selections->Count();
+   int n = selections->size();
    for ( int i = 0; i < n; i++ )
    {
       Message *msg = GetMessage((*selections)[i]);
@@ -1046,7 +1046,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
       if ( found != crit->m_Invert )
       {
          // really found, remember its UID or msgno depending on the flags
-         results->Add(flags & SEARCH_UID ? hi->GetUId() : idx + 1);
+         results->push_back(flags & SEARCH_UID ? hi->GetUId() : idx + 1);
       }
 
       // update the progress dialog and check for abort
@@ -1055,7 +1055,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
          String msg;
          msg.Printf(_("Searching in %lu messages..."), nMessages);
 
-         unsigned long cnt = results->Count();
+         unsigned long cnt = results->size();
          if ( cnt != countFound )
          {
             String msg2;
@@ -1515,7 +1515,7 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 bool
 MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
 {
-   int n = selections->Count();
+   int n = selections->size();
    int i;
    bool rc = true;
    for(i = 0; i < n; i++)
@@ -1651,11 +1651,11 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
    CHECK( filterRule, false, _T("FilterNewMail: NULL filter") );
 
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(%zu msgs)"),
-              GetName(), uidsNew.GetCount());
+              GetName(), uidsNew.size());
 
    // we're almost surely going to look at all new messages, so pre-cache them
    // all at once
-   CacheLastMessages(uidsNew.GetCount());
+   CacheLastMessages(uidsNew.size());
 
    // apply the filters finally
    int rc = filterRule->Apply(this, uidsNew);
@@ -1692,7 +1692,7 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
 
    // some messages could have been deleted by filters
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(): %zu msgs left"),
-              GetName(), uidsNew.GetCount());
+              GetName(), uidsNew.size());
 
    return true;
 }
@@ -1800,7 +1800,7 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
       if ( !ok || !mf )
          return ok;
 
-      if ( uidsNew->IsEmpty() )
+      if ( uidsNew->empty() )
       {
          // all new mail was deleted by the filters, nothing more to do
          return true;
@@ -1848,7 +1848,7 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
          return false;
       }
 
-      if ( uidsNew->IsEmpty() )
+      if ( uidsNew->empty() )
       {
          // we moved everything elsewhere, nothing left
          return true;
@@ -1873,7 +1873,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
 {
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ProcessNewMail(%zu msgs) for %s",
               GetName(),
-              uidsNew.GetCount(),
+              uidsNew.size(),
               folderDst ? folderDst->GetFullName() : wxString("ourselves"));
 
    // use the settings for the folder where the new mail is!
@@ -1926,7 +1926,7 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
 
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::CollectNewMail(%zu msgs) (%s)"),
               GetName(),
-              uidsNew.GetCount(),
+              uidsNew.size(),
               move ? "moving" : "copying");
 
    if ( !SaveMessages(&uidsNew, newMailFolder) )
@@ -1946,7 +1946,7 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
       DeleteMessages(&uidsNew, true);
 
       // no new mail left here
-      uidsNew.Clear();
+      uidsNew.clear();
    }
 
    return true;
@@ -1979,7 +1979,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
 
    // the count is only given if the array itself is not
    if ( uidsNew )
-      countNew = uidsNew->GetCount();
+      countNew = uidsNew->size();
 
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ReportNewMail(%lu msgs) (folder is %s)"),
               folder->GetFullName(),
@@ -2096,7 +2096,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
 
                for ( unsigned long i = 0; i < countNew; i++)
                {
-                  Message_obj msg(mf->GetMessage(uidsNew->Item(i)));
+                  Message_obj msg(mf->GetMessage((*uidsNew)[i]));
                   if ( msg )
                   {
                      infos.push_back(
@@ -2107,7 +2107,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
                   {
                      // this may happen if another session deleted it
                      wxLogDebug(_T("New message %lu disappeared from folder '%s'"),
-                                uidsNew->Item(i),
+                                (*uidsNew)[i],
                                 folder->GetFullName());
                   }
                }

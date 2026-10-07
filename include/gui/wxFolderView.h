@@ -380,7 +380,7 @@ private:
       void Init(const UIdArray& uidsSearched)
       {
          uids = uidsSearched;
-         idx = forward ? 0 : uidsSearched.GetCount() - 1;
+         idx = forward ? 0 : uidsSearched.size() - 1;
          justStarted = true;
       }
    } m_searchData;

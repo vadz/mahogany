@@ -170,11 +170,6 @@ private:
 // private functions
 // ----------------------------------------------------------------------------
 
-int CMPFUNC_CONV MsgnoCmpFunc(UIdType *msgno1, UIdType *msgno2)
-{
-   return *msgno1 - *msgno2;
-}
-
 static UIdType MapIndexToMsgno(UIdType uid)
 {
    return uid + 1;
@@ -1135,7 +1130,7 @@ HeaderInfoListImpl::FindFirstInRange(const MsgnoArray& array,
 
    // test for m_count in the loop to detect if the folder is unexpectedly
    // closed
-   const size_t count = array.GetCount();
+   const size_t count = array.size();
    for ( size_t n = 0; m_count && n < count; n++ )
    {
       MsgnoType pos = GetPosFromIdx(array[n] - 1);
@@ -1976,10 +1971,10 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
             return;
          }
 
-         msgnos.Add(msgno);
+         msgnos.push_back(msgno);
       }
 
-      msgnos.Sort(MsgnoCmpFunc);
+      std::sort(msgnos.begin(), msgnos.end());
 
       seqMsgnos.AddArray(msgnos);
    }

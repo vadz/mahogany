@@ -22,11 +22,11 @@
 class ASMailFolder;
 class MessageView;
 class MFolder;
-class UIdArray;
 
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 
 #include "MEvent.h"
+#include "UIdArray.h"
 
 // ----------------------------------------------------------------------------
 // MsgCmdProc

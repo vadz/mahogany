@@ -473,7 +473,7 @@ public:
                      {
                         size_t nMatches = 0;
 
-                        size_t count = uidsMatching->GetCount();
+                        size_t count = uidsMatching->size();
                         for ( size_t n = 0; n < count; n++ )
                         {
                            Message_obj msg(mf->GetMessage((*uidsMatching)[n]));

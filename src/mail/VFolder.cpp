@@ -724,7 +724,7 @@ MailFolderVirt::SearchByFlag(MessageStatus flag,
          // don't care whether it is or not
          if ( !(msg->flags & MSG_STAT_DELETED) || !(flags & SEARCH_UNDELETED) )
          {
-            results->Add(flags & SEARCH_UID ? msg->uidVirt : n);
+            results->push_back(flags & SEARCH_UID ? msg->uidVirt : n);
          }
       }
    }
