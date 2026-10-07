@@ -5164,15 +5164,12 @@ bool wxConfigSourcesDialog::TransferDataToWindow()
    int n = 0;
 
    const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
-   for ( AllConfigSources::List::iterator i = sources.begin(),
-                                        end = sources.end();
-         i != end;
-         ++i, ++n )
+   for ( const auto& config : sources )
    {
       m_sources->AppendRows(1);
 
-      wxString type = i->GetType(),
-               spec = i->GetSpec();
+      wxString type = config->GetType(),
+               spec = config->GetSpec();
 
 #ifdef OS_WIN
       // special case: the unnamed/local config may use registry and not a file
@@ -5181,9 +5178,11 @@ bool wxConfigSourcesDialog::TransferDataToWindow()
          type = gettext_noop("registry");
 #endif // OS_WIN
 
-      m_sources->SetCellValue(n, Col_Name, i->GetName());
+      m_sources->SetCellValue(n, Col_Name, config->GetName());
       m_sources->SetCellValue(n, Col_Type, wxGetTranslation(type));
       m_sources->SetCellValue(n, Col_Spec, spec);
+
+      n++;
    }
 
    // allow to choose only supported types for the type column

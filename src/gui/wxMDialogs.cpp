@@ -2065,19 +2065,16 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
    wxArrayString entries;
 
    const AllConfigSources::List& sources = AllConfigSources::Get().GetSources();
-   for ( AllConfigSources::List::iterator config = sources.begin(),
-                                             end = sources.end();
-         config != end;
-         ++config )
+   for ( const auto& config : sources )
    {
-      dlg.AddAllEntries(config.operator->(), wxEmptyString, entries);
+      dlg.AddAllEntries(config.get(), wxEmptyString, entries);
 
       ConfigSource::EnumData dummy;
       String name;
       bool cont = config->GetFirstGroup(MESSAGE_BOXES_ROOT, name, dummy);
       while ( cont )
       {
-         dlg.AddAllEntries(config.operator->(), name, entries);
+         dlg.AddAllEntries(config.get(), name, entries);
 
          cont = config->GetNextGroup(name, dummy);
       }
@@ -2101,10 +2098,7 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
                // we don't know in which config source this message box was
                // disabled but it doesn't matter: if we want to reenable it, we
                // must do it in all of them anyhow
-               for ( AllConfigSources::List::iterator config = sources.begin(),
-                                                         end = sources.end();
-                     config != end;
-                     ++config )
+               for ( const auto& config : sources )
                {
                   config->DeleteEntry(key);
                }

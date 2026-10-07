@@ -45,12 +45,9 @@ ConfigSourceChoice::Create(wxWindow *parent, int hExtra)
 
    ConfigSourceChoice * const chcSources = new ConfigSourceChoice(parent);
 
-   for ( AllConfigSources::List::iterator i = sources.begin(),
-                                        end = sources.end();
-         i != end;
-         ++i )
+   for ( const auto& config : sources )
    {
-      chcSources->Append(i->GetName());
+      chcSources->Append(config->GetName());
    }
 
    wxLayoutConstraints *c;
@@ -87,12 +84,7 @@ ConfigSource *ConfigSourceChoice::GetSelectedSource() const
    ConfigSource *config = NULL;
    if ( sel != wxNOT_FOUND )
    {
-      AllConfigSources::List::iterator
-         i = AllConfigSources::Get().GetSources().begin();
-      for ( int n = 0; n < sel; n++ )
-         ++i;
-
-      config = i.operator->();
+      config = AllConfigSources::Get().GetSources()[sel].get();
    }
 
    return config;

@@ -33,6 +33,8 @@
 #include "ConfigSourceLocal.h"
 #include "ConfigPrivate.h"
 
+#include <algorithm>
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -154,7 +156,7 @@ public:
       bool foundAny = false;
       for ( ;; )
       {
-         AllConfigSources::List::iterator i = m_configSources.FindEntry(path);
+         const auto i = m_configSources.FindEntry(path);
          if ( i == m_configSources.GetSources().end() )
          {
             CHECK( foundAny, false, _T("entry to delete doesn't exist") );
@@ -162,7 +164,7 @@ public:
          }
 
          foundAny = true;
-         if ( !i->DeleteEntry(path) )
+         if ( !(*i)->DeleteEntry(path) )
             return false;
       }
 
@@ -176,7 +178,7 @@ public:
       bool foundAny = false;
       for ( ;; )
       {
-         AllConfigSources::List::iterator i = m_configSources.FindGroup(path);
+         const auto i = m_configSources.FindGroup(path);
          if ( i == m_configSources.GetSources().end() )
          {
             CHECK( foundAny, false, _T("group to delete doesn't exist") );
@@ -184,7 +186,7 @@ public:
          }
 
          foundAny = true;
-         if ( !i->DeleteGroup(path) )
+         if ( !(*i)->DeleteGroup(path) )
             return false;
       }
 
@@ -226,7 +228,7 @@ protected:
                m_path.StartsWith(_T("/") M_SETTINGS_CONFIG_SECTION _T("/") +
                                     wxPSplitterWindow::GetConfigPath()) )
       {
-         config = *m_configSources.GetSources().begin().operator->();
+         config = m_configSources.GetSources().front().get();
       }
       else // can be shared
       {
@@ -293,8 +295,6 @@ private:
 // AllConfigSources implementation
 // ============================================================================
 
-M_LIST(LongList, long);
-
 AllConfigSources *AllConfigSources::ms_theInstance = NULL;
 
 // ----------------------------------------------------------------------------
@@ -323,10 +323,12 @@ AllConfigSources::AllConfigSources(const String& filename)
    // ----------------------------------------------
 
    // local config is always first
-   m_sources.push_back(configLocal);
+   m_sources.emplace_back(configLocal);
 
-   // now get all the other configs
-   LongList priorities;
+   // now get all the other configs, keeping them sorted by priority: this
+   // vector contains the priorities of all config sources except the local
+   // one, in the same order as they're stored in m_sources
+   std::vector<long> priorities;
 
    ConfigSource::EnumData cookie;
    const String key(M_CONFIGSRC_CONFIG_SECTION),
@@ -354,17 +356,14 @@ AllConfigSources::AllConfigSources(const String& filename)
             prio = INT_MAX;
          }
 
-         List::iterator i = m_sources.begin();
-         ++i;              // skip local config which is always first
+         // insert after all the sources with the same priority, if any
+         const auto j = std::upper_bound(priorities.begin(),
+                                         priorities.end(),
+                                         prio);
 
-         LongList::iterator j;
-         for ( j = priorities.begin(); j != priorities.end(); ++i, ++j )
-         {
-            if ( *j > prio )
-               break;
-         }
-
-         m_sources.insert(i, config);
+         // +1 to skip local config which is always first
+         m_sources.emplace(m_sources.begin() + (j - priorities.begin()) + 1,
+                           config);
          priorities.insert(j, prio);
       }
       //else: creation failed, don't do anything
@@ -404,11 +403,10 @@ bool AllConfigSources::Read(const String& path, LookupData& data) const
 
    const bool isNumeric = data.GetType() == LookupData::LD_LONG;
 
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   for ( const auto& config : m_sources )
    {
-      if ( isNumeric ? i->Read(fullpath, data.GetLongPtr())
-                     : i->Read(fullpath, data.GetStringPtr()) )
+      if ( isNumeric ? config->Read(fullpath, data.GetLongPtr())
+                     : config->Read(fullpath, data.GetStringPtr()) )
       {
          return true;
       }
@@ -459,10 +457,9 @@ AllConfigSources::Write(const String& path,
 
       // note that this loop terminates with config set to the last source if
       // the element is not found anywhere, just as desired
-      const List::iterator end = m_sources.end();
-      for ( List::iterator i = m_sources.begin(); i != end; ++i )
+      for ( const auto& source : m_sources )
       {
-         config = *i;
+         config = source.get();
          if ( config->HasEntry(fullpath) ||
                (!fullpathUnsusp.empty() && config->HasEntry(fullpathUnsusp)) )
          {
@@ -521,10 +518,9 @@ AllConfigSources::CopyGroup(const String& pathSrc, const String& pathDst)
 {
    bool rc = true;
 
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   for ( const auto& config : m_sources )
    {
-      rc &= CopyGroup(i.operator->(), pathSrc, pathDst);
+      rc &= CopyGroup(config.get(), pathSrc, pathDst);
    }
 
    return rc;
@@ -554,26 +550,26 @@ AllConfigSources::GetFirstEntry(const String& path,
    return data.GetNextEntry(entry);
 }
 
-AllConfigSources::List::iterator
+AllConfigSources::List::const_iterator
 AllConfigSources::FindGroup(const String& path) const
 {
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   const auto end = m_sources.end();
+   for ( auto i = m_sources.begin(); i != end; ++i )
    {
-      if ( i->HasGroup(path) )
+      if ( (*i)->HasGroup(path) )
          return i;
    }
 
    return end;
 }
 
-AllConfigSources::List::iterator
+AllConfigSources::List::const_iterator
 AllConfigSources::FindEntry(const String& path) const
 {
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   const auto end = m_sources.end();
+   for ( auto i = m_sources.begin(); i != end; ++i )
    {
-      if ( i->HasEntry(path) )
+      if ( (*i)->HasEntry(path) )
          return i;
    }
 
@@ -588,10 +584,9 @@ bool AllConfigSources::FlushAll()
 {
    bool rc = true;
 
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   for ( const auto& config : m_sources )
    {
-      rc &= i->Flush();
+      rc &= config->Flush();
    }
 
    return rc;
@@ -606,18 +601,17 @@ bool AllConfigSources::Rename(const String& pathOld, const String& nameNew)
           name = pathOld.AfterLast(_T('/')),
           group;
 
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   for ( const auto& config : m_sources )
    {
       ConfigSource::EnumData cookie;
-      for ( bool cont = i->GetFirstGroup(parent, group, cookie);
+      for ( bool cont = config->GetFirstGroup(parent, group, cookie);
             cont;
-            cont = i->GetNextGroup(group, cookie) )
+            cont = config->GetNextGroup(group, cookie) )
       {
          if ( group == name )
          {
             // this config has that group, do rename it
-            if ( i->RenameGroup(pathOld, nameNew) )
+            if ( config->RenameGroup(pathOld, nameNew) )
                numRenamed++;
             else
                rc = false;
@@ -638,18 +632,17 @@ bool AllConfigSources::DeleteEntry(const String& path)
           name = path.AfterLast(_T('/')),
           entry;
 
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   for ( const auto& config : m_sources )
    {
       ConfigSource::EnumData cookie;
-      for ( bool cont = i->GetFirstEntry(parent, entry, cookie);
+      for ( bool cont = config->GetFirstEntry(parent, entry, cookie);
             cont;
-            cont = i->GetNextEntry(entry, cookie) )
+            cont = config->GetNextEntry(entry, cookie) )
       {
          if ( entry == name )
          {
             // this config has that entry, do remove it
-            rc &= i->DeleteEntry(path);
+            rc &= config->DeleteEntry(path);
 
             break;
          }
@@ -667,18 +660,17 @@ bool AllConfigSources::DeleteGroup(const String& path)
           name = path.AfterLast(_T('/')),
           group;
 
-   const List::iterator end = m_sources.end();
-   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   for ( const auto& config : m_sources )
    {
       ConfigSource::EnumData cookie;
-      for ( bool cont = i->GetFirstGroup(parent, group, cookie);
+      for ( bool cont = config->GetFirstGroup(parent, group, cookie);
             cont;
-            cont = i->GetNextGroup(group, cookie) )
+            cont = config->GetNextGroup(group, cookie) )
       {
          if ( group == name )
          {
             // this config has that group, do remove it
-            rc &= i->DeleteGroup(path);
+            rc &= config->DeleteGroup(path);
 
             break;
          }
@@ -696,7 +688,7 @@ wxConfigBase *AllConfigSources::GetLocalConfig() const
 
    // we know that the first config source is the local one...
    ConfigSourceLocal *
-      config = static_cast<ConfigSourceLocal *>(*m_sources.begin());
+      config = static_cast<ConfigSourceLocal *>(m_sources.front().get());
 
    return config->GetConfig();
 }
@@ -714,7 +706,7 @@ AllConfigSources::SetSources(const wxArrayString& names,
    CHECK( types.size() == count && specs.size() == count, false,
             _T("array size mismatch") );
 
-   ConfigSource& config = **m_sources.begin();
+   ConfigSource& config = *m_sources.front();
 
    // we need just the name for RenameGroup()
    String configsBackup(_T("Configs.Old"));

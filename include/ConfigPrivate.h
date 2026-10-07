@@ -109,8 +109,8 @@ public:
 
    // must be called (by AllConfigSources) before calling GetNextXXX()
    void Init(const String& path,
-             AllConfigSources::List::iterator begin,
-             AllConfigSources::List::iterator end)
+             AllConfigSources::List::const_iterator begin,
+             AllConfigSources::List::const_iterator end)
    {
       m_path = path;
       m_current = begin;
@@ -132,8 +132,8 @@ private:
 
 
    // the current and one beyond last config source we're iterating over
-   AllConfigSources::List::iterator m_current,
-                                    m_end;
+   AllConfigSources::List::const_iterator m_current,
+                                          m_end;
 
    // the path of the key whose entries/groups we're enumerating
    String m_path;

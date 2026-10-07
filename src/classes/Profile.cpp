@@ -35,7 +35,6 @@
 
 #include <wx/config.h>
 
-#include "lists.h"
 #include "pointers.h"
 
 #include "ConfigSourcesAll.h"
@@ -419,14 +418,14 @@ bool ProfileEnumDataImpl::DoGetNext(String& s, What what)
       bool rc;
       if ( !m_started )
       {
-         rc = what == Group ? m_current->GetFirstGroup(m_path, s, m_cookie)
-                            : m_current->GetFirstEntry(m_path, s, m_cookie);
+         rc = what == Group ? (*m_current)->GetFirstGroup(m_path, s, m_cookie)
+                            : (*m_current)->GetFirstEntry(m_path, s, m_cookie);
          m_started = true;
       }
       else // GetFirst() already called, now do GetNext()
       {
-         rc = what == Group ? m_current->GetNextGroup(s, m_cookie)
-                            : m_current->GetNextEntry(s, m_cookie);
+         rc = what == Group ? (*m_current)->GetNextGroup(s, m_cookie)
+                            : (*m_current)->GetNextEntry(s, m_cookie);
       }
 
       if ( !rc )
