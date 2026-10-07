@@ -116,6 +116,35 @@ public:
    }
 
    /**
+      Move constructor.
+
+      Takes the pointer from the other object, which becomes @c NULL, without
+      changing the reference count.
+
+      Note that it is important for this constructor to be noexcept, as
+      otherwise std::vector<> would copy, rather than move, the elements when
+      reallocating.
+    */
+   RefCounter(RefCounter<T>&& other) noexcept
+      : m_pointer(other.release())
+   {
+   }
+
+   /**
+      Move assignment operator.
+
+      Releases the currently held pointer, if any, and takes the pointer from
+      the other object, which becomes @c NULL.
+
+      This works correctly for self-assignment too.
+    */
+   RefCounter<T>& operator=(RefCounter<T>&& other) noexcept
+   {
+      attach(other.release());
+      return *this;
+   }
+
+   /**
       Destructor releases the pointer possibly destroying it.
 
       Destructor is not virtual, this class can't be used polymorphically.
