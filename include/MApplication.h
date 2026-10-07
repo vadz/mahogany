@@ -14,7 +14,8 @@
 #endif // USE_PCH
 
 #include "MEvent.h"
-#include "lists.h"
+
+#include <vector>
 
 class CmdLineOptions;
 class FolderMonitor;
@@ -30,8 +31,6 @@ class WXDLLIMPEXP_FWD_BASE wxPageSetupDialogData;
 class WXDLLIMPEXP_FWD_BASE wxPrintData;
 class WXDLLIMPEXP_FWD_BASE wxConfigBase;
 class WXDLLIMPEXP_FWD_CORE wxWindow;
-
-M_LIST_PTR(ListLibraries, wxDynamicLibrary);
 
 /// the global application object pointer
 extern MAppBase *mApplication;
@@ -570,8 +569,8 @@ protected:
    /// the struct containing the command line options
    CmdLineOptions *m_cmdLineOptions;
 
-   /// the list of DLLs to unload a.s.a.p.
-   ListLibraries m_dllsToUnload;
+   /// the DLLs to unload a.s.a.p.
+   std::vector<wxDynamicLibrary *> m_dllsToUnload;
 
 private:
    /**

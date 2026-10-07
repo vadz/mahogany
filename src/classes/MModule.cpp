@@ -131,17 +131,17 @@ MModuleList *GetMModuleList(void)
 
 void MAppBase::UnloadDLLs()
 {
-   while ( !m_dllsToUnload.empty() )
+   for ( wxDynamicLibrary *dll : m_dllsToUnload )
    {
       // FIXME: if we do unload the library, M crashes because modules are
       //        unloaded too soon -- they should really remain in memory for as
       //        long as they're used
-      (*m_dllsToUnload.begin())->Detach(); // prevent DLL from being unloaded
+      dll->Detach(); // prevent DLL from being unloaded
 
-      delete *m_dllsToUnload.begin();
-
-      m_dllsToUnload.pop_front();
+      delete dll;
    }
+
+   m_dllsToUnload.clear();
 }
 
 /* When a module gets deleted it must make sure that it is no longer
