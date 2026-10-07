@@ -24,11 +24,13 @@
    #include "Mcommon.h"
 #endif // USE_PCH
 
-#include "lists.h"
-
 #include "MFolder.h"
 #include "mail/Driver.h"
 #include "mail/FolderPool.h"
+
+#include "pointers.h"
+
+#include <list>
 
 // ----------------------------------------------------------------------------
 // constants
@@ -51,26 +53,23 @@ struct MFConnection
    String spec;
 
    // also cache the MFolder which can be used to (re)open this mf later
-   MFolder *folder;
+   RefCounter<MFolder> folder;
 
 
    MFConnection(MailFolder *mf_, const String& spec_, const MFolder *folder_)
-      : spec(spec_)
+      : spec(spec_),
+        folder(RefCounter<MFolder>::convert(const_cast<MFolder *>(folder_)))
    {
       mf = mf_;
-      folder = const_cast<MFolder *>(folder_);
-      if ( folder )
-         folder->IncRef();
-   }
-
-   ~MFConnection()
-   {
-      if ( folder )
-         folder->DecRef();
    }
 };
 
-M_LIST_OWN(MFConnectionList, MFConnection);
+// Note that we must use std::list and not std::vector here (and for
+// MFClassPoolList below) because CookieImpl keeps iterators into these lists
+// while the code iterating over the pool runs and this code can add new
+// connections to the pool or remove the existing ones from it (e.g. closing
+// the folder removes it from the pool), and the iterators must remain valid.
+using MFConnectionList = std::list<MFConnection>;
 
 // ----------------------------------------------------------------------------
 // MFClassPool caches information about all connections for the given driver
@@ -90,7 +89,7 @@ struct MFClassPool
    // find the connection with the given spec in this pool
    //
    // returns NULL if not found
-   MFConnection *FindConnection(const String& spec) const;
+   MFConnection *FindConnection(const String& spec);
 
 
    const String driverName;
@@ -109,7 +108,9 @@ struct MFClassPool
 // member static variables to reduce compilation dependencies
 
 // the global pool is a linked list of class pools
-M_LIST_OWN(MFClassPoolList, MFClassPool) gs_pool;
+using MFClassPoolList = std::list<MFClassPool>;
+
+MFClassPoolList gs_pool;
 
 // ----------------------------------------------------------------------------
 // Cookie: used to store state information by the iteration functions
@@ -135,7 +136,7 @@ public:
       MailFolder *mf = m_iterConn->mf;
       if ( pFolder )
       {
-         *pFolder = m_iterConn->folder;
+         *pFolder = m_iterConn->folder.get();
          (*pFolder)->IncRef();
       }
 
@@ -177,25 +178,21 @@ private:
 
 MFClassPool *MFClassPool::Find(const String& driverName)
 {
-   for ( MFClassPoolList::iterator i = gs_pool.begin();
-         i != gs_pool.end();
-         ++i )
+   for ( MFClassPool& pool : gs_pool )
    {
-      if ( i->driverName == driverName )
-         return *i;
+      if ( pool.driverName == driverName )
+         return &pool;
    }
 
    return NULL;
 }
 
-MFConnection *MFClassPool::FindConnection(const String& spec) const
+MFConnection *MFClassPool::FindConnection(const String& spec)
 {
-   for ( MFConnectionList::iterator i = connections.begin();
-         i != connections.end();
-         ++i )
+   for ( MFConnection& conn : connections )
    {
-      if ( i->spec == spec )
-         return *i;
+      if ( conn.spec == spec )
+         return &conn;
    }
 
    return NULL;
@@ -234,9 +231,7 @@ MFPool::Add(MFDriver *driver,
    if ( !pool )
    {
       // create new class pool
-      pool = new MFClassPool(driverName);
-
-      gs_pool.push_back(pool);
+      pool = &gs_pool.emplace_back(driverName);
    }
 
    const String spec = driver->GetFullSpec(folder, login);
@@ -244,7 +239,7 @@ MFPool::Add(MFDriver *driver,
    MFConnection *conn = pool->FindConnection(spec);
    CHECK_RET( !conn, _T("MFPool::Add(): folder already in the pool") );
 
-   pool->connections.push_back(new MFConnection(mf, spec, folder));
+   pool->connections.emplace_back(mf, spec, folder);
 
    wxLogTrace(TRACE_MFPOOL, _T("Added '%s' to the pool."), mf->GetName());
 }
@@ -280,12 +275,10 @@ MFPool::Find(MFDriver *driver,
 /* static */
 bool MFPool::Remove(MailFolder *mf)
 {
-   for ( MFClassPoolList::iterator pool = gs_pool.begin();
-         pool != gs_pool.end();
-         ++pool )
+   for ( MFClassPool& pool : gs_pool )
    {
-      for ( MFConnectionList::iterator i = pool->connections.begin();
-            i != pool->connections.end();
+      for ( auto i = pool.connections.begin();
+            i != pool.connections.end();
             ++i )
       {
          if ( i->mf == mf )
@@ -293,7 +286,7 @@ bool MFPool::Remove(MailFolder *mf)
             wxLogTrace(TRACE_MFPOOL, _T("Removing '%s' from the pool."),
                        mf->GetName());
 
-            pool->connections.erase(i);
+            pool.connections.erase(i);
 
             // there can be only one node containing this folder so stop here
             return true;
@@ -308,13 +301,6 @@ bool MFPool::Remove(MailFolder *mf)
 void MFPool::DeleteAll()
 {
    wxLogTrace(TRACE_MFPOOL, _T("Clearing the pool."));
-
-   for ( MFClassPoolList::iterator pool = gs_pool.begin();
-         pool != gs_pool.end();
-         ++pool )
-   {
-      pool->connections.clear();
-   }
 
    gs_pool.clear();
 }
