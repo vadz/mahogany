@@ -22,7 +22,6 @@ class FolderMonitor;
 class MAppBase;
 class MailFolder;
 class MModuleCommon;
-class ArrayFrames;
 class wxMFrame;
 
 class WXDLLIMPEXP_FWD_BASE wxDynamicLibrary;
@@ -550,7 +549,7 @@ protected:
    bool m_UseOutbox;
 
    /// list of frames to not ask again in CanClose()
-   ArrayFrames *m_framesOkToClose;
+   std::vector<const wxMFrame *> m_framesOkToClose;
 
    /// where are we in the application life cycle?
    enum LifeCycle

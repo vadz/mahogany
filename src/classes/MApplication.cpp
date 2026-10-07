@@ -25,7 +25,6 @@
 #  include "Mcclient.h"         // For env_parameters
 #  include "Mdefaults.h"
 
-#  include <wx/dynarray.h>      // for WX_DEFINE_ARRAY
 #  include <wx/dirdlg.h>        // wxDirDialog
 #endif   // USE_PCH
 
@@ -120,12 +119,6 @@ extern const MPersMsgBox *M_MSGBOX_EMPTY_TRASH_ON_EXIT;
 extern const MPersMsgBox *M_MSGBOX_SEND_OUTBOX_ON_EXIT;
 
 // ----------------------------------------------------------------------------
-// private types
-// ----------------------------------------------------------------------------
-
-WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
-
-// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -153,7 +146,6 @@ MAppBase::MAppBase()
    m_eventFolderUpdateReg = nullptr;
 
    m_topLevelFrame = nullptr;
-   m_framesOkToClose = nullptr;
    m_FolderMonitor = nullptr;
    m_profile = nullptr;
 
@@ -189,8 +181,6 @@ MAppBase::~MAppBase()
    }
 
    Profile::DeleteGlobalConfig();
-
-   delete m_framesOkToClose;
 
    // execute MRunAtExit callbacks
    for ( MRunAtExit *p = MRunAtExit::GetFirst(); p; p = p->GetNext() )
@@ -870,23 +860,20 @@ MAppBase::OnClose()
 void
 MAppBase::AddToFramesOkToClose(const wxMFrame *frame)
 {
-   if ( !m_framesOkToClose )
-      m_framesOkToClose = new ArrayFrames;
-
-   m_framesOkToClose->Add(frame);
+   m_framesOkToClose.push_back(frame);
 }
 
 void
 MAppBase::ResetFramesOkToClose()
 {
-   if ( m_framesOkToClose )
-      m_framesOkToClose->Empty();
+   m_framesOkToClose.clear();
 }
 
 bool
 MAppBase::IsOkToClose(const wxMFrame *frame) const
 {
-   return m_framesOkToClose && m_framesOkToClose->Index(frame) != wxNOT_FOUND;
+   return std::find(m_framesOkToClose.begin(), m_framesOkToClose.end(),
+                    frame) != m_framesOkToClose.end();
 }
 
 void
