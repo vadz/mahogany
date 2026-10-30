@@ -3536,23 +3536,44 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
 
    if ( last )
    {
+      if ( !m_MailStream )
+      {
+         mail_free_searchpgm(&pgm);
+
+         FAIL_MSG( _T("SearchByFlag: folder is closed") );
+
+         return nullptr;
+      }
+
+      const bool searchUID = (flags & SEARCH_UID) != 0;
+
       // only search among the messages after this one
+      MsgnoType max;
+      if ( !m_nMessages )
+         max = 0;
+      else if ( searchUID )
+         max = mail_uid(m_MailStream, m_nMessages);
+      else
+         max = m_nMessages;
+
+      // there are no messages after the given one: we must not search for
+      // them as "last+1:max" set would be interpreted as "max:last+1" and so
+      // would still find the last message
+      if ( max <= last )
+      {
+         mail_free_searchpgm(&pgm);
+
+         return new UIdArray;
+      }
+
       SEARCHSET *sset = mail_newsearchset();
       sset->first = last + 1;
+      sset->last = max;
 
-      CHECK( m_MailStream, nullptr, _T("SearchByFlag: folder is closed") );
-
-
-      if ( flags & SEARCH_UID )
-      {
-         sset->last = mail_uid(m_MailStream, m_nMessages);
+      if ( searchUID )
          pgm->uid = sset;
-      }
       else // msgno search
-      {
-         sset->last = m_nMessages;
          pgm->msgno = sset;
-      }
    }
 
    return DoSearch(pgm, flags & (SEARCH_UID | SEARCH_MSGNO));
