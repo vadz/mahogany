@@ -1231,6 +1231,24 @@ struct LastNewUIDEntry
 
 static std::vector<LastNewUIDEntry> gs_lastNewUIDList;
 
+// remember the last new UID for the given folder until it is reopened
+static void
+StoreLastNewUID(const String& folderName, UIdType uidLastNew, UIdType uidValidity)
+{
+   for ( LastNewUIDEntry& entry : gs_lastNewUIDList )
+   {
+      if ( entry.m_folderName == folderName )
+      {
+         entry.m_uidLastNew = uidLastNew;
+         entry.m_uidValidity = uidValidity;
+
+         return;
+      }
+   }
+
+   gs_lastNewUIDList.emplace_back(folderName, uidLastNew, uidValidity);
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -2392,24 +2410,7 @@ MailFolderCC::Close(bool mayLinger)
    m_nMessages = 0;
 
    // save our last new UID in case this folder is going to be reopened later
-   String folderName = GetName();
-
-   auto i = gs_lastNewUIDList.begin();
-   for ( ; i != gs_lastNewUIDList.end(); ++i )
-   {
-      if ( i->m_folderName == folderName )
-      {
-         i->m_uidLastNew = m_uidLastNew;
-         i->m_uidValidity = m_uidValidity;
-
-         break;
-      }
-   }
-
-   if ( i == gs_lastNewUIDList.end() )
-   {
-      gs_lastNewUIDList.emplace_back(folderName, m_uidLastNew, m_uidValidity);
-   }
+   StoreLastNewUID(GetName(), m_uidLastNew, m_uidValidity);
 }
 
 void
