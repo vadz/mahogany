@@ -17,6 +17,8 @@
 #
 #    - USE_PYTHON: Enable Python scripting support (default: ON if Python found)
 #    - USE_SSL: Enable SSL/TLS support (default: ON if OpenSSL found)
+#    - USE_WEBVIEW: Enable wxWebView-based message viewer (default: ON if
+#      wxWebView library is available)
 #
 # 3. Build:
 #
@@ -63,6 +65,7 @@ else()
   option(USE_SSL "Enable SSL/TLS support" ON)
 endif()
 option(USE_DSPAM "Enable built-in support for spam filtering" OFF)
+option(USE_WEBVIEW "Enable wxWebView-based message viewer" ON)
 set(WX_CONFIG "" CACHE PATH "Path to wxWidgets wx-config script")
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -116,9 +119,13 @@ if(WX_CONFIG)
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
+  if(USE_WEBVIEW)
+    set(wx_optional_libs --optional-libs webview)
+  endif()
+
   execute_process(
     COMMAND
-      ${WX_CONFIG} --libs net,html,qa,xml,core,base
+      ${WX_CONFIG} --libs net,html,qa,xml,core,base ${wx_optional_libs}
     OUTPUT_VARIABLE
       wxWidgets_LIBS
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -127,12 +134,21 @@ if(WX_CONFIG)
   separate_arguments(wxWidgets_CXXFLAGS)
   separate_arguments(wxWidgets_LIBS)
 
+  # This is used for checking for optional libraries below.
+  set(wx_all_libs ${wxWidgets_LIBS})
+
   add_library(mahogany_wx INTERFACE)
   target_compile_options(mahogany_wx INTERFACE ${wxWidgets_CXXFLAGS})
   target_link_libraries(mahogany_wx INTERFACE ${wxWidgets_LIBS})
   set(wxWidgets_LIBRARIES mahogany_wx)
 else()
-  find_package(wxWidgets 3.2 COMPONENTS core base net html qa xml)
+  if(USE_WEBVIEW)
+    set(wx_optional_components OPTIONAL_COMPONENTS webview)
+  endif()
+
+  find_package(wxWidgets 3.2 COMPONENTS core base net html qa xml
+    ${wx_optional_components}
+  )
   if(NOT wxWidgets_FOUND)
     message(FATAL_ERROR "wxWidgets not found. Mahogany requires wxWidgets 3.2 or later.
 
@@ -145,6 +161,17 @@ else()
   # This variable is not defined in CONFIG search mode.
   if(wxWidgets_USE_FILE)
     include(${wxWidgets_USE_FILE})
+  endif()
+
+  set(wx_all_libs ${wxWidgets_LIBRARIES})
+endif()
+
+if(USE_WEBVIEW)
+  if(wx_all_libs MATCHES "webview")
+    list(APPEND extra_features "wxWebView")
+  else()
+    message(WARNING "wxWebView library not found, wxWebView-based viewer will be disabled.")
+    set(USE_WEBVIEW OFF)
   endif()
 endif()
 

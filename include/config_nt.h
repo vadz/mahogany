@@ -37,6 +37,9 @@
 /** Define this if you want to compile in SSL support. */
 #define USE_SSL
 
+/** Define this to build the wxWebView-based message viewer */
+#define USE_WEBVIEW
+
 /** Define this to use built-in i18n support */
 #define USE_I18N
 
