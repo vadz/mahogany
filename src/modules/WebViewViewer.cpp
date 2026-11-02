@@ -36,8 +36,6 @@
 #include <wx/base64.h>
 #include <wx/mstream.h>
 
-#include <wx/html/htmlpars.h>   // for wxHtmlParser used to extract <body>
-
 #include <wx/webview.h>
 
 #include <memory>
@@ -49,6 +47,36 @@
 
 // the URL scheme used for the links corresponding to our clickable objects
 #define CLICKABLE_SCHEME "x-mahogany-clickable:"
+
+// the HTML message parts are shown in iframes which need to be resized to fit
+// their contents, as there is no way to do it using just CSS
+//
+// notice that this script is injected as user script, which is not affected
+// by the page CSP, and that it uses capturing listener because load events
+// don't bubble
+static const char *const FIT_IFRAMES_SCRIPT = R"(
+if ( window === window.top ) {
+   document.addEventListener('load', function(event) {
+      const frame = event.target;
+      if ( !(frame instanceof HTMLIFrameElement) )
+         return;
+
+      const doc = frame.contentDocument;
+      if ( !doc || !doc.documentElement )
+         return;
+
+      // set the height to 0 first to make the contents shrink if possible
+      // (e.g. if it uses "height: 100%")
+      const fit = function() {
+         frame.style.height = '0';
+         frame.style.height = doc.scrollingElement.scrollHeight + 'px';
+      };
+
+      // this also calls fit() initially
+      new ResizeObserver(fit).observe(doc.documentElement);
+   }, true);
+}
+)";
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -63,9 +91,8 @@ static wxString EscapeHtml(const wxString& text);
 // return the data: URI containing the given image in PNG format
 static wxString ImageToDataURI(const wxImage& image);
 
-// return the contents of the <body> tag of the given HTML document or the
-// entire document if it has no <body>
-static wxString ExtractHtmlBody(const wxString& html);
+// return CSS font-family and font-size properties for the given font
+static wxString Font2CSS(const wxFont& font);
 
 // ----------------------------------------------------------------------------
 // wxWebView configuration helpers
@@ -335,56 +362,12 @@ static wxString ImageToDataURI(const wxImage& image)
             wxBase64Encode(buf->GetBufferStart(), buf->GetBufferSize());
 }
 
-static wxString ExtractHtmlBody(const wxString& html)
+static wxString Font2CSS(const wxFont& font)
 {
-   // tag handler used to find the <body> tag contents
-   class BodyTagHandler : public wxHtmlTagHandler
-   {
-   public:
-      explicit BodyTagHandler(const wxString& text)
-      {
-         // by default, take all
-         m_begin = text.begin();
-         m_end = text.end();
-      }
-
-      wxString GetSupportedTags() override { return "BODY"; }
-      bool HandleTag(const wxHtmlTag& tag) override
-      {
-         // "end 1" is the position just before the closing tag while "end 2"
-         // is after the tag, as we don't need the tag itself, use the former
-         m_begin = tag.GetBeginIter();
-         m_end = tag.GetEndIter1();
-
-         return false;
-      }
-
-      using IterType = wxString::const_iterator;
-
-      IterType GetBegin() const { return m_begin; }
-      IterType GetEnd() const { return m_end; }
-
-   private:
-      IterType m_begin,
-               m_end;
-   };
-
-   class BodyParser : public wxHtmlParser
-   {
-   public:
-      BodyParser() { }
-
-      // provide stubs for base class pure virtual methods which we don't use
-      wxObject* GetProduct() override { return nullptr; }
-      void AddText(const wxString& WXUNUSED(txt)) override { }
-   };
-
-   BodyTagHandler *handler = new BodyTagHandler(html);
-   BodyParser parser;
-   parser.AddTagHandler(handler);
-   parser.Parse(html);
-
-   return wxString(handler->GetBegin(), handler->GetEnd());
+   return wxString::Format(R"(font-family: "%s", %s; font-size: %gpt;)",
+                           font.GetFaceName(),
+                           font.IsFixedWidth() ? "monospace" : "sans-serif",
+                           font.GetFractionalPointSize());
 }
 
 // ----------------------------------------------------------------------------
@@ -408,6 +391,8 @@ void WebViewViewer::Create(MessageView *msgView, wxWindow *parent)
    //
    // TODO: show our own context menu, especially for the clickables
    m_window->EnableContextMenu(false);
+
+   m_window->AddUserScript(FIT_IFRAMES_SCRIPT);
 
    m_window->Bind(wxEVT_WEBVIEW_NAVIGATING,
                   [this](wxWebViewEvent& event) { OnNavigating(event); });
@@ -470,8 +455,19 @@ String WebViewViewer::GetSelection() const
 {
    // don't use wxWebView::GetSelectedText() as it depends on the web
    // extension being available under GTK, which is not necessarily the case
+   //
+   // also check for the selection inside the focused iframe, if any
    String text;
-   m_window->RunScript("window.getSelection().toString()", &text);
+   m_window->RunScript
+   (
+      "(function() {"
+      "  const frame = document.activeElement;"
+      "  const win = frame instanceof HTMLIFrameElement ? frame.contentWindow"
+      "                                                 : window;"
+      "  return win.getSelection().toString();"
+      "})()",
+      &text
+   );
    return text;
 }
 
@@ -544,12 +540,7 @@ void WebViewViewer::StartMessage()
 
    const wxFont font(profileValues.GetFont());
    if ( font.IsOk() )
-   {
-      m_htmlText << R"( font-family: ")" << font.GetFaceName() << R"(", )"
-                 << (font.IsFixedWidth() ? "monospace" : "sans-serif") << ";"
-                 << wxString::Format(" font-size: %gpt;",
-                                     font.GetFractionalPointSize());
-   }
+      m_htmlText << " " << Font2CSS(font);
 
    m_htmlText << " }\n";
 
@@ -574,6 +565,8 @@ void WebViewViewer::StartMessage()
                  " font-family: monospace; white-space: nowrap; }\n"
                  "div.part { margin: 1em 0; }\n"
                  "span.text { white-space: pre-wrap; }\n"
+                 "iframe.html { display: block; width: 100%; border: none;"
+                 " background-color: white; }\n"
                  "</style>"
                  "</head><body>";
 }
@@ -711,11 +704,32 @@ void WebViewViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 
 void WebViewViewer::InsertRawContents(const String& data)
 {
-   // we're already inside body so we can't insert the entire HTML document
-   // here, so extract just its body
-   //
-   // TODO: put it into an <iframe srcdoc="..."> instead to preserve its styles
-   m_htmlText += ExtractHtmlBody(data);
+   // put the HTML contents into an iframe to keep its styles separate from
+   // ours and vice versa
+   String html = data;
+
+   // HTML messages are meant to be shown using their own colours, which we
+   // don't change, but use our font for them if they don't specify any: this
+   // style uses zero specificity so that anything in the message overrides it
+   // and, as it's appended at the end of the document, the browser will move
+   // it inside the body, which is fine
+   const wxFont font(GetOptions().GetFont());
+   if ( font.IsOk() )
+      html << "<style>:where(html) { " << Font2CSS(font) << " }</style>";
+
+   // the links navigating the iframe itself are blocked by our CSP, which
+   // doesn't allow loading anything in the frames, so make them navigate the
+   // top window instead, which allows us to handle them in OnNavigating(),
+   // unless the message has its own <base target>, as the first one is used
+   html << R"(<base target="_top">)";
+
+   // the sandbox prevents any scripts from running inside the iframe, even
+   // independently of our CSP, which is inherited by it, but allows us to
+   // access its contents and to handle the links inside it
+   m_htmlText << R"(<iframe class="html" scrolling="no" )"
+                 R"(sandbox="allow-same-origin allow-popups )"
+                 R"(allow-top-navigation-by-user-activation" )"
+                 R"(srcdoc=")" << EscapeHtml(html) << R"("></iframe>)";
 
    // TODO: unlike HtmlViewer, we don't call m_msgView->OnBodyText() here, so
    //       quoting HTML-only messages in replies doesn't work yet
