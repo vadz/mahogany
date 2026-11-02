@@ -50,13 +50,17 @@
 // the URL scheme used for the links corresponding to our clickable objects
 #define CLICKABLE_SCHEME "x-mahogany-clickable:"
 
+// the name of the script message handler used to send the HTML parts text
+#define SCRIPT_MSG_HANDLER "mahogany"
+
 // the HTML message parts are shown in iframes which need to be resized to fit
-// their contents, as there is no way to do it using just CSS
+// their contents, as there is no way to do it using just CSS, and whose text
+// needs to be sent to us, as it is only available once they're rendered
 //
 // notice that this script is injected as user script, which is not affected
 // by the page CSP, and that it uses capturing listener because load events
 // don't bubble
-static const char *const FIT_IFRAMES_SCRIPT = R"(
+static const char *const HTML_PARTS_SCRIPT = R"(
 if ( window === window.top ) {
    document.addEventListener('load', function(event) {
       const frame = event.target;
@@ -76,6 +80,12 @@ if ( window === window.top ) {
 
       // this also calls fit() initially
       new ResizeObserver(fit).observe(doc.documentElement);
+
+      // send the text of the part, prefixed with its identifier, to be used
+      // for quoting it in the replies
+      const root = doc.body || doc.documentElement;
+      window.)" SCRIPT_MSG_HANDLER R"(.postMessage(frame.dataset.part + ':' +
+                                                    root.innerText);
    }, true);
 }
 )";
@@ -250,6 +260,7 @@ private:
    // event handlers
    void OnNavigating(wxWebViewEvent& event);
    void OnNewWindow(wxWebViewEvent& event);
+   void OnScriptMessage(wxWebViewEvent& event);
 
 
    // the configuration shared by all viewers
@@ -273,6 +284,21 @@ private:
 
    // the string we're searching for
    String m_findText;
+
+   // the text of the HTML parts is only available after they're rendered, so
+   // we remember the position in the message body text where it must be
+   // inserted and the length of the text inserted so far (0 if none yet)
+   struct HtmlPartText
+   {
+      size_t pos = 0;
+      size_t len = 0;
+   };
+
+   std::vector<HtmlPartText> m_htmlParts;
+
+   // incremented every time we're cleared to ignore the text of the HTML parts
+   // of the previously shown message which could still arrive after it
+   unsigned m_generation = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -496,12 +522,18 @@ void WebViewViewer::Create(MessageView *msgView, wxWindow *parent)
    // TODO: show our own context menu, especially for the clickables
    m_window->EnableContextMenu(false);
 
-   m_window->AddUserScript(FIT_IFRAMES_SCRIPT);
+   m_window->AddUserScript(HTML_PARTS_SCRIPT);
+
+   // notice that under GTK this runs a nested event loop to wait until the
+   // handler is registered in the current page
+   m_window->AddScriptMessageHandler(SCRIPT_MSG_HANDLER);
 
    m_window->Bind(wxEVT_WEBVIEW_NAVIGATING,
                   [this](wxWebViewEvent& event) { OnNavigating(event); });
    m_window->Bind(wxEVT_WEBVIEW_NEWWINDOW,
                   [this](wxWebViewEvent& event) { OnNewWindow(event); });
+   m_window->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED,
+                  [this](wxWebViewEvent& event) { OnScriptMessage(event); });
 }
 
 void WebViewViewer::Clear()
@@ -511,6 +543,8 @@ void WebViewViewer::Clear()
    m_htmlText.clear();
    m_bmpXFace = wxNullBitmap;
    m_clickables.clear();
+   m_htmlParts.clear();
+   m_generation++;
 }
 
 void WebViewViewer::Update()
@@ -833,13 +867,16 @@ void WebViewViewer::InsertRawContents(const String& data)
    // the sandbox prevents any scripts from running inside the iframe, even
    // independently of our CSP, which is inherited by it, but allows us to
    // access its contents and to handle the links inside it
-   m_htmlText << R"(<iframe class="html" scrolling="no" )"
+   // the text of this part will be inserted at the current position in the
+   // body text once it's rendered and HTML_PARTS_SCRIPT sends it to us
+   m_htmlText << wxString::Format(R"(<iframe data-part="%u:%zu" )",
+                                  m_generation, m_htmlParts.size());
+   m_htmlParts.push_back({m_msgView->GetBodyTextPos()});
+
+   m_htmlText << R"(class="html" scrolling="no" )"
                  R"(sandbox="allow-same-origin allow-popups )"
                  R"(allow-top-navigation-by-user-activation" )"
                  R"(srcdoc=")" << EscapeHtml(html) << R"("></iframe>)";
-
-   // TODO: unlike HtmlViewer, we don't call m_msgView->OnBodyText() here, so
-   //       quoting HTML-only messages in replies doesn't work yet
 }
 
 void WebViewViewer::InsertText(const String& text, const MTextStyle& style)
@@ -939,6 +976,52 @@ void WebViewViewer::OnNewWindow(wxWebViewEvent& event)
    // this is generated for the links with target="_blank" which are very
    // common in HTML messages, handle them as normal links
    OnLinkClicked(event.GetURL());
+}
+
+void WebViewViewer::OnScriptMessage(wxWebViewEvent& event)
+{
+   // the message is "generation:index:text", see HTML_PARTS_SCRIPT
+   const String msg = event.GetString();
+
+   unsigned long generation,
+                 index;
+   const size_t posSep1 = msg.find(':');
+   const size_t posSep2 = msg.find(':', posSep1 + 1);
+   if ( posSep2 == String::npos ||
+         !msg.substr(0, posSep1).ToULong(&generation) ||
+         !msg.substr(posSep1 + 1, posSep2 - posSep1 - 1).ToULong(&index) )
+   {
+      wxLogDebug("Unexpected script message \"%s\".", msg);
+      return;
+   }
+
+   // ignore the text of the previously shown message, it's harmless
+   if ( generation != m_generation )
+      return;
+
+   if ( index >= m_htmlParts.size() || m_htmlParts[index].len )
+   {
+      wxLogDebug("Unexpected text for HTML part %lu.", index);
+      return;
+   }
+
+   String text = msg.substr(posSep2 + 1);
+   if ( text.empty() )
+      return;
+
+   // separate it from the text of the next part, if any
+   if ( text.Last() != '\n' )
+      text += '\n';
+
+   // the text of the previous parts may have been already inserted before
+   // the position of this one, account for it
+   size_t pos = m_htmlParts[index].pos;
+   for ( size_t n = 0; n < index; n++ )
+      pos += m_htmlParts[n].len;
+
+   m_msgView->InsertBodyText(pos, text);
+
+   m_htmlParts[index].len = text.length();
 }
 
 // ----------------------------------------------------------------------------

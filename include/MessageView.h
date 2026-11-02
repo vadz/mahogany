@@ -313,6 +313,29 @@ public:
    void OnBodyText(const String& text) { m_textBody += text; }
 
    /**
+      Return the current position in the body text.
+
+      This is used by the viewers which can only get the text of some parts
+      after showing them, e.g. because they need to be rendered first: they
+      should remember the position when showing the part and then call
+      InsertBodyText() with it later.
+    */
+   size_t GetBodyTextPos() const { return m_textBody.length(); }
+
+   /**
+      Insert the text at the given position in the body text.
+
+      The position must have been returned by GetBodyTextPos() for the current
+      message and adjusted for any text inserted before it since then.
+    */
+   void InsertBodyText(size_t pos, const String& text)
+   {
+      CHECK_RET( pos <= m_textBody.length(), "invalid body text position" );
+
+      m_textBody.insert(pos, text);
+   }
+
+   /**
       Give us ownership of a virtual mime part created on the fly.
 
       This is a hack: sometimes we create virtual, i.e. not existing in the
