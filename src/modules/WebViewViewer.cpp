@@ -71,6 +71,15 @@ static wxString ExtractHtmlBody(const wxString& html);
 // wxWebView configuration helpers
 // ----------------------------------------------------------------------------
 
+// The legacy IE backend under MSW doesn't support Content-Security-Policy,
+// which we rely on for blocking scripts and remote content, nor many other
+// modern features, so we only use Edge there.
+#ifdef __WXMSW__
+   #define WEBVIEW_BACKEND wxWebViewBackendEdge
+#else
+   #define WEBVIEW_BACKEND wxWebViewBackendDefault
+#endif
+
 // All our wxWebViews must share the same configuration: with WebKitGTK, each
 // configuration has its own web context with its own helper processes, so
 // using a new one for every viewer would launch new processes every time the
@@ -82,7 +91,7 @@ using WebViewConfig = wxWebViewConfiguration;
 
 static WebViewConfig CreateWebViewConfig()
 {
-   return wxWebView::NewConfiguration();
+   return wxWebView::NewConfiguration(WEBVIEW_BACKEND);
 }
 
 static wxWebView *
@@ -107,7 +116,8 @@ static wxWebView *
 CreateWebView(const WebViewConfig& /* config */, wxWindow *parent)
 {
    return wxWebView::New(parent, wxID_ANY, wxWebViewDefaultURLStr,
-                         wxDefaultPosition, parent->GetClientSize());
+                         wxDefaultPosition, parent->GetClientSize(),
+                         WEBVIEW_BACKEND);
 }
 
 #endif // wx 3.3+/wx < 3.3
@@ -257,7 +267,7 @@ MModule *WebViewViewerFactory::Init(int /* version_major */,
                                     MInterface * /* minterface */,
                                     int * /* errorCode */)
 {
-   if ( !wxWebView::IsBackendAvailable(wxWebViewBackendDefault) )
+   if ( !wxWebView::IsBackendAvailable(WEBVIEW_BACKEND) )
       return nullptr;
 
    return new WebViewViewerFactory();
