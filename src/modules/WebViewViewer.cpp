@@ -34,7 +34,9 @@
 #include "MTextStyle.h"
 
 #include <wx/base64.h>
+#include <wx/filesys.h>
 #include <wx/mstream.h>
+#include <wx/uri.h>
 
 #include <wx/webview.h>
 
@@ -88,8 +90,21 @@ static wxString Col2CSS(const wxColour& col);
 // replace HTML special characters with the corresponding entities
 static wxString EscapeHtml(const wxString& text);
 
+// return the data: URI with the given contents
+static wxString DataToDataURI(const wxString& mimetype,
+                              const void *data,
+                              size_t len);
+
 // return the data: URI containing the given image in PNG format
 static wxString ImageToDataURI(const wxImage& image);
+
+// return the data: URI with the contents of the MIME part with the given CID
+// stored by MessageView or an empty string if there is no such part
+static wxString CIDToDataURI(const wxString& cid);
+
+// replace all "cid:" URLs referring to the stored MIME parts in the given HTML
+// with data: URIs
+static wxString ReplaceCIDs(const wxString& html);
 
 // return CSS font-family and font-size properties for the given font
 static wxString Font2CSS(const wxFont& font);
@@ -350,6 +365,13 @@ static wxString EscapeHtml(const wxString& text)
    return textSafe;
 }
 
+static wxString DataToDataURI(const wxString& mimetype,
+                              const void *data,
+                              size_t len)
+{
+   return "data:" + mimetype.Lower() + ";base64," + wxBase64Encode(data, len);
+}
+
 static wxString ImageToDataURI(const wxImage& image)
 {
    wxMemoryOutputStream stream;
@@ -358,8 +380,90 @@ static wxString ImageToDataURI(const wxImage& image)
 
    const wxStreamBuffer * const buf = stream.GetOutputStreamBuffer();
 
-   return "data:image/png;base64," +
-            wxBase64Encode(buf->GetBufferStart(), buf->GetBufferSize());
+   return DataToDataURI("image/png",
+                        buf->GetBufferStart(), buf->GetBufferSize());
+}
+
+static wxString CIDToDataURI(const wxString& cid)
+{
+   // MessageView stores the parts using the wxFileSystem handler for "cid:"
+   // protocol
+   wxFileSystem fs;
+   std::unique_ptr<wxFSFile> file(fs.OpenFile("cid:" + cid));
+   if ( !file )
+   {
+      // the URLs are supposed to be URL-encoded (RFC 2392), while the
+      // Content-ID header values are not, so try decoding it too
+      const wxString cidUnescaped = wxURI::Unescape(cid);
+      if ( cidUnescaped != cid )
+         file.reset(fs.OpenFile("cid:" + cidUnescaped));
+
+      if ( !file )
+         return wxString();
+   }
+
+   wxMemoryOutputStream stream;
+   file->GetStream()->Read(stream);
+
+   const wxStreamBuffer * const buf = stream.GetOutputStreamBuffer();
+
+   return DataToDataURI(file->GetMimeType(),
+                        buf->GetBufferStart(), buf->GetBufferSize());
+}
+
+static wxString ReplaceCIDs(const wxString& html)
+{
+   // the URLs can occur in many different attributes and in CSS too, so,
+   // rather than parsing HTML, just look for all occurrences of "cid:"
+   // preceded by a character which can occur before an URL: a quote, an equal
+   // sign (for unquoted attribute values) or an opening parenthesis (for CSS
+   // url()), as this is good enough in practice
+   const wxString htmlLower = html.Lower();
+
+   // the result is at least as long as the original HTML, as data: URIs are
+   // longer than the "cid:" URLs they replace
+   wxString result;
+   result.reserve(html.length());
+
+   size_t posCopied = 0;
+   for ( size_t pos = 0; ; )
+   {
+      pos = htmlLower.find("cid:", pos);
+      if ( pos == wxString::npos )
+         break;
+
+      const size_t posCID = pos + 4; // strlen("cid:")
+      if ( pos == 0 || wxString("\"'=(").find(html[pos - 1]) == wxString::npos )
+      {
+         pos = posCID;
+         continue;
+      }
+
+      size_t posEnd = html.find_first_of("\"'()<> \t\r\n", posCID);
+      if ( posEnd == wxString::npos )
+         posEnd = html.length();
+
+      const wxString cid = html.substr(posCID, posEnd - posCID);
+      const wxString uri = CIDToDataURI(cid);
+      if ( !uri.empty() )
+      {
+         result.append(html, posCopied, pos - posCopied);
+         result += uri;
+         posCopied = posEnd;
+      }
+      else if ( cid.find('&') != wxString::npos )
+      {
+         // we don't decode HTML entities, so such CIDs are not found, but
+         // they're not supposed to occur in practice, so just mention it
+         wxLogDebug("CID \"%s\" containing HTML entities not supported.", cid);
+      }
+
+      pos = posEnd;
+   }
+
+   result.append(html, posCopied, wxString::npos);
+
+   return result;
 }
 
 static wxString Font2CSS(const wxFont& font)
@@ -706,7 +810,10 @@ void WebViewViewer::InsertRawContents(const String& data)
 {
    // put the HTML contents into an iframe to keep its styles separate from
    // ours and vice versa
-   String html = data;
+   //
+   // as nothing can be loaded from outside the iframe, embed the images
+   // and other parts referenced by it directly into it
+   String html = ReplaceCIDs(data);
 
    // HTML messages are meant to be shown using their own colours, which we
    // don't change, but use our font for them if they don't specify any: this
