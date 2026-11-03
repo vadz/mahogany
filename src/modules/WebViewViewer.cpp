@@ -26,6 +26,7 @@
 #  include "Mcommon.h"
 
 #  include <wx/bitmap.h>
+#  include <wx/frame.h>
 #  include <wx/image.h>
 #endif // USE_PCH
 
@@ -50,18 +51,100 @@
 // the URL scheme used for the links corresponding to our clickable objects
 #define CLICKABLE_SCHEME "x-mahogany-clickable:"
 
-// the name of the script message handler used to send the HTML parts text
+// the name of the script message handler used by VIEWER_SCRIPT
 #define SCRIPT_MSG_HANDLER "mahogany"
 
-// the HTML message parts are shown in iframes which need to be resized to fit
-// their contents, as there is no way to do it using just CSS, and whose text
-// needs to be sent to us, as it is only available once they're rendered
+// this script is injected as user script into all pages, which is not affected
+// by the page CSP, and sends messages of the form "type:generation:data" to us,
+// where the generation is that of the page, see StartMessage()
 //
-// notice that this script is injected as user script, which is not affected
-// by the page CSP, and that it uses capturing listener because load events
-// don't bubble
-static const char *const HTML_PARTS_SCRIPT = R"(
+// it handles the hovering over and right clicking the links, which we want to
+// handle ourselves, as well as the HTML message parts, which are shown in
+// iframes which need to be resized to fit their contents, as there is no way
+// to do it using just CSS, and whose text needs to be sent to us, as it is
+// only available once they're rendered
+//
+// notice that the scripts in the iframes are blocked by the CSP inherited by
+// them, but we can still access their contents and add our event listeners to
+// them from here
+static const char *const VIEWER_SCRIPT = R"(
 if ( window === window.top ) {
+   const post = function(type, data) {
+      window.)" SCRIPT_MSG_HANDLER R"(.postMessage(type + ':' +
+         document.documentElement.dataset.generation + ':' + data);
+   };
+
+   // return the URL of the link containing the given element or empty string
+   // (notice that SVG links don't have string href and are just ignored)
+   const linkAt = function(elem) {
+      const link = elem.closest('a[href]');
+      return link && typeof link.href === 'string' ? link.href : '';
+   };
+
+   // the menu to show when the right mouse button is released, see below
+   let pendingMenu = null;
+
+   let hovered = '';
+   const setHovered = function(url) {
+      if ( url !== hovered ) {
+         hovered = url;
+         post('hover', url);
+      }
+   };
+
+   // handle the links in the given document, which is either our own one or
+   // that of the given iframe
+   const handleLinks = function(doc, frame) {
+      doc.addEventListener('mouseover', function(event) {
+         setHovered(linkAt(event.target));
+      });
+
+      doc.addEventListener('mouseout', function(event) {
+         // this happens when leaving the window or the iframe, in the latter
+         // case we'll get mouseover for the element containing the mouse now
+         if ( !event.relatedTarget )
+            setHovered('');
+      });
+
+      doc.addEventListener('contextmenu', function(event) {
+         const url = linkAt(event.target);
+         if ( !url )
+            return;
+
+         event.preventDefault();
+
+         let x = event.clientX,
+             y = event.clientY;
+         if ( frame ) {
+            const rect = frame.getBoundingClientRect();
+            x += rect.left;
+            y += rect.top;
+         }
+
+         const menu = Math.round(x) + ',' + Math.round(y) + ':' + url;
+
+         // under some platforms (e.g. GTK) this event is generated when the
+         // button is pressed and the menu shown at this moment would be
+         // dismissed when it is released, so wait until then to show it
+         if ( event.buttons & 2 )
+            pendingMenu = menu;
+         else
+            post('menu', menu);
+      });
+
+      doc.addEventListener('mouseup', function(event) {
+         // releasing any other button cancels the pending menu, in case we
+         // somehow didn't get the right button release event
+         if ( event.button === 2 && pendingMenu )
+            post('menu', pendingMenu);
+
+         pendingMenu = null;
+      });
+   };
+
+   handleLinks(document, null);
+
+   // use capturing listener because load events don't bubble
    document.addEventListener('load', function(event) {
       const frame = event.target;
       if ( !(frame instanceof HTMLIFrameElement) )
@@ -81,11 +164,12 @@ if ( window === window.top ) {
       // this also calls fit() initially
       new ResizeObserver(fit).observe(doc.documentElement);
 
-      // send the text of the part, prefixed with its identifier, to be used
-      // for quoting it in the replies
+      handleLinks(doc, frame);
+
+      // send the text of the part, prefixed with its index, to be used for
+      // quoting it in the replies
       const root = doc.body || doc.documentElement;
-      window.)" SCRIPT_MSG_HANDLER R"(.postMessage(frame.dataset.part + ':' +
-                                                    root.innerText);
+      post('text', frame.dataset.part + ':' + root.innerText);
    }, true);
 }
 )";
@@ -249,12 +333,22 @@ private:
    // insert the given image as a link to the given clickable
    void InsertClickableImage(const wxImage& image, ClickableInfo *ci);
 
+   // return the clickable corresponding to the given URL, creating a new one
+   // for a normal URL, or nullptr if the URL is an invalid clickable one
+   ClickableInfo *GetClickable(const String& url);
+
    // handle a click on the link with the given URL
    void OnLinkClicked(const String& url);
 
    // scroll by the given (JavaScript) amount in pixels, return true if the
    // scroll position changed
    bool ScrollBy(const char *amount);
+
+
+   // handlers for the different VIEWER_SCRIPT messages
+   void OnPartText(const String& data);
+   void OnLinkHover(const String& url);
+   void OnLinkMenu(const String& data);
 
 
    // event handlers
@@ -296,9 +390,12 @@ private:
 
    std::vector<HtmlPartText> m_htmlParts;
 
-   // incremented every time we're cleared to ignore the text of the HTML parts
-   // of the previously shown message which could still arrive after it
+   // incremented every time we're cleared to ignore the messages from the
+   // previously shown message which could still arrive after it
    unsigned m_generation = 0;
+
+   // true if we show the label of the link under mouse in the status bar
+   bool m_showsLinkLabel = false;
 };
 
 // ----------------------------------------------------------------------------
@@ -517,12 +614,10 @@ void WebViewViewer::Create(MessageView *msgView, wxWindow *parent)
    m_window = CreateWebView(m_config, parent);
 
    // the default context menu contains items such as "Reload" or "Back"
-   // which make no sense for us
-   //
-   // TODO: show our own context menu, especially for the clickables
+   // which make no sense for us, we show our own menu for the links instead
    m_window->EnableContextMenu(false);
 
-   m_window->AddUserScript(HTML_PARTS_SCRIPT);
+   m_window->AddUserScript(VIEWER_SCRIPT);
 
    // notice that under GTK this runs a nested event loop to wait until the
    // handler is registered in the current page
@@ -545,6 +640,9 @@ void WebViewViewer::Clear()
    m_clickables.clear();
    m_htmlParts.clear();
    m_generation++;
+
+   // the link under mouse, if any, is gone now
+   OnLinkHover(String());
 }
 
 void WebViewViewer::Update()
@@ -662,11 +760,13 @@ void WebViewViewer::StartMessage()
 {
    const ProfileValues& profileValues = GetOptions();
 
-   m_htmlText = "<!DOCTYPE html>\n"
-                "<html><head>"
-                R"(<meta charset="utf-8">)"
-                R"(<meta http-equiv="Content-Security-Policy" content=")";
-   m_htmlText << GetContentSecurityPolicy() << R"(">)";
+   // the generation is used by VIEWER_SCRIPT to identify this page
+   m_htmlText = wxString::Format("<!DOCTYPE html>\n"
+                                 R"(<html data-generation="%u"><head>)",
+                                 m_generation);
+   m_htmlText << R"(<meta charset="utf-8">)"
+                 R"(<meta http-equiv="Content-Security-Policy" content=")"
+              << GetContentSecurityPolicy() << R"(">)";
 
    m_htmlText << "<style>\n"
                  "body {";
@@ -864,17 +964,19 @@ void WebViewViewer::InsertRawContents(const String& data)
    // unless the message has its own <base target>, as the first one is used
    html << R"(<base target="_top">)";
 
-   // the sandbox prevents any scripts from running inside the iframe, even
-   // independently of our CSP, which is inherited by it, but allows us to
-   // access its contents and to handle the links inside it
+   // the sandbox restricts what the iframe contents can do, but we need to
+   // allow scripts in it as otherwise even our own event listeners added to
+   // it by VIEWER_SCRIPT are not called: the scripts from the message itself
+   // are still blocked by our CSP, which is inherited by the iframe
+   //
    // the text of this part will be inserted at the current position in the
-   // body text once it's rendered and HTML_PARTS_SCRIPT sends it to us
-   m_htmlText << wxString::Format(R"(<iframe data-part="%u:%zu" )",
-                                  m_generation, m_htmlParts.size());
+   // body text once it's rendered and VIEWER_SCRIPT sends it to us
+   m_htmlText << wxString::Format(R"(<iframe data-part="%zu" )",
+                                  m_htmlParts.size());
    m_htmlParts.push_back({m_msgView->GetBodyTextPos()});
 
    m_htmlText << R"(class="html" scrolling="no" )"
-                 R"(sandbox="allow-same-origin allow-popups )"
+                 R"(sandbox="allow-scripts allow-same-origin allow-popups )"
                  R"(allow-top-navigation-by-user-activation" )"
                  R"(srcdoc=")" << EscapeHtml(html) << R"("></iframe>)";
 }
@@ -928,10 +1030,8 @@ void WebViewViewer::EndBody()
 // links handling
 // ----------------------------------------------------------------------------
 
-void WebViewViewer::OnLinkClicked(const String& url)
+ClickableInfo *WebViewViewer::GetClickable(const String& url)
 {
-   ClickableInfo *ci = nullptr;
-
    String index;
    if ( url.StartsWith(CLICKABLE_SCHEME, &index) )
    {
@@ -939,18 +1039,23 @@ void WebViewViewer::OnLinkClicked(const String& url)
       if ( !index.ToULong(&n) || n >= m_clickables.size() )
       {
          wxLogDebug("Invalid clickable URL \"%s\".", url);
-         return;
+         return nullptr;
       }
 
-      ci = m_clickables[n].get();
-   }
-   else // a normal URL
-   {
-      ci = new ClickableURL(m_msgView, url);
-      StoreClickable(ci);
+      return m_clickables[n].get();
    }
 
-   ci->OnLeftClick();
+   // a normal URL
+   ClickableInfo * const ci = new ClickableURL(m_msgView, url);
+   StoreClickable(ci);
+   return ci;
+}
+
+void WebViewViewer::OnLinkClicked(const String& url)
+{
+   ClickableInfo * const ci = GetClickable(url);
+   if ( ci )
+      ci->OnLeftClick();
 }
 
 void WebViewViewer::OnNavigating(wxWebViewEvent& event)
@@ -980,24 +1085,45 @@ void WebViewViewer::OnNewWindow(wxWebViewEvent& event)
 
 void WebViewViewer::OnScriptMessage(wxWebViewEvent& event)
 {
-   // the message is "generation:index:text", see HTML_PARTS_SCRIPT
+   // the message is "type:generation:data", see VIEWER_SCRIPT
    const String msg = event.GetString();
 
-   unsigned long generation,
-                 index;
+   unsigned long generation;
    const size_t posSep1 = msg.find(':');
    const size_t posSep2 = msg.find(':', posSep1 + 1);
    if ( posSep2 == String::npos ||
-         !msg.substr(0, posSep1).ToULong(&generation) ||
-         !msg.substr(posSep1 + 1, posSep2 - posSep1 - 1).ToULong(&index) )
+         !msg.substr(posSep1 + 1, posSep2 - posSep1 - 1).ToULong(&generation) )
    {
       wxLogDebug("Unexpected script message \"%s\".", msg);
       return;
    }
 
-   // ignore the text of the previously shown message, it's harmless
+   // ignore the messages from the previously shown message, it's harmless
    if ( generation != m_generation )
       return;
+
+   const String type = msg.substr(0, posSep1);
+   const String data = msg.substr(posSep2 + 1);
+   if ( type == "text" )
+      OnPartText(data);
+   else if ( type == "hover" )
+      OnLinkHover(data);
+   else if ( type == "menu" )
+      OnLinkMenu(data);
+   else
+      wxLogDebug("Unknown script message type \"%s\".", type);
+}
+
+void WebViewViewer::OnPartText(const String& data)
+{
+   // the data is "index:text"
+   unsigned long index;
+   const size_t posSep = data.find(':');
+   if ( posSep == String::npos || !data.substr(0, posSep).ToULong(&index) )
+   {
+      wxLogDebug("Unexpected HTML part text message \"%s\".", data);
+      return;
+   }
 
    if ( index >= m_htmlParts.size() || m_htmlParts[index].len )
    {
@@ -1005,7 +1131,7 @@ void WebViewViewer::OnScriptMessage(wxWebViewEvent& event)
       return;
    }
 
-   String text = msg.substr(posSep2 + 1);
+   String text = data.substr(posSep + 1);
    if ( text.empty() )
       return;
 
@@ -1022,6 +1148,57 @@ void WebViewViewer::OnScriptMessage(wxWebViewEvent& event)
    m_msgView->InsertBodyText(pos, text);
 
    m_htmlParts[index].len = text.length();
+}
+
+void WebViewViewer::OnLinkHover(const String& url)
+{
+   // don't overwrite the status bar text set by somebody else if we hadn't
+   // shown anything there
+   if ( url.empty() && !m_showsLinkLabel )
+      return;
+
+   wxFrame * const frame = m_msgView->GetParentFrame();
+   if ( !frame || !frame->GetStatusBar() )
+      return;
+
+   String label;
+   String index;
+   if ( url.StartsWith(CLICKABLE_SCHEME, &index) )
+   {
+      unsigned long n;
+      if ( index.ToULong(&n) && n < m_clickables.size() )
+         label = m_clickables[n]->GetLabel();
+   }
+   else // a normal URL
+   {
+      label = url;
+   }
+
+   frame->SetStatusText(label);
+
+   m_showsLinkLabel = !label.empty();
+}
+
+void WebViewViewer::OnLinkMenu(const String& data)
+{
+   // the data is "x,y:url" with the coordinates in CSS pixels
+   long x, y;
+   const size_t posComma = data.find(',');
+   const size_t posSep = data.find(':', posComma);
+   if ( posSep == String::npos ||
+         !data.substr(0, posComma).ToLong(&x) ||
+         !data.substr(posComma + 1, posSep - posComma - 1).ToLong(&y) )
+   {
+      wxLogDebug("Unexpected link menu message \"%s\".", data);
+      return;
+   }
+
+   ClickableInfo * const ci = GetClickable(data.substr(posSep + 1));
+   if ( !ci )
+      return;
+
+   // CSS pixels are DIPs, at least as long as the page is not zoomed
+   ci->OnRightClick(m_window->FromDIP(wxPoint(x, y)));
 }
 
 // ----------------------------------------------------------------------------
