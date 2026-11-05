@@ -124,6 +124,14 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                      m_str += "\r\n";
                      m_str += *m_pcCurrent;
                   }
+                  else if ( !m_str.empty() )
+                  {
+                     // the whitespace at the start of the continuation line
+                     // separates it from the previous one, so it must be
+                     // preserved when unfolding (RFC 5322 section 2.2.3),
+                     // unless the value only starts on this line
+                     m_str += ' ';
+                  }
 
                   // continue with the current header and ignore all leading
                   // whitespace on the next line
