@@ -389,6 +389,17 @@ private:
    /// update the folder after appending messages to it
    void UpdateAfterAppend();
 
+   /**
+      Don't consider any messages currently in the folder as new mail.
+
+      This is used for the messages copied to this folder by the user: they
+      shouldn't be filtered nor reported as new mail.
+    */
+   void MarkAllAsReported();
+
+   /// return true if we're processing new mail in this folder right now
+   bool IsProcessingNewMail() const { return m_mutexNewMail.IsLocked(); }
+
    void ReadConfig(MailFolderCmn::MFCmnOptions& config) override;
 
    /// fill mailstatus with the results of c-client mail_status() call

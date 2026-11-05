@@ -1091,6 +1091,57 @@ String MMStatusRedirector::ms_filename;
 NETMBX MMStatusRedirector::ms_mbx;
 MAILSTATUS *MMStatusRedirector::ms_mailstatus = nullptr;
 
+// collect the UIDs of the messages copied by mail_copy() in the destination
+// folder: this only works if the server supports UIDPLUS extension, otherwise
+// GetLastUID() just returns UID_ILLEGAL
+class CopyUIDCollector
+{
+public:
+   CopyUIDCollector()
+   {
+      ms_uidValidity =
+      ms_uidLast = UID_ILLEGAL;
+
+      (void)mail_parameters(nullptr, SET_COPYUID, (void *)OnCopyUID);
+   }
+
+   ~CopyUIDCollector()
+   {
+      (void)mail_parameters(nullptr, SET_COPYUID, nullptr);
+   }
+
+   UIdType GetUIDValidity() const { return ms_uidValidity; }
+   UIdType GetLastUID() const { return ms_uidLast; }
+
+private:
+   static void OnCopyUID(MAILSTREAM * /* stream */,
+                         char * /* mailbox */,
+                         unsigned long uidValidity,
+                         SEARCHSET * /* sourceset */,
+                         SEARCHSET *destset)
+   {
+      ms_uidValidity = uidValidity;
+
+      for ( SEARCHSET *set = destset; set; set = set->next )
+      {
+         // "last" is 0 if this is a single UID and not a range, and the range
+         // bounds can be given in any order
+         UIdType uid = set->last;
+         if ( uid < set->first )
+            uid = set->first;
+
+         if ( ms_uidLast == UID_ILLEGAL || uid > ms_uidLast )
+            ms_uidLast = uid;
+      }
+   }
+
+   static UIdType ms_uidValidity;
+   static UIdType ms_uidLast;
+};
+
+UIdType CopyUIDCollector::ms_uidValidity = UID_ILLEGAL;
+UIdType CopyUIDCollector::ms_uidLast = UID_ILLEGAL;
+
 // ----------------------------------------------------------------------------
 // ReadProgressInfo: create an instance of this object to start showing progress
 // info, delete it to make it disappear
@@ -1230,6 +1281,24 @@ struct LastNewUIDEntry
 };
 
 static std::vector<LastNewUIDEntry> gs_lastNewUIDList;
+
+// remember the last new UID for the given folder until it is reopened
+static void
+StoreLastNewUID(const String& folderName, UIdType uidLastNew, UIdType uidValidity)
+{
+   for ( LastNewUIDEntry& entry : gs_lastNewUIDList )
+   {
+      if ( entry.m_folderName == folderName )
+      {
+         entry.m_uidLastNew = uidLastNew;
+         entry.m_uidValidity = uidValidity;
+
+         return;
+      }
+   }
+
+   gs_lastNewUIDList.emplace_back(folderName, uidLastNew, uidValidity);
+}
 
 // ============================================================================
 // implementation
@@ -2392,24 +2461,7 @@ MailFolderCC::Close(bool mayLinger)
    m_nMessages = 0;
 
    // save our last new UID in case this folder is going to be reopened later
-   String folderName = GetName();
-
-   auto i = gs_lastNewUIDList.begin();
-   for ( ; i != gs_lastNewUIDList.end(); ++i )
-   {
-      if ( i->m_folderName == folderName )
-      {
-         i->m_uidLastNew = m_uidLastNew;
-         i->m_uidValidity = m_uidValidity;
-
-         break;
-      }
-   }
-
-   if ( i == gs_lastNewUIDList.end() )
-   {
-      gs_lastNewUIDList.emplace_back(folderName, m_uidLastNew, m_uidValidity);
-   }
+   StoreLastNewUID(GetName(), m_uidLastNew, m_uidValidity);
 }
 
 void
@@ -3045,6 +3097,11 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    */
    bool didServerSideCopy = false;
    String serverErrMsg;
+
+   // the UIDs of the copied messages in the destination folder, if known
+   UIdType uidValidityDst = UID_ILLEGAL,
+           uidLastDst = UID_ILLEGAL;
+
    if ( GetType() == MF_IMAP && folder->GetType() == MF_IMAP )
    {
       // they're both IMAP but do they live on the same server?
@@ -3071,12 +3128,16 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
             String pathDst = GetPathFromImapSpec(specDst);
 
             CCErrorLogRedirector redirectErrors(serverErrMsg);
+            CopyUIDCollector copyUIDs;
             if ( mail_copy_full(m_MailStream,
                                 sequence.char_str(),
                                 pathDst.char_str(),
                                 CP_UID) )
             {
                didServerSideCopy = true;
+
+               uidValidityDst = copyUIDs.GetUIDValidity();
+               uidLastDst = copyUIDs.GetLastUID();
             }
             else
             {
@@ -3096,7 +3157,23 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    {
       // use the inefficient retrieve-append way
       if ( MailFolderCmn::SaveMessages(selections, folder) )
+      {
+         // the destination folder was opened by the base class method and is
+         // normally still opened as it has a pending new mail notification,
+         // so mark the messages copied by the user as already reported before
+         // it processes this notification
+         if ( !IsProcessingNewMail() )
+         {
+            MailFolderCC *mfDst = FindFolder(folder);
+            if ( mfDst )
+            {
+               mfDst->MarkAllAsReported();
+               mfDst->DecRef();
+            }
+         }
+
          return true;
+      }
 
       // if we failed to copy the message on server above also show the
       // server-side error message as it might contain valuable information
@@ -3122,7 +3199,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       return true;
    }
 
-   MailFolder *mfDst = FindFolder(folder);
+   MailFolderCC *mfDst = FindFolder(folder);
 
    // update status of the target folder
    MfStatusCache *mfStatusCache = MfStatusCache::Get();
@@ -3201,13 +3278,22 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    // always send this one to update the number of messages in the tree
    mfStatusCache->UpdateStatus(nameDst, status);
 
+   // only the messages copied while processing new mail in this folder (i.e.
+   // by the filters or when collecting it) are new mail in the destination
+   // folder too, the messages copied by the user are not
+   const bool isNewMail = IsProcessingNewMail();
+
    // if the folder is opened, we must also update the display
    if ( mfDst )
    {
       mfDst->Ping();
+
+      if ( !isNewMail )
+         mfDst->MarkAllAsReported();
+
       mfDst->DecRef();
    }
-   else // dst folder not opened
+   else if ( isNewMail ) // dst folder not opened
    {
       // if we have copied any new messages to the dst folder, we must process
       // them (i.e. filter, report, ...)
@@ -3216,6 +3302,16 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
          ProcessNewMail(uidsNew, folder);
       }
       //else: no need to open it
+   }
+   else // dst folder not opened and the messages were copied by the user
+   {
+      // ensure that they're not processed as new mail when the folder is
+      // opened later neither, if we know their UIDs (if we don't, there is
+      // nothing we can do, unfortunately)
+      if ( uidLastDst != UID_ILLEGAL )
+      {
+         StoreLastNewUID(nameDst, uidLastDst, uidValidityDst);
+      }
    }
 
    return true;
@@ -3535,23 +3631,44 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
 
    if ( last )
    {
+      if ( !m_MailStream )
+      {
+         mail_free_searchpgm(&pgm);
+
+         FAIL_MSG( _T("SearchByFlag: folder is closed") );
+
+         return nullptr;
+      }
+
+      const bool searchUID = (flags & SEARCH_UID) != 0;
+
       // only search among the messages after this one
+      MsgnoType max;
+      if ( !m_nMessages )
+         max = 0;
+      else if ( searchUID )
+         max = mail_uid(m_MailStream, m_nMessages);
+      else
+         max = m_nMessages;
+
+      // there are no messages after the given one: we must not search for
+      // them as "last+1:max" set would be interpreted as "max:last+1" and so
+      // would still find the last message
+      if ( max <= last )
+      {
+         mail_free_searchpgm(&pgm);
+
+         return new UIdArray;
+      }
+
       SEARCHSET *sset = mail_newsearchset();
       sset->first = last + 1;
+      sset->last = max;
 
-      CHECK( m_MailStream, nullptr, _T("SearchByFlag: folder is closed") );
-
-
-      if ( flags & SEARCH_UID )
-      {
-         sset->last = mail_uid(m_MailStream, m_nMessages);
+      if ( searchUID )
          pgm->uid = sset;
-      }
       else // msgno search
-      {
-         sset->last = m_nMessages;
          pgm->msgno = sset;
-      }
    }
 
    return DoSearch(pgm, flags & (SEARCH_UID | SEARCH_MSGNO));
@@ -4608,6 +4725,25 @@ MailFolderCC::HandleMailExpunge(MsgnoType msgno)
 // MailFolderCC new mail handling
 // ----------------------------------------------------------------------------
 
+void MailFolderCC::MarkAllAsReported()
+{
+   // the folder could have been closed if pinging it failed
+   if ( !m_MailStream || !m_MailStream->nmsgs )
+      return;
+
+   const UIdType uid = mail_uid(m_MailStream, m_MailStream->nmsgs);
+   if ( uid == 0 )
+   {
+      // this is not supposed to happen but, if it does, we can't do anything
+      return;
+   }
+
+   wxLogTrace(TRACE_MF_NEWMAIL, "Folder %s: last new UID %ld -> %ld",
+              GetName(), m_uidLastNew, uid);
+
+   m_uidLastNew = uid;
+}
+
 void MailFolderCC::OnNewMail()
 {
    if ( !m_MailStream )
@@ -4665,8 +4801,7 @@ void MailFolderCC::OnNewMail()
       // explanation of MP_NEWMAIL_UNSEEN option: normally the recent messages
       // in the folder should be also unread (this is what is called "new", in
       // fact) but sometimes it may be desirable to process all messages, even
-      // already read (this allows to apply filters by simply moving the
-      // messages to this folder, for example)
+      // already read ones
       UIdArray *uidsNew = SearchByFlag
                           (
                            READ_CONFIG(m_Profile, MP_NEWMAIL_UNSEEN)

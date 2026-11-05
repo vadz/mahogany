@@ -265,6 +265,7 @@ extern const MOption MP_MSGVIEW_AUTO_VIEWER;
 extern const MOption MP_MSGVIEW_PREFER_HTML;
 extern const MOption MP_MSGVIEW_ALLOW_HTML;
 extern const MOption MP_MSGVIEW_ALLOW_IMAGES;
+extern const MOption MP_MSGVIEW_USE_WEBVIEW;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_MSGVIEW_ALL_HEADERS;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
@@ -942,6 +943,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGVIEW_ALLOW_HTML_NAME "AllowHTML"
 /// allow image-capable viewer when there are inline images?
 #define MP_MSGVIEW_ALLOW_IMAGES_NAME "AllowImages"
+/// use web engine-based viewer instead of the basic HTML one if available?
+#define MP_MSGVIEW_USE_WEBVIEW_NAME "UseWebViewer"
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_NAME     "MsgViewHeaders"
 /// all headers we know about
@@ -1809,6 +1812,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_MSGVIEW_ALLOW_HTML_DEFVAL 1L
 /// allow image-capable viewer when there are inline images?
 #define MP_MSGVIEW_ALLOW_IMAGES_DEFVAL 1L
+/// use web engine-based viewer instead of the basic HTML one if available?
+#define MP_MSGVIEW_USE_WEBVIEW_DEFVAL 1L
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_DEFVAL     \
           "Date:" \

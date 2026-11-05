@@ -10,6 +10,8 @@
 
 #cmakedefine USE_SSL 1
 
+#cmakedefine USE_WEBVIEW 1
+
 /* These are always enabled in CMake builds */
 #define USE_I18N 1
 #define HAVE_COMPFACE_H 1

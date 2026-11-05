@@ -1050,6 +1050,7 @@
     <ClCompile Include="src\modules\HtmlViewer.cpp" />
     <ClCompile Include="src\modules\LayoutViewer.cpp" />
     <ClCompile Include="src\modules\TextViewer.cpp" />
+    <ClCompile Include="src\modules\WebViewViewer.cpp" />
     <ClCompile Include="src\modules\BareBonesEditor.cpp" />
     <ClCompile Include="src\modules\LayoutEditor.cpp" />
     <ClCompile Include="src\modules\NetscapeImporter.cpp" />
