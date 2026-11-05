@@ -5502,7 +5502,7 @@ bool wxComposeView::ConfigureInReplyTo()
 
       // and add to references
       for ( i = m_extraHeadersNames.begin(),
-            end = m_extraHeadersNames.begin(),
+            end = m_extraHeadersNames.end(),
             j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
       {
          if ( wxStricmp(*i, "References") == 0 )
