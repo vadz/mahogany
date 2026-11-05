@@ -143,16 +143,12 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                switch ( *++m_pcCurrent )
                {
                   case '\r':
-                     if ( *++m_pcCurrent != '\n' )
-                     {
-                        wxLogDebug(_T("Bare '\\r' in header ignored"));
-                        m_pcCurrent -= 2; // skip back before '\r'
-                        break;
-                     }
-
-                     m_pcCurrent++; // skip '\n' too
-
-                     // fall through
+                     // nothing on this line, but this doesn't mean that the
+                     // header is empty as its value may start on the next one
+                     // (and some mailers do it for long values): let the code
+                     // handling the end of line above determine this
+                     m_pcCurrent--;
+                     break;
 
                   case '\0':
                      // empty header, uncommon but valid
