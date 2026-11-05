@@ -1783,8 +1783,16 @@ void
 MessageView::ShowFace(const wxString& faceString)
 {
    // according to the spec at http://quimby.gnus.org/circus/face/ the Face
-   // header must be less than 966 after folding the lines
-   if ( faceString.length() > 966 )
+   // header must be less than 966 after folding the lines (not counting
+   // whitespace which could be introruced by folding)
+   size_t lenFace = 0;
+   for ( const wxUniChar c : faceString )
+   {
+      if ( !wxIsspace(c) )
+         lenFace++;
+   }
+
+   if ( lenFace > 966 )
    {
       wxLogDebug("Message \"%s\" Face header is too long, ignored.",
                  m_mailMessage->Subject());

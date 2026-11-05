@@ -89,6 +89,9 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                   // but have seen something -- this is not normal
                   wxLogDebug(_T("Header line '%s' is malformed; ignored."),
                              m_str);
+
+                  // don't let it become part of the next header name
+                  m_str.clear();
                }
                else // no name neither
                {
@@ -121,6 +124,14 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                      m_str += "\r\n";
                      m_str += *m_pcCurrent;
                   }
+                  else if ( !m_str.empty() )
+                  {
+                     // the whitespace at the start of the continuation line
+                     // separates it from the previous one, so it must be
+                     // preserved when unfolding (RFC 5322 section 2.2.3),
+                     // unless the value only starts on this line
+                     m_str += ' ';
+                  }
 
                   // continue with the current header and ignore all leading
                   // whitespace on the next line
@@ -143,16 +154,12 @@ bool HeaderIterator::GetNext(String *name, String *value, int flags)
                switch ( *++m_pcCurrent )
                {
                   case '\r':
-                     if ( *++m_pcCurrent != '\n' )
-                     {
-                        wxLogDebug(_T("Bare '\\r' in header ignored"));
-                        m_pcCurrent -= 2; // skip back before '\r'
-                        break;
-                     }
-
-                     m_pcCurrent++; // skip '\n' too
-
-                     // fall through
+                     // nothing on this line, but this doesn't mean that the
+                     // header is empty as its value may start on the next one
+                     // (and some mailers do it for long values): let the code
+                     // handling the end of line above determine this
+                     m_pcCurrent--;
+                     break;
 
                   case '\0':
                      // empty header, uncommon but valid
