@@ -139,6 +139,7 @@ target_sources(mahogany PRIVATE
   modules/NetscapeImporter.cpp
   modules/PineImport.cpp
   modules/TextViewer.cpp
+  modules/WebViewViewer.cpp
   modules/crypt/PGPEngine.cpp
   modules/spam/HeadersFilter.cpp
   modules/spam/ServerSideFilter.cpp
@@ -388,10 +389,13 @@ if(MSVC)
     wxNO_RIBBON_LIB
     wxNO_RICHTEXT_LIB
     wxNO_STC_LIB
-    wxNO_WEBVIEW_LIB
     wxNO_XRC_LIB
     USE_PCH
   )
+
+  if(NOT USE_WEBVIEW)
+    target_compile_definitions(mahogany PRIVATE wxNO_WEBVIEW_LIB)
+  endif()
 
   target_compile_options(mahogany PRIVATE
     /Zm110   # Increase compiler memory limit

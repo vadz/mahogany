@@ -543,6 +543,9 @@
     <ClCompile Include="src\modules\TextViewer.cpp">
       <Filter>Source Files\modules\viewers</Filter>
     </ClCompile>
+    <ClCompile Include="src\modules\WebViewViewer.cpp">
+      <Filter>Source Files\modules\viewers</Filter>
+    </ClCompile>
     <ClCompile Include="src\modules\BareBonesEditor.cpp">
       <Filter>Source Files\modules\editors</Filter>
     </ClCompile>

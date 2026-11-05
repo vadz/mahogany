@@ -379,6 +379,9 @@ enum ConfigFields
    ConfigField_MessageViewPreferHTML,
    ConfigField_MessageViewAllowHTML,
    ConfigField_MessageViewAllowImages,
+#ifdef USE_WEBVIEW
+   ConfigField_MessageViewUseWebViewer,
+#endif // USE_WEBVIEW
    ConfigField_MessageViewSpacer,
 #ifdef USE_FONT_DESC
    ConfigField_MessageViewFont,
@@ -1535,6 +1538,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prefer &HTML to plain text"),   Field_Bool, ConfigField_MessageViewAutoViewer },
    { gettext_noop("Sho&w HTML if no text"),        Field_Bool, ConfigField_MessageViewAutoViewer },
    { gettext_noop("Ensure &images are shown"),     Field_Bool, ConfigField_MessageViewAutoViewer },
+#ifdef USE_WEBVIEW
+   { gettext_noop("Use &advanced HTML viewer if available"), Field_Bool, ConfigField_MessageViewAutoViewer },
+#endif // USE_WEBVIEW
    { "",                                           Field_Message, -1},
 
 #ifdef USE_FONT_DESC
@@ -2171,6 +2177,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MSGVIEW_PREFER_HTML),
    CONFIG_ENTRY(MP_MSGVIEW_ALLOW_HTML),
    CONFIG_ENTRY(MP_MSGVIEW_ALLOW_IMAGES),
+#ifdef USE_WEBVIEW
+   CONFIG_ENTRY(MP_MSGVIEW_USE_WEBVIEW),
+#endif // USE_WEBVIEW
    CONFIG_NONE(),
 #ifdef USE_FONT_DESC
    CONFIG_ENTRY(MP_MVIEW_FONT_DESC),
