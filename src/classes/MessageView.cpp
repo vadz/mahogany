@@ -119,6 +119,7 @@ extern const MOption MP_MSGVIEW_AUTO_VIEWER;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_MSGVIEW_PREFER_HTML;
+extern const MOption MP_MSGVIEW_USE_WEBVIEW;
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_MVIEW_TITLE_FMT;
 extern const MOption MP_MVIEW_FONT;
@@ -544,7 +545,8 @@ MessageView::AllProfileValues::AllProfileValues()
    autoViewer =
    preferHTML =
    allowHTML =
-   allowImages = false;
+   allowImages =
+   useWebViewer = false;
 
    inlineGFX = -1;
    showExtImages = false;
@@ -577,7 +579,8 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(showFaces) &&
 #endif // HAVE_XFACES
           CMP(autoViewer) &&
-          (!autoViewer || (CMP(preferHTML) && CMP(allowHTML) && CMP(allowImages)));
+          (!autoViewer || (CMP(preferHTML) && CMP(allowHTML) &&
+                           CMP(allowImages) && CMP(useWebViewer)));
 
    #undef CMP
 }
@@ -789,6 +792,31 @@ static MessageViewer *LoadViewer(const String& name, String *nameAlt = nullptr)
 
    return viewer;
 }
+
+#ifdef USE_WEBVIEW
+
+/**
+   Return true if the web engine-based viewer can be used.
+
+   This checks that its module can be loaded, which fails if wxWebView backend
+   is not available, but does it only once, as this can't change while we run.
+ */
+static bool IsWebViewerAvailable()
+{
+   static const bool s_available = []()
+   {
+      MModule * const module = MModule::LoadModule("WebViewViewer");
+      if ( !module )
+         return false;
+
+      module->DecRef();
+      return true;
+   }();
+
+   return s_available;
+}
+
+#endif // USE_WEBVIEW
 
 void
 MessageView::CreateViewer()
@@ -1262,6 +1290,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->preferHTML = READ_CONFIG_BOOL(profile, MP_MSGVIEW_PREFER_HTML);
    settings->allowHTML = READ_CONFIG_BOOL(profile, MP_MSGVIEW_ALLOW_HTML);
    settings->allowImages = READ_CONFIG_BOOL(profile, MP_MSGVIEW_ALLOW_IMAGES);
+   settings->useWebViewer = READ_CONFIG_BOOL(profile, MP_MSGVIEW_USE_WEBVIEW);
 
    settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
 
@@ -2960,7 +2989,14 @@ MessageView::AutoAdjustViewer(const MimePart *mimepart)
                ((contents & PartContent_HTMLImage) &&
                   m_ProfileValues.allowImages) )
       {
-         viewerName = "HtmlViewer";
+#ifdef USE_WEBVIEW
+         // prefer the viewer using the web engine, which supports much more
+         // of HTML and CSS than our own one, if we can use it
+         if ( m_ProfileValues.useWebViewer && IsWebViewerAvailable() )
+            viewerName = "WebViewViewer";
+         else
+#endif // USE_WEBVIEW
+            viewerName = "HtmlViewer";
       }
    }
 

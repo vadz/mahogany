@@ -428,6 +428,9 @@ protected:
       /// switch viewer to be able to show images inline?
       bool allowImages:1;
 
+      /// use web engine-based viewer for HTML if available?
+      bool useWebViewer:1;
+
       //@}
 
       /// @name URL viewing
